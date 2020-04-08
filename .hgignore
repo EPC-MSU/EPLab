@@ -1,0 +1,9 @@
+syntax: glob
+
+*/__pycache__
+*.pyc
+*.o
+# Intellij Idea files
+.idea
+*.iml
+venv
