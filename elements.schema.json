@@ -40,6 +40,10 @@
                   "maximum": -1,
                   "type": "integer"
                 },
+                "comment": {
+                  "description": "Pin comment",
+                  "type": "string"
+                },
                 "ivc": {
                   "description": "Electrical measurement data that is considered to match against reference data.",
                   "anyOf": [
@@ -132,6 +136,7 @@
                       "type": "object",
                       "properties": {
                         "measure_settings": {
+                          "additionalProperties": false,
                           "type": "object",
                           "properties": {
                             "probe_signal_frequency": {
