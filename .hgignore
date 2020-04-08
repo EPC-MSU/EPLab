@@ -7,3 +7,5 @@ syntax: glob
 .idea
 *.iml
 venv
+# Other
+elements.json

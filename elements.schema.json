@@ -16,32 +16,13 @@
         "additionalProperties": false,
         "type": "object",
         "properties": {
-          "probability": {
-            "description": "Probability from classifier that this component is recognized correctly.",
-            "anyOf": [
-              {
-                "description": "For manually added elements probability is set to null.",
-                "type": "null"
-              },
-              {
-                "description": "For automatically recognized components probability is 0-1.",
-                "minimum": 0,
-                "maximum": 1,
-                "type": "number"
-              }
-            ]
-          },
-          "manual_name": {
-            "description": "The name assigned by user. Is set when automatical systems failed to recognized one of the standard names of PCB component. Otherwise it is empty string.",
+          "name": {
+            "description": "Is set when component was recognized by automated system and set one of the supported names.",
             "type": "string"
           },
           "is_manual": {
             "description": "Is set when component was added manually and not with automated recognition of supported components. Otherwise it is false.",
             "type": "boolean"
-          },
-          "name": {
-            "description": "Is set when component was recognized by automated system and set one of the supported names. When entering component names manually this is also set equal to manual_name.",
-            "type": "string"
           },
           "pins": {
             "description": "An array of testable pins of the PCB component. Pins are simple because they are just one point on the map, but they contain electrical data. Each component must have at least one pin to be meaningful.",
@@ -85,16 +66,6 @@
                             "max_current": {
                               "type": "number"
                             },
-                            "reserved": {
-                              "type": "array",
-                              "items": {
-                                "type": "integer"
-                              }
-                            },
-                            "n_points": {
-                              "description": "The number of points in voltage and current arrays.",
-                              "type": "integer"
-                            },
                             "n_charge_points": {
                               "description": "TODO: What is it?",
                               "type": "integer"
@@ -112,14 +83,12 @@
                             "max_current",
                             "max_voltage",
                             "probe_signal_frequency",
-                            "n_points",
-                            "n_charge_points",
-                            "reserved"
+                            "n_charge_points"
                           ]
                         },
                         "voltage": {
                           "description": "Measured voltages [V] in dependence with time.",
-                          "minItems": 4,
+                          "minItems": 1,
                           "type": "array",
                           "items": {
                             "type": "number"
@@ -127,7 +96,7 @@
                         },
                         "current": {
                           "description": "Measured currents [A] in dependence with time.",
-                          "minItems": 4,
+                          "minItems": 1,
                           "type": "array",
                           "items": {
                             "type": "number"
@@ -174,15 +143,6 @@
                             "max_current": {
                               "type": "number"
                             },
-                            "reserved": {
-                              "type": "array",
-                              "items": {
-                                "type": "integer"
-                              }
-                            },
-                            "n_points": {
-                              "type": "integer"
-                            },
                             "n_charge_points": {
                               "type": "integer"
                             },
@@ -199,9 +159,7 @@
                             "max_current",
                             "max_voltage",
                             "probe_signal_frequency",
-                            "n_points",
-                            "n_charge_points",
-                            "reserved"
+                            "n_charge_points"
                           ]
                         },
                         "voltage": {
@@ -224,12 +182,6 @@
                       ]
                     }
                   ]
-                },
-                "score": {
-                  "description": "Score is a comparison result of this pin ivc measurement with reference ivc from the reference board. Score have no meaning when one of the two measurements is not available.",
-                  "minimum": 0,
-                  "maximum": 1,
-                  "type": "number"
                 }
               },
               "required": [
@@ -237,35 +189,10 @@
                 "is_dynamic",
                 "ivc",
                 "reference_ivc",
-                "score",
                 "x",
                 "y"
               ]
             }
-          },
-          "side_indexes": {
-            "description": "For elements with rows of pins like LQFP.",
-            "anyOf": [
-              {
-                "description": "Set to null if element is not described as one having rows of pins.",
-                "type": "null"
-              },
-              {
-                "description": "The size of array is the number of rows. It may be 2 for SOIC-like components of 4 for LQFP-like components. Each array element represent a row of pins.",
-                "type": "array",
-                "minItems": 2,
-                "maxItems": 4,
-                "items": {
-                  "description": "Each element is a pin row defined with two numbers: first pin of the row and pin after the last one in this row.",
-                  "type": "array",
-                  "minItems": 2,
-                  "maxItems": 2,
-                  "items": {
-                    "type": "integer"
-                  }
-                }
-              }
-            ]
           },
           "center": {
             "description": "Defines 2D coordinates for component center [pixels]. First x, then y.",
@@ -305,16 +232,6 @@
             "maximum": 3,
             "type": "integer"
           },
-          "h_pins": {
-            "description": "How many pins are horizontally aligned (for lqfp, soic). It is -1 if cannot be determined (for manually entered components for example)..",
-            "minimum": -1,
-            "type": "integer"
-          },
-          "w_pins": {
-            "description": "How many pins are vertically aligned (for lqfp, soic). It is -1 if cannot be determined (for manually entered components for example).",
-            "minimum": -1,
-            "type": "integer"
-          },
           "width": {
             "description": "TODO: Meaning not understood. Relation to bounding box?",
             "type": "number"
@@ -327,22 +244,21 @@
         "required": [
           "bounding_zone",
           "center",
-          "h_pins",
           "height",
-          "manual_name",
-          "probability",
           "rotation",
-          "side_indexes",
-          "w_pins",
           "width",
           "name",
-          "is_manual",
           "pins"
         ]
       }
+    },
+    "version": {
+      "description": "Protocol version",
+      "type": "string"
     }
   },
   "required": [
-    "elements"
+    "elements",
+    "version"
   ]
 }
