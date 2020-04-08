@@ -1,0 +1,348 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "hg://hg.ximc.ru/eyepoint-src/doc/elements.schema.json",
+  "title": "Eyepoint Lab savefile format",
+  "description": "This describes format of savefiles of Eyepoint Lab in elements.json. There are additional data in the saves, but this only describes one main json file",
+  "additionalProperties": false,
+  "type": "object",
+  "properties": {
+    "elements": {
+      "description": "Array of elements, each of them represents a component on the PCB.",
+      "minItems": 1,
+      "uniqueItems": true,
+      "type": "array",
+      "items": {
+        "description": "Component on the PCB. May be a interated circuit or SMD chip. Sometimes a nonexistent component is created just to place testing points inside it. One board may contain just one component, real or faked. So basically component provides convinient wrapper for pins.",
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "probability": {
+            "description": "Probability from classifier that this component is recognized correctly.",
+            "anyOf": [
+              {
+                "description": "For manually added elements probability is set to null.",
+                "type": "null"
+              },
+              {
+                "description": "For automatically recognized components probability is 0-1.",
+                "minimum": 0,
+                "maximum": 1,
+                "type": "number"
+              }
+            ]
+          },
+          "manual_name": {
+            "description": "The name assigned by user. Is set when automatical systems failed to recognized one of the standard names of PCB component. Otherwise it is empty string.",
+            "type": "string"
+          },
+          "is_manual": {
+            "description": "Is set when component was added manually and not with automated recognition of supported components. Otherwise it is false.",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Is set when component was recognized by automated system and set one of the supported names. When entering component names manually this is also set equal to manual_name.",
+            "type": "string"
+          },
+          "pins": {
+            "description": "An array of testable pins of the PCB component. Pins are simple because they are just one point on the map, but they contain electrical data. Each component must have at least one pin to be meaningful.",
+            "uniqueItems": true,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "description": "A pin for electrical test.",
+              "additionalProperties": false,
+              "type": "object",
+              "properties": {
+                "cluster_id": {
+                  "description": "Must be used when multiple measurements will be available for one pin. It's not true for now.",
+                  "minimum": -1,
+                  "maximum": -1,
+                  "type": "integer"
+                },
+                "ivc": {
+                  "description": "Electrical measurement data that is considered to match against reference data.",
+                  "anyOf": [
+                    {
+                      "description": "May be null when was renamed to reference_ivc.",
+                      "type": "null"
+                    },
+                    {
+                      "description": "Each measurement consists of voltages, currents (the iv curve) and measurement details.",
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "measure_settings": {
+                          "description": "The measurement details.",
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "probe_signal_frequency": {
+                              "type": "number"
+                            },
+                            "max_voltage": {
+                              "type": "number"
+                            },
+                            "max_current": {
+                              "type": "number"
+                            },
+                            "reserved": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer"
+                              }
+                            },
+                            "n_points": {
+                              "description": "The number of points in voltage and current arrays.",
+                              "type": "integer"
+                            },
+                            "n_charge_points": {
+                              "description": "TODO: What is it?",
+                              "type": "integer"
+                            },
+                            "desc_frequency": {
+                              "type": "number"
+                            },
+                            "flags": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "desc_frequency",
+                            "flags",
+                            "max_current",
+                            "max_voltage",
+                            "probe_signal_frequency",
+                            "n_points",
+                            "n_charge_points",
+                            "reserved"
+                          ]
+                        },
+                        "voltage": {
+                          "description": "Measured voltages [V] in dependence with time.",
+                          "minItems": 4,
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          }
+                        },
+                        "current": {
+                          "description": "Measured currents [A] in dependence with time.",
+                          "minItems": 4,
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "required": [
+                        "current",
+                        "measure_settings",
+                        "voltage"
+                      ]
+                    }
+                  ]
+                },
+                "y": {
+                  "description": "Y coordinate of the pin on the board image [pixels]",
+                  "type": "number"
+                },
+                "x": {
+                  "description": "X coordinate of the pin on the board image [pixels]",
+                  "type": "number"
+                },
+                "is_dynamic": {
+                  "description": "The electrical measurement can reveal that it differs from time to time. This is called dynamic ivc and marked with this flag.",
+                  "type": "boolean"
+                },
+                "reference_ivc": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "measure_settings": {
+                          "type": "object",
+                          "properties": {
+                            "probe_signal_frequency": {
+                              "type": "number"
+                            },
+                            "max_voltage": {
+                              "type": "number"
+                            },
+                            "max_current": {
+                              "type": "number"
+                            },
+                            "reserved": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer"
+                              }
+                            },
+                            "n_points": {
+                              "type": "integer"
+                            },
+                            "n_charge_points": {
+                              "type": "integer"
+                            },
+                            "desc_frequency": {
+                              "type": "number"
+                            },
+                            "flags": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "desc_frequency",
+                            "flags",
+                            "max_current",
+                            "max_voltage",
+                            "probe_signal_frequency",
+                            "n_points",
+                            "n_charge_points",
+                            "reserved"
+                          ]
+                        },
+                        "voltage": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          }
+                        },
+                        "current": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "required": [
+                        "current",
+                        "measure_settings",
+                        "voltage"
+                      ]
+                    }
+                  ]
+                },
+                "score": {
+                  "description": "Score is a comparison result of this pin ivc measurement with reference ivc from the reference board. Score have no meaning when one of the two measurements is not available.",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "cluster_id",
+                "is_dynamic",
+                "ivc",
+                "reference_ivc",
+                "score",
+                "x",
+                "y"
+              ]
+            }
+          },
+          "side_indexes": {
+            "description": "For elements with rows of pins like LQFP.",
+            "anyOf": [
+              {
+                "description": "Set to null if element is not described as one having rows of pins.",
+                "type": "null"
+              },
+              {
+                "description": "The size of array is the number of rows. It may be 2 for SOIC-like components of 4 for LQFP-like components. Each array element represent a row of pins.",
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 4,
+                "items": {
+                  "description": "Each element is a pin row defined with two numbers: first pin of the row and pin after the last one in this row.",
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              }
+            ]
+          },
+          "center": {
+            "description": "Defines 2D coordinates for component center [pixels]. First x, then y.",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "bounding_zone": {
+            "description": "TODO: please rewrite whole block with some understanding.",
+            "anyOf": [
+              {
+                "description": "bounding_zone is an empty array when not used.",
+                "maxItems": 0,
+                "type": "array"
+              },
+              {
+                "description": "bounding_zone is an array with 4 or 12 vertixes when used.",
+                "minItems": 4,
+                "maxItems": 12,
+                "type": "array",
+                "items": {
+                  "description": "A 2D coordinates of ...",
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            ]
+          },
+          "rotation": {
+            "description": "Each automatically recognized PCB component can be placed on the board in 4 different rotations - each one by additionl 90 degrees from the original. This parameter is reqired for correct placement of component and its picture.",
+            "minimum": 0,
+            "maximum": 3,
+            "type": "integer"
+          },
+          "h_pins": {
+            "description": "How many pins are horizontally aligned (for lqfp, soic). It is -1 if cannot be determined (for manually entered components for example)..",
+            "minimum": -1,
+            "type": "integer"
+          },
+          "w_pins": {
+            "description": "How many pins are vertically aligned (for lqfp, soic). It is -1 if cannot be determined (for manually entered components for example).",
+            "minimum": -1,
+            "type": "integer"
+          },
+          "width": {
+            "description": "TODO: Meaning not understood. Relation to bounding box?",
+            "type": "number"
+          },
+          "height": {
+            "description": "TODO: Meaning not understood. Relation to bounding box?",
+            "type": "number"
+          }
+        },
+        "required": [
+          "bounding_zone",
+          "center",
+          "h_pins",
+          "height",
+          "manual_name",
+          "probability",
+          "rotation",
+          "side_indexes",
+          "w_pins",
+          "width",
+          "name",
+          "is_manual",
+          "pins"
+        ]
+      }
+    }
+  },
+  "required": [
+    "elements"
+  ]
+}
