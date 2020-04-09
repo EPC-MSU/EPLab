@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "hg://hg.ximc.ru/eyepoint-src/doc/elements.schema.json",
-  "title": "Eyepoint Lab savefile format",
-  "description": "This describes format of savefiles of Eyepoint Lab in elements.json. There are additional data in the saves, but this only describes one main json file",
+  "$id": "hg://hg.ximc.ru/eyepoint/elements.schema.json",
+  "title": "EPLab PCB file format",
+  "description": "This schema describes the EPLab files format for PCB components description. There is an additional data in the saves, but this only describes one main json file",
   "additionalProperties": false,
   "type": "object",
   "properties": {
@@ -12,7 +12,7 @@
       "uniqueItems": true,
       "type": "array",
       "items": {
-        "description": "Component on the PCB. May be a interated circuit or SMD chip. Sometimes a nonexistent component is created just to place testing points inside it. One board may contain just one component, real or faked. So basically component provides convinient wrapper for pins.",
+        "description": "Component on the PCB. May be a integrated circuit or SMD chip. Sometimes a nonexistent component is created just to place testing points inside it. Each board should contain at least one component, real or faked. So basically component provides convinient wrapper for pins.",
         "additionalProperties": false,
         "type": "object",
         "properties": {
@@ -62,22 +62,27 @@
                           "type": "object",
                           "properties": {
                             "probe_signal_frequency": {
+                              "description": "Harmonic probe signal frequency. Units: Hz. Normally this parameter is set together with sampling rate for providing fixed resolution.",
                               "type": "number"
                             },
                             "max_voltage": {
+                              "description": "Harmonic probe signal voltage amplitude. Units: Volts. This is open circuit voltage. Real voltage drop between probes during the measurement will be smaller due to finite current sensor impedance.",
                               "type": "number"
                             },
                             "max_current": {
+                              "description": "Maximum short circuit current. Units: mA. This parameter may not be supported by the most devices.",
                               "type": "number"
                             },
                             "n_charge_points": {
-                              "description": "TODO: What is it?",
+                              "description": "This parameter determines delay added for testing component precharge before measurement. This parameter is set as number of samples. The value of the delay in seconds can be calculated as NumberChargePoints ∗ SamplingRate. These precharge points are not presented in measurement results. Warning: some devices don’t support precharge.",
                               "type": "integer"
                             },
                             "desc_frequency": {
+                              "description": "This rate determines the period between subsequent samples in measured curve. Units: samples / second. Normally this parameter is set together with probe signal frequency for providing fixed resolution, which is determined by the SamplingRate / ProbeSignalFrequency ratio.",
                               "type": "number"
                             },
                             "flags": {
+                              "description": "Flags for current sensor mode definition. Current sensor modes define resolution and noise level. Current sense resistors also limit the maximum current. See hardware manual for more detailed description of mode values for this parameter.",
                               "type": "integer"
                             }
                           },
@@ -92,7 +97,7 @@
                         },
                         "voltage": {
                           "description": "Measured voltages [V] in dependence with time.",
-                          "minItems": 1,
+                          "minItems": 2,
                           "type": "array",
                           "items": {
                             "type": "number"
@@ -100,7 +105,7 @@
                         },
                         "current": {
                           "description": "Measured currents [A] in dependence with time.",
-                          "minItems": 1,
+                          "minItems": 2,
                           "type": "array",
                           "items": {
                             "type": "number"
@@ -140,21 +145,27 @@
                           "type": "object",
                           "properties": {
                             "probe_signal_frequency": {
+                              "description": "Harmonic probe signal frequency. Units: Hz. Normally this parameter is set together with sampling rate for providing fixed resolution.",
                               "type": "number"
                             },
                             "max_voltage": {
+                              "description": "Harmonic probe signal voltage amplitude. Units: Volts. This is open circuit voltage. Real voltage drop between probes during the measurement will be smaller due to finite current sensor impedance.",
                               "type": "number"
                             },
                             "max_current": {
+                              "description": "Maximum short circuit current. Units: mA. This parameter may not be supported by the most devices.",
                               "type": "number"
                             },
                             "n_charge_points": {
+                              "description": "This parameter determines delay added for testing component precharge before measurement. This parameter is set as number of samples. The value of the delay in seconds can be calculated as NumberChargePoints ∗ SamplingRate. These precharge points are not presented in measurement results. Warning: some devices don’t support precharge.",
                               "type": "integer"
                             },
                             "desc_frequency": {
+                              "description": "This rate determines the period between subsequent samples in measured curve. Units: samples / second. Normally this parameter is set together with probe signal frequency for providing fixed resolution, which is determined by the SamplingRate / ProbeSignalFrequency ratio.",
                               "type": "number"
                             },
                             "flags": {
+                              "description": "Flags for current sensor mode definition. Current sensor modes define resolution and noise level. Current sense resistors also limit the maximum current. See hardware manual for more detailed description of mode values for this parameter.",
                               "type": "integer"
                             }
                           },
@@ -168,12 +179,14 @@
                           ]
                         },
                         "voltage": {
+                          "description": "Measured voltages [V] in dependence with time.",
                           "type": "array",
                           "items": {
                             "type": "number"
                           }
                         },
                         "current": {
+                          "description": "Measured currents [A] in dependence with time.",
                           "type": "array",
                           "items": {
                             "type": "number"
@@ -238,11 +251,11 @@
             "type": "integer"
           },
           "width": {
-            "description": "TODO: Meaning not understood. Relation to bounding box?",
+            "description": "Component width in px (measured by marginal pins).",
             "type": "number"
           },
           "height": {
-            "description": "TODO: Meaning not understood. Relation to bounding box?",
+            "description": "Component height in px (measured by marginal pins).",
             "type": "number"
           }
         },
