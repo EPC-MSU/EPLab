@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "hg://hg.ximc.ru/eyepoint/elements.schema.json",
+  "$id": "hg://hg.ximc.ru/eyepoint/eplab/elements.schema.json",
   "title": "EPLab PCB file format",
   "description": "This schema describes the EPLab files format for PCB components description. There is an additional data in the saves, but this only describes one main json file",
   "additionalProperties": false,
@@ -17,7 +17,7 @@
         "type": "object",
         "properties": {
           "name": {
-            "description": "Is set when component was recognized by automated system and set one of the supported names.",
+            "description": "Is set either by automatic recognition as one of the supported names or manually by user. See is_manual flag.",
             "type": "string"
           },
           "is_manual": {
@@ -25,23 +25,16 @@
             "type": "boolean"
           },
           "pins": {
-            "description": "An array of testable pins of the PCB component. Pins are simple because they are just one point on the map, but they contain electrical data. Each component must have at least one pin to be meaningful.",
+            "description": "An array of testable pins of the PCB component. Pins are simple because they are just one point on the map, but they contain electrical data. Component may have no pins because there may be mechanical and not electrical components. They may still count for probe trajectory.",
             "uniqueItems": true,
-            "minItems": 1,
             "type": "array",
             "items": {
               "description": "A pin for electrical test.",
               "additionalProperties": false,
               "type": "object",
               "properties": {
-                "cluster_id": {
-                  "description": "Must be used when multiple measurements will be available for one pin. It's not true for now.",
-                  "minimum": -1,
-                  "maximum": -1,
-                  "type": "integer"
-                },
                 "comment": {
-                  "description": "Pin comment",
+                  "description": "Pin comment for user convenience.",
                   "type": "string"
                 },
                 "y": {
@@ -52,163 +45,97 @@
                   "description": "X coordinate of the pin on the board image [pixels]",
                   "type": "number"
                 },
-                "is_dynamic": {
-                  "description": "The electrical measurement can reveal that it differs from time to time. This is called dynamic ivc and marked with this flag.",
-                  "type": "boolean"
-                },
-                "reference_ivc": {
-                  "anyOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "measure_settings": {
-                          "additionalProperties": false,
+                "ivc": {
+                  "description": "An array of electrical measurements of the pin. There may be several reference measurements with various parameters, test measurements, or even no measurements because they haven't been done yet.",
+                  "type": "array",
+                  "items": {
+                    "description": "IV curve measurement: measurement parameters and results (voltages and currents). Measurements can be reference, meaning the measurement from valid board and component.",
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "comment": {
+                        "description": "Measurement comment for user convenience.",
+                        "type": "string"
+                      },
+                      "measure_settings": {
+                        "description": "The measurement details.",
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "probe_signal_frequency": {
+                            "description": "Harmonic probe signal frequency. Units: Hz. Normally this parameter is set together with sampling rate for providing fixed resolution.",
+                            "type": "number"
+                          },
+                          "max_voltage": {
+                            "description": "Harmonic probe signal voltage amplitude. Units: Volts. This is open circuit voltage. Real voltage drop between probes during the measurement will be smaller due to finite current sensor impedance.",
+                            "type": "number"
+                          },
+                          "max_current": {
+                            "description": "Maximum short circuit current. Units: mA. This parameter may not be supported by the most devices.",
+                            "type": "number"
+                          },
+                          "number_charge_points": {
+                            "description": "This parameter determines delay added for testing component precharge before measurement. This parameter is set as number of samples. The value of the delay in seconds can be calculated as NumberChargePoints ∗ SamplingRate. These precharge points are not presented in measurement results. Warning: some devices don’t support precharge.",
+                            "type": "integer"
+                          },
+                          "desc_frequency": {
+                            "description": "This rate determines the period between subsequent samples in measured curve. Units: samples / second. Normally this parameter is set together with probe signal frequency for providing fixed resolution, which is determined by the SamplingRate / ProbeSignalFrequency ratio.",
+                            "type": "number"
+                          },
+                          "flags": {
+                            "description": "Flags for current sensor mode definition. Current sensor modes define resolution and noise level. Current sense resistors also limit the maximum current. See hardware manual for more detailed description of mode values for this parameter.",
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "desc_frequency",
+                          "flags",
+                          "max_current",
+                          "max_voltage",
+                          "probe_signal_frequency",
+                          "number_charge_points"
+                        ]
+                      },
+                      "is_dynamic": {
+                        "description": "The electrical measurement can reveal that it differs from time to time. This is called dynamic ivc and marked with this flag. If flag is not present, then flag is false.",
+                        "type": "boolean"
+                      },
+                      "is_reference": {
+                        "description": "Some measurements are marked as reference. Other test measurements must be compared with reference ones. They are always considered true. If flag is not present, then flag is false.",
+                        "type": "boolean"
+                      },
+                      "iv_array": {
+                        "description": "Measured voltages and currents in dependence with time as array. Time step between measurements is defined by measurement settings.",
+                        "minItems": 2,
+                        "type": "array",
+                        "items": {
+                          "description": "A pair of voltage [V] and current [A].",
                           "type": "object",
+                          "additionalProperties": false,
                           "properties": {
-                            "probe_signal_frequency": {
-                              "description": "Harmonic probe signal frequency. Units: Hz. Normally this parameter is set together with sampling rate for providing fixed resolution.",
+                            "current": {
                               "type": "number"
                             },
-                            "max_voltage": {
-                              "description": "Harmonic probe signal voltage amplitude. Units: Volts. This is open circuit voltage. Real voltage drop between probes during the measurement will be smaller due to finite current sensor impedance.",
+                            "voltage": {
                               "type": "number"
-                            },
-                            "max_current": {
-                              "description": "Maximum short circuit current. Units: mA. This parameter may not be supported by the most devices.",
-                              "type": "number"
-                            },
-                            "n_charge_points": {
-                              "description": "This parameter determines delay added for testing component precharge before measurement. This parameter is set as number of samples. The value of the delay in seconds can be calculated as NumberChargePoints ∗ SamplingRate. These precharge points are not presented in measurement results. Warning: some devices don’t support precharge.",
-                              "type": "integer"
-                            },
-                            "desc_frequency": {
-                              "description": "This rate determines the period between subsequent samples in measured curve. Units: samples / second. Normally this parameter is set together with probe signal frequency for providing fixed resolution, which is determined by the SamplingRate / ProbeSignalFrequency ratio.",
-                              "type": "number"
-                            },
-                            "flags": {
-                              "description": "Flags for current sensor mode definition. Current sensor modes define resolution and noise level. Current sense resistors also limit the maximum current. See hardware manual for more detailed description of mode values for this parameter.",
-                              "type": "integer"
                             }
                           },
                           "required": [
-                            "desc_frequency",
-                            "flags",
-                            "max_current",
-                            "max_voltage",
-                            "probe_signal_frequency",
-                            "n_charge_points"
+                            "current",
+                            "voltage"
                           ]
-                        },
-                        "voltage": {
-                          "description": "Measured voltages [V] in dependence with time.",
-                          "type": "array",
-                          "items": {
-                            "type": "number"
-                          }
-                        },
-                        "current": {
-                          "description": "Measured currents [A] in dependence with time.",
-                          "type": "array",
-                          "items": {
-                            "type": "number"
-                          }
                         }
-                      },
-                      "required": [
-                        "current",
-                        "measure_settings",
-                        "voltage"
-                      ]
-                    }
-                  ]
-                }
-              },
-              "patternProperties": {
-                "ivc$": { 
-                  "description": "IV curve measuremnt: device settings and measurement results. ivc – basic measurement. Additionally in reference_ivc filed reference data could be stored.",
-                  "anyOf": [
-                    {
-                      "description": "May be null when was renamed to reference_ivc.",
-                      "type": "null"
+                      }
                     },
-                    {
-                      "description": "Each measurement consists of voltages, currents (the iv curve) and measurement details.",
-                      "additionalProperties": false,
-                      "type": "object",
-                      "properties": {
-                        "measure_settings": {
-                          "description": "The measurement details.",
-                          "additionalProperties": false,
-                          "type": "object",
-                          "properties": {
-                            "probe_signal_frequency": {
-                              "description": "Harmonic probe signal frequency. Units: Hz. Normally this parameter is set together with sampling rate for providing fixed resolution.",
-                              "type": "number"
-                            },
-                            "max_voltage": {
-                              "description": "Harmonic probe signal voltage amplitude. Units: Volts. This is open circuit voltage. Real voltage drop between probes during the measurement will be smaller due to finite current sensor impedance.",
-                              "type": "number"
-                            },
-                            "max_current": {
-                              "description": "Maximum short circuit current. Units: mA. This parameter may not be supported by the most devices.",
-                              "type": "number"
-                            },
-                            "n_charge_points": {
-                              "description": "This parameter determines delay added for testing component precharge before measurement. This parameter is set as number of samples. The value of the delay in seconds can be calculated as NumberChargePoints ∗ SamplingRate. These precharge points are not presented in measurement results. Warning: some devices don’t support precharge.",
-                              "type": "integer"
-                            },
-                            "desc_frequency": {
-                              "description": "This rate determines the period between subsequent samples in measured curve. Units: samples / second. Normally this parameter is set together with probe signal frequency for providing fixed resolution, which is determined by the SamplingRate / ProbeSignalFrequency ratio.",
-                              "type": "number"
-                            },
-                            "flags": {
-                              "description": "Flags for current sensor mode definition. Current sensor modes define resolution and noise level. Current sense resistors also limit the maximum current. See hardware manual for more detailed description of mode values for this parameter.",
-                              "type": "integer"
-                            }
-                          },
-                          "required": [
-                            "desc_frequency",
-                            "flags",
-                            "max_current",
-                            "max_voltage",
-                            "probe_signal_frequency",
-                            "n_charge_points"
-                          ]
-                        },
-                        "voltage": {
-                          "description": "Measured voltages [V] in dependence with time.",
-                          "minItems": 2,
-                          "type": "array",
-                          "items": {
-                            "type": "number"
-                          }
-                        },
-                        "current": {
-                          "description": "Measured currents [A] in dependence with time.",
-                          "minItems": 2,
-                          "type": "array",
-                          "items": {
-                            "type": "number"
-                          }
-                        }
-                      },
-                      "required": [
-                        "current",
-                        "measure_settings",
-                        "voltage"
-                      ]
-                    }
-                  ]
+                    "required": [
+                      "iv_array",
+                      "measure_settings"
+                    ]
+                  }
                 }
               },
               "required": [
-                "cluster_id",
-                "is_dynamic",
                 "ivc",
-                "reference_ivc",
                 "x",
                 "y"
               ]
@@ -273,7 +200,7 @@
       }
     },
     "version": {
-      "description": "Protocol version",
+      "description": "Savefile version",
       "type": "string"
     }
   },
