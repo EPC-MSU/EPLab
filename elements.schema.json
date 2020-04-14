@@ -21,7 +21,7 @@
             "type": "string"
           },
           "is_manual": {
-            "description": "Is set when component was added manually and not with automated recognition of supported components. Otherwise it is false.",
+            "description": "Is set when component was added manually and not with automated recognition of supported components. Otherwise it is false. Empty field means false.",
             "type": "boolean"
           },
           "pins": {
@@ -57,7 +57,7 @@
                         "description": "Measurement comment for user convenience.",
                         "type": "string"
                       },
-                      "measure_settings": {
+                      "measurement_settings": {
                         "description": "The measurement details.",
                         "additionalProperties": false,
                         "type": "object",
@@ -70,27 +70,22 @@
                             "description": "Harmonic probe signal voltage amplitude. Units: Volts. This is open circuit voltage. Real voltage drop between probes during the measurement will be smaller due to finite current sensor impedance.",
                             "type": "number"
                           },
-                          "max_current": {
-                            "description": "Maximum short circuit current. Units: mA. This parameter may not be supported by the most devices.",
-                            "type": "number"
-                          },
                           "number_charge_points": {
                             "description": "This parameter determines delay added for testing component precharge before measurement. This parameter is set as number of samples. The value of the delay in seconds can be calculated as NumberChargePoints ∗ SamplingRate. These precharge points are not presented in measurement results. Warning: some devices don’t support precharge.",
                             "type": "integer"
                           },
-                          "desc_frequency": {
+                          "sampling_rate": {
                             "description": "This rate determines the period between subsequent samples in measured curve. Units: samples / second. Normally this parameter is set together with probe signal frequency for providing fixed resolution, which is determined by the SamplingRate / ProbeSignalFrequency ratio.",
                             "type": "number"
                           },
-                          "flags": {
+                          "current_sensor_mode": {
                             "description": "Flags for current sensor mode definition. Current sensor modes define resolution and noise level. Current sense resistors also limit the maximum current. See hardware manual for more detailed description of mode values for this parameter.",
                             "type": "integer"
                           }
                         },
                         "required": [
-                          "desc_frequency",
-                          "flags",
-                          "max_current",
+                          "sampling_rate",
+                          "current_sensor_mode",
                           "max_voltage",
                           "probe_signal_frequency",
                           "number_charge_points"
@@ -129,7 +124,7 @@
                     },
                     "required": [
                       "iv_array",
-                      "measure_settings"
+                      "measurement_settings"
                     ]
                   }
                 }
