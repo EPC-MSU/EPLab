@@ -146,27 +146,17 @@
             }
           },
           "bounding_zone": {
-            "description": "TODO: please rewrite whole block with some understanding.",
-            "anyOf": [
-              {
-                "description": "bounding_zone is an empty array when not used.",
-                "maxItems": 0,
-                "type": "array"
-              },
-              {
-                "description": "bounding_zone is an array with 4 or 12 vertixes when used.",
-                "minItems": 4,
-                "maxItems": 12,
-                "type": "array",
-                "items": {
-                  "description": "A 2D coordinates of ...",
-                  "type": "array",
-                  "items": {
-                    "type": "number"
-                  }
-                }
+            "description": "bounding_zone, if present, sets a polygon on the board which is occupied by the element. There must be no overlapping polygons. It is an array with 4 or 12 vertixes when used. 4 vertixes for simple rectangular component. 12 vertixes for intergated circuits that are found by 4 corners (16 corners minus 4 inner corners).",
+            "minItems": 4,
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "description": "A 2D coordinates of bounding_zone polygon.",
+              "type": "array",
+              "items": {
+                "type": "number"
               }
-            ]
+            }
           },
           "rotation": {
             "description": "Each automatically recognized PCB component can be placed on the board in 4 different rotations - each one by additionl 90 degrees from the original. This parameter is reqired for correct placement of component and its picture.",
@@ -184,7 +174,6 @@
           }
         },
         "required": [
-          "bounding_zone",
           "center",
           "height",
           "rotation",
