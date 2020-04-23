@@ -78,14 +78,14 @@
                             "description": "This rate determines the period between subsequent samples in measured curve. Units: samples / second. Normally this parameter is set together with probe signal frequency for providing fixed resolution, which is determined by the SamplingRate / ProbeSignalFrequency ratio.",
                             "type": "number"
                           },
-                          "current_sensor_mode": {
-                            "description": "Flags for current sensor mode definition. Current sensor modes define resolution and noise level. Current sense resistors also limit the maximum current. See hardware manual for more detailed description of mode values for this parameter.",
-                            "type": "integer"
+                          "internal_resistance": {
+                            "description": "A current limiter is used inside measurement device during the measurement. It is usually a resistor and its value limits maximum current for passive circuits. Units: Ohms.",
+                            "type": "number"
                           }
                         },
                         "required": [
                           "sampling_rate",
-                          "current_sensor_mode",
+                          "internal_resistance",
                           "max_voltage",
                           "probe_signal_frequency",
                           "number_charge_points"
