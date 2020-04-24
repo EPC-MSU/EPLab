@@ -1,4 +1,4 @@
-{
+schema{
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "hg://hg.ximc.ru/eyepoint/eplab/elements.schema.json",
   "version": "1.0.0",
@@ -79,14 +79,14 @@
                             "description": "This rate determines the period between subsequent samples in measured curve. Units: samples / second. Normally this parameter is set together with probe signal frequency for providing fixed resolution, which is determined by the SamplingRate / ProbeSignalFrequency ratio.",
                             "type": "number"
                           },
-                          "current_sensor_resistance": {
-                            "description": "Internal current sensor resistance connected in series to the testing component. This resistance includes current sensor resistor, current limiting resistor and all other internal serial resistances in measurement circuit. Units: Ohms.",
+                          "internal_resistance": {
+                            "description": "Internal current sensor resistance, current limiting resistor and all other internal serial resistances in measurement circuit. Units: Ohms.",
                             "type": "number"
                           }
                         },
                         "required": [
                           "sampling_rate",
-                          "current_sensor_resistance",
+                          "internal_resistance",
                           "max_voltage",
                           "probe_signal_frequency"
                         ]
