@@ -164,11 +164,11 @@
             "type": "integer"
           },
           "width": {
-            "description": "Component width in px (measured by marginal pins).",
+            "description": "Component width in mm (measured by marginal pins).",
             "type": "number"
           },
           "height": {
-            "description": "Component height in px (measured by marginal pins).",
+            "description": "Component height in mm (measured by marginal pins).",
             "type": "number"
           }
         },
