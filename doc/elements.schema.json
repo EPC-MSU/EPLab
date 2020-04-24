@@ -135,6 +135,10 @@
               ]
             }
           },
+          "package": {
+            "description": "Element package name. Names from IPC-7351B standard should be used if possible.",
+            "type": "string"
+          },
           "center": {
             "description": "Defines 2D coordinates for component center [pixels]. First x, then y.",
             "type": "array",
