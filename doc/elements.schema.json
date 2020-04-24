@@ -173,11 +173,6 @@
           }
         },
         "required": [
-          "center",
-          "height",
-          "rotation",
-          "width",
-          "name",
           "pins"
         ]
       }
