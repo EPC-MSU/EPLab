@@ -17,11 +17,11 @@
         "type": "object",
         "properties": {
           "name": {
-            "description": "Is set either by automatic recognition as one of the supported names or manually by user. See is_manual flag.",
+            "description": "Component name.",
             "type": "string"
           },
-          "is_manual": {
-            "description": "Is set when component was added manually and not with automated recognition of supported components. Otherwise it is false. Empty field means false.",
+          "set_automatically": {
+            "description": "This flag indicates that this component was set by the automated recognition system and all fields are in correspondence with basic internal representation for the current device. In case of manual component editing this flag should be reset. Empty field assumed false.",
             "type": "boolean"
           },
           "pins": {
