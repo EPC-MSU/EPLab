@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "hg://hg.ximc.ru/eyepoint/eplab/elements.schema.json",
+  "version": "1.0.0",
   "title": "UFIV - Universal file format for IV-curve measurements.",
   "description": "This format describes set of IV-curve measurements for a set of electrical components on a single PCB.",
   "additionalProperties": false,
