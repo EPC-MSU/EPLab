@@ -70,9 +70,9 @@
                             "description": "Harmonic probe signal voltage amplitude. Units: Volts. This is open circuit voltage. Real voltage drop between probes during the measurement will be smaller due to finite current sensor impedance.",
                             "type": "number"
                           },
-                          "number_charge_points": {
-                            "description": "This parameter determines delay added for testing component precharge before measurement. This parameter is set as number of samples. The value of the delay in seconds can be calculated as NumberChargePoints ∗ SamplingRate. These precharge points are not presented in measurement results. Warning: some devices don’t support precharge.",
-                            "type": "integer"
+                          "precharge_delay": {
+                            "description": "This parameter determines delay added for testing component precharge before measurement. During this delay appropriate probe signal is applied. Units: seconds",
+                            "type": "number"
                           },
                           "sampling_rate": {
                             "description": "This rate determines the period between subsequent samples in measured curve. Units: samples / second. Normally this parameter is set together with probe signal frequency for providing fixed resolution, which is determined by the SamplingRate / ProbeSignalFrequency ratio.",
