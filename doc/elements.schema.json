@@ -71,7 +71,7 @@
                             "type": "number"
                           },
                           "precharge_delay": {
-                            "description": "This parameter determines delay added for testing component precharge before measurement. During this delay appropriate probe signal is applied. Units: seconds",
+                            "description": "This parameter determines delay added for testing component precharge before measurement. During this delay appropriate probe signal is applied. If not presented assumed 0. Units: seconds",
                             "type": "number"
                           },
                           "sampling_rate": {
@@ -85,10 +85,9 @@
                         },
                         "required": [
                           "sampling_rate",
-                          "internal_resistance",
+                          "current_sensor_resistance",
                           "max_voltage",
-                          "probe_signal_frequency",
-                          "number_charge_points"
+                          "probe_signal_frequency"
                         ]
                       },
                       "is_dynamic": {
