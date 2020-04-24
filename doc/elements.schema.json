@@ -78,8 +78,8 @@
                             "description": "This rate determines the period between subsequent samples in measured curve. Units: samples / second. Normally this parameter is set together with probe signal frequency for providing fixed resolution, which is determined by the SamplingRate / ProbeSignalFrequency ratio.",
                             "type": "number"
                           },
-                          "internal_resistance": {
-                            "description": "A current limiter is used inside measurement device during the measurement. It is usually a resistor and its value limits maximum current for passive circuits. Units: Ohms.",
+                          "current_sensor_resistance": {
+                            "description": "Internal current sensor resistance connected in series to the testing component. This resistance includes current sensor resistor, current limiting resistor and all other internal serial resistances in measurement circuit. Units: Ohms.",
                             "type": "number"
                           }
                         },
