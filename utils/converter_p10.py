@@ -7,13 +7,18 @@ def _convert_measurement_settings(settings: Dict) -> Dict:
     rename_settings_keys = {
         "desc_frequency": "sampling_rate",
     }
+    internal_resistance_map = {
+        3: 475,
+        2: 4750,
+        1: 47500
+    }
 
-    for key in remove_settings_keys:
-        settings.pop(key, None)
+    settings["internal_resistance"] = internal_resistance_map.get(settings["flags"], 0)
+
     for key, new_key in rename_settings_keys.items():
         settings[new_key] = settings.pop(key)
-
-    settings["internal_resistance"] = 666  # TODO: what is that?
+    for key in remove_settings_keys:
+        settings.pop(key, None)
 
     return settings
 
@@ -50,9 +55,13 @@ def _convert_pin(pin: Dict) -> Dict:
 
 
 def _convert_element(element: Dict) -> Dict:
-    remove_element_keys = ["side_indexes", "probability", "manual_name", "is_manual", "w_pins", "h_pins"]
+    remove_element_keys = ["side_indexes", "probability", "manual_name", "is_manual", "w_pins", "h_pins", "width",
+                           "height"]
 
     element["pins"] = [_convert_pin(pin) for pin in element["pins"]]
+
+    if not element["is_manual"]:
+        element["set_automatically"] = True
 
     for key in remove_element_keys:
         element.pop(key, None)
