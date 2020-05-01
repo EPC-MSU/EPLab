@@ -84,7 +84,7 @@ def convert_p10(source_json: Dict, version: str) -> Dict:
 
 if __name__ == "__main__":
     from jsonschema.validators import validate
-    from json import load, dumps
+    import json
     from argparse import ArgumentParser
 
     parser = ArgumentParser(description="Convert EyePoint P10 format to EPLab format")
@@ -96,11 +96,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     with open(args.source, "r") as source_file:
-        converted = convert_p10(load(source_file), "0.0.0")
+        converted = convert_p10(json.load(source_file), "0.0.0")
 
     with open(args.destination, "w") as dest_file:
-        dest_file.write(dumps(converted))
+        dest_file.write(json.dumps(converted))
 
     if args.validate is not None:
         with open(args.validate) as schema:
-            validate(converted, load(schema))
+            validate(converted, json.load(schema))
