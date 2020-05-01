@@ -90,7 +90,8 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="Convert EyePoint P10 format to EPLab format")
     parser.add_argument("--source", help="EyePoint P10 elements.json file", default="elements.json")
     parser.add_argument("--destination", help="EPLab output json file", default="converted.json")
-    parser.add_argument("--validate", help="Enable output file validation", default=False, action="store_true")
+    parser.add_argument("--validate", help="Validate output file over this schema, optional parameter",
+                        nargs='?', const="doc/elements.schema.json")
 
     args = parser.parse_args()
 
@@ -100,6 +101,6 @@ if __name__ == "__main__":
     with open(args.destination, "w") as dest_file:
         dest_file.write(dumps(converted))
 
-    if args.validate:
-        with open("doc/elements.schema.json") as schema:
+    if args.validate is not None:
+        with open(args.validate) as schema:
             validate(converted, load(schema))
