@@ -7,6 +7,32 @@
   "additionalProperties": false,
   "type": "object",
   "properties": {
+    "PCB": {
+      "description": "Data related to the PCB (printed circuit board) and not the mounted components on the board.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pcb_name": {
+          "description": "PCB name, if any.",
+          "type": "string"
+        },
+        "pcb_image_path": {
+          "description": "Local path to the board image relative to the savefile.",
+          "type": "string"
+        },
+        "image_resolution_ppcm": {
+          "description": "Resolution of the PCB image in pixels per centimeter. An approximate value may be used for images with no defined or stable resolution over the image.",
+          "type": "number"
+        },
+        "comment": {
+          "description": "User comment for convinience.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pcb_image_path"
+      ]
+    },
     "elements": {
       "description": "Array of elements, each of them represents a component on the PCB.",
       "minItems": 1,
@@ -99,31 +125,18 @@
                         "description": "Some measurements are marked as reference. Other test measurements must be compared with reference ones. They are always considered true. If flag is not present, then flag is false.",
                         "type": "boolean"
                       },
-                      "iv_array": {
-                        "description": "Measured voltages and currents in dependence with time as array. Time step between measurements is defined by measurement settings.",
-                        "minItems": 2,
-                        "type": "array",
-                        "items": {
-                          "description": "A pair of voltage [V] and current [A].",
-                          "type": "object",
-                          "additionalProperties": false,
-                          "properties": {
-                            "current": {
-                              "type": "number"
-                            },
-                            "voltage": {
-                              "type": "number"
-                            }
-                          },
-                          "required": [
-                            "current",
-                            "voltage"
-                          ]
-                        }
+                      "currents": {
+                        "description": "TODO",
+                        "type": "array"
+                      },
+                      "voltages": {
+                        "description": "TODO",
+                        "type": "array"
                       }
                     },
                     "required": [
-                      "iv_array",
+                      "currents",
+                      "voltages",
                       "measurement_settings"
                     ]
                   }
