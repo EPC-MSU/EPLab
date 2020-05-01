@@ -1,5 +1,6 @@
 from typing import Dict
 from copy import deepcopy
+import json
 
 
 def _convert_measurement_settings(settings: Dict) -> Dict:
@@ -82,9 +83,52 @@ def convert_p10(source_json: Dict, version: str) -> Dict:
     return result
 
 
+class ShortFloatCustomJSONEncoder(json.JSONEncoder):
+    def __init__(self, *_args, **_kwargs):
+        super(ShortFloatCustomJSONEncoder, self).__init__(*_args, **_kwargs)
+        self.current_indent = 0
+        self.current_indent_str = ""
+
+    def encode(self, o):
+        # Recursive Processing for lists required
+        if isinstance(o, (list, tuple)):
+            primitives_only = True
+            for item in o:
+                if isinstance(item, (list, tuple, dict)):
+                    primitives_only = False
+                    break
+            output = []
+            if primitives_only:
+                for item in o:
+                    output.append(json.dumps(item))
+                return "[ " + ", ".join(output) + " ]"
+            else:
+                self.current_indent += self.indent
+                self.current_indent_str = "".join([" " for _ in range(self.current_indent)])
+                for item in o:
+                    output.append(self.current_indent_str + self.encode(item))
+                self.current_indent -= self.indent
+                self.current_indent_str = "".join([" " for _ in range(self.current_indent)])
+                return "[\n" + ",\n".join(output) + "\n" + self.current_indent_str + "]"
+        # Recursive Processing for dictionaries required
+        elif isinstance(o, dict):
+            output = []
+            self.current_indent += self.indent
+            self.current_indent_str = "".join([" " for _ in range(self.current_indent)])
+            for key, value in o.items():
+                output.append(self.current_indent_str + json.dumps(key) + ": " + self.encode(value))
+            self.current_indent -= self.indent
+            self.current_indent_str = "".join([" " for _ in range(self.current_indent)])
+            return "{\n" + ",\n".join(output) + "\n" + self.current_indent_str + "}"
+        # Special float processing
+        elif isinstance(o, float):
+            return format(o, '.3g')
+        else:
+            return json.dumps(o)
+
+
 if __name__ == "__main__":
     from jsonschema.validators import validate
-    from json import load, dumps
     from argparse import ArgumentParser
 
     parser = ArgumentParser(description="Convert EyePoint P10 format to EPLab format")
@@ -96,11 +140,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     with open(args.source, "r") as source_file:
-        converted = convert_p10(load(source_file), "0.0.0")
+        converted = convert_p10(json.load(source_file), "0.0.0")
 
     with open(args.destination, "w") as dest_file:
-        dest_file.write(dumps(converted))
+        dest_file.write(json.dumps(converted, indent=0, cls=ShortFloatCustomJSONEncoder))
 
     if args.validate is not None:
         with open(args.validate) as schema:
-            validate(converted, load(schema))
+            validate(converted, json.load(schema))
