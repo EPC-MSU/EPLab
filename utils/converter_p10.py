@@ -99,7 +99,7 @@ if __name__ == "__main__":
         converted = convert_p10(json.load(source_file), "0.0.0")
 
     with open(args.destination, "w") as dest_file:
-        dest_file.write(json.dumps(converted))
+        dest_file.write(json.dumps(converted, indent=1, sort_keys=True))
 
     if args.validate is not None:
         with open(args.validate) as schema:
