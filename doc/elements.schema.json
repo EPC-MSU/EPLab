@@ -125,13 +125,21 @@
                         "description": "Some measurements are marked as reference. Other test measurements must be compared with reference ones. They are always considered true. If flag is not present, then flag is false.",
                         "type": "boolean"
                       },
-                      "currents": {
-                        "description": "TODO",
-                        "type": "array"
-                      },
                       "voltages": {
-                        "description": "TODO",
-                        "type": "array"
+                        "description": "Circuit voltages measured with sampling rate. Together with currents they form an iv_curve of circuit under investigation, its analog signature. Units: Volts.",
+                        "minItems": 4,
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      },
+                      "currents": {
+                        "description": "Curcuit currents measured with sampling rate. Together with voltages they form an iv_curve of circuit under investigation, its analog signature. Units: Amperes.",
+                        "minItems": 4,
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
                       }
                     },
                     "required": [
