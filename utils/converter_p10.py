@@ -81,6 +81,10 @@ def convert_p10(source_json: Dict, version: str) -> Dict:
 
     return result
 
+class MyFloat(float):
+    pass
+
+
 
 if __name__ == "__main__":
     from jsonschema.validators import validate
@@ -100,6 +104,7 @@ if __name__ == "__main__":
 
     with open(args.destination, "w") as dest_file:
         dest_file.write(json.dumps(converted, indent=1, sort_keys=True))
+        dest_file.write(json.dumps(MyFloat(1)))
 
     if args.validate is not None:
         with open(args.validate) as schema:

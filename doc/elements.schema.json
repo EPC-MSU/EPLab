@@ -72,7 +72,7 @@
                   "description": "X coordinate of the pin on the board image [pixels]",
                   "type": "number"
                 },
-                "ivc": {
+                "iv_curves": {
                   "description": "An array of electrical measurements of the pin. There may be several reference measurements with various parameters, test measurements, or even no measurements because they haven't been done yet.",
                   "type": "array",
                   "items": {
@@ -151,7 +151,7 @@
                 }
               },
               "required": [
-                "ivc",
+                "iv_curves",
                 "x",
                 "y"
               ]
