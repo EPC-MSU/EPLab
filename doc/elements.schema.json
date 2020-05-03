@@ -118,7 +118,7 @@
                         ]
                       },
                       "is_dynamic": {
-                        "description": "The electrical measurement can reveal that it differs from time to time. This is called dynamic ivc and marked with this flag. If flag is not present, then flag is false.",
+                        "description": "The electrical measurement can reveal that it differs from time to time. This is called dynamic iv_curve and marked with this flag. If flag is not present, then flag is false.",
                         "type": "boolean"
                       },
                       "is_reference": {
