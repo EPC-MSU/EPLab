@@ -1,5 +1,5 @@
 [flake8]
-exclude = .git,.hg,__pycache__,ivm.py
+exclude = .git,.hg,__pycache__,ivm.py,venv
 max-complexity = 14
 inline-quotes = double
 multiline-quotes = """
