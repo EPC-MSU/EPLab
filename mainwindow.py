@@ -11,7 +11,7 @@ class EPLabWindow(QMainWindow):
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
 
-        self.setWindowTitle("EyePoint Lab")
+        self.setWindowTitle("EPLab")
         self.setWindowIcon(QIcon("ico.png"))
         self.resize(250, 100)
 
