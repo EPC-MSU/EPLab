@@ -28,7 +28,7 @@ class EPLabWindow(QMainWindow):
         self._board_window = BoardWidget()
         self._board_window.resize(600, 600)
         self._board_window.setWindowIcon(QIcon("ico.png"))
-        self._board_window.setWindowTitle("EyePoint Lab - Board")
+        self._board_window.setWindowTitle("EPLab - Board")
 
     def _on_load_board(self):
         dialog = QFileDialog()

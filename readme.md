@@ -16,3 +16,9 @@ python -m pip install -r requirements.txt
 python main.py
 ```
 
+## Дополнительно
+
+Файл платы для тестов можно загрузить из папки  `tests\test_data\eyepoint_calibration_board`.
+
+Чтобы сконвертировать файлы плат, сделанные с помощью EyePoint Px, можно воспользоваться конвертером, который находится в модуле `epcore.utils`.
+

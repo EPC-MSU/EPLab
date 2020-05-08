@@ -9,3 +9,5 @@ syntax: glob
 venv
 # Other
 elements.json
+src/*
+doc/*.png
