@@ -37,13 +37,13 @@ class EPLabWindow(QMainWindow):
 
         self._board_window = BoardWidget()
         self._board_window.resize(600, 600)
-        self._board_window.setWindowIcon(QIcon("media/ico.png"))
-        self._board_window.setWindowTitle("EPLab - Board")
+        self._board_window.setWindowIcon(QIcon("media/ico.png"))  # TODO: don't duplicate base configurations
+        self._board_window.setWindowTitle("EPLab - Board")        # TODO: don't duplicate base configurations
 
         self._iv_window = IVViewer()
         self._iv_window.resize(200, 200)
-        self._iv_window.setWindowIcon((QIcon("media/ico.png")))
-        self._iv_window.setWindowTitle("EPLab - IVC")
+        self._iv_window.setWindowIcon((QIcon("media/ico.png")))   # TODO: don't duplicate base configurations
+        self._iv_window.setWindowTitle("EPLab - IVC")             # TODO: don't duplicate base configurations
 
     @pyqtSlot()
     def _on_load_board(self):

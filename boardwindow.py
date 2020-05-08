@@ -29,6 +29,7 @@ class BoardWidget(QWidget):
 
         if board.image:
             self._scene.set_background(QPixmap(board.image))
+            self._scene.scale_to_window_size(self.width(), self.height())
 
         pin_counter = count()
 
