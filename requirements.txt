@@ -3,3 +3,4 @@
 -e git+https://github.com/EPC-MSU/board-view@master#egg=boardview
 PyQtExtendedScene
 PyQt5-stubs==5.14.2.2
+epsound

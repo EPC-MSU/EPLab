@@ -12,7 +12,7 @@ class EPLabWindow(QMainWindow):
         self.setCentralWidget(central_widget)
 
         self.setWindowTitle("EPLab")
-        self.setWindowIcon(QIcon("ico.png"))
+        self.setWindowIcon(QIcon("media/ico.png"))
         self.resize(250, 100)
 
         layout = QVBoxLayout(central_widget)
@@ -27,7 +27,7 @@ class EPLabWindow(QMainWindow):
 
         self._board_window = BoardWidget()
         self._board_window.resize(600, 600)
-        self._board_window.setWindowIcon(QIcon("ico.png"))
+        self._board_window.setWindowIcon(QIcon("media/ico.png"))
         self._board_window.setWindowTitle("EPLab - Board")
 
     def _on_load_board(self):
