@@ -36,3 +36,7 @@ class BoardWidget(QWidget):
             for pin in element.pins:
                 component = GraphicsManualPinItem(QPointF(pin.x, pin.y), number=next(pin_counter))
                 self._scene.add_component(component)
+
+    @property
+    def workspace(self) -> ExtendedScene:
+        return self._scene
