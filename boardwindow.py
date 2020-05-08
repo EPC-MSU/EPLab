@@ -29,6 +29,7 @@ class BoardWidget(QWidget):
 
         if board.image:
             self._scene.set_background(QPixmap(board.image))
+            self._scene.scale_to_window_size(self.width(), self.height())
 
         pin_counter = count()
 
@@ -36,3 +37,7 @@ class BoardWidget(QWidget):
             for pin in element.pins:
                 component = GraphicsManualPinItem(QPointF(pin.x, pin.y), number=next(pin_counter))
                 self._scene.add_component(component)
+
+    @property
+    def workspace(self) -> ExtendedScene:
+        return self._scene
