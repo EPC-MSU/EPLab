@@ -20,5 +20,6 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     window = EPLabWindow()
+    window.resize(1200, 600)
     window.show()
     app.exec()

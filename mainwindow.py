@@ -24,6 +24,8 @@ class EPLabWindow(QMainWindow):
         self._iv_window.setWindowIcon((QIcon("media/ico.png")))   # TODO: don't duplicate base configurations
         self._iv_window.setWindowTitle("EPLab - IVC")             # TODO: don't duplicate base configurations
 
+        self.setCentralWidget(self._iv_window)
+
     @pyqtSlot()
     def _on_load_board(self):
         dialog = QFileDialog()
