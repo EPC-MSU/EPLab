@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QPushButton, QWidget, QFileDialog, QLabel
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
+from PyQt5 import uic
 import epcore.filemanager as epfilemanager
 from boardwindow import BoardWidget
 from boardwindow import GraphicsManualPinItem
@@ -11,29 +12,7 @@ class EPLabWindow(QMainWindow):
     def __init__(self):
         super(EPLabWindow, self).__init__()
 
-        central_widget = QWidget(self)
-        self.setCentralWidget(central_widget)
-
-        self.setWindowTitle("EPLab")
-        self.setWindowIcon(QIcon("media/ico.png"))
-        self.resize(250, 100)
-
-        layout = QVBoxLayout(central_widget)
-
-        self._load_board_btn = QPushButton("Load board")
-        layout.addWidget(self._load_board_btn)
-        self._load_board_btn.clicked.connect(self._on_load_board)
-
-        self._board_view_btn = QPushButton("View board")
-        layout.addWidget(self._board_view_btn)
-        self._board_view_btn.clicked.connect(self._on_view_board)
-
-        self._iv_view_btn = QPushButton("View IVC")
-        layout.addWidget(self._iv_view_btn)
-        self._iv_view_btn.clicked.connect(self._on_view_iv)
-
-        self._point_data_lbl = QLabel()
-        layout.addWidget(self._point_data_lbl)
+        uic.loadUi("gui/mainwindow.ui", self)  # Load the .ui file
 
         self._board_window = BoardWidget()
         self._board_window.resize(600, 600)
