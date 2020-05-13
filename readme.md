@@ -6,7 +6,17 @@
 ```
 python -m pip install -r requirements.txt
 ```
+Выше приведён случай для установки на чистый Python.
+
+Если в системе Python уже используется, желательно поставить все зависимости в виртуальное окружение:
+
+```
+python -m venv venv
+venv\Scripts\python -m pip install -r requirements.txt
+```
+
 ## Установка в Linux
+
 ```
 python3 -m pip install -r requirements.txt
 ```
@@ -21,7 +31,14 @@ python3 -m pip install -r requirements.txt
 ```
 python main.py
 ```
+Если используется виртуальное окружение, то запускать нужно так:
+
+```
+venv\Scripts\python main.py
+```
+
 ## Запуск в Linux
+
 ```
 python3 main.py
 ```
