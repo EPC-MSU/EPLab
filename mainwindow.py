@@ -41,7 +41,7 @@ class EPLabWindow(QMainWindow):
         self._board_window.setWindowTitle("EPLab - Board")        # TODO: don't duplicate base configurations
 
         self._iv_window = IVViewer()
-        self._iv_window.resize(200, 200)
+        self._iv_window.resize(600, 600)
         self._iv_window.setWindowIcon((QIcon("media/ico.png")))   # TODO: don't duplicate base configurations
         self._iv_window.setWindowTitle("EPLab - IVC")             # TODO: don't duplicate base configurations
 

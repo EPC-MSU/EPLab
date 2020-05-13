@@ -5,3 +5,4 @@
 PyQtExtendedScene
 PyQt5-stubs==5.14.2.2
 epsound
+PyQt5<=5.14.0
