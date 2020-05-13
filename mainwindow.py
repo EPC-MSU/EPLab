@@ -6,9 +6,11 @@ from PyQt5 import uic
 import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem
 from epcore.elements import IVCurve
+from epcore.measurementmanager.ivc_comparator import IVCComparator
 from boardwindow import BoardWidget
 from boardwindow import GraphicsManualPinItem
 from ivviewer import Viewer as IVViewer, Curve as ViewerCurve
+from score import ScoreWrapper
 
 
 def _to_viewer_curve(curve: IVCurve) -> ViewerCurve:
@@ -23,6 +25,10 @@ class EPLabWindow(QMainWindow):
 
         self._msystem = msystem
         self._msystem.trigger_measurements()
+
+        self._comparator = IVCComparator()
+
+        self._score_wrapper = ScoreWrapper(self.score_label)
 
         self._board_window = BoardWidget()
         self._board_window.resize(600, 600)
@@ -42,12 +48,19 @@ class EPLabWindow(QMainWindow):
     def _update_ivc(self):
         if self._msystem.measurements_are_ready():
             self._msystem.trigger_measurements()
-            # TODO: why [0] measurer is 'ref' and [1] measurer is 'test'? Should be smth like measurers.test
-            ref = _to_viewer_curve(self._msystem.measurers[0].get_last_iv_curve())
-            test = _to_viewer_curve(self._msystem.measurers[1].get_last_iv_curve())
-            self._iv_window.plot.set_reference_curve(ref)
-            self._iv_window.plot.set_test_curve(test)
 
+            # Update plot
+            # TODO: why [0] measurer is 'ref' and [1] measurer is 'test'? Should be smth like measurers.test
+            ref = self._msystem.measurers[0].get_last_iv_curve()
+            test = self._msystem.measurers[1].get_last_iv_curve()
+            self._iv_window.plot.set_reference_curve(_to_viewer_curve(ref))
+            self._iv_window.plot.set_test_curve(_to_viewer_curve(test))
+
+            # Update score
+            score = self._comparator.compare_ivc(ref, test)
+            self._score_wrapper.set_score(score)
+
+            # Add this task to event loop
             QTimer.singleShot(0, self._update_ivc)
 
     @pyqtSlot()
@@ -61,10 +74,6 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_view_board(self):
         self._board_window.show()
-
-    @pyqtSlot()
-    def _on_view_iv(self):
-        self._iv_window.show()
 
     @pyqtSlot(GraphicsManualPinItem)
     def _on_component_click(self, component: GraphicsManualPinItem):
