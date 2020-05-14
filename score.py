@@ -14,5 +14,5 @@ class ScoreWrapper:
         color = self._color_good if score < self._treshold else self._color_bad
         friendly_score = round(score * 100.0)
         text = f'<html><head/><body><p><span style="font-size:48pt;color:{color};">' \
-               f'{friendly_score}%</span></p></body></html>'
+               f"{friendly_score}%</span></p></body></html>"
         self._label.setText(text)
