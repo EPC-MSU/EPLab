@@ -22,7 +22,6 @@ class BoardWidget(QWidget):
         layout.addWidget(self._scene)
 
     def set_board(self, board: Board):
-
         self.layout().removeWidget(self._scene)
         self._scene = ExtendedScene()
         self.layout().addWidget(self._scene)

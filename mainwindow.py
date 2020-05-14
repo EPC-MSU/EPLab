@@ -3,14 +3,17 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot, QTimer
 from PyQt5 import uic
 
+from functools import partial
+
 import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem
-from epcore.elements import IVCurve
+from epcore.elements import IVCurve, MeasurementSettings
 from epcore.measurementmanager.ivc_comparator import IVCComparator
 from boardwindow import BoardWidget
 from boardwindow import GraphicsManualPinItem
 from ivviewer import Viewer as IVViewer, Curve as ViewerCurve
 from score import ScoreWrapper
+from ivview_parameters import IVViewerParametersAdjuster
 
 
 def _to_viewer_curve(curve: IVCurve) -> ViewerCurve:
@@ -40,7 +43,39 @@ class EPLabWindow(QMainWindow):
         self._iv_window.setWindowIcon((QIcon("media/ico.png")))   # TODO: don't duplicate base configurations
         self._iv_window.setWindowTitle("EPLab - IVC")             # TODO: don't duplicate base configurations
 
+        self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
+
         self.setCentralWidget(self._iv_window)
+
+        self._frequencies = {
+            self.frequency_1hz_radio_button: 1,
+            self.frequency_10hz_radio_button: 10,
+            self.frequency_100hz_radio_button: 100,
+            self.frequency_1khz_radio_button: 1000,
+            self.frequency_10khz_radio_button: 10000,
+            self.frequency_100khz_radio_button: 100000
+        }
+        for button, frequency in self._frequencies.items():
+            button.toggled.connect(partial(self._on_frequency_radio_button_toggled, frequency))
+
+        self._voltages = {
+            self.voltage_1_2v_radio_button: 1.2,
+            self.voltage_3_3v_radio_button: 3.3,
+            self.voltage_5v_radio_button: 5.0,
+            self.voltage_12v_radio_button: 12.0
+        }
+        for button, voltage in self._voltages.items():
+            button.toggled.connect(partial(self._on_voltage_radio_button_toggled, voltage))
+
+        self._sensitivities = {
+            self.sens_low_radio_button: 47500.0,  # Omh
+            self.sens_medium_radio_button: 4750.0,
+            self.sens_high_radio_button: 475.0
+        }
+        for button, resistance in self._sensitivities.items():
+            button.toggled.connect(partial(self._on_sensitivity_radio_button_toggled, resistance))
+
+        self._iv_window_parameters_adjuster.adjust_parameters(self._msystem.get_settings())
 
         QTimer.singleShot(0, self._update_ivc)
 
@@ -62,6 +97,29 @@ class EPLabWindow(QMainWindow):
 
             # Add this task to event loop
             QTimer.singleShot(0, self._update_ivc)
+
+    def _set_msystem_settings(self, settings: MeasurementSettings):
+        self._msystem.set_settings(settings)
+        self._iv_window_parameters_adjuster.adjust_parameters(settings)
+
+    def _on_frequency_radio_button_toggled(self, frequency: float, checked: bool) -> None:
+        if checked:
+            settings = self._msystem.get_settings()
+            settings.probe_signal_frequency = frequency
+            settings.sampling_rate = frequency * 100
+            self._set_msystem_settings(settings)
+
+    def _on_voltage_radio_button_toggled(self, voltage: float, checked: bool) -> None:
+        if checked:
+            settings = self._msystem.get_settings()
+            settings.max_voltage = voltage
+            self._set_msystem_settings(settings)
+
+    def _on_sensitivity_radio_button_toggled(self, resistance: float, checked: bool) -> None:
+        if checked:
+            settings = self._msystem.get_settings()
+            settings.internal_resistance = resistance
+            self._set_msystem_settings(settings)
 
     @pyqtSlot()
     def _on_load_board(self):

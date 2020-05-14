@@ -248,7 +248,7 @@
        </property>
        <layout class="QVBoxLayout" name="current_group_box_layout">
         <item>
-         <widget class="QRadioButton" name="current_250ua_radio_button">
+         <widget class="QRadioButton" name="sens_low_radio_button">
           <property name="text">
            <string>Низкая</string>
           </property>
@@ -258,14 +258,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="current_2_5ma_radio_button">
+         <widget class="QRadioButton" name="sens_medium_radio_button">
           <property name="text">
            <string>Средняя</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="current_25ma_radio_button">
+         <widget class="QRadioButton" name="sens_high_radio_button">
           <property name="text">
            <string>Высокая</string>
           </property>
