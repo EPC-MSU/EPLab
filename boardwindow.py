@@ -1,42 +1,39 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QPointF
-from itertools import count
 from typing import Optional
-from PyQtExtendedScene import ExtendedScene
-from boardview.BoardViewWidget import GraphicsManualPinItem
-from epcore.elements import Board
+from boardview.BoardViewWidget import BoardView
+from epcore.measurementmanager import MeasurementPlan
 
 
 class BoardWidget(QWidget):
 
-    _board: Optional[Board] = None
-    _scene: ExtendedScene
+    _board: Optional[MeasurementPlan] = None
+    _scene: BoardView
 
     def __init__(self, parent=None):
         super(BoardWidget, self).__init__(parent)
 
         layout = QVBoxLayout(self)
 
-        self._scene = ExtendedScene()
+        self._scene = BoardView()
         layout.addWidget(self._scene)
 
-    def set_board(self, board: Board):
+    def set_board(self, board: MeasurementPlan):
         self.layout().removeWidget(self._scene)
-        self._scene = ExtendedScene()
+        self._scene = BoardView()
         self.layout().addWidget(self._scene)
 
         if board.image:
             self._scene.set_background(QPixmap(board.image))
             self._scene.scale_to_window_size(self.width(), self.height())
 
-        pin_counter = count()
+        for number, pin in board.all_pins_iterator():
+            self._scene.add_point(QPointF(pin.x, pin.y), number=number)
 
-        for element in board.elements:
-            for pin in element.pins:
-                component = GraphicsManualPinItem(QPointF(pin.x, pin.y), number=next(pin_counter))
-                self._scene.add_component(component)
+    def add_point(self, x: float, y: float, number: int):
+        self._scene.add_point(QPointF(x, y), number)
 
     @property
-    def workspace(self) -> ExtendedScene:
+    def workspace(self) -> BoardView:
         return self._scene

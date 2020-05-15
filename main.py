@@ -28,4 +28,5 @@ if __name__ == "__main__":
     window = EPLabWindow(measurement_system)
     window.resize(1200, 600)
     window.show()
+
     app.exec()

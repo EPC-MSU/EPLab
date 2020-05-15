@@ -2,7 +2,6 @@
 -e hg+https://hg.ximc.ru/eyepoint/epcore@dev-0.1#egg=epcore
 -e hg+https://hg.ximc.ru/eyepoint/ivviewer@dev-0.1#egg=ivviewer
 -e git+https://github.com/EPC-MSU/board-view@master#egg=boardview
-PyQtExtendedScene
 PyQt5-stubs==5.14.2.2
 epsound
 PyQt5<=5.14.0
