@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot, QTimer
+from PyQt5.QtCore import pyqtSlot, QTimer, QPointF
 from PyQt5 import uic
 
 from functools import partial
@@ -110,6 +110,8 @@ class EPLabWindow(QMainWindow):
 
         QTimer.singleShot(0, self._update_ivc)
 
+        self._update_current_pin()
+
     def _change_work_mode(self, mode: WorkMode):
         if self._work_mode is mode:
             return
@@ -124,6 +126,15 @@ class EPLabWindow(QMainWindow):
             self._change_work_mode(WorkMode.write)
         elif tab == "test_plan_tab_TP":  # test
             self._change_work_mode(WorkMode.test)
+
+    @pyqtSlot(QPointF)
+    def _on_board_right_click(self, point: QPointF):
+        if self._work_mode is WorkMode.write:
+            # Create new pin
+            pin = Pin(x=point.x(), y=point.y(), measurements=[])
+            self._measurement_plan.append_pin(pin)
+            self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
+            self._update_current_pin()
 
     @pyqtSlot()
     def _update_current_pin(self):
@@ -181,8 +192,9 @@ class EPLabWindow(QMainWindow):
         if filename:
             board = epfilemanager.load_board_from_ufiv(filename)
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
-            self._board_window.set_board(self._measurement_plan)
+            self._board_window.set_board(self._measurement_plan)  # New workspace will be created here
             self._board_window.workspace.point_selected.connect(self._on_board_pin_selected)
+            self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
 
             self._update_current_pin()
 
