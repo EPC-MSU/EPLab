@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Eyepoint S1</string>
+   <string>EyePoint Lab</string>
   </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QDockWidget" name="scoreDock">
@@ -362,7 +362,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="test_plan_tab_S">
         <attribute name="title">

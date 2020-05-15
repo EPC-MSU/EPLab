@@ -6,8 +6,8 @@ from PyQt5 import uic
 from functools import partial
 
 import epcore.filemanager as epfilemanager
-from epcore.measurementmanager import MeasurementSystem
-from epcore.elements import IVCurve, MeasurementSettings
+from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
+from epcore.elements import IVCurve, MeasurementSettings, Board
 from epcore.measurementmanager.ivc_comparator import IVCComparator
 from boardwindow import BoardWidget
 from boardwindow import GraphicsManualPinItem
@@ -21,6 +21,7 @@ def _to_viewer_curve(curve: IVCurve) -> ViewerCurve:
 
 
 class EPLabWindow(QMainWindow):
+
     def __init__(self, msystem: MeasurementSystem):
         super(EPLabWindow, self).__init__()
 
@@ -32,6 +33,8 @@ class EPLabWindow(QMainWindow):
         self._comparator = IVCComparator()
 
         self._score_wrapper = ScoreWrapper(self.score_label)
+
+        self.setWindowIcon(QIcon("media/ico.png"))
 
         self._board_window = BoardWidget()
         self._board_window.resize(600, 600)
@@ -46,6 +49,9 @@ class EPLabWindow(QMainWindow):
         self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
 
         self.setCentralWidget(self._iv_window)
+
+        # TODO: why measurers[0]? Must be smth like 'measurers.reference'
+        self._measurement_plan = MeasurementPlan(Board(elements=[]), measurer=self._msystem.measurers[0])
 
         self._frequencies = {
             self.frequency_1hz_radio_button: 1,
@@ -75,9 +81,50 @@ class EPLabWindow(QMainWindow):
         for button, resistance in self._sensitivities.items():
             button.toggled.connect(partial(self._on_sensitivity_radio_button_toggled, resistance))
 
+        self.zp_push_button_left.clicked.connect(self._on_go_left_pin)
+        self.tp_push_button_left.clicked.connect(self._on_go_left_pin)
+        self.zp_push_button_right.clicked.connect(self._on_go_right_pin)
+        self.tp_push_button_right.clicked.connect(self._on_go_right_pin)
+        self.zp_push_button_new_point.clicked.connect(self._on_new_pin)
+        self.zp_push_button_save.clicked.connect(self._on_save_pin)
+        self.zp_open_file_button.clicked.connect(self._on_load_board)
+        self.zp_save_new_file_button.clicked.connect(self._on_save_board)
+
         self._iv_window_parameters_adjuster.adjust_parameters(self._msystem.get_settings())
 
         QTimer.singleShot(0, self._update_ivc)
+
+    @pyqtSlot()
+    def _on_go_left_pin(self):
+        self._measurement_plan.go_prev_pin()
+
+    @pyqtSlot()
+    def _on_go_right_pin(self):
+        self._measurement_plan.go_next_pin()
+
+    @pyqtSlot()
+    def _on_new_pin(self):
+        print("new pin...")
+        pass  # TODO: this
+
+    @pyqtSlot()
+    def _on_save_pin(self):
+        self._measurement_plan.save_last_measurement_as_reference()
+
+    @pyqtSlot()
+    def _on_save_board(self):
+        dialog = QFileDialog()
+        filename = dialog.getSaveFileName(self, "Save board", filter="JSON (*.json)")[0]
+        if filename:
+            epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
+
+    @pyqtSlot()
+    def _on_load_board(self):
+        dialog = QFileDialog()
+        filename = dialog.getOpenFileName(self, "Open board", filter="JSON (*.json)")[0]
+        if filename:
+            self._board_window.set_board(epfilemanager.load_board_from_ufiv(filename))
+            self._board_window.workspace.on_component_left_click.connect(self._on_component_click)
 
     @pyqtSlot()
     def _update_ivc(self):
@@ -95,8 +142,8 @@ class EPLabWindow(QMainWindow):
             score = self._comparator.compare_ivc(ref, test)
             self._score_wrapper.set_score(score)
 
-            # Add this task to event loop
-            QTimer.singleShot(0, self._update_ivc)
+        # Add this task to event loop
+        QTimer.singleShot(10, self._update_ivc)
 
     def _set_msystem_settings(self, settings: MeasurementSettings):
         self._msystem.set_settings(settings)
@@ -120,14 +167,6 @@ class EPLabWindow(QMainWindow):
             settings = self._msystem.get_settings()
             settings.internal_resistance = resistance
             self._set_msystem_settings(settings)
-
-    @pyqtSlot()
-    def _on_load_board(self):
-        dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, "Open board", filter="JSON (*.json)")[0]
-        if filename:
-            self._board_window.set_board(epfilemanager.load_board_from_ufiv(filename))
-            self._board_window.workspace.on_component_left_click.connect(self._on_component_click)
 
     @pyqtSlot()
     def _on_view_board(self):
