@@ -7,7 +7,7 @@ from functools import partial
 
 import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
-from epcore.elements import MeasurementSettings, Board, Pin, Element
+from epcore.elements import MeasurementSettings, Board, Pin, Element, IVCurve
 from epcore.measurementmanager.ivc_comparator import IVCComparator
 from boardwindow import BoardWidget
 from ivviewer import Viewer as IVViewer
@@ -15,6 +15,8 @@ from score import ScoreWrapper
 from ivview_parameters import IVViewerParametersAdjuster
 
 from enum import Enum, auto
+
+from typing import Optional
 
 
 class WorkMode(Enum):
@@ -108,13 +110,20 @@ class EPLabWindow(QMainWindow):
 
         self._work_mode = WorkMode.compare  # compare two current IVC's
 
-        QTimer.singleShot(0, self._update_ivc)
+        self._ref_curve = None
+        self._test_curve = None
+
+        QTimer.singleShot(0, self._read_curves_periodic_task)
 
         self._update_current_pin()
 
     def _change_work_mode(self, mode: WorkMode):
         if self._work_mode is mode:
             return
+
+        if mode is not WorkMode.compare:
+            self._remove_ref_curve()
+
         self._work_mode = mode
 
     @pyqtSlot(int)
@@ -138,6 +147,10 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _update_current_pin(self):
+        """
+        Call this method when current pin index changed
+        :return:
+        """
         index = self._measurement_plan.get_current_index()
         self.zp_label_num.setText(str(index))
         self.tp_label_num.setText(str(index))
@@ -146,10 +159,12 @@ class EPLabWindow(QMainWindow):
         if self._work_mode is WorkMode.test:  # In test mode we must display saved IVC
             current_pin = self._measurement_plan.get_current_pin()
             measurement = current_pin.get_reference_measurement()
+
             if measurement:
-                self._iv_window.plot.set_reference_curve(measurement.ivc)
+                self._update_curves(ref=measurement.ivc)
             else:
-                self._iv_window.plot.set_reference_curve(None)
+                self._remove_ref_curve()
+                self._update_curves()
 
     @pyqtSlot()
     def _on_go_left_pin(self):
@@ -176,6 +191,10 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_save_pin(self):
+        """
+        Save current pin IVC as reference for current pin
+        :return:
+        """
         self._measurement_plan.save_last_measurement_as_reference()
 
     @pyqtSlot()
@@ -202,26 +221,41 @@ class EPLabWindow(QMainWindow):
                 self._board_window.show()
 
     @pyqtSlot()
-    def _update_ivc(self):
+    def _update_curves(self, test: Optional[IVCurve] = None, ref: Optional[IVCurve] = None):
+        # Store last curves
+        if test is not None:
+            self._test_curve = test
+        if ref is not None:
+            self._ref_curve = ref
+
+        # Update plots
+        self._iv_window.plot.set_test_curve(self._test_curve)
+        self._iv_window.plot.set_reference_curve(self._ref_curve)
+
+        # Update score
+        if self._ref_curve and self._test_curve:
+            score = self._comparator.compare_ivc(self._ref_curve, self._test_curve)
+            self._score_wrapper.set_score(score)
+
+    def _remove_ref_curve(self):
+        self._ref_curve = None
+
+    @pyqtSlot()
+    def _read_curves_periodic_task(self):
         if self._msystem.measurements_are_ready():
             # TODO: why [0] measurer is 'ref' and [1] measurer is 'test'? Should be smth like measurers.test
             test = self._msystem.measurers[0].get_last_iv_curve()
-            self._iv_window.plot.set_test_curve(test)
 
             ref = None
             if self._work_mode is WorkMode.compare:  # We need reference curve only in compare mode
                 ref = self._msystem.measurers[1].get_last_iv_curve()
-                self._iv_window.plot.set_reference_curve(ref)
 
-            # Update score (only if here are two curves)
-            if ref and test:
-                score = self._comparator.compare_ivc(ref, test)
-                self._score_wrapper.set_score(score)
+            self._update_curves(test, ref)
 
             self._msystem.trigger_measurements()
 
         # Add this task to event loop
-        QTimer.singleShot(10, self._update_ivc)
+        QTimer.singleShot(10, self._read_curves_periodic_task)
 
     def _set_msystem_settings(self, settings: MeasurementSettings):
         self._msystem.set_settings(settings)
