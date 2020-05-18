@@ -3,7 +3,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot, QTimer, QPointF
 from PyQt5 import uic
 
-from functools import partial
+from warnings import warn
 
 import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
@@ -75,7 +75,7 @@ class EPLabWindow(QMainWindow):
             self.frequency_100khz_radio_button: 100000
         }
         for button, frequency in self._frequencies.items():
-            button.toggled.connect(partial(self._on_frequency_radio_button_toggled, frequency))
+            button.toggled.connect(self._on_settings_btn_checked)
 
         self._voltages = {
             self.voltage_1_2v_radio_button: 1.2,
@@ -84,7 +84,7 @@ class EPLabWindow(QMainWindow):
             self.voltage_12v_radio_button: 12.0
         }
         for button, voltage in self._voltages.items():
-            button.toggled.connect(partial(self._on_voltage_radio_button_toggled, voltage))
+            button.toggled.connect(self._on_settings_btn_checked)
 
         self._sensitivities = {
             self.sens_low_radio_button: 47500.0,  # Omh
@@ -92,7 +92,7 @@ class EPLabWindow(QMainWindow):
             self.sens_high_radio_button: 475.0
         }
         for button, resistance in self._sensitivities.items():
-            button.toggled.connect(partial(self._on_sensitivity_radio_button_toggled, resistance))
+            button.toggled.connect(self._on_settings_btn_checked)
 
         self.zp_push_button_left.clicked.connect(self._on_go_left_pin)
         self.tp_push_button_left.clicked.connect(self._on_go_left_pin)
@@ -103,17 +103,20 @@ class EPLabWindow(QMainWindow):
         self.zp_open_file_button.clicked.connect(self._on_load_board)
         self.zp_save_new_file_button.clicked.connect(self._on_save_board)
 
-        self.test_plan_tab_widget.setCurrentIndex(0)
+        self.test_plan_tab_widget.setCurrentIndex(0)  # first tab - curves comparison
         self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
 
         self._iv_window_parameters_adjuster.adjust_parameters(self._msystem.get_settings())
 
-        self._work_mode = WorkMode.compare  # compare two current IVC's
+        self._work_mode = WorkMode.compare  # default mode - compare two curves
 
         self._ref_curve = None
         self._test_curve = None
 
         QTimer.singleShot(0, self._read_curves_periodic_task)
+
+        settings = self._msystem.get_settings()  # set ui settings state to current device
+        self._settings_to_ui(settings)
 
         self._update_current_pin()
 
@@ -124,7 +127,59 @@ class EPLabWindow(QMainWindow):
         if mode is not WorkMode.compare:
             self._remove_ref_curve()
 
+        settings_enable = mode is not WorkMode.test  # Disable settings in test mode
+
+        for button in self._voltages:
+            button.setEnabled(settings_enable)
+        for button in self._frequencies:
+            button.setEnabled(settings_enable)
+        for button in self._sensitivities:
+            button.setEnabled(settings_enable)
+
         self._work_mode = mode
+
+    def _ui_to_settings(self) -> MeasurementSettings:
+        """
+        Convert UI current RadioButton's states to measurement settings
+        :return: Settings
+        """
+        settings = self._msystem.get_settings()
+
+        for button, value in self._frequencies.items():
+            if button.isChecked():
+                settings.probe_signal_frequency = value
+                settings.sampling_rate = value * 100
+        for button, value in self._voltages.items():
+            if button.isChecked():
+                settings.max_voltage = value
+        for button, value in self._sensitivities.items():
+            if button.isChecked():
+                settings.internal_resistance = value
+
+        return settings
+
+    def _settings_to_ui(self, settings: MeasurementSettings):
+        """
+        Convert measurement settings to UI RadioButton's states
+        :return:
+        """
+        if settings.probe_signal_frequency not in self._frequencies.values():
+            warn(f"No radio button for device frequency {settings.probe_signal_frequency}")
+        for button, value in self._frequencies.items():
+            if value == settings.probe_signal_frequency:
+                button.setChecked(True)
+
+        if settings.internal_resistance not in self._sensitivities.values():
+            warn(f"No radio button for device internal resistance {settings.internal_resistance}")
+        for button, value in self._sensitivities.items():
+            if value == settings.probe_signal_frequency:
+                button.setChecked(True)
+
+        if settings.max_voltage not in self._voltages.values():
+            warn(f"No radio button for device max voltage {settings.max_voltage}")
+        for button, value in self._voltages.items():
+            if value == settings.max_voltage:
+                button.setChecked(True)
 
     @pyqtSlot(int)
     def _on_test_plan_tab_switch(self, index: int):
@@ -162,6 +217,9 @@ class EPLabWindow(QMainWindow):
 
             if measurement:
                 self._update_curves(ref=measurement.ivc)
+                settings = measurement.settings
+                self._set_msystem_settings(settings)
+                self._settings_to_ui(settings)
             else:
                 self._remove_ref_curve()
                 self._update_curves()
@@ -261,23 +319,9 @@ class EPLabWindow(QMainWindow):
         self._msystem.set_settings(settings)
         self._iv_window_parameters_adjuster.adjust_parameters(settings)
 
-    def _on_frequency_radio_button_toggled(self, frequency: float, checked: bool) -> None:
+    def _on_settings_btn_checked(self, checked: bool) -> None:
         if checked:
-            settings = self._msystem.get_settings()
-            settings.probe_signal_frequency = frequency
-            settings.sampling_rate = frequency * 100
-            self._set_msystem_settings(settings)
-
-    def _on_voltage_radio_button_toggled(self, voltage: float, checked: bool) -> None:
-        if checked:
-            settings = self._msystem.get_settings()
-            settings.max_voltage = voltage
-            self._set_msystem_settings(settings)
-
-    def _on_sensitivity_radio_button_toggled(self, resistance: float, checked: bool) -> None:
-        if checked:
-            settings = self._msystem.get_settings()
-            settings.internal_resistance = resistance
+            settings = self._ui_to_settings()
             self._set_msystem_settings(settings)
 
     @pyqtSlot()
