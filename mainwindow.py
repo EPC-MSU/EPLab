@@ -279,6 +279,7 @@ class EPLabWindow(QMainWindow):
             self._board_window.set_board(self._measurement_plan)  # New workspace will be created here
             self._board_window.workspace.point_selected.connect(self._on_board_pin_selected)
             self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
+            self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
 
             self._update_current_pin()
 
