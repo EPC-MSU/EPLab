@@ -119,6 +119,9 @@ class EPLabWindow(QMainWindow):
 
         self._update_current_pin()
 
+    def closeEvent(self, ev):
+        self._board_window.close()
+
     def _change_work_mode(self, mode: WorkMode):
         if self._work_mode is mode:
             return
@@ -339,3 +342,9 @@ class EPLabWindow(QMainWindow):
     def _on_board_pin_selected(self, number: int):
         self._measurement_plan.go_pin(number)
         self._update_current_pin()
+
+    @pyqtSlot(int, QPointF)
+    def _on_board_pin_moved(self, number: int, point: QPointF):
+        self._measurement_plan.go_pin(number)
+        self._measurement_plan.get_current_pin().x = point.x()
+        self._measurement_plan.get_current_pin().y = point.y()
