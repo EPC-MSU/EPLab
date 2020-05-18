@@ -238,8 +238,13 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_new_pin(self):
         if self._measurement_plan.image:
-            pin = Pin(self._measurement_plan.image.width() / 2,
-                      self._measurement_plan.image.height() / 2,
+            # Place at the center of current viewpoint by default
+            width = self._board_window.workspace.width()
+            height = self._board_window.workspace.height()
+            point = self._board_window.workspace.mapToScene(int(width/2), int(height/2))
+
+            pin = Pin(point.x(),
+                      point.y(),
                       measurements=[])
         else:
             pin = Pin(0, 0, measurements=[])
