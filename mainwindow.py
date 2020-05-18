@@ -4,6 +4,7 @@ from PyQt5.QtCore import pyqtSlot, QTimer, QPointF
 from PyQt5 import uic
 
 from warnings import warn
+from enum import Enum, auto
 
 import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
@@ -13,8 +14,6 @@ from boardwindow import BoardWidget
 from ivviewer import Viewer as IVViewer
 from score import ScoreWrapper
 from ivview_parameters import IVViewerParametersAdjuster
-
-from enum import Enum, auto
 
 from typing import Optional
 
@@ -124,9 +123,6 @@ class EPLabWindow(QMainWindow):
         if self._work_mode is mode:
             return
 
-        if mode is not WorkMode.compare:
-            self._remove_ref_curve()
-
         settings_enable = mode is not WorkMode.test  # Disable settings in test mode
 
         for button in self._voltages:
@@ -137,6 +133,8 @@ class EPLabWindow(QMainWindow):
             button.setEnabled(settings_enable)
 
         self._work_mode = mode
+
+        self._update_current_pin()
 
     def _ui_to_settings(self) -> MeasurementSettings:
         """
@@ -211,15 +209,15 @@ class EPLabWindow(QMainWindow):
         self.tp_label_num.setText(str(index))
         self._board_window.workspace.select_point(index)
 
-        if self._work_mode is WorkMode.test:  # In test mode we must display saved IVC
+        if self._work_mode in (WorkMode.test, WorkMode.write):
             current_pin = self._measurement_plan.get_current_pin()
             measurement = current_pin.get_reference_measurement()
 
             if measurement:
-                self._update_curves(ref=measurement.ivc)
                 settings = measurement.settings
                 self._set_msystem_settings(settings)
                 self._settings_to_ui(settings)
+                self._update_curves(ref=measurement.ivc)
             else:
                 self._remove_ref_curve()
                 self._update_curves()
@@ -254,6 +252,7 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         self._measurement_plan.save_last_measurement_as_reference()
+        self._update_current_pin()
 
     @pyqtSlot()
     def _on_save_board(self):
@@ -303,12 +302,20 @@ class EPLabWindow(QMainWindow):
         if self._msystem.measurements_are_ready():
             # TODO: why [0] measurer is 'ref' and [1] measurer is 'test'? Should be smth like measurers.test
             test = self._msystem.measurers[0].get_last_iv_curve()
+            ref = self._msystem.measurers[1].get_last_iv_curve()
 
-            ref = None
-            if self._work_mode is WorkMode.compare:  # We need reference curve only in compare mode
-                ref = self._msystem.measurers[1].get_last_iv_curve()
-
-            self._update_curves(test, ref)
+            if self._work_mode is WorkMode.compare:
+                # Just display two current curves
+                self._update_curves(test, ref)
+            elif self._work_mode is WorkMode.write:
+                # In write mode here are two curves: reference curve (dynamic) and saved reference curve (static, red)
+                # But IVViewer knows only two types of curves: ref and test
+                self._update_curves(test=ref)
+            elif self._work_mode is WorkMode.test:
+                # Reference curve will be read from measurement plan
+                self._update_curves(test=test)
+            else:
+                raise NotImplementedError(f"Undefined behavior for work mode {self._work_mode}")
 
             self._msystem.trigger_measurements()
 
