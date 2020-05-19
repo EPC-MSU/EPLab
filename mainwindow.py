@@ -109,6 +109,11 @@ class EPLabWindow(QMainWindow):
 
         self._work_mode = WorkMode.compare  # default mode - compare two curves
 
+        # Update plot settings at next measurement cycle (place settings here or None)
+        self._settings_update_next_cycle = None
+        # Set to True to skip next measured curves
+        self._skip_curve = False
+
         self._ref_curve = None
         self._test_curve = None
 
@@ -313,18 +318,26 @@ class EPLabWindow(QMainWindow):
             test = self._msystem.measurers[0].get_last_iv_curve()
             ref = self._msystem.measurers[1].get_last_iv_curve()
 
-            if self._work_mode is WorkMode.compare:
-                # Just display two current curves
-                self._update_curves(test, ref)
-            elif self._work_mode is WorkMode.write:
-                # In write mode here are two curves: reference curve (dynamic) and saved reference curve (static, red)
-                # But IVViewer knows only two types of curves: ref and test
-                self._update_curves(test=ref)
-            elif self._work_mode is WorkMode.test:
-                # Reference curve will be read from measurement plan
-                self._update_curves(test=test)
+            if self._skip_curve:
+                self._skip_curve = False
             else:
-                raise NotImplementedError(f"Undefined behavior for work mode {self._work_mode}")
+                if self._work_mode is WorkMode.compare:
+                    # Just display two current curves
+                    self._update_curves(test, ref)
+                elif self._work_mode is WorkMode.write:
+                    # In write mode here are two curves: reference curve (dynamic) and saved ref curve (static, red)
+                    # But IVViewer knows only two types of curves: ref and test
+                    self._update_curves(test=ref)
+                elif self._work_mode is WorkMode.test:
+                    # Reference curve will be read from measurement plan
+                    self._update_curves(test=test)
+                else:
+                    raise NotImplementedError(f"Undefined behavior for work mode {self._work_mode}")
+
+                if self._settings_update_next_cycle:
+                    # New curve with new settings - we must update plot parameters
+                    self._iv_window_parameters_adjuster.adjust_parameters(self._settings_update_next_cycle)
+                    self._settings_update_next_cycle = None
 
             self._msystem.trigger_measurements()
 
@@ -333,7 +346,12 @@ class EPLabWindow(QMainWindow):
 
     def _set_msystem_settings(self, settings: MeasurementSettings):
         self._msystem.set_settings(settings)
-        self._iv_window_parameters_adjuster.adjust_parameters(settings)
+
+        # Skip next measurement because it still have old settings
+        self._skip_curve = True
+        
+        # When new curve will be received plot parameters will be adjusted
+        self._settings_update_next_cycle = settings
 
     def _on_settings_btn_checked(self, checked: bool) -> None:
         if checked:
