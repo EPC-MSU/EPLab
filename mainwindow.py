@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot, QTimer, QPointF
+from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, Qt
 from PyQt5 import uic
 
 from warnings import warn
@@ -102,6 +102,9 @@ class EPLabWindow(QMainWindow):
         self.zp_open_file_button.clicked.connect(self._on_load_board)
         self.zp_save_new_file_button.clicked.connect(self._on_save_board)
 
+        self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
+        self.freeze_curve_b_check_box.stateChanged.connect(self._on_freeze_b)
+
         self.test_plan_tab_widget.setCurrentIndex(0)  # first tab - curves comparison
         self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
 
@@ -130,6 +133,11 @@ class EPLabWindow(QMainWindow):
     def _change_work_mode(self, mode: WorkMode):
         if self._work_mode is mode:
             return
+
+        if mode is not WorkMode.compare:
+            # "Freeze" is only for compare mode
+            self.freeze_curve_a_check_box.setChecked(False)
+            self.freeze_curve_b_check_box.setChecked(False)
 
         settings_enable = mode is not WorkMode.test  # Disable settings in test mode
 
@@ -186,6 +194,22 @@ class EPLabWindow(QMainWindow):
         for button, value in self._voltages.items():
             if value == settings.max_voltage:
                 button.setChecked(True)
+
+    @pyqtSlot(int)
+    def _on_freeze_a(self, state: int):
+        # TODO: dont use hardcode indexes
+        if state == Qt.Checked:
+            self._msystem.measurers[1].freeze()
+        else:
+            self._msystem.measurers[1].unfreeze()
+
+    @pyqtSlot(int)
+    def _on_freeze_b(self, state: int):
+        # TODO: don't use hardcode indexes
+        if state == Qt.Checked:
+            self._msystem.measurers[0].freeze()
+        else:
+            self._msystem.measurers[0].unfreeze()
 
     @pyqtSlot(int)
     def _on_test_plan_tab_switch(self, index: int):
@@ -315,8 +339,8 @@ class EPLabWindow(QMainWindow):
     def _read_curves_periodic_task(self):
         if self._msystem.measurements_are_ready():
             # TODO: why [0] measurer is 'ref' and [1] measurer is 'test'? Should be smth like measurers.test
-            test = self._msystem.measurers[0].get_last_iv_curve()
-            ref = self._msystem.measurers[1].get_last_iv_curve()
+            test = self._msystem.measurers[0].get_last_cached_iv_curve()
+            ref = self._msystem.measurers[1].get_last_cached_iv_curve()
 
             if self._skip_curve:
                 self._skip_curve = False
@@ -349,7 +373,7 @@ class EPLabWindow(QMainWindow):
 
         # Skip next measurement because it still have old settings
         self._skip_curve = True
-        
+
         # When new curve will be received plot parameters will be adjusted
         self._settings_update_next_cycle = settings
 
