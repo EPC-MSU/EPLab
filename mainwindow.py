@@ -108,6 +108,9 @@ class EPLabWindow(QMainWindow):
         self.save_image_push_button.clicked.connect(self._on_save_image)
         self.tp_push_button_save.clicked.connect(self._on_save_image)
 
+        self.pushButton_score_threshold_minus.clicked.connect(self._on_threshold_dec)
+        self.pushButton_score_threshold_plus.clicked.connect(self._on_threshold_inc)
+
         self.test_plan_tab_widget.setCurrentIndex(0)  # first tab - curves comparison
         self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
 
@@ -129,6 +132,8 @@ class EPLabWindow(QMainWindow):
         self._settings_to_ui(settings)
 
         self._update_current_pin()
+
+        self._update_threshold()
 
     def closeEvent(self, ev):
         self._board_window.close()
@@ -268,6 +273,19 @@ class EPLabWindow(QMainWindow):
             else:
                 self._remove_ref_curve()
                 self._update_curves()
+
+    def _update_threshold(self):
+        self.label_score_threshold_value.setText(str(round(self._score_wrapper.threshold, 2)))
+
+    @pyqtSlot()
+    def _on_threshold_dec(self):
+        self._score_wrapper.decrease_threshold()
+        self._update_threshold()
+
+    @pyqtSlot()
+    def _on_threshold_inc(self):
+        self._score_wrapper.increase_threshold()
+        self._update_threshold()
 
     @pyqtSlot()
     def _on_go_left_pin(self):
