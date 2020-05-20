@@ -5,6 +5,7 @@ from PyQt5 import uic
 
 from warnings import warn
 from enum import Enum, auto
+from datetime import datetime
 
 import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
@@ -224,8 +225,10 @@ class EPLabWindow(QMainWindow):
         # Freeze image at first
         image = self.grab(self.rect())
 
+        filename = "ivc" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
+
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, "Save IVC", filter="Image (*.png)")[0]
+        filename = dialog.getSaveFileName(self, "Save IVC", filter="Image (*.png)", directory=filename)[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
