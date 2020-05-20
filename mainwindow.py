@@ -105,6 +105,9 @@ class EPLabWindow(QMainWindow):
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
         self.freeze_curve_b_check_box.stateChanged.connect(self._on_freeze_b)
 
+        self.save_image_push_button.clicked.connect(self._on_save_image)
+        self.tp_push_button_save.clicked.connect(self._on_save_image)
+
         self.test_plan_tab_widget.setCurrentIndex(0)  # first tab - curves comparison
         self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
 
@@ -210,6 +213,18 @@ class EPLabWindow(QMainWindow):
             self._msystem.measurers[0].freeze()
         else:
             self._msystem.measurers[0].unfreeze()
+
+    @pyqtSlot()
+    def _on_save_image(self):
+        # Freeze image at first
+        image = self.grab(self.rect())
+
+        dialog = QFileDialog()
+        filename = dialog.getSaveFileName(self, "Save IVC", filter="Image (*.png)")[0]
+        if filename:
+            if not filename.endswith(".png"):
+                filename += ".png"
+            image.save(filename)
 
     @pyqtSlot(int)
     def _on_test_plan_tab_switch(self, index: int):
