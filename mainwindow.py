@@ -112,6 +112,8 @@ class EPLabWindow(QMainWindow):
         self.pushButton_score_threshold_minus.clicked.connect(self._on_threshold_dec)
         self.pushButton_score_threshold_plus.clicked.connect(self._on_threshold_inc)
 
+        self.c_push_button_auto_calibration.clicked.connect(self._on_auto_calibration)
+
         self.test_plan_tab_widget.setCurrentIndex(0)  # first tab - curves comparison
         self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
 
@@ -203,6 +205,10 @@ class EPLabWindow(QMainWindow):
         for button, value in self._voltages.items():
             if value == settings.max_voltage:
                 button.setChecked(True)
+
+    @pyqtSlot()
+    def _on_auto_calibration(self):
+        self._msystem.calibrate()
 
     @pyqtSlot(int)
     def _on_freeze_a(self, state: int):
