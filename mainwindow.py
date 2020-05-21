@@ -197,7 +197,7 @@ class EPLabWindow(QMainWindow):
         if settings.internal_resistance not in self._sensitivities.values():
             warn(f"No radio button for device internal resistance {settings.internal_resistance}")
         for button, value in self._sensitivities.items():
-            if value == settings.probe_signal_frequency:
+            if value == settings.internal_resistance:
                 button.setChecked(True)
 
         if settings.max_voltage not in self._voltages.values():
