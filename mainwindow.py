@@ -286,7 +286,7 @@ class EPLabWindow(QMainWindow):
                 self._update_curves()
 
     def _update_threshold(self):
-        self.label_score_threshold_value.setText(str(round(self._score_wrapper.threshold, 2)))
+        self.label_score_threshold_value.setText(f"{int(self._score_wrapper.threshold * 100.0)}%")
 
     @pyqtSlot()
     def _on_threshold_dec(self):
