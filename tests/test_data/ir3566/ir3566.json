@@ -113,7 +113,7 @@
         -2.1647929315804504e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -326,7 +326,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -544,7 +544,7 @@
         -2.976560608658474e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -757,7 +757,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -975,7 +975,7 @@
         -2.7059555577579886e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -1188,7 +1188,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -1406,7 +1406,7 @@
         -1.894187880679965e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -1619,7 +1619,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -1837,7 +1837,7 @@
         -1.6235828297794797e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -2050,7 +2050,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -2268,7 +2268,7 @@
         -1.894187880679965e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -2481,7 +2481,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -2699,7 +2699,7 @@
         -5.411624897533329e-06
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -2912,7 +2912,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -3130,7 +3130,7 @@
         2.7060509637522046e-06
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -3343,7 +3343,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -3561,7 +3561,7 @@
         -5.41195877303835e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -3774,7 +3774,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -3992,7 +3992,7 @@
         -1.6235828297794797e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -4205,7 +4205,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -4423,7 +4423,7 @@
         -1.894187880679965e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -4636,7 +4636,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -4854,7 +4854,7 @@
         1.0824203855008818e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -5067,7 +5067,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -5285,7 +5285,7 @@
         -4.329585863160901e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -5498,7 +5498,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -5716,7 +5716,7 @@
         1.0824203855008818e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -5929,7 +5929,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -6147,7 +6147,7 @@
         1.6236304873018526e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -6360,7 +6360,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -6578,7 +6578,7 @@
         -0.00010282755101798102
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -6791,7 +6791,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -7009,7 +7009,7 @@
         1.0824203855008818e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -7222,7 +7222,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -7440,7 +7440,7 @@
         5.412101927504409e-06
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -7653,7 +7653,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -7871,7 +7871,7 @@
         4.768371808516747e-10
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -8084,7 +8084,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -8302,7 +8302,7 @@
         -6.764936551917344e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -8515,7 +8515,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -8733,7 +8733,7 @@
         -2.7059555577579886e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -8946,7 +8946,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -9164,7 +9164,7 @@
         3.517818549880758e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -9377,7 +9377,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -9595,7 +9595,7 @@
         -1.3529777788789943e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -9808,7 +9808,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -10026,7 +10026,7 @@
         5.412101927504409e-06
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -10239,7 +10239,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -10457,7 +10457,7 @@
         2.7060032152803615e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -10670,7 +10670,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -10888,7 +10888,7 @@
         -4.329585863160901e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -11101,7 +11101,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -11319,7 +11319,7 @@
         1.3530254364013672e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -11532,7 +11532,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -11750,7 +11750,7 @@
         5.412101927504409e-06
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -11963,7 +11963,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -12181,7 +12181,7 @@
         -8.117961988318712e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -12394,7 +12394,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -12612,7 +12612,7 @@
         3.247213317081332e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -12825,7 +12825,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -13043,7 +13043,7 @@
         -1.6235828297794797e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -13256,7 +13256,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -13474,7 +13474,7 @@
         -1.0823726370290387e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -13687,7 +13687,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -13905,7 +13905,7 @@
         -3.247165659558959e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -14118,7 +14118,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -14336,7 +14336,7 @@
         1.0824203855008818e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -14549,7 +14549,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -14767,7 +14767,7 @@
         -4.058980994159356e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -14980,7 +14980,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -15198,7 +15198,7 @@
         1.0824203855008818e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -15411,7 +15411,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -15629,7 +15629,7 @@
         -8.117675861285534e-06
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -15842,7 +15842,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -16060,7 +16060,7 @@
         8.118152436509263e-06
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -16273,7 +16273,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -16491,7 +16491,7 @@
         -2.1647929315804504e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -16704,7 +16704,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -16922,7 +16922,7 @@
         2.7060509637522046e-06
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -17135,7 +17135,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -17353,7 +17353,7 @@
         -1.3529777788789943e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -17566,7 +17566,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -17784,7 +17784,7 @@
         -1.0823726370290387e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -17997,7 +17997,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -18215,7 +18215,7 @@
         -3.247165659558959e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -18428,7 +18428,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -18646,7 +18646,7 @@
         1.0824203855008818e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -18859,7 +18859,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -19077,7 +19077,7 @@
         -2.976560608658474e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -19290,7 +19290,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -19508,7 +19508,7 @@
         1.0824203855008818e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -19721,7 +19721,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -19939,7 +19939,7 @@
         -2.7055739337811247e-06
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -20152,7 +20152,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -20370,7 +20370,7 @@
         -8.117675861285534e-06
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -20583,7 +20583,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -20801,7 +20801,7 @@
         -3.78837576135993e-05
        ],
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0
@@ -21014,7 +21014,7 @@
        ],
        "is_reference": true,
        "measurement_settings": {
-        "internal_resistance": 4750,
+        "internal_resistance": 4750.0,
         "max_voltage": 3.3,
         "probe_signal_frequency": 100.0,
         "sampling_rate": 10000.0

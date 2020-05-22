@@ -149,6 +149,9 @@ class EPLabWindow(QMainWindow):
             self.freeze_curve_a_check_box.setChecked(False)
             self.freeze_curve_b_check_box.setChecked(False)
 
+        # Drag allowed only in write mode
+        self._board_window.workspace.allow_drag(mode is WorkMode.write)
+
         settings_enable = mode is not WorkMode.test  # Disable settings in test mode
 
         for button in self._voltages:
@@ -350,6 +353,7 @@ class EPLabWindow(QMainWindow):
             self._board_window.workspace.point_selected.connect(self._on_board_pin_selected)
             self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
             self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
+            self._board_window.workspace.allow_drag(self._work_mode is WorkMode.write)
 
             self._update_current_pin()
 
