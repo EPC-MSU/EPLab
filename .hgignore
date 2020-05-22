@@ -1,5 +1,8 @@
 syntax: glob
 
+# Distr build files
+build
+dist
 */__pycache__
 *.pyc
 *.o

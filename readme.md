@@ -58,6 +58,15 @@ python3 main.py
 venv/bin/python3 main.py
 ```
 
+## Релиз
+
+Для релиза есть скрипт release.cmd. В нём нужно прописать путь до системного 
+интерпретатора Python3.6 64 бита. Запуск:
+```
+cmd release.cmd
+```
+Собранный релиз будет лежать в папке dist
+
 ## Дополнительно
 
 Файл платы для тестов можно загрузить из папки  `tests\test_data\eyepoint_calibration_board`.
