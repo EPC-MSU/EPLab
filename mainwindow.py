@@ -15,6 +15,7 @@ from boardwindow import BoardWidget
 from ivviewer import Viewer as IVViewer
 from score import ScoreWrapper
 from ivview_parameters import IVViewerParametersAdjuster
+from version import Version
 
 from typing import Optional
 
@@ -40,16 +41,14 @@ class EPLabWindow(QMainWindow):
         self._score_wrapper = ScoreWrapper(self.score_label)
 
         self.setWindowIcon(QIcon("media/ico.png"))
+        self.setWindowTitle(self.windowTitle() + " " + Version.full)
 
         self._board_window = BoardWidget()
         self._board_window.resize(600, 600)
-        self._board_window.setWindowIcon(QIcon("media/ico.png"))  # TODO: don't duplicate base configurations
-        self._board_window.setWindowTitle("EPLab - Board")  # TODO: don't duplicate base configurations
+        self._board_window.setWindowIcon(QIcon("media/ico.png"))
+        self._board_window.setWindowTitle("EPLab - Board")
 
         self._iv_window = IVViewer()
-        self._iv_window.resize(600, 600)
-        self._iv_window.setWindowIcon((QIcon("media/ico.png")))  # TODO: don't duplicate base configurations
-        self._iv_window.setWindowTitle("EPLab - IVC")  # TODO: don't duplicate base configurations
 
         self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
 
