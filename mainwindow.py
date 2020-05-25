@@ -58,15 +58,7 @@ class EPLabWindow(QMainWindow):
 
         self.setCentralWidget(self._iv_window)
 
-        # Create default board with 1 pin
-        # TODO: why measurers[1]? Must be smth like 'measurers.reference'
-        self._measurement_plan = MeasurementPlan(
-            Board(elements=[Element(
-                pins=[Pin(0, 0, measurements=[])]
-            )]
-            ),
-            measurer=self._msystem.measurers[1]
-        )
+        self._reset_board()
         self._board_window.set_board(self._measurement_plan)
 
         self._frequencies = {
@@ -105,7 +97,8 @@ class EPLabWindow(QMainWindow):
         self.zp_push_button_save.clicked.connect(self._on_save_pin)
         self.zp_open_file_button.clicked.connect(self._on_load_board)
         self.tp_open_file_button.clicked.connect(self._on_load_board)  # same button on test tab
-        self.zp_save_new_file_button.clicked.connect(self._on_save_board)
+        self.zp_new_file_button.clicked.connect(self._on_new_board)
+        self.zp_save_file_button.clicked.connect(self._on_save_board)
         self.zp_add_image_button.clicked.connect(self._on_load_board_image)
 
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
@@ -142,6 +135,8 @@ class EPLabWindow(QMainWindow):
         self._update_current_pin()
 
         self._update_threshold()
+
+        self._current_file_path = None
 
     def closeEvent(self, ev):
         self._board_window.close()
@@ -344,10 +339,38 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan.save_last_measurement_as_reference()
         self._update_current_pin()
 
+    def _reset_board(self):
+        """
+        Set measuremnet plan to default empty board
+        :return:
+        """
+        # Create default board with 1 pin
+        # TODO: why measurers[1]? Must be smth like 'measurers.reference'
+        self._measurement_plan = MeasurementPlan(
+            Board(elements=[Element(
+                pins=[Pin(0, 0, measurements=[])]
+            )]
+            ),
+            measurer=self._msystem.measurers[1]
+        )
+
+    @pyqtSlot()
+    def _on_new_board(self):
+        dialog = QFileDialog()
+        filename = dialog.getSaveFileName(self, "Save new board", filter="JSON (*.json)")[0]
+        if filename:
+            self._current_file_path = filename
+            self._reset_board()
+            epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
+            self._board_window.set_board(self._measurement_plan)
+            self._update_current_pin()
+
     @pyqtSlot()
     def _on_save_board(self):
-        dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, "Save board", filter="JSON (*.json)")[0]
+        filename = self._current_file_path
+        if not filename:
+            dialog = QFileDialog()
+            filename = dialog.getSaveFileName(self, "Save board", filter="JSON (*.json)")[0]
         if filename:
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
 
@@ -360,6 +383,7 @@ class EPLabWindow(QMainWindow):
         dialog = QFileDialog()
         filename = dialog.getOpenFileName(self, "Open board", filter="JSON (*.json)")[0]
         if filename:
+            self._current_file_path = filename
             board = epfilemanager.load_board_from_ufiv(filename)
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
             self._board_window.set_board(self._measurement_plan)  # New workspace will be created here
