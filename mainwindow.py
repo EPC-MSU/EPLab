@@ -251,6 +251,9 @@ class EPLabWindow(QMainWindow):
             self._change_work_mode(WorkMode.write)
         elif tab == "test_plan_tab_TP":  # test
             self._change_work_mode(WorkMode.test)
+        elif tab == "test_plan_tab_SET":  # settings
+            # Settings mode is equal to compare mode, see #39314-9
+            self._change_work_mode(WorkMode.compare)
 
     @pyqtSlot(QPointF)
     def _on_board_right_click(self, point: QPointF):

@@ -401,7 +401,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="test_plan_tab_S">
         <attribute name="title">
@@ -667,7 +667,7 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab">
+       <widget class="QWidget" name="test_plan_tab_SET">
         <attribute name="title">
          <string>Настройки</string>
         </attribute>
