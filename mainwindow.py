@@ -100,6 +100,7 @@ class EPLabWindow(QMainWindow):
         self.zp_push_button_new_point.clicked.connect(self._on_new_pin)
         self.zp_push_button_save.clicked.connect(self._on_save_pin)
         self.zp_open_file_button.clicked.connect(self._on_load_board)
+        self.tp_open_file_button.clicked.connect(self._on_load_board)  # same button on test tab
         self.zp_save_new_file_button.clicked.connect(self._on_save_board)
 
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
