@@ -99,6 +99,7 @@ class EPLabWindow(QMainWindow):
         self.tp_open_file_button.clicked.connect(self._on_load_board)  # same button on test tab
         self.zp_new_file_button.clicked.connect(self._on_new_board)
         self.zp_save_file_button.clicked.connect(self._on_save_board)
+        self.zp_save_file_as_button.clicked.connect(self._on_save_board_as)
         self.zp_add_image_button.clicked.connect(self._on_load_board_image)
 
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
@@ -366,13 +367,18 @@ class EPLabWindow(QMainWindow):
             self._update_current_pin()
 
     @pyqtSlot()
-    def _on_save_board(self):
-        filename = self._current_file_path
-        if not filename:
-            dialog = QFileDialog()
-            filename = dialog.getSaveFileName(self, "Save board", filter="JSON (*.json)")[0]
+    def _on_save_board_as(self):
+        dialog = QFileDialog()
+        filename = dialog.getSaveFileName(self, "Save board", filter="JSON (*.json)")[0]
         if filename:
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
+            self._current_file_path = filename
+
+    @pyqtSlot()
+    def _on_save_board(self):
+        if not self._current_file_path:
+            return self._on_save_board_as()
+        epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
 
     @pyqtSlot()
     def _on_load_board(self):
