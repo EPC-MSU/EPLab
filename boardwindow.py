@@ -32,6 +32,7 @@ class BoardWidget(QWidget):
         super(BoardWidget, self).__init__(parent)
 
         layout = QVBoxLayout(self)
+        self.setStyleSheet("background-color:black;")
 
         self._scene = BoardView()
         layout.addWidget(self._scene)
