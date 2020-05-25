@@ -407,7 +407,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="test_plan_tab_S">
         <attribute name="title">
@@ -564,7 +564,7 @@
            </item>
           </layout>
          </item>
-         <item row="3" column="0">
+         <item row="4" column="0">
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -588,6 +588,13 @@
           <widget class="QPushButton" name="zp_open_file_button">
            <property name="text">
             <string>Открыть файл</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QPushButton" name="zp_add_image_button">
+           <property name="text">
+            <string>Добавить изображение</string>
            </property>
           </widget>
          </item>

@@ -37,9 +37,8 @@ class BoardWidget(QWidget):
         layout.addWidget(self._scene)
 
     def set_board(self, board: MeasurementPlan):
-        self.layout().removeWidget(self._scene)
-        self._scene = BoardView()
-        self.layout().addWidget(self._scene)
+
+        self._scene.clear_scene()
 
         if board.image:
             self._scene.set_background(pil_to_pixmap(board.image))

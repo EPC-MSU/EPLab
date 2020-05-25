@@ -48,6 +48,10 @@ class EPLabWindow(QMainWindow):
         self._board_window.setWindowIcon(QIcon("media/ico.png"))
         self._board_window.setWindowTitle("EPLab - Board")
 
+        self._board_window.workspace.point_selected.connect(self._on_board_pin_selected)
+        self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
+        self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
+
         self._iv_window = IVViewer()
 
         self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
@@ -102,6 +106,7 @@ class EPLabWindow(QMainWindow):
         self.zp_open_file_button.clicked.connect(self._on_load_board)
         self.tp_open_file_button.clicked.connect(self._on_load_board)  # same button on test tab
         self.zp_save_new_file_button.clicked.connect(self._on_save_board)
+        self.zp_add_image_button.clicked.connect(self._on_load_board_image)
 
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
         self.freeze_curve_b_check_box.stateChanged.connect(self._on_freeze_b)
@@ -348,21 +353,35 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_load_board(self):
+        """
+        "Load board" button handler
+        :return:
+        """
         dialog = QFileDialog()
         filename = dialog.getOpenFileName(self, "Open board", filter="JSON (*.json)")[0]
         if filename:
             board = epfilemanager.load_board_from_ufiv(filename)
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
             self._board_window.set_board(self._measurement_plan)  # New workspace will be created here
-            self._board_window.workspace.point_selected.connect(self._on_board_pin_selected)
-            self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
-            self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
-            self._board_window.workspace.allow_drag(self._work_mode is WorkMode.write)
 
             self._update_current_pin()
 
             if board.image:
                 self._board_window.show()
+
+    @pyqtSlot()
+    def _on_load_board_image(self):
+        """
+        "Load board image" button handler
+        :return:
+        """
+        dialog = QFileDialog()
+        filename = dialog.getOpenFileName(self, "Open board image", filter="Image (*.png)")[0]
+        if filename:
+            epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
+            self._board_window.set_board(self._measurement_plan)
+            self._update_current_pin()
+            self._board_window.show()
 
     @pyqtSlot()
     def _update_curves(self, test: Optional[IVCurve] = None, ref: Optional[IVCurve] = None):
