@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>EyePoint Lab</string>
+   <string>EPLab</string>
   </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QDockWidget" name="scoreDock">
