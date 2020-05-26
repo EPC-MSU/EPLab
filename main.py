@@ -12,9 +12,9 @@ from mainwindow import EPLabWindow
 if __name__ == "__main__":
 
     parser = ArgumentParser(description="EyePoint Lab")
+    parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual' for virtual mode)")
+    parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)")
     parser.add_argument("--en", help="Use English version", action="store_true")
-    parser.add_argument("-a", help="Path to measurer A", default="virtual")
-    parser.add_argument("-b", help="Path to measurer B", default="virtual")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.ERROR)
@@ -26,16 +26,22 @@ if __name__ == "__main__":
         translator.load("gui/super_translate_en.qm")
         app.installTranslator(translator)
 
-    if args.a == "virtual":
-        ivm1 = IVMeasurerVirtual()
-    else:
-        ivm1 = IVMeasurerIVM10(args.a)
-    if args.b == "virtual":
-        ivm2 = IVMeasurerVirtual()
-    else:
-        ivm2 = IVMeasurerIVM10(args.b)
+    measurers = []
 
-    measurement_system = MeasurementSystem([ivm1, ivm2])
+    if args.test == "virtual":
+        ivm_test = IVMeasurerVirtual(name="test")
+    else:
+        ivm_test = IVMeasurerIVM10(args.a, name="test")
+    measurers.append(ivm_test)
+
+    if args.ref:
+        if args.ref == "virtual":
+            ivm_ref = IVMeasurerVirtual(name="ref")
+        else:
+            ivm_ref = IVMeasurerIVM10(args.ref, name="ref")
+        measurers.append(ivm_ref)
+
+    measurement_system = MeasurementSystem(measurers)
 
     window = EPLabWindow(measurement_system)
     window.resize(1200, 600)

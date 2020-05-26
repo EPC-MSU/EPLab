@@ -1,1 +1,1 @@
-python main.py
+python main.py virtual --ref virtual

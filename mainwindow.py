@@ -105,6 +105,9 @@ class EPLabWindow(QMainWindow):
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
         self.freeze_curve_b_check_box.stateChanged.connect(self._on_freeze_b)
 
+        if "ref" not in self._msystem.measurers_map:
+            self.freeze_curve_a_check_box.setEnabled(False)
+
         self.save_image_push_button.clicked.connect(self._on_save_image)
         self.tp_push_button_save.clicked.connect(self._on_save_image)
 
@@ -218,19 +221,18 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot(int)
     def _on_freeze_a(self, state: int):
-        # TODO: dont use hardcode indexes
-        if state == Qt.Checked:
-            self._msystem.measurers[1].freeze()
-        else:
-            self._msystem.measurers[1].unfreeze()
+        if "ref" in self._msystem.measurers_map:
+            if state == Qt.Checked:
+                self._msystem.measurers_map["ref"].freeze()
+            else:
+                self._msystem.measurers_map["ref"].unfreeze()
 
     @pyqtSlot(int)
     def _on_freeze_b(self, state: int):
-        # TODO: don't use hardcode indexes
         if state == Qt.Checked:
-            self._msystem.measurers[0].freeze()
+            self._msystem.measurers_map["test"].freeze()
         else:
-            self._msystem.measurers[0].unfreeze()
+            self._msystem.measurers_map["test"].unfreeze()
 
     @pyqtSlot(int)
     def _on_sound_checked(self, state: int):
@@ -353,13 +355,12 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         # Create default board with 1 pin
-        # TODO: why measurers[1]? Must be smth like 'measurers.reference'
         self._measurement_plan = MeasurementPlan(
             Board(elements=[Element(
                 pins=[Pin(0, 0, measurements=[])]
             )]
             ),
-            measurer=self._msystem.measurers[1]
+            measurer=self._msystem.measurers_map["test"]
         )
 
     @pyqtSlot()
@@ -398,7 +399,7 @@ class EPLabWindow(QMainWindow):
         if filename:
             self._current_file_path = filename
             board = epfilemanager.load_board_from_ufiv(filename)
-            self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
+            self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers_map["test"])
             self._board_window.set_board(self._measurement_plan)  # New workspace will be created here
 
             self._update_current_pin()
@@ -444,9 +445,10 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _read_curves_periodic_task(self):
         if self._msystem.measurements_are_ready():
-            # TODO: why [0] measurer is 'ref' and [1] measurer is 'test'? Should be smth like measurers.test
-            test = self._msystem.measurers[0].get_last_cached_iv_curve()
-            ref = self._msystem.measurers[1].get_last_cached_iv_curve()
+            test = self._msystem.measurers_map["test"].get_last_cached_iv_curve()
+            ref = None
+            if "ref" in self._msystem.measurers_map:
+                ref = self._msystem.measurers_map["ref"].get_last_cached_iv_curve()
 
             if self._skip_curve:
                 self._skip_curve = False
@@ -454,15 +456,9 @@ class EPLabWindow(QMainWindow):
                 if self._work_mode is WorkMode.compare:
                     # Just display two current curves
                     self._update_curves(test, ref)
-                elif self._work_mode is WorkMode.write:
-                    # In write mode here are two curves: reference curve (dynamic) and saved ref curve (static, red)
-                    # But IVViewer knows only two types of curves: ref and test
-                    self._update_curves(test=ref)
-                elif self._work_mode is WorkMode.test:
+                else:
                     # Reference curve will be read from measurement plan
                     self._update_curves(test=test)
-                else:
-                    raise NotImplementedError(f"Undefined behavior for work mode {self._work_mode}")
 
                 if self._settings_update_next_cycle:
                     # New curve with new settings - we must update plot parameters
