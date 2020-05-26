@@ -48,21 +48,17 @@ class EPLabWindow(QMainWindow):
         self._board_window.setWindowIcon(QIcon("media/ico.png"))
         self._board_window.setWindowTitle("EPLab - Board")
 
+        self._board_window.workspace.point_selected.connect(self._on_board_pin_selected)
+        self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
+        self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
+
         self._iv_window = IVViewer()
 
         self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
 
         self.setCentralWidget(self._iv_window)
 
-        # Create default board with 1 pin
-        # TODO: why measurers[1]? Must be smth like 'measurers.reference'
-        self._measurement_plan = MeasurementPlan(
-            Board(elements=[Element(
-                pins=[Pin(0, 0, measurements=[])]
-            )]
-            ),
-            measurer=self._msystem.measurers[1]
-        )
+        self._reset_board()
         self._board_window.set_board(self._measurement_plan)
 
         self._frequencies = {
@@ -100,7 +96,11 @@ class EPLabWindow(QMainWindow):
         self.zp_push_button_new_point.clicked.connect(self._on_new_pin)
         self.zp_push_button_save.clicked.connect(self._on_save_pin)
         self.zp_open_file_button.clicked.connect(self._on_load_board)
-        self.zp_save_new_file_button.clicked.connect(self._on_save_board)
+        self.tp_open_file_button.clicked.connect(self._on_load_board)  # same button on test tab
+        self.zp_new_file_button.clicked.connect(self._on_new_board)
+        self.zp_save_file_button.clicked.connect(self._on_save_board)
+        self.zp_save_file_as_button.clicked.connect(self._on_save_board_as)
+        self.zp_add_image_button.clicked.connect(self._on_load_board_image)
 
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
         self.freeze_curve_b_check_box.stateChanged.connect(self._on_freeze_b)
@@ -136,6 +136,8 @@ class EPLabWindow(QMainWindow):
         self._update_current_pin()
 
         self._update_threshold()
+
+        self._current_file_path = None
 
     def closeEvent(self, ev):
         self._board_window.close()
@@ -251,6 +253,9 @@ class EPLabWindow(QMainWindow):
             self._change_work_mode(WorkMode.write)
         elif tab == "test_plan_tab_TP":  # test
             self._change_work_mode(WorkMode.test)
+        elif tab == "test_plan_tab_SET":  # settings
+            # Settings mode is equal to compare mode, see #39314-9
+            self._change_work_mode(WorkMode.compare)
 
     @pyqtSlot(QPointF)
     def _on_board_right_click(self, point: QPointF):
@@ -286,7 +291,7 @@ class EPLabWindow(QMainWindow):
                 self._update_curves()
 
     def _update_threshold(self):
-        self.label_score_threshold_value.setText(str(round(self._score_wrapper.threshold, 2)))
+        self.label_score_threshold_value.setText(f"{int(self._score_wrapper.threshold * 100.0)}%")
 
     @pyqtSlot()
     def _on_threshold_dec(self):
@@ -335,30 +340,78 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan.save_last_measurement_as_reference()
         self._update_current_pin()
 
+    def _reset_board(self):
+        """
+        Set measuremnet plan to default empty board
+        :return:
+        """
+        # Create default board with 1 pin
+        # TODO: why measurers[1]? Must be smth like 'measurers.reference'
+        self._measurement_plan = MeasurementPlan(
+            Board(elements=[Element(
+                pins=[Pin(0, 0, measurements=[])]
+            )]
+            ),
+            measurer=self._msystem.measurers[1]
+        )
+
     @pyqtSlot()
-    def _on_save_board(self):
+    def _on_new_board(self):
+        dialog = QFileDialog()
+        filename = dialog.getSaveFileName(self, "Save new board", filter="JSON (*.json)")[0]
+        if filename:
+            self._current_file_path = filename
+            self._reset_board()
+            epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
+            self._board_window.set_board(self._measurement_plan)
+            self._update_current_pin()
+
+    @pyqtSlot()
+    def _on_save_board_as(self):
         dialog = QFileDialog()
         filename = dialog.getSaveFileName(self, "Save board", filter="JSON (*.json)")[0]
         if filename:
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
+            self._current_file_path = filename
+
+    @pyqtSlot()
+    def _on_save_board(self):
+        if not self._current_file_path:
+            return self._on_save_board_as()
+        epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
 
     @pyqtSlot()
     def _on_load_board(self):
+        """
+        "Load board" button handler
+        :return:
+        """
         dialog = QFileDialog()
         filename = dialog.getOpenFileName(self, "Open board", filter="JSON (*.json)")[0]
         if filename:
+            self._current_file_path = filename
             board = epfilemanager.load_board_from_ufiv(filename)
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
             self._board_window.set_board(self._measurement_plan)  # New workspace will be created here
-            self._board_window.workspace.point_selected.connect(self._on_board_pin_selected)
-            self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
-            self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
-            self._board_window.workspace.allow_drag(self._work_mode is WorkMode.write)
 
             self._update_current_pin()
 
             if board.image:
                 self._board_window.show()
+
+    @pyqtSlot()
+    def _on_load_board_image(self):
+        """
+        "Load board image" button handler
+        :return:
+        """
+        dialog = QFileDialog()
+        filename = dialog.getOpenFileName(self, "Open board image", filter="Image (*.png)")[0]
+        if filename:
+            epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
+            self._board_window.set_board(self._measurement_plan)
+            self._update_current_pin()
+            self._board_window.show()
 
     @pyqtSlot()
     def _update_curves(self, test: Optional[IVCurve] = None, ref: Optional[IVCurve] = None):

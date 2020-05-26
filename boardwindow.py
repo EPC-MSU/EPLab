@@ -32,14 +32,14 @@ class BoardWidget(QWidget):
         super(BoardWidget, self).__init__(parent)
 
         layout = QVBoxLayout(self)
+        self.setStyleSheet("background-color:black;")
 
         self._scene = BoardView()
         layout.addWidget(self._scene)
 
     def set_board(self, board: MeasurementPlan):
-        self.layout().removeWidget(self._scene)
-        self._scene = BoardView()
-        self.layout().addWidget(self._scene)
+
+        self._scene.clear_scene()
 
         if board.image:
             self._scene.set_background(pil_to_pixmap(board.image))
