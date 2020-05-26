@@ -4,7 +4,6 @@ from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, Qt
 from PyQt5 import uic
 
 from warnings import warn
-from enum import Enum, auto
 from datetime import datetime
 
 import epcore.filemanager as epfilemanager
@@ -16,14 +15,10 @@ from ivviewer import Viewer as IVViewer
 from score import ScoreWrapper
 from ivview_parameters import IVViewerParametersAdjuster
 from version import Version
+from player import SoundPlayer
+from common import WorkMode
 
 from typing import Optional
-
-
-class WorkMode(Enum):
-    compare = auto()
-    write = auto()
-    test = auto()
 
 
 class EPLabWindow(QMainWindow):
@@ -39,6 +34,9 @@ class EPLabWindow(QMainWindow):
         self._comparator = IVCComparator()
 
         self._score_wrapper = ScoreWrapper(self.score_label)
+
+        self._player = SoundPlayer()
+        self._player.set_mute(not self.sound_enabled_checkbox.isChecked())
 
         self.setWindowIcon(QIcon("media/ico.png"))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
@@ -102,6 +100,8 @@ class EPLabWindow(QMainWindow):
         self.zp_save_file_as_button.clicked.connect(self._on_save_board_as)
         self.zp_add_image_button.clicked.connect(self._on_load_board_image)
 
+        self.sound_enabled_checkbox.stateChanged.connect(self._on_sound_checked)
+
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
         self.freeze_curve_b_check_box.stateChanged.connect(self._on_freeze_b)
 
@@ -143,6 +143,8 @@ class EPLabWindow(QMainWindow):
         self._board_window.close()
 
     def _change_work_mode(self, mode: WorkMode):
+        self._player.set_work_mode(mode)
+
         if self._work_mode is mode:
             return
 
@@ -230,6 +232,10 @@ class EPLabWindow(QMainWindow):
         else:
             self._msystem.measurers[0].unfreeze()
 
+    @pyqtSlot(int)
+    def _on_sound_checked(self, state: int):
+        self._player.set_mute(state != Qt.Checked)
+
     @pyqtSlot()
     def _on_save_image(self):
         # Freeze image at first
@@ -292,6 +298,7 @@ class EPLabWindow(QMainWindow):
 
     def _update_threshold(self):
         self.label_score_threshold_value.setText(f"{int(self._score_wrapper.threshold * 100.0)}%")
+        self._player.set_threshold(self._score_wrapper.threshold)
 
     @pyqtSlot()
     def _on_threshold_dec(self):
@@ -429,6 +436,7 @@ class EPLabWindow(QMainWindow):
         if self._ref_curve and self._test_curve:
             score = self._comparator.compare_ivc(self._ref_curve, self._test_curve)
             self._score_wrapper.set_score(score)
+            self._player.score_updated(score)
 
     def _remove_ref_curve(self):
         self._ref_curve = None
