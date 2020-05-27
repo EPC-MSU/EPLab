@@ -12,6 +12,7 @@ rd /S /Q build
 venv\Scripts\pyinstaller main.py ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm-win64\ivm.dll;." ^
 --add-data "venv\Lib\site-packages\epcore\measurementmanager\ivcmp-win64\ivcmp.dll;." ^
+--add-dava "venv\Lib\site-packages\epsound\void.wav;." ^
 --add-data "media\*;media" ^
 --add-data "gui\*;gui" ^
 --icon=media\ico.ico
