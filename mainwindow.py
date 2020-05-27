@@ -22,7 +22,6 @@ from typing import Optional
 
 
 class EPLabWindow(QMainWindow):
-
     def __init__(self, msystem: MeasurementSystem):
         super(EPLabWindow, self).__init__()
 
@@ -351,7 +350,7 @@ class EPLabWindow(QMainWindow):
 
     def _reset_board(self):
         """
-        Set measuremnet plan to default empty board
+        Set measurement plan to default empty board
         :return:
         """
         # Create default board with 1 pin
@@ -414,7 +413,7 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, "Open board image", filter="Image (*.png)")[0]
+        filename = dialog.getOpenFileName(self, "Open board image", filter="Image Files (*.png *.jpg *.bmp)")[0]
         if filename:
             epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
             self._board_window.set_board(self._measurement_plan)
