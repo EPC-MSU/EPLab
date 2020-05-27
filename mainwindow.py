@@ -31,6 +31,9 @@ class EPLabWindow(QMainWindow):
         self._msystem.trigger_measurements()
 
         self._comparator = IVCComparator()
+        # Little bit hardcode here. See #39320
+        # TODO: separate config file
+        self._comparator.set_min_ivc(0.6, 0.0002)
 
         self._score_wrapper = ScoreWrapper(self.score_label)
 
