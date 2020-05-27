@@ -9,7 +9,6 @@ class TestSound(unittest.TestCase):
         # Just test that here are no unexpected errors like ValueError, RuntimeError, etc
 
         player = SoundPlayer()
-        player.set_mute(True)
 
         for mode in WorkMode:
             player.set_work_mode(mode)
