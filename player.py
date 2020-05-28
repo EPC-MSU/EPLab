@@ -32,7 +32,7 @@ class SoundPlayer:
         try:
             self._player.play(name)
         except RuntimeError:
-            logging.error("Unable to lay sound name")
+            logging.error(f"Unable to play sound {name}")
 
     def score_updated(self, score: float):
         # Logic described here #39296
