@@ -123,6 +123,10 @@ class EPLabWindow(QMainWindow):
         self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
 
         with self._device_errors_handler:
+            for m in self._msystem.measurers:
+                m.open_device()
+
+        with self._device_errors_handler:
             self._iv_window_parameters_adjuster.adjust_parameters(self._msystem.get_settings())
 
         self._work_mode = WorkMode.compare  # default mode - compare two curves

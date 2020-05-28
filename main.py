@@ -31,14 +31,14 @@ if __name__ == "__main__":
     if args.test == "virtual":
         ivm_test = IVMeasurerVirtual(name="test")
     else:
-        ivm_test = IVMeasurerIVM10(args.test, name="test")
+        ivm_test = IVMeasurerIVM10(args.test, name="test", defer_open=True)
     measurers.append(ivm_test)
 
     if args.ref:
         if args.ref == "virtual":
             ivm_ref = IVMeasurerVirtual(name="ref")
         else:
-            ivm_ref = IVMeasurerIVM10(args.ref, name="ref")
+            ivm_ref = IVMeasurerIVM10(args.ref, name="ref", defer_open=True)
         measurers.append(ivm_ref)
 
     measurement_system = MeasurementSystem(measurers)
