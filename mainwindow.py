@@ -16,7 +16,7 @@ from score import ScoreWrapper
 from ivview_parameters import IVViewerParametersAdjuster
 from version import Version
 from player import SoundPlayer
-from common import WorkMode
+from common import WorkMode, HandleDeviceErrors
 
 from typing import Optional
 
@@ -27,8 +27,9 @@ class EPLabWindow(QMainWindow):
 
         uic.loadUi("gui/mainwindow.ui", self)
 
+        self._device_errors_handler = HandleDeviceErrors()
+
         self._msystem = msystem
-        self._msystem.trigger_measurements()
 
         self._comparator = IVCComparator()
         # Little bit hardcode here. See #39320
@@ -121,7 +122,8 @@ class EPLabWindow(QMainWindow):
         self.test_plan_tab_widget.setCurrentIndex(0)  # first tab - curves comparison
         self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
 
-        self._iv_window_parameters_adjuster.adjust_parameters(self._msystem.get_settings())
+        with self._device_errors_handler:
+            self._iv_window_parameters_adjuster.adjust_parameters(self._msystem.get_settings())
 
         self._work_mode = WorkMode.compare  # default mode - compare two curves
 
@@ -133,14 +135,17 @@ class EPLabWindow(QMainWindow):
         self._ref_curve = None
         self._test_curve = None
 
-        QTimer.singleShot(0, self._read_curves_periodic_task)
+        QTimer.singleShot(0, self._periodic_task)
 
-        settings = self._msystem.get_settings()  # set ui settings state to current device
-        self._settings_to_ui(settings)
+        with self._device_errors_handler:
+            settings = self._msystem.get_settings()  # set ui settings state to current device
+            self._settings_to_ui(settings)
 
         self._update_current_pin()
-
         self._update_threshold()
+
+        with self._device_errors_handler:
+            self._msystem.trigger_measurements()
 
         self._current_file_path = None
 
@@ -219,7 +224,8 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_auto_calibration(self):
-        self._msystem.calibrate()
+        with self._device_errors_handler:
+            self._msystem.calibrate()
 
     @pyqtSlot(int)
     def _on_freeze_a(self, state: int):
@@ -292,10 +298,11 @@ class EPLabWindow(QMainWindow):
             measurement = current_pin.get_reference_measurement()
 
             if measurement:
-                settings = measurement.settings
-                self._set_msystem_settings(settings)
-                self._settings_to_ui(settings)
-                self._update_curves(ref=measurement.ivc)
+                with self._device_errors_handler:
+                    settings = measurement.settings
+                    self._set_msystem_settings(settings)
+                    self._settings_to_ui(settings)
+                    self._update_curves(ref=measurement.ivc)
             else:
                 self._remove_ref_curve()
                 self._update_curves()
@@ -348,7 +355,8 @@ class EPLabWindow(QMainWindow):
         Save current pin IVC as reference for current pin
         :return:
         """
-        self._measurement_plan.save_last_measurement_as_reference()
+        with self._device_errors_handler:
+            self._measurement_plan.save_last_measurement_as_reference()
         self._update_current_pin()
 
     def _reset_board(self):
@@ -444,7 +452,23 @@ class EPLabWindow(QMainWindow):
     def _remove_ref_curve(self):
         self._ref_curve = None
 
-    @pyqtSlot()
+    def _reconnect_periodic_task(self):
+        # Draw empty curves
+        self._test_curve = None
+        if self._work_mode is WorkMode.compare:
+            self._ref_curve = None
+        self._update_curves()
+
+        # Draw text
+        self._iv_window.plot.set_center_text("DISCONNECTED")
+
+        if self._msystem.reconnect():
+            # Reconnection success!
+            self._device_errors_handler.reset_error()
+            self._iv_window.plot.clear_text()
+            with self._device_errors_handler:
+                self._msystem.trigger_measurements()
+
     def _read_curves_periodic_task(self):
         if self._msystem.measurements_are_ready():
             test = self._msystem.measurers_map["test"].get_last_cached_iv_curve()
@@ -469,8 +493,16 @@ class EPLabWindow(QMainWindow):
 
             self._msystem.trigger_measurements()
 
+    @pyqtSlot()
+    def _periodic_task(self):
+        if self._device_errors_handler.all_ok:
+            with self._device_errors_handler:
+                self._read_curves_periodic_task()
+        else:
+            self._reconnect_periodic_task()
+
         # Add this task to event loop
-        QTimer.singleShot(10, self._read_curves_periodic_task)
+        QTimer.singleShot(10, self._periodic_task)
 
     def _set_msystem_settings(self, settings: MeasurementSettings):
         self._msystem.set_settings(settings)
@@ -483,8 +515,9 @@ class EPLabWindow(QMainWindow):
 
     def _on_settings_btn_checked(self, checked: bool) -> None:
         if checked:
-            settings = self._ui_to_settings()
-            self._set_msystem_settings(settings)
+            with self._device_errors_handler:
+                settings = self._ui_to_settings()
+                self._set_msystem_settings(settings)
 
     @pyqtSlot()
     def _on_view_board(self):
