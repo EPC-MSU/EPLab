@@ -31,7 +31,7 @@ if __name__ == "__main__":
     if args.test == "virtual":
         ivm_test = IVMeasurerVirtual(name="test")
     else:
-        ivm_test = IVMeasurerIVM10(args.a, name="test")
+        ivm_test = IVMeasurerIVM10(args.test, name="test")
     measurers.append(ivm_test)
 
     if args.ref:
