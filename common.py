@@ -39,7 +39,7 @@ class HandleDeviceErrors:
           # Success! Reset error state
           _deice_context.reset_error()
     """
-    _device_errors = (RuntimeError,)
+    _device_errors = (RuntimeError, OSError, )
 
     def __init__(self):
         self._all_ok = True
