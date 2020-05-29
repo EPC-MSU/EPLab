@@ -71,7 +71,7 @@ class EPLabWindow(QMainWindow):
             self.frequency_100khz_radio_button: 100000
         }
         for button, frequency in self._frequencies.items():
-            button.toggled.connect(self._on_settings_btn_checked)
+            button.clicked.connect(self._on_settings_btn_checked)
 
         self._voltages = {
             self.voltage_1_2v_radio_button: 1.2,
@@ -80,7 +80,7 @@ class EPLabWindow(QMainWindow):
             self.voltage_12v_radio_button: 12.0
         }
         for button, voltage in self._voltages.items():
-            button.toggled.connect(self._on_settings_btn_checked)
+            button.clicked.connect(self._on_settings_btn_checked)
 
         self._sensitivities = {
             self.sens_low_radio_button: 47500.0,  # Omh
@@ -88,7 +88,7 @@ class EPLabWindow(QMainWindow):
             self.sens_high_radio_button: 475.0
         }
         for button, resistance in self._sensitivities.items():
-            button.toggled.connect(self._on_settings_btn_checked)
+            button.clicked.connect(self._on_settings_btn_checked)
 
         self.zp_push_button_left.clicked.connect(self._on_go_left_pin)
         self.tp_push_button_left.clicked.connect(self._on_go_left_pin)
