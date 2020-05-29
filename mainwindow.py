@@ -509,8 +509,7 @@ class EPLabWindow(QMainWindow):
         QTimer.singleShot(10, self._periodic_task)
 
     def _set_msystem_settings(self, settings: MeasurementSettings):
-        with self._device_errors_handler:
-            self._msystem.set_settings(settings)
+        self._msystem.set_settings(settings)
 
         # Skip next measurement because it still have old settings
         self._skip_curve = True
