@@ -16,7 +16,7 @@ from score import ScoreWrapper
 from ivview_parameters import IVViewerParametersAdjuster
 from version import Version
 from player import SoundPlayer
-from common import WorkMode, HandleDeviceErrors
+from common import WorkMode, DeviceErrorsHandler
 
 from typing import Optional
 
@@ -27,7 +27,7 @@ class EPLabWindow(QMainWindow):
 
         uic.loadUi("gui/mainwindow.ui", self)
 
-        self._device_errors_handler = HandleDeviceErrors()
+        self._device_errors_handler = DeviceErrorsHandler()
 
         self._msystem = msystem
 

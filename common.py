@@ -7,14 +7,14 @@ class WorkMode(Enum):
     test = auto()
 
 
-class HandleDeviceErrors:
+class DeviceErrorsHandler:
     """
     All uRPC actions should be wrapped with that context manager.
     In case of device errors (for example: device disconnected) context object will change "all_ok" state
     For example:
 
     # Anywhere in initialization method...
-    _device_context = HandleDeviceErrors()
+    _device_context = DeviceErrorsHandler()
 
     ...
 
