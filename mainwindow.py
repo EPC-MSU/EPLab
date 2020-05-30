@@ -414,7 +414,7 @@ class EPLabWindow(QMainWindow):
         filename = dialog.getOpenFileName(self, "Open board", filter="JSON (*.json)")[0]
         if filename:
             self._current_file_path = filename
-            board = epfilemanager.load_board_from_ufiv(filename)
+            board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers_map["test"])
             self._board_window.set_board(self._measurement_plan)  # New workspace will be created here
 

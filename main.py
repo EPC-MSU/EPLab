@@ -17,7 +17,7 @@ if __name__ == "__main__":
     parser.add_argument("--en", help="Use English version", action="store_true")
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.ERROR)
+    logging.basicConfig(level=logging.WARNING)
 
     app = QApplication(sys.argv)
 
