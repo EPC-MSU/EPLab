@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>882</width>
-    <height>773</height>
+    <height>839</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -390,12 +390,19 @@
    <widget class="QWidget" name="dockWidgetContents_6">
     <layout class="QVBoxLayout" name="verticalLayout_10">
      <item>
-      <widget class="QLineEdit" name="line_comment_pin"/>
+      <widget class="QLineEdit" name="line_comment_pin">
+       <property name="placeholderText">
+        <string>Комментарий...</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QTabWidget" name="test_plan_tab_widget">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -407,7 +414,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="test_plan_tab_S">
         <attribute name="title">
@@ -470,6 +477,19 @@
             </widget>
            </item>
           </layout>
+         </item>
+         <item row="1" column="0">
+          <spacer name="verticalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>

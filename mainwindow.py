@@ -104,6 +104,8 @@ class EPLabWindow(QMainWindow):
         self.zp_save_file_as_button.clicked.connect(self._on_save_board_as)
         self.zp_add_image_button.clicked.connect(self._on_load_board_image)
 
+        self.line_comment_pin.returnPressed.connect(self._on_save_comment)
+
         self.sound_enabled_checkbox.stateChanged.connect(self._on_sound_checked)
 
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
@@ -130,7 +132,8 @@ class EPLabWindow(QMainWindow):
         with self._device_errors_handler:
             self._iv_window_parameters_adjuster.adjust_parameters(self._msystem.get_settings())
 
-        self._work_mode = WorkMode.compare  # default mode - compare two curves
+        self._work_mode = None
+        self._change_work_mode(WorkMode.compare)  # default mode - compare two curves
 
         # Update plot settings at next measurement cycle (place settings here or None)
         self._settings_update_next_cycle = None
@@ -162,6 +165,9 @@ class EPLabWindow(QMainWindow):
 
         if self._work_mode is mode:
             return
+
+        # Comment is only for test and write mode
+        self.line_comment_pin.setEnabled(mode is not WorkMode.compare)
 
         if mode is not WorkMode.compare:
             # "Freeze" is only for compare mode
@@ -253,6 +259,11 @@ class EPLabWindow(QMainWindow):
         self._player.set_mute(state != Qt.Checked)
 
     @pyqtSlot()
+    def _on_save_comment(self):
+        comment = self.line_comment_pin.text()
+        self._measurement_plan.get_current_pin().comment = comment
+
+    @pyqtSlot()
     def _on_save_image(self):
         # Freeze image at first
         image = self.grab(self.rect())
@@ -302,6 +313,8 @@ class EPLabWindow(QMainWindow):
         if self._work_mode in (WorkMode.test, WorkMode.write):
             current_pin = self._measurement_plan.get_current_pin()
             measurement = current_pin.get_reference_measurement()
+
+            self.line_comment_pin.setText(current_pin.comment or "")
 
             if measurement:
                 with self._device_errors_handler:
