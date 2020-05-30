@@ -454,6 +454,8 @@ class EPLabWindow(QMainWindow):
             score = self._comparator.compare_ivc(self._ref_curve, self._test_curve)
             self._score_wrapper.set_score(score)
             self._player.score_updated(score)
+        else:
+            self._score_wrapper.set_dummy_score()
 
     def _remove_ref_curve(self):
         self._ref_curve = None
