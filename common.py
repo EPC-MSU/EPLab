@@ -7,14 +7,14 @@ class WorkMode(Enum):
     test = auto()
 
 
-class HandleDeviceErrors:
+class DeviceErrorsHandler:
     """
     All uRPC actions should be wrapped with that context manager.
     In case of device errors (for example: device disconnected) context object will change "all_ok" state
     For example:
 
     # Anywhere in initialization method...
-    _device_context = HandleDeviceErrors()
+    _device_context = DeviceErrorsHandler()
 
     ...
 
@@ -39,10 +39,11 @@ class HandleDeviceErrors:
           # Success! Reset error state
           _deice_context.reset_error()
     """
-    _device_errors = (RuntimeError,)
+    _device_errors = (RuntimeError, OSError, )
 
     def __init__(self):
         self._all_ok = True
+        self._in_context = False
 
     @property
     def all_ok(self):
@@ -52,9 +53,13 @@ class HandleDeviceErrors:
         self._all_ok = True
 
     def __enter__(self):
+        if self._in_context:
+            raise ValueError("You should not use more that one nesting level")
+        self._in_context = True
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self._in_context = False
         if not exc_type:
             return True  # No exceptions, all is OK
 

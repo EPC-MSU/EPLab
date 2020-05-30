@@ -16,7 +16,7 @@ from score import ScoreWrapper
 from ivview_parameters import IVViewerParametersAdjuster
 from version import Version
 from player import SoundPlayer
-from common import WorkMode, HandleDeviceErrors
+from common import WorkMode, DeviceErrorsHandler
 
 from typing import Optional
 
@@ -27,7 +27,7 @@ class EPLabWindow(QMainWindow):
 
         uic.loadUi("gui/mainwindow.ui", self)
 
-        self._device_errors_handler = HandleDeviceErrors()
+        self._device_errors_handler = DeviceErrorsHandler()
 
         self._msystem = msystem
 
@@ -63,15 +63,16 @@ class EPLabWindow(QMainWindow):
         self._board_window.set_board(self._measurement_plan)
 
         self._frequencies = {
-            self.frequency_1hz_radio_button: 1,
-            self.frequency_10hz_radio_button: 10,
-            self.frequency_100hz_radio_button: 100,
-            self.frequency_1khz_radio_button: 1000,
-            self.frequency_10khz_radio_button: 10000,
-            self.frequency_100khz_radio_button: 100000
+            # Frequency and sampling rate here (freq, sampling rate)
+            self.frequency_1hz_radio_button: (1, 100),
+            self.frequency_10hz_radio_button: (10, 1000),
+            self.frequency_100hz_radio_button: (100, 10000),
+            self.frequency_1khz_radio_button: (1000, 100000),
+            self.frequency_10khz_radio_button: (10000, 1000000),
+            self.frequency_100khz_radio_button: (100000, 10000000)
         }
         for button, frequency in self._frequencies.items():
-            button.toggled.connect(self._on_settings_btn_checked)
+            button.clicked.connect(self._on_settings_btn_checked)
 
         self._voltages = {
             self.voltage_1_2v_radio_button: 1.2,
@@ -80,7 +81,7 @@ class EPLabWindow(QMainWindow):
             self.voltage_12v_radio_button: 12.0
         }
         for button, voltage in self._voltages.items():
-            button.toggled.connect(self._on_settings_btn_checked)
+            button.clicked.connect(self._on_settings_btn_checked)
 
         self._sensitivities = {
             self.sens_low_radio_button: 47500.0,  # Omh
@@ -88,7 +89,7 @@ class EPLabWindow(QMainWindow):
             self.sens_high_radio_button: 475.0
         }
         for button, resistance in self._sensitivities.items():
-            button.toggled.connect(self._on_settings_btn_checked)
+            button.clicked.connect(self._on_settings_btn_checked)
 
         self.zp_push_button_left.clicked.connect(self._on_go_left_pin)
         self.tp_push_button_left.clicked.connect(self._on_go_left_pin)
@@ -190,10 +191,10 @@ class EPLabWindow(QMainWindow):
         """
         settings = self._msystem.get_settings()
 
-        for button, value in self._frequencies.items():
+        for button, (freq, sampling) in self._frequencies.items():
             if button.isChecked():
-                settings.probe_signal_frequency = value
-                settings.sampling_rate = value * 100
+                settings.probe_signal_frequency = freq
+                settings.sampling_rate = sampling
         for button, value in self._voltages.items():
             if button.isChecked():
                 settings.max_voltage = value
@@ -208,10 +209,11 @@ class EPLabWindow(QMainWindow):
         Convert measurement settings to UI RadioButton's states
         :return:
         """
-        if settings.probe_signal_frequency not in self._frequencies.values():
-            warn(f"No radio button for device frequency {settings.probe_signal_frequency}")
-        for button, value in self._frequencies.items():
-            if value == settings.probe_signal_frequency:
+        if (settings.probe_signal_frequency, settings.sampling_rate) not in self._frequencies.values():
+            warn(f"No radio button for device frequency {settings.probe_signal_frequency} sampling rate "
+                 f"{settings.sampling_rate}")
+        for button, (freq, sampling) in self._frequencies.items():
+            if freq == settings.probe_signal_frequency:
                 button.setChecked(True)
 
         if settings.internal_resistance not in self._sensitivities.values():
@@ -452,6 +454,8 @@ class EPLabWindow(QMainWindow):
             score = self._comparator.compare_ivc(self._ref_curve, self._test_curve)
             self._score_wrapper.set_score(score)
             self._player.score_updated(score)
+        else:
+            self._score_wrapper.set_dummy_score()
 
     def _remove_ref_curve(self):
         self._ref_curve = None
@@ -471,6 +475,8 @@ class EPLabWindow(QMainWindow):
             self._device_errors_handler.reset_error()
             self._iv_window.plot.clear_text()
             with self._device_errors_handler:
+                # Update current settings to reconnected device
+                self._ui_to_settings()
                 self._msystem.trigger_measurements()
 
     def _read_curves_periodic_task(self):
