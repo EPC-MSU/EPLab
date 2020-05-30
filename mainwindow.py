@@ -63,12 +63,13 @@ class EPLabWindow(QMainWindow):
         self._board_window.set_board(self._measurement_plan)
 
         self._frequencies = {
-            self.frequency_1hz_radio_button: 1,
-            self.frequency_10hz_radio_button: 10,
-            self.frequency_100hz_radio_button: 100,
-            self.frequency_1khz_radio_button: 1000,
-            self.frequency_10khz_radio_button: 10000,
-            self.frequency_100khz_radio_button: 100000
+            # Frequency and sampling rate here (freq, sampling rate)
+            self.frequency_1hz_radio_button: (1, 100),
+            self.frequency_10hz_radio_button: (10, 1000),
+            self.frequency_100hz_radio_button: (100, 10000),
+            self.frequency_1khz_radio_button: (1000, 100000),
+            self.frequency_10khz_radio_button: (10000, 1000000),
+            self.frequency_100khz_radio_button: (100000, 10000000)
         }
         for button, frequency in self._frequencies.items():
             button.clicked.connect(self._on_settings_btn_checked)
@@ -190,10 +191,10 @@ class EPLabWindow(QMainWindow):
         """
         settings = self._msystem.get_settings()
 
-        for button, value in self._frequencies.items():
+        for button, (freq, sampling) in self._frequencies.items():
             if button.isChecked():
-                settings.probe_signal_frequency = value
-                settings.sampling_rate = value * 100
+                settings.probe_signal_frequency = freq
+                settings.sampling_rate = sampling
         for button, value in self._voltages.items():
             if button.isChecked():
                 settings.max_voltage = value
@@ -208,10 +209,11 @@ class EPLabWindow(QMainWindow):
         Convert measurement settings to UI RadioButton's states
         :return:
         """
-        if settings.probe_signal_frequency not in self._frequencies.values():
-            warn(f"No radio button for device frequency {settings.probe_signal_frequency}")
-        for button, value in self._frequencies.items():
-            if value == settings.probe_signal_frequency:
+        if (settings.probe_signal_frequency, settings.sampling_rate) not in self._frequencies.values():
+            warn(f"No radio button for device frequency {settings.probe_signal_frequency} sampling rate "
+                 f"{settings.sampling_rate}")
+        for button, (freq, sampling) in self._frequencies.items():
+            if freq == settings.probe_signal_frequency:
                 button.setChecked(True)
 
         if settings.internal_resistance not in self._sensitivities.values():
