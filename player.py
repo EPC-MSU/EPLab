@@ -32,7 +32,7 @@ class SoundPlayer:
         try:
             self._player.play(name)
         except RuntimeError:
-            logging.error(f"Unable to play sound {name}")
+            pass  # Another sound in progress - it's ok to get error here...
 
     def score_updated(self, score: float):
         # Logic described here #39296
