@@ -69,7 +69,7 @@ class EPLabWindow(QMainWindow):
             self.frequency_100hz_radio_button: (100, 10000),
             self.frequency_1khz_radio_button: (1000, 100000),
             self.frequency_10khz_radio_button: (10000, 1000000),
-            self.frequency_100khz_radio_button: (100000, 10000000)
+            self.frequency_100khz_radio_button: (100000, 2000000)
         }
         for button, frequency in self._frequencies.items():
             button.clicked.connect(self._on_settings_btn_checked)
