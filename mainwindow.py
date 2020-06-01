@@ -489,7 +489,8 @@ class EPLabWindow(QMainWindow):
             self._iv_window.plot.clear_text()
             with self._device_errors_handler:
                 # Update current settings to reconnected device
-                self._ui_to_settings()
+                settings = self._ui_to_settings()
+                self._set_msystem_settings(settings)
                 self._msystem.trigger_measurements()
 
     def _read_curves_periodic_task(self):
