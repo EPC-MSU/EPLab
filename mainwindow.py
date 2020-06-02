@@ -234,6 +234,10 @@ class EPLabWindow(QMainWindow):
             if value == settings.max_voltage:
                 button.setChecked(True)
 
+    def _open_board_window_if_needed(self):
+        if self._measurement_plan.image:
+            self._board_window.show()
+
     @pyqtSlot()
     def _on_auto_calibration(self):
         with self._device_errors_handler:
@@ -344,11 +348,13 @@ class EPLabWindow(QMainWindow):
     def _on_go_left_pin(self):
         self._measurement_plan.go_prev_pin()
         self._update_current_pin()
+        self._open_board_window_if_needed()
 
     @pyqtSlot()
     def _on_go_right_pin(self):
         self._measurement_plan.go_next_pin()
         self._update_current_pin()
+        self._open_board_window_if_needed()
 
     @pyqtSlot()
     def _on_new_pin(self):
@@ -432,9 +438,7 @@ class EPLabWindow(QMainWindow):
             self._board_window.set_board(self._measurement_plan)  # New workspace will be created here
 
             self._update_current_pin()
-
-            if board.image:
-                self._board_window.show()
+            self._open_board_window_if_needed()
 
     @pyqtSlot()
     def _on_load_board_image(self):
@@ -448,7 +452,7 @@ class EPLabWindow(QMainWindow):
             epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
             self._board_window.set_board(self._measurement_plan)
             self._update_current_pin()
-            self._board_window.show()
+            self._open_board_window_if_needed()
 
     @pyqtSlot()
     def _update_curves(self, test: Optional[IVCurve] = None, ref: Optional[IVCurve] = None):
