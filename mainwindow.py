@@ -34,7 +34,9 @@ class EPLabWindow(QMainWindow):
         self._comparator = IVCComparator()
         # Little bit hardcode here. See #39320
         # TODO: separate config file
-        self._comparator.set_min_ivc(0.6, 0.0002)
+        # Dv and DI (voltage and current noise squared)
+        # Voltage in Volts, current in mA
+        self._comparator.set_min_ivc(0.6, 0.0000002)
 
         self._score_wrapper = ScoreWrapper(self.score_label)
 
