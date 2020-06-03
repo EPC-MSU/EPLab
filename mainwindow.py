@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, Qt
 from PyQt5 import uic
@@ -17,6 +17,7 @@ from ivview_parameters import IVViewerParametersAdjuster
 from version import Version
 from player import SoundPlayer
 from common import WorkMode, DeviceErrorsHandler
+from jsonschema import ValidationError
 
 from typing import Optional
 
@@ -435,7 +436,17 @@ class EPLabWindow(QMainWindow):
         filename = dialog.getOpenFileName(self, "Open board", filter="JSON (*.json)")[0]
         if filename:
             self._current_file_path = filename
-            board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
+            try:
+                board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
+            except ValidationError as e:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.setWindowTitle("Error")
+                msg.setText("Invalid input file")
+                msg.setInformativeText(str(e)[0:512] + "\n...")
+                msg.exec_()
+                return
+
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers_map["test"])
             self._board_window.set_board(self._measurement_plan)  # New workspace will be created here
 
