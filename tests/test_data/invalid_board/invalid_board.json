@@ -1,0 +1,26 @@
+{
+  "version": "1.1.1",
+  "elements": [
+    {
+      "pins": [
+        {
+          "x": 0,
+          "y": 0,
+          "iv_curves": [
+            {
+              "measurement_settings": {
+                "sampling_rate": 0,
+                "internal_resistance": 0,
+                "max_voltage": 0,
+                "probe_signal_frequency": 0
+              },
+              "currents": [0],
+              "voltages": [1]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "foo": "bar"
+}
