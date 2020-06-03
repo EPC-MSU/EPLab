@@ -17,7 +17,6 @@ from ivview_parameters import IVViewerParametersAdjuster
 from version import Version
 from player import SoundPlayer
 from common import WorkMode, DeviceErrorsHandler
-from jsonschema import ValidationError
 
 from typing import Optional
 
@@ -438,7 +437,7 @@ class EPLabWindow(QMainWindow):
             self._current_file_path = filename
             try:
                 board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
-            except ValidationError as e:
+            except Exception as e:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
                 msg.setWindowTitle("Error")

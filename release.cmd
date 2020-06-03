@@ -1,4 +1,4 @@
-set PYTHON=C:\Python36\python
+set PYTHON=python
 
 
 rd /S /Q venv
