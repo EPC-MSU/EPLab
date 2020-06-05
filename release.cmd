@@ -11,6 +11,8 @@ rd /S /Q dist
 rd /S /Q build
 venv\Scripts\pyinstaller main.py ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm-win64\ivm.dll;." ^
+--add-data "venv\Lib\site-packages\epcore\doc\p10_elements.schema.json;epcore\doc" ^
+--add-data "venv\Lib\site-packages\epcore\doc\ufiv.schema.json;epcore\doc" ^
 --add-data "venv\Lib\site-packages\epcore\measurementmanager\ivcmp-win64\ivcmp.dll;." ^
 --add-data "venv\Lib\site-packages\epsound\void.wav;epsound" ^
 --add-data "media\*;media" ^
