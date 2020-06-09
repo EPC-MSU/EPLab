@@ -319,7 +319,8 @@ class EPLabWindow(QMainWindow):
         if self._work_mode in (WorkMode.test, WorkMode.write):
             current_pin = self._measurement_plan.get_current_pin()
             measurement = current_pin.get_reference_measurement()
-
+            comment = self.line_comment_pin.text()
+            self._measurement_plan.get_current_pin().comment = comment
             self.line_comment_pin.setText(current_pin.comment or "")
 
             if measurement:
