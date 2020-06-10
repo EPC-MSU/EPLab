@@ -4,7 +4,7 @@
 
 ## Установка в Windows
 ```
-python -m pip install -r requirements.txt
+python -m pip install -r requirements.txt --upgrade
 ```
 Выше приведён случай для установки на чистый Python.
 
@@ -13,13 +13,13 @@ python -m pip install -r requirements.txt
 ```
 python -m venv venv
 venv\Scripts\python -m pip install --upgrade pip
-venv\Scripts\python -m pip install -r requirements.txt
+venv\Scripts\python -m pip install -r requirements.txt --upgrade
 ```
 
 ## Установка в Linux
 
 ```
-python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements.txt --upgrade
 ```
 Выше приведён случай для установки на чистый Python.
 
@@ -28,7 +28,7 @@ python3 -m pip install -r requirements.txt
 ```
 python3 -m venv venv
 venv/bin/python3 -m pip install --upgrade pip
-venv/bin/python3 -m pip install -r requirements.txt
+venv/bin/python3 -m pip install -r requirements.txt --upgrade
 ```
 
 Если при установке зависимостей через hg возникает ошибка авторизации, то нужно прописать в Hg логин и пароль от репозитория hg.ximc.ru. Это можно сделать через TortoiseHg, открыв любой репозиторий, перейдя во вкладку синхронизации (две стрелочки по кругу на верхней панели) и нажав на иконку с изображением замка (в середине страницы, слева от строки с адресом сервера). 
@@ -69,13 +69,13 @@ python3 main.py <ivm_url> [--ref <ivm_url>]
 Пример запуска:
 
 ```
-python3 main.py "com:///dev/ttyACM0 --ref virtual
+python3 main.py com:///dev/ttyACM0 --ref virtual
 ```
 
 Если используется виртуальное окружение, то запускать нужно так:
 
 ```
-venv/bin/python3 main.py "com:///dev/ttyACM0 --ref virtual
+venv/bin/python3 main.py com:///dev/ttyACM0 --ref virtual
 ```
 
 ## Релиз
