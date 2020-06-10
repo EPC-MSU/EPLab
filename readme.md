@@ -39,23 +39,43 @@ venv/bin/python3 -m pip install -r requirements.txt
 
 ## Запуск в Windows
 ```
-python main.py
+python main.py <ivm_url> [--ref <ivm_url>]
 ```
+ПО может работать как с одним, так и с двумя устройствами (второе устройство задавать не обязательно).
+
+`ivm_url` обычно - это адрес COM-порта. Также `ivm_url` может быть `virtual` (будет использоваться виртуальный измеритель).
+
+Пример запуска:
+
+```
+python main.py com:\\.\COM13 --ref virtual
+```
+
 Если используется виртуальное окружение, то запускать нужно так:
 
 ```
-venv\Scripts\python main.py
+venv\Scripts\python main.py com:\\.\COM13 --ref virtual
 ```
 
 ## Запуск в Linux
 
 ```
-python3 main.py
+python3 main.py <ivm_url> [--ref <ivm_url>]
 ```
+ПО может работать как с одним, так и с двумя устройствами (второе устройство задавать не обязательно).
+
+`ivm_url` обычно - это адрес COM-порта. Также `ivm_url` может быть `virtual` (будет использоваться виртуальный измеритель).
+
+Пример запуска:
+
+```
+python3 main.py "com:///dev/ttyACM0 --ref virtual
+```
+
 Если используется виртуальное окружение, то запускать нужно так:
 
 ```
-venv/bin/python3 main.py
+venv/bin/python3 main.py "com:///dev/ttyACM0 --ref virtual
 ```
 
 ## Релиз
