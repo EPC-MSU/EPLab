@@ -87,6 +87,12 @@ release.cmd
 ```
 Собранный релиз будет лежать в папке dist
 
+## Запуск тестов
+
+```
+venv\Scripts\python -m unittest discover -s tests -p "test_*.py"
+```
+
 ## Дополнительно
 
 Файл платы для тестов можно загрузить из папки  `tests\test_data\eyepoint_calibration_board`.

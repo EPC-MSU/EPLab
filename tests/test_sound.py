@@ -2,6 +2,7 @@ import unittest
 from player import SoundPlayer
 from common import WorkMode
 from random import random
+import time
 
 
 class TestSound(unittest.TestCase):
@@ -13,8 +14,9 @@ class TestSound(unittest.TestCase):
         for mode in WorkMode:
             player.set_work_mode(mode)
 
-            for _ in range(20):
-                player.set_threshold(random())
-                player.score_updated(random())
+            for i in range(-1, 11):
+                player.set_threshold(0)
+                player.score_updated(i)
+                time.sleep(0.1)
 
         self.assertTrue(True)
