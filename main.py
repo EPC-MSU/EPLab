@@ -30,6 +30,7 @@ if __name__ == "__main__":
 
     if args.test == "virtual":
         ivm_test = IVMeasurerVirtual(name="test")
+        ivm_test.nominal = 1000
     else:
         ivm_test = IVMeasurerIVM10(args.test, name="test", defer_open=True)
     measurers.append(ivm_test)
