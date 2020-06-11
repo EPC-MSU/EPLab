@@ -176,6 +176,13 @@ class EPLabWindow(QMainWindow):
             self.freeze_curve_a_check_box.setChecked(False)
             self.freeze_curve_b_check_box.setChecked(False)
 
+        if mode is WorkMode.compare:
+            # Remove reference curve in case we have only one IVMeasurer
+            # in compare mode
+            if len(self._msystem.measurers_map) < 2:
+                self._remove_ref_curve()
+            
+
         # Drag allowed only in write mode
         self._board_window.workspace.allow_drag(mode is WorkMode.write)
 
