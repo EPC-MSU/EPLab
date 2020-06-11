@@ -1,7 +1,6 @@
 import unittest
 from player import SoundPlayer
 from common import WorkMode
-from random import random
 import time
 
 
