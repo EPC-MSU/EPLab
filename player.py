@@ -26,7 +26,10 @@ class SoundPlayer:
             self._player.set_mute(mute)
 
     def _score_to_sound_n(self, score: float) -> int:
-        return min(int(score * 10.0) + 1, 10)
+        # TODO: When will stabilise ivcmp library,
+        # add exceptions here
+        sound_n = min(int(score * 10.0) + 1, 10)
+        return max(1, sound_n)
 
     def _play(self, name: str):
         try:

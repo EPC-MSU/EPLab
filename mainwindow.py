@@ -181,7 +181,6 @@ class EPLabWindow(QMainWindow):
             # in compare mode
             if len(self._msystem.measurers_map) < 2:
                 self._remove_ref_curve()
-            
 
         # Drag allowed only in write mode
         self._board_window.workspace.allow_drag(mode is WorkMode.write)
