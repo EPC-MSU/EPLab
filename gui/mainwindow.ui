@@ -30,64 +30,37 @@
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
+   <property name="windowTitle">
+    <string>Степень различия</string>
+   </property>
    <attribute name="dockWidgetArea">
-    <number>1</number>
+    <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
-      <widget class="QGroupBox" name="score_group_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QLabel" name="score_label">
+       <property name="minimumSize">
+        <size>
+         <width>182</width>
+         <height>0</height>
+        </size>
        </property>
-       <property name="title">
-        <string>Степень различия</string>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>100</height>
+        </size>
        </property>
-       <layout class="QVBoxLayout" name="score_group_box_layout">
-        <property name="spacing">
-         <number>0</number>
-        </property>
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="score_label">
-          <property name="minimumSize">
-           <size>
-            <width>182</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>100</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:48pt; color:#73d216;&quot;&gt;0%&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-          <property name="textFormat">
-           <enum>Qt::RichText</enum>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:48pt; color:#73d216;&quot;&gt;0%&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::RichText</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
       </widget>
      </item>
      <item>
@@ -122,40 +95,28 @@
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
+   <property name="windowTitle">
+    <string>Звук</string>
+   </property>
    <attribute name="dockWidgetArea">
-    <number>1</number>
+    <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout" name="verticalLayout_6">
      <item>
-      <widget class="QGroupBox" name="sound_group_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QCheckBox" name="sound_enabled_checkbox">
+       <property name="autoFillBackground">
+        <bool>false</bool>
        </property>
-       <property name="title">
-        <string>Звук</string>
+       <property name="text">
+        <string>Включен</string>
        </property>
-       <layout class="QVBoxLayout" name="sound_group_box_layout">
-        <item>
-         <widget class="QCheckBox" name="sound_enabled_checkbox">
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Включен</string>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-          <property name="tristate">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+       <property name="tristate">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -178,75 +139,63 @@
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
+   <property name="windowTitle">
+    <string>Частота пробного сигнала</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QVBoxLayout" name="verticalLayout_7">
      <item>
-      <widget class="QGroupBox" name="frequency_group_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QRadioButton" name="frequency_1hz_radio_button">
+       <property name="enabled">
+        <bool>true</bool>
        </property>
-       <property name="title">
-        <string>Частота пробного сигнала</string>
+       <property name="text">
+        <string>1 Гц</string>
        </property>
-       <layout class="QVBoxLayout" name="frequency_group_box_layout">
-        <item>
-         <widget class="QRadioButton" name="frequency_1hz_radio_button">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="text">
-           <string>1 Гц</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="frequency_10hz_radio_button">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="text">
-           <string>10 Гц</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="frequency_100hz_radio_button">
-          <property name="text">
-           <string>100 Гц</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="frequency_1khz_radio_button">
-          <property name="text">
-           <string>1 кГц</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="frequency_10khz_radio_button">
-          <property name="text">
-           <string>10 кГц</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="frequency_100khz_radio_button">
-          <property name="text">
-           <string>100 кГц</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="frequency_10hz_radio_button">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>10 Гц</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="frequency_100hz_radio_button">
+       <property name="text">
+        <string>100 Гц</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="frequency_1khz_radio_button">
+       <property name="text">
+        <string>1 кГц</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="frequency_10khz_radio_button">
+       <property name="text">
+        <string>10 кГц</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="frequency_100khz_radio_button">
+       <property name="text">
+        <string>100 кГц</string>
+       </property>
       </widget>
      </item>
     </layout>
@@ -262,48 +211,36 @@
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
+   <property name="windowTitle">
+    <string>Чувствительность по току</string>
+   </property>
    <attribute name="dockWidgetArea">
-    <number>1</number>
+    <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_4">
     <layout class="QVBoxLayout" name="verticalLayout_8">
      <item>
-      <widget class="QGroupBox" name="current_group_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QRadioButton" name="sens_low_radio_button">
+       <property name="text">
+        <string>Низкая</string>
        </property>
-       <property name="title">
-        <string>Чувствительность по току</string>
+       <property name="checked">
+        <bool>true</bool>
        </property>
-       <layout class="QVBoxLayout" name="current_group_box_layout">
-        <item>
-         <widget class="QRadioButton" name="sens_low_radio_button">
-          <property name="text">
-           <string>Низкая</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="sens_medium_radio_button">
-          <property name="text">
-           <string>Средняя</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="sens_high_radio_button">
-          <property name="text">
-           <string>Высокая</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="sens_medium_radio_button">
+       <property name="text">
+        <string>Средняя</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="sens_high_radio_button">
+       <property name="text">
+        <string>Высокая</string>
+       </property>
       </widget>
      </item>
      <item>
@@ -326,55 +263,43 @@
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
+   <property name="windowTitle">
+    <string>Амплитуда пробного сигнала</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_5">
     <layout class="QVBoxLayout" name="verticalLayout_9">
      <item>
-      <widget class="QGroupBox" name="voltage_group_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QRadioButton" name="voltage_1_2v_radio_button">
+       <property name="text">
+        <string>1.2 В</string>
        </property>
-       <property name="title">
-        <string>Амплитуда пробного сигнала</string>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="voltage_3_3v_radio_button">
+       <property name="text">
+        <string>3.3 В</string>
        </property>
-       <layout class="QVBoxLayout" name="voltage_group_box_layout">
-        <item>
-         <widget class="QRadioButton" name="voltage_1_2v_radio_button">
-          <property name="text">
-           <string>1.2 В</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="voltage_3_3v_radio_button">
-          <property name="text">
-           <string>3.3 В</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="voltage_5v_radio_button">
-          <property name="text">
-           <string>5 В</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="voltage_12v_radio_button">
-          <property name="text">
-           <string>12 В</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="voltage_5v_radio_button">
+       <property name="text">
+        <string>5 В</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="voltage_12v_radio_button">
+       <property name="text">
+        <string>12 В</string>
+       </property>
       </widget>
      </item>
     </layout>
@@ -383,6 +308,9 @@
   <widget class="QDockWidget" name="planDock">
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string>Режимы</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
