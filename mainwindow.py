@@ -203,7 +203,8 @@ class EPLabWindow(QMainWindow):
         Convert UI current RadioButton's states to measurement settings
         :return: Settings
         """
-        settings = self._msystem.get_settings()
+        # settings = self._msystem.get_settings() # Cause an error of different settings. #TODO: find out why.
+        settings = self._msystem.measurers[0].get_settings()
 
         for button, (freq, sampling) in self._frequencies.items():
             if button.isChecked():
