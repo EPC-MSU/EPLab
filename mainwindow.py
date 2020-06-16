@@ -520,11 +520,11 @@ class EPLabWindow(QMainWindow):
     def _read_curves_periodic_task(self):
         if self._msystem.measurements_are_ready():
             curves = self._msystem.get_processed_curves(self._SMOOTH_POINTS)
-            #test = self._msystem.measurers_map["test"].get_last_cached_iv_curve()
+            # test = self._msystem.measurers_map["test"].get_last_cached_iv_curve()
             test = curves[0]
             ref = None
             if "ref" in self._msystem.measurers_map:
-                #ref = self._msystem.measurers_map["ref"].get_last_cached_iv_curve()
+                # ref = self._msystem.measurers_map["ref"].get_last_cached_iv_curve()
                 ref = curves[1]
 
             if self._skip_curve:
