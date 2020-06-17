@@ -85,9 +85,9 @@ class EPLabWindow(QMainWindow):
             button.clicked.connect(self._on_settings_btn_checked)
 
         self._sensitivities = {
-            self.sens_low_radio_button: 47500.0,  # Omh
+            self.sens_low_radio_button: 475.0,  # Omh
             self.sens_medium_radio_button: 4750.0,
-            self.sens_high_radio_button: 475.0
+            self.sens_high_radio_button: 47500.0
         }
         self._SMOOTH_POINTS = 5
         for button, resistance in self._sensitivities.items():
