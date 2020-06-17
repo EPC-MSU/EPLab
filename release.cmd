@@ -8,7 +8,6 @@ venv\Scripts\python -m pip install -r requirements.txt
 
 venv\Scripts\python -m pip install pyinstaller
 rd /S /Q dist
-rd /S /Q build
 venv\Scripts\pyinstaller main.py ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm-win64\ivm.dll;." ^
 --add-data "venv\Lib\site-packages\epcore\doc\p10_elements.schema.json;epcore\doc" ^
@@ -18,3 +17,4 @@ venv\Scripts\pyinstaller main.py ^
 --add-data "media\*;media" ^
 --add-data "gui\*;gui" ^
 --icon=media\ico.ico
+rd /S /Q build

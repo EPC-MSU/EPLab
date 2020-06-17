@@ -5,6 +5,7 @@ from PyQt5 import uic
 
 from warnings import warn
 from datetime import datetime
+import numpy as np
 
 import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
@@ -158,6 +159,58 @@ class EPLabWindow(QMainWindow):
             self._msystem.trigger_measurements()
 
         self._current_file_path = None
+
+    
+    def _get_min_var(self):
+        """
+        Retrun "noise" amplitude for 
+        specified mode. 
+        """
+        s = self._ui_to_settings()
+
+        # Default values
+        var_v = s.voltage / 20
+        var_c = s.voltage / (s.internal_resistance * 20)
+
+        # Magic redefinitions for specific modes
+        if (np.isclose(s.voltage, 12) and np.isclose(s.internal_resistance, 475)):
+            var_v = 0.6
+            var_c = 0.008
+        elif (np.isclose(s.voltage, 5) and np.isclose(s.internal_resistance, 475)):
+            var_v = 0.6
+            var_c = 0.008
+        elif (np.isclose(s.voltage, 3.3) and np.isclose(s.internal_resistance, 475)):
+            var_v = 0.3
+            var_c = 0.008
+        elif (np.isclose(s.voltage, 1.2) and np.isclose(s.internal_resistance, 475)):
+            var_v = 0.3
+            var_c = 0.008
+        elif (np.isclose(s.voltage, 12) and np.isclose(s.internal_resistance, 4750)):
+            var_v = 0.6
+            var_c = 0.0005
+        elif (np.isclose(s.voltage, 5) and np.isclose(s.internal_resistance, 4750)):
+            var_v = 0.3
+            var_c = 0.0005
+        elif (np.isclose(s.voltage, 3.3) and np.isclose(s.internal_resistance, 4750)):
+            var_v = 0.3
+            var_c = 0.0005
+        elif (np.isclose(s.voltage, 1.2) and np.isclose(s.internal_resistance, 4750)):
+            var_v = 0.3
+            var_c = 0.0005
+        elif (np.isclose(s.voltage, 12) and np.isclose(s.internal_resistance, 47500)):
+            var_v = 0.6
+            var_c = 0.00005
+        elif (np.isclose(s.voltage, 5) and np.isclose(s.internal_resistance, 47500)):
+            var_v = 0.3
+            var_c = 0.00005
+        elif (np.isclose(s.voltage, 3.3) and np.isclose(s.internal_resistance, 47500)):
+            var_v = 0.3
+            var_c = 0.00005
+        elif (np.isclose(s.voltage, 1.2) and np.isclose(s.internal_resistance, 47500)):
+            var_v = 0.3
+            var_c = 0.00005
+
+        return (var_v, var_c)
 
     def closeEvent(self, ev):
         self._board_window.close()
@@ -488,7 +541,8 @@ class EPLabWindow(QMainWindow):
 
         # Update score
         if self._ref_curve and self._test_curve:
-            score = self._comparator.compare_ivc(self._ref_curve, self._test_curve)
+            var_v, var_c = self.get_min_var()
+            score = self._comparator.compare_ivc(self._ref_curve, self._test_curve, var_v, var_c)
             self._score_wrapper.set_score(score)
             self._player.score_updated(score)
         else:
