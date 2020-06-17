@@ -160,11 +160,10 @@ class EPLabWindow(QMainWindow):
 
         self._current_file_path = None
 
-    
     def _get_min_var(self):
         """
-        Retrun "noise" amplitude for 
-        specified mode. 
+        Retrun "noise" amplitude for
+        specified mode.
         """
         s = self._ui_to_settings()
 
