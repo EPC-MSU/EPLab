@@ -213,7 +213,7 @@ class EPLabWindow(QMainWindow):
 
     def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve) -> float:
         var_v, var_c = self._get_min_var()
-        self._comparator.set_min_ivc(var_v, var_c) # It is very important to set relevant noise levels
+        self._comparator.set_min_ivc(var_v, var_c)  # It is very important to set relevant noise levels
         score = self._comparator.compare_ivc(self._ref_curve, self._test_curve)
         return score
 
