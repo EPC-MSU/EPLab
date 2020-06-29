@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>882</width>
-    <height>1086</height>
+    <height>1121</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -330,7 +330,7 @@
      <item>
       <widget class="QPushButton" name="save_comment_push_button">
        <property name="text">
-        <string>Сохранить</string>
+        <string>Сохранить комментарий</string>
        </property>
       </widget>
      </item>
