@@ -342,8 +342,6 @@ class EPLabWindow(QMainWindow):
                 comment = self.line_comment_pin.text()
                 self._measurement_plan.get_current_pin().comment = comment
 
-
-
     @pyqtSlot()
     def _on_save_image(self):
         # Freeze image at first
