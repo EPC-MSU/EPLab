@@ -106,7 +106,7 @@ class EPLabWindow(QMainWindow):
         self.zp_save_file_button.clicked.connect(self._on_save_board)
         self.zp_save_file_as_button.clicked.connect(self._on_save_board_as)
         self.zp_add_image_button.clicked.connect(self._on_load_board_image)
-
+        self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
 
         self.sound_enabled_checkbox.stateChanged.connect(self._on_sound_checked)
