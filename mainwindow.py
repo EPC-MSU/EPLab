@@ -440,6 +440,11 @@ class EPLabWindow(QMainWindow):
 
         self._measurement_plan.append_pin(pin)
         self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
+
+        # It is important to initialize pin with real measurement.
+        # Otherwise user can create several empty points and they will not be unique.
+        # This will cause some errors during ufiv validation.
+        self._on_save_pin()
         self._update_current_pin()
 
     @pyqtSlot()
