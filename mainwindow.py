@@ -331,8 +331,18 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_save_comment(self):
-        comment = self.line_comment_pin.text()
-        self._measurement_plan.get_current_pin().comment = comment
+        if self._work_mode in (WorkMode.test, WorkMode.write):
+            if self._current_file_path:
+                board = MeasurementPlan(epfilemanager.load_board_from_ufiv(self._current_file_path,
+                                                                           auto_convert_p10=True),
+                                        measurer=self._msystem.measurers_map["test"])
+                board.get_current_pin().comment = self.line_comment_pin.text()
+                epfilemanager.save_board_to_ufiv(self._current_file_path, board)
+            else:
+                comment = self.line_comment_pin.text()
+                self._measurement_plan.get_current_pin().comment = comment
+
+
 
     @pyqtSlot()
     def _on_save_image(self):
