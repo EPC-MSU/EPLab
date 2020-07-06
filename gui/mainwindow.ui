@@ -148,16 +148,6 @@
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QVBoxLayout" name="verticalLayout_7">
      <item>
-      <widget class="QRadioButton" name="frequency_1hz_radio_button">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>1 Гц</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QRadioButton" name="frequency_10hz_radio_button">
        <property name="enabled">
         <bool>true</bool>
