@@ -66,7 +66,7 @@ class EPLabWindow(QMainWindow):
 
         self._frequencies = {
             # Frequency and sampling rate here (freq, sampling rate)
-            #self.frequency_1hz_radio_button: (1, 100),
+            # self.frequency_1hz_radio_button: (1, 100),
             self.frequency_10hz_radio_button: (10, 1000),
             self.frequency_100hz_radio_button: (100, 10000),
             self.frequency_1khz_radio_button: (1000, 100000),
