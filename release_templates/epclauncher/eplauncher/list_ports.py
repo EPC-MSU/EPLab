@@ -109,7 +109,7 @@ class Window(QMainWindow):
         self.info_label.setText("Выберите устройства.\n"
                                 "Если Вы хотите использовать\n"
                                 "не все устройства, для неиспользуемых\n"
-                                "устройств выберите None.")
+                                "устройств выберите 'none'.")
         self.info_label.move(20, 15)
         self.info_label.resize(210, 50)
 
@@ -119,8 +119,8 @@ class Window(QMainWindow):
             except Exception as e:
                 error_dialog = QErrorMessage()
                 error_dialog.showMessage(str(e))
-            self.urpc_ports.append("Virtual")
-            self.urpc_ports.append("None")
+            self.urpc_ports.append("virtual")
+            self.urpc_ports.append("none")
             self.cb.append(QComboBox(self))
             self.cb[i].addItems(self.urpc_ports)
             self.cb[i].move(20, 80 + 40 * i)
@@ -131,7 +131,7 @@ class Window(QMainWindow):
         button.move(20, 80 + 40 * len(self.cb))
         button.clicked.connect(self._ok_button)
 
-        self.setWindowTitle("EPC Launcher 0.1.1")
+        self.setWindowTitle("EPC Launcher 0.1.2")
         self.setGeometry(300, 300, 250, 120 + 40 * len(self.cb))
         self.show()
 

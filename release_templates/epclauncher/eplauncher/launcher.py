@@ -100,14 +100,16 @@ def command_is_valid(command, template):
     template_elements = template.split(" ")
 
     if len(command_elements) != len(template_elements):
-        logging.info(
-            "Command structure mismatch\n" +
-            str(command_elements) + "\n" +
-            str(template_elements)
-        )
+        logging.info("Command structure mismatch")
+        logging.debug("Command: " + str(command_elements))
+        logging.debug("Template: " + str(command_elements))
         return False
 
     for i, element in enumerate(template_elements):
+        if len(element) < 1:
+            # element is not URL placeholder
+            return False
+
         if element[0] != "{":
             # element is not URL placeholder
             if element != command_elements[i]:
@@ -131,8 +133,8 @@ def check_device_urls(launch_info: LaunchInfo):
             logging.info("Cannot find ports for {}: {}.".format(launch_info.device_types[i], str(e)))
             return False
 
-        urpc_ports.append("Virtual")
-        urpc_ports.append("None")
+        urpc_ports.append("virtual")
+        urpc_ports.append("none")
 
         try:
             url = launch_info.device_urls[i]
