@@ -31,16 +31,24 @@ if __name__ == "__main__":
     if args.test == "virtual":
         ivm_test = IVMeasurerVirtual(name="test")
         ivm_test.nominal = 1000
-    else:
+        measurers.append(ivm_test)
+    elif "com:" in args.test:
         ivm_test = IVMeasurerIVM10(args.test, name="test", defer_open=True)
-    measurers.append(ivm_test)
+        measurers.append(ivm_test)
 
     if args.ref:
         if args.ref == "virtual":
             ivm_ref = IVMeasurerVirtual(name="ref")
-        else:
+            measurers.append(ivm_ref)
+        elif "com:" in args.ref:
             ivm_ref = IVMeasurerIVM10(args.ref, name="ref", defer_open=True)
+            measurers.append(ivm_ref)
+
+    if len(measurers) == 0:
+        ivm_ref = IVMeasurerVirtual(name="test")
         measurers.append(ivm_ref)
+    elif len(measurers) == 1:
+        measurers[0]._name = "test"
 
     measurement_system = MeasurementSystem(measurers)
 
