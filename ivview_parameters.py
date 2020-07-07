@@ -1,10 +1,15 @@
 from ivviewer import Viewer
 from epcore.elements import MeasurementSettings
+from PyQt5.QtGui import QColor
 
 
 class IVViewerParametersAdjuster:
     def __init__(self, viewer: Viewer):
         self._viewer = viewer
+
+        # Make test curve blue, because EP U22 test channel is marked as blue.
+        # #TODO: Move curve color to EPProduct config
+        self._viewer._plot.set_test_curve_params(color=QColor(0, 0, 255, 200))
 
         # Dictionary? TODO: universal parameters adjuster
         self._volt_min_borders = {  # Voltage [V] -> Minimum border [V]
