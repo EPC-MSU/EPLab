@@ -12,6 +12,7 @@ venv\Scripts\python -m pip install pyinstaller
 venv\Scripts\pyinstaller main.py ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm-win64\ivm.dll;." ^
 --add-data "venv\Lib\site-packages\epcore\doc\p10_elements.schema.json;epcore\doc" ^
+--add-data "venv\Lib\site-packages\epcore\doc\p10_elements_2.schema.json;epcore\doc" ^
 --add-data "venv\Lib\site-packages\epcore\doc\ufiv.schema.json;epcore\doc" ^
 --add-data "venv\Lib\site-packages\epcore\measurementmanager\ivcmp-win64\ivcmp.dll;." ^
 --add-data "venv\Lib\site-packages\epsound\void.wav;epsound" ^
