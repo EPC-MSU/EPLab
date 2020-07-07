@@ -90,7 +90,11 @@ def get_device_urls_from_command(command, template):
         if element[0] == "{":
             # TODO make more acurate search
             # We found url placeholder
-            device_urls.append(command_elements[i])
+            url = command_elements[i]
+            url = url.replace(" ", "")
+            url = url.replace("\r", "")
+            url = url.replace("\n", "")
+            device_urls.append(url)
 
     return device_urls
 

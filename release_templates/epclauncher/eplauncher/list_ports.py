@@ -131,7 +131,7 @@ class Window(QMainWindow):
         button.move(20, 80 + 40 * len(self.cb))
         button.clicked.connect(self._ok_button)
 
-        self.setWindowTitle("EPC Launcher 0.1.3")
+        self.setWindowTitle("EPC Launcher 0.1.4")
         self.setGeometry(300, 300, 250, 120 + 40 * len(self.cb))
         self.show()
 
