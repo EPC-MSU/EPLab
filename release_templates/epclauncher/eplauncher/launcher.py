@@ -46,7 +46,13 @@ def get_launch_info_from_config():
     config = configparser.ConfigParser()
     config.read("launch.ini")
 
-    command_template = str(config["Commands"]["launch_command"]) + " " + config["Commands"]["launch_file"]
+    command_template = ""
+    if str(config["Commands"]["launch_command"]) != "":
+        command_template += str(config["Commands"]["launch_command"])
+    if config["Commands"]["launch_file"] != "":
+        if len(command_template) > 0:
+            command_template += " "
+        command_template += config["Commands"]["launch_file"]
 
     device_types = []
     for i in range(int(config["Commands"]["num_devices"])):
