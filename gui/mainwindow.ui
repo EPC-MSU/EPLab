@@ -370,7 +370,7 @@
               <item>
                <widget class="QCheckBox" name="freeze_curve_b_check_box">
                 <property name="styleSheet">
-                 <string notr="true">color: rgb(0, 0, 0);</string>
+                 <string notr="true">color: rgb(0, 0, 255);</string>
                 </property>
                 <property name="text">
                  <string>Фиксировать B</string>
