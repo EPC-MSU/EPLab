@@ -20,7 +20,7 @@ venv\Scripts\pyinstaller main.py ^
 --add-data "gui\*;gui" ^
 --icon=media\ico.ico
 
-xcopy release_templates\* dist\* /S /E
+xcopy release_templates\win64* dist\* /S /E
 rename dist release
 cd release
 rename main eplab
