@@ -54,8 +54,16 @@ if __name__ == "__main__":
         # Reorder measurers according to their ranks if needed.
         # We swap IVMs only if both ranks are set correctly.
         # If ranks are not set order should be the same to the order of cmd args.
-        if (measurers[0].get_identity_information().rank == 1 and
-            measurers[1].get_identity_information().rank == 2):
+        ivm_info = []
+        for i in range(len(measurers)):
+            try:
+                measurers[i].open_device()
+                ivm_info.append(measurers[i].get_identity_information())
+            finally:
+                measurers[i].close_device()
+
+        if (ivm_info[0].rank == 1 and
+            ivm_info[1].rank == 2):
             ivm_0 = measurers[0]
             ivm_1 = measurers[1]
             measurers = [ivm_1, ivm_0]
@@ -63,7 +71,7 @@ if __name__ == "__main__":
     # Set pretty names for measurers
     measurers[0]._name = "test"
     if len(measurers) == 2:
-        measurers[0]._name = "ref"
+        measurers[1]._name = "ref"
 
     measurement_system = MeasurementSystem(measurers)
 
