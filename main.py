@@ -63,7 +63,7 @@ if __name__ == "__main__":
                 measurers[i].close_device()
 
         if (ivm_info[0].rank == 1 and
-            ivm_info[1].rank == 2):
+                ivm_info[1].rank == 2):
             ivm_0 = measurers[0]
             ivm_1 = measurers[1]
             measurers = [ivm_1, ivm_0]
