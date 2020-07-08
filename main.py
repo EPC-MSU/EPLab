@@ -29,26 +29,41 @@ if __name__ == "__main__":
     measurers = []
 
     if args.test == "virtual":
-        ivm_test = IVMeasurerVirtual(name="test")
-        ivm_test.nominal = 1000
-        measurers.append(ivm_test)
+        ivm_1 = IVMeasurerVirtual()
+        ivm_1.nominal = 1000
+        measurers.append(ivm_1)
     elif "com:" in args.test:
-        ivm_test = IVMeasurerIVM10(args.test, name="test", defer_open=True)
-        measurers.append(ivm_test)
+        ivm_1 = IVMeasurerIVM10(args.test, defer_open=True)
+        measurers.append(ivm_1)
 
     if args.ref:
         if args.ref == "virtual":
-            ivm_ref = IVMeasurerVirtual(name="ref")
-            measurers.append(ivm_ref)
+            ivm_2 = IVMeasurerVirtual()
+            measurers.append(ivm_2)
         elif "com:" in args.ref:
-            ivm_ref = IVMeasurerIVM10(args.ref, name="ref", defer_open=True)
-            measurers.append(ivm_ref)
+            ivm_2 = IVMeasurerIVM10(args.ref, defer_open=True)
+            measurers.append(ivm_2)
 
     if len(measurers) == 0:
-        ivm_ref = IVMeasurerVirtual(name="test")
-        measurers.append(ivm_ref)
-    elif len(measurers) == 1:
-        measurers[0]._name = "test"
+        # Logically it will be correctly to abort here.
+        # But for better user experience we will add single virtual IVM.
+        ivm_1 = IVMeasurerVirtual()
+        measurers.append(ivm_1)
+
+    if len(measurers) == 2:
+        # Reorder measurers according to their ranks if needed.
+        # We swap IVMs only if both ranks are set correctly.
+        # If ranks are not set order should be the same to the order of cmd args.
+        if (measurers[0].get_identity_information().rank == 1 and
+            measurers[1].get_identity_information().rank == 2):
+            ivm_0 = measurers[0]
+            ivm_1 = measurers[1]
+            measurers = [ivm_1, ivm_0]
+
+    # Set pretty names for measurers
+    measurers[0]._name = "test"
+    if len(measurers) == 2:
+        measurers[0]._name = "ref"
 
     measurement_system = MeasurementSystem(measurers)
 
