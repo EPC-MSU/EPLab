@@ -82,10 +82,17 @@ venv/bin/python3 main.py com:///dev/ttyACM0 --ref virtual
 
 Для релиза есть скрипт release.cmd. В нём нужно прописать путь до системного 
 интерпретатора Python**3.6** **x64**. Для запуска в консоли набрать:
+
 ```
-release.cmd
+release.bat
 ```
 Собранный релиз будет лежать в папке dist
+
+На Linnux нужно выполнить
+
+```
+release.sh
+```
 
 ## Запуск тестов
 
