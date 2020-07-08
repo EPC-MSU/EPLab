@@ -1,11 +1,11 @@
-#rm -rf venv
-#rm -rf dist
-#rm -rf build
-#rm -rf release
-#python3 -m venv venv
-#./venv/bin/python3 -m pip install --upgrade pip
-#./venv/bin/python3 -m pip install -r requirements.txt
-#./venv/bin/python3 -m pip install pyinstaller
+rm -rf venv
+rm -rf dist
+rm -rf build
+rm -rf release
+python3 -m venv venv
+./venv/bin/python3 -m pip install --upgrade pip
+./venv/bin/python3 -m pip install -r requirements.txt
+./venv/bin/python3 -m pip install pyinstaller
 ./venv/bin/pyinstaller main.py \
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ivm-debian/libivm.so:." \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/p10_elements.schema.json:epcore/doc" \
