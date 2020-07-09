@@ -16,6 +16,8 @@ venv\Scripts\python -m pip install --upgrade pip
 venv\Scripts\python -m pip install -r requirements.txt --upgrade
 ```
 
+Для работы нужно установить драйвер `ivm.inf` из папки `release_templates\win64\driver`.
+
 ## Установка в Linux
 
 ```
@@ -36,6 +38,17 @@ venv/bin/python3 -m pip install -r requirements.txt --upgrade
 После этого нужно переоткрыть консоль.
 
 Также нужен доступ на hg.ximc.ru к репозиториям: epcore, ivviewer.
+
+Перед первым запуском обычно нужно прописать в системе VID и PID устройства
+для драйвера виртуального COM-порта. 
+В Ubuntu это можно сделать так:
+
+```
+sudo sh -c 'echo 1CBC 0007 > /sys/bus/usb/drivers/cdc_acm/new_id'
+```
+
+Для корректной работы ПО с COM-портами, пользователь должен находиться в группе dealout.
+Если при открытии устройств возникают какие-то проблемы, попробуйте запустить ПО с правами root.
 
 ## Запуск в Windows
 ```
