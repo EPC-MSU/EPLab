@@ -358,9 +358,9 @@
              </property>
              <layout class="QVBoxLayout" name="ivc_state_group_box_layout">
               <item>
-               <widget class="QCheckBox" name="freeze_curve_a_check_box">
+               <widget class="QCheckBox" name="freeze_curve_b_check_box">
                 <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 0, 0);</string>
+                 <string notr="true">color: rgb(0, 0, 255);</string>
                 </property>
                 <property name="text">
                  <string>Фиксировать A</string>
@@ -368,9 +368,9 @@
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="freeze_curve_b_check_box">
+               <widget class="QCheckBox" name="freeze_curve_a_check_box">
                 <property name="styleSheet">
-                 <string notr="true">color: rgb(0, 0, 255);</string>
+                 <string notr="true">color: rgb(255, 0, 0);</string>
                 </property>
                 <property name="text">
                  <string>Фиксировать B</string>
