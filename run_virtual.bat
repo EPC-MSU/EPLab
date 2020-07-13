@@ -1,1 +1,1 @@
-python main.py virtual --ref virtual
+venv\scripts\python main.py virtual --ref virtual
