@@ -287,19 +287,19 @@ class EPLabWindow(QMainWindow):
             warn(f"No radio button for device frequency {settings.probe_signal_frequency} sampling rate "
                  f"{settings.sampling_rate}")
         for button, (freq, sampling) in self._frequencies.items():
-            if freq == settings.probe_signal_frequency:
+            if np.isclose(freq, settings.probe_signal_frequency, atol=0.01):
                 button.setChecked(True)
 
         if settings.internal_resistance not in self._sensitivities.values():
             warn(f"No radio button for device internal resistance {settings.internal_resistance}")
         for button, value in self._sensitivities.items():
-            if value == settings.internal_resistance:
+            if np.isclose(value, settings.internal_resistance, atol=0.01):
                 button.setChecked(True)
 
         if settings.max_voltage not in self._voltages.values():
             warn(f"No radio button for device max voltage {settings.max_voltage}")
         for button, value in self._voltages.items():
-            if value == settings.max_voltage:
+            if np.isclose(value, settings.max_voltage, atol=0.01):
                 button.setChecked(True)
 
     def _open_board_window_if_needed(self):
