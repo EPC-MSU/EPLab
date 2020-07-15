@@ -3,6 +3,12 @@
 Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов).
 
 ## Установка в Windows
+
+Установить MSVC 2013 redistributable (разрядность должна совпадать с разрядностью python).
+https://www.microsoft.com/en-us/download/details.aspx?id=40784
+
+Установить зависимости для python:
+
 ```
 python -m pip install -r requirements.txt --upgrade
 ```
@@ -19,6 +25,14 @@ venv\Scripts\python -m pip install -r requirements.txt --upgrade
 Для работы нужно установить драйвер `ivm.inf` из папки `release_templates\win64\driver`.
 
 ## Установка в Linux
+
+Установить библиотеки для работы со звуком и для сборки пакетов python:
+
+```
+sudo apt-get install -y python3-dev libasound2-dev
+```
+
+Установить зависимости для python:
 
 ```
 python3 -m pip install -r requirements.txt --upgrade
