@@ -378,6 +378,11 @@ class EPLabWindow(QMainWindow):
             self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
             self._update_current_pin()
 
+    def _set_comment(self):
+        comment = self.line_comment_pin.text()
+        self._measurement_plan.get_current_pin().comment = comment
+        self.line_comment_pin.setText(self._measurement_plan.get_current_pin().comment or "")
+
     @pyqtSlot()
     def _update_current_pin(self):
         """
@@ -392,8 +397,7 @@ class EPLabWindow(QMainWindow):
         if self._work_mode in (WorkMode.test, WorkMode.write):
             current_pin = self._measurement_plan.get_current_pin()
             measurement = current_pin.get_reference_measurement()
-            comment = self.line_comment_pin.text()
-            self._measurement_plan.get_current_pin().comment = comment
+            self.line_comment_pin.returnPressed.connect(self._set_comment)
             self.line_comment_pin.setText(current_pin.comment or "")
 
             if measurement:
@@ -463,6 +467,7 @@ class EPLabWindow(QMainWindow):
         """
         with self._device_errors_handler:
             self._measurement_plan.save_last_measurement_as_reference()
+        self._set_comment()
         self._update_current_pin()
 
     def _reset_board(self):
