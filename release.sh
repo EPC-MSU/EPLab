@@ -16,3 +16,12 @@ python3 -m venv venv
 --add-data "./media/*:media" \
 --add-data "./gui/*:gui" \
 --icon=media/ico.ico
+
+
+cp ./release_templates/debian/* ./dist -R
+mv dist release
+mv ./release/main ./release/eplab
+rm -rf build
+rm -rf dist
+rm -rf venv
+rm -rf *.spec
