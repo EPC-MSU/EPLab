@@ -1,5 +1,5 @@
 [flake8]
-exclude = .git,.hg,__pycache__,ivm.py,venv,release_templates/win64/epclauncher
+exclude = .git,.hg,__pycache__,ivm.py,venv,release_templates/win64/epclauncher,release_templates/win32/epclauncher
 max-complexity = 14
 inline-quotes = double
 multiline-quotes = """
