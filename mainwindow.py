@@ -444,6 +444,7 @@ class EPLabWindow(QMainWindow):
 
         self._measurement_plan.append_pin(pin)
         self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
+        self.line_comment_pin.setText(pin.comment or "")
 
         # It is important to initialize pin with real measurement.
         # Otherwise user can create several empty points and they will not be unique.
