@@ -324,11 +324,11 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot(bool)
     def _on_freeze_curve_a(self, state: bool):
-        self.freeze_curve_a_check_box.setChecked(state)
+        self.freeze_curve_b_check_box.setChecked(state)
 
     @pyqtSlot(bool)
     def _on_freeze_curve_b(self, state: bool):
-        self.freeze_curve_b_check_box.setChecked(state)
+        self.freeze_curve_a_check_box.setChecked(state)
 
     @pyqtSlot(int)
     def _on_freeze_a(self, state: int):
@@ -337,6 +337,7 @@ class EPLabWindow(QMainWindow):
                 self._msystem.measurers_map["ref"].freeze()
             else:
                 self._msystem.measurers_map["ref"].unfreeze()
+            self.freeze_curve_b_action.setChecked(state)
 
     @pyqtSlot(int)
     def _on_freeze_b(self, state: int):
@@ -344,6 +345,7 @@ class EPLabWindow(QMainWindow):
             self._msystem.measurers_map["test"].freeze()
         else:
             self._msystem.measurers_map["test"].unfreeze()
+        self.freeze_curve_a_action.setChecked(state)
 
     @pyqtSlot(int)
     def _on_sound_checked(self, state: int):
