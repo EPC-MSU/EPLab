@@ -323,15 +323,15 @@ class EPLabWindow(QMainWindow):
             self._msystem.calibrate()
 
     @pyqtSlot(bool)
-    def _on_freeze_curve_a(self, state: bool):
+    def _on_freeze_curve_b(self, state: bool):
         self.freeze_curve_b_check_box.setChecked(state)
 
     @pyqtSlot(bool)
-    def _on_freeze_curve_b(self, state: bool):
+    def _on_freeze_curve_a(self, state: bool):
         self.freeze_curve_a_check_box.setChecked(state)
 
     @pyqtSlot(int)
-    def _on_freeze_a(self, state: int):
+    def _on_freeze_b(self, state: int):
         if "ref" in self._msystem.measurers_map:
             if state == Qt.Checked:
                 self._msystem.measurers_map["ref"].freeze()
@@ -340,7 +340,7 @@ class EPLabWindow(QMainWindow):
             self.freeze_curve_b_action.setChecked(state)
 
     @pyqtSlot(int)
-    def _on_freeze_b(self, state: int):
+    def _on_freeze_a(self, state: int):
         if state == Qt.Checked:
             self._msystem.measurers_map["test"].freeze()
         else:
