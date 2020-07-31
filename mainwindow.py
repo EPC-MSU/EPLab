@@ -137,7 +137,7 @@ class EPLabWindow(QMainWindow):
         self.test_plan_tab_widget.setCurrentIndex(0)  # first tab - curves comparison
         self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
         self.comparing_mode_action.triggered.connect(self._on_test_plan_tab_switch_compare)
-        self.recording_mode_action.triggered.connect(self._on_test_plan_tab_switch_write)
+        self.writing_mode_action.triggered.connect(self._on_test_plan_tab_switch_write)
         self.testing_mode_action.triggered.connect(self._on_test_plan_tab_switch_test)
         self.setting_mode_action.triggered.connect(self._on_test_plan_tab_switch_set)
         with self._device_errors_handler:
@@ -392,29 +392,43 @@ class EPLabWindow(QMainWindow):
         tab = self.test_plan_tab_widget.currentWidget().objectName()
         if tab == "test_plan_tab_S":  # compare
             self._change_work_mode(WorkMode.compare)
+            self._switch_mode_action(c=True)
         elif tab == "test_plan_tab_ZP":  # write
             self._change_work_mode(WorkMode.write)
+            self._switch_mode_action(w=True)
         elif tab == "test_plan_tab_TP":  # test
             self._change_work_mode(WorkMode.test)
+            self._switch_mode_action(t=True)
         elif tab == "test_plan_tab_SET":  # settings
             # Settings mode is equal to compare mode, see #39314-9
             self._change_work_mode(WorkMode.compare)
+            self._switch_mode_action(s=True)
+
+    def _switch_mode_action(self, c=False, w=False, t=False, s=False):
+        self.comparing_mode_action.setChecked(c)
+        self.writing_mode_action.setChecked(w)
+        self.testing_mode_action.setChecked(t)
+        self.setting_mode_action.setChecked(s)
 
     @pyqtSlot(bool)
     def _on_test_plan_tab_switch_compare(self):
         self.test_plan_tab_widget.setCurrentIndex(0)
+        self._switch_mode_action(c=True)
 
     @pyqtSlot(bool)
     def _on_test_plan_tab_switch_write(self):
         self.test_plan_tab_widget.setCurrentIndex(1)
+        self._switch_mode_action(w=True)
 
     @pyqtSlot(bool)
     def _on_test_plan_tab_switch_test(self):
         self.test_plan_tab_widget.setCurrentIndex(2)
+        self._switch_mode_action(t=True)
 
     @pyqtSlot(bool)
     def _on_test_plan_tab_switch_set(self):
         self.test_plan_tab_widget.setCurrentIndex(3)
+        self._switch_mode_action(s=True)
 
     @pyqtSlot(QPointF)
     def _on_board_right_click(self, point: QPointF):

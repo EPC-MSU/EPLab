@@ -339,7 +339,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="test_plan_tab_S">
         <attribute name="title">
@@ -776,7 +776,7 @@
      <string>Режим</string>
     </property>
     <addaction name="comparing_mode_action"/>
-    <addaction name="recording_mode_action"/>
+    <addaction name="writing_mode_action"/>
     <addaction name="testing_mode_action"/>
     <addaction name="setting_mode_action"/>
    </widget>
@@ -838,23 +838,47 @@
    </property>
   </action>
   <action name="comparing_mode_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Сравнение</string>
    </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
   </action>
-  <action name="recording_mode_action">
+  <action name="writing_mode_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Запись плана тестирования</string>
    </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="testing_mode_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Тестирование по плану</string>
    </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="setting_mode_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Настройка</string>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
    </property>
   </action>
   <action name="about_action">

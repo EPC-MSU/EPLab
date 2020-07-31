@@ -1,4 +1,4 @@
-set IVM_TEST=com:\\.\COM125
+set IVM_TEST=com:\\.\COM115
 set IVM_REF=com:\\.\COM126
 
 
