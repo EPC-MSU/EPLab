@@ -101,23 +101,32 @@ class EPLabWindow(QMainWindow):
         self.zp_push_button_new_point.clicked.connect(self._on_new_pin)
         self.zp_push_button_save.clicked.connect(self._on_save_pin)
         self.zp_open_file_button.clicked.connect(self._on_load_board)
+        self.open_file_action.triggered.connect(self._on_load_board)
         self.tp_open_file_button.clicked.connect(self._on_load_board)  # same button on test tab
         self.zp_new_file_button.clicked.connect(self._on_new_board)
+        self.new_file_action.triggered.connect(self._on_new_board)
         self.zp_save_file_button.clicked.connect(self._on_save_board)
+        self.save_file_action.triggered.connect(self._on_save_board)
         self.zp_save_file_as_button.clicked.connect(self._on_save_board_as)
+        self.save_as_file_action.triggered.connect(self._on_load_board_image)
         self.zp_add_image_button.clicked.connect(self._on_load_board_image)
+        self.open_window_board_action.triggered.connect(self._on_load_board_image)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
+        self.about_action.triggered.connect(self._about_product_message)
 
         self.sound_enabled_checkbox.stateChanged.connect(self._on_sound_checked)
 
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
         self.freeze_curve_b_check_box.stateChanged.connect(self._on_freeze_b)
+        self.freeze_curve_a_action.toggled.connect(self._on_freeze_curve_a)
+        self.freeze_curve_b_action.toggled.connect(self._on_freeze_curve_b)
 
         if "ref" not in self._msystem.measurers_map:
             self.freeze_curve_a_check_box.setEnabled(False)
 
         self.save_image_push_button.clicked.connect(self._on_save_image)
+        self.save_screen_action.triggered.connect(self._on_save_image)
         self.tp_push_button_save.clicked.connect(self._on_save_image)
 
         self.pushButton_score_threshold_minus.clicked.connect(self._on_threshold_dec)
@@ -127,7 +136,10 @@ class EPLabWindow(QMainWindow):
 
         self.test_plan_tab_widget.setCurrentIndex(0)  # first tab - curves comparison
         self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
-
+        self.comparing_mode_action.triggered.connect(self._on_test_plan_tab_switch_compare)
+        self.recording_mode_action.triggered.connect(self._on_test_plan_tab_switch_write)
+        self.testing_mode_action.triggered.connect(self._on_test_plan_tab_switch_test)
+        self.setting_mode_action.triggered.connect(self._on_test_plan_tab_switch_set)
         with self._device_errors_handler:
             for m in self._msystem.measurers:
                 m.open_device()
@@ -310,6 +322,14 @@ class EPLabWindow(QMainWindow):
         with self._device_errors_handler:
             self._msystem.calibrate()
 
+    @pyqtSlot(bool)
+    def _on_freeze_curve_a(self, state: bool):
+        self.freeze_curve_a_check_box.setChecked(state)
+
+    @pyqtSlot(bool)
+    def _on_freeze_curve_b(self, state: bool):
+        self.freeze_curve_b_check_box.setChecked(state)
+
     @pyqtSlot(int)
     def _on_freeze_a(self, state: int):
         if "ref" in self._msystem.measurers_map:
@@ -328,6 +348,25 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot(int)
     def _on_sound_checked(self, state: int):
         self._player.set_mute(state != Qt.Checked)
+
+    @pyqtSlot(bool)
+    def _about_product_message(self):
+        def msgbtn(i):
+            if i.text() == "Перейти":
+                import webbrowser
+                webbrowser.open_new_tab('http://eyepoint.physlab.ru')
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setWindowTitle("Справка")
+        msg.setText(self.windowTitle())
+        msg.setInformativeText("Программное обеспечение для работы с устройствами линейки EyePoint, "
+                               "предназначенными для поиска неисправностей на печатных платах "
+                               "в ручном режиме (при помощи ручных щупов). Для более подробной информации об Eyepoint, "
+                               "перейдите по ссылке http://eyepoint.physlab.ru.")
+        msg.addButton('Перейти', QMessageBox.YesRole)
+        msg.addButton('ОК', QMessageBox.NoRole)
+        msg.buttonClicked.connect(msgbtn)
+        msg.exec_()
 
     @pyqtSlot()
     def _on_save_comment(self):
@@ -360,6 +399,22 @@ class EPLabWindow(QMainWindow):
         elif tab == "test_plan_tab_SET":  # settings
             # Settings mode is equal to compare mode, see #39314-9
             self._change_work_mode(WorkMode.compare)
+
+    @pyqtSlot(bool)
+    def _on_test_plan_tab_switch_compare(self):
+        self.test_plan_tab_widget.setCurrentIndex(0)
+
+    @pyqtSlot(bool)
+    def _on_test_plan_tab_switch_write(self):
+        self.test_plan_tab_widget.setCurrentIndex(1)
+
+    @pyqtSlot(bool)
+    def _on_test_plan_tab_switch_test(self):
+        self.test_plan_tab_widget.setCurrentIndex(2)
+
+    @pyqtSlot(bool)
+    def _on_test_plan_tab_switch_set(self):
+        self.test_plan_tab_widget.setCurrentIndex(3)
 
     @pyqtSlot(QPointF)
     def _on_board_right_click(self, point: QPointF):

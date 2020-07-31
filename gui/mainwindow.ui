@@ -743,6 +743,125 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>882</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="file_menu_action">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="new_file_action"/>
+    <addaction name="open_file_action"/>
+    <addaction name="save_file_action"/>
+    <addaction name="save_as_file_action"/>
+    <addaction name="separator"/>
+    <addaction name="save_screen_action"/>
+   </widget>
+   <widget class="QMenu" name="view_menu_action">
+    <property name="title">
+     <string>Вид</string>
+    </property>
+    <addaction name="open_window_board_action"/>
+    <addaction name="freeze_curve_a_action"/>
+    <addaction name="freeze_curve_b_action"/>
+   </widget>
+   <widget class="QMenu" name="mode_menu_action">
+    <property name="title">
+     <string>Режим</string>
+    </property>
+    <addaction name="comparing_mode_action"/>
+    <addaction name="recording_mode_action"/>
+    <addaction name="testing_mode_action"/>
+    <addaction name="setting_mode_action"/>
+   </widget>
+   <widget class="QMenu" name="help_menu_action">
+    <property name="title">
+     <string>Справка</string>
+    </property>
+    <addaction name="about_action"/>
+   </widget>
+   <addaction name="file_menu_action"/>
+   <addaction name="view_menu_action"/>
+   <addaction name="mode_menu_action"/>
+   <addaction name="help_menu_action"/>
+  </widget>
+  <action name="new_file_action">
+   <property name="text">
+    <string>Создать план тестирования</string>
+   </property>
+  </action>
+  <action name="open_file_action">
+   <property name="text">
+    <string>Открыть план тестирования</string>
+   </property>
+  </action>
+  <action name="save_file_action">
+   <property name="text">
+    <string>Сохранить план тестирования</string>
+   </property>
+  </action>
+  <action name="save_as_file_action">
+   <property name="text">
+    <string>Сохранить план тестирования как</string>
+   </property>
+  </action>
+  <action name="save_screen_action">
+   <property name="text">
+    <string>Сохранить скриншот</string>
+   </property>
+  </action>
+  <action name="open_window_board_action">
+   <property name="text">
+    <string>Открыть окно просмотра платы</string>
+   </property>
+  </action>
+  <action name="freeze_curve_a_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Заморозить канал А</string>
+   </property>
+  </action>
+  <action name="freeze_curve_b_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Заморозить канал B</string>
+   </property>
+  </action>
+  <action name="comparing_mode_action">
+   <property name="text">
+    <string>Сравнение</string>
+   </property>
+  </action>
+  <action name="recording_mode_action">
+   <property name="text">
+    <string>Запись плана тестирования</string>
+   </property>
+  </action>
+  <action name="testing_mode_action">
+   <property name="text">
+    <string>Тестирование по плану</string>
+   </property>
+  </action>
+  <action name="setting_mode_action">
+   <property name="text">
+    <string>Настройка</string>
+   </property>
+  </action>
+  <action name="about_action">
+   <property name="text">
+    <string>О программе</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
