@@ -356,7 +356,7 @@ class EPLabWindow(QMainWindow):
         def msgbtn(i):
             if i.text() == "Перейти":
                 import webbrowser
-                webbrowser.open_new_tab('http://eyepoint.physlab.ru')
+                webbrowser.open_new_tab("http://eyepoint.physlab.ru")
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setWindowTitle("Справка")
@@ -365,8 +365,8 @@ class EPLabWindow(QMainWindow):
                                "предназначенными для поиска неисправностей на печатных платах "
                                "в ручном режиме (при помощи ручных щупов). Для более подробной информации об Eyepoint, "
                                "перейдите по ссылке http://eyepoint.physlab.ru.")
-        msg.addButton('Перейти', QMessageBox.YesRole)
-        msg.addButton('ОК', QMessageBox.NoRole)
+        msg.addButton("Перейти", QMessageBox.YesRole)
+        msg.addButton("ОК", QMessageBox.NoRole)
         msg.buttonClicked.connect(msgbtn)
         msg.exec_()
 
