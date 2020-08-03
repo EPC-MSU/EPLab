@@ -495,12 +495,32 @@ class EPLabWindow(QMainWindow):
         if filename:
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._current_file_path = filename
+            try:
+                epfilemanager.load_board_from_ufiv(self._current_file_path)
+            except Exception as e:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.setWindowTitle("Error")
+                msg.setText("Invalid format save file")
+                msg.setInformativeText(str(e)[0:512] + "\n...")
+                msg.exec_()
+                return
 
     @pyqtSlot()
     def _on_save_board(self):
         if not self._current_file_path:
             return self._on_save_board_as()
         epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
+        try:
+            epfilemanager.load_board_from_ufiv(self._current_file_path)
+        except Exception as e:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("Error")
+            msg.setText("Invalid format save file")
+            msg.setInformativeText(str(e)[0:512] + "\n...")
+            msg.exec_()
+            return
 
     @pyqtSlot()
     def _on_load_board(self):
