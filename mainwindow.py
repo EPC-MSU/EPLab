@@ -592,7 +592,8 @@ class EPLabWindow(QMainWindow):
         if self._work_mode is WorkMode.compare:
             self._ref_curve = None
         self._update_curves()
-
+        self._iv_window.plot.set_test_curve(None)
+        self._iv_window.plot.set_reference_curve(None)
         # Draw text
         self._iv_window.plot.set_center_text("DISCONNECTED")
 
