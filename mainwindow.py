@@ -58,7 +58,7 @@ class EPLabWindow(QMainWindow):
         self._score_wrapper = ScoreWrapper(self.score_label)
 
         self._player = SoundPlayer()
-        self._player.set_mute(not self.sound_enabled_checkbox.isChecked())
+        self._player.set_mute(not self.sound_enabled_action.isChecked())
 
         self.setWindowIcon(QIcon("media/ico.png"))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
@@ -128,12 +128,12 @@ class EPLabWindow(QMainWindow):
         self.zp_save_file_as_button.clicked.connect(self._on_save_board_as)
         self.save_as_file_action.triggered.connect(self._on_load_board_image)
         self.zp_add_image_button.clicked.connect(self._on_load_board_image)
-        self.open_window_board_action.triggered.connect(self._on_load_board_image)
+        self.open_window_board_action.triggered.connect(self._on_open_board_image)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
         self.about_action.triggered.connect(self._about_product_message)
 
-        self.sound_enabled_checkbox.stateChanged.connect(self._on_sound_checked)
+        self.sound_enabled_action.toggled.connect(self._on_sound_checked)
 
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
         self.freeze_curve_b_check_box.stateChanged.connect(self._on_freeze_b)
@@ -336,6 +336,10 @@ class EPLabWindow(QMainWindow):
             self._board_window.show()
 
     @pyqtSlot()
+    def _on_open_board_image(self):
+        self._open_board_window_if_needed()
+
+    @pyqtSlot()
     def _on_auto_calibration(self):
         with self._device_errors_handler:
             self._msystem.calibrate()
@@ -365,9 +369,9 @@ class EPLabWindow(QMainWindow):
             self._msystem.measurers_map["test"].unfreeze()
         self.freeze_curve_a_action.setChecked(state)
 
-    @pyqtSlot(int)
-    def _on_sound_checked(self, state: int):
-        self._player.set_mute(state != Qt.Checked)
+    @pyqtSlot(bool)
+    def _on_sound_checked(self, state: bool):
+        self._player.set_mute(not state)
 
     @pyqtSlot(bool)
     def _about_product_message(self):
