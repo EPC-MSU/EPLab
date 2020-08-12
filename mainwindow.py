@@ -35,10 +35,6 @@ class SettingsWindow(QDialog):
         self.auto_calibration_push_button.clicked.connect(parent._on_auto_calibration)
 
 
-
-
-
-
 class EPLabWindow(QMainWindow):
     def __init__(self, msystem: MeasurementSystem):
         super(EPLabWindow, self).__init__()
@@ -441,12 +437,8 @@ class EPLabWindow(QMainWindow):
         elif tab == "test_plan_tab_TP":  # test
             self._change_work_mode(WorkMode.test)
             self._switch_mode_action(t=True)
-        elif tab == "test_plan_tab_SET":  # settings
-            # Settings mode is equal to compare mode, see #39314-9
-            self._change_work_mode(WorkMode.compare)
-            self._switch_mode_action(s=True)
 
-    def _switch_mode_action(self, c=False, w=False, t=False, s=False):
+    def _switch_mode_action(self, c=False, w=False, t=False):
         self.comparing_mode_action.setChecked(c)
         self.writing_mode_action.setChecked(w)
         self.testing_mode_action.setChecked(t)
