@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, Qt
 from PyQt5 import uic
@@ -18,8 +18,25 @@ from ivview_parameters import IVViewerParametersAdjuster
 from version import Version
 from player import SoundPlayer
 from common import WorkMode, DeviceErrorsHandler
-
+import os
 from typing import Optional
+
+
+class SettingsWindow(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+
+        uic.loadUi(os.path.join("gui", "settings.ui"), self)
+
+        self.setWindowTitle("Настройки")
+        self.score_treshold_button_minus.clicked.connect(parent._on_threshold_dec)
+        self.score_treshold_button_plus.clicked.connect(parent._on_threshold_inc)
+
+        self.auto_calibration_push_button.clicked.connect(parent._on_auto_calibration)
+
+
+
+
 
 
 class EPLabWindow(QMainWindow):
@@ -59,6 +76,7 @@ class EPLabWindow(QMainWindow):
         self._iv_window = IVViewer()
 
         self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
+        self.__settings_window = SettingsWindow(self)
 
         self.setCentralWidget(self._iv_window)
 
@@ -129,17 +147,17 @@ class EPLabWindow(QMainWindow):
         self.save_screen_action.triggered.connect(self._on_save_image)
         self.tp_push_button_save.clicked.connect(self._on_save_image)
 
-        self.pushButton_score_threshold_minus.clicked.connect(self._on_threshold_dec)
-        self.pushButton_score_threshold_plus.clicked.connect(self._on_threshold_inc)
+        # self.pushButton_score_threshold_minus.clicked.connect(self._on_threshold_dec)
+        # self.pushButton_score_threshold_plus.clicked.connect(self._on_threshold_inc)
 
-        self.c_push_button_auto_calibration.clicked.connect(self._on_auto_calibration)
+        # self.c_push_button_auto_calibration.clicked.connect(self._on_auto_calibration)
 
         self.test_plan_tab_widget.setCurrentIndex(0)  # first tab - curves comparison
         self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
         self.comparing_mode_action.triggered.connect(self._on_test_plan_tab_switch_compare)
         self.writing_mode_action.triggered.connect(self._on_test_plan_tab_switch_write)
         self.testing_mode_action.triggered.connect(self._on_test_plan_tab_switch_test)
-        self.setting_mode_action.triggered.connect(self._on_test_plan_tab_switch_set)
+        self.settings_mode_action.triggered.connect(self._show_settings_window)
         with self._device_errors_handler:
             for m in self._msystem.measurers:
                 m.open_device()
@@ -375,6 +393,24 @@ class EPLabWindow(QMainWindow):
         comment = self.line_comment_pin.text()
         self._measurement_plan.get_current_pin().comment = comment
 
+    def _update_threshold(self):
+        self.__settings_window.score_treshold_value_label.setText(f"{round(self._score_wrapper.threshold * 100.0)}%")
+        self._player.set_threshold(self._score_wrapper.threshold)
+
+    @pyqtSlot()
+    def _on_threshold_dec(self):
+        self._score_wrapper.decrease_threshold()
+        self._update_threshold()
+
+    @pyqtSlot()
+    def _on_threshold_inc(self):
+        self._score_wrapper.increase_threshold()
+        self._update_threshold()
+
+    @pyqtSlot()
+    def _show_settings_window(self):
+        self.__settings_window.open()
+
     @pyqtSlot()
     def _on_save_image(self):
         # Freeze image at first
@@ -410,7 +446,6 @@ class EPLabWindow(QMainWindow):
         self.comparing_mode_action.setChecked(c)
         self.writing_mode_action.setChecked(w)
         self.testing_mode_action.setChecked(t)
-        self.setting_mode_action.setChecked(s)
 
     @pyqtSlot(bool)
     def _on_test_plan_tab_switch_compare(self):
@@ -473,19 +508,6 @@ class EPLabWindow(QMainWindow):
                 self._remove_ref_curve()
                 self._update_curves()
 
-    def _update_threshold(self):
-        self.label_score_threshold_value.setText(f"{round(self._score_wrapper.threshold * 100.0)}%")
-        self._player.set_threshold(self._score_wrapper.threshold)
-
-    @pyqtSlot()
-    def _on_threshold_dec(self):
-        self._score_wrapper.decrease_threshold()
-        self._update_threshold()
-
-    @pyqtSlot()
-    def _on_threshold_inc(self):
-        self._score_wrapper.increase_threshold()
-        self._update_threshold()
 
     @pyqtSlot()
     def _on_go_left_pin(self):
