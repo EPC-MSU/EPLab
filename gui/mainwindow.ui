@@ -631,8 +631,9 @@
     <addaction name="writing_mode_action"/>
     <addaction name="testing_mode_action"/>
     <addaction name="separator"/>
-    <addaction name="settings_mode_action"/>
     <addaction name="sound_enabled_action"/>
+    <addaction name="separator"/>
+    <addaction name="settings_mode_action"/>
    </widget>
    <widget class="QMenu" name="help_menu_action">
     <property name="title">
@@ -752,6 +753,11 @@
    </property>
    <property name="text">
     <string>Звук</string>
+   </property>
+  </action>
+  <action name="settings_mode_action">
+   <property name="text">
+    <string>Настройки</string>
    </property>
   </action>
  </widget>
