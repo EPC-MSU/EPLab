@@ -352,6 +352,18 @@
             <number>0</number>
            </property>
            <item>
+            <widget class="QPushButton" name="search_optimal_button">
+             <property name="font">
+              <font>
+                <pointsize>7</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Автоподбор параметров</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QGroupBox" name="ivc_state_group_box">
              <property name="title">
               <string>ВАХ</string>

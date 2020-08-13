@@ -11,6 +11,7 @@ import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
 from epcore.elements import MeasurementSettings, Board, Pin, Element, IVCurve
 from epcore.measurementmanager.ivc_comparator import IVCComparator
+from epcore.measurementmanager.utils import search_optimal_settings
 from boardwindow import BoardWidget
 from ivviewer import Viewer as IVViewer
 from score import ScoreWrapper
@@ -113,6 +114,8 @@ class EPLabWindow(QMainWindow):
 
         self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
         self.freeze_curve_b_check_box.stateChanged.connect(self._on_freeze_b)
+
+        self.search_optimal_button.clicked.connect(self._on_search_optimal)
 
         if "ref" not in self._msystem.measurers_map:
             self.freeze_curve_a_check_box.setEnabled(False)
@@ -324,6 +327,13 @@ class EPLabWindow(QMainWindow):
             self._msystem.measurers_map["test"].freeze()
         else:
             self._msystem.measurers_map["test"].unfreeze()
+
+    @pyqtSlot()
+    def _on_search_optimal(self):
+        with self._device_errors_handler:
+            optimal_settings = search_optimal_settings(self._msystem.measurers[0])
+            self._set_msystem_settings(optimal_settings)
+            self._settings_to_ui(optimal_settings)
 
     @pyqtSlot(int)
     def _on_sound_checked(self, state: int):
