@@ -50,7 +50,7 @@ class IVViewerParametersAdjuster:
         }
 
     def adjust_parameters(self, settings: MeasurementSettings):
-        self._viewer.plot.set_scale(*self._scale_adjuster[str(round(settings.max_voltage, 1))]
-                                                         [str(round(settings.internal_resistance, 1))])
-        self._viewer.plot.set_min_borders(self._volt_min_borders[str(round(settings.max_voltage, 1))],
-                                          self._curr_min_borders[str(round(settings.internal_resistance, 1))])
+        self._viewer.plot.set_scale(*self._scale_adjuster["{:.1f}".format(settings.max_voltage)]
+                                                         ["{:.1f}".format(settings.internal_resistance)])
+        self._viewer.plot.set_min_borders(self._volt_min_borders["{:.1f}".format(settings.max_voltage)],
+                                          self._curr_min_borders["{:.1f}".format(settings.internal_resistance)])
