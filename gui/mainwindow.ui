@@ -283,7 +283,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="test_plan_tab_S">
         <attribute name="title">
@@ -641,9 +641,21 @@
     </property>
     <addaction name="about_action"/>
    </widget>
+   <widget class="QMenu" name="test_plan_menu_action">
+    <property name="title">
+     <string>План тестирования</string>
+    </property>
+    <addaction name="next_point_action"/>
+    <addaction name="last_point_action"/>
+    <addaction name="separator"/>
+    <addaction name="new_point_action"/>
+    <addaction name="save_point_action"/>
+    <addaction name="add_board_image_action"/>
+   </widget>
    <addaction name="file_menu_action"/>
    <addaction name="view_menu_action"/>
    <addaction name="mode_menu_action"/>
+   <addaction name="test_plan_menu_action"/>
    <addaction name="help_menu_action"/>
   </widget>
   <action name="new_file_action">
@@ -758,6 +770,46 @@
   <action name="settings_mode_action">
    <property name="text">
     <string>Настройки</string>
+   </property>
+  </action>
+  <action name="next_point_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Следующая точка</string>
+   </property>
+  </action>
+  <action name="last_point_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Предыдущая точка</string>
+   </property>
+  </action>
+  <action name="new_point_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Новая точка</string>
+   </property>
+  </action>
+  <action name="save_point_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Сохранить точку</string>
+   </property>
+  </action>
+  <action name="add_board_image_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Добавить изображение</string>
    </property>
   </action>
  </widget>

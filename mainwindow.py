@@ -110,10 +110,14 @@ class EPLabWindow(QMainWindow):
 
         self.zp_push_button_left.clicked.connect(self._on_go_left_pin)
         self.tp_push_button_left.clicked.connect(self._on_go_left_pin)
+        self.last_point_action.triggered.connect(self._on_go_left_pin)
         self.zp_push_button_right.clicked.connect(self._on_go_right_pin)
+        self.next_point_action.triggered.connect(self._on_go_right_pin)
         self.tp_push_button_right.clicked.connect(self._on_go_right_pin)
         self.zp_push_button_new_point.clicked.connect(self._on_new_pin)
+        self.new_point_action.triggered.connect(self._on_new_pin)
         self.zp_push_button_save.clicked.connect(self._on_save_pin)
+        self.save_point_action.triggered.connect(self._on_save_pin)
         self.zp_open_file_button.clicked.connect(self._on_load_board)
         self.open_file_action.triggered.connect(self._on_load_board)
         self.tp_open_file_button.clicked.connect(self._on_load_board)  # same button on test tab
@@ -124,6 +128,7 @@ class EPLabWindow(QMainWindow):
         self.zp_save_file_as_button.clicked.connect(self._on_save_board_as)
         self.save_as_file_action.triggered.connect(self._on_load_board_image)
         self.zp_add_image_button.clicked.connect(self._on_load_board_image)
+        self.add_board_image_action.triggered.connect(self._on_load_board_image)
         self.open_window_board_action.triggered.connect(self._on_open_board_image)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
@@ -442,6 +447,11 @@ class EPLabWindow(QMainWindow):
         self.comparing_mode_action.setChecked(c)
         self.writing_mode_action.setChecked(w)
         self.testing_mode_action.setChecked(t)
+        self.next_point_action.setEnabled(w | t)
+        self.last_point_action.setEnabled(w | t)
+        self.new_point_action.setEnabled(w)
+        self.save_point_action.setEnabled(w)
+        self.add_board_image_action.setEnabled(w)
 
     @pyqtSlot(bool)
     def _on_test_plan_tab_switch_compare(self):
