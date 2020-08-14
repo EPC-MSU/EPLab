@@ -452,6 +452,7 @@ class EPLabWindow(QMainWindow):
         self.new_point_action.setEnabled(w)
         self.save_point_action.setEnabled(w)
         self.add_board_image_action.setEnabled(w)
+        self.label_number_point.setEnabled(w | t)
 
     @pyqtSlot(bool)
     def _on_test_plan_tab_switch_compare(self):
@@ -496,6 +497,7 @@ class EPLabWindow(QMainWindow):
         index = self._measurement_plan.get_current_index()
         self.zp_label_num.setText(str(index))
         self.tp_label_num.setText(str(index))
+        self.label_number_point.setText(str(index))
         self._board_window.workspace.select_point(index)
 
         if self._work_mode in (WorkMode.test, WorkMode.write):
@@ -513,7 +515,6 @@ class EPLabWindow(QMainWindow):
             else:
                 self._remove_ref_curve()
                 self._update_curves()
-
 
     @pyqtSlot()
     def _on_go_left_pin(self):
