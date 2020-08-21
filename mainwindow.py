@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, Qt
 from PyQt5 import uic
 
@@ -70,6 +70,9 @@ class EPLabWindow(QMainWindow):
         self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
 
         self._iv_window = IVViewer()
+        self.reference_curve_plot = self._iv_window.plot.add_curve()
+        self.test_curve_plot = self._iv_window.plot.add_curve()
+        self.test_curve_plot.set_curve_params(QColor(0, 0, 255, 200))
 
         self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
         self.__settings_window = SettingsWindow(self)
@@ -652,8 +655,8 @@ class EPLabWindow(QMainWindow):
             self._ref_curve = ref
 
         # Update plots
-        self._iv_window.plot.set_test_curve(self._test_curve)
-        self._iv_window.plot.set_reference_curve(self._ref_curve)
+        self.test_curve_plot.set_curve(self._test_curve)
+        self.reference_curve_plot.set_curve(self._ref_curve)
 
         # Update score
         if self._ref_curve and self._test_curve:
