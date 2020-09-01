@@ -668,7 +668,7 @@ class EPLabWindow(QMainWindow):
             self._score_wrapper.set_dummy_score()
 
         self._iv_window.plot.set_lower_text("Voltage scale and current scale: "
-                                            "{}".format(self._iv_window.plot.get_axis_step()))
+                                            "{}".format(self._iv_window.plot.get_minor_axis_step()))
 
     def _remove_ref_curve(self):
         self._ref_curve = None
