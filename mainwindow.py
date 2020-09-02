@@ -112,26 +112,14 @@ class EPLabWindow(QMainWindow):
         for button, resistance in self._sensitivities.items():
             button.clicked.connect(self._on_settings_btn_checked)
 
-        self.zp_push_button_left.clicked.connect(self._on_go_left_pin)
-        self.tp_push_button_left.clicked.connect(self._on_go_left_pin)
         self.last_point_action.triggered.connect(self._on_go_left_pin)
-        self.zp_push_button_right.clicked.connect(self._on_go_right_pin)
         self.next_point_action.triggered.connect(self._on_go_right_pin)
-        self.tp_push_button_right.clicked.connect(self._on_go_right_pin)
-        self.zp_push_button_new_point.clicked.connect(self._on_new_pin)
         self.new_point_action.triggered.connect(self._on_new_pin)
-        self.zp_push_button_save.clicked.connect(self._on_save_pin)
         self.save_point_action.triggered.connect(self._on_save_pin)
-        self.zp_open_file_button.clicked.connect(self._on_load_board)
-        self.open_file_action.triggered.connect(self._on_load_board)
-        self.tp_open_file_button.clicked.connect(self._on_load_board)  # same button on test tab
-        self.zp_new_file_button.clicked.connect(self._on_new_board)
+        self.open_file_action.triggered.connect(self._on_load_board)  # same button on test tab
         self.new_file_action.triggered.connect(self._on_new_board)
-        self.zp_save_file_button.clicked.connect(self._on_save_board)
         self.save_file_action.triggered.connect(self._on_save_board)
-        self.zp_save_file_as_button.clicked.connect(self._on_save_board_as)
-        self.save_as_file_action.triggered.connect(self._on_load_board_image)
-        self.zp_add_image_button.clicked.connect(self._on_load_board_image)
+        self.save_as_file_action.triggered.connect(self._on_save_board_as)
         self.add_board_image_action.triggered.connect(self._on_load_board_image)
         self.open_window_board_action.triggered.connect(self._on_open_board_image)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
@@ -140,29 +128,17 @@ class EPLabWindow(QMainWindow):
 
         self.sound_enabled_action.toggled.connect(self._on_sound_checked)
 
-        self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
-        self.freeze_curve_b_check_box.stateChanged.connect(self._on_freeze_b)
-        self.freeze_curve_a_action.toggled.connect(self._on_freeze_curve_a)
-        self.freeze_curve_b_action.toggled.connect(self._on_freeze_curve_b)
+        self.freeze_curve_a_action.toggled.connect(self._on_freeze_a)
+        self.freeze_curve_b_action.toggled.connect(self._on_freeze_b)
 
         if "ref" not in self._msystem.measurers_map:
-            self.freeze_curve_b_check_box.setEnabled(False)
             self.freeze_curve_b_action.setEnabled(False)
 
-        self.save_image_push_button.clicked.connect(self._on_save_image)
         self.save_screen_action.triggered.connect(self._on_save_image)
-        self.tp_push_button_save.clicked.connect(self._on_save_image)
 
-        # self.pushButton_score_threshold_minus.clicked.connect(self._on_threshold_dec)
-        # self.pushButton_score_threshold_plus.clicked.connect(self._on_threshold_inc)
-
-        # self.c_push_button_auto_calibration.clicked.connect(self._on_auto_calibration)
-
-        self.test_plan_tab_widget.setCurrentIndex(0)  # first tab - curves comparison
-        self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
-        self.comparing_mode_action.triggered.connect(self._on_test_plan_tab_switch_compare)
-        self.writing_mode_action.triggered.connect(self._on_test_plan_tab_switch_write)
-        self.testing_mode_action.triggered.connect(self._on_test_plan_tab_switch_test)
+        self.comparing_mode_action.triggered.connect(lambda: self._on_work_mode_switch(WorkMode.compare))
+        self.writing_mode_action.triggered.connect(lambda: self._on_work_mode_switch(WorkMode.write))
+        self.testing_mode_action.triggered.connect(lambda: self._on_work_mode_switch(WorkMode.test))
         self.settings_mode_action.triggered.connect(self._show_settings_window)
         with self._device_errors_handler:
             for m in self._msystem.measurers:
@@ -267,8 +243,8 @@ class EPLabWindow(QMainWindow):
 
         if mode is not WorkMode.compare:
             # "Freeze" is only for compare mode
-            self.freeze_curve_a_check_box.setChecked(False)
-            self.freeze_curve_b_check_box.setChecked(False)
+            self.freeze_curve_a_action.setChecked(False)
+            self.freeze_curve_b_action.setChecked(False)
 
         if mode is WorkMode.compare:
             # Remove reference curve in case we have only one IVMeasurer
@@ -351,29 +327,21 @@ class EPLabWindow(QMainWindow):
             self._msystem.calibrate()
 
     @pyqtSlot(bool)
-    def _on_freeze_curve_b(self, state: bool):
-        self.freeze_curve_b_check_box.setChecked(state)
-
-    @pyqtSlot(bool)
-    def _on_freeze_curve_a(self, state: bool):
-        self.freeze_curve_a_check_box.setChecked(state)
-
-    @pyqtSlot(int)
-    def _on_freeze_b(self, state: int):
+    def _on_freeze_b(self, state: bool):
         if "ref" in self._msystem.measurers_map:
-            if state == Qt.Checked:
+            if state:
                 self._msystem.measurers_map["ref"].freeze()
             else:
                 self._msystem.measurers_map["ref"].unfreeze()
-            self.freeze_curve_b_action.setChecked(state)
+            # self.freeze_curve_b_action.setChecked(state)
 
-    @pyqtSlot(int)
-    def _on_freeze_a(self, state: int):
-        if state == Qt.Checked:
+    @pyqtSlot(bool)
+    def _on_freeze_a(self, state: bool):
+        if state:
             self._msystem.measurers_map["test"].freeze()
         else:
             self._msystem.measurers_map["test"].unfreeze()
-        self.freeze_curve_a_action.setChecked(state)
+        # self.freeze_curve_a_action.setChecked(state)
 
     @pyqtSlot(bool)
     def _on_sound_checked(self, state: bool):
@@ -435,49 +403,18 @@ class EPLabWindow(QMainWindow):
                 filename += ".png"
             image.save(filename)
 
-    @pyqtSlot(int)
-    def _on_test_plan_tab_switch(self, index: int):
-        tab = self.test_plan_tab_widget.currentWidget().objectName()
-        if tab == "test_plan_tab_S":  # compare
-            self._change_work_mode(WorkMode.compare)
-            self._switch_mode_action(c=True)
-        elif tab == "test_plan_tab_ZP":  # write
-            self._change_work_mode(WorkMode.write)
-            self._switch_mode_action(w=True)
-        elif tab == "test_plan_tab_TP":  # test
-            self._change_work_mode(WorkMode.test)
-            self._switch_mode_action(t=True)
-
-    def _switch_mode_action(self, c=False, w=False, t=False):
-        self.comparing_mode_action.setChecked(c)
-        self.writing_mode_action.setChecked(w)
-        self.testing_mode_action.setChecked(t)
-        self.next_point_action.setEnabled(w | t)
-        self.last_point_action.setEnabled(w | t)
-        self.new_point_action.setEnabled(w)
-        self.save_point_action.setEnabled(w)
-        self.add_board_image_action.setEnabled(w)
-        self.label_number_point.setEnabled(w | t)
-
     @pyqtSlot(bool)
-    def _on_test_plan_tab_switch_compare(self):
-        self.test_plan_tab_widget.setCurrentIndex(0)
-        self._switch_mode_action(c=True)
-
-    @pyqtSlot(bool)
-    def _on_test_plan_tab_switch_write(self):
-        self.test_plan_tab_widget.setCurrentIndex(1)
-        self._switch_mode_action(w=True)
-
-    @pyqtSlot(bool)
-    def _on_test_plan_tab_switch_test(self):
-        self.test_plan_tab_widget.setCurrentIndex(2)
-        self._switch_mode_action(t=True)
-
-    @pyqtSlot(bool)
-    def _on_test_plan_tab_switch_set(self):
-        self.test_plan_tab_widget.setCurrentIndex(3)
-        self._switch_mode_action(s=True)
+    def _on_work_mode_switch(self, mode: WorkMode):
+        self.comparing_mode_action.setChecked(mode is WorkMode.compare)
+        self.writing_mode_action.setChecked(mode is WorkMode.write)
+        self.testing_mode_action.setChecked(mode is WorkMode.test)
+        self.next_point_action.setEnabled(mode is not WorkMode.compare)
+        self.last_point_action.setEnabled(mode is not WorkMode.compare)
+        self.label_number_point.setEnabled(mode is not WorkMode.compare)
+        self.new_point_action.setEnabled(mode is WorkMode.write)
+        self.save_point_action.setEnabled(mode is WorkMode.write)
+        self.add_board_image_action.setEnabled(mode is WorkMode.write)
+        self._change_work_mode(mode)
 
     @pyqtSlot(QPointF)
     def _on_board_right_click(self, point: QPointF):
@@ -500,8 +437,6 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         index = self._measurement_plan.get_current_index()
-        self.zp_label_num.setText(str(index))
-        self.tp_label_num.setText(str(index))
         self.label_number_point.setText(str(index))
         self._board_window.workspace.select_point(index)
 
