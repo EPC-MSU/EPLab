@@ -146,7 +146,8 @@ class EPLabWindow(QMainWindow):
         self.freeze_curve_b_action.toggled.connect(self._on_freeze_curve_b)
 
         if "ref" not in self._msystem.measurers_map:
-            self.freeze_curve_a_check_box.setEnabled(False)
+            self.freeze_curve_b_check_box.setEnabled(False)
+            self.freeze_curve_b_action.setEnabled(False)
 
         self.save_image_push_button.clicked.connect(self._on_save_image)
         self.save_screen_action.triggered.connect(self._on_save_image)
