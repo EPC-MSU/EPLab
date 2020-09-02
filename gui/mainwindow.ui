@@ -731,7 +731,7 @@
   <action name="save_screen_action">
    <property name="icon">
     <iconset>
-     <normaloff>../../../../Downloads/screen.png</normaloff>../../../../Downloads/screen.png</iconset>
+     <normaloff>../media/screen.png</normaloff>../media/screen.png</iconset>
    </property>
    <property name="text">
     <string>Сохранить скриншот</string>
@@ -748,7 +748,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../Downloads/freezea.jpg</normaloff>../../../../Downloads/freezea.jpg</iconset>
+     <normaloff>../media/freezea.jpg</normaloff>../media/freezea.jpg</iconset>
    </property>
    <property name="text">
     <string>Заморозить канал А</string>
@@ -763,7 +763,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../Downloads/freezeb.jpg</normaloff>../../../../Downloads/freezeb.jpg</iconset>
+     <normaloff>../media/freezeb.jpg</normaloff>../media/freezeb.jpg</iconset>
    </property>
    <property name="text">
     <string>Заморозить канал B</string>
@@ -843,7 +843,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../Downloads/right.png</normaloff>../../../../Downloads/right.png</iconset>
+     <normaloff>../media/right.png</normaloff>../media/right.png</iconset>
    </property>
    <property name="text">
     <string>Следующая точка</string>
@@ -855,7 +855,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../Downloads/left.png</normaloff>../../../../Downloads/left.png</iconset>
+     <normaloff>../media/left.png</normaloff>../media/left.png</iconset>
    </property>
    <property name="text">
     <string>Предыдущая точка</string>
@@ -867,7 +867,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../Downloads/newpoint.png</normaloff>../../../../Downloads/newpoint.png</iconset>
+     <normaloff>../media/newpoint.png</normaloff>../media/newpoint.png</iconset>
    </property>
    <property name="text">
     <string>Новая точка</string>
@@ -879,7 +879,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../Downloads/save.png</normaloff>../../../../Downloads/save.png</iconset>
+     <normaloff>../media/save.png</normaloff>../media/save.png</iconset>
    </property>
    <property name="text">
     <string>Сохранить точку</string>
