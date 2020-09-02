@@ -333,6 +333,29 @@
    <addaction name="test_plan_menu_action"/>
    <addaction name="help_menu_action"/>
   </widget>
+  <widget class="QToolBar" name="toolBar_file">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Файл</string>
+   </property>
+   <property name="toolTipDuration">
+    <number>-1</number>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="new_file_action"/>
+   <addaction name="open_file_action"/>
+   <addaction name="save_file_action"/>
+  </widget>
   <widget class="QToolBar" name="toolBar_test">
    <property name="minimumSize">
     <size>
@@ -385,16 +408,28 @@
    <addaction name="testing_mode_action"/>
   </widget>
   <action name="new_file_action">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/newfile.png</normaloff>../media/newfile.png</iconset>
+   </property>
    <property name="text">
     <string>Создать план тестирования</string>
    </property>
   </action>
   <action name="open_file_action">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/openfile.png</normaloff>../media/openfile.png</iconset>
+   </property>
    <property name="text">
     <string>Открыть план тестирования</string>
    </property>
   </action>
   <action name="save_file_action">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/savefile.png</normaloff>../media/savefile.png</iconset>
+   </property>
    <property name="text">
     <string>Сохранить план тестирования</string>
    </property>
@@ -430,7 +465,7 @@
     <string>Заморозить канал А</string>
    </property>
    <property name="toolTip">
-    <string>Заморозить канал А</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Заморозить канал А&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
   <action name="freeze_curve_b_action">
@@ -443,6 +478,12 @@
    </property>
    <property name="text">
     <string>Заморозить канал B</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Заморозить канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="whatsThis">
+    <string/>
    </property>
   </action>
   <action name="comparing_mode_action">

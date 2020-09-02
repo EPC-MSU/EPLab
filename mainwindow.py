@@ -112,6 +112,7 @@ class EPLabWindow(QMainWindow):
         for button, resistance in self._sensitivities.items():
             button.clicked.connect(self._on_settings_btn_checked)
 
+        self.toolBar_file.setGeometry(0, 26, 123, 40)
         self.last_point_action.triggered.connect(self._on_go_left_pin)
         self.next_point_action.triggered.connect(self._on_go_right_pin)
         self.new_point_action.triggered.connect(self._on_new_pin)
