@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog
 from PyQt5.QtGui import QIcon, QColor
-from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, Qt
+from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication
 from PyQt5 import uic
 
 from warnings import warn
@@ -28,7 +28,7 @@ class SettingsWindow(QDialog):
 
         uic.loadUi(os.path.join("gui", "settings.ui"), self)
 
-        self.setWindowTitle("Настройки")
+        self.setWindowTitle(QCoreApplication.translate("t", "Настройки"))
         self.score_treshold_button_minus.clicked.connect(parent._on_threshold_dec)
         self.score_treshold_button_plus.clicked.connect(parent._on_threshold_inc)
 
@@ -350,19 +350,21 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot(bool)
     def _about_product_message(self):
         def msgbtn(i):
-            if i.text() == "Перейти":
+            if i.text() == "Перейти" or i.text() == "Go":
                 import webbrowser
                 webbrowser.open_new_tab("http://eyepoint.physlab.ru")
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
-        msg.setWindowTitle("Справка")
+        msg.setWindowTitle(QCoreApplication.translate("t", "Справка"))
         msg.setText(self.windowTitle())
-        msg.setInformativeText("Программное обеспечение для работы с устройствами линейки EyePoint, "
-                               "предназначенными для поиска неисправностей на печатных платах "
-                               "в ручном режиме (при помощи ручных щупов). Для более подробной информации об Eyepoint, "
-                               "перейдите по ссылке http://eyepoint.physlab.ru.")
-        msg.addButton("Перейти", QMessageBox.YesRole)
-        msg.addButton("ОК", QMessageBox.NoRole)
+        msg.setInformativeText(QCoreApplication.translate("t", "Программное обеспечение для работы с устройствами "
+                                                               "линейки EyePoint, предназначенными для поиска "
+                                                               "неисправностей на печатных платах в ручном режиме "
+                                                               "(при помощи ручных щупов). Для более подробной "
+                                                               "информации об Eyepoint, перейдите по ссылке "
+                                                               "http://eyepoint.physlab.ru."))
+        msg.addButton(QCoreApplication.translate("t", "Перейти"), QMessageBox.YesRole)
+        msg.addButton(QCoreApplication.translate("t", "ОК"), QMessageBox.NoRole)
         msg.buttonClicked.connect(msgbtn)
         msg.exec_()
 
@@ -397,7 +399,8 @@ class EPLabWindow(QMainWindow):
         filename = "ivc" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
 
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, "Save IVC", filter="Image (*.png)", directory=filename)[0]
+        filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить ВАХ"),
+                                          filter="Image (*.png)", directory=filename)[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
@@ -520,7 +523,8 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_new_board(self):
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, "Save new board", filter="JSON (*.json)")[0]
+        filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить новую плату"),
+                                          filter="JSON (*.json)")[0]
         if filename:
             self._current_file_path = filename
             self._reset_board()
@@ -531,7 +535,8 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_save_board_as(self):
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, "Save board", filter="JSON (*.json)")[0]
+        filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить плату"),
+                                          filter="JSON (*.json)")[0]
         if filename:
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._current_file_path = filename
@@ -549,7 +554,8 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, "Open board", filter="JSON (*.json)")[0]
+        filename = dialog.getOpenFileName(self, QCoreApplication.translate("t", "Открыть плату"),
+                                          filter="JSON (*.json)")[0]
         if filename:
             self._current_file_path = filename
             try:
@@ -557,8 +563,8 @@ class EPLabWindow(QMainWindow):
             except Exception as e:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
-                msg.setWindowTitle("Error")
-                msg.setText("Invalid input file")
+                msg.setWindowTitle(QCoreApplication.translate("t", "Ошибка"))
+                msg.setText(QCoreApplication.translate("t", "Формат файла не подходит"))
                 msg.setInformativeText(str(e)[0:512] + "\n...")
                 msg.exec_()
                 return
@@ -576,7 +582,8 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, "Open board image", filter="Image Files (*.png *.jpg *.bmp)")[0]
+        filename = dialog.getOpenFileName(self, QCoreApplication.translate("t", "Открыть изображение платы"),
+                                          filter="Image Files (*.png *.jpg *.bmp)")[0]
         if filename:
             epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
             self._board_window.set_board(self._measurement_plan)
@@ -602,9 +609,8 @@ class EPLabWindow(QMainWindow):
             self._player.score_updated(score)
         else:
             self._score_wrapper.set_dummy_score()
-
-        self._iv_window.plot.set_lower_text("Voltage scale (V) and current scale (mA): "
-                                            "{}".format(self._iv_window.plot.get_minor_axis_step()))
+        _text = QCoreApplication.translate("t", "Шкала по напряжению (V) и шкала по току (mA): ")
+        self._iv_window.plot.set_lower_text("{} {}".format(_text, self._iv_window.plot.get_minor_axis_step()))
 
     def _remove_ref_curve(self):
         self._ref_curve = None
@@ -617,7 +623,7 @@ class EPLabWindow(QMainWindow):
         self._update_curves()
 
         # Draw text
-        self._iv_window.plot.set_center_text("DISCONNECTED")
+        self._iv_window.plot.set_center_text(QCoreApplication.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
 
         if self._msystem.reconnect():
             # Reconnection success!
