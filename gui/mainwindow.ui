@@ -343,6 +343,9 @@
    <property name="windowTitle">
     <string>Файл</string>
    </property>
+   <property name="toolTip">
+    <string>Файл</string>
+   </property>
    <property name="toolTipDuration">
     <number>-1</number>
    </property>
@@ -366,6 +369,9 @@
    <property name="windowTitle">
     <string>План тестирования</string>
    </property>
+   <property name="toolTip">
+    <string>План тестирования</string>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -383,6 +389,9 @@
    <property name="windowTitle">
     <string>Сравнение</string>
    </property>
+   <property name="toolTip">
+    <string>Сравнение</string>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -395,6 +404,9 @@
   </widget>
   <widget class="QToolBar" name="toolBar_mode">
    <property name="windowTitle">
+    <string>Режим</string>
+   </property>
+   <property name="toolTip">
     <string>Режим</string>
    </property>
    <attribute name="toolBarArea">
