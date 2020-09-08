@@ -639,9 +639,9 @@ class EPLabWindow(QMainWindow):
         else:
             self._score_wrapper.set_dummy_score()
         _v, _c = self._iv_window.plot.get_minor_axis_step()
-        _text = QCoreApplication.translate("t", "Напряжение: ") + str(_v) + \
-                QCoreApplication.translate("t", "(В)/дел.\nТок: ") + str(_c) + \
-                QCoreApplication.translate("t", "(мА)/дел.")
+        _text = (QCoreApplication.translate("t", "Напряжение: ") + str(_v) +
+                 QCoreApplication.translate("t", "(В)/дел.\nТок: ") + str(_c) +
+                 QCoreApplication.translate("t", "(мА)/дел."))
         self._iv_window.plot.set_lower_text(_text)
 
     def _remove_ref_curve(self):
