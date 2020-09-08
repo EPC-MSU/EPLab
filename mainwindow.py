@@ -70,7 +70,8 @@ class EPLabWindow(QMainWindow):
         self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
 
         self._iv_window = IVViewer(grid_color=QColor(255, 255, 255),
-                                   back_color=QColor(0, 0, 0), solid_axis_enabled=False)
+                                   back_color=QColor(0, 0, 0), solid_axis_enabled=False,
+                                   axis_sign_enabled=False)
         self.reference_curve_plot = self._iv_window.plot.add_curve()
         self.test_curve_plot = self._iv_window.plot.add_curve()
         self.test_curve_plot.set_curve_params(QColor(0, 0, 255, 200))
@@ -609,8 +610,11 @@ class EPLabWindow(QMainWindow):
             self._player.score_updated(score)
         else:
             self._score_wrapper.set_dummy_score()
-        _text = QCoreApplication.translate("t", "Шкала по напряжению (V) и шкала по току (mA): ")
-        self._iv_window.plot.set_lower_text("{} {}".format(_text, self._iv_window.plot.get_minor_axis_step()))
+        _v, _c = self._iv_window.plot.get_minor_axis_step()
+        _text = QCoreApplication.translate("t", "Напряжение: ") + str(_v) + \
+                QCoreApplication.translate("t", "(В)/дел.\nТок: ") + str(_c) + \
+                QCoreApplication.translate("t", "(мА)/дел.")
+        self._iv_window.plot.set_lower_text(_text)
 
     def _remove_ref_curve(self):
         self._ref_curve = None

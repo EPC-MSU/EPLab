@@ -508,7 +508,14 @@
    <property name="checked">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/test_plan_tab_s_icon.png</normaloff>../media/test_plan_tab_s_icon.png</iconset>
+   </property>
    <property name="text">
+    <string>Сравнение</string>
+   </property>
+   <property name="iconText">
     <string>Сравнение</string>
    </property>
    <property name="autoRepeat">
@@ -518,6 +525,10 @@
   <action name="writing_mode_action">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/test_plan_tab_zp_icon.png</normaloff>../media/test_plan_tab_zp_icon.png</iconset>
    </property>
    <property name="text">
     <string>Запись плана тестирования</string>
@@ -529,6 +540,10 @@
   <action name="testing_mode_action">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/test_plan_tab_tp_icon.png</normaloff>../media/test_plan_tab_tp_icon.png</iconset>
    </property>
    <property name="text">
     <string>Тестирование по плану</string>
