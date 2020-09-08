@@ -239,12 +239,12 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="planDock">
+  <widget class="QDockWidget" name="commentDock">
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="windowTitle">
-    <string>Режимы</string>
+    <string>Комментарий</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -366,6 +366,9 @@
      <height>30</height>
     </size>
    </property>
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
    <property name="windowTitle">
     <string>План тестирования</string>
    </property>
@@ -431,7 +434,7 @@
   <action name="open_file_action">
    <property name="icon">
     <iconset>
-     <normaloff>../media/openfile.png</normaloff>../media/openfile.png</iconset>
+     <normaloff>../media/openfile.jpg</normaloff>../media/openfile.jpg</iconset>
    </property>
    <property name="text">
     <string>Открыть план тестирования</string>
