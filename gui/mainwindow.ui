@@ -297,6 +297,8 @@
     <addaction name="open_window_board_action"/>
     <addaction name="freeze_curve_a_action"/>
     <addaction name="freeze_curve_b_action"/>
+    <addaction name="separator"/>
+    <addaction name="search_optimal_action"/>
    </widget>
    <widget class="QMenu" name="mode_menu_action">
     <property name="title">
@@ -674,6 +676,11 @@
    </property>
    <property name="text">
     <string/>
+   </property>
+  </action>
+  <action name="search_optimal_action">
+   <property name="text">
+    <string>Автоподбор параметров</string>
    </property>
   </action>
  </widget>
