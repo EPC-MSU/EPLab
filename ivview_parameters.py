@@ -9,7 +9,10 @@ class IVViewerParametersAdjuster:
 
         # Make test curve blue, because EP U22 test channel is marked as blue.
         # #TODO: Move curve color to EPProduct config
-        self._viewer._plot.set_test_curve_params(color=QColor(0, 0, 255, 200))
+
+        self.test_curve_plot = self._viewer._plot.add_curve()
+        self.reference_curve_plot = self._viewer._plot.add_curve()
+        self.test_curve_plot.set_curve_params(color=QColor(0, 0, 255, 200))
 
         # Dictionary? TODO: universal parameters adjuster
         self._volt_min_borders = {  # Voltage [V] -> Minimum border [V]

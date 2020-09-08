@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, Qt
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog
+from PyQt5.QtGui import QIcon, QColor
+from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication
 from PyQt5 import uic
 
 from warnings import warn
@@ -18,8 +18,21 @@ from ivview_parameters import IVViewerParametersAdjuster
 from version import Version
 from player import SoundPlayer
 from common import WorkMode, DeviceErrorsHandler
-
+import os
 from typing import Optional
+
+
+class SettingsWindow(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+
+        uic.loadUi(os.path.join("gui", "settings.ui"), self)
+
+        self.setWindowTitle(QCoreApplication.translate("t", "Настройки"))
+        self.score_treshold_button_minus.clicked.connect(parent._on_threshold_dec)
+        self.score_treshold_button_plus.clicked.connect(parent._on_threshold_inc)
+
+        self.auto_calibration_push_button.clicked.connect(parent._on_auto_calibration)
 
 
 class EPLabWindow(QMainWindow):
@@ -41,7 +54,7 @@ class EPLabWindow(QMainWindow):
         self._score_wrapper = ScoreWrapper(self.score_label)
 
         self._player = SoundPlayer()
-        self._player.set_mute(not self.sound_enabled_checkbox.isChecked())
+        self._player.set_mute(not self.sound_enabled_action.isChecked())
 
         self.setWindowIcon(QIcon("media/ico.png"))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
@@ -56,9 +69,15 @@ class EPLabWindow(QMainWindow):
         self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
         self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
 
-        self._iv_window = IVViewer()
+        self._iv_window = IVViewer(grid_color=QColor(255, 255, 255),
+                                   back_color=QColor(0, 0, 0), solid_axis_enabled=False,
+                                   axis_sign_enabled=False)
+        self.reference_curve_plot = self._iv_window.plot.add_curve()
+        self.test_curve_plot = self._iv_window.plot.add_curve()
+        self.test_curve_plot.set_curve_params(QColor(0, 0, 255, 200))
 
         self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
+        self.__settings_window = SettingsWindow(self)
 
         self.setCentralWidget(self._iv_window)
 
@@ -94,40 +113,34 @@ class EPLabWindow(QMainWindow):
         for button, resistance in self._sensitivities.items():
             button.clicked.connect(self._on_settings_btn_checked)
 
-        self.zp_push_button_left.clicked.connect(self._on_go_left_pin)
-        self.tp_push_button_left.clicked.connect(self._on_go_left_pin)
-        self.zp_push_button_right.clicked.connect(self._on_go_right_pin)
-        self.tp_push_button_right.clicked.connect(self._on_go_right_pin)
-        self.zp_push_button_new_point.clicked.connect(self._on_new_pin)
-        self.zp_push_button_save.clicked.connect(self._on_save_pin)
-        self.zp_open_file_button.clicked.connect(self._on_load_board)
-        self.tp_open_file_button.clicked.connect(self._on_load_board)  # same button on test tab
-        self.zp_new_file_button.clicked.connect(self._on_new_board)
-        self.zp_save_file_button.clicked.connect(self._on_save_board)
-        self.zp_save_file_as_button.clicked.connect(self._on_save_board_as)
-        self.zp_add_image_button.clicked.connect(self._on_load_board_image)
+        self.last_point_action.triggered.connect(self._on_go_left_pin)
+        self.next_point_action.triggered.connect(self._on_go_right_pin)
+        self.new_point_action.triggered.connect(self._on_new_pin)
+        self.save_point_action.triggered.connect(self._on_save_pin)
+        self.open_file_action.triggered.connect(self._on_load_board)  # same button on test tab
+        self.new_file_action.triggered.connect(self._on_new_board)
+        self.save_file_action.triggered.connect(self._on_save_board)
+        self.save_as_file_action.triggered.connect(self._on_save_board_as)
+        self.add_board_image_action.triggered.connect(self._on_load_board_image)
+        self.open_window_board_action.triggered.connect(self._on_open_board_image)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
+        self.about_action.triggered.connect(self._about_product_message)
 
-        self.sound_enabled_checkbox.stateChanged.connect(self._on_sound_checked)
+        self.sound_enabled_action.toggled.connect(self._on_sound_checked)
 
-        self.freeze_curve_a_check_box.stateChanged.connect(self._on_freeze_a)
-        self.freeze_curve_b_check_box.stateChanged.connect(self._on_freeze_b)
+        self.freeze_curve_a_action.toggled.connect(self._on_freeze_a)
+        self.freeze_curve_b_action.toggled.connect(self._on_freeze_b)
 
         if "ref" not in self._msystem.measurers_map:
-            self.freeze_curve_a_check_box.setEnabled(False)
+            self.freeze_curve_b_action.setEnabled(False)
 
-        self.save_image_push_button.clicked.connect(self._on_save_image)
-        self.tp_push_button_save.clicked.connect(self._on_save_image)
+        self.save_screen_action.triggered.connect(self._on_save_image)
 
-        self.pushButton_score_threshold_minus.clicked.connect(self._on_threshold_dec)
-        self.pushButton_score_threshold_plus.clicked.connect(self._on_threshold_inc)
-
-        self.c_push_button_auto_calibration.clicked.connect(self._on_auto_calibration)
-
-        self.test_plan_tab_widget.setCurrentIndex(0)  # first tab - curves comparison
-        self.test_plan_tab_widget.currentChanged.connect(self._on_test_plan_tab_switch)
-
+        self.comparing_mode_action.triggered.connect(lambda: self._on_work_mode_switch(WorkMode.compare))
+        self.writing_mode_action.triggered.connect(lambda: self._on_work_mode_switch(WorkMode.write))
+        self.testing_mode_action.triggered.connect(lambda: self._on_work_mode_switch(WorkMode.test))
+        self.settings_mode_action.triggered.connect(self._show_settings_window)
         with self._device_errors_handler:
             for m in self._msystem.measurers:
                 m.open_device()
@@ -231,8 +244,8 @@ class EPLabWindow(QMainWindow):
 
         if mode is not WorkMode.compare:
             # "Freeze" is only for compare mode
-            self.freeze_curve_a_check_box.setChecked(False)
-            self.freeze_curve_b_check_box.setChecked(False)
+            self.freeze_curve_a_action.setChecked(False)
+            self.freeze_curve_b_action.setChecked(False)
 
         if mode is WorkMode.compare:
             # Remove reference curve in case we have only one IVMeasurer
@@ -306,33 +319,78 @@ class EPLabWindow(QMainWindow):
             self._board_window.show()
 
     @pyqtSlot()
+    def _on_open_board_image(self):
+        self._open_board_window_if_needed()
+
+    @pyqtSlot()
     def _on_auto_calibration(self):
         with self._device_errors_handler:
             self._msystem.calibrate()
 
-    @pyqtSlot(int)
-    def _on_freeze_a(self, state: int):
+    @pyqtSlot(bool)
+    def _on_freeze_b(self, state: bool):
         if "ref" in self._msystem.measurers_map:
-            if state == Qt.Checked:
+            if state:
                 self._msystem.measurers_map["ref"].freeze()
             else:
                 self._msystem.measurers_map["ref"].unfreeze()
+            # self.freeze_curve_b_action.setChecked(state)
 
-    @pyqtSlot(int)
-    def _on_freeze_b(self, state: int):
-        if state == Qt.Checked:
+    @pyqtSlot(bool)
+    def _on_freeze_a(self, state: bool):
+        if state:
             self._msystem.measurers_map["test"].freeze()
         else:
             self._msystem.measurers_map["test"].unfreeze()
+        # self.freeze_curve_a_action.setChecked(state)
 
-    @pyqtSlot(int)
-    def _on_sound_checked(self, state: int):
-        self._player.set_mute(state != Qt.Checked)
+    @pyqtSlot(bool)
+    def _on_sound_checked(self, state: bool):
+        self._player.set_mute(not state)
+
+    @pyqtSlot(bool)
+    def _about_product_message(self):
+        def msgbtn(i):
+            if i.text() == "Перейти" or i.text() == "Go":
+                import webbrowser
+                webbrowser.open_new_tab("http://eyepoint.physlab.ru")
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setWindowTitle(QCoreApplication.translate("t", "Справка"))
+        msg.setText(self.windowTitle())
+        msg.setInformativeText(QCoreApplication.translate("t", "Программное обеспечение для работы с устройствами "
+                                                               "линейки EyePoint, предназначенными для поиска "
+                                                               "неисправностей на печатных платах в ручном режиме "
+                                                               "(при помощи ручных щупов). Для более подробной "
+                                                               "информации об Eyepoint, перейдите по ссылке "
+                                                               "http://eyepoint.physlab.ru."))
+        msg.addButton(QCoreApplication.translate("t", "Перейти"), QMessageBox.YesRole)
+        msg.addButton(QCoreApplication.translate("t", "ОК"), QMessageBox.NoRole)
+        msg.buttonClicked.connect(msgbtn)
+        msg.exec_()
 
     @pyqtSlot()
     def _on_save_comment(self):
         comment = self.line_comment_pin.text()
         self._measurement_plan.get_current_pin().comment = comment
+
+    def _update_threshold(self):
+        self.__settings_window.score_treshold_value_label.setText(f"{round(self._score_wrapper.threshold * 100.0)}%")
+        self._player.set_threshold(self._score_wrapper.threshold)
+
+    @pyqtSlot()
+    def _on_threshold_dec(self):
+        self._score_wrapper.decrease_threshold()
+        self._update_threshold()
+
+    @pyqtSlot()
+    def _on_threshold_inc(self):
+        self._score_wrapper.increase_threshold()
+        self._update_threshold()
+
+    @pyqtSlot()
+    def _show_settings_window(self):
+        self.__settings_window.open()
 
     @pyqtSlot()
     def _on_save_image(self):
@@ -342,24 +400,25 @@ class EPLabWindow(QMainWindow):
         filename = "ivc" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
 
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, "Save IVC", filter="Image (*.png)", directory=filename)[0]
+        filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить ВАХ"),
+                                          filter="Image (*.png)", directory=filename)[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
             image.save(filename)
 
-    @pyqtSlot(int)
-    def _on_test_plan_tab_switch(self, index: int):
-        tab = self.test_plan_tab_widget.currentWidget().objectName()
-        if tab == "test_plan_tab_S":  # compare
-            self._change_work_mode(WorkMode.compare)
-        elif tab == "test_plan_tab_ZP":  # write
-            self._change_work_mode(WorkMode.write)
-        elif tab == "test_plan_tab_TP":  # test
-            self._change_work_mode(WorkMode.test)
-        elif tab == "test_plan_tab_SET":  # settings
-            # Settings mode is equal to compare mode, see #39314-9
-            self._change_work_mode(WorkMode.compare)
+    @pyqtSlot(bool)
+    def _on_work_mode_switch(self, mode: WorkMode):
+        self.comparing_mode_action.setChecked(mode is WorkMode.compare)
+        self.writing_mode_action.setChecked(mode is WorkMode.write)
+        self.testing_mode_action.setChecked(mode is WorkMode.test)
+        self.next_point_action.setEnabled(mode is not WorkMode.compare)
+        self.last_point_action.setEnabled(mode is not WorkMode.compare)
+        self.label_number_point.setEnabled(mode is not WorkMode.compare)
+        self.new_point_action.setEnabled(mode is WorkMode.write)
+        self.save_point_action.setEnabled(mode is WorkMode.write)
+        self.add_board_image_action.setEnabled(mode is WorkMode.write)
+        self._change_work_mode(mode)
 
     @pyqtSlot(QPointF)
     def _on_board_right_click(self, point: QPointF):
@@ -382,8 +441,7 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         index = self._measurement_plan.get_current_index()
-        self.zp_label_num.setText(str(index))
-        self.tp_label_num.setText(str(index))
+        self.label_number_point.setText(str(index))
         self._board_window.workspace.select_point(index)
 
         if self._work_mode in (WorkMode.test, WorkMode.write):
@@ -401,20 +459,6 @@ class EPLabWindow(QMainWindow):
             else:
                 self._remove_ref_curve()
                 self._update_curves()
-
-    def _update_threshold(self):
-        self.label_score_threshold_value.setText(f"{round(self._score_wrapper.threshold * 100.0)}%")
-        self._player.set_threshold(self._score_wrapper.threshold)
-
-    @pyqtSlot()
-    def _on_threshold_dec(self):
-        self._score_wrapper.decrease_threshold()
-        self._update_threshold()
-
-    @pyqtSlot()
-    def _on_threshold_inc(self):
-        self._score_wrapper.increase_threshold()
-        self._update_threshold()
 
     @pyqtSlot()
     def _on_go_left_pin(self):
@@ -480,7 +524,8 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_new_board(self):
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, "Save new board", filter="JSON (*.json)")[0]
+        filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить новую плату"),
+                                          filter="JSON (*.json)")[0]
         if filename:
             self._current_file_path = filename
             self._reset_board()
@@ -491,7 +536,8 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_save_board_as(self):
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, "Save board", filter="JSON (*.json)")[0]
+        filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить плату"),
+                                          filter="JSON (*.json)")[0]
         if filename:
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._current_file_path = filename
@@ -529,7 +575,8 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, "Open board", filter="JSON (*.json)")[0]
+        filename = dialog.getOpenFileName(self, QCoreApplication.translate("t", "Открыть плату"),
+                                          filter="JSON (*.json)")[0]
         if filename:
             self._current_file_path = filename
             try:
@@ -537,8 +584,8 @@ class EPLabWindow(QMainWindow):
             except Exception as e:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
-                msg.setWindowTitle("Error")
-                msg.setText("Invalid input file")
+                msg.setWindowTitle(QCoreApplication.translate("t", "Ошибка"))
+                msg.setText(QCoreApplication.translate("t", "Формат файла не подходит"))
                 msg.setInformativeText(str(e)[0:512] + "\n...")
                 msg.exec_()
                 return
@@ -556,7 +603,8 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, "Open board image", filter="Image Files (*.png *.jpg *.bmp)")[0]
+        filename = dialog.getOpenFileName(self, QCoreApplication.translate("t", "Открыть изображение платы"),
+                                          filter="Image Files (*.png *.jpg *.bmp)")[0]
         if filename:
             epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
             self._board_window.set_board(self._measurement_plan)
@@ -572,8 +620,8 @@ class EPLabWindow(QMainWindow):
             self._ref_curve = ref
 
         # Update plots
-        self._iv_window.plot.set_test_curve(self._test_curve)
-        self._iv_window.plot.set_reference_curve(self._ref_curve)
+        self.test_curve_plot.set_curve(self._test_curve)
+        self.reference_curve_plot.set_curve(self._ref_curve)
 
         # Update score
         if self._ref_curve and self._test_curve:
@@ -582,6 +630,11 @@ class EPLabWindow(QMainWindow):
             self._player.score_updated(score)
         else:
             self._score_wrapper.set_dummy_score()
+        _v, _c = self._iv_window.plot.get_minor_axis_step()
+        _text = QCoreApplication.translate("t", "Напряжение: ") + str(_v) + \
+                QCoreApplication.translate("t", "(В)/дел.\nТок: ") + str(_c) + \
+                QCoreApplication.translate("t", "(мА)/дел.")
+        self._iv_window.plot.set_lower_text(_text)
 
     def _remove_ref_curve(self):
         self._ref_curve = None
@@ -595,7 +648,7 @@ class EPLabWindow(QMainWindow):
         self._iv_window.plot.set_test_curve(None)
         self._iv_window.plot.set_reference_curve(None)
         # Draw text
-        self._iv_window.plot.set_center_text("DISCONNECTED")
+        self._iv_window.plot.set_center_text(QCoreApplication.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
 
         if self._msystem.reconnect():
             # Reconnection success!
