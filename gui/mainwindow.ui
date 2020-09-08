@@ -363,7 +363,7 @@
    <property name="minimumSize">
     <size>
      <width>0</width>
-     <height>30</height>
+     <height>0</height>
     </size>
    </property>
    <property name="acceptDrops">
@@ -373,7 +373,10 @@
     <string>План тестирования</string>
    </property>
    <property name="toolTip">
-    <string>План тестирования</string>
+    <string>Тестирование по плану</string>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonFollowStyle</enum>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -384,7 +387,23 @@
    <addaction name="last_point_action"/>
    <addaction name="label_number_point"/>
    <addaction name="next_point_action"/>
-   <addaction name="separator"/>
+  </widget>
+  <widget class="QToolBar" name="toolBar_write">
+   <property name="windowTitle">
+    <string>Запись плана тестирования</string>
+   </property>
+   <property name="toolTip">
+    <string>Запись плана тестирования</string>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
    <addaction name="new_point_action"/>
    <addaction name="save_point_action"/>
   </widget>
@@ -411,6 +430,15 @@
    </property>
    <property name="toolTip">
     <string>Режим</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
