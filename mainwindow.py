@@ -75,7 +75,7 @@ class EPLabWindow(QMainWindow):
                                    axis_sign_enabled=False)
         self.reference_curve_plot = self._iv_window.plot.add_curve()
         self.test_curve_plot = self._iv_window.plot.add_curve()
-        self.test_curve_plot.set_curve_params(QColor(0, 0, 255, 200))
+        self.test_curve_plot.set_curve_params(QColor(0, 128, 255, 200))
 
         self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
         self.__settings_window = SettingsWindow(self)
