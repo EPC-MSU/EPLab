@@ -244,10 +244,10 @@ class EPLabWindow(QMainWindow):
         # Comment is only for test and write mode
         self.line_comment_pin.setEnabled(mode is not WorkMode.compare)
 
-        if mode is not WorkMode.compare:
+        # if mode is not WorkMode.compare:
             # "Freeze" is only for compare mode
-            self.freeze_curve_a_action.setChecked(False)
-            self.freeze_curve_b_action.setChecked(False)
+            # self.freeze_curve_a_action.setChecked(False)
+            # self.freeze_curve_b_action.setChecked(False)
 
         if mode is WorkMode.compare:
             # Remove reference curve in case we have only one IVMeasurer
@@ -350,7 +350,6 @@ class EPLabWindow(QMainWindow):
             self._msystem.measurers_map["test"].freeze()
         else:
             self._msystem.measurers_map["test"].unfreeze()
-        # self.freeze_curve_a_action.setChecked(state)
 
     @pyqtSlot(bool)
     def _on_sound_checked(self, state: bool):
