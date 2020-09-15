@@ -244,7 +244,6 @@ class EPLabWindow(QMainWindow):
         # Comment is only for test and write mode
         self.line_comment_pin.setEnabled(mode is not WorkMode.compare)
 
-
         if mode is WorkMode.compare:
             # Remove reference curve in case we have only one IVMeasurer
             # in compare mode
