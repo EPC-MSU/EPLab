@@ -277,7 +277,7 @@
      <x>0</x>
      <y>0</y>
      <width>882</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu_action">
@@ -387,7 +387,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="last_point_action"/>
-   <addaction name="label_number_point"/>
    <addaction name="next_point_action"/>
   </widget>
   <widget class="QToolBar" name="toolBar_write">
@@ -649,6 +648,9 @@
    <property name="text">
     <string>Новая точка</string>
    </property>
+   <property name="iconText">
+    <string> Новая точка</string>
+   </property>
   </action>
   <action name="save_point_action">
    <property name="enabled">
@@ -661,6 +663,9 @@
    <property name="text">
     <string>Сохранить точку</string>
    </property>
+   <property name="iconText">
+    <string> Сохранить точку</string>
+   </property>
   </action>
   <action name="add_board_image_action">
    <property name="enabled">
@@ -668,14 +673,6 @@
    </property>
    <property name="text">
     <string>Добавить изображение</string>
-   </property>
-  </action>
-  <action name="label_number_point">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string/>
    </property>
   </action>
   <action name="search_optimal_action">

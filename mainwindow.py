@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLineEdit
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication
 from PyQt5 import uic
@@ -113,7 +113,13 @@ class EPLabWindow(QMainWindow):
         }
         for button, resistance in self._sensitivities.items():
             button.clicked.connect(self._on_settings_btn_checked)
-
+        self.num_point_line_edit = QLineEdit(self)
+        self.num_point_line_edit.setFixedWidth(40)
+        # cursor = QCursor(Qt.WaitCursor)
+        # self._iv_window.setCursor(cursor)
+        self.num_point_line_edit.setEnabled(False)
+        self.toolBar_test.insertWidget(self.next_point_action, self.num_point_line_edit)
+        self.num_point_line_edit.returnPressed.connect(self._on_go_selected_pin)
         self.last_point_action.triggered.connect(self._on_go_left_pin)
         self.next_point_action.triggered.connect(self._on_go_right_pin)
         self.new_point_action.triggered.connect(self._on_new_pin)
@@ -416,7 +422,7 @@ class EPLabWindow(QMainWindow):
         self.testing_mode_action.setChecked(mode is WorkMode.test)
         self.next_point_action.setEnabled(mode is not WorkMode.compare)
         self.last_point_action.setEnabled(mode is not WorkMode.compare)
-        self.label_number_point.setEnabled(mode is not WorkMode.compare)
+        self.num_point_line_edit.setEnabled(mode is not WorkMode.compare)
         self.new_point_action.setEnabled(mode is WorkMode.write)
         self.save_point_action.setEnabled(mode is WorkMode.write)
         self.add_board_image_action.setEnabled(mode is WorkMode.write)
@@ -443,7 +449,7 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         index = self._measurement_plan.get_current_index()
-        self.label_number_point.setText(str(index))
+        self.num_point_line_edit.setText(str(index))
         self._board_window.workspace.select_point(index)
 
         if self._work_mode in (WorkMode.test, WorkMode.write):
@@ -461,6 +467,12 @@ class EPLabWindow(QMainWindow):
             else:
                 self._remove_ref_curve()
                 self._update_curves()
+
+    @pyqtSlot()
+    def _on_go_selected_pin(self):
+        self._measurement_plan.go_pin(int(self.num_point_line_edit.text()))
+        self._update_current_pin()
+        self._open_board_window_if_needed()
 
     @pyqtSlot()
     def _on_go_left_pin(self):
@@ -630,13 +642,48 @@ class EPLabWindow(QMainWindow):
             score = self._calculate_score(self._ref_curve, self._test_curve)
             self._score_wrapper.set_score(score)
             self._player.score_updated(score)
+            score = str(round(score * 100.0)) + "%"
         else:
+            score = "-"
             self._score_wrapper.set_dummy_score()
         _v, _c = self._iv_window.plot.get_minor_axis_step()
-        _text = (QCoreApplication.translate("t", "Напряжение: ") + str(_v) +
-                 QCoreApplication.translate("t", "(В)/дел.\nТок: ") + str(_c) +
-                 QCoreApplication.translate("t", "(мА)/дел."))
+        settings = self._msystem.measurers[0].get_settings()
+        sensity = [button.text() for button in self._sensitivities.keys() if self._sensitivities[button] ==
+                                    settings.internal_resistance]
+
+        _t0 = QCoreApplication.translate("t", "Ампл. проб. сигнала: ") + str(settings.max_voltage) + \
+              QCoreApplication.translate("t", " мА / дел.")
+        _t1 = QCoreApplication.translate("t", "Ток: ") + str(_c) + QCoreApplication.translate("t", " В / дел.")
+        _t2 = self._trans("Напряжение: ") + str(_v) + QCoreApplication.translate("t", " B")
+        _t3 = QCoreApplication.translate("t", "Чувствительность: ") + str(sensity[0])
+        _t4 = QCoreApplication.translate("t", "Частота: ") + str(settings.probe_signal_frequency) + \
+              QCoreApplication.translate("t", " Гц")
+        _t5 = QCoreApplication.translate("t", "Различие: ") + score
+        first_row = [_t0, _t1]
+        second_row = [_t2, _t3]
+        third_row = [_t4, _t5]
+        _text = ""
+        for i in list(zip(first_row, second_row, third_row)):
+            line = "".join(str(x).ljust(len(_t0) + 1) for x in i)
+            _text += "{}\n".format(line)
+        # _t0, _t1 = self._append_tab(_t0, _t1)
+        # _t2, _t3 = self._append_tab(_t2, _t3)
+        # _t4, _t5 = self._append_tab(_t4, _t5)
+        # _text = (_t0 + "\t" + _t2 + "\t" + _t4 + "\n" +_t1 + "\t" + _t3 + "\t" + _t5)
         self._iv_window.plot.set_lower_text(_text)
+
+    def _trans(self, string):
+        return QCoreApplication.translate("t", string)
+
+    def _append_tab(self, str1, str2):
+        while len(str1) != len(str2):
+            if len(str1) < len(str2):
+                str1 += ""
+            elif len(str2) < len(str1):
+                str2 += "0"
+            else:
+                break
+        return str1, str2
 
     def _remove_ref_curve(self):
         self._ref_curve = None

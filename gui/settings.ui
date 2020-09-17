@@ -20,7 +20,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>80</y>
+     <y>60</y>
      <width>111</width>
      <height>28</height>
     </rect>
@@ -32,8 +32,8 @@
   <widget class="QPushButton" name="score_treshold_button_plus">
    <property name="geometry">
     <rect>
-     <x>280</x>
-     <y>80</y>
+     <x>270</x>
+     <y>60</y>
      <width>70</width>
      <height>28</height>
     </rect>
@@ -52,7 +52,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>80</y>
+     <y>60</y>
      <width>70</width>
      <height>28</height>
     </rect>
@@ -83,8 +83,8 @@
   <widget class="QLabel" name="score_treshold_value_label">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>80</y>
+     <x>210</x>
+     <y>60</y>
      <width>50</width>
      <height>28</height>
     </rect>
