@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLin
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
 
 from warnings import warn
 from datetime import datetime
@@ -76,7 +75,7 @@ class EPLabWindow(QMainWindow):
         self.main_widget = QWidget(self)
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
-        x = QVBoxLayout()
+        vbox = QVBoxLayout()
 
         self._iv_window = IVViewer(grid_color=QColor(255, 255, 255),
                                    back_color=QColor(0, 0, 0), solid_axis_enabled=False,
@@ -87,11 +86,11 @@ class EPLabWindow(QMainWindow):
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
         self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
         self.__settings_window = SettingsWindow(self)
-        x.setSpacing(0)
-        x.addWidget(self._iv_window)
-        x.addLayout(self.grid_param)
-        l = QHBoxLayout(self.main_widget)
-        l.addLayout(x)
+        vbox.setSpacing(0)
+        vbox.addWidget(self._iv_window)
+        vbox.addLayout(self.grid_param)
+        hbox = QHBoxLayout(self.main_widget)
+        hbox.addLayout(vbox)
         self._reset_board()
         self._board_window.set_board(self._measurement_plan)
 
@@ -657,27 +656,24 @@ class EPLabWindow(QMainWindow):
         _v, _c = self._iv_window.plot.get_minor_axis_step()
         settings = self._msystem.measurers[0].get_settings()
         sensity = [button.text() for button in self._sensitivities.keys() if self._sensitivities[button] ==
-                                    settings.internal_resistance]
-
-        _t0 = QCoreApplication.translate("t", "Ампл. проб. сигнала: ") + str(settings.max_voltage) + \
-              QCoreApplication.translate("t", " мА / дел.")
-        _t1 = QCoreApplication.translate("t", "Ток: ") + str(_c) + QCoreApplication.translate("t", " В / дел.")
-        _t2 = self._trans("Напряжение: ") + str(_v) + QCoreApplication.translate("t", " B")
-        _t3 = QCoreApplication.translate("t", "Чувствительность: ") + str(sensity[0])
-        _t4 = QCoreApplication.translate("t", "Частота: ") + str(settings.probe_signal_frequency) + \
-              QCoreApplication.translate("t", " Гц")
-        _t5 = QCoreApplication.translate("t", "Различие: ") + score
-
-        self._param_dict["Ампл. проб. сигнала"].setText(_t0)
-        self._param_dict["Ток"].setText(_t1)
-        self._param_dict["Напряжение"].setText(_t2)
-        self._param_dict["Чувствительность"].setText(_t3)
-        self._param_dict["Частота"].setText(_t4)
-        self._param_dict["Различие"].setText(_t5)
+                   settings.internal_resistance]
+        self._param_dict["Напряжение"].setText(QCoreApplication.translate("t", "Напряжение: ") + str(_v) +
+                                               QCoreApplication.translate("t", " В / дел."))
+        self._param_dict["Ампл. проб. сигнала"].setText(QCoreApplication.translate("t", "Ампл. проб. сигнала: ") +
+                                                        str(settings.max_voltage) +
+                                                        QCoreApplication.translate("t", " B"))
+        self._param_dict["Частота"].setText(QCoreApplication.translate("t", "Частота: ") +
+                                            str(settings.probe_signal_frequency) +
+                                            QCoreApplication.translate("t", " Гц"))
+        self._param_dict["Ток"].setText(QCoreApplication.translate("t", "Ток: ") + str(_c) +
+                                        QCoreApplication.translate("t", " мА / дел."))
+        self._param_dict["Чувствительность"].setText(QCoreApplication.translate("t", "Чувствительность: ") +
+                                                     str(sensity[0]))
+        self._param_dict["Различие"].setText(QCoreApplication.translate("t", "Различие: ") + score)
 
     def plot_parameters(self):
-        self._param_dict = {"Ампл. проб. сигнала": QLabel(self), "Ток": QLabel(self), "Напряжение": QLabel(self),
-                            "Чувствительность": QLabel(self), "Частота": QLabel(self), "Различие": QLabel(self)}
+        self._param_dict = {"Напряжение": QLabel(self), "Ампл. проб. сигнала": QLabel(self), "Частота": QLabel(self),
+                            "Ток": QLabel(self), "Чувствительность": QLabel(self), "Различие": QLabel(self)}
         self.grid_param = QGridLayout()
         positions = [(i, j) for i in range(2) for j in range(3)]
         for position, name in zip(positions, self._param_dict.keys()):
@@ -686,19 +682,6 @@ class EPLabWindow(QMainWindow):
             tb.setStyleSheet("background:black; color:white;spacing: 10;")
             tb.addWidget(self._param_dict[name])
             self.grid_param.addWidget(tb, *position)
-
-    def _trans(self, string):
-        return QCoreApplication.translate("t", string)
-
-    def _append_tab(self, str1, str2):
-        while len(str1) != len(str2):
-            if len(str1) < len(str2):
-                str1 += ""
-            elif len(str2) < len(str1):
-                str2 += "0"
-            else:
-                break
-        return str1, str2
 
     def _remove_ref_curve(self):
         self._ref_curve = None
