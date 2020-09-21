@@ -1,7 +1,9 @@
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLineEdit
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLineEdit, QLabel, QWidget, QVBoxLayout, \
+    QHBoxLayout, QToolBar, QGridLayout
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication
 from PyQt5 import uic
+from PyQt5.QtCore import Qt
 
 from warnings import warn
 from datetime import datetime
@@ -70,18 +72,26 @@ class EPLabWindow(QMainWindow):
         self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
         self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
 
+        self.plot_parameters()
+        self.main_widget = QWidget(self)
+        self.main_widget.setFocus()
+        self.setCentralWidget(self.main_widget)
+        x = QVBoxLayout()
+
         self._iv_window = IVViewer(grid_color=QColor(255, 255, 255),
                                    back_color=QColor(0, 0, 0), solid_axis_enabled=False,
                                    axis_sign_enabled=False)
         self.reference_curve_plot = self._iv_window.plot.add_curve()
         self.test_curve_plot = self._iv_window.plot.add_curve()
         self.test_curve_plot.set_curve_params(QColor(0, 128, 255, 200))
-
+        self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
         self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
         self.__settings_window = SettingsWindow(self)
-
-        self.setCentralWidget(self._iv_window)
-
+        x.setSpacing(0)
+        x.addWidget(self._iv_window)
+        x.addLayout(self.grid_param)
+        l = QHBoxLayout(self.main_widget)
+        l.addLayout(x)
         self._reset_board()
         self._board_window.set_board(self._measurement_plan)
 
@@ -115,8 +125,6 @@ class EPLabWindow(QMainWindow):
             button.clicked.connect(self._on_settings_btn_checked)
         self.num_point_line_edit = QLineEdit(self)
         self.num_point_line_edit.setFixedWidth(40)
-        # cursor = QCursor(Qt.WaitCursor)
-        # self._iv_window.setCursor(cursor)
         self.num_point_line_edit.setEnabled(False)
         self.toolBar_test.insertWidget(self.next_point_action, self.num_point_line_edit)
         self.num_point_line_edit.returnPressed.connect(self._on_go_selected_pin)
@@ -659,18 +667,25 @@ class EPLabWindow(QMainWindow):
         _t4 = QCoreApplication.translate("t", "Частота: ") + str(settings.probe_signal_frequency) + \
               QCoreApplication.translate("t", " Гц")
         _t5 = QCoreApplication.translate("t", "Различие: ") + score
-        first_row = [_t0, _t1]
-        second_row = [_t2, _t3]
-        third_row = [_t4, _t5]
-        _text = ""
-        for i in list(zip(first_row, second_row, third_row)):
-            line = "".join(str(x).ljust(len(_t0) + 1) for x in i)
-            _text += "{}\n".format(line)
-        # _t0, _t1 = self._append_tab(_t0, _t1)
-        # _t2, _t3 = self._append_tab(_t2, _t3)
-        # _t4, _t5 = self._append_tab(_t4, _t5)
-        # _text = (_t0 + "\t" + _t2 + "\t" + _t4 + "\n" +_t1 + "\t" + _t3 + "\t" + _t5)
-        self._iv_window.plot.set_lower_text(_text)
+
+        self._param_dict["Ампл. проб. сигнала"].setText(_t0)
+        self._param_dict["Ток"].setText(_t1)
+        self._param_dict["Напряжение"].setText(_t2)
+        self._param_dict["Чувствительность"].setText(_t3)
+        self._param_dict["Частота"].setText(_t4)
+        self._param_dict["Различие"].setText(_t5)
+
+    def plot_parameters(self):
+        self._param_dict = {"Ампл. проб. сигнала": QLabel(self), "Ток": QLabel(self), "Напряжение": QLabel(self),
+                            "Чувствительность": QLabel(self), "Частота": QLabel(self), "Различие": QLabel(self)}
+        self.grid_param = QGridLayout()
+        positions = [(i, j) for i in range(2) for j in range(3)]
+        for position, name in zip(positions, self._param_dict.keys()):
+            tb = QToolBar()
+            tb.setFixedHeight(30)
+            tb.setStyleSheet("background:black; color:white;spacing: 10;")
+            tb.addWidget(self._param_dict[name])
+            self.grid_param.addWidget(tb, *position)
 
     def _trans(self, string):
         return QCoreApplication.translate("t", string)
