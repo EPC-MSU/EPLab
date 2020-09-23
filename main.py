@@ -5,7 +5,7 @@ import logging
 from argparse import ArgumentParser
 from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerIVM10
 from epcore.measurementmanager import MeasurementSystem
-
+import os
 from mainwindow import EPLabWindow
 
 
@@ -33,7 +33,7 @@ if __name__ == "__main__":
         ivm_1.nominal = 1000
         measurers.append(ivm_1)
     elif "com:" in args.test:
-        ivm_1 = IVMeasurerIVM10(args.test, defer_open=True)
+        ivm_1 = IVMeasurerIVM10(args.test, config=os.path.abspath("cur.ini"), defer_open=True)
         measurers.append(ivm_1)
 
     if args.ref:
@@ -41,7 +41,8 @@ if __name__ == "__main__":
             ivm_2 = IVMeasurerVirtual()
             measurers.append(ivm_2)
         elif "com:" in args.ref:
-            ivm_2 = IVMeasurerIVM10(args.ref, defer_open=True)
+
+            ivm_2 = IVMeasurerIVM10(args.ref, config=os.path.abspath("cur.ini"), defer_open=True)
             measurers.append(ivm_2)
 
     if len(measurers) == 0:
