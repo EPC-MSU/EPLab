@@ -1,5 +1,5 @@
-hg+https://hg.ximc.ru/eyepoint/epcore@adf89c6b28cbb80a7c31a385b1dd524f6bff0abd#egg=epcore
-hg+https://hg.ximc.ru/eyepoint/ivviewer@3fea77ff9555341925b26acbd6aebe796881cb15#egg=ivviewer
+hg+https://hg.ximc.ru/eyepoint/epcore@4fd7b3241f42653d3eb3bb9c10eb26e368a662a7#egg=epcore
+hg+https://hg.ximc.ru/eyepoint/ivviewer@ddc627a554aadaf5713b57e14b7b3889d059948c#egg=ivviewer
 git+https://github.com/EPC-MSU/board-view@Version0.1.0#egg=boardview
 epsound==0.0.12
 PyQt5<=5.15.0
