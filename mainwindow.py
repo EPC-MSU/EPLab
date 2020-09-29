@@ -470,10 +470,10 @@ class EPLabWindow(QMainWindow):
                     settings = measurement.settings
                     self._set_msystem_settings(settings)
                     self._settings_to_ui(settings)
-                    self._update_curves(ref=measurement.ivc)
+                    self._update_curves(ref=measurement.ivc, settings=self._msystem.measurers[0].get_settings())
             else:
                 self._remove_ref_curve()
-                self._update_curves()
+                self._update_curves(settings=self._msystem.measurers[0].get_settings())
 
     @pyqtSlot()
     def _on_go_selected_pin(self):
@@ -633,13 +633,12 @@ class EPLabWindow(QMainWindow):
             self._open_board_window_if_needed()
 
     @pyqtSlot()
-    def _update_curves(self, test: Optional[IVCurve] = None, ref: Optional[IVCurve] = None):
+    def _update_curves(self, test: Optional[IVCurve] = None, ref: Optional[IVCurve] = None, settings=None):
         # Store last curves
         if test is not None:
             self._test_curve = test
         if ref is not None:
             self._ref_curve = ref
-
         # Update plots
         self.test_curve_plot.set_curve(self._test_curve)
         self.reference_curve_plot.set_curve(self._ref_curve)
@@ -654,21 +653,28 @@ class EPLabWindow(QMainWindow):
             score = "-"
             self._score_wrapper.set_dummy_score()
         _v, _c = self._iv_window.plot.get_minor_axis_step()
-        settings = self._msystem.measurers[0].get_settings()
-        sensity = [button.text() for button in self._sensitivities.keys() if self._sensitivities[button] ==
-                   settings.internal_resistance]
+        if settings is not None:
+            sensity = [button.text() for button in self._sensitivities.keys() if self._sensitivities[button] ==
+                       settings.internal_resistance]
+            sensity = sensity[0]
+            max_v = np.round(settings.max_voltage, 1)
+            probe_freq = np.round(settings.probe_signal_frequency, 1)
+        else:
+            sensity = "-"
+            max_v = "-"
+            probe_freq = "-"
         self._param_dict["Напряжение"].setText(QCoreApplication.translate("t", "Напряжение: ") + str(_v) +
                                                QCoreApplication.translate("t", " В / дел."))
         self._param_dict["Ампл. проб. сигнала"].setText(QCoreApplication.translate("t", "Ампл. проб. сигнала: ") +
-                                                        str(settings.max_voltage) +
+                                                        str(max_v) +
                                                         QCoreApplication.translate("t", " B"))
         self._param_dict["Частота"].setText(QCoreApplication.translate("t", "Частота: ") +
-                                            str(settings.probe_signal_frequency) +
+                                            str(probe_freq) +
                                             QCoreApplication.translate("t", " Гц"))
         self._param_dict["Ток"].setText(QCoreApplication.translate("t", "Ток: ") + str(_c) +
                                         QCoreApplication.translate("t", " мА / дел."))
         self._param_dict["Чувствительность"].setText(QCoreApplication.translate("t", "Чувствительность: ") +
-                                                     str(sensity[0]))
+                                                     str(sensity))
         self._param_dict["Различие"].setText(QCoreApplication.translate("t", "Различие: ") + score)
 
     def plot_parameters(self):
@@ -692,15 +698,15 @@ class EPLabWindow(QMainWindow):
         if self._work_mode is WorkMode.compare:
             self._ref_curve = None
         self._update_curves()
-        self._iv_window.plot.set_test_curve(None)
-        self._iv_window.plot.set_reference_curve(None)
+        self.reference_curve_plot.set_curve(None)
+        self.test_curve_plot.set_curve(None)
         # Draw text
         self._iv_window.plot.set_center_text(QCoreApplication.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
 
         if self._msystem.reconnect():
             # Reconnection success!
             self._device_errors_handler.reset_error()
-            self._iv_window.plot.clear_text()
+            self._iv_window.plot.clear_center_text()
             with self._device_errors_handler:
                 # Update current settings to reconnected device
                 settings = self._ui_to_settings()
@@ -719,10 +725,10 @@ class EPLabWindow(QMainWindow):
             else:
                 if self._work_mode is WorkMode.compare:
                     # Just display two current curves
-                    self._update_curves(test, ref)
+                    self._update_curves(test, ref, settings=self._msystem.measurers[0].get_settings())
                 else:
                     # Reference curve will be read from measurement plan
-                    self._update_curves(test=test)
+                    self._update_curves(test=test, settings=self._msystem.measurers[0].get_settings())
 
                 if self._settings_update_next_cycle:
                     # New curve with new settings - we must update plot parameters
@@ -738,7 +744,6 @@ class EPLabWindow(QMainWindow):
                 self._read_curves_periodic_task()
         else:
             self._reconnect_periodic_task()
-
         # Add this task to event loop
         QTimer.singleShot(10, self._periodic_task)
 
