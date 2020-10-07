@@ -70,6 +70,8 @@ class EPLabWindow(QMainWindow):
         self._board_window.workspace.point_selected.connect(self._on_board_pin_selected)
         self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
         self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
+        self.add_cursor_action.triggered.connect(self._on_add_cursor)
+        self.remove_cursor_action.triggered.connect(self._on_del_cursor)
 
         self.plot_parameters()
         self.main_widget = QWidget(self)
@@ -327,6 +329,14 @@ class EPLabWindow(QMainWindow):
     def _open_board_window_if_needed(self):
         if self._measurement_plan.image:
             self._board_window.show()
+
+    @pyqtSlot()
+    def _on_add_cursor(self):
+        self._iv_window.plot.activate_adding_cursor()
+
+    @pyqtSlot()
+    def _on_del_cursor(self):
+        self._iv_window.plot.activate_removing_cursor()
 
     @pyqtSlot()
     def _on_open_board_image(self):
