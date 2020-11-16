@@ -15,6 +15,7 @@ python3 -m venv venv
 --add-data "./venv/lib/python3.6/site-packages/epsound/void.wav:epsound" \
 --add-data "./media/*:media" \
 --add-data "./gui/*:gui" \
+--add-data "./cur.ini;." \
 --icon=media/ico.ico
 
 

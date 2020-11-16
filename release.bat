@@ -22,6 +22,7 @@ venv\Scripts\pyinstaller main.py ^
 --add-data "venv\Lib\site-packages\epsound\void.wav;epsound" ^
 --add-data "media\*;media" ^
 --add-data "gui\*;gui" ^
+--add-data "cur.ini;." ^
 --hidden-import=PyQt5.sip ^
 --icon=media\ico.ico
 
