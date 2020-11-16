@@ -11,22 +11,27 @@
     <message utf8="true">
         <location filename="settings.ui" line="29"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Порог ошибки:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="obsolete">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Score treshold:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Score treshold:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="settings.ui" line="48"/>
         <source>+</source>
-        <translation type="obsolete">+</translation>
+        <translation>+</translation>
     </message>
     <message>
         <location filename="settings.ui" line="67"/>
         <source>-</source>
-        <translation type="obsolete">-</translation>
+        <translation>-</translation>
     </message>
     <message utf8="true">
         <location filename="settings.ui" line="80"/>
         <source>Автокалибровка</source>
-        <translation type="obsolete">Autocalibration</translation>
+        <translation>Autocalibration</translation>
+    </message>
+    <message utf8="true">
+        <location filename="settings.ui" line="14"/>
+        <source>Настройки</source>
+        <translation>Settings</translation>
     </message>
 </context>
 <context>
@@ -147,7 +152,7 @@
         <translation type="obsolete">Save</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="650"/>
+        <location filename="mainwindow.ui" line="669"/>
         <source>Новая точка</source>
         <translation>New point</translation>
     </message>
@@ -202,7 +207,7 @@
         <translation type="obsolete">0.0</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="609"/>
+        <location filename="mainwindow.ui" line="628"/>
         <source>Звук</source>
         <translation>Sound</translation>
     </message>
@@ -227,7 +232,7 @@
         <translation type="obsolete">25 mA</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="549"/>
+        <location filename="mainwindow.ui" line="568"/>
         <source>Сравнение</source>
         <translation>Save</translation>
     </message>
@@ -262,7 +267,7 @@
         <translation type="obsolete">Test</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="614"/>
+        <location filename="mainwindow.ui" line="633"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
@@ -332,7 +337,7 @@
         <translation>View</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="434"/>
+        <location filename="mainwindow.ui" line="453"/>
         <source>Режим</source>
         <translation>Mode</translation>
     </message>
@@ -347,92 +352,92 @@
         <translation>Test plan</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="461"/>
+        <location filename="mainwindow.ui" line="480"/>
         <source>Создать план тестирования</source>
         <translation>Create test plan</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="470"/>
+        <location filename="mainwindow.ui" line="489"/>
         <source>Открыть план тестирования</source>
         <translation>Open test plan</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="479"/>
+        <location filename="mainwindow.ui" line="498"/>
         <source>Сохранить план тестирования</source>
         <translation>Save test plan</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="484"/>
+        <location filename="mainwindow.ui" line="503"/>
         <source>Сохранить план тестирования как</source>
         <translation></translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="493"/>
+        <location filename="mainwindow.ui" line="512"/>
         <source>Сохранить скриншот</source>
         <translation>Screenshot</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="498"/>
+        <location filename="mainwindow.ui" line="517"/>
         <source>Открыть окно просмотра платы</source>
         <translation>Open board window</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="510"/>
+        <location filename="mainwindow.ui" line="529"/>
         <source>Заморозить канал А</source>
         <translation>Freeze A</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="513"/>
+        <location filename="mainwindow.ui" line="532"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Заморозить канал А&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Freeze A&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="525"/>
+        <location filename="mainwindow.ui" line="544"/>
         <source>Заморозить канал B</source>
         <translation>Freeze B</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="528"/>
+        <location filename="mainwindow.ui" line="547"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Заморозить канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Freeze B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="564"/>
+        <location filename="mainwindow.ui" line="583"/>
         <source>Запись плана тестирования</source>
         <translation>Write test plan</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="579"/>
+        <location filename="mainwindow.ui" line="598"/>
         <source>Тестирование по плану</source>
         <translation>Plan testing</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="590"/>
+        <location filename="mainwindow.ui" line="609"/>
         <source>Настройка</source>
         <translation>Settings</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="598"/>
+        <location filename="mainwindow.ui" line="617"/>
         <source>О программе</source>
         <translation>About product</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="626"/>
+        <location filename="mainwindow.ui" line="645"/>
         <source>Следующая точка</source>
         <translation>Next point</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="638"/>
+        <location filename="mainwindow.ui" line="657"/>
         <source>Предыдущая точка</source>
         <translation>Last point</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="665"/>
+        <location filename="mainwindow.ui" line="684"/>
         <source>Сохранить точку</source>
         <translation>Save point</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="676"/>
+        <location filename="mainwindow.ui" line="695"/>
         <source>Добавить изображение</source>
         <translation>Add board window</translation>
     </message>
@@ -442,19 +447,34 @@
         <translation>Comment</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="681"/>
+        <location filename="mainwindow.ui" line="700"/>
         <source>Автоподбор параметров</source>
         <translation>Optimal  search of parameters</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="653"/>
+        <location filename="mainwindow.ui" line="672"/>
         <source> Новая точка</source>
         <translation> New point</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="668"/>
+        <location filename="mainwindow.ui" line="687"/>
         <source> Сохранить точку</source>
         <translation> Save point</translation>
+    </message>
+    <message utf8="true">
+        <location filename="mainwindow.ui" line="709"/>
+        <source>Добавить курсор</source>
+        <translation>Add cursor</translation>
+    </message>
+    <message utf8="true">
+        <location filename="mainwindow.ui" line="718"/>
+        <source>Удалить курсор</source>
+        <translation>Delete cursor</translation>
+    </message>
+    <message utf8="true">
+        <location filename="mainwindow.ui" line="420"/>
+        <source>Курсор</source>
+        <translation>Cursor</translation>
     </message>
 </context>
 <context>
@@ -527,32 +547,32 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation>Settings</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="374"/>
+        <location filename="../mainwindow.py" line="384"/>
         <source>Справка</source>
         <translation>Help</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="376"/>
+        <location filename="../mainwindow.py" line="386"/>
         <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Для более подробной информации об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru.</source>
         <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). For more information on Eyepoint, follow the link http://eyepoint.physlab.ru.</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="382"/>
+        <location filename="../mainwindow.py" line="392"/>
         <source>Перейти</source>
         <translation>Go</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="383"/>
+        <location filename="../mainwindow.py" line="393"/>
         <source>ОК</source>
         <translation>OK</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="418"/>
+        <location filename="../mainwindow.py" line="428"/>
         <source>Сохранить ВАХ</source>
         <translation>Save IVC</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="548"/>
+        <location filename="../mainwindow.py" line="558"/>
         <source>Сохранить новую плату</source>
         <translation>Save new board</translation>
     </message>
@@ -562,12 +582,12 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation type="obsolete">Save board</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="599"/>
+        <location filename="../mainwindow.py" line="609"/>
         <source>Открыть плату</source>
         <translation>Open board</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="627"/>
+        <location filename="../mainwindow.py" line="637"/>
         <source>Открыть изображение платы</source>
         <translation>Open board window</translation>
     </message>
@@ -577,27 +597,27 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation type="obsolete">Voltage scale (V) and current scale (mA): </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="698"/>
+        <location filename="../mainwindow.py" line="714"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="560"/>
+        <location filename="../mainwindow.py" line="570"/>
         <source>Сохранить плату</source>
         <translation>Save board</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="608"/>
+        <location filename="../mainwindow.py" line="618"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="609"/>
+        <location filename="../mainwindow.py" line="619"/>
         <source>Формат файла не подходит</source>
         <translation>Invalid input file</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="660"/>
+        <location filename="../mainwindow.py" line="676"/>
         <source>Напряжение: </source>
         <translation>Voltage: </translation>
     </message>
@@ -614,47 +634,47 @@ Current: </translation>
         <translation type="obsolete">(mA)/div.</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="662"/>
+        <location filename="../mainwindow.py" line="678"/>
         <source>Ампл. проб. сигнала: </source>
         <translation>Probe signal ampl.: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="668"/>
+        <location filename="../mainwindow.py" line="684"/>
         <source> мА / дел.</source>
         <translation>mA / div.</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="668"/>
+        <location filename="../mainwindow.py" line="684"/>
         <source>Ток: </source>
         <translation>Current: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="660"/>
+        <location filename="../mainwindow.py" line="676"/>
         <source> В / дел.</source>
         <translation> V / div. </translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="662"/>
+        <location filename="../mainwindow.py" line="678"/>
         <source> B</source>
         <translation> V</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="670"/>
+        <location filename="../mainwindow.py" line="686"/>
         <source>Чувствительность: </source>
         <translation>Sensity: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="665"/>
+        <location filename="../mainwindow.py" line="681"/>
         <source>Частота: </source>
         <translation>Frequency: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="665"/>
+        <location filename="../mainwindow.py" line="681"/>
         <source> Гц</source>
         <translation> Hz</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="672"/>
+        <location filename="../mainwindow.py" line="688"/>
         <source>Различие: </source>
         <translation>Different: </translation>
     </message>

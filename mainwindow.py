@@ -30,10 +30,8 @@ class SettingsWindow(QDialog):
 
         uic.loadUi(os.path.join("gui", "settings.ui"), self)
 
-        self.setWindowTitle(QCoreApplication.translate("t", "Настройки"))
         self.score_treshold_button_minus.clicked.connect(parent._on_threshold_dec)
         self.score_treshold_button_plus.clicked.connect(parent._on_threshold_inc)
-
         self.auto_calibration_push_button.clicked.connect(parent._on_auto_calibration)
 
 
