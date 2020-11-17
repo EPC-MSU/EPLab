@@ -550,7 +550,6 @@ class EPLabWindow(QMainWindow):
             measurer=self._msystem.measurers_map["test"]
         )
 
-
     @pyqtSlot()
     def _on_new_board(self):
         if self._current_file_path is not None:
@@ -607,7 +606,6 @@ class EPLabWindow(QMainWindow):
             msg.setInformativeText(str(e)[0:512] + "\n...")
             msg.exec_()
             return
-
 
     @pyqtSlot()
     def _on_save_board(self):
