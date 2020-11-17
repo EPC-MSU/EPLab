@@ -33,6 +33,7 @@ class SettingsWindow(QDialog):
         self.score_treshold_button_minus.clicked.connect(parent._on_threshold_dec)
         self.score_treshold_button_plus.clicked.connect(parent._on_threshold_inc)
         self.auto_calibration_push_button.clicked.connect(parent._on_auto_calibration)
+        self.score_treshold_value_lineEdit.returnPressed.connect(parent._on_threshold_set_value)
 
 
 class EPLabWindow(QMainWindow):
@@ -398,7 +399,7 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan.get_current_pin().comment = comment
 
     def _update_threshold(self):
-        self.__settings_window.score_treshold_value_label.setText(f"{round(self._score_wrapper.threshold * 100.0)}%")
+        self.__settings_window.score_treshold_value_lineEdit.setText(f"{round(self._score_wrapper.threshold * 100.0)}%")
         self._player.set_threshold(self._score_wrapper.threshold)
 
     @pyqtSlot()
@@ -409,6 +410,12 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_threshold_inc(self):
         self._score_wrapper.increase_threshold()
+        self._update_threshold()
+
+    @pyqtSlot()
+    def _on_threshold_set_value(self):
+        value = float(int(self.__settings_window.score_treshold_value_lineEdit.text()[:-1]) / 100.0)
+        self._score_wrapper.set_threshold(value)
         self._update_threshold()
 
     @pyqtSlot()

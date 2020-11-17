@@ -33,6 +33,9 @@ class ScoreWrapper:
     def decrease_threshold(self):
         self._threshold = max(self._threshold - self._step, 0.0)
 
+    def set_threshold(self, value: float):
+        self._threshold = max(min(value, 1.0), 0.0)
+
     @property
     def threshold(self):
         return self._threshold
