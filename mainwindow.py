@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLineEdit, QLabel, QWidget, QVBoxLayout, \
-    QHBoxLayout, QToolBar, QGridLayout
+    QHBoxLayout, QToolBar, QGridLayout, QPushButton
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication
 from PyQt5 import uic
@@ -7,7 +7,7 @@ from PyQt5 import uic
 from warnings import warn
 from datetime import datetime
 import numpy as np
-
+from PyQt5.QtCore import Qt as QtC
 import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
 from epcore.measurementmanager.utils import search_optimal_settings
@@ -550,10 +550,35 @@ class EPLabWindow(QMainWindow):
             measurer=self._msystem.measurers_map["test"]
         )
 
+
+
     @pyqtSlot()
     def _on_new_board(self):
+        if self._current_file_path is not None:
+            d = QDialog()
+            label = QLabel("Сохранить изменеия в файл?")
+            btn_yes = QPushButton("Да")
+            btn_no = QPushButton("Нет")
+            btn_cancel = QPushButton("Отмена")
+            layout = QVBoxLayout(d)
+            hl = QHBoxLayout(d)
+            layout.addWidget(label)
+            hl.addWidget(btn_yes)
+            hl.addWidget(btn_no)
+            hl.addWidget(btn_cancel)
+            layout.addLayout(hl)
+            btn_yes.clicked.connect(d.accept)
+            btn_no.clicked.connect(lambda: d.done(1))
+            btn_cancel.clicked.connect(d.reject)
+            d.setWindowTitle("Внимание")
+            d.setWindowModality(QtC.ApplicationModal)
+            resp = d.exec()
+            if resp == QDialog.Accepted:
+                self._on_save_board()
+            elif resp == QDialog.Rejected:
+                return
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить новую плату"),
+        filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Создать новую плату"),
                                           filter="JSON (*.json)")[0]
         if filename:
             self._current_file_path = filename
@@ -570,16 +595,21 @@ class EPLabWindow(QMainWindow):
         if filename:
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._current_file_path = filename
-            try:
-                epfilemanager.load_board_from_ufiv(self._current_file_path)
-            except Exception as e:
-                msg = QMessageBox()
-                msg.setIcon(QMessageBox.Critical)
-                msg.setWindowTitle("Error")
-                msg.setText("Invalid format save file")
-                msg.setInformativeText(str(e)[0:512] + "\n...")
-                msg.exec_()
-                return
+        elif self._current_file_path is None:
+            self._current_file_path = os.path.join(os.getcwd(), "board.json")
+            epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
+        try:
+            epfilemanager.load_board_from_ufiv(self._current_file_path)
+        except Exception as e:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("Error")
+            msg.setText("Invalid format save file")
+            msg.setInformativeText(str(e)[0:512] + "\n...")
+            msg.exec_()
+            return
+
+
 
     @pyqtSlot()
     def _on_save_board(self):
