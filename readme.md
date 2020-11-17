@@ -105,6 +105,11 @@ python3 main.py com:///dev/ttyACM0 --ref virtual
 venv/bin/python3 main.py com:///dev/ttyACM0 --ref virtual
 ```
 
+Если хотите изменить язык, то нужно добавить/убрать флаг --en:
+```
+python3 main.py com:///dev/ttyACM0 --ref virtual --en
+```
+
 ## Релиз
 
 Для релиза есть скрипт release.cmd. В нём нужно прописать путь до системного 
