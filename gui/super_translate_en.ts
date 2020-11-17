@@ -369,7 +369,7 @@
     <message utf8="true">
         <location filename="mainwindow.ui" line="503"/>
         <source>Сохранить план тестирования как</source>
-        <translation></translation>
+        <translation>Save test plan as</translation>
     </message>
     <message utf8="true">
         <location filename="mainwindow.ui" line="512"/>
@@ -544,35 +544,35 @@ EPC MSU e-mail:  info@ximc.ru</translation>
     <message utf8="true">
         <location filename="../mainwindow.py" line="33"/>
         <source>Настройки</source>
-        <translation>Settings</translation>
+        <translation type="obsolete">Settings</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="384"/>
+        <location filename="../mainwindow.py" line="382"/>
         <source>Справка</source>
         <translation>Help</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="386"/>
+        <location filename="../mainwindow.py" line="384"/>
         <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Для более подробной информации об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru.</source>
         <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). For more information on Eyepoint, follow the link http://eyepoint.physlab.ru.</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="392"/>
+        <location filename="../mainwindow.py" line="390"/>
         <source>Перейти</source>
         <translation>Go</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="393"/>
+        <location filename="../mainwindow.py" line="391"/>
         <source>ОК</source>
         <translation>OK</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="428"/>
+        <location filename="../mainwindow.py" line="426"/>
         <source>Сохранить ВАХ</source>
         <translation>Save IVC</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="558"/>
+        <location filename="../mainwindow.py" line="556"/>
         <source>Сохранить новую плату</source>
         <translation>Save new board</translation>
     </message>
@@ -582,12 +582,12 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation type="obsolete">Save board</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="609"/>
+        <location filename="../mainwindow.py" line="607"/>
         <source>Открыть плату</source>
         <translation>Open board</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="637"/>
+        <location filename="../mainwindow.py" line="635"/>
         <source>Открыть изображение платы</source>
         <translation>Open board window</translation>
     </message>
@@ -597,27 +597,27 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation type="obsolete">Voltage scale (V) and current scale (mA): </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="714"/>
+        <location filename="../mainwindow.py" line="712"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="570"/>
+        <location filename="../mainwindow.py" line="568"/>
         <source>Сохранить плату</source>
         <translation>Save board</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="618"/>
+        <location filename="../mainwindow.py" line="616"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="619"/>
+        <location filename="../mainwindow.py" line="617"/>
         <source>Формат файла не подходит</source>
         <translation>Invalid input file</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="676"/>
+        <location filename="../mainwindow.py" line="674"/>
         <source>Напряжение: </source>
         <translation>Voltage: </translation>
     </message>
@@ -634,47 +634,47 @@ Current: </translation>
         <translation type="obsolete">(mA)/div.</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="678"/>
+        <location filename="../mainwindow.py" line="676"/>
         <source>Ампл. проб. сигнала: </source>
         <translation>Probe signal ampl.: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="684"/>
+        <location filename="../mainwindow.py" line="682"/>
         <source> мА / дел.</source>
         <translation>mA / div.</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="684"/>
+        <location filename="../mainwindow.py" line="682"/>
         <source>Ток: </source>
         <translation>Current: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="676"/>
+        <location filename="../mainwindow.py" line="674"/>
         <source> В / дел.</source>
         <translation> V / div. </translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="678"/>
+        <location filename="../mainwindow.py" line="676"/>
         <source> B</source>
         <translation> V</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="686"/>
+        <location filename="../mainwindow.py" line="684"/>
         <source>Чувствительность: </source>
         <translation>Sensity: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="681"/>
+        <location filename="../mainwindow.py" line="679"/>
         <source>Частота: </source>
         <translation>Frequency: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="681"/>
+        <location filename="../mainwindow.py" line="679"/>
         <source> Гц</source>
         <translation> Hz</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="688"/>
+        <location filename="../mainwindow.py" line="686"/>
         <source>Различие: </source>
         <translation>Different: </translation>
     </message>
