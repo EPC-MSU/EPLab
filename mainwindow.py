@@ -37,6 +37,9 @@ class SettingsWindow(QDialog):
 
 
 class EPLabWindow(QMainWindow):
+
+    default_path = "../EPLab-Files"
+
     def __init__(self, msystem: MeasurementSystem):
         super(EPLabWindow, self).__init__()
 
@@ -427,11 +430,17 @@ class EPLabWindow(QMainWindow):
         # Freeze image at first
         image = self.grab(self.rect())
 
-        filename = "ivc" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
+        filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
+
+        if not os.path.isdir(self.default_path):
+            os.mkdir(self.default_path)
+        if not os.path.isdir(os.path.join(self.default_path, "Screenshot")):
+            os.mkdir(os.path.join(self.default_path, "Screenshot"))
 
         dialog = QFileDialog()
         filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить ВАХ"),
-                                          filter="Image (*.png)", directory=filename)[0]
+                                          filter="Image (*.png)", directory=os.path.join(self.default_path,
+                                                                                         "Screenshot", filename))[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
@@ -594,9 +603,14 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_save_board_as(self):
+        if not os.path.isdir(self.default_path):
+            os.mkdir(self.default_path)
+        if not os.path.isdir(os.path.join(self.default_path, "Reference")):
+            os.mkdir(os.path.join(self.default_path, "Reference"))
         dialog = QFileDialog()
         filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить плату"),
-                                          filter="JSON (*.json)")[0]
+                                          filter="JSON (*.json)", directory=os.path.join(self.default_path,
+                                                                                         "Reference", "board.json"))[0]
         if filename:
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._current_file_path = filename
