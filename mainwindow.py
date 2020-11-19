@@ -615,7 +615,7 @@ class EPLabWindow(QMainWindow):
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._current_file_path = filename
         elif self._current_file_path is None:
-            self._current_file_path = os.path.join(os.getcwd(), "board.json")
+            self._current_file_path = os.path.join(self.default_path, "Reference", "board.json")
             epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
         try:
             epfilemanager.load_board_from_ufiv(self._current_file_path)
