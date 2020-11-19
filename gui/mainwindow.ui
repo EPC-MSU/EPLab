@@ -483,7 +483,7 @@
   <action name="open_file_action">
    <property name="icon">
     <iconset>
-     <normaloff>../media/openfile.png</normaloff>../media/openfile.png</iconset>
+     <normaloff>../media/open.png</normaloff>../media/open.png</iconset>
    </property>
    <property name="text">
     <string>Открыть план тестирования</string>
@@ -623,6 +623,10 @@
    </property>
    <property name="checked">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/sound.png</normaloff>../media/sound.png</iconset>
    </property>
    <property name="text">
     <string>Звук</string>
