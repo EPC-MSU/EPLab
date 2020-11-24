@@ -502,7 +502,27 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_go_selected_pin(self):
-        self._measurement_plan.go_pin(int(self.num_point_line_edit.text()))
+        try:
+            num_point = int(self.num_point_line_edit.text())
+        except Exception as e:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setWindowTitle(QCoreApplication.translate("t", "Ошибка открытия точки"))
+            msg.setText(QCoreApplication.translate("t", "Неверный формат номера точки. Номер точки может "
+                                                        "принимать только целочисленное значение!"))
+            msg.setInformativeText(str(e))
+            msg.exec_()
+            return
+        try:
+            self._measurement_plan.go_pin(num_point)
+        except Exception as e:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setWindowTitle(QCoreApplication.translate("t", "Ошибка открытия точки"))
+            msg.setText(QCoreApplication.translate("t", "Точка с таким номером не найдена на данной плате."))
+            msg.setInformativeText(str(e))
+            msg.exec_()
+            return
         self._update_current_pin()
         self._open_board_window_if_needed()
 
@@ -719,7 +739,7 @@ class EPLabWindow(QMainWindow):
             sensity = "-"
             max_v = "-"
             probe_freq = "-"
-        self._param_dict["Напряжение"].setText(QCoreApplication.translate("t", "Напряжение: ") + str(_v) +
+        self._param_dict["Напряжение"].setText(QCoreApplication.translate("t", "  Напряжение: ") + str(_v) +
                                                QCoreApplication.translate("t", " В / дел."))
         self._param_dict["Ампл. проб. сигнала"].setText(QCoreApplication.translate("t", "Ампл. проб. сигнала: ") +
                                                         str(max_v) +
@@ -727,7 +747,7 @@ class EPLabWindow(QMainWindow):
         self._param_dict["Частота"].setText(QCoreApplication.translate("t", "Частота: ") +
                                             str(probe_freq) +
                                             QCoreApplication.translate("t", " Гц"))
-        self._param_dict["Ток"].setText(QCoreApplication.translate("t", "Ток: ") + str(_c) +
+        self._param_dict["Ток"].setText(QCoreApplication.translate("t", "  Ток: ") + str(_c) +
                                         QCoreApplication.translate("t", " мА / дел."))
         self._param_dict["Чувствительность"].setText(QCoreApplication.translate("t", "Чувствительность: ") +
                                                      str(sensity))
@@ -741,7 +761,7 @@ class EPLabWindow(QMainWindow):
         for position, name in zip(positions, self._param_dict.keys()):
             tb = QToolBar()
             tb.setFixedHeight(30)
-            tb.setStyleSheet("background:black; color:white;spacing: 10;")
+            tb.setStyleSheet("background:black; color:white;spacing:10;")
             tb.addWidget(self._param_dict[name])
             self.grid_param.addWidget(tb, *position)
 

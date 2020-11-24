@@ -19,12 +19,12 @@
         <translation>+</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="67"/>
+        <location filename="settings.ui" line="73"/>
         <source>-</source>
         <translation>-</translation>
     </message>
     <message utf8="true">
-        <location filename="settings.ui" line="80"/>
+        <location filename="settings.ui" line="89"/>
         <source>Автокалибровка</source>
         <translation>Autocalibration</translation>
     </message>
@@ -152,7 +152,7 @@
         <translation type="obsolete">Save</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="669"/>
+        <location filename="mainwindow.ui" line="673"/>
         <source>Новая точка</source>
         <translation>New point</translation>
     </message>
@@ -207,7 +207,7 @@
         <translation type="obsolete">0.0</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="628"/>
+        <location filename="mainwindow.ui" line="632"/>
         <source>Звук</source>
         <translation>Sound</translation>
     </message>
@@ -267,7 +267,7 @@
         <translation type="obsolete">Test</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="633"/>
+        <location filename="mainwindow.ui" line="637"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
@@ -422,52 +422,52 @@
         <translation>About product</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="645"/>
+        <location filename="mainwindow.ui" line="649"/>
         <source>Следующая точка</source>
         <translation>Next point</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="657"/>
+        <location filename="mainwindow.ui" line="661"/>
         <source>Предыдущая точка</source>
         <translation>Last point</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="684"/>
+        <location filename="mainwindow.ui" line="688"/>
         <source>Сохранить точку</source>
         <translation>Save point</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="695"/>
+        <location filename="mainwindow.ui" line="699"/>
         <source>Добавить изображение</source>
         <translation>Add board window</translation>
     </message>
     <message utf8="true">
         <location filename="mainwindow.ui" line="247"/>
         <source>Комментарий</source>
-        <translation>Comment</translation>
+        <translation type="obsolete">Comment</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="700"/>
+        <location filename="mainwindow.ui" line="704"/>
         <source>Автоподбор параметров</source>
         <translation>Optimal  search of parameters</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="672"/>
+        <location filename="mainwindow.ui" line="676"/>
         <source> Новая точка</source>
         <translation> New point</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="687"/>
+        <location filename="mainwindow.ui" line="691"/>
         <source> Сохранить точку</source>
         <translation> Save point</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="709"/>
+        <location filename="mainwindow.ui" line="713"/>
         <source>Добавить курсор</source>
         <translation>Add cursor</translation>
     </message>
     <message utf8="true">
-        <location filename="mainwindow.ui" line="718"/>
+        <location filename="mainwindow.ui" line="722"/>
         <source>Удалить курсор</source>
         <translation>Delete cursor</translation>
     </message>
@@ -475,6 +475,11 @@
         <location filename="mainwindow.ui" line="420"/>
         <source>Курсор</source>
         <translation>Cursor</translation>
+    </message>
+    <message utf8="true">
+        <location filename="mainwindow.ui" line="247"/>
+        <source>Комментарий к точке</source>
+        <translation>Point comment</translation>
     </message>
 </context>
 <context>
@@ -547,34 +552,34 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation type="obsolete">Settings</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="382"/>
+        <location filename="../mainwindow.py" line="387"/>
         <source>Справка</source>
         <translation>Help</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="384"/>
+        <location filename="../mainwindow.py" line="389"/>
         <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Для более подробной информации об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru.</source>
         <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). For more information on Eyepoint, follow the link http://eyepoint.physlab.ru.</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="390"/>
+        <location filename="../mainwindow.py" line="395"/>
         <source>Перейти</source>
         <translation>Go</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="391"/>
+        <location filename="../mainwindow.py" line="396"/>
         <source>ОК</source>
         <translation>OK</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="426"/>
+        <location filename="../mainwindow.py" line="442"/>
         <source>Сохранить ВАХ</source>
         <translation>Save IVC</translation>
     </message>
     <message utf8="true">
         <location filename="../mainwindow.py" line="556"/>
         <source>Сохранить новую плату</source>
-        <translation>Save new board</translation>
+        <translation type="obsolete">Save new board</translation>
     </message>
     <message utf8="true">
         <location filename="../mainwindow.py" line="538"/>
@@ -582,12 +587,12 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation type="obsolete">Save board</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="607"/>
+        <location filename="../mainwindow.py" line="675"/>
         <source>Открыть плату</source>
         <translation>Open board</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="635"/>
+        <location filename="../mainwindow.py" line="703"/>
         <source>Открыть изображение платы</source>
         <translation>Open board window</translation>
     </message>
@@ -597,29 +602,29 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation type="obsolete">Voltage scale (V) and current scale (mA): </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="712"/>
+        <location filename="../mainwindow.py" line="780"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="568"/>
+        <location filename="../mainwindow.py" line="632"/>
         <source>Сохранить плату</source>
         <translation>Save board</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="616"/>
+        <location filename="../mainwindow.py" line="684"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="617"/>
+        <location filename="../mainwindow.py" line="685"/>
         <source>Формат файла не подходит</source>
         <translation>Invalid input file</translation>
     </message>
     <message utf8="true">
         <location filename="../mainwindow.py" line="674"/>
         <source>Напряжение: </source>
-        <translation>Voltage: </translation>
+        <translation type="obsolete">Voltage: </translation>
     </message>
     <message utf8="true">
         <location filename="../mainwindow.py" line="643"/>
@@ -634,49 +639,79 @@ Current: </translation>
         <translation type="obsolete">(mA)/div.</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="676"/>
+        <location filename="../mainwindow.py" line="744"/>
         <source>Ампл. проб. сигнала: </source>
         <translation>Probe signal ampl.: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="682"/>
+        <location filename="../mainwindow.py" line="750"/>
         <source> мА / дел.</source>
         <translation>mA / div.</translation>
     </message>
     <message utf8="true">
         <location filename="../mainwindow.py" line="682"/>
         <source>Ток: </source>
-        <translation>Current: </translation>
+        <translation type="obsolete">Current: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="674"/>
+        <location filename="../mainwindow.py" line="742"/>
         <source> В / дел.</source>
         <translation> V / div. </translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="676"/>
+        <location filename="../mainwindow.py" line="744"/>
         <source> B</source>
         <translation> V</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="684"/>
+        <location filename="../mainwindow.py" line="752"/>
         <source>Чувствительность: </source>
         <translation>Sensity: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="679"/>
+        <location filename="../mainwindow.py" line="747"/>
         <source>Частота: </source>
         <translation>Frequency: </translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="679"/>
+        <location filename="../mainwindow.py" line="747"/>
         <source> Гц</source>
         <translation> Hz</translation>
     </message>
     <message utf8="true">
-        <location filename="../mainwindow.py" line="686"/>
+        <location filename="../mainwindow.py" line="754"/>
         <source>Различие: </source>
         <translation>Different: </translation>
+    </message>
+    <message utf8="true">
+        <location filename="../mainwindow.py" line="616"/>
+        <source>Создать новую плату</source>
+        <translation>Create new board</translation>
+    </message>
+    <message utf8="true">
+        <location filename="../mainwindow.py" line="742"/>
+        <source>  Напряжение: </source>
+        <translation>  Voltage: </translation>
+    </message>
+    <message utf8="true">
+        <location filename="../mainwindow.py" line="750"/>
+        <source>  Ток: </source>
+        <translation>  Current: </translation>
+    </message>
+    <message utf8="true">
+        <location filename="../mainwindow.py" line="521"/>
+        <source>Ошибка открытия точки</source>
+        <translation>Open pin error</translation>
+    </message>
+    <message utf8="true">
+        <location filename="../mainwindow.py" line="511"/>
+        <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение!</source>
+        <translation>Incorrect format of pin number. Pin number must be integer!</translation>
+    </message>
+    <message utf8="true">
+        <location filename="../mainwindow.py" line="522"/>
+        <source>Точка с таким номером не найдена на данной плате.</source>
+        <translation>Pin not found on the board.</translation>
     </message>
 </context>
 </TS>
