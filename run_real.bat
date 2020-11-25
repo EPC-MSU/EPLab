@@ -1,5 +1,5 @@
-set IVM_TEST=com:\\.\COM133
-set IVM_REF=com:\\.\COM134
+set IVM_TEST=com:\\.\COMx
+set IVM_REF=com:\\.\COMx
 
 
-python main.py %IVM_TEST% --ref %IVM_REF%
+venv\scripts\python main.py %IVM_TEST% --ref %IVM_REF%
