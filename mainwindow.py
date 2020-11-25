@@ -151,9 +151,12 @@ class EPLabWindow(QMainWindow):
 
         self.freeze_curve_a_action.toggled.connect(self._on_freeze_a)
         self.freeze_curve_b_action.toggled.connect(self._on_freeze_b)
+        self.hide_curve_a_action.toggled.connect(self._on_hide_a)
+        self.hide_curve_b_action.toggled.connect(self._on_hide_b)
 
         if "ref" not in self._msystem.measurers_map:
             self.freeze_curve_b_action.setEnabled(False)
+            self.hide_curve_b_action.setEnabled(False)
 
         self.save_screen_action.triggered.connect(self._on_save_image)
 
@@ -175,7 +178,8 @@ class EPLabWindow(QMainWindow):
         self._settings_update_next_cycle = None
         # Set to True to skip next measured curves
         self._skip_curve = False
-
+        self._hide_curve_test = False
+        self._hide_curve_ref = False
         self._ref_curve = None
         self._test_curve = None
 
@@ -349,6 +353,14 @@ class EPLabWindow(QMainWindow):
     def _on_auto_calibration(self):
         with self._device_errors_handler:
             self._msystem.calibrate()
+
+    @pyqtSlot(bool)
+    def _on_hide_b(self, state: bool):
+        self._hide_curve_ref = state
+
+    @pyqtSlot(bool)
+    def _on_hide_a(self, state: bool):
+        self._hide_curve_test = state
 
     @pyqtSlot(bool)
     def _on_freeze_b(self, state: bool):
@@ -716,8 +728,14 @@ class EPLabWindow(QMainWindow):
         if ref is not None:
             self._ref_curve = ref
         # Update plots
-        self.test_curve_plot.set_curve(self._test_curve)
-        self.reference_curve_plot.set_curve(self._ref_curve)
+        if not self._hide_curve_test:
+            self.test_curve_plot.set_curve(self._test_curve)
+        else:
+            self.test_curve_plot.set_curve(None)
+        if not self._hide_curve_ref:
+            self.reference_curve_plot.set_curve(self._ref_curve)
+        else:
+            self.reference_curve_plot.set_curve(None)
 
         # Update score
         if self._ref_curve and self._test_curve:

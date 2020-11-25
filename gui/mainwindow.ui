@@ -298,6 +298,8 @@
     <addaction name="open_window_board_action"/>
     <addaction name="freeze_curve_a_action"/>
     <addaction name="freeze_curve_b_action"/>
+    <addaction name="hide_curve_a_action"/>
+    <addaction name="hide_curve_b_action"/>
     <addaction name="separator"/>
     <addaction name="search_optimal_action"/>
    </widget>
@@ -709,6 +711,10 @@
    </property>
   </action>
   <action name="search_optimal_action">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/searchparam.png</normaloff>../media/searchparam.png</iconset>
+   </property>
    <property name="text">
     <string>Автоподбор параметров</string>
    </property>
@@ -729,6 +735,38 @@
    </property>
    <property name="text">
     <string>Удалить курсор</string>
+   </property>
+  </action>
+  <action name="hide_curve_a_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/show_a.png</normaloff>
+     <activeon>../media/hide_a.png</activeon>../media/show_a.png</iconset>
+   </property>
+   <property name="text">
+    <string>Скрыть канал А</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Скрыть канал А&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="hide_curve_b_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/show_b.jpg</normaloff>
+     <activeon>../media/hide_b.jpg</activeon>../media/show_b.jpg</iconset>
+   </property>
+   <property name="text">
+    <string>Скрыть канал B</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Скрыть канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
  </widget>
