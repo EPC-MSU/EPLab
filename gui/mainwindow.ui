@@ -523,7 +523,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../media/freezea.png</normaloff>../media/freezea.png</iconset>
+     <normaloff>../media/freezea.jpg</normaloff>../media/freezea.jpg</iconset>
    </property>
    <property name="text">
     <string>Заморозить канал А</string>
@@ -538,7 +538,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../media/freezeb.png</normaloff>../media/freezeb.png</iconset>
+     <normaloff>../media/freezeb.jpg</normaloff>../media/freezeb.jpg</iconset>
    </property>
    <property name="text">
     <string>Заморозить канал B</string>
@@ -601,18 +601,11 @@
     <bool>false</bool>
    </property>
   </action>
-  <action name="setting_mode_action">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Настройка</string>
-   </property>
-   <property name="autoRepeat">
-    <bool>false</bool>
-   </property>
-  </action>
   <action name="about_action">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/help.png</normaloff>../media/help.png</iconset>
+   </property>
    <property name="text">
     <string>О программе</string>
    </property>
@@ -633,6 +626,10 @@
    </property>
   </action>
   <action name="settings_mode_action">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/test_plan_tab_c_icon.png</normaloff>../media/test_plan_tab_c_icon.png</iconset>
+   </property>
    <property name="text">
     <string>Настройки</string>
    </property>
