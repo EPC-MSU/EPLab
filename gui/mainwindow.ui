@@ -499,6 +499,10 @@
    </property>
   </action>
   <action name="save_as_file_action">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/savefileas.png</normaloff>../media/savefileas.png</iconset>
+   </property>
    <property name="text">
     <string>Сохранить план тестирования как</string>
    </property>
@@ -513,6 +517,10 @@
    </property>
   </action>
   <action name="open_window_board_action">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/openboard.png</normaloff>../media/openboard.png</iconset>
+   </property>
    <property name="text">
     <string>Открыть окно просмотра платы</string>
    </property>
@@ -691,6 +699,10 @@
   <action name="add_board_image_action">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/add_image.png</normaloff>../media/add_image.png</iconset>
    </property>
    <property name="text">
     <string>Добавить изображение</string>
