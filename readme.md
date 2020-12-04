@@ -22,6 +22,14 @@ venv\Scripts\python -m pip install --upgrade pip
 venv\Scripts\python -m pip install -r requirements.txt --upgrade
 ```
 
+Если у вас возникла такая ошибка: qt.qpa.plugin: Could not find the Qt platform plugin "windows" in "" 
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+Выполните следующую команду в виртуальном окружении:
+
+```
+set QT_QPA_PLATFORM_PLUGIN_PATH=venv\Lib\site-packages\PyQt5\Qt\plugins\platforms
+```
+
 Для работы нужно установить драйвер `ivm.inf` из папки `release_templates\win64\driver`.
 
 ## Установка в Linux
@@ -50,6 +58,14 @@ venv/bin/python3 -m pip install -r requirements.txt --upgrade
 Если при установке зависимостей через hg возникает ошибка авторизации, то нужно прописать в Hg логин и пароль от репозитория hg.ximc.ru. Это можно сделать через TortoiseHg, открыв любой репозиторий, перейдя во вкладку синхронизации (две стрелочки по кругу на верхней панели) и нажав на иконку с изображением замка (в середине страницы, слева от строки с адресом сервера). 
 
 После этого нужно переоткрыть консоль.
+
+Если у вас возникла такая ошибка: qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.
+Выполните следующие команды:
+
+```
+export QT_DEBUG_PLUGINS=1
+sudo apt-get install --reinstall libxcb-xinerama0
+```
 
 Также нужен доступ на hg.ximc.ru к репозиториям: epcore, ivviewer.
 
