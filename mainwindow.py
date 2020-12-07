@@ -20,6 +20,7 @@ from ivview_parameters import IVViewerParametersAdjuster
 from version import Version
 from player import SoundPlayer
 from common import WorkMode, DeviceErrorsHandler
+from settings.settings import Settings
 import os
 from typing import Optional
 
@@ -34,6 +35,8 @@ class SettingsWindow(QDialog):
         self.score_treshold_button_plus.clicked.connect(parent._on_threshold_inc)
         self.auto_calibration_push_button.clicked.connect(parent._on_auto_calibration)
         self.score_treshold_value_lineEdit.returnPressed.connect(parent._on_threshold_set_value)
+        self.load_settings_push_button.clicked.connect(parent._on_open_settings)
+        self.save_settings_push_button.clicked.connect(parent._save_settings_to_file)
 
 
 class EPLabWindow(QMainWindow):
@@ -56,7 +59,7 @@ class EPLabWindow(QMainWindow):
         self._comparator.set_min_ivc(0.6, 0.002)
 
         self._score_wrapper = ScoreWrapper(self.score_label)
-
+        self.__settings = Settings()
         self._player = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
 
@@ -458,6 +461,67 @@ class EPLabWindow(QMainWindow):
             if not filename.endswith(".png"):
                 filename += ".png"
             image.save(filename)
+
+    @pyqtSlot()
+    def _on_open_settings(self):
+        settings_path = QFileDialog(self).getOpenFileName(self, "Open file", ".", "Ini file (*.ini);;All Files (*)")[0]
+        if len(settings_path) == 0:
+            return
+
+        self.__settings.import_(path=settings_path)
+        self._load_settings()
+
+    def _load_settings(self):
+        self._on_work_mode_switch(self.__settings.work_mode)
+        for button, voltage in self._voltages.items():
+            if voltage == self.__settings.max_voltage:
+                button.setChecked(True)
+        for button, frequency in self._frequencies.items():
+            if frequency == self.__settings.frequency:
+                button.setChecked(True)
+        for button, sensitivity in self._sensitivities.items():
+            if sensitivity == self.__settings.internal_resistance:
+                button.setChecked(True)
+        self.__settings_window.score_treshold_value_lineEdit.setText(f"{round(self.__settings.score_threshold * 100.0)}"
+                                                                     f"%")
+        self.hide_curve_a_action.setChecked(self.__settings.hide_curve_a)
+        self.hide_curve_b_action.setChecked(self.__settings.hide_curve_b)
+        self.sound_enabled_action.setChecked(self.__settings.sound_enabled)
+
+    def _store_settings(self, settings=None):
+        if settings is None:
+            settings = self.__settings
+        for button, voltage in self._voltages.items():
+            if button.isChecked():
+                settings.max_voltage = voltage
+        for button, frequency in self._frequencies.items():
+            if button.isChecked():
+                settings.frequency = frequency
+        for button, sensitivity in self._sensitivities.items():
+            if button.isChecked():
+                settings.internal_resistance = sensitivity
+        if self.testing_mode_action.isChecked():
+            settings.work_mode = WorkMode.test
+        elif self.writing_mode_action.isChecked():
+            settings.work_mode = WorkMode.write
+        else:
+            settings.work_mode = WorkMode.compare
+        settings.score_threshold = float(int(self.__settings_window.score_treshold_value_lineEdit.text()[:-1]) / 100.0)
+        settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
+        settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
+        settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
+    @pyqtSlot()
+    def _save_settings_to_file(self):
+        settings_path = QFileDialog(self).getSaveFileName(self, "Save file", ".", "Ini file (*.ini);;All Files (*)")[0]
+        if len(settings_path) == 0:
+            return
+
+        if not settings_path.endswith(".ini"):
+            settings_path += ".ini"
+
+        settings = Settings()
+        self._store_settings(settings)
+        settings.export(path=settings_path)
 
     @pyqtSlot(bool)
     def _on_work_mode_switch(self, mode: WorkMode):
