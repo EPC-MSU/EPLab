@@ -510,6 +510,7 @@ class EPLabWindow(QMainWindow):
         settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
+
     @pyqtSlot()
     def _save_settings_to_file(self):
         settings_path = QFileDialog(self).getSaveFileName(self, "Save file", ".", "Ini file (*.ini);;All Files (*)")[0]
