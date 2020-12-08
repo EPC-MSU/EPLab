@@ -75,8 +75,8 @@ class EPLabWindow(QMainWindow):
         self._board_window.workspace.point_selected.connect(self._on_board_pin_selected)
         self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
         self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
-        self.add_cursor_action.triggered.connect(self._on_add_cursor)
-        self.remove_cursor_action.triggered.connect(self._on_del_cursor)
+        self.add_cursor_action.toggled.connect(self._on_add_cursor)
+        self.remove_cursor_action.toggled.connect(self._on_del_cursor)
 
         self.plot_parameters()
         self.main_widget = QWidget(self)
@@ -878,6 +878,10 @@ class EPLabWindow(QMainWindow):
                 self._msystem.trigger_measurements()
 
     def _read_curves_periodic_task(self):
+        if not self._iv_window.plot.get_state_removing_cursor():
+            self.remove_cursor_action.setChecked(False)
+        if not self._iv_window.plot.get_state_adding_cursor():
+            self.add_cursor_action.setChecked(False)
         if self._msystem.measurements_are_ready():
             test = self._msystem.measurers_map["test"].get_last_cached_iv_curve()
             ref = None

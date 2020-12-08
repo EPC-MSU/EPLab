@@ -421,6 +421,9 @@
    <property name="windowTitle">
     <string>Курсор</string>
    </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -720,21 +723,36 @@
    </property>
   </action>
   <action name="add_cursor_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
-     <normaloff>../media/plus.png</normaloff>../media/plus.png</iconset>
+     <normaloff>../media/add_label.png</normaloff>../media/add_label.png</iconset>
    </property>
    <property name="text">
-    <string>Добавить курсор</string>
+    <string>Добавить  метку</string>
+   </property>
+   <property name="iconText">
+    <string> Добавить метку</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить  метку</string>
    </property>
   </action>
   <action name="remove_cursor_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
-     <normaloff>../media/minus.png</normaloff>../media/minus.png</iconset>
+     <normaloff>../media/minus_label.png</normaloff>../media/minus_label.png</iconset>
    </property>
    <property name="text">
-    <string>Удалить курсор</string>
+    <string>Удалить метку</string>
+   </property>
+   <property name="iconText">
+    <string> Удалить метку</string>
    </property>
   </action>
   <action name="hide_curve_a_action">
