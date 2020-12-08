@@ -345,13 +345,13 @@ class EPLabWindow(QMainWindow):
             msg.setText("Для данной платы изображение не задано!")
             msg.exec_()
 
-    @pyqtSlot()
-    def _on_add_cursor(self):
-        self._iv_window.plot.activate_adding_cursor()
+    @pyqtSlot(bool)
+    def _on_add_cursor(self, state):
+        self._iv_window.plot.set_state_adding_cursor(state)
 
-    @pyqtSlot()
-    def _on_del_cursor(self):
-        self._iv_window.plot.activate_removing_cursor()
+    @pyqtSlot(bool)
+    def _on_del_cursor(self, state):
+        self._iv_window.plot.set_state_removing_cursor(state)
 
     @pyqtSlot()
     def _on_open_board_image(self):
@@ -878,10 +878,6 @@ class EPLabWindow(QMainWindow):
                 self._msystem.trigger_measurements()
 
     def _read_curves_periodic_task(self):
-        if not self._iv_window.plot.get_state_removing_cursor():
-            self.remove_cursor_action.setChecked(False)
-        if not self._iv_window.plot.get_state_adding_cursor():
-            self.add_cursor_action.setChecked(False)
         if self._msystem.measurements_are_ready():
             test = self._msystem.measurers_map["test"].get_last_cached_iv_curve()
             ref = None
