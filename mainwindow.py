@@ -347,10 +347,14 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot(bool)
     def _on_add_cursor(self, state):
+        if state:
+            self.remove_cursor_action.setChecked(False)
         self._iv_window.plot.set_state_adding_cursor(state)
 
     @pyqtSlot(bool)
     def _on_del_cursor(self, state):
+        if state:
+            self.add_cursor_action.setChecked(False)
         self._iv_window.plot.set_state_removing_cursor(state)
 
     @pyqtSlot()
