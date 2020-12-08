@@ -339,11 +339,6 @@ class EPLabWindow(QMainWindow):
     def _open_board_window_if_needed(self):
         if self._measurement_plan.image:
             self._board_window.show()
-        else:
-            msg = QMessageBox()
-            msg.setWindowTitle(QCoreApplication.translate("t", "Открытие изображения платы"))
-            msg.setText("Для данной платы изображение не задано!")
-            msg.exec_()
 
     @pyqtSlot(bool)
     def _on_add_cursor(self, state):
@@ -360,6 +355,11 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_open_board_image(self):
         self._open_board_window_if_needed()
+        if not self._measurement_plan.image:
+            msg = QMessageBox()
+            msg.setWindowTitle(QCoreApplication.translate("t", "Открытие изображения платы"))
+            msg.setText("Для данной платы изображение не задано!")
+            msg.exec_()
 
     @pyqtSlot()
     def _on_auto_calibration(self):
