@@ -698,9 +698,14 @@ class EPLabWindow(QMainWindow):
                 self._on_save_board()
             elif resp == QDialog.Rejected:
                 return
+        if not os.path.isdir(self.default_path):
+            os.mkdir(self.default_path)
+        if not os.path.isdir(os.path.join(self.default_path, "Reference")):
+            os.mkdir(os.path.join(self.default_path, "Reference"))
         dialog = QFileDialog()
         filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Создать новую плату"),
-                                          filter="JSON (*.json)")[0]
+                                          filter="Zip File (*.zip)",
+                                          directory=os.path.join(self.default_path, "Reference", "board.zip"))[0]
         if filename:
             self._current_file_path = filename
             self._reset_board()
@@ -716,13 +721,13 @@ class EPLabWindow(QMainWindow):
             os.mkdir(os.path.join(self.default_path, "Reference"))
         dialog = QFileDialog()
         filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить плату"),
-                                          filter="JSON (*.json)", directory=os.path.join(self.default_path,
-                                                                                         "Reference", "board.json"))[0]
+                                          filter="Zip File (*.zip)",
+                                          directory=os.path.join(self.default_path, "Reference", "board.zip"))[0]
         if filename:
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._current_file_path = filename
         elif self._current_file_path is None:
-            self._current_file_path = os.path.join(self.default_path, "Reference", "board.json")
+            self._current_file_path = os.path.join(self.default_path, "Reference", "board.zip")
             epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
         try:
             epfilemanager.load_board_from_ufiv(self._current_file_path)
@@ -759,7 +764,7 @@ class EPLabWindow(QMainWindow):
         """
         dialog = QFileDialog()
         filename = dialog.getOpenFileName(self, QCoreApplication.translate("t", "Открыть плату"),
-                                          filter="JSON (*.json)")[0]
+                                          filter="Board Files (*.json *.zip)")[0]
         if filename:
             self._current_file_path = filename
             try:
