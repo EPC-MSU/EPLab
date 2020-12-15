@@ -1,4 +1,3 @@
-from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTranslator
 import sys
 import logging
@@ -7,19 +6,22 @@ from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerIVM10
 from epcore.measurementmanager import MeasurementSystem
 import os
 from mainwindow import EPLabWindow
+import mainwindow as m
+from mainwindow import excepthook
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QLabel, qApp, QApplication, QWidget, QDesktopWidget
+import traceback
+
+sys._excepthook = sys.excepthook
 
 
-if __name__ == "__main__":
+def exception_hook(exctype, value, traceback):
+    sys._excepthook(exctype, value, traceback)
 
-    parser = ArgumentParser(description="EyePoint Lab")
-    parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual' for virtual mode)")
-    parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)")
-    parser.add_argument("--en", help="Use English version", action="store_true")
-    args = parser.parse_args()
 
-    logging.basicConfig(level=logging.WARNING)
+sys.excepthook = excepthook
 
-    app = QApplication(sys.argv)
+
+def launch_eplab(args, app):
 
     if args.en:
         translator = QTranslator()
@@ -79,5 +81,60 @@ if __name__ == "__main__":
     window = EPLabWindow(measurement_system)
     window.resize(1200, 600)
     window.show()
-
     app.exec()
+
+
+class ErrorWindow(QMainWindow):
+
+    def __init__(self, error, traceback):
+        super().__init__()
+        self.initUI(error, traceback)
+
+    def initUI(self, error, traceback):
+        self.centralwidget = QWidget()
+        self.setCentralWidget(self.centralwidget)
+        exit_btn = QPushButton("OK",  self)
+        error_lbl = QLabel(self)
+        traceback_lbl = QLabel(self)
+        error_lbl.setText(error)
+        traceback_lbl.setText(traceback)
+        self.v = QVBoxLayout(self.centralwidget)
+        self.v.addWidget(error_lbl)
+        self.v.addWidget(traceback_lbl)
+        self.v.addWidget(exit_btn)
+        exit_btn.clicked.connect(qApp.quit)
+        centerPoint = QDesktopWidget().availableGeometry().center()
+        qtRectangle = self.frameGeometry()
+        qtRectangle.moveCenter(centerPoint)
+        self.move(qtRectangle.topLeft())
+        self.setWindowTitle("Error")
+
+
+def start_err_app(app, e=None):
+    sys.excepthook = exception_hook
+    if e is not None:
+        ex = ErrorWindow(e, "".join(traceback.format_exception(*sys.exc_info())))
+    else:
+        ex = ErrorWindow("", m.tb)
+    ex.show()
+    app.exec_()
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser(description="EyePoint Lab")
+    parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual' for virtual mode)")
+    parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)")
+    parser.add_argument("--en", help="Use English version", action="store_true")
+    args = parser.parse_args()
+
+    logging.basicConfig(level=logging.WARNING)
+
+    app = QApplication(sys.argv)
+    try:
+        launch_eplab(args, app)
+        if m.tb:
+            for f in app.allWindows():
+                f.close()
+            start_err_app(app)
+    except Exception as e:
+        start_err_app(app, str(e))

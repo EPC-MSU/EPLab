@@ -23,6 +23,8 @@ from common import WorkMode, DeviceErrorsHandler
 from settings.settings import Settings
 import os
 from typing import Optional
+import traceback
+from PyQt5.QtWidgets import QApplication
 
 
 class SettingsWindow(QDialog):
@@ -949,3 +951,15 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan.go_pin(number)
         self._measurement_plan.get_current_pin().x = point.x()
         self._measurement_plan.get_current_pin().y = point.y()
+
+
+tb = None
+
+
+def excepthook(exc_type, exc_value, exc_tb):
+    global tb
+    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    print("error catched!:")
+    print("error message:\n", tb)
+    QApplication.quit()
+
