@@ -962,4 +962,3 @@ def excepthook(exc_type, exc_value, exc_tb):
     print("error catched!:")
     print("error message:\n", tb)
     QApplication.quit()
-
