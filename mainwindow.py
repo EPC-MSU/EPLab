@@ -27,6 +27,10 @@ import traceback
 from PyQt5.QtWidgets import QApplication
 
 
+def _(text: str):
+    return QCoreApplication.translate("t", text)
+
+
 class SettingsWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -359,7 +363,7 @@ class EPLabWindow(QMainWindow):
         self._open_board_window_if_needed()
         if not self._measurement_plan.image:
             msg = QMessageBox()
-            msg.setWindowTitle(QCoreApplication.translate("t", "Открытие изображения платы"))
+            msg.setWindowTitle(_("Открытие изображения платы"))
             msg.setText("Для данной платы изображение не задано!")
             msg.exec_()
 
@@ -410,16 +414,16 @@ class EPLabWindow(QMainWindow):
                 webbrowser.open_new_tab("http://eyepoint.physlab.ru")
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
-        msg.setWindowTitle(QCoreApplication.translate("t", "Справка"))
+        msg.setWindowTitle(_("Справка"))
         msg.setText(self.windowTitle())
-        msg.setInformativeText(QCoreApplication.translate("t", "Программное обеспечение для работы с устройствами "
-                                                               "линейки EyePoint, предназначенными для поиска "
-                                                               "неисправностей на печатных платах в ручном режиме "
-                                                               "(при помощи ручных щупов). Для более подробной "
-                                                               "информации об Eyepoint, перейдите по ссылке "
-                                                               "http://eyepoint.physlab.ru."))
-        msg.addButton(QCoreApplication.translate("t", "Перейти"), QMessageBox.YesRole)
-        msg.addButton(QCoreApplication.translate("t", "ОК"), QMessageBox.NoRole)
+        msg.setInformativeText(_("Программное обеспечение для работы с устройствами "
+                                 "линейки EyePoint, предназначенными для поиска "
+                                 "неисправностей на печатных платах в ручном режиме "
+                                 "(при помощи ручных щупов). Для более подробной "
+                                 "информации об Eyepoint, перейдите по ссылке "
+                                 "http://eyepoint.physlab.ru."))
+        msg.addButton(_("Перейти"), QMessageBox.YesRole)
+        msg.addButton(_("ОК"), QMessageBox.NoRole)
         msg.buttonClicked.connect(msgbtn)
         msg.exec_()
 
@@ -465,7 +469,7 @@ class EPLabWindow(QMainWindow):
             os.mkdir(os.path.join(self.default_path, "Screenshot"))
 
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить ВАХ"),
+        filename = dialog.getSaveFileName(self, _("Сохранить ВАХ"),
                                           filter="Image (*.png)", directory=os.path.join(self.default_path,
                                                                                          "Screenshot", filename))[0]
         if filename:
@@ -595,9 +599,8 @@ class EPLabWindow(QMainWindow):
         except Exception as e:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
-            msg.setWindowTitle(QCoreApplication.translate("t", "Ошибка открытия точки"))
-            msg.setText(QCoreApplication.translate("t", "Неверный формат номера точки. Номер точки может "
-                                                        "принимать только целочисленное значение!"))
+            msg.setWindowTitle(_("Ошибка открытия точки"))
+            msg.setText(_("Неверный формат номера точки. Номер точки может принимать только целочисленное значение!"))
             msg.setInformativeText(str(e))
             msg.exec_()
             return
@@ -606,8 +609,8 @@ class EPLabWindow(QMainWindow):
         except Exception as e:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
-            msg.setWindowTitle(QCoreApplication.translate("t", "Ошибка открытия точки"))
-            msg.setText(QCoreApplication.translate("t", "Точка с таким номером не найдена на данной плате."))
+            msg.setWindowTitle(_("Ошибка открытия точки"))
+            msg.setText(_("Точка с таким номером не найдена на данной плате."))
             msg.setInformativeText(str(e))
             msg.exec_()
             return
@@ -705,7 +708,7 @@ class EPLabWindow(QMainWindow):
         if not os.path.isdir(os.path.join(self.default_path, "Reference")):
             os.mkdir(os.path.join(self.default_path, "Reference"))
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Создать новую плату"),
+        filename = dialog.getSaveFileName(self, _("Создать новую плату"),
                                           filter="UFIV Archived File (*.uzf)",
                                           directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
         if filename:
@@ -722,7 +725,7 @@ class EPLabWindow(QMainWindow):
         if not os.path.isdir(os.path.join(self.default_path, "Reference")):
             os.mkdir(os.path.join(self.default_path, "Reference"))
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, QCoreApplication.translate("t", "Сохранить плату"),
+        filename = dialog.getSaveFileName(self, _("Сохранить плату"),
                                           filter="UFIV Archived File (*.uzf)",
                                           directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
         if filename:
@@ -765,7 +768,7 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, QCoreApplication.translate("t", "Открыть плату"),
+        filename = dialog.getOpenFileName(self, _("Открыть плату"),
                                           filter="Board Files (*.json *.uzf)")[0]
         if filename:
             self._current_file_path = filename
@@ -774,8 +777,8 @@ class EPLabWindow(QMainWindow):
             except Exception as e:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
-                msg.setWindowTitle(QCoreApplication.translate("t", "Ошибка"))
-                msg.setText(QCoreApplication.translate("t", "Формат файла не подходит"))
+                msg.setWindowTitle(_("Ошибка"))
+                msg.setText(_("Формат файла не подходит"))
                 msg.setInformativeText(str(e)[0:512] + "\n...")
                 msg.exec_()
                 return
@@ -793,7 +796,7 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, QCoreApplication.translate("t", "Открыть изображение платы"),
+        filename = dialog.getOpenFileName(self, _("Открыть изображение платы"),
                                           filter="Image Files (*.png *.jpg *.bmp)")[0]
         if filename:
             epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
@@ -838,19 +841,19 @@ class EPLabWindow(QMainWindow):
             sensity = "-"
             max_v = "-"
             probe_freq = "-"
-        self._param_dict["Напряжение"].setText(QCoreApplication.translate("t", "  Напряжение: ") + str(_v) +
-                                               QCoreApplication.translate("t", " В / дел."))
-        self._param_dict["Ампл. проб. сигнала"].setText(QCoreApplication.translate("t", "Ампл. проб. сигнала: ") +
+        self._param_dict["Напряжение"].setText(_("  Напряжение: ") + str(_v) +
+                                               _(" В / дел."))
+        self._param_dict["Ампл. проб. сигнала"].setText(_("Ампл. проб. сигнала: ") +
                                                         str(max_v) +
-                                                        QCoreApplication.translate("t", " B"))
-        self._param_dict["Частота"].setText(QCoreApplication.translate("t", "Частота: ") +
+                                                        _(" B"))
+        self._param_dict["Частота"].setText(_("Частота: ") +
                                             str(probe_freq) +
-                                            QCoreApplication.translate("t", " Гц"))
-        self._param_dict["Ток"].setText(QCoreApplication.translate("t", "  Ток: ") + str(_c) +
-                                        QCoreApplication.translate("t", " мА / дел."))
-        self._param_dict["Чувствительность"].setText(QCoreApplication.translate("t", "Чувствительность: ") +
+                                            _(" Гц"))
+        self._param_dict["Ток"].setText(_("  Ток: ") + str(_c) +
+                                        _(" мА / дел."))
+        self._param_dict["Чувствительность"].setText(_("Чувствительность: ") +
                                                      str(sensity))
-        self._param_dict["Различие"].setText(QCoreApplication.translate("t", "Различие: ") + score)
+        self._param_dict["Различие"].setText(_("Различие: ") + score)
 
     def plot_parameters(self):
         self._param_dict = {"Напряжение": QLabel(self), "Ампл. проб. сигнала": QLabel(self), "Частота": QLabel(self),
@@ -876,7 +879,7 @@ class EPLabWindow(QMainWindow):
         self.reference_curve_plot.set_curve(None)
         self.test_curve_plot.set_curve(None)
         # Draw text
-        self._iv_window.plot.set_center_text(QCoreApplication.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
+        self._iv_window.plot.set_center_text(_("НЕТ ПОДКЛЮЧЕНИЯ"))
 
         if self._msystem.reconnect():
             # Reconnection success!
