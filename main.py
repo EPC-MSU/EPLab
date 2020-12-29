@@ -6,19 +6,20 @@ from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerIVM10
 from epcore.measurementmanager import MeasurementSystem
 import os
 from mainwindow import EPLabWindow
-import mainwindow as m
-from mainwindow import excepthook
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QLabel, qApp, QApplication, QWidget, QDesktopWidget
 import traceback
 
-sys._excepthook = sys.excepthook
+tb = None
 
 
-def exception_hook(exctype, value, traceback):
-    sys._excepthook(exctype, value, traceback)
+def exception_hook(exc_type, exc_value, exc_tb):
+    global tb
+    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    for f in app.allWindows():
+        f.close()
 
 
-sys.excepthook = excepthook
+sys.excepthook = exception_hook
 
 
 def launch_eplab(args, app):
@@ -110,12 +111,8 @@ class ErrorWindow(QMainWindow):
         self.setWindowTitle("Error")
 
 
-def start_err_app(app, e=None):
-    sys.excepthook = exception_hook
-    if e is not None:
-        ex = ErrorWindow(e, "".join(traceback.format_exception(*sys.exc_info())))
-    else:
-        ex = ErrorWindow("", m.tb)
+def start_err_app(app, error="", traceback=""):
+    ex = ErrorWindow(error, traceback)
     ex.show()
     app.exec_()
 
@@ -132,9 +129,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     try:
         launch_eplab(args, app)
-        if m.tb:
-            for f in app.allWindows():
-                f.close()
-            start_err_app(app)
+        assert(tb is None)
+    except AssertionError:
+        start_err_app(app, traceback=tb)
     except Exception as e:
-        start_err_app(app, str(e))
+        start_err_app(app, error=str(e), traceback="".join(traceback.format_exception(*sys.exc_info())))
