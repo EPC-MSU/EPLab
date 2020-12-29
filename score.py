@@ -6,7 +6,7 @@ class ScoreWrapper:
         self._label = label
         self._threshold = score_threshold
         self._step = threshold_step
-
+        self._friendly_score = "-"
         self._color_good = "#73d216"
         self._color_bad = "#cc0000"
 
@@ -18,14 +18,18 @@ class ScoreWrapper:
     def set_score(self, score: float):
         color = self._color_good if score < self._threshold else self._color_bad
         try:
-            friendly_score = str(round(score * 100.0)) + "%"
+            self._friendly_score = str(round(score * 100.0)) + "%"
         except ValueError:
             # TODO: this should not happen
-            friendly_score = "NaN"
-        self._set_score_text(friendly_score, color)
+            self._friendly_score = "NaN"
+        self._set_score_text(self._friendly_score, color)
+
+    def get_score(self):
+        return self._friendly_score
 
     def set_dummy_score(self):
-        self._set_score_text("-", self._color_good)
+        self._friendly_score = "-"
+        self._set_score_text(self._friendly_score, self._color_good)
 
     def increase_threshold(self):
         self._threshold = min(self._threshold + self._step, 1.0)

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLineEdit, QLabel, QWidget, QVBoxLayout, \
     QHBoxLayout, QToolBar, QGridLayout, QPushButton, QApplication
 from PyQt5.QtGui import QIcon, QColor
-from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication
+from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication as qApp
 from PyQt5 import uic
 
 from warnings import warn
@@ -27,10 +27,6 @@ from typing import Optional
 import traceback
 
 ERROR_CODE = -10000
-
-
-def _(text: str):
-    return QCoreApplication.translate("t", text)
 
 
 def show_exception(f, msg_title, msg_text):
@@ -374,8 +370,8 @@ class EPLabWindow(QMainWindow):
         self._open_board_window_if_needed()
         if not self._measurement_plan.image:
             msg = QMessageBox()
-            msg.setWindowTitle(_("Открытие изображения платы"))
-            msg.setText("Для данной платы изображение не задано!")
+            msg.setWindowTitle(qApp.translate("t", "Открытие изображения платы"))
+            msg.setText(qApp.translate("t", "Для данной платы изображение не задано!"))
             msg.exec_()
 
     @pyqtSlot()
@@ -425,14 +421,15 @@ class EPLabWindow(QMainWindow):
                 webbrowser.open_new_tab("http://eyepoint.physlab.ru")
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
-        msg.setWindowTitle(_("Справка"))
+        msg.setWindowTitle(qApp.translate("t", "Справка"))
         msg.setText(self.windowTitle())
-        msg.setInformativeText(_("Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными "
-                                 "для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных "
-                                 "щупов). Для более подробной информации об Eyepoint, перейдите по ссылке "
-                                 "http://eyepoint.physlab.ru."))
-        msg.addButton(_("Перейти"), QMessageBox.YesRole)
-        msg.addButton(_("ОК"), QMessageBox.NoRole)
+        msg.setInformativeText(qApp.translate("t", "Программное обеспечение для работы с устройствами линейки EyePoint,"
+                                                   " предназначенными для поиска неисправностей на печатных платах в "
+                                                   "ручном режиме (при помощи ручных щупов). Для более подробной "
+                                                   "информации об Eyepoint, перейдите по ссылке "
+                                                   "http://eyepoint.physlab.ru."))
+        msg.addButton(qApp.translate("t", "Перейти"), QMessageBox.YesRole)
+        msg.addButton(qApp.translate("t", "ОК"), QMessageBox.NoRole)
         msg.buttonClicked.connect(msgbtn)
         msg.exec_()
 
@@ -478,7 +475,7 @@ class EPLabWindow(QMainWindow):
             os.mkdir(os.path.join(self.default_path, "Screenshot"))
 
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, _("Сохранить ВАХ"), filter="Image (*.png)",
+        filename = dialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
                                           directory=os.path.join(self.default_path, "Screenshot", filename))[0]
         if filename:
             if not filename.endswith(".png"):
@@ -487,7 +484,8 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_open_settings(self):
-        settings_path = QFileDialog(self).getOpenFileName(self, "Open file", ".", "Ini file (*.ini);;All Files (*)")[0]
+        settings_path = QFileDialog(self).getOpenFileName(self, qApp.translate("t", "Открыть файл"), ".",
+                                                          "Ini file (*.ini);;All Files (*)")[0]
         if len(settings_path) == 0:
             return
 
@@ -536,7 +534,8 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _save_settings_to_file(self):
-        settings_path = QFileDialog(self).getSaveFileName(self, "Save file", ".", "Ini file (*.ini);;All Files (*)")[0]
+        settings_path = QFileDialog(self).getSaveFileName(self, qApp.translate("t", "Сохранить файл"), ".",
+                                                          "Ini file (*.ini);;All Files (*)")[0]
         if len(settings_path) == 0:
             return
 
@@ -602,13 +601,14 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_go_selected_pin(self):
-        str_to_int = show_exception(int, _("Ошибка открытия точки"), _("Неверный формат номера точки. Номер точки может"
-                                                                       " принимать только целочисленное значение!"))
+        str_to_int = show_exception(int, qApp.translate("t", "Ошибка открытия точки"),
+                                    qApp.translate("t", "Неверный формат номера точки. Номер точки может"
+                                                        " принимать только целочисленное значение!"))
         num_point = str_to_int(self.num_point_line_edit.text())
         if num_point == ERROR_CODE:
             return
-        go_pin = show_exception(self._measurement_plan.go_pin, _("Ошибка открытия точки"),
-                                _("Точка с таким номером не найдена на данной плате."))
+        go_pin = show_exception(self._measurement_plan.go_pin, qApp.translate("t", "Ошибка открытия точки"),
+                                qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
         status = go_pin(num_point)
         if status == ERROR_CODE:
             return
@@ -680,10 +680,10 @@ class EPLabWindow(QMainWindow):
     def _on_new_board(self):
         if self._current_file_path is not None:
             d = QDialog()
-            label = QLabel("Сохранить изменеия в файл?")
-            btn_yes = QPushButton("Да")
-            btn_no = QPushButton("Нет")
-            btn_cancel = QPushButton("Отмена")
+            label = QLabel(qApp.translate("t", "Сохранить изменения в файл?"))
+            btn_yes = QPushButton(qApp.translate("t", "Да"))
+            btn_no = QPushButton(qApp.translate("t", "Нет"))
+            btn_cancel = QPushButton(qApp.translate("t", "Отмена"))
             layout = QVBoxLayout(d)
             hl = QHBoxLayout(d)
             layout.addWidget(label)
@@ -694,7 +694,7 @@ class EPLabWindow(QMainWindow):
             btn_yes.clicked.connect(d.accept)
             btn_no.clicked.connect(lambda: d.done(1))
             btn_cancel.clicked.connect(d.reject)
-            d.setWindowTitle("Внимание")
+            d.setWindowTitle(qApp.translate("t", "Внимание"))
             d.setWindowModality(QtC.ApplicationModal)
             resp = d.exec()
             if resp == QDialog.Accepted:
@@ -706,7 +706,8 @@ class EPLabWindow(QMainWindow):
         if not os.path.isdir(os.path.join(self.default_path, "Reference")):
             os.mkdir(os.path.join(self.default_path, "Reference"))
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, _("Создать новую плату"), filter="UFIV Archived File (*.uzf)",
+        filename = dialog.getSaveFileName(self, qApp.translate("t", "Создать новую плату"),
+                                          filter="UFIV Archived File (*.uzf)",
                                           directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
         if filename:
             self._current_file_path = filename
@@ -722,7 +723,8 @@ class EPLabWindow(QMainWindow):
         if not os.path.isdir(os.path.join(self.default_path, "Reference")):
             os.mkdir(os.path.join(self.default_path, "Reference"))
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, _("Сохранить плату"), filter="UFIV Archived File (*.uzf)",
+        filename = dialog.getSaveFileName(self, qApp.translate("t", "Сохранить плату"),
+                                          filter="UFIV Archived File (*.uzf)",
                                           directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
         if filename:
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
@@ -730,8 +732,8 @@ class EPLabWindow(QMainWindow):
         elif self._current_file_path is None:
             self._current_file_path = os.path.join(self.default_path, "Reference", "board.uzf")
             epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
-        load_file = show_exception(epfilemanager.load_board_from_ufiv, _("Ошибка"),
-                                   _("Неверный формат сохраняемого файла"))
+        load_file = show_exception(epfilemanager.load_board_from_ufiv, qApp.translate("t", "Ошибка"),
+                                   qApp.translate("t", "Неверный формат сохраняемого файла"))
         load_file(self._current_file_path)
 
     @pyqtSlot()
@@ -739,8 +741,8 @@ class EPLabWindow(QMainWindow):
         if not self._current_file_path:
             return self._on_save_board_as()
         epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
-        load_file = show_exception(epfilemanager.load_board_from_ufiv, _("Ошибка"),
-                                   _("Неверный формат сохраняемого файла"))
+        load_file = show_exception(epfilemanager.load_board_from_ufiv, qApp.translate("t", "Ошибка"),
+                                   qApp.translate("t", "Неверный формат сохраняемого файла"))
         load_file(self._current_file_path)
 
     @pyqtSlot()
@@ -750,11 +752,12 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, _("Открыть плату"),
+        filename = dialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
                                           filter="Board Files (*.json *.uzf)")[0]
         if filename:
             self._current_file_path = filename
-            load_file = show_exception(epfilemanager.load_board_from_ufiv, _("Ошибка"), _("Формат файла не подходит"))
+            load_file = show_exception(epfilemanager.load_board_from_ufiv, qApp.translate("t", "Ошибка"),
+                                       qApp.translate("t", "Формат файла не подходит"))
             board = load_file(filename, auto_convert_p10=True)
             if board == ERROR_CODE:
                 return
@@ -772,7 +775,7 @@ class EPLabWindow(QMainWindow):
         :return:
         """
         dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, _("Открыть изображение платы"),
+        filename = dialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
                                           filter="Image Files (*.png *.jpg *.bmp)")[0]
         if filename:
             epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
@@ -802,9 +805,7 @@ class EPLabWindow(QMainWindow):
             score = self._calculate_score(self._ref_curve, self._test_curve)
             self._score_wrapper.set_score(score)
             self._player.score_updated(score)
-            score = str(round(score * 100.0)) + "%"
         else:
-            score = "-"
             self._score_wrapper.set_dummy_score()
         _v, _c = self._iv_window.plot.get_minor_axis_step()
         if settings is not None:
@@ -817,19 +818,15 @@ class EPLabWindow(QMainWindow):
             sensity = "-"
             max_v = "-"
             probe_freq = "-"
-        self._param_dict["Напряжение"].setText(_("  Напряжение: ") + str(_v) +
-                                               _(" В / дел."))
-        self._param_dict["Ампл. проб. сигнала"].setText(_("Ампл. проб. сигнала: ") +
-                                                        str(max_v) +
-                                                        _(" B"))
-        self._param_dict["Частота"].setText(_("Частота: ") +
-                                            str(probe_freq) +
-                                            _(" Гц"))
-        self._param_dict["Ток"].setText(_("  Ток: ") + str(_c) +
-                                        _(" мА / дел."))
-        self._param_dict["Чувствительность"].setText(_("Чувствительность: ") +
-                                                     str(sensity))
-        self._param_dict["Различие"].setText(_("Различие: ") + score)
+        self._param_dict["Напряжение"].setText(qApp.translate("t", "  Напряжение: ") + str(_v) +
+                                               qApp.translate("t", " В / дел."))
+        self._param_dict["Ампл. проб. сигнала"].setText(qApp.translate("t", "Ампл. проб. сигнала: ") +
+                                                        str(max_v) + qApp.translate("t", " B"))
+        self._param_dict["Частота"].setText(qApp.translate("t", "Частота: ") + str(probe_freq) +
+                                            qApp.translate("t", " Гц"))
+        self._param_dict["Ток"].setText(qApp.translate("t", "  Ток: ") + str(_c) + qApp.translate("t", " мА / дел."))
+        self._param_dict["Чувствительность"].setText(qApp.translate("t", "Чувствительность: ") + str(sensity))
+        self._param_dict["Различие"].setText(qApp.translate("t", "Различие: ") + self._score_wrapper.get_score())
 
     def plot_parameters(self):
         self._param_dict = {"Напряжение": QLabel(self), "Ампл. проб. сигнала": QLabel(self), "Частота": QLabel(self),
@@ -855,7 +852,7 @@ class EPLabWindow(QMainWindow):
         self.reference_curve_plot.set_curve(None)
         self.test_curve_plot.set_curve(None)
         # Draw text
-        self._iv_window.plot.set_center_text(_("НЕТ ПОДКЛЮЧЕНИЯ"))
+        self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
 
         if self._msystem.reconnect():
             # Reconnection success!
