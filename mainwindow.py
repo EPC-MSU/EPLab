@@ -21,7 +21,7 @@ from version import Version
 from player import SoundPlayer
 from common import WorkMode, DeviceErrorsHandler
 from settings.settings import Settings
-from settings.settingswindow import SettingsWindow
+from settings.settingswindow import SettingsWindow, LowSettingsPanel
 import os
 from typing import Optional
 import traceback
@@ -91,7 +91,7 @@ class EPLabWindow(QMainWindow):
         self.add_cursor_action.toggled.connect(self._on_add_cursor)
         self.remove_cursor_action.toggled.connect(self._on_del_cursor)
 
-        self.plot_parameters()
+        self.low_panel_settings = LowSettingsPanel(self)
         self.main_widget = QWidget(self)
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -807,38 +807,20 @@ class EPLabWindow(QMainWindow):
             self._player.score_updated(score)
         else:
             self._score_wrapper.set_dummy_score()
-        _v, _c = self._iv_window.plot.get_minor_axis_step()
-        if settings is not None:
-            sensity = [button.text() for button in self._sensitivities.keys() if self._sensitivities[button] ==
-                       settings.internal_resistance]
-            sensity = sensity[0]
-            max_v = np.round(settings.max_voltage, 1)
-            probe_freq = np.round(settings.probe_signal_frequency, 1)
-        else:
-            sensity = "-"
-            max_v = "-"
-            probe_freq = "-"
-        self._param_dict["Напряжение"].setText(qApp.translate("t", "  Напряжение: ") + str(_v) +
-                                               qApp.translate("t", " В / дел."))
-        self._param_dict["Ампл. проб. сигнала"].setText(qApp.translate("t", "Ампл. проб. сигнала: ") +
-                                                        str(max_v) + qApp.translate("t", " B"))
-        self._param_dict["Частота"].setText(qApp.translate("t", "Частота: ") + str(probe_freq) +
-                                            qApp.translate("t", " Гц"))
-        self._param_dict["Ток"].setText(qApp.translate("t", "  Ток: ") + str(_c) + qApp.translate("t", " мА / дел."))
-        self._param_dict["Чувствительность"].setText(qApp.translate("t", "Чувствительность: ") + str(sensity))
-        self._param_dict["Различие"].setText(qApp.translate("t", "Различие: ") + self._score_wrapper.get_score())
+        self.plot_parameters(settings)
 
-    def plot_parameters(self):
-        self._param_dict = {"Напряжение": QLabel(self), "Ампл. проб. сигнала": QLabel(self), "Частота": QLabel(self),
-                            "Ток": QLabel(self), "Чувствительность": QLabel(self), "Различие": QLabel(self)}
-        self.grid_param = QGridLayout()
-        positions = [(i, j) for i in range(2) for j in range(3)]
-        for position, name in zip(positions, self._param_dict.keys()):
-            tb = QToolBar()
-            tb.setFixedHeight(30)
-            tb.setStyleSheet("background:black; color:white;spacing:10;")
-            tb.addWidget(self._param_dict[name])
-            self.grid_param.addWidget(tb, *position)
+    def plot_parameters(self, settings=None):
+        param_dict = {}
+        param_dict["voltage"], param_dict["current"] = self._iv_window.plot.get_minor_axis_step()
+        param_dict["score"] = self._score_wrapper.get_score()
+        param_dict["sensity"], param_dict["max_voltage"], param_dict["probe_signal_frequency"] = "-", "-", "-"
+        if settings is not None:
+            _s = [button.text() for button in self._sensitivities.keys() if self._sensitivities[button] ==
+                       settings.internal_resistance]
+            param_dict["sensity"] = _s[0]
+            param_dict["max_voltage"] = np.round(settings.max_voltage, 1)
+            param_dict["probe_signal_frequency"] = np.round(settings.probe_signal_frequency, 1)
+        self.low_panel_settings.set_all_parameters(**param_dict)
 
     def _remove_ref_curve(self):
         self._ref_curve = None
