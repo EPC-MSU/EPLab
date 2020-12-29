@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLineEdit, QLabel, QWidget, QVBoxLayout, \
-    QHBoxLayout, QToolBar, QGridLayout, QPushButton, QApplication
+    QHBoxLayout, QPushButton
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication as qApp
 from PyQt5 import uic
@@ -24,7 +24,6 @@ from settings.settings import Settings
 from settings.settingswindow import SettingsWindow, LowSettingsPanel
 import os
 from typing import Optional
-import traceback
 
 ERROR_CODE = -10000
 
@@ -810,13 +809,12 @@ class EPLabWindow(QMainWindow):
         self.plot_parameters(settings)
 
     def plot_parameters(self, settings=None):
-        param_dict = {}
+        param_dict = {"sensity": "-", "max_voltage": "-", "probe_signal_frequency": "-"}
         param_dict["voltage"], param_dict["current"] = self._iv_window.plot.get_minor_axis_step()
         param_dict["score"] = self._score_wrapper.get_score()
-        param_dict["sensity"], param_dict["max_voltage"], param_dict["probe_signal_frequency"] = "-", "-", "-"
         if settings is not None:
             _s = [button.text() for button in self._sensitivities.keys() if self._sensitivities[button] ==
-                       settings.internal_resistance]
+                  settings.internal_resistance]
             param_dict["sensity"] = _s[0]
             param_dict["max_voltage"] = np.round(settings.max_voltage, 1)
             param_dict["probe_signal_frequency"] = np.round(settings.probe_signal_frequency, 1)

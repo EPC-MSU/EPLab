@@ -33,7 +33,8 @@ class SettingsWindow(QDialog):
 
 class LowSettingsPanel:
     def __init__(self, window):
-        self._param_dict = {"Напряжение": QLabel(window), "Ампл. проб. сигнала": QLabel(window), "Частота": QLabel(window),
+        self._param_dict = {"Напряжение": QLabel(window), "Ампл. проб. сигнала": QLabel(window),
+                            "Частота": QLabel(window),
                             "Ток": QLabel(window), "Чувствительность": QLabel(window), "Различие": QLabel(window)}
         window.grid_param = QGridLayout()
         positions = [(i, j) for i in range(2) for j in range(3)]
@@ -74,4 +75,3 @@ class LowSettingsPanel:
         self.set_cur(s.current)
         self.set_sensity(s.sensity)
         self.set_score(s.score)
-
