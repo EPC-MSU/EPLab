@@ -730,7 +730,8 @@ class EPLabWindow(QMainWindow):
         elif self._current_file_path is None:
             self._current_file_path = os.path.join(self.default_path, "Reference", "board.uzf")
             epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
-        load_file = show_exception(epfilemanager.load_board_from_ufiv, "Error", "Invalid format save file")
+        load_file = show_exception(epfilemanager.load_board_from_ufiv, _("Ошибка"),
+                                   _("Неверный формат сохраняемого файла"))
         load_file(self._current_file_path)
 
     @pyqtSlot()
@@ -738,7 +739,8 @@ class EPLabWindow(QMainWindow):
         if not self._current_file_path:
             return self._on_save_board_as()
         epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
-        load_file = show_exception(epfilemanager.load_board_from_ufiv, "Error", "Invalid format save file")
+        load_file = show_exception(epfilemanager.load_board_from_ufiv, _("Ошибка"),
+                                   _("Неверный формат сохраняемого файла"))
         load_file(self._current_file_path)
 
     @pyqtSlot()
@@ -752,8 +754,7 @@ class EPLabWindow(QMainWindow):
                                           filter="Board Files (*.json *.uzf)")[0]
         if filename:
             self._current_file_path = filename
-            load_file = show_exception(epfilemanager.load_board_from_ufiv, _("Ошибка"),
-                                _("Формат файла не подходит"))
+            load_file = show_exception(epfilemanager.load_board_from_ufiv, _("Ошибка"), _("Формат файла не подходит"))
             board = load_file(filename, auto_convert_p10=True)
             if board == ERROR_CODE:
                 return

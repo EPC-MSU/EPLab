@@ -15,4 +15,3 @@ class SettingsWindow(QDialog):
         self.score_treshold_value_lineEdit.returnPressed.connect(parent._on_threshold_set_value)
         self.load_settings_push_button.clicked.connect(parent._on_open_settings)
         self.save_settings_push_button.clicked.connect(parent._save_settings_to_file)
-
