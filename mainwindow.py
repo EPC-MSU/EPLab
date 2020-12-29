@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLineEdit, QLabel, QWidget, QVBoxLayout, \
-    QHBoxLayout, QToolBar, QGridLayout, QPushButton
+    QHBoxLayout, QToolBar, QGridLayout, QPushButton, QApplication
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication
 from PyQt5 import uic
@@ -21,24 +21,35 @@ from version import Version
 from player import SoundPlayer
 from common import WorkMode, DeviceErrorsHandler
 from settings.settings import Settings
+from settings.settingswindow import SettingsWindow
 import os
 from typing import Optional
 import traceback
-from PyQt5.QtWidgets import QApplication
+
+ERROR_CODE = -10000
 
 
-class SettingsWindow(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-
-        uic.loadUi(os.path.join("gui", "settings.ui"), self)
-
-        self.score_treshold_button_minus.clicked.connect(parent._on_threshold_dec)
-        self.score_treshold_button_plus.clicked.connect(parent._on_threshold_inc)
-        self.auto_calibration_push_button.clicked.connect(parent._on_auto_calibration)
-        self.score_treshold_value_lineEdit.returnPressed.connect(parent._on_threshold_set_value)
-        self.load_settings_push_button.clicked.connect(parent._on_open_settings)
-        self.save_settings_push_button.clicked.connect(parent._save_settings_to_file)
+def show_exception(f, msg_title, msg_text):
+    """
+    This wrapper show message if has error
+    :param f:
+    :param msg_title:
+    :param msg_text:
+    :return:
+    """
+    def func(*args, **kwargs):
+        try:
+            res = f(*args, **kwargs)
+            return res
+        except Exception as e:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setWindowTitle(msg_title)
+            msg.setText(msg_text)
+            msg.setInformativeText(str(e)[0:512] + "\n...")
+            msg.exec_()
+            return ERROR_CODE
+    return func
 
 
 class EPLabWindow(QMainWindow):
@@ -590,26 +601,16 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_go_selected_pin(self):
-        try:
-            num_point = int(self.num_point_line_edit.text())
-        except Exception as e:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Warning)
-            msg.setWindowTitle(QCoreApplication.translate("t", "Ошибка открытия точки"))
-            msg.setText(QCoreApplication.translate("t", "Неверный формат номера точки. Номер точки может "
-                                                        "принимать только целочисленное значение!"))
-            msg.setInformativeText(str(e))
-            msg.exec_()
+        str_to_int = show_exception(int, QCoreApplication.translate("t", "Ошибка открытия точки"),
+                             QCoreApplication.translate("t", "Неверный формат номера точки. Номер точки может "
+                                                             "принимать только целочисленное значение!"))
+        num_point = str_to_int(self.num_point_line_edit.text())
+        if num_point == ERROR_CODE:
             return
-        try:
-            self._measurement_plan.go_pin(num_point)
-        except Exception as e:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Warning)
-            msg.setWindowTitle(QCoreApplication.translate("t", "Ошибка открытия точки"))
-            msg.setText(QCoreApplication.translate("t", "Точка с таким номером не найдена на данной плате."))
-            msg.setInformativeText(str(e))
-            msg.exec_()
+        go_pin = show_exception(self._measurement_plan.go_pin, QCoreApplication.translate("t", "Ошибка открытия точки"),
+                         QCoreApplication.translate("t", "Точка с таким номером не найдена на данной плате."))
+        status = go_pin(num_point)
+        if status == ERROR_CODE:
             return
         self._update_current_pin()
         self._open_board_window_if_needed()
@@ -731,32 +732,16 @@ class EPLabWindow(QMainWindow):
         elif self._current_file_path is None:
             self._current_file_path = os.path.join(self.default_path, "Reference", "board.uzf")
             epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
-        try:
-            epfilemanager.load_board_from_ufiv(self._current_file_path)
-        except Exception as e:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setWindowTitle("Error")
-            msg.setText("Invalid format save file")
-            msg.setInformativeText(str(e)[0:512] + "\n...")
-            msg.exec_()
-            return
+        load_file = show_exception(epfilemanager.load_board_from_ufiv, "Error", "Invalid format save file")
+        load_file(self._current_file_path)
 
     @pyqtSlot()
     def _on_save_board(self):
         if not self._current_file_path:
             return self._on_save_board_as()
         epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
-        try:
-            epfilemanager.load_board_from_ufiv(self._current_file_path)
-        except Exception as e:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setWindowTitle("Error")
-            msg.setText("Invalid format save file")
-            msg.setInformativeText(str(e)[0:512] + "\n...")
-            msg.exec_()
-            return
+        load_file = show_exception(epfilemanager.load_board_from_ufiv, "Error", "Invalid format save file")
+        load_file(self._current_file_path)
 
     @pyqtSlot()
     def _on_load_board(self):
@@ -769,15 +754,10 @@ class EPLabWindow(QMainWindow):
                                           filter="Board Files (*.json *.uzf)")[0]
         if filename:
             self._current_file_path = filename
-            try:
-                board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
-            except Exception as e:
-                msg = QMessageBox()
-                msg.setIcon(QMessageBox.Critical)
-                msg.setWindowTitle(QCoreApplication.translate("t", "Ошибка"))
-                msg.setText(QCoreApplication.translate("t", "Формат файла не подходит"))
-                msg.setInformativeText(str(e)[0:512] + "\n...")
-                msg.exec_()
+            load_file = show_exception(epfilemanager.load_board_from_ufiv, QCoreApplication.translate("t", "Ошибка"),
+                                QCoreApplication.translate("t", "Формат файла не подходит"))
+            board = load_file(filename, auto_convert_p10=True)
+            if board == ERROR_CODE:
                 return
 
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers_map["test"])
