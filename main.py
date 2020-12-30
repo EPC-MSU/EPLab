@@ -22,7 +22,7 @@ def exception_hook(exc_type, exc_value, exc_tb):
 sys.excepthook = exception_hook
 
 
-def launch_eplab(args, app):
+def launch_eplab(app: QApplication, args):
 
     if args.en:
         translator = QTranslator()
@@ -86,19 +86,22 @@ def launch_eplab(args, app):
 
 
 class ErrorWindow(QMainWindow):
+    """
+    Window with error message with traceback
+    """
 
-    def __init__(self, error, traceback):
+    def __init__(self, error: str, trace_back: str):
         super().__init__()
-        self.initUI(error, traceback)
+        self.initUI(error, trace_back)
 
-    def initUI(self, error, traceback):
+    def initUI(self, error: str, trace_back: str):
         self.centralwidget = QWidget()
         self.setCentralWidget(self.centralwidget)
         exit_btn = QPushButton("OK",  self)
         error_lbl = QLabel(self)
         traceback_lbl = QLabel(self)
         error_lbl.setText(error)
-        traceback_lbl.setText(traceback)
+        traceback_lbl.setText(trace_back)
         self.v = QVBoxLayout(self.centralwidget)
         self.v.addWidget(error_lbl)
         self.v.addWidget(traceback_lbl)
@@ -111,8 +114,8 @@ class ErrorWindow(QMainWindow):
         self.setWindowTitle("Error")
 
 
-def start_err_app(app, error="", traceback=""):
-    ex = ErrorWindow(error, traceback)
+def start_err_app(app: QApplication, error: str = "", trace_back: str = ""):
+    ex = ErrorWindow(error, trace_back)
     ex.show()
     app.exec_()
 
@@ -128,9 +131,9 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     try:
-        launch_eplab(args, app)
+        launch_eplab(app, args)
         assert(tb is None)
     except AssertionError:
-        start_err_app(app, traceback=tb)
+        start_err_app(app, trace_back=str(tb))
     except Exception as e:
-        start_err_app(app, error=str(e), traceback="".join(traceback.format_exception(*sys.exc_info())))
+        start_err_app(app, error=str(e), trace_back="".join(traceback.format_exception(*sys.exc_info())))

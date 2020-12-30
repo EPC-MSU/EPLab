@@ -18,6 +18,9 @@ PanelParameters = namedtuple(
 
 
 class SettingsWindow(QDialog):
+    """
+    Qdialog window, load settings.ui
+    """
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
@@ -32,6 +35,9 @@ class SettingsWindow(QDialog):
 
 
 class LowSettingsPanel:
+    """
+    Class plot parameters on the low panel at gui
+    """
     def __init__(self, window):
         self._param_dict = {"Напряжение": QLabel(window), "Ампл. проб. сигнала": QLabel(window),
                             "Частота": QLabel(window),
@@ -45,29 +51,34 @@ class LowSettingsPanel:
             tb.addWidget(self._param_dict[name])
             window.grid_param.addWidget(tb, *position)
 
-    def set_volt(self, voltage):
+    def set_volt(self, voltage: float):
         self._param_dict["Напряжение"].setText(qApp.translate("t", "  Напряжение: ") + str(voltage) +
                                                qApp.translate("t", " В / дел."))
 
-    def set_v_ampl(self, max_v):
+    def set_v_ampl(self, max_v: float):
         self._param_dict["Ампл. проб. сигнала"].setText(qApp.translate("t", "Ампл. проб. сигнала: ") +
                                                         str(max_v) + qApp.translate("t", " B"))
 
-    def set_probe_freq(self, probe_freq):
+    def set_probe_freq(self, probe_freq: int):
         self._param_dict["Частота"].setText(qApp.translate("t", "Частота: ") + str(probe_freq) +
                                             qApp.translate("t", " Гц"))
 
-    def set_cur(self, current):
+    def set_cur(self, current: float):
         self._param_dict["Ток"].setText(qApp.translate("t", "  Ток: ") + str(current) +
                                         qApp.translate("t", " мА / дел."))
 
-    def set_sensity(self, sensity):
-        self._param_dict["Чувствительность"].setText(qApp.translate("t", "Чувствительность: ") + str(sensity))
+    def set_sensity(self, sensity: str):
+        self._param_dict["Чувствительность"].setText(qApp.translate("t", "Чувствительность: ") + sensity)
 
-    def set_score(self, score):
+    def set_score(self, score: str):
         self._param_dict["Различие"].setText(qApp.translate("t", "Различие: ") + score)
 
     def set_all_parameters(self, **kwargs):
+        """
+        set all parameters on the low panel
+        :param kwargs: dict of parameters, correspond PanelParameters
+        :return:
+        """
         s = PanelParameters(**kwargs)
         self.set_volt(s.voltage)
         self.set_v_ampl(s.max_voltage)
