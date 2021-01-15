@@ -1,4 +1,4 @@
-hg+https://hg.ximc.ru/eyepoint/epcore@c967a27d078f#egg=epcore
+hg+https://hg.ximc.ru/eyepoint/epcore@3a268c20a357#egg=epcore
 hg+https://hg.ximc.ru/eyepoint/ivviewer@16e3af4f6e3ef4503df37803ea38899f9880c02a#egg=ivviewer
 git+https://github.com/EPC-MSU/board-view@Version0.1.1#egg=boardview
 epsound==0.0.13

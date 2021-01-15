@@ -853,7 +853,7 @@ class EPLabWindow(QMainWindow):
             curves = {}
             curves["test"] = self._msystem.measurers[0].get_last_cached_iv_curve()
 
-            if self._work_mode is WorkMode.compare:
+            if self._work_mode is WorkMode.compare and len(self._msystem.measurers) > 1:
                 # Display two current curves
                 curves["ref"] = self._msystem.measurers[1].get_last_cached_iv_curve()
             else:
