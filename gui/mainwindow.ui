@@ -277,7 +277,7 @@
      <x>0</x>
      <y>0</y>
      <width>871</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu_action">
@@ -536,7 +536,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../media/freezea.jpg</normaloff>../media/freezea.jpg</iconset>
+     <normaloff>../media/freezea.png</normaloff>../media/freezea.png</iconset>
    </property>
    <property name="text">
     <string>Заморозить канал А</string>
@@ -551,7 +551,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../media/freezeb.jpg</normaloff>../media/freezeb.jpg</iconset>
+     <normaloff>../media/freezeb.png</normaloff>../media/freezeb.png</iconset>
    </property>
    <property name="text">
     <string>Заморозить канал B</string>
@@ -777,8 +777,8 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../media/show_b.jpg</normaloff>
-     <activeon>../media/hide_b.jpg</activeon>../media/show_b.jpg</iconset>
+     <normaloff>../media/show_b.png</normaloff>
+     <activeon>../media/hide_b.jpg</activeon>../media/show_b.png</iconset>
    </property>
    <property name="text">
     <string>Скрыть канал B</string>
