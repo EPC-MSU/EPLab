@@ -402,7 +402,7 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot(bool)
     def _on_freeze_a(self, state: bool):
-        self._freeze_measurer(0 ,state)
+        self._freeze_measurer(0, state)
 
     @pyqtSlot(bool)
     def _on_freeze_b(self, state: bool):
