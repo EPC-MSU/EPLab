@@ -23,7 +23,7 @@ from common import WorkMode, DeviceErrorsHandler
 from settings.settings import Settings
 from settings.settingswindow import SettingsWindow, LowSettingsPanel
 import os
-from typing import Optional
+from typing import Dict
 
 ERROR_CODE = -10000
 
@@ -169,7 +169,7 @@ class EPLabWindow(QMainWindow):
         self.hide_curve_a_action.toggled.connect(self._on_hide_a)
         self.hide_curve_b_action.toggled.connect(self._on_hide_b)
 
-        if "ref" not in self._msystem.measurers_map:
+        if len(self._msystem.measurers) < 2:
             self.freeze_curve_b_action.setEnabled(False)
             self.hide_curve_b_action.setEnabled(False)
 
@@ -284,7 +284,7 @@ class EPLabWindow(QMainWindow):
         if mode is WorkMode.compare:
             # Remove reference curve in case we have only one IVMeasurer
             # in compare mode
-            if len(self._msystem.measurers_map) < 2:
+            if len(self._msystem.measurers) < 2:
                 self._remove_ref_curve()
 
         # Drag allowed only in write mode
@@ -386,14 +386,6 @@ class EPLabWindow(QMainWindow):
     def _on_hide_a(self, state: bool):
         self._hide_curve_test = state
 
-    @pyqtSlot(bool)
-    def _on_freeze_b(self, state: bool):
-        if "ref" in self._msystem.measurers_map:
-            if state:
-                self._msystem.measurers_map["ref"].freeze()
-            else:
-                self._msystem.measurers_map["ref"].unfreeze()
-
     @pyqtSlot()
     def _on_search_optimal(self):
         with self._device_errors_handler:
@@ -401,12 +393,20 @@ class EPLabWindow(QMainWindow):
             self._set_msystem_settings(optimal_settings)
             self._settings_to_ui(optimal_settings)
 
+    def _freeze_measurer(self, measurer_id: int, state: bool):
+        if measurer_id < len(self._msystem.measurers):
+            if state:
+                self._msystem.measurers[measurer_id].freeze()
+            else:
+                self._msystem.measurers[measurer_id].unfreeze()
+
     @pyqtSlot(bool)
     def _on_freeze_a(self, state: bool):
-        if state:
-            self._msystem.measurers_map["test"].freeze()
-        else:
-            self._msystem.measurers_map["test"].unfreeze()
+        self._freeze_measurer(0 ,state)
+
+    @pyqtSlot(bool)
+    def _on_freeze_b(self, state: bool):
+        self._freeze_measurer(1, state)
 
     @pyqtSlot(bool)
     def _on_sound_checked(self, state: bool):
@@ -593,10 +593,10 @@ class EPLabWindow(QMainWindow):
                     settings = measurement.settings
                     self._set_msystem_settings(settings)
                     self._settings_to_ui(settings)
-                    self._update_curves(ref=measurement.ivc, settings=self._msystem.measurers[0].get_settings())
+                    self._update_curves({"ref": measurement.ivc}, settings=self._msystem.measurers[0].get_settings())
             else:
                 self._remove_ref_curve()
-                self._update_curves(settings=self._msystem.measurers[0].get_settings())
+                self._update_curves({}, settings=self._msystem.measurers[0].get_settings())
 
     @pyqtSlot()
     def _on_go_selected_pin(self):
@@ -672,7 +672,7 @@ class EPLabWindow(QMainWindow):
                 pins=[Pin(0, 0, measurements=[])]
             )]
             ),
-            measurer=self._msystem.measurers_map["test"]
+            measurer=self._msystem.measurers[0]
         )
 
     @pyqtSlot()
@@ -761,7 +761,7 @@ class EPLabWindow(QMainWindow):
             if board == ERROR_CODE:
                 return
 
-            self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers_map["test"])
+            self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
             self._board_window.set_board(self._measurement_plan)  # New workspace will be created here
 
             self._update_current_pin()
@@ -783,12 +783,15 @@ class EPLabWindow(QMainWindow):
             self._open_board_window_if_needed()
 
     @pyqtSlot()
-    def _update_curves(self, test: Optional[IVCurve] = None, ref: Optional[IVCurve] = None, settings=None):
+    def _update_curves(self, curves: Dict[str, IVCurve], settings=None):
+        # TODO: let the function work with larger lists
         # Store last curves
-        if test is not None:
-            self._test_curve = test
-        if ref is not None:
-            self._ref_curve = ref
+        if "test" in curves.keys():
+            self._test_curve = curves["test"]
+
+        if "ref" in curves.keys():
+            self._ref_curve = curves["ref"]
+
         # Update plots
         if not self._hide_curve_test:
             self.test_curve_plot.set_curve(self._test_curve)
@@ -846,20 +849,21 @@ class EPLabWindow(QMainWindow):
 
     def _read_curves_periodic_task(self):
         if self._msystem.measurements_are_ready():
-            test = self._msystem.measurers_map["test"].get_last_cached_iv_curve()
-            ref = None
-            if "ref" in self._msystem.measurers_map:
-                ref = self._msystem.measurers_map["ref"].get_last_cached_iv_curve()
+            # Get curves from devices
+            curves = {}
+            curves["test"] = self._msystem.measurers[0].get_last_cached_iv_curve()
+
+            if self._work_mode is WorkMode.compare:
+                # Display two current curves
+                curves["ref"] = self._msystem.measurers[1].get_last_cached_iv_curve()
+            else:
+                # Reference curve will be read from measurement plan
+                pass
 
             if self._skip_curve:
                 self._skip_curve = False
             else:
-                if self._work_mode is WorkMode.compare:
-                    # Just display two current curves
-                    self._update_curves(test, ref, settings=self._msystem.measurers[0].get_settings())
-                else:
-                    # Reference curve will be read from measurement plan
-                    self._update_curves(test=test, settings=self._msystem.measurers[0].get_settings())
+                self._update_curves(curves, settings=self._msystem.measurers[0].get_settings())
 
                 if self._settings_update_next_cycle:
                     # New curve with new settings - we must update plot parameters
