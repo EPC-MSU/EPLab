@@ -49,8 +49,8 @@ class Settings(SettingsHandler):
 
     def measurement_settings(self) -> MeasurementSettings:
         return MeasurementSettings(
-            probe_signal_frequency=self.frequency[0],
-            sampling_rate=self.frequency[1],
+            probe_signal_frequency=self.probe_signal_frequency[0],
+            sampling_rate=self.probe_signal_frequency[1],
             internal_resistance=self.internal_resistance,
             max_voltage=self.max_voltage,
         )
