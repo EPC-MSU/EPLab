@@ -1,10 +1,9 @@
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLineEdit, QLabel, QWidget, QVBoxLayout, \
-    QHBoxLayout, QPushButton
+    QHBoxLayout, QPushButton, QRadioButton
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication as qApp
 from PyQt5 import uic
 
-from warnings import warn
 from datetime import datetime
 import numpy as np
 from PyQt5.QtCore import Qt as QtC
@@ -13,18 +12,20 @@ from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
 from epcore.measurementmanager.utils import search_optimal_settings
 from epcore.elements import MeasurementSettings, Board, Pin, Element, IVCurve
 from epcore.measurementmanager.ivc_comparator import IVCComparator
+from epcore.product import EPLab
 from boardwindow import BoardWidget
 from ivviewer import Viewer as IVViewer
 from score import ScoreWrapper
-from ivview_parameters import IVViewerParametersAdjuster
 from version import Version
 from player import SoundPlayer
 from common import WorkMode, DeviceErrorsHandler
+from language import Language
 from settings.settings import Settings
 from settings.settingswindow import SettingsWindow, LowSettingsPanel
 import os
 from typing import Dict
 
+# TODO: is that C-style error code? Refactor!
 ERROR_CODE = -10000
 
 
@@ -36,6 +37,7 @@ def show_exception(f, msg_title, msg_text):
     :param msg_text:
     :return:
     """
+
     def func(*args, **kwargs):
         try:
             res = f(*args, **kwargs)
@@ -45,17 +47,18 @@ def show_exception(f, msg_title, msg_text):
             msg.setIcon(QMessageBox.Warning)
             msg.setWindowTitle(msg_title)
             msg.setText(msg_text)
+            # TODO: remove hardcoded constant parameter
             msg.setInformativeText(str(e)[0:512] + "\n...")
             msg.exec_()
             return ERROR_CODE
+
     return func
 
 
 class EPLabWindow(QMainWindow):
-
     default_path = "../EPLab-Files"
 
-    def __init__(self, msystem: MeasurementSystem):
+    def __init__(self, msystem: MeasurementSystem, product: EPLab):
         super(EPLabWindow, self).__init__()
 
         uic.loadUi("gui/mainwindow.ui", self)
@@ -63,6 +66,8 @@ class EPLabWindow(QMainWindow):
         self._device_errors_handler = DeviceErrorsHandler()
 
         self._msystem = msystem
+
+        self._product = product
 
         self._comparator = IVCComparator()
         # Little bit hardcode here. See #39320
@@ -104,7 +109,6 @@ class EPLabWindow(QMainWindow):
         self.reference_curve_plot.set_curve_params(QColor(0, 128, 255, 200))
         self.test_curve_plot.set_curve_params(QColor(255, 0, 0, 200))
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
-        self._iv_window_parameters_adjuster = IVViewerParametersAdjuster(self._iv_window)
         self.__settings_window = SettingsWindow(self)
         vbox.setSpacing(0)
         vbox.addWidget(self._iv_window)
@@ -114,34 +118,35 @@ class EPLabWindow(QMainWindow):
         self._reset_board()
         self._board_window.set_board(self._measurement_plan)
 
-        self._frequencies = {
-            # Frequency and sampling rate here (freq, sampling rate)
-            # self.frequency_1hz_radio_button: (1, 100),
-            self.frequency_10hz_radio_button: (10, 1000),
-            self.frequency_100hz_radio_button: (100, 10000),
-            self.frequency_1khz_radio_button: (1000, 100000),
-            self.frequency_10khz_radio_button: (10000, 1000000),
-            self.frequency_100khz_radio_button: (100000, 2000000)
+        self._option_buttons = {
+            EPLab.Parameter.frequency: dict(),
+            EPLab.Parameter.voltage: dict(),
+            EPLab.Parameter.sensitive: dict()
         }
-        for button, frequency in self._frequencies.items():
-            button.clicked.connect(self._on_settings_btn_checked)
 
-        self._voltages = {
-            self.voltage_1_2v_radio_button: 1.2,
-            self.voltage_3_3v_radio_button: 3.3,
-            self.voltage_5v_radio_button: 5.0,
-            self.voltage_12v_radio_button: 12.0
-        }
-        for button, voltage in self._voltages.items():
-            button.clicked.connect(self._on_settings_btn_checked)
+        lang = qApp.instance().property("language")
 
-        self._sensitivities = {
-            self.sens_low_radio_button: 475.0,  # Omh
-            self.sens_medium_radio_button: 4750.0,
-            self.sens_high_radio_button: 47500.0
-        }
-        for button, resistance in self._sensitivities.items():
+        for option in self._product.mparams[EPLab.Parameter.frequency].options:
+            button = QRadioButton()
+            self.freqLayout.layout().addWidget(button)
+            button.setText(option.label_ru if lang == Language.ru else option.label_en)
             button.clicked.connect(self._on_settings_btn_checked)
+            self._option_buttons[EPLab.Parameter.frequency][option.name] = button
+
+        for option in self._product.mparams[EPLab.Parameter.voltage].options:
+            button = QRadioButton()
+            self.voltageLayout.layout().addWidget(button)
+            button.setText(option.label_ru if lang == Language.ru else option.label_en)
+            button.clicked.connect(self._on_settings_btn_checked)
+            self._option_buttons[EPLab.Parameter.voltage][option.name] = button
+
+        for option in self._product.mparams[EPLab.Parameter.sensitive].options:
+            button = QRadioButton()
+            self.currentLayout.layout().addWidget(button)
+            button.setText(option.label_ru if lang == Language.ru else option.label_en)
+            button.clicked.connect(self._on_settings_btn_checked)
+            self._option_buttons[EPLab.Parameter.sensitive][option.name] = button
+
         self.num_point_line_edit = QLineEdit(self)
         self.num_point_line_edit.setFixedWidth(40)
         self.num_point_line_edit.setEnabled(False)
@@ -184,7 +189,7 @@ class EPLabWindow(QMainWindow):
                 m.open_device()
 
         with self._device_errors_handler:
-            self._iv_window_parameters_adjuster.adjust_parameters(self._msystem.get_settings())
+            self._adjust_plot_params(self._msystem.get_settings())
 
         self._work_mode = None
         self._change_work_mode(WorkMode.compare)  # default mode - compare two curves
@@ -202,7 +207,8 @@ class EPLabWindow(QMainWindow):
 
         with self._device_errors_handler:
             settings = self._msystem.get_settings()  # set ui settings state to current device
-            self._settings_to_ui(settings)
+            options = self._product.settings_to_options(settings)
+            self._options_to_ui(options)
 
         self._update_current_pin()
         self._update_threshold()
@@ -212,59 +218,36 @@ class EPLabWindow(QMainWindow):
 
         self._current_file_path = None
 
-    def _get_min_var(self):
+    def _ui_to_options(self) -> Dict:
         """
-        Retrun "noise" amplitude for
+        Get current options state from ui
+        """
+
+        def _get_checked_button(buttons: Dict) -> str:
+            for name, button in buttons.items():
+                if button.isChecked():
+                    return name
+
+        return {
+            param: _get_checked_button(self._option_buttons[param]) for param in self._option_buttons
+        }
+
+    def _options_to_ui(self, options: Dict[EPLab.Parameter, str]):
+        """
+        Convert options to us state
+        """
+        for group in options.keys():
+            self._option_buttons[group][options[group]].setChecked(True)
+
+    def _get_min_var(self, settings: MeasurementSettings):
+        """
+        Return "noise" amplitude for
         specified mode.
         """
-        s = self._ui_to_settings()
+        return self._product.adjust_noise_amplitude(settings)
 
-        # Default values
-        var_v = s.max_voltage / 20
-        var_c = s.max_voltage / (s.internal_resistance * 20)
-
-        # Magic redefinitions for specific modes
-        if (np.isclose(s.max_voltage, 12) and np.isclose(s.internal_resistance, 475)):
-            var_v = 0.6
-            var_c = 0.008
-        elif (np.isclose(s.max_voltage, 5) and np.isclose(s.internal_resistance, 475)):
-            var_v = 0.6
-            var_c = 0.008
-        elif (np.isclose(s.max_voltage, 3.3) and np.isclose(s.internal_resistance, 475)):
-            var_v = 0.3
-            var_c = 0.008
-        elif (np.isclose(s.max_voltage, 1.2) and np.isclose(s.internal_resistance, 475)):
-            var_v = 0.3
-            var_c = 0.008
-        elif (np.isclose(s.max_voltage, 12) and np.isclose(s.internal_resistance, 4750)):
-            var_v = 0.6
-            var_c = 0.0005
-        elif (np.isclose(s.max_voltage, 5) and np.isclose(s.internal_resistance, 4750)):
-            var_v = 0.3
-            var_c = 0.0005
-        elif (np.isclose(s.max_voltage, 3.3) and np.isclose(s.internal_resistance, 4750)):
-            var_v = 0.3
-            var_c = 0.0005
-        elif (np.isclose(s.max_voltage, 1.2) and np.isclose(s.internal_resistance, 4750)):
-            var_v = 0.3
-            var_c = 0.0005
-        elif (np.isclose(s.max_voltage, 12) and np.isclose(s.internal_resistance, 47500)):
-            var_v = 0.6
-            var_c = 0.00005
-        elif (np.isclose(s.max_voltage, 5) and np.isclose(s.internal_resistance, 47500)):
-            var_v = 0.3
-            var_c = 0.00005
-        elif (np.isclose(s.max_voltage, 3.3) and np.isclose(s.internal_resistance, 47500)):
-            var_v = 0.3
-            var_c = 0.00005
-        elif (np.isclose(s.max_voltage, 1.2) and np.isclose(s.internal_resistance, 47500)):
-            var_v = 0.3
-            var_c = 0.00005
-
-        return (var_v, var_c)
-
-    def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve) -> float:
-        var_v, var_c = self._get_min_var()
+    def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> float:
+        var_v, var_c = self._get_min_var(settings)
         self._comparator.set_min_ivc(var_v, var_c)  # It is very important to set relevant noise levels
         score = self._comparator.compare_ivc(self._ref_curve, self._test_curve)
         return score
@@ -292,61 +275,13 @@ class EPLabWindow(QMainWindow):
 
         settings_enable = mode is not WorkMode.test  # Disable settings in test mode
 
-        for button in self._voltages:
-            button.setEnabled(settings_enable)
-        for button in self._frequencies:
-            button.setEnabled(settings_enable)
-        for button in self._sensitivities:
-            button.setEnabled(settings_enable)
+        for group in self._option_buttons.values():
+            for button in group.values():
+                button.setEnabled(settings_enable)
 
         self._work_mode = mode
 
         self._update_current_pin()
-
-    def _ui_to_settings(self) -> MeasurementSettings:
-        """
-        Convert UI current RadioButton's states to measurement settings
-        :return: Settings
-        """
-        # settings = self._msystem.get_settings() # Cause an error of different settings. #TODO: find out why.
-        settings = self._msystem.measurers[0].get_settings()
-
-        for button, (freq, sampling) in self._frequencies.items():
-            if button.isChecked():
-                settings.probe_signal_frequency = freq
-                settings.sampling_rate = sampling
-        for button, value in self._voltages.items():
-            if button.isChecked():
-                settings.max_voltage = value
-        for button, value in self._sensitivities.items():
-            if button.isChecked():
-                settings.internal_resistance = value
-
-        return settings
-
-    def _settings_to_ui(self, settings: MeasurementSettings):
-        """
-        Convert measurement settings to UI RadioButton's states
-        :return:
-        """
-        if (settings.probe_signal_frequency, settings.sampling_rate) not in self._frequencies.values():
-            warn(f"No radio button for device frequency {settings.probe_signal_frequency} sampling rate "
-                 f"{settings.sampling_rate}")
-        for button, (freq, sampling) in self._frequencies.items():
-            if np.isclose(freq, settings.probe_signal_frequency, atol=0.01):
-                button.setChecked(True)
-
-        if settings.internal_resistance not in self._sensitivities.values():
-            warn(f"No radio button for device internal resistance {settings.internal_resistance}")
-        for button, value in self._sensitivities.items():
-            if np.isclose(value, settings.internal_resistance, atol=0.01):
-                button.setChecked(True)
-
-        if settings.max_voltage not in self._voltages.values():
-            warn(f"No radio button for device max voltage {settings.max_voltage}")
-        for button, value in self._voltages.items():
-            if np.isclose(value, settings.max_voltage, atol=0.01):
-                button.setChecked(True)
 
     def _open_board_window_if_needed(self):
         if self._measurement_plan.image:
@@ -418,6 +353,7 @@ class EPLabWindow(QMainWindow):
             if i.text() == "Перейти" or i.text() == "Go":
                 import webbrowser
                 webbrowser.open_new_tab("http://eyepoint.physlab.ru")
+
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setWindowTitle(qApp.translate("t", "Справка"))
@@ -493,33 +429,21 @@ class EPLabWindow(QMainWindow):
 
     def _load_settings(self):
         self._on_work_mode_switch(self.__settings.work_mode)
-        for button, voltage in self._voltages.items():
-            if voltage == self.__settings.max_voltage:
-                button.setChecked(True)
-        for button, frequency in self._frequencies.items():
-            if frequency == self.__settings.frequency:
-                button.setChecked(True)
-        for button, sensitivity in self._sensitivities.items():
-            if sensitivity == self.__settings.internal_resistance:
-                button.setChecked(True)
+
+        settings = self.__settings.measurement_settings()
+        options = self._product.settings_to_options(settings)
+        self._options_to_ui(options)
+
         self.__settings_window.score_treshold_value_lineEdit.setText(f"{round(self.__settings.score_threshold * 100.0)}"
                                                                      f"%")
         self.hide_curve_a_action.setChecked(self.__settings.hide_curve_a)
         self.hide_curve_b_action.setChecked(self.__settings.hide_curve_b)
         self.sound_enabled_action.setChecked(self.__settings.sound_enabled)
 
-    def _store_settings(self, settings=None):
-        if settings is None:
-            settings = self.__settings
-        for button, voltage in self._voltages.items():
-            if button.isChecked():
-                settings.max_voltage = voltage
-        for button, frequency in self._frequencies.items():
-            if button.isChecked():
-                settings.frequency = frequency
-        for button, sensitivity in self._sensitivities.items():
-            if button.isChecked():
-                settings.internal_resistance = sensitivity
+    def _store_settings(self, settings: Settings):
+
+        settings.set_measurement_settings(self._msystem.get_settings())
+
         if self.testing_mode_action.isChecked():
             settings.work_mode = WorkMode.test
         elif self.writing_mode_action.isChecked():
@@ -632,7 +556,7 @@ class EPLabWindow(QMainWindow):
             # Place at the center of current viewpoint by default
             width = self._board_window.workspace.width()
             height = self._board_window.workspace.height()
-            point = self._board_window.workspace.mapToScene(int(width/2), int(height/2))
+            point = self._board_window.workspace.mapToScene(int(width / 2), int(height / 2))
 
             pin = Pin(point.x(),
                       point.y(),
@@ -804,27 +728,38 @@ class EPLabWindow(QMainWindow):
 
         # Update score
         if self._ref_curve and self._test_curve:
-            score = self._calculate_score(self._ref_curve, self._test_curve)
+            assert settings is not None
+            score = self._calculate_score(self._ref_curve, self._test_curve, settings)
             self._score_wrapper.set_score(score)
             self._player.score_updated(score)
         else:
             self._score_wrapper.set_dummy_score()
         self.plot_parameters(settings)
 
-    def plot_parameters(self, settings=None):
+    def plot_parameters(self, settings: MeasurementSettings):
+        # TODO: refactor!
         param_dict = {"sensity": "-", "max_voltage": "-", "probe_signal_frequency": "-"}
         param_dict["voltage"], param_dict["current"] = self._iv_window.plot.get_minor_axis_step()
         param_dict["score"] = self._score_wrapper.get_score()
-        if settings is not None:
-            _s = [button.text() for button in self._sensitivities.keys() if self._sensitivities[button] ==
-                  settings.internal_resistance]
-            param_dict["sensity"] = _s[0]
-            param_dict["max_voltage"] = np.round(settings.max_voltage, 1)
-            param_dict["probe_signal_frequency"] = np.round(settings.probe_signal_frequency, 1)
+
+        buttons = self._option_buttons[EPLab.Parameter.sensitive]
+        sensitive = buttons[self._product.settings_to_options(settings)[EPLab.Parameter.sensitive]].text()
+        param_dict["sensity"] = sensitive
+        param_dict["max_voltage"] = np.round(settings.max_voltage, 1)
+        param_dict["probe_signal_frequency"] = np.round(settings.probe_signal_frequency, 1)
         self.low_panel_settings.set_all_parameters(**param_dict)
 
     def _remove_ref_curve(self):
         self._ref_curve = None
+
+    def _adjust_plot_params(self, settings: MeasurementSettings):
+        """
+        Adjust plot parameters
+        """
+        borders = self._product.adjust_plot_borders(settings)
+        scale = self._product.adjust_plot_scale(settings)
+        self._iv_window.plot.set_scale(*scale)
+        self._iv_window.plot.set_min_borders(*borders)
 
     def _reconnect_periodic_task(self):
         # Draw empty curves
@@ -850,7 +785,7 @@ class EPLabWindow(QMainWindow):
     def _read_curves_periodic_task(self):
         if self._msystem.measurements_are_ready():
             # Get curves from devices
-            curves = {}
+            curves = dict()
             curves["test"] = self._msystem.measurers[0].get_last_cached_iv_curve()
 
             if self._work_mode is WorkMode.compare and len(self._msystem.measurers) > 1:
@@ -867,7 +802,7 @@ class EPLabWindow(QMainWindow):
 
                 if self._settings_update_next_cycle:
                     # New curve with new settings - we must update plot parameters
-                    self._iv_window_parameters_adjuster.adjust_parameters(self._settings_update_next_cycle)
+                    self._adjust_plot_params(self._settings_update_next_cycle)
                     self._settings_update_next_cycle = None
 
             self._msystem.trigger_measurements()
@@ -894,7 +829,10 @@ class EPLabWindow(QMainWindow):
     def _on_settings_btn_checked(self, checked: bool) -> None:
         if checked:
             with self._device_errors_handler:
-                settings = self._ui_to_settings()
+                # settings = self._msystem.get_settings() # Cause an error of different settings. #TODO: find out why.
+                settings = self._msystem.measurers[0].get_settings()
+                options = self._ui_to_options()
+                settings = self._product.options_to_settings(options, settings)
                 self._set_msystem_settings(settings)
 
     @pyqtSlot()

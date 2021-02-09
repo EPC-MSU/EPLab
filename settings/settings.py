@@ -1,3 +1,4 @@
+from epcore.elements.measurement import MeasurementSettings
 from settings.utils import get_parameter, set_parameter, to_bool, float_to_str
 from .settingshandler import SettingsHandler
 from common import WorkMode
@@ -45,6 +46,19 @@ class Settings(SettingsHandler):
         self.__active_editors.discard(editor)
         if len(self.__active_editors) == 0:
             self.changed.emit()
+
+    def measurement_settings(self) -> MeasurementSettings:
+        return MeasurementSettings(
+            probe_signal_frequency=self.frequency[0],
+            sampling_rate=self.frequency[1],
+            internal_resistance=self.internal_resistance,
+            max_voltage=self.max_voltage,
+        )
+
+    def set_measurement_settings(self, settings: MeasurementSettings):
+        self.max_voltage = settings.max_voltage
+        self.frequency = settings.probe_signal_frequency, settings.sampling_rate
+        self.internal_resistance = settings.internal_resistance
 
     def _read(self, settings):
         with SettingsEditor(self):

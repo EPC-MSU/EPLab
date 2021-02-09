@@ -2,10 +2,13 @@ from PyQt5.QtCore import QTranslator
 import sys
 import logging
 from argparse import ArgumentParser
+import os
 from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerIVM10
 from epcore.measurementmanager import MeasurementSystem
-import os
+from epcore.product import EPLab
+from utils import read_json
 from mainwindow import EPLabWindow
+from language import Language
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QLabel, qApp, QApplication, QWidget, QDesktopWidget
 import traceback
 
@@ -28,6 +31,9 @@ def launch_eplab(app: QApplication, args):
         translator = QTranslator()
         translator.load("gui/super_translate_en.qm")
         app.installTranslator(translator)
+        app.setProperty("language", Language.en)
+    else:
+        app.setProperty("language", Language.ru)
 
     measurers = []
 
@@ -73,13 +79,14 @@ def launch_eplab(app: QApplication, args):
             measurers = [ivm_1, ivm_0]
 
     # Set pretty names for measurers
+    # TODO: remove access to protected class fields
     measurers[0]._name = "test"
     if len(measurers) == 2:
         measurers[1]._name = "ref"
 
     measurement_system = MeasurementSystem(measurers)
 
-    window = EPLabWindow(measurement_system)
+    window = EPLabWindow(measurement_system, EPLab(read_json(args.config)))
     window.resize(1200, 600)
     window.show()
     app.exec()
@@ -115,6 +122,7 @@ class ErrorWindow(QMainWindow):
 
 
 def start_err_app(app: QApplication, error: str = "", trace_back: str = ""):
+    print(error)
     ex = ErrorWindow(error, trace_back)
     ex.show()
     app.exec_()
@@ -125,6 +133,7 @@ if __name__ == "__main__":
     parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual' for virtual mode)")
     parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)")
     parser.add_argument("--en", help="Use English version", action="store_true")
+    parser.add_argument("--config", help="Path to specific EPLab config file", default=None)
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.WARNING)
