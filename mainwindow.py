@@ -326,7 +326,8 @@ class EPLabWindow(QMainWindow):
         with self._device_errors_handler:
             optimal_settings = search_optimal_settings(self._msystem.measurers[0])
             self._set_msystem_settings(optimal_settings)
-            self._settings_to_ui(optimal_settings)
+            options = self._product.settings_to_options(optimal_settings)
+            self._options_to_ui(options)
 
     def _freeze_measurer(self, measurer_id: int, state: bool):
         if measurer_id < len(self._msystem.measurers):
@@ -518,7 +519,8 @@ class EPLabWindow(QMainWindow):
                 with self._device_errors_handler:
                     settings = measurement.settings
                     self._set_msystem_settings(settings)
-                    self._settings_to_ui(settings)
+                    options = self._product.settings_to_options(settings)
+                    self._options_to_ui(options)
                     self._update_curves({"ref": measurement.ivc}, settings=self._msystem.measurers[0].get_settings())
             else:
                 self._remove_ref_curve()
