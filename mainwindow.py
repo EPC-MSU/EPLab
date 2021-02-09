@@ -434,6 +434,8 @@ class EPLabWindow(QMainWindow):
         options = self._product.settings_to_options(settings)
         self._options_to_ui(options)
 
+        self._set_msystem_settings(settings)
+
         self.__settings_window.score_treshold_value_lineEdit.setText(f"{round(self.__settings.score_threshold * 100.0)}"
                                                                      f"%")
         self.hide_curve_a_action.setChecked(self.__settings.hide_curve_a)
