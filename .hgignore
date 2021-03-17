@@ -10,6 +10,7 @@ dist
 .idea
 *.iml
 venv
+release
 # Other
 elements.json
 src/*

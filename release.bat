@@ -18,6 +18,8 @@ venv\Scripts\pyinstaller main.py ^
 --add-data "venv\Lib\site-packages\epcore\doc\p10_elements.schema.json;epcore\doc" ^
 --add-data "venv\Lib\site-packages\epcore\doc\p10_elements_2.schema.json;epcore\doc" ^
 --add-data "venv\Lib\site-packages\epcore\doc\ufiv.schema.json;epcore\doc" ^
+--add-data "venv\Lib\site-packages\epcore\product\eplab_default_options.json;epcore\product" ^
+--add-data "venv\Lib\site-packages\epcore\product\doc\eplab_schema.json;epcore\product\doc" ^
 --add-data "venv\Lib\site-packages\epcore\measurementmanager\ivcmp-win%target_platform%\ivcmp.dll;." ^
 --add-data "venv\Lib\site-packages\epsound\void.wav;epsound" ^
 --add-data "media\*;media" ^

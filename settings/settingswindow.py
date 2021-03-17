@@ -1,5 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QLabel, QGridLayout, QToolBar
 from PyQt5.QtCore import QCoreApplication as qApp
+from PyQt5.QtCore import QRegExp
+from PyQt5.QtGui import QRegExpValidator
 import os
 from PyQt5 import uic
 from collections import namedtuple
@@ -29,6 +31,8 @@ class SettingsWindow(QDialog):
         self.score_treshold_button_minus.clicked.connect(parent._on_threshold_dec)
         self.score_treshold_button_plus.clicked.connect(parent._on_threshold_inc)
         self.auto_calibration_push_button.clicked.connect(parent._on_auto_calibration)
+        validator = QRegExpValidator(QRegExp('^(\d|\d\d)%?'), self)
+        self.score_treshold_value_lineEdit.setValidator(validator)
         self.score_treshold_value_lineEdit.returnPressed.connect(parent._on_threshold_set_value)
         self.load_settings_push_button.clicked.connect(parent._on_open_settings)
         self.save_settings_push_button.clicked.connect(parent._save_settings_to_file)

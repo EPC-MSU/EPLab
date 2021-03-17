@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QLabel
 
 
 class ScoreWrapper:
-    def __init__(self, label: QLabel, score_threshold: float = 0.5, threshold_step: float = 0.1):
+    def __init__(self, label: QLabel, score_threshold: float = 0.5, threshold_step: float = 0.05):
         self._label = label
         self._threshold = score_threshold
         self._step = threshold_step

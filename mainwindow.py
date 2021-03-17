@@ -390,7 +390,12 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_threshold_set_value(self):
-        value = float(int(self.__settings_window.score_treshold_value_lineEdit.text()[:-1]) / 100.0)
+        value = self.__settings_window.score_treshold_value_lineEdit.text()
+        if value[-1] == "%":
+            value = float(int(value[:-1]) / 100.0)
+        else:
+            value = float(int(value) / 100.0)
+        # value = float(int(self.__settings_window.score_treshold_value_lineEdit.text()[:-1]) / 100.0)
         self._score_wrapper.set_threshold(value)
         self._update_threshold()
 
@@ -453,7 +458,10 @@ class EPLabWindow(QMainWindow):
             settings.work_mode = WorkMode.write
         else:
             settings.work_mode = WorkMode.compare
-        settings.score_threshold = float(int(self.__settings_window.score_treshold_value_lineEdit.text()[:-1]) / 100.0)
+        value = self.__settings_window.score_treshold_value_lineEdit.text()
+        if value[-1] == "%":
+            value = value[:-1]
+        settings.score_threshold = float(int(value) / 100.0)
         settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
