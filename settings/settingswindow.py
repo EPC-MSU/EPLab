@@ -31,7 +31,7 @@ class SettingsWindow(QDialog):
         self.score_treshold_button_minus.clicked.connect(parent._on_threshold_dec)
         self.score_treshold_button_plus.clicked.connect(parent._on_threshold_inc)
         self.auto_calibration_push_button.clicked.connect(parent._on_auto_calibration)
-        validator = QRegExpValidator(QRegExp('^(\d|\d\d)%?'), self)
+        validator = QRegExpValidator(QRegExp(r"^(\d|\d\d)%?"), self)
         self.score_treshold_value_lineEdit.setValidator(validator)
         self.score_treshold_value_lineEdit.returnPressed.connect(parent._on_threshold_set_value)
         self.load_settings_push_button.clicked.connect(parent._on_open_settings)
