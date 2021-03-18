@@ -468,8 +468,9 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _save_settings_to_file(self):
-        settings_path = QFileDialog(self).getSaveFileName(self, qApp.translate("t", "Сохранить файл"), ".",
-                                                          "Ini file (*.ini);;All Files (*)")[0]
+        settings_path = QFileDialog(self).getSaveFileName(self, qApp.translate("t", "Сохранить файл"),
+                                                          filter="Ini file (*.ini);;All Files (*)",
+                                                          directory="settings.ini")[0]
         if len(settings_path) == 0:
             return
 
