@@ -413,7 +413,9 @@ class EPLabWindow(QMainWindow):
         """
 
         value = self.__settings_window.score_treshold_value_lineEdit.text()
-        if value[-1] == "%":
+        if not value:
+            value = 0
+        elif value[-1] == "%":
             value = value[:-1]
         return float(int(value) / 100.0)
 
@@ -433,12 +435,11 @@ class EPLabWindow(QMainWindow):
         settings window.
         """
 
-        if self.__settings is None:
+        threshold = self._get_threshold_value()
+        if (self.__settings is None or
+                (self.__settings and self.__settings.score_threshold != threshold)):
             # Settings were not loaded from file
-            value = self.__settings_window.score_treshold_value_lineEdit.text()
-            if value[-1] == "%":
-                value = value[:-1]
-            self._update_threshold(float(int(value) / 100.0))
+            self._update_threshold(threshold)
             return
         # Settings were loaded from file
         self._on_work_mode_switch(self.__settings.work_mode)
