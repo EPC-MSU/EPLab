@@ -76,7 +76,7 @@ class EPLabWindow(QMainWindow):
         self._comparator.set_min_ivc(0.6, 0.002)
 
         self._score_wrapper = ScoreWrapper(self.score_label)
-        self.__settings = Settings()
+        self.__settings: Settings = None
         self._player = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
 
@@ -211,7 +211,7 @@ class EPLabWindow(QMainWindow):
             self._options_to_ui(options)
 
         self._update_current_pin()
-        self._update_threshold()
+        self._init_threshold()
 
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
@@ -374,35 +374,6 @@ class EPLabWindow(QMainWindow):
         comment = self.line_comment_pin.text()
         self._measurement_plan.get_current_pin().comment = comment
 
-    def _update_threshold(self):
-        self.__settings_window.score_treshold_value_lineEdit.setText(f"{round(self._score_wrapper.threshold * 100.0)}%")
-        self._player.set_threshold(self._score_wrapper.threshold)
-
-    @pyqtSlot()
-    def _on_threshold_dec(self):
-        self._score_wrapper.decrease_threshold()
-        self._update_threshold()
-
-    @pyqtSlot()
-    def _on_threshold_inc(self):
-        self._score_wrapper.increase_threshold()
-        self._update_threshold()
-
-    @pyqtSlot()
-    def _on_threshold_set_value(self):
-        value = self.__settings_window.score_treshold_value_lineEdit.text()
-        if value[-1] == "%":
-            value = float(int(value[:-1]) / 100.0)
-        else:
-            value = float(int(value) / 100.0)
-        # value = float(int(self.__settings_window.score_treshold_value_lineEdit.text()[:-1]) / 100.0)
-        self._score_wrapper.set_threshold(value)
-        self._update_threshold()
-
-    @pyqtSlot()
-    def _show_settings_window(self):
-        self.__settings_window.open()
-
     @pyqtSlot()
     def _on_save_image(self):
         # Freeze image at first
@@ -424,62 +395,156 @@ class EPLabWindow(QMainWindow):
             image.save(filename)
 
     @pyqtSlot()
-    def _on_open_settings(self):
-        settings_path = QFileDialog(self).getOpenFileName(self, qApp.translate("t", "Открыть файл"), ".",
-                                                          "Ini file (*.ini);;All Files (*)")[0]
-        if len(settings_path) == 0:
-            return
+    def _show_settings_window(self):
+        """
+        The method is called when you click on 'Settings' button, it shows
+        settings window.
+        """
 
-        self.__settings.import_(path=settings_path)
-        self._load_settings()
+        self._update_threshold_in_settings_wnd(self._score_wrapper.threshold)
+        self.__settings_window.open()
+        self.__settings = None
 
+    def _get_threshold_value(self) -> float:
+        """
+        The method returns value of score threshold from
+        score_threshold_value_lineEdit in settings window.
+        :return: score threshold value.
+        """
+
+        value = self.__settings_window.score_treshold_value_lineEdit.text()
+        if value[-1] == "%":
+            value = value[:-1]
+        return float(int(value) / 100.0)
+
+    def _init_threshold(self):
+        """
+        The method initializes initial value (50%) of score threshold.
+        """
+
+        threshold = self._score_wrapper.threshold
+        self._update_threshold_in_settings_wnd(threshold)
+        self._update_threshold(threshold)
+
+    @pyqtSlot()
     def _load_settings(self):
-        self._on_work_mode_switch(self.__settings.work_mode)
+        """
+        The method is called when you click on the 'Apply' button in the
+        settings window.
+        """
 
+        if self.__settings is None:
+            # Settings were not loaded from file
+            value = self.__settings_window.score_treshold_value_lineEdit.text()
+            if value[-1] == "%":
+                value = value[:-1]
+            self._update_threshold(float(int(value) / 100.0))
+            return
+        # Settings were loaded from file
+        self._on_work_mode_switch(self.__settings.work_mode)
         settings = self.__settings.measurement_settings()
         options = self._product.settings_to_options(settings)
         self._options_to_ui(options)
-
         self._set_msystem_settings(settings)
-
-        self.__settings_window.score_treshold_value_lineEdit.setText(f"{round(self.__settings.score_threshold * 100.0)}"
-                                                                     f"%")
         self.hide_curve_a_action.setChecked(self.__settings.hide_curve_a)
         self.hide_curve_b_action.setChecked(self.__settings.hide_curve_b)
         self.sound_enabled_action.setChecked(self.__settings.sound_enabled)
+        self._update_threshold(self.__settings.score_threshold)
+
+    @pyqtSlot()
+    def _on_open_settings(self):
+        """
+        The method is called when you click on the 'Load settings' button in
+        the settings window.
+        """
+
+        settings_path = QFileDialog(self).getOpenFileName(
+            self, qApp.translate("t", "Открыть файл"), ".",
+            "Ini file (*.ini);;All Files (*)")[0]
+        if len(settings_path) == 0:
+            return
+        self.__settings = Settings()
+        self.__settings.import_(path=settings_path)
+        self.__settings_window.score_treshold_value_lineEdit.setText(
+            f"{round(self.__settings.score_threshold * 100.0)}%")
+
+    @pyqtSlot()
+    def _on_threshold_dec(self):
+        """
+        The method is called when you click on the '-' button in the settings
+        window.
+        """
+
+        threshold = self._get_threshold_value()
+        threshold_step = 0.05
+        threshold = max(threshold - threshold_step, 0.0)
+        self._update_threshold_in_settings_wnd(threshold)
+
+    @pyqtSlot()
+    def _on_threshold_inc(self):
+        """
+        The method is called when you click on the '+' button in the settings
+        window.
+        """
+
+        threshold = self._get_threshold_value()
+        threshold_step = 0.05
+        threshold = min(threshold + threshold_step, 1.0)
+        self._update_threshold_in_settings_wnd(threshold)
+
+    @pyqtSlot()
+    def _save_settings_to_file(self):
+        """
+        The method is called when you click on the 'Save settings' button in
+        the settings window.
+        """
+
+        settings_path = QFileDialog(self).getSaveFileName(
+            self, qApp.translate("t", "Сохранить файл"), filter="Ini file (*.ini);;All Files (*)",
+            directory="settings.ini")[0]
+        if len(settings_path) == 0:
+            return
+        if not settings_path.endswith(".ini"):
+            settings_path += ".ini"
+        settings = Settings()
+        self._store_settings(settings)
+        settings.export(path=settings_path)
 
     def _store_settings(self, settings: Settings):
+        """
+        The method stores current applied settings in object.
+        :param settings: object to store current settings.
+        """
 
         settings.set_measurement_settings(self._msystem.get_settings())
-
         if self.testing_mode_action.isChecked():
             settings.work_mode = WorkMode.test
         elif self.writing_mode_action.isChecked():
             settings.work_mode = WorkMode.write
         else:
             settings.work_mode = WorkMode.compare
-        value = self.__settings_window.score_treshold_value_lineEdit.text()
-        if value[-1] == "%":
-            value = value[:-1]
-        settings.score_threshold = float(int(value) / 100.0)
+        settings.score_threshold = self._get_threshold_value()
         settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
 
-    @pyqtSlot()
-    def _save_settings_to_file(self):
-        settings_path = QFileDialog(self).getSaveFileName(self, qApp.translate("t", "Сохранить файл"),
-                                                          filter="Ini file (*.ini);;All Files (*)",
-                                                          directory="settings.ini")[0]
-        if len(settings_path) == 0:
-            return
+    def _update_threshold(self, threshold: float):
+        """
+        The method updates score threshold value in _score_wrapper and _player.
+        :param threshold: score threshold value.
+        """
 
-        if not settings_path.endswith(".ini"):
-            settings_path += ".ini"
+        self._score_wrapper.set_threshold(threshold)
+        self._player.set_threshold(threshold)
 
-        settings = Settings()
-        self._store_settings(settings)
-        settings.export(path=settings_path)
+    def _update_threshold_in_settings_wnd(self, threshold: float):
+        """
+        The method updates score threshold value in settings window.
+        :param threshold: new score threshold value.
+        """
+
+        self.__settings_window.score_treshold_value_lineEdit.setText(
+            f"{round(threshold * 100.0)}%")
 
     @pyqtSlot(bool)
     def _on_work_mode_switch(self, mode: WorkMode):

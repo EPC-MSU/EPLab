@@ -3,45 +3,55 @@
 <TS version="2.1" language="en_US">
 <context>
     <name>Dialog</name>
-    <message>
+	<message>
         <location filename="settings.ui" line="14"/>
         <source>Settings</source>
         <translation type="obsolete">Settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="29"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Порог ошибки:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Score treshold:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="48"/>
-        <source>+</source>
-        <translation>+</translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="73"/>
-        <source>-</source>
-        <translation>-</translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="89"/>
+        <location filename="settings.ui" line="35"/>
         <source>Автокалибровка</source>
         <translation>Autocalibration</translation>
     </message>
-    <message>
+	<message>
         <location filename="settings.ui" line="14"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="115"/>
+        <location filename="settings.ui" line="53"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Порог ошибки:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Score threshold:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="settings.ui" line="80"/>
+        <source>-</source>
+        <translation>-</translation>
+    </message>
+    <message>
+        <location filename="settings.ui" line="124"/>
+        <source>+</source>
+        <translation>+</translation>
+    </message>
+    <message>
+        <location filename="settings.ui" line="155"/>
         <source>Загрузить настройки</source>
         <translation>Load settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="128"/>
+        <location filename="settings.ui" line="174"/>
         <source>Сохранить настройки</source>
         <translation>Save settings</translation>
+    </message>
+    <message>
+        <location filename="settings.ui" line="197"/>
+        <source>Применить</source>
+        <translation>Apply</translation>
+    </message>
+    <message>
+        <location filename="settings.ui" line="216"/>
+        <source>Отмена</source>
+        <translation>Cancel</translation>
     </message>
 </context>
 <context>
