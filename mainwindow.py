@@ -31,17 +31,15 @@ ERROR_CODE = -10000
 
 def show_exception(f, msg_title, msg_text):
     """
-    This wrapper show message if has error
-    :param f:
-    :param msg_title:
-    :param msg_text:
-    :return:
+    Wrapper show message box if wrapped function terminates with error.
+    :param f: wrapped function;
+    :param msg_title: title of message box;
+    :param msg_text: message text.
     """
 
     def func(*args, **kwargs):
         try:
-            res = f(*args, **kwargs)
-            return res
+            return f(*args, **kwargs)
         except Exception as e:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
@@ -220,7 +218,7 @@ class EPLabWindow(QMainWindow):
 
     def _ui_to_options(self) -> Dict:
         """
-        Get current options state from ui
+        Get current options state from ui.
         """
 
         def _get_checked_button(buttons: Dict) -> str:
@@ -234,15 +232,14 @@ class EPLabWindow(QMainWindow):
 
     def _options_to_ui(self, options: Dict[EPLab.Parameter, str]):
         """
-        Convert options to us state
+        Convert options to us state.
         """
         for group in options.keys():
             self._option_buttons[group][options[group]].setChecked(True)
 
     def _get_min_var(self, settings: MeasurementSettings):
         """
-        Return "noise" amplitude for
-        specified mode.
+        Return "noise" amplitude for specified mode.
         """
         return self._product.adjust_noise_amplitude(settings)
 
@@ -577,8 +574,7 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _update_current_pin(self):
         """
-        Call this method when current pin index changed
-        :return:
+        Call this method when current pin index changed.
         """
         index = self._measurement_plan.get_current_index()
         self.num_point_line_edit.setText(str(index))
@@ -636,10 +632,7 @@ class EPLabWindow(QMainWindow):
             width = self._board_window.workspace.width()
             height = self._board_window.workspace.height()
             point = self._board_window.workspace.mapToScene(int(width / 2), int(height / 2))
-
-            pin = Pin(point.x(),
-                      point.y(),
-                      measurements=[])
+            pin = Pin(point.x(), point.y(), measurements=[])
         else:
             pin = Pin(0, 0, measurements=[])
 
@@ -650,14 +643,13 @@ class EPLabWindow(QMainWindow):
         # It is important to initialize pin with real measurement.
         # Otherwise user can create several empty points and they will not be unique.
         # This will cause some errors during ufiv validation.
-        self._on_save_pin()
+        # self._on_save_pin()
         self._update_current_pin()
 
     @pyqtSlot()
     def _on_save_pin(self):
         """
-        Save current pin IVC as reference for current pin
-        :return:
+        Save current pin IVC as reference for current pin.
         """
         with self._device_errors_handler:
             self._measurement_plan.save_last_measurement_as_reference()
@@ -666,8 +658,7 @@ class EPLabWindow(QMainWindow):
 
     def _reset_board(self):
         """
-        Set measurement plan to default empty board
-        :return:
+        Set measurement plan to default empty board.
         """
         # Create default board with 1 pin
         self._measurement_plan = MeasurementPlan(
@@ -718,8 +709,38 @@ class EPLabWindow(QMainWindow):
             self._board_window.set_board(self._measurement_plan)
             self._update_current_pin()
 
+    def _check_measurement_plan(self) -> bool:
+        """
+        Method checks if there are pins without measurements.
+        :return: True if there are pins without measurements.
+        """
+
+        zero_pins = ""
+        for pin_index, pin in self._measurement_plan.all_pins_iterator():
+            if not pin.measurements:
+                if zero_pins:
+                    zero_pins += ", "
+                zero_pins += str(pin_index)
+        if zero_pins:
+            def func():
+                raise ValueError("")
+            if "," in zero_pins:
+                text = f"Точки {zero_pins} не содержат"
+            else:
+                text = f"Точка {zero_pins} не содержит"
+            text = (f"{text} сохраненных измерений. Для сохранения плана "
+                    f"тестирования все точки должны содержать сохраненные "
+                    f"измерения")
+            exec_msgbox = show_exception(func, qApp.translate("t", "Ошибка"),
+                                         qApp.translate("t", text))
+            exec_msgbox()
+            return True
+        return False
+
     @pyqtSlot()
     def _on_save_board_as(self):
+        if self._check_measurement_plan():
+            return
         if not os.path.isdir(self.default_path):
             os.mkdir(self.default_path)
         if not os.path.isdir(os.path.join(self.default_path, "Reference")):
@@ -740,6 +761,9 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_save_board(self):
+
+        if self._check_measurement_plan():
+            return
         if not self._current_file_path:
             return self._on_save_board_as()
         epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
@@ -750,8 +774,7 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_load_board(self):
         """
-        "Load board" button handler
-        :return:
+        "Load board" button handler.
         """
         dialog = QFileDialog()
         filename = dialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
@@ -773,8 +796,7 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_load_board_image(self):
         """
-        "Load board image" button handler
-        :return:
+        "Load board image" button handler.
         """
         dialog = QFileDialog()
         filename = dialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
