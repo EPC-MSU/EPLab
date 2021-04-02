@@ -3,7 +3,7 @@
 <TS version="2.1" language="en_US">
 <context>
     <name>Dialog</name>
-	<message>
+    <message>
         <location filename="settings.ui" line="14"/>
         <source>Settings</source>
         <translation type="obsolete">Settings</translation>
@@ -13,7 +13,7 @@
         <source>Автокалибровка</source>
         <translation>Autocalibration</translation>
     </message>
-	<message>
+    <message>
         <location filename="settings.ui" line="14"/>
         <source>Настройки</source>
         <translation>Settings</translation>
@@ -546,17 +546,13 @@
     <name>t</name>
     <message>
         <location filename="ivcviewer.py" line="66"/>
-        <source>
-Напряжение (В)</source>
-        <translation type="obsolete">
-Voltage (V)</translation>
+        <source>Напряжение (В)</source>
+        <translation type="obsolete">Voltage (V)</translation>
     </message>
     <message>
         <location filename="ivcviewer.py" line="78"/>
-        <source>Ток (мА)
-</source>
-        <translation type="obsolete">Current (mA)
-</translation>
+        <source>Ток (мА)</source>
+        <translation type="obsolete">Current (mA)</translation>
     </message>
     <message>
         <location filename="mainwindow.py" line="322"/>
@@ -565,19 +561,14 @@ Voltage (V)</translation>
     </message>
     <message>
         <location filename="mainwindow.py" line="325"/>
-        <source>
-Версия прошивки: </source>
+        <source>Версия прошивки: </source>
         <translation type="obsolete">Firmware version: </translation>
     </message>
     <message>
         <location filename="mainwindow.py" line="328"/>
-        <source>
-Эта версия библиотеки не подходит для данной прошивки.
- Версии прошивок, которые совместимы с данной библиотекой:
-</source>
-        <translation type="obsolete">
-This library version not correspond for this firmware. 
-The firmware versions, which compatible with this library: </translation>
+        <source>Эта версия библиотеки не подходит для данной прошивки. Версии прошивок, которые совместимы с данной библиотекой:
+	</source>
+        <translation type="obsolete">This library version not correspond for this firmware. The firmware versions, which compatible with this library: </translation>
     </message>
     <message>
         <location filename="mainwindow.py" line="335"/>
@@ -612,27 +603,27 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation type="obsolete">Settings</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="424"/>
+        <location filename="../mainwindow.py" line="357"/>
         <source>Справка</source>
         <translation>Help</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="426"/>
+        <location filename="../mainwindow.py" line="359"/>
         <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Для более подробной информации об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru.</source>
         <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). For more information on Eyepoint, follow the link http://eyepoint.physlab.ru.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="431"/>
+        <location filename="../mainwindow.py" line="364"/>
         <source>Перейти</source>
         <translation>Go</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="432"/>
+        <location filename="../mainwindow.py" line="365"/>
         <source>ОК</source>
         <translation>OK</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="478"/>
+        <location filename="../mainwindow.py" line="387"/>
         <source>Сохранить ВАХ</source>
         <translation>Save IVC</translation>
     </message>
@@ -642,17 +633,27 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation type="obsolete">Save new board</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="538"/>
-        <source>Сохраненить плату</source>
-        <translation type="obsolete">Save board</translation>
+        <location filename="../mainwindow.py" line="750"/>
+        <source>Сохранить плату</source>
+        <translation>Save board</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="755"/>
+        <location filename="../mainwindow.py" line="781"/>
         <source>Открыть плату</source>
         <translation>Open board</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="778"/>
+        <location filename="../mainwindow.py" line="785"/>
+        <source>Ошибка</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="786"/>
+        <source>Формат файла не подходит</source>
+        <translation>Invalid input file</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="803"/>
         <source>Открыть изображение платы</source>
         <translation>Open board window</translation>
     </message>
@@ -662,24 +663,9 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation type="obsolete">Voltage scale (V) and current scale (mA): </translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="855"/>
+        <location filename="../mainwindow.py" line="875"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="726"/>
-        <source>Сохранить плату</source>
-        <translation>Save board</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="759"/>
-        <source>Ошибка</source>
-        <translation>Error</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="759"/>
-        <source>Формат файла не подходит</source>
-        <translation>Invalid input file</translation>
     </message>
     <message>
         <location filename="../mainwindow.py" line="674"/>
@@ -688,10 +674,8 @@ EPC MSU e-mail:  info@ximc.ru</translation>
     </message>
     <message>
         <location filename="../mainwindow.py" line="643"/>
-        <source>(В)/дел.
-Ток: </source>
-        <translation type="obsolete">(V)/div.
-Current: </translation>
+        <source>(В)/дел. Ток: </source>
+        <translation type="obsolete">(V)/div. Current: </translation>
     </message>
     <message>
         <location filename="../mainwindow.py" line="644"/>
@@ -744,7 +728,7 @@ Current: </translation>
         <translation>Different: </translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="709"/>
+        <location filename="../mainwindow.py" line="702"/>
         <source>Создать новую плату</source>
         <translation>Create new board</translation>
     </message>
@@ -759,69 +743,79 @@ Current: </translation>
         <translation>  Current: </translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="610"/>
+        <location filename="../mainwindow.py" line="602"/>
         <source>Ошибка открытия точки</source>
         <translation>Open pin error</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="604"/>
+        <location filename="../mainwindow.py" line="603"/>
         <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение!</source>
         <translation>Incorrect format of pin number. Pin number must be integer!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="610"/>
+        <location filename="../mainwindow.py" line="609"/>
         <source>Точка с таким номером не найдена на данной плате.</source>
         <translation>Pin not found on the board.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="373"/>
+        <location filename="../mainwindow.py" line="304"/>
         <source>Открытие изображения платы</source>
         <translation>Open board image</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="374"/>
+        <location filename="../mainwindow.py" line="305"/>
         <source>Для данной платы изображение не задано!</source>
         <translation>Not found image for current board!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="487"/>
+        <location filename="../mainwindow.py" line="460"/>
         <source>Открыть файл</source>
         <translation>Open file</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="537"/>
+        <location filename="../mainwindow.py" line="501"/>
         <source>Сохранить файл</source>
         <translation>Save file</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="683"/>
+        <location filename="../mainwindow.py" line="676"/>
         <source>Сохранить изменения в файл?</source>
         <translation>Do you want to save changes in file?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="684"/>
+        <location filename="../mainwindow.py" line="677"/>
         <source>Да</source>
         <translation>Yes</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="685"/>
+        <location filename="../mainwindow.py" line="678"/>
         <source>Нет</source>
         <translation>No</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="686"/>
+        <location filename="../mainwindow.py" line="679"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="697"/>
+        <location filename="../mainwindow.py" line="690"/>
         <source>Внимание</source>
         <translation>Warning</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="744"/>
+        <location filename="../mainwindow.py" line="760"/>
         <source>Неверный формат сохраняемого файла</source>
         <translation>Invalid format save file</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="728"/>
+        <source>Точки POINTS_PARAM не содержат сохраненных измерений. Для сохранения плана тестирования все точки должны содержать сохраненные измерения</source>
+        <translation>Points POINTS_PARAM do not contain saved measurements. To save the test plan all points must contain saved measurements</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="732"/>
+        <source>Точка POINTS_PARAM не содержит сохраненных измерений. Для сохранения плана тестирования все точки должны содержать сохраненные измерения</source>
+        <translation>Point POINTS_PARAM does not contain saved measurements. To save the test plan all points must contain saved measurements</translation>
     </message>
 </context>
 </TS>

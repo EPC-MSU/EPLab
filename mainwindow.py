@@ -715,24 +715,25 @@ class EPLabWindow(QMainWindow):
         :return: True if there are pins without measurements.
         """
 
-        zero_pins = ""
+        empty_pins = ""
         for pin_index, pin in self._measurement_plan.all_pins_iterator():
             if not pin.measurements:
-                if zero_pins:
-                    zero_pins += ", "
-                zero_pins += str(pin_index)
-        if zero_pins:
+                if empty_pins:
+                    empty_pins += ", "
+                empty_pins += str(pin_index)
+        if empty_pins:
             def func():
                 raise ValueError("")
-            if "," in zero_pins:
-                text = f"Точки {zero_pins} не содержат"
+            if "," in empty_pins:
+                text = qApp.translate("t", "Точки POINTS_PARAM не содержат сохраненных измерений. "
+                                           "Для сохранения плана тестирования все точки должны "
+                                           "содержать сохраненные измерения")
             else:
-                text = f"Точка {zero_pins} не содержит"
-            text = (f"{text} сохраненных измерений. Для сохранения плана "
-                    f"тестирования все точки должны содержать сохраненные "
-                    f"измерения")
-            exec_msgbox = show_exception(func, qApp.translate("t", "Ошибка"),
-                                         qApp.translate("t", text))
+                text = qApp.translate("t", "Точка POINTS_PARAM не содержит сохраненных измерений. "
+                                           "Для сохранения плана тестирования все точки должны "
+                                           "содержать сохраненные измерения")
+            text = text.replace("POINTS_PARAM", empty_pins)
+            exec_msgbox = show_exception(func, qApp.translate("t", "Ошибка"), text)
             exec_msgbox()
             return True
         return False
