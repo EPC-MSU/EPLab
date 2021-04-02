@@ -673,25 +673,28 @@ class EPLabWindow(QMainWindow):
     def _on_new_board(self):
         if self._current_file_path is not None:
             d = QDialog()
+            d.setWindowTitle(qApp.translate("t", "Внимание"))
+            d.setWindowModality(QtC.ApplicationModal)
             label = QLabel(qApp.translate("t", "Сохранить изменения в файл?"))
             btn_yes = QPushButton(qApp.translate("t", "Да"))
+            btn_yes.clicked.connect(d.accept)
             btn_no = QPushButton(qApp.translate("t", "Нет"))
+            btn_no.clicked.connect(lambda: d.done(10))
             btn_cancel = QPushButton(qApp.translate("t", "Отмена"))
-            layout = QVBoxLayout(d)
-            hl = QHBoxLayout(d)
-            layout.addWidget(label)
+            btn_cancel.clicked.connect(d.reject)
+            hl = QHBoxLayout()
             hl.addWidget(btn_yes)
             hl.addWidget(btn_no)
             hl.addWidget(btn_cancel)
+            layout = QVBoxLayout()
+            layout.addWidget(label)
             layout.addLayout(hl)
-            btn_yes.clicked.connect(d.accept)
-            btn_no.clicked.connect(lambda: d.done(1))
-            btn_cancel.clicked.connect(d.reject)
-            d.setWindowTitle(qApp.translate("t", "Внимание"))
-            d.setWindowModality(QtC.ApplicationModal)
+            d.setLayout(layout)
             resp = d.exec()
             if resp == QDialog.Accepted:
                 self._on_save_board()
+            elif resp == 10:
+                pass
             elif resp == QDialog.Rejected:
                 return
         if not os.path.isdir(self.default_path):
@@ -740,6 +743,10 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_save_board_as(self):
+        """
+        Method saves board in new file.
+        """
+
         if self._check_measurement_plan():
             return
         if not os.path.isdir(self.default_path):
@@ -751,26 +758,24 @@ class EPLabWindow(QMainWindow):
                                           filter="UFIV Archived File (*.uzf)",
                                           directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
         if filename:
-            epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
+            save_file = show_exception(epfilemanager.save_board_to_ufiv, qApp.translate("t", "Ошибка"),
+                                       qApp.translate("t", "Неверный формат сохраняемого файла"))
+            save_file(filename, self._measurement_plan)
             self._current_file_path = filename
-        elif self._current_file_path is None:
-            self._current_file_path = os.path.join(self.default_path, "Reference", "board.uzf")
-            epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
-        load_file = show_exception(epfilemanager.load_board_from_ufiv, qApp.translate("t", "Ошибка"),
-                                   qApp.translate("t", "Неверный формат сохраняемого файла"))
-        load_file(self._current_file_path)
 
     @pyqtSlot()
     def _on_save_board(self):
+        """
+        Method saves board in file.
+        """
 
         if self._check_measurement_plan():
             return
         if not self._current_file_path:
             return self._on_save_board_as()
-        epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
-        load_file = show_exception(epfilemanager.load_board_from_ufiv, qApp.translate("t", "Ошибка"),
+        save_file = show_exception(epfilemanager.save_board_to_ufiv, qApp.translate("t", "Ошибка"),
                                    qApp.translate("t", "Неверный формат сохраняемого файла"))
-        load_file(self._current_file_path)
+        save_file(self._current_file_path, self._measurement_plan)
 
     @pyqtSlot()
     def _on_load_board(self):
