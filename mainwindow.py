@@ -911,6 +911,9 @@ class EPLabWindow(QMainWindow):
                     # New curve with new settings - we must update plot parameters
                     self._adjust_plot_params(self._settings_update_next_cycle)
                     self._settings_update_next_cycle = None
+                    # You need to redraw markers with new plot parameters
+                    # (the scale of the plot has changed)
+                    self._iv_window.plot.redraw_cursors()
 
             self._msystem.trigger_measurements()
 
