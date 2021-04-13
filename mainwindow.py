@@ -1,29 +1,35 @@
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLineEdit, QLabel, QWidget, QVBoxLayout, \
-    QHBoxLayout, QPushButton, QRadioButton
-from PyQt5.QtGui import QIcon, QColor
-from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication as qApp
-from PyQt5 import uic
+"""
+File with class for main window of application.
+"""
 
+import os
 from datetime import datetime
+from functools import partial
+from typing import Dict
 import numpy as np
-from PyQt5.QtCore import Qt as QtC
+from PyQt5 import uic
+from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QPointF,
+                          Qt as QtC, QTimer)
+from PyQt5.QtGui import QIcon, QColor
+from PyQt5.QtWidgets import (QAction, QDialog, QFileDialog, QHBoxLayout,
+                             QLabel, QLineEdit, QMainWindow, QMessageBox,
+                             QPushButton, QRadioButton, QVBoxLayout, QWidget)
+from boardwindow import BoardWidget
+from common import WorkMode, DeviceErrorsHandler
 import epcore.filemanager as epfilemanager
-from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
-from epcore.measurementmanager.utils import search_optimal_settings
 from epcore.elements import MeasurementSettings, Board, Pin, Element, IVCurve
+from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
+from epcore.measurementmanager.utils import Searcher
 from epcore.measurementmanager.ivc_comparator import IVCComparator
 from epcore.product import EPLab
-from boardwindow import BoardWidget
 from ivviewer import Viewer as IVViewer
+from measurer_settings_window import MeasurerSettingsWindow
+from player import SoundPlayer
 from score import ScoreWrapper
 from version import Version
-from player import SoundPlayer
-from common import WorkMode, DeviceErrorsHandler
 from language import Language
 from settings.settings import Settings
 from settings.settingswindow import SettingsWindow, LowSettingsPanel
-import os
-from typing import Dict
 
 # TODO: is that C-style error code? Refactor!
 ERROR_CODE = -10000
@@ -164,6 +170,8 @@ class EPLabWindow(QMainWindow):
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
         self.about_action.triggered.connect(self._about_product_message)
+        # Create menu items to select settings for available measurers
+        self._create_measurer_setting_actions()
 
         self.sound_enabled_action.toggled.connect(self._on_sound_checked)
 
@@ -215,6 +223,32 @@ class EPLabWindow(QMainWindow):
             self._msystem.trigger_measurements()
 
         self._current_file_path = None
+
+    def _create_measurer_setting_actions(self):
+        """
+        Method creates menu items to select settings for available measurers.
+        """
+
+        for measurer in self._msystem.measurers:
+            device_name = measurer.name
+            action = QAction(device_name, self)
+            action.triggered.connect(partial(self._on_show_device_settings,
+                                             measurer))
+            self.measurers_menu.addAction(action)
+
+    @pyqtSlot()
+    def _on_show_device_settings(self, selected_measurer):
+        """
+        Method shows window to select device settings.
+        """
+
+        for measurer in self._msystem.measurers:
+            if measurer == selected_measurer:
+                all_settings = measurer.get_all_settings()
+                dialog = MeasurerSettingsWindow(self, all_settings, measurer)
+                if dialog.exec_():
+                    dialog.set_parameters()
+                return
 
     def _ui_to_options(self) -> Dict:
         """
@@ -321,7 +355,8 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_search_optimal(self):
         with self._device_errors_handler:
-            optimal_settings = search_optimal_settings(self._msystem.measurers[0])
+            searcher = Searcher(self._msystem.measurers[0], self._product.mparams)
+            optimal_settings = searcher.search_optimal_settings()
             self._set_msystem_settings(optimal_settings)
             options = self._product.settings_to_options(optimal_settings)
             self._options_to_ui(options)
