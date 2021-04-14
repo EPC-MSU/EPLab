@@ -4,7 +4,7 @@ File with class for dialog window with settings of measurer.
 
 from functools import partial
 from inspect import getmembers, ismethod
-from typing import Callable, Dict
+from typing import Any, Callable, Dict
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import QRegExp
 from PyQt5.QtGui import QRegExpValidator
@@ -60,18 +60,26 @@ class MeasurerSettingsWindow(qt.QDialog):
                 break
         return button
 
-    def _create_combobox(self, data: Dict) -> qt.QWidget:
+    def _create_combobox(self, data: Dict, current_value: Any) -> qt.QWidget:
         """
         Method creates combobox to select one of several available values of
         parameter of measurer.
-        :param data: information about created combobox.
+        :param data: information about created combobox;
+        :param current_value: current value of parameter for which combobox is
+        created.
         :return: created combobox.
         """
 
         label = qt.QLabel(data["parameter_name"])
         combo = qt.QComboBox()
-        values = [item["label"] for item in data["values"]]
-        combo.addItems(values)
+        labels = [item["label"] for item in data["values"]]
+        combo.addItems(labels)
+        # Find index of current value of parameter in list of available values
+        convertor = get_convertor(data)
+        for index, item in enumerate(data["values"]):
+            if convertor(item["value"]) == current_value:
+                combo.setCurrentIndex(index)
+                break
         h_box = qt.QHBoxLayout()
         h_box.addWidget(label)
         h_box.addWidget(combo)
@@ -81,10 +89,12 @@ class MeasurerSettingsWindow(qt.QDialog):
         self._widgets[data["parameter"]] = data
         return widget
 
-    def _create_line_edit(self, data: Dict) -> qt.QWidget:
+    def _create_line_edit(self, data: Dict, current_value: Any) -> qt.QWidget:
         """
         Method creates line edit to input value of parameter of measurer.
-        :param data: information about created line edit.
+        :param data: information about created line edit;
+        :param current_value: current value of parameter for which line edit is
+        created.
         :return: created line edit.
         """
 
@@ -99,6 +109,8 @@ class MeasurerSettingsWindow(qt.QDialog):
         if "max" in data and "min" in data:
             line_edit.textChanged.connect(
                 partial(self._process_line_edit, data, line_edit))
+        # Set current value
+        line_edit.setText(str(current_value))
         h_box = qt.QHBoxLayout()
         h_box.addWidget(label)
         h_box.addWidget(line_edit)
@@ -108,20 +120,26 @@ class MeasurerSettingsWindow(qt.QDialog):
         self._widgets[data["parameter"]] = data
         return widget
 
-    def _create_radio_button(self, data: Dict) -> qt.QWidget:
+    def _create_radio_button(self, data: Dict,
+                             current_value: Any) -> qt.QWidget:
         """
         Method creates radio buttons to select one of several available values
         of parameter of measurer.
-        :param data: information about created radio buttons.
+        :param data: information about created radio buttons;
+        :param current_value: current value of parameter for which radio
+        buttons are created.
         :return: created radio buttons.
         """
 
         v_box = qt.QVBoxLayout()
         radios = []
-        for value in data["values"]:
-            radio = qt.QRadioButton(value["label"])
+        convertor = get_convertor(data)
+        for item in data["values"]:
+            radio = qt.QRadioButton(item["label"])
             v_box.addWidget(radio)
             radios.append(radio)
+            if convertor(item["value"]) == current_value:
+                radio.setChecked(True)
         group = qt.QGroupBox(data["parameter_name"])
         group.setLayout(v_box)
         data["widget"] = radios
@@ -176,14 +194,16 @@ class MeasurerSettingsWindow(qt.QDialog):
             device_name = self._measurer.get_identity_information().device_name
             self.setWindowTitle(f"Настройки для {device_name}")
             for element in settings["elements"]:
+                current_value = self._measurer.get_current_value_of_parameter(
+                    element["parameter"])
                 if element["type"] == "button":
                     widget = self._create_button(element)
                 elif element["type"] == "radio_button":
-                    widget = self._create_radio_button(element)
+                    widget = self._create_radio_button(element, current_value)
                 elif element["type"] == "combobox":
-                    widget = self._create_combobox(element)
+                    widget = self._create_combobox(element, current_value)
                 elif element["type"] == "line_edit":
-                    widget = self._create_line_edit(element)
+                    widget = self._create_line_edit(element, current_value)
                 v_box.addWidget(widget)
             btns = qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel
             self.buttonBox = qt.QDialogButtonBox(btns)

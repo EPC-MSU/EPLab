@@ -179,7 +179,7 @@
      <x>0</x>
      <y>0</y>
      <width>871</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu_action">
@@ -234,10 +234,16 @@
     <addaction name="save_point_action"/>
     <addaction name="add_board_image_action"/>
    </widget>
+   <widget class="QMenu" name="measurers_menu">
+    <property name="title">
+     <string>Измерители</string>
+    </property>
+   </widget>
    <addaction name="file_menu_action"/>
    <addaction name="view_menu_action"/>
    <addaction name="mode_menu_action"/>
    <addaction name="test_plan_menu_action"/>
+   <addaction name="measurers_menu"/>
    <addaction name="help_menu_action"/>
   </widget>
   <widget class="QToolBar" name="toolBar_file">
