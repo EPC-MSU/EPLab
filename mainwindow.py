@@ -19,7 +19,7 @@ from common import WorkMode, DeviceErrorsHandler
 import epcore.filemanager as epfilemanager
 from epcore.elements import MeasurementSettings, Board, Pin, Element, IVCurve
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
-from epcore.measurementmanager.utils import search_optimal_settings
+from epcore.measurementmanager.utils import Searcher
 from epcore.measurementmanager.ivc_comparator import IVCComparator
 from epcore.product import EPLab
 from ivviewer import Viewer as IVViewer
@@ -355,7 +355,8 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_search_optimal(self):
         with self._device_errors_handler:
-            optimal_settings = search_optimal_settings(self._msystem.measurers[0])
+            searcher = Searcher(self._msystem.measurers[0], self._product.mparams)
+            optimal_settings = searcher.search_optimal_settings()
             self._set_msystem_settings(optimal_settings)
             options = self._product.settings_to_options(optimal_settings)
             self._options_to_ui(options)
