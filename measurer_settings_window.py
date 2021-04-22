@@ -194,8 +194,9 @@ class MeasurerSettingsWindow(qt.QDialog):
             device_name = self._measurer.get_identity_information().device_name
             self.setWindowTitle(f"Настройки для {device_name}")
             for element in settings["elements"]:
-                current_value = self._measurer.get_current_value_of_parameter(
-                    element["parameter"])
+                if "parameter" in element:
+                    current_value = self._measurer.get_current_value_of_parameter(
+                        element["parameter"])
                 if element["type"] == "button":
                     widget = self._create_button(element)
                 elif element["type"] == "radio_button":
@@ -253,3 +254,4 @@ class MeasurerSettingsWindow(qt.QDialog):
             if value:
                 value = convertor(value)
                 self._measurer.set_value_to_parameter(parameter_name, value)
+        self._measurer.set_settings()

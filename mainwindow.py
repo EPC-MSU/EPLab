@@ -13,11 +13,13 @@ from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QPointF,
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtWidgets import (QAction, QDialog, QFileDialog, QHBoxLayout,
                              QLabel, QLineEdit, QMainWindow, QMessageBox,
-                             QPushButton, QRadioButton, QVBoxLayout, QWidget)
+                             QPushButton, QRadioButton, QScrollArea,
+                             QVBoxLayout, QWidget)
 from boardwindow import BoardWidget
 from common import WorkMode, DeviceErrorsHandler
 import epcore.filemanager as epfilemanager
 from epcore.elements import MeasurementSettings, Board, Pin, Element, IVCurve
+from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerIVM10
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
 from epcore.measurementmanager.utils import Searcher
 from epcore.measurementmanager.ivc_comparator import IVCComparator
@@ -127,29 +129,15 @@ class EPLabWindow(QMainWindow):
             EPLab.Parameter.voltage: dict(),
             EPLab.Parameter.sensitive: dict()
         }
-
-        lang = qApp.instance().property("language")
-
-        for option in self._product.mparams[EPLab.Parameter.frequency].options:
-            button = QRadioButton()
-            self.freqLayout.layout().addWidget(button)
-            button.setText(option.label_ru if lang == Language.ru else option.label_en)
-            button.clicked.connect(self._on_settings_btn_checked)
-            self._option_buttons[EPLab.Parameter.frequency][option.name] = button
-
-        for option in self._product.mparams[EPLab.Parameter.voltage].options:
-            button = QRadioButton()
-            self.voltageLayout.layout().addWidget(button)
-            button.setText(option.label_ru if lang == Language.ru else option.label_en)
-            button.clicked.connect(self._on_settings_btn_checked)
-            self._option_buttons[EPLab.Parameter.voltage][option.name] = button
-
-        for option in self._product.mparams[EPLab.Parameter.sensitive].options:
-            button = QRadioButton()
-            self.currentLayout.layout().addWidget(button)
-            button.setText(option.label_ru if lang == Language.ru else option.label_en)
-            button.clicked.connect(self._on_settings_btn_checked)
-            self._option_buttons[EPLab.Parameter.sensitive][option.name] = button
+        # Radio buttons for frequency selection
+        scroll_area = self._fill_options_widget(EPLab.Parameter.frequency)
+        self.freqLayout.layout().addWidget(scroll_area)
+        # Radio buttons for voltage selection
+        scroll_area = self._fill_options_widget(EPLab.Parameter.voltage)
+        self.voltageLayout.layout().addWidget(scroll_area)
+        # Radio buttons for current/resistor selection
+        scroll_area = self._fill_options_widget(EPLab.Parameter.sensitive)
+        self.currentLayout.layout().addWidget(scroll_area)
 
         self.num_point_line_edit = QLineEdit(self)
         self.num_point_line_edit.setFixedWidth(40)
@@ -172,6 +160,8 @@ class EPLabWindow(QMainWindow):
         self.about_action.triggered.connect(self._about_product_message)
         # Create menu items to select settings for available measurers
         self._create_measurer_setting_actions()
+        # If necessary, deactivate the menu item for auto-selection
+        self._disable_optimal_parameter_searcher()
 
         self.sound_enabled_action.toggled.connect(self._on_sound_checked)
 
@@ -223,6 +213,43 @@ class EPLabWindow(QMainWindow):
             self._msystem.trigger_measurements()
 
         self._current_file_path = None
+
+    def _disable_optimal_parameter_searcher(self):
+        """
+        Method disables searcher of optimal parameters. Now searcher can work
+        only for IVMeasurerIVM10.
+        """
+
+        for measurer in self._msystem.measurers:
+            if (not isinstance(measurer, IVMeasurerIVM10) and
+                    not isinstance(measurer, IVMeasurerVirtual)):
+                self.search_optimal_action.setEnabled(False)
+                return
+
+    def _fill_options_widget(self, option_name) -> QScrollArea:
+        """
+        Method creates scroll area and fills it with main options for
+        measurement.
+        :param option_name: name of option.
+        :return: scroll area.
+        """
+
+        lang = qApp.instance().property("language")
+        v_box = QVBoxLayout()
+        for option in self._product.mparams[option_name].options:
+            button = QRadioButton()
+            v_box.addWidget(button)
+            button.setText(option.label_ru if lang == Language.ru else option.label_en)
+            button.clicked.connect(self._on_settings_btn_checked)
+            self._option_buttons[option_name][option.name] = button
+        widget = QWidget()
+        widget.setLayout(v_box)
+        scroll_area = QScrollArea()
+        scroll_area.setVerticalScrollBarPolicy(QtC.ScrollBarAlwaysOn)
+        scroll_area.setHorizontalScrollBarPolicy(QtC.ScrollBarAlwaysOff)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(widget)
+        return scroll_area
 
     def _create_measurer_setting_actions(self):
         """
@@ -973,12 +1000,13 @@ class EPLabWindow(QMainWindow):
 
     def _on_settings_btn_checked(self, checked: bool) -> None:
         if checked:
-            with self._device_errors_handler:
-                # settings = self._msystem.get_settings() # Cause an error of different settings. #TODO: find out why.
-                settings = self._msystem.measurers[0].get_settings()
-                options = self._ui_to_options()
-                settings = self._product.options_to_settings(options, settings)
-                self._set_msystem_settings(settings)
+            settings = self._msystem.get_settings()
+            options = self._ui_to_options()
+            settings = self._product.options_to_settings(options, settings)
+            set_settings = show_exception(
+                self._set_msystem_settings, qApp.translate("t", "Ошибка"),
+                qApp.translate("t", "Ошибка при установке настроек устройства"))
+            set_settings(settings)
 
     @pyqtSlot()
     def _on_view_board(self):

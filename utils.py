@@ -6,5 +6,5 @@ def read_json(path: Optional[str] = None) -> Optional[Dict]:
     if not path:
         return None
 
-    with open(path, "r") as file:
+    with open(path, "r", encoding="utf-8") as file:
         return json.load(file)

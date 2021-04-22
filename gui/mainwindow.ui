@@ -110,21 +110,7 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="currentLayout">
-    <layout class="QVBoxLayout" name="verticalLayout_8">
-     <item>
-      <spacer name="verticalSpacer_6">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>300</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
+    <layout class="QVBoxLayout" name="verticalLayout_8"/>
    </widget>
   </widget>
   <widget class="QDockWidget" name="voltageDock">

@@ -1,16 +1,18 @@
-from PyQt5.QtCore import QTranslator
-import sys
 import logging
-from argparse import ArgumentParser
 import os
-from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerIVM10
+import sys
+import traceback
+from argparse import ArgumentParser
+from PyQt5.QtCore import QTranslator
+from PyQt5.QtWidgets import (QMainWindow, QPushButton, QVBoxLayout, QLabel, qApp,
+                             QApplication, QWidget, QDesktopWidget)
+from epcore.ivmeasurer import (IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual,
+                               IVMeasurerVirtualASA)
 from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EPLab
-from utils import read_json
-from mainwindow import EPLabWindow
 from language import Language
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QLabel, qApp, QApplication, QWidget, QDesktopWidget
-import traceback
+from mainwindow import EPLabWindow
+from utils import read_json
 
 tb = None
 
@@ -36,23 +38,22 @@ def launch_eplab(app: QApplication, args):
         app.setProperty("language", Language.ru)
 
     measurers = []
-
-    if args.test == "virtual":
-        ivm_1 = IVMeasurerVirtual()
-        ivm_1.nominal = 1000
-        measurers.append(ivm_1)
-    elif "com:" in args.test:
-        ivm_1 = IVMeasurerIVM10(args.test, config=os.path.abspath("cur.ini"), defer_open=True)
-        measurers.append(ivm_1)
-
-    if args.ref:
-        if args.ref == "virtual":
-            ivm_2 = IVMeasurerVirtual()
-            measurers.append(ivm_2)
-        elif "com:" in args.ref:
-
-            ivm_2 = IVMeasurerIVM10(args.ref, config=os.path.abspath("cur.ini"), defer_open=True)
-            measurers.append(ivm_2)
+    measurers_args = (args.test, args.ref)
+    for measurer_arg in measurers_args:
+        if measurer_arg == "virtual":
+            measurer = IVMeasurerVirtual()
+            measurer.nominal = 1000
+            measurers.append(measurer)
+        elif measurer_arg == "virtualasa":
+            measurer = IVMeasurerVirtualASA(defer_open=True)
+            measurers.append(measurer)
+        elif measurer_arg is not None and "com:" in measurer_arg:
+            measurer = IVMeasurerIVM10(measurer_arg, config=os.path.abspath("cur.ini"),
+                                       defer_open=True)
+            measurers.append(measurer)
+        elif measurer_arg is not None and "xmlrpc:" in measurer_arg:
+            measurer = IVMeasurerASA(measurer_arg, defer_open=True)
+            measurers.append(measurer)
 
     if len(measurers) == 0:
         # Logically it will be correctly to abort here.
@@ -65,13 +66,12 @@ def launch_eplab(app: QApplication, args):
         # We swap IVMs only if both ranks are set correctly.
         # If ranks are not set order should be the same to the order of cmd args.
         ivm_info = []
-        for i in range(len(measurers)):
+        for measurer in measurers:
             try:
-                measurers[i].open_device()
-                ivm_info.append(measurers[i].get_identity_information())
+                measurer.open_device()
+                ivm_info.append(measurer.get_identity_information())
             finally:
-                measurers[i].close_device()
-
+                measurer.close_device()
         if (ivm_info[0].rank == 1 and
                 ivm_info[1].rank == 2):
             ivm_0 = measurers[0]
@@ -79,10 +79,9 @@ def launch_eplab(app: QApplication, args):
             measurers = [ivm_1, ivm_0]
 
     # Set pretty names for measurers
-    # TODO: remove access to protected class fields
-    measurers[0]._name = "test"
+    measurers[0].name = "test"
     if len(measurers) == 2:
-        measurers[1]._name = "ref"
+        measurers[1].name = "ref"
 
     measurement_system = MeasurementSystem(measurers)
 
@@ -130,7 +129,8 @@ def start_err_app(app: QApplication, error: str = "", trace_back: str = ""):
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="EyePoint Lab")
-    parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual' for virtual mode)")
+    parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual'"
+                                      " for virtual mode)")
     parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)")
     parser.add_argument("--en", help="Use English version", action="store_true")
     parser.add_argument("--config", help="Path to specific EPLab config file", default=None)
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     try:
         launch_eplab(app, args)
-        assert(tb is None)
+        assert tb is None
     except AssertionError:
         start_err_app(app, trace_back=str(tb))
     except Exception as e:
