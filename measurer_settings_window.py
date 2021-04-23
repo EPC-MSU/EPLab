@@ -6,9 +6,10 @@ from functools import partial
 from inspect import getmembers, ismethod
 from typing import Any, Callable, Dict
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import QRegExp
+from PyQt5.QtCore import QCoreApplication as qApp, QRegExp
 from PyQt5.QtGui import QRegExpValidator
 from epcore.ivmeasurer.base import IVMeasurerBase
+from language import Language
 
 __all__ = ["MeasurerSettingsWindow"]
 
@@ -44,6 +45,8 @@ class MeasurerSettingsWindow(qt.QDialog):
         super().__init__(parent=parent)
         self._measurer = measurer
         self._widgets = dict()
+        lang = qApp.instance().property("language")
+        self.lang = "ru" if lang == Language.ru else "en"
         self._init_ui(settings)
 
     def _create_button(self, data: Dict) -> qt.QWidget:
@@ -53,7 +56,8 @@ class MeasurerSettingsWindow(qt.QDialog):
         :return: created button.
         """
 
-        button = qt.QPushButton(data["title"])
+        label = data[f"label_{self.lang}"]
+        button = qt.QPushButton(label)
         for member_name, member in getmembers(self._measurer):
             if member_name == data["func"] and ismethod(member):
                 button.clicked.connect(member)
@@ -70,9 +74,9 @@ class MeasurerSettingsWindow(qt.QDialog):
         :return: created combobox.
         """
 
-        label = qt.QLabel(data["parameter_name"])
+        label = qt.QLabel(data[f"parameter_name_{self.lang}"])
         combo = qt.QComboBox()
-        labels = [item["label"] for item in data["values"]]
+        labels = [item[f"label_{self.lang}"] for item in data["values"]]
         combo.addItems(labels)
         # Find index of current value of parameter in list of available values
         convertor = get_convertor(data)
@@ -98,7 +102,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         :return: created line edit.
         """
 
-        label = qt.QLabel(data["parameter_name"])
+        label = qt.QLabel(data[f"parameter_name_{self.lang}"])
         line_edit = qt.QLineEdit()
         if data["value_type"] == "float":
             validator = QRegExpValidator(QRegExp(r"^\d*\.\d*$"))
@@ -135,12 +139,12 @@ class MeasurerSettingsWindow(qt.QDialog):
         radios = []
         convertor = get_convertor(data)
         for item in data["values"]:
-            radio = qt.QRadioButton(item["label"])
+            radio = qt.QRadioButton(item[f"label_{self.lang}"])
             v_box.addWidget(radio)
             radios.append(radio)
             if convertor(item["value"]) == current_value:
                 radio.setChecked(True)
-        group = qt.QGroupBox(data["parameter_name"])
+        group = qt.QGroupBox(data[f"parameter_name_{self.lang}"])
         group.setLayout(v_box)
         data["widget"] = radios
         self._widgets[data["parameter"]] = data
@@ -192,7 +196,9 @@ class MeasurerSettingsWindow(qt.QDialog):
         v_box = qt.QVBoxLayout()
         if settings:
             device_name = self._measurer.get_identity_information().device_name
-            self.setWindowTitle(f"Настройки для {device_name}")
+            title = qApp.translate("t", "Настройки для ")
+            title += device_name
+            self.setWindowTitle(title)
             for element in settings["elements"]:
                 if "parameter" in element:
                     current_value = self._measurer.get_current_value_of_parameter(
@@ -212,7 +218,7 @@ class MeasurerSettingsWindow(qt.QDialog):
             self.buttonBox.rejected.connect(self.reject)
             v_box.addWidget(self.buttonBox)
         else:
-            v_box.addWidget(qt.QLabel("Нет настроек"))
+            v_box.addWidget(qt.QLabel(qApp.translate("t", "Нет настроек")))
         self.adjustSize()
         self.setLayout(v_box)
 

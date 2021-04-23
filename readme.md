@@ -98,6 +98,18 @@ python main.py com:\\.\COM13 --ref virtual
 venv\Scripts\python main.py com:\\.\COM13 --ref virtual
 ```
 
+ПО предоставляет возможность работать с устройствами IVM10 и ASA (Meridian) по отдельности. Чтобы запустить приложение для работы с сетевым вахометром ASA нужно выполнить команду:
+
+```
+venv\Scripts\python main.py xmlrpc:172.16.3.213 --ref virtualasa --config eplab_asa_options.json
+```
+
+Здесь предполагается, что:
+
+- сервер вахометра имеет IP адрес 172.16.3.213 и прослушивает порт 8888;
+- совместно вахометром ASA запускается виртуальный вахометр (за это отвечает аргумент virtualasa);
+- ПО получает файл с конфигурацией `eplab_asa_options.json` для работы с вахометром ASA.
+
 ## Запуск в Linux
 
 ```

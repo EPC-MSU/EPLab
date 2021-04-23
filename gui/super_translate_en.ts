@@ -367,6 +367,11 @@
         <translation>Help</translation>
     </message>
     <message>
+        <location filename="mainwindow.ui" line="225"/>
+        <source>Измерители</source>
+        <translation>Measurers</translation>
+    </message>
+    <message>
         <location filename="mainwindow.ui" line="378"/>
         <source>План тестирования</source>
         <translation>Test plan</translation>
@@ -816,6 +821,21 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <location filename="../mainwindow.py" line="732"/>
         <source>Точка POINTS_PARAM не содержит сохраненных измерений. Для сохранения плана тестирования все точки должны содержать сохраненные измерения</source>
         <translation>Point POINTS_PARAM does not contain saved measurements. To save the test plan all points must contain saved measurements</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1010"/>
+        <source>Ошибка при установке настроек устройства</source>
+        <translation>Error occurred while configuring device settings</translation>
+    </message>
+    <message>
+        <location filename="../measurer_settings_window.py" line="190"/>
+        <source>Настройки для </source>
+        <translation>Settings for </translation>
+    </message>
+    <message>
+        <location filename="../measurer_settings_window.py" line="220"/>
+        <source>Нет настроек</source>
+        <translation>No settings</translation>
     </message>
 </context>
 </TS>

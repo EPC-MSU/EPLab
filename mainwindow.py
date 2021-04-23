@@ -1001,12 +1001,17 @@ class EPLabWindow(QMainWindow):
     def _on_settings_btn_checked(self, checked: bool) -> None:
         if checked:
             settings = self._msystem.get_settings()
+            import copy
+            old_settings = copy.deepcopy(settings)
             options = self._ui_to_options()
             settings = self._product.options_to_settings(options, settings)
             set_settings = show_exception(
                 self._set_msystem_settings, qApp.translate("t", "Ошибка"),
                 qApp.translate("t", "Ошибка при установке настроек устройства"))
-            set_settings(settings)
+            if set_settings(settings) == ERROR_CODE:
+                set_settings(old_settings)
+                old_options = self._product.settings_to_options(old_settings)
+                self._options_to_ui(old_options)
 
     @pyqtSlot()
     def _on_view_board(self):
