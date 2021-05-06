@@ -828,12 +828,17 @@ EPC MSU e-mail:  info@ximc.ru</translation>
         <translation>Error occurred while configuring device settings</translation>
     </message>
     <message>
-        <location filename="../measurer_settings_window.py" line="190"/>
+        <location filename="../measurer_settings_window.py" line="199"/>
         <source>Настройки для </source>
         <translation>Settings for </translation>
     </message>
     <message>
-        <location filename="../measurer_settings_window.py" line="220"/>
+        <location filename="../measurer_settings_window.py" line="221"/>
+        <source>Настройки для устройства</source>
+        <translation>Settings for device</translation>
+    </message>
+    <message>
+        <location filename="../measurer_settings_window.py" line="222"/>
         <source>Нет настроек</source>
         <translation>No settings</translation>
     </message>
