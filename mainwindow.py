@@ -761,8 +761,7 @@ class EPLabWindow(QMainWindow):
         if filename:
             save_file = show_exception(epfilemanager.save_board_to_ufiv, qApp.translate("t", "Ошибка"),
                                        qApp.translate("t", "Неверный формат сохраняемого файла"))
-            save_file(filename, self._measurement_plan)
-            self._current_file_path = filename
+            self._current_file_path = save_file(filename, self._measurement_plan)
 
     @pyqtSlot()
     def _on_save_board(self):
@@ -776,7 +775,7 @@ class EPLabWindow(QMainWindow):
             return self._on_save_board_as()
         save_file = show_exception(epfilemanager.save_board_to_ufiv, qApp.translate("t", "Ошибка"),
                                    qApp.translate("t", "Неверный формат сохраняемого файла"))
-        save_file(self._current_file_path, self._measurement_plan)
+        self._current_file_path = save_file(self._current_file_path, self._measurement_plan)
 
     @pyqtSlot()
     def _on_load_board(self):
