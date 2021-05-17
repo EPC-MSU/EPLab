@@ -4,3 +4,4 @@ git+https://github.com/EPC-MSU/board-view@Version0.1.1#egg=boardview
 epsound==0.0.13
 PyQt5<=5.15.0
 PyQt5-stubs
+pyserial==3.5

@@ -6,7 +6,7 @@ import os
 from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerIVM10
 from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EPLab
-from utils import read_json
+from utils import read_json, sort_devices_by_usb_numbers
 from mainwindow import EPLabWindow
 from language import Language
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QLabel, qApp, QApplication, QWidget, QDesktopWidget
@@ -61,22 +61,26 @@ def launch_eplab(app: QApplication, args):
         measurers.append(ivm_1)
 
     if len(measurers) == 2:
+
+        # Reorder measurers according to their addresses in USB hubs tree
+        measurers = sort_devices_by_usb_numbers(measurers)
+
         # Reorder measurers according to their ranks if needed.
         # We swap IVMs only if both ranks are set correctly.
         # If ranks are not set order should be the same to the order of cmd args.
-        ivm_info = []
-        for i in range(len(measurers)):
-            try:
-                measurers[i].open_device()
-                ivm_info.append(measurers[i].get_identity_information())
-            finally:
-                measurers[i].close_device()
+        # ivm_info = []
+        # for i in range(len(measurers)):
+        #    try:
+        #        measurers[i].open_device()
+        #        ivm_info.append(measurers[i].get_identity_information())
+        #   finally:
+        #        measurers[i].close_device()
 
-        if (ivm_info[0].rank == 1 and
-                ivm_info[1].rank == 2):
-            ivm_0 = measurers[0]
-            ivm_1 = measurers[1]
-            measurers = [ivm_1, ivm_0]
+        # if (ivm_info[0].rank == 1 and
+        #        ivm_info[1].rank == 2):
+        #    ivm_0 = measurers[0]
+        #    ivm_1 = measurers[1]
+        #    measurers = [ivm_1, ivm_0]
 
     # Set pretty names for measurers
     # TODO: remove access to protected class fields
