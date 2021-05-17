@@ -1,6 +1,7 @@
 import json
 import re
 from operator import itemgetter
+from platform import system
 from typing import Dict, Iterable, List, Optional
 import serial.tools.list_ports
 
@@ -13,14 +14,33 @@ def read_json(path: Optional[str] = None) -> Optional[Dict]:
         return json.load(file)
 
 
-def find_address_in_usb_hubs_tree(port: str) -> str:
+def get_port(url) -> str:
     """
-    Function finds address of given port in USB hubs tree.
-    :param port: port.
+    Functions returns port name from URL.
+    :return: port.
+    """
+
+    port = ""
+    if system() == "Linux":
+        port = re.findall(r"^com:///dev/(?P<port>.+)$", url)
+    elif system() == "Windows":
+        port = re.findall(r"^com:\\\\.\\(?P<port>.+)$", url)
+    if not port:
+        return None
+    return port[0]
+
+
+def find_address_in_usb_hubs_tree(url: str) -> str:
+    """
+    Function finds address of given URL in USB hubs tree.
+    :param url: URL of device.
     :return: address of port in USB hubs tree or None if address was not found.
     """
 
     ports = list(serial.tools.list_ports.comports())
+    port = get_port(url)
+    if not port:
+        return None
     for existing_port in ports:
         if port in existing_port.device:
             hub = re.findall(r"LOCATION=(?P<hub>.+)", existing_port.hwid)
