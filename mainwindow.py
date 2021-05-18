@@ -6,6 +6,7 @@ from PyQt5 import uic
 
 from datetime import datetime
 import numpy as np
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt as QtC
 import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
@@ -959,3 +960,16 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan.go_pin(number)
         self._measurement_plan.get_current_pin().x = point.x()
         self._measurement_plan.get_current_pin().y = point.y()
+
+    def resizeEvent(self, event):
+        """
+        Method handles the resizing of the main window.
+        :param event: resizing event.
+        """
+
+        if self.width() < 1100:
+            self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolBar_compare)
+            self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolBar_mode)
+        else:
+            self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar_compare)
+            self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar_mode)
