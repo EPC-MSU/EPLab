@@ -81,6 +81,7 @@ class EPLabWindow(QMainWindow):
 
         self.setWindowIcon(QIcon("media/ico.png"))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
+        self.setMinimumWidth(600)
         self.move(50, 50)
 
         self._board_window = BoardWidget()
@@ -967,9 +968,10 @@ class EPLabWindow(QMainWindow):
         :param event: resizing event.
         """
 
+        tool_bars = (self.toolBar_write, self.toolBar_cursor, self.toolBar_mode)
         if self.width() < 1100:
-            self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolBar_compare)
-            self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolBar_mode)
+            style = QtC.ToolButtonIconOnly
         else:
-            self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar_compare)
-            self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar_mode)
+            style = QtC.ToolButtonTextBesideIcon
+        for tool_bar in tool_bars:
+            tool_bar.setToolButtonStyle(style)
