@@ -1,3 +1,4 @@
+from platform import system
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLineEdit, QLabel, QWidget, QVBoxLayout, \
     QHBoxLayout, QPushButton, QRadioButton
 from PyQt5.QtGui import QIcon, QColor
@@ -967,10 +968,23 @@ class EPLabWindow(QMainWindow):
         :param event: resizing event.
         """
 
-        tool_bars = (self.toolBar_write, self.toolBar_cursor, self.toolBar_mode)
-        if self.width() < 1100:
-            style = QtC.ToolButtonIconOnly
+        # Determine the critical width of the window for given language and OS
+        lang = qApp.instance().property("language")
+        if system() == "Windows":
+            if lang == Language.en:
+                size = 1100
+            else:
+                size = 1350
         else:
-            style = QtC.ToolButtonTextBesideIcon
+            if lang == Language.en:
+                size = 1300
+            else:
+                size = 1600
+        # Change style of toolbars
+        tool_bars = (self.toolBar_write, self.toolBar_cursor, self.toolBar_mode)
         for tool_bar in tool_bars:
+            if self.width() < size:
+                style = QtC.ToolButtonIconOnly
+            else:
+                style = QtC.ToolButtonTextBesideIcon
             tool_bar.setToolButtonStyle(style)
