@@ -14,7 +14,7 @@ venv\Scripts\python -m pip install --upgrade pip
 venv\Scripts\python -m pip install -r requirements.txt
 venv\Scripts\python -m pip install pyinstaller
 venv\Scripts\pyinstaller main.py ^
---add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm-win%target_platform%\ivm.dll;." ^
+--add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm10\ivm-win%target_platform%\ivm.dll;." ^
 --add-data "venv\Lib\site-packages\epcore\doc\p10_elements.schema.json;epcore\doc" ^
 --add-data "venv\Lib\site-packages\epcore\doc\p10_elements_2.schema.json;epcore\doc" ^
 --add-data "venv\Lib\site-packages\epcore\doc\ufiv.schema.json;epcore\doc" ^

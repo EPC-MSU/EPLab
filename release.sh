@@ -7,7 +7,7 @@ python3 -m venv venv
 ./venv/bin/python3 -m pip install -r requirements.txt
 ./venv/bin/python3 -m pip install pyinstaller
 ./venv/bin/pyinstaller main.py \
---add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ivm-debian/libivm.so:." \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ivm10/ivm-debian/libivm.so:." \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/p10_elements.schema.json:epcore/doc" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/p10_elements_2.schema.json:epcore/doc" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/ufiv.schema.json:epcore/doc" \
