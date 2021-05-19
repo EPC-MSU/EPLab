@@ -81,7 +81,7 @@ class EPLabWindow(QMainWindow):
 
         self.setWindowIcon(QIcon("media/ico.png"))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
-        self.setMinimumWidth(600)
+        self.setMinimumWidth(700)
         self.move(50, 50)
 
         self._board_window = BoardWidget()
