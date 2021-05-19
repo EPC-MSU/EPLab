@@ -83,10 +83,9 @@ def launch_eplab(app: QApplication, args):
         #    measurers = [ivm_1, ivm_0]
 
     # Set pretty names for measurers
-    # TODO: remove access to protected class fields
-    measurers[0]._name = "test"
+    measurers[0].name = "test"
     if len(measurers) == 2:
-        measurers[1]._name = "ref"
+        measurers[1].name = "ref"
 
     measurement_system = MeasurementSystem(measurers)
 
