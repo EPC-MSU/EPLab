@@ -6,7 +6,6 @@ from PyQt5 import uic
 
 from datetime import datetime
 import numpy as np
-from PyQt5 import QtCore
 from PyQt5.QtCore import Qt as QtC
 import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
