@@ -602,7 +602,7 @@ class EPLabWindow(QMainWindow):
         except ValueError as exc:
             show_exception(qApp.translate("t", "Ошибка открытия точки"),
                            qApp.translate("t", "Неверный формат номера точки. Номер точки может"
-                                                " принимать только целочисленное значение!"),
+                                               " принимать только целочисленное значение!"),
                            exc)
             return
 
@@ -611,7 +611,7 @@ class EPLabWindow(QMainWindow):
         except ValueError as exc:
             show_exception(qApp.translate("t", "Ошибка открытия точки"),
                            qApp.translate("t", "Точка с таким номером не найдена на "
-                                                "данной плате."), exc)
+                                               "данной плате."), exc)
             return
         self._update_current_pin()
         self._open_board_window_if_needed()
