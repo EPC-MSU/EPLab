@@ -23,6 +23,7 @@ from common import WorkMode, DeviceErrorsHandler
 from language import Language
 from settings.settings import Settings
 from settings.settingswindow import SettingsWindow, LowSettingsPanel
+from utils import read_settings_auto, save_settings_auto
 import os
 from typing import Dict
 
@@ -188,9 +189,6 @@ class EPLabWindow(QMainWindow):
             for m in self._msystem.measurers:
                 m.open_device()
 
-        with self._device_errors_handler:
-            self._adjust_plot_params(self._msystem.get_settings())
-
         self._work_mode = None
         self._change_work_mode(WorkMode.compare)  # default mode - compare two curves
 
@@ -205,10 +203,15 @@ class EPLabWindow(QMainWindow):
 
         QTimer.singleShot(0, self._periodic_task)
 
+        # Set ui settings state to current device
         with self._device_errors_handler:
-            settings = self._msystem.get_settings()  # set ui settings state to current device
+            settings = read_settings_auto(self._product)
+            if settings is not None:
+                self._msystem.set_settings(settings)
+            settings = self._msystem.get_settings()
             options = self._product.settings_to_options(settings)
             self._options_to_ui(options)
+            self._adjust_plot_params(settings)
 
         self._update_current_pin()
         self._init_threshold()
@@ -945,6 +948,7 @@ class EPLabWindow(QMainWindow):
                 settings = self._msystem.measurers[0].get_settings()
                 options = self._ui_to_options()
                 settings = self._product.options_to_settings(options, settings)
+                save_settings_auto(self._product, settings)
                 self._set_msystem_settings(settings)
 
     @pyqtSlot()
