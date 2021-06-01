@@ -40,6 +40,10 @@ set QT_QPA_PLATFORM_PLUGIN_PATH=venv\Lib\site-packages\PyQt5\Qt\plugins\platform
 sudo apt-get install -y python3-dev libasound2-dev
 ```
 
+Если Вы используете для работы с EPLab Ubuntu 20, необходимо использовать GLIBC версии 2.29.
+Для работы с Ubuntu 18 используется GLIBC 2.27 и обновление библиотеки не требуется! 
+
+
 Установить зависимости для python:
 
 ```
