@@ -12,6 +12,18 @@ from language import Language
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QLabel, qApp, QApplication, QWidget, QDesktopWidget
 import traceback
 
+tb = None
+
+
+def exception_hook(exc_type, exc_value, exc_tb):
+    global tb
+    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    for f in app.allWindows():
+        f.close()
+
+
+sys.excepthook = exception_hook
+
 
 def launch_eplab(app: QApplication, args):
 
@@ -132,5 +144,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     try:
         launch_eplab(app, args)
+        if tb is not None:
+            start_err_app(app, trace_back=str(tb))
     except Exception as e:
         start_err_app(app, error=str(e), trace_back="".join(traceback.format_exception(*sys.exc_info())))
