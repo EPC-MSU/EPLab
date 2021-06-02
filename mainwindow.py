@@ -1,21 +1,22 @@
-from platform import system
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, QLineEdit, QLabel, QWidget, QVBoxLayout, \
-    QHBoxLayout, QPushButton, QRadioButton
-from PyQt5.QtGui import QIcon, QColor
-from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication as qApp
-from PyQt5 import uic
-
+import os
 from datetime import datetime
+from platform import system
+from typing import Dict
 import numpy as np
-from PyQt5.QtCore import Qt as QtC
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtSlot, QTimer, QPointF, QCoreApplication as qApp, Qt as QtC
+from PyQt5.QtGui import QIcon, QColor
+from PyQt5.QtWidgets import (QDialog, QFileDialog, QHBoxLayout, QLabel, QLineEdit,
+                             QMainWindow, QMessageBox, QPushButton, QRadioButton,
+                             QVBoxLayout, QWidget)
 import epcore.filemanager as epfilemanager
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
 from epcore.measurementmanager.utils import Searcher
 from epcore.elements import MeasurementSettings, Board, Pin, Element, IVCurve
 from epcore.measurementmanager.ivc_comparator import IVCComparator
 from epcore.product import EPLab
-from boardwindow import BoardWidget
 from ivviewer import Viewer as IVViewer
+from boardwindow import BoardWidget
 from score import ScoreWrapper
 from version import Version
 from player import SoundPlayer
@@ -24,35 +25,23 @@ from language import Language
 from settings.settings import Settings
 from settings.settingswindow import SettingsWindow, LowSettingsPanel
 from utils import read_settings_auto, save_settings_auto
-import os
-from typing import Dict
-
-# TODO: is that C-style error code? Refactor!
-ERROR_CODE = -10000
 
 
-def show_exception(f, msg_title, msg_text):
+def show_exception(msg_title: str, msg_text: str, exc: Exception = None):
     """
-    Wrapper show message box if wrapped function terminates with error.
-    :param f: wrapped function;
+    Function shows message box with error.
     :param msg_title: title of message box;
-    :param msg_text: message text.
+    :param msg_text: message text;
+    :param exc: exception.
     """
 
-    def func(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except Exception as e:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Warning)
-            msg.setWindowTitle(msg_title)
-            msg.setText(msg_text)
-            # TODO: remove hardcoded constant parameter
-            msg.setInformativeText(str(e)[0:512] + "\n...")
-            msg.exec_()
-            return ERROR_CODE
-
-    return func
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Warning)
+    msg.setWindowTitle(msg_title)
+    msg.setText(msg_text)
+    if exc:
+        msg.setInformativeText(str(exc))
+    msg.exec_()
 
 
 class EPLabWindow(QMainWindow):
@@ -181,9 +170,12 @@ class EPLabWindow(QMainWindow):
 
         self.save_screen_action.triggered.connect(self._on_save_image)
 
-        self.comparing_mode_action.triggered.connect(lambda: self._on_work_mode_switch(WorkMode.compare))
-        self.writing_mode_action.triggered.connect(lambda: self._on_work_mode_switch(WorkMode.write))
-        self.testing_mode_action.triggered.connect(lambda: self._on_work_mode_switch(WorkMode.test))
+        self.comparing_mode_action.triggered.connect(
+            lambda: self._on_work_mode_switch(WorkMode.compare))
+        self.writing_mode_action.triggered.connect(
+            lambda: self._on_work_mode_switch(WorkMode.write))
+        self.testing_mode_action.triggered.connect(
+            lambda: self._on_work_mode_switch(WorkMode.test))
         self.settings_mode_action.triggered.connect(self._show_settings_window)
         with self._device_errors_handler:
             for m in self._msystem.measurers:
@@ -248,10 +240,12 @@ class EPLabWindow(QMainWindow):
         """
         return self._product.adjust_noise_amplitude(settings)
 
-    def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> float:
+    def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve,
+                         settings: MeasurementSettings) -> float:
         var_v, var_c = self._get_min_var(settings)
-        self._comparator.set_min_ivc(var_v, var_c)  # It is very important to set relevant noise levels
-        score = self._comparator.compare_ivc(self._ref_curve, self._test_curve)
+        # It is very important to set relevant noise levels
+        self._comparator.set_min_ivc(var_v, var_c)
+        score = self._comparator.compare_ivc(curve_1, curve_2)
         return score
 
     def closeEvent(self, ev):
@@ -362,11 +356,11 @@ class EPLabWindow(QMainWindow):
         msg.setIcon(QMessageBox.Information)
         msg.setWindowTitle(qApp.translate("t", "Справка"))
         msg.setText(self.windowTitle())
-        msg.setInformativeText(qApp.translate("t", "Программное обеспечение для работы с устройствами линейки EyePoint,"
-                                                   " предназначенными для поиска неисправностей на печатных платах в "
-                                                   "ручном режиме (при помощи ручных щупов). Для более подробной "
-                                                   "информации об Eyepoint, перейдите по ссылке "
-                                                   "http://eyepoint.physlab.ru."))
+        msg.setInformativeText(qApp.translate(
+            "t", "Программное обеспечение для работы с устройствами линейки EyePoint,"
+                 " предназначенными для поиска неисправностей на печатных платах в "
+                 "ручном режиме (при помощи ручных щупов). Для более подробной информации "
+                 "об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru."))
         msg.addButton(qApp.translate("t", "Перейти"), QMessageBox.YesRole)
         msg.addButton(qApp.translate("t", "ОК"), QMessageBox.NoRole)
         msg.buttonClicked.connect(msgbtn)
@@ -390,8 +384,9 @@ class EPLabWindow(QMainWindow):
             os.mkdir(os.path.join(self.default_path, "Screenshot"))
 
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
-                                          directory=os.path.join(self.default_path, "Screenshot", filename))[0]
+        filename = dialog.getSaveFileName(
+            self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
+            directory=os.path.join(self.default_path, "Screenshot", filename))[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
@@ -469,8 +464,7 @@ class EPLabWindow(QMainWindow):
             return
         self.__settings = Settings()
         self.__settings.import_(path=settings_path)
-        self.__settings_window.score_treshold_value_lineEdit.setText(
-            f"{round(self.__settings.score_threshold * 100.0)}%")
+        self._update_threshold_in_settings_wnd(self.__settings_window.score_threshold)
 
     @pyqtSlot()
     def _on_threshold_dec(self):
@@ -598,23 +592,29 @@ class EPLabWindow(QMainWindow):
                     self._set_msystem_settings(settings)
                     options = self._product.settings_to_options(settings)
                     self._options_to_ui(options)
-                    self._update_curves({"ref": measurement.ivc}, settings=self._msystem.measurers[0].get_settings())
+                    self._update_curves({"ref": measurement.ivc},
+                                        self._msystem.measurers[0].get_settings())
             else:
                 self._remove_ref_curve()
-                self._update_curves({}, settings=self._msystem.measurers[0].get_settings())
+                self._update_curves({}, self._msystem.measurers[0].get_settings())
 
     @pyqtSlot()
     def _on_go_selected_pin(self):
-        str_to_int = show_exception(int, qApp.translate("t", "Ошибка открытия точки"),
-                                    qApp.translate("t", "Неверный формат номера точки. Номер точки может"
-                                                        " принимать только целочисленное значение!"))
-        num_point = str_to_int(self.num_point_line_edit.text())
-        if num_point == ERROR_CODE:
+        try:
+            num_point = int(self.num_point_line_edit.text())
+        except ValueError as exc:
+            show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                           qApp.translate("t", "Неверный формат номера точки. Номер точки может"
+                                               " принимать только целочисленное значение!"),
+                           exc)
             return
-        go_pin = show_exception(self._measurement_plan.go_pin, qApp.translate("t", "Ошибка открытия точки"),
-                                qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
-        status = go_pin(num_point)
-        if status == ERROR_CODE:
+
+        try:
+            self._measurement_plan.go_pin(num_point)
+        except ValueError as exc:
+            show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                           qApp.translate("t", "Точка с таким номером не найдена на "
+                                               "данной плате."), exc)
             return
         self._update_current_pin()
         self._open_board_window_if_needed()
@@ -708,9 +708,10 @@ class EPLabWindow(QMainWindow):
         if not os.path.isdir(os.path.join(self.default_path, "Reference")):
             os.mkdir(os.path.join(self.default_path, "Reference"))
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, qApp.translate("t", "Создать новую плату"),
-                                          filter="UFIV Archived File (*.uzf)",
-                                          directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
+        filename = dialog.getSaveFileName(
+            self, qApp.translate("t", "Создать новую плату"),
+            filter="UFIV Archived File (*.uzf)",
+            directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
         if filename:
             self._current_file_path = filename
             self._reset_board()
@@ -731,8 +732,6 @@ class EPLabWindow(QMainWindow):
                     empty_pins += ", "
                 empty_pins += str(pin_index)
         if empty_pins:
-            def func():
-                raise ValueError("")
             if "," in empty_pins:
                 text = qApp.translate("t", "Точки POINTS_PARAM не содержат сохраненных измерений. "
                                            "Для сохранения плана тестирования все точки должны "
@@ -742,8 +741,7 @@ class EPLabWindow(QMainWindow):
                                            "Для сохранения плана тестирования все точки должны "
                                            "содержать сохраненные измерения")
             text = text.replace("POINTS_PARAM", empty_pins)
-            exec_msgbox = show_exception(func, qApp.translate("t", "Ошибка"), text)
-            exec_msgbox()
+            show_exception(qApp.translate("t", "Ошибка"), text, "")
             return True
         return False
 
@@ -760,13 +758,13 @@ class EPLabWindow(QMainWindow):
         if not os.path.isdir(os.path.join(self.default_path, "Reference")):
             os.mkdir(os.path.join(self.default_path, "Reference"))
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self, qApp.translate("t", "Сохранить плату"),
-                                          filter="UFIV Archived File (*.uzf)",
-                                          directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
+        filename = dialog.getSaveFileName(
+            self, qApp.translate("t", "Сохранить плату"),
+            filter="UFIV Archived File (*.uzf)",
+            directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
         if filename:
-            save_file = show_exception(epfilemanager.save_board_to_ufiv, qApp.translate("t", "Ошибка"),
-                                       qApp.translate("t", "Неверный формат сохраняемого файла"))
-            self._current_file_path = save_file(filename, self._measurement_plan)
+            self._current_file_path = epfilemanager.save_board_to_ufiv(
+                filename, self._measurement_plan)
 
     @pyqtSlot()
     def _on_save_board(self):
@@ -778,9 +776,8 @@ class EPLabWindow(QMainWindow):
             return
         if not self._current_file_path:
             return self._on_save_board_as()
-        save_file = show_exception(epfilemanager.save_board_to_ufiv, qApp.translate("t", "Ошибка"),
-                                   qApp.translate("t", "Неверный формат сохраняемого файла"))
-        self._current_file_path = save_file(self._current_file_path, self._measurement_plan)
+        self._current_file_path = epfilemanager.save_board_to_ufiv(
+            self._current_file_path, self._measurement_plan)
 
     @pyqtSlot()
     def _on_load_board(self):
@@ -791,15 +788,17 @@ class EPLabWindow(QMainWindow):
         filename = dialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
                                           filter="Board Files (*.json *.uzf)")[0]
         if filename:
-            self._current_file_path = filename
-            load_file = show_exception(epfilemanager.load_board_from_ufiv, qApp.translate("t", "Ошибка"),
-                                       qApp.translate("t", "Формат файла не подходит"))
-            board = load_file(filename, auto_convert_p10=True)
-            if board == ERROR_CODE:
+            try:
+                board = epfilemanager.load_board_from_ufiv(
+                    filename, auto_convert_p10=True)
+            except Exception as exc:
+                show_exception(
+                    qApp.translate("t", "Ошибка"),
+                    qApp.translate("t", "Формат файла не подходит"), exc)
                 return
-
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
-            self._board_window.set_board(self._measurement_plan)  # New workspace will be created here
+            # New workspace will be created here
+            self._board_window.set_board(self._measurement_plan)
 
             self._update_current_pin()
             self._open_board_window_if_needed()
@@ -819,7 +818,7 @@ class EPLabWindow(QMainWindow):
             self._open_board_window_if_needed()
 
     @pyqtSlot()
-    def _update_curves(self, curves: Dict[str, IVCurve], settings=None):
+    def _update_curves(self, curves: Dict[str, IVCurve], settings: MeasurementSettings = None):
         # TODO: let the function work with larger lists
         # Store last curves
         if "test" in curves.keys():
@@ -849,16 +848,18 @@ class EPLabWindow(QMainWindow):
         self.plot_parameters(settings)
 
     def plot_parameters(self, settings: MeasurementSettings):
-        # TODO: refactor!
-        param_dict = {"sensity": "-", "max_voltage": "-", "probe_signal_frequency": "-"}
-        param_dict["voltage"], param_dict["current"] = self._iv_window.plot.get_minor_axis_step()
-        param_dict["score"] = self._score_wrapper.get_score()
-
         buttons = self._option_buttons[EPLab.Parameter.sensitive]
-        sensitive = buttons[self._product.settings_to_options(settings)[EPLab.Parameter.sensitive]].text()
-        param_dict["sensity"] = sensitive
-        param_dict["max_voltage"] = np.round(settings.max_voltage, 1)
-        param_dict["probe_signal_frequency"] = np.round(settings.probe_signal_frequency, 1)
+        sensitive = buttons[self._product.settings_to_options(settings)[
+            EPLab.Parameter.sensitive]].text()
+        voltage, current = self._iv_window.plot.get_minor_axis_step()
+        param_dict = {
+            "voltage": voltage,
+            "current": current,
+            "score": self._score_wrapper.get_score(),
+            "sensity": sensitive,
+            "max_voltage": np.round(settings.max_voltage, 1),
+            "probe_signal_frequency": np.round(settings.probe_signal_frequency, 1)
+        }
         self.low_panel_settings.set_all_parameters(**param_dict)
 
     def _remove_ref_curve(self):
@@ -910,7 +911,7 @@ class EPLabWindow(QMainWindow):
             if self._skip_curve:
                 self._skip_curve = False
             else:
-                self._update_curves(curves, settings=self._msystem.measurers[0].get_settings())
+                self._update_curves(curves, self._msystem.measurers[0].get_settings())
 
                 if self._settings_update_next_cycle:
                     # New curve with new settings - we must update plot parameters
@@ -944,8 +945,7 @@ class EPLabWindow(QMainWindow):
     def _on_settings_btn_checked(self, checked: bool) -> None:
         if checked:
             with self._device_errors_handler:
-                # settings = self._msystem.get_settings() # Cause an error of different settings. #TODO: find out why.
-                settings = self._msystem.measurers[0].get_settings()
+                settings = self._msystem.get_settings()
                 options = self._ui_to_options()
                 settings = self._product.options_to_settings(options, settings)
                 save_settings_auto(self._product, settings)
