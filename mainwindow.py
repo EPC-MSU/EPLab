@@ -27,12 +27,12 @@ from settings.settingswindow import SettingsWindow, LowSettingsPanel
 from utils import read_settings_auto, save_settings_auto
 
 
-def show_exception(msg_title: str, msg_text: str, exc: Exception = None):
+def show_exception(msg_title: str, msg_text: str, exc: str = ""):
     """
     Function shows message box with error.
     :param msg_title: title of message box;
     :param msg_text: message text;
-    :param exc: exception.
+    :param exc: text of exception.
     """
 
     msg = QMessageBox()
@@ -194,6 +194,7 @@ class EPLabWindow(QMainWindow):
         self._test_curve = None
 
         QTimer.singleShot(0, self._periodic_task)
+        self._time = 0
 
         # Set ui settings state to current device
         with self._device_errors_handler:
@@ -794,7 +795,7 @@ class EPLabWindow(QMainWindow):
             except Exception as exc:
                 show_exception(
                     qApp.translate("t", "Ошибка"),
-                    qApp.translate("t", "Формат файла не подходит"), exc)
+                    qApp.translate("t", "Формат файла не подходит"), str(exc))
                 return
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
             # New workspace will be created here
@@ -925,6 +926,11 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _periodic_task(self):
+
+        self._time += 1
+        if self._time == 100:
+            raise ValueError("My Exception")
+
         if self._device_errors_handler.all_ok:
             with self._device_errors_handler:
                 self._read_curves_periodic_task()
