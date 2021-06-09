@@ -1,16 +1,34 @@
-from PyQt5.QtCore import QTranslator
-import sys
 import logging
-from argparse import ArgumentParser
 import os
+import sys
+import traceback
+from argparse import ArgumentParser
+from PyQt5.QtCore import QTranslator
+from PyQt5.QtWidgets import (qApp, QApplication, QDesktopWidget, QLabel,
+                             QMainWindow, QPushButton, QVBoxLayout, QWidget)
 from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerIVM10
 from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EPLab
-from utils import read_json, sort_devices_by_usb_numbers
-from mainwindow import EPLabWindow
 from language import Language
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QLabel, qApp, QApplication, QWidget, QDesktopWidget
-import traceback
+from mainwindow import EPLabWindow, show_exception
+from utils import read_json, sort_devices_by_usb_numbers
+
+
+def exception_hook(exc_type: Exception, exc_value: Exception, exc_traceback: "traceback"):
+    """
+    Function handles unexpected errors.
+    :param exc_type: exception class;
+    :param exc_value: exception instance;
+    :param exc_traceback: traceback object.
+    """
+
+    traceback.print_exception(exc_type, exc_value, exc_traceback)
+    traceback_text = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+    show_exception("Error", str(exc_value), traceback_text)
+    sys.exit(1)
+
+
+sys.excepthook = exception_hook
 
 
 def launch_eplab(app: QApplication, args):
@@ -90,25 +108,25 @@ class ErrorWindow(QMainWindow):
 
     def __init__(self, error: str, trace_back: str):
         super().__init__()
-        self.initUI(error, trace_back)
+        self.init_ui(error, trace_back)
 
-    def initUI(self, error: str, trace_back: str):
-        self.centralwidget = QWidget()
-        self.setCentralWidget(self.centralwidget)
+    def init_ui(self, error: str, trace_back: str):
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
         exit_btn = QPushButton("OK",  self)
         error_lbl = QLabel(self)
         traceback_lbl = QLabel(self)
         error_lbl.setText(error)
         traceback_lbl.setText(trace_back)
-        self.v = QVBoxLayout(self.centralwidget)
+        self.v = QVBoxLayout(self.central_widget)
         self.v.addWidget(error_lbl)
         self.v.addWidget(traceback_lbl)
         self.v.addWidget(exit_btn)
         exit_btn.clicked.connect(qApp.quit)
-        centerPoint = QDesktopWidget().availableGeometry().center()
-        qtRectangle = self.frameGeometry()
-        qtRectangle.moveCenter(centerPoint)
-        self.move(qtRectangle.topLeft())
+        center_point = QDesktopWidget().availableGeometry().center()
+        qt_rectangle = self.frameGeometry()
+        qt_rectangle.moveCenter(center_point)
+        self.move(qt_rectangle.topLeft())
         self.setWindowTitle("Error")
 
 
@@ -121,7 +139,8 @@ def start_err_app(app: QApplication, error: str = "", trace_back: str = ""):
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="EyePoint Lab")
-    parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual' for virtual mode)")
+    parser.add_argument("--ref", help="Path to REF [additional] measurer "
+                                      "(type 'virtual' for virtual mode)")
     parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)")
     parser.add_argument("--en", help="Use English version", action="store_true")
     parser.add_argument("--config", help="Path to specific EPLab config file", default=None)
@@ -133,4 +152,5 @@ if __name__ == "__main__":
     try:
         launch_eplab(app, args)
     except Exception as e:
-        start_err_app(app, error=str(e), trace_back="".join(traceback.format_exception(*sys.exc_info())))
+        start_err_app(app, error=str(e),
+                      trace_back="".join(traceback.format_exception(*sys.exc_info())))
