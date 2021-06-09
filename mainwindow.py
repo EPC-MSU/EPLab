@@ -194,7 +194,6 @@ class EPLabWindow(QMainWindow):
         self._test_curve = None
 
         QTimer.singleShot(0, self._periodic_task)
-        self._time = 0
 
         # Set ui settings state to current device
         with self._device_errors_handler:
@@ -926,11 +925,6 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _periodic_task(self):
-
-        self._time += 1
-        if self._time == 100:
-            raise ValueError("My Exception")
-
         if self._device_errors_handler.all_ok:
             with self._device_errors_handler:
                 self._read_curves_periodic_task()
