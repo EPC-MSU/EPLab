@@ -4,76 +4,56 @@
 
 ## Установка в Windows
 
-Установить MSVC 2013 redistributable (разрядность должна совпадать с разрядностью python).
-https://www.microsoft.com/en-us/download/details.aspx?id=40784
+1. Установите MSVC 2013 redistributable (разрядность должна совпадать с разрядностью python) https://www.microsoft.com/en-us/download/details.aspx?id=40784.
 
-Установить зависимости для python:
+2. Установите драйвер `ivm.inf` из папки `release_templates\win64\driver`.
 
-```
-python -m pip install -r requirements.txt --upgrade
-```
-Выше приведён случай для установки на чистый Python.
+3. Установить зависимости для Python, запустив скрипт `install_requirements.bat`:
 
-Если в системе Python уже используется, желательно поставить все зависимости в виртуальное окружение:
+   ```
+   install_requirements.bat
+   ```
 
-```
-python -m venv venv
-venv\Scripts\python -m pip install --upgrade pip
-venv\Scripts\python -m pip install -r requirements.txt --upgrade
-```
+Если у Вас возникла такая ошибка:
 
-Если у вас возникла такая ошибка: qt.qpa.plugin: Could not find the Qt platform plugin "windows" in "" 
-This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
-Выполните следующую команду в виртуальном окружении:
+`qt.qpa.plugin: Could not find the Qt platform plugin "windows" in "" 
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem`
+выполните следующую команду в виртуальном окружении:
 
 ```
 set QT_QPA_PLATFORM_PLUGIN_PATH=venv\Lib\site-packages\PyQt5\Qt\plugins\platforms
 ```
 
-Для работы нужно установить драйвер `ivm.inf` из папки `release_templates\win64\driver`.
-
 ## Установка в Linux
 
-Установить библиотеки для работы со звуком и для сборки пакетов python:
+1. Установите библиотеки для работы со звуком и для сборки пакетов Python:
 
-```
-sudo apt-get install -y python3-dev libasound2-dev
-```
+   ```
+   sudo apt-get install -y python3-dev libasound2-dev
+   ```
 
-Если Вы используете для работы с EPLab Ubuntu 20, необходимо использовать GLIBC версии 2.29.
-Для работы с Ubuntu 18 используется GLIBC 2.27 и обновление библиотеки не требуется! 
+2. Установите зависимости для Python:
 
+   ```
+   bash install_requirements.sh
+   ```
 
-Установить зависимости для python:
+Если Вы используете для работы с EPLab Ubuntu 20, необходимо использовать GLIBC версии 2.29. Для работы с Ubuntu 18 используется GLIBC 2.27 и обновление библиотеки не требуется!
 
-```
-python3 -m pip install -r requirements.txt --upgrade
-```
-Выше приведён случай для установки на чистый Python.
+Если при установке зависимостей через hg возникает ошибка авторизации, то нужно прописать в Hg логин и пароль от репозитория hg.ximc.ru. Это можно сделать через TortoiseHg, открыв любой репозиторий, перейдя во вкладку синхронизации (две стрелочки по кругу на верхней панели) и нажав на иконку с изображением замка (в середине страницы, слева от строки с адресом сервера). После этого нужно переоткрыть консоль. Также нужен доступ на hg.ximc.ru к репозиториям epcore, ivviewer.
 
-Если в системе Python уже используется, желательно поставить все зависимости в виртуальное окружение:
+Если у вас возникла такая ошибка:
 
-```
-python3 -m venv venv
-venv/bin/python3 -m pip install --upgrade pip
-venv/bin/python3 -m pip install -r requirements.txt --upgrade
-```
-
-Если при установке зависимостей через hg возникает ошибка авторизации, то нужно прописать в Hg логин и пароль от репозитория hg.ximc.ru. Это можно сделать через TortoiseHg, открыв любой репозиторий, перейдя во вкладку синхронизации (две стрелочки по кругу на верхней панели) и нажав на иконку с изображением замка (в середине страницы, слева от строки с адресом сервера). 
-
-После этого нужно переоткрыть консоль.
-
-Если у вас возникла такая ошибка: qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.
-Выполните следующие команды:
+`qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found`
+выполните следующие команды:
 
 ```
 export QT_DEBUG_PLUGINS=1
 sudo apt-get install --reinstall libxcb-xinerama0
 ```
 
-Также нужен доступ на hg.ximc.ru к репозиториям: epcore, ivviewer.
-Если при подключении вахометров они не обнаруживаются , то стоит прописать в системе VID и PID устройства для драйвера виртуального COM-порта. 
-В Ubuntu это можно сделать так:
+
+Если при подключении вахометров они не обнаруживаются, то стоит прописать в системе VID и PID устройства для драйвера виртуального COM-порта. В Ubuntu это можно сделать так:
 
 ```
 sudo sh -c 'echo 1CBC 0007 > /sys/bus/usb/drivers/cdc_acm/new_id'
@@ -88,7 +68,7 @@ python main.py <ivm_url> [--ref <ivm_url>]
 ```
 ПО может работать как с одним, так и с двумя устройствами (второе устройство задавать не обязательно).
 
-`ivm_url` обычно - это адрес COM-порта. Также `ivm_url` может быть `virtual` (будет использоваться виртуальный измеритель).
+`ivm_url` - это адрес COM-порта. Также `ivm_url` может быть `virtual` (будет использоваться виртуальный измеритель).
 
 Пример запуска:
 
@@ -109,7 +89,7 @@ python3 main.py <ivm_url> [--ref <ivm_url>]
 ```
 ПО может работать как с одним, так и с двумя устройствами (второе устройство задавать не обязательно).
 
-`ivm_url` обычно - это адрес COM-порта. Также `ivm_url` может быть `virtual` (будет использоваться виртуальный измеритель).
+`ivm_url` - это адрес COM-порта. Также `ivm_url` может быть `virtual` (будет использоваться виртуальный измеритель).
 
 Пример запуска:
 
@@ -128,21 +108,24 @@ venv/bin/python3 main.py com:///dev/ttyACM0 --ref virtual
 python3 main.py com:///dev/ttyACM0 --ref virtual --en
 ```
 
-## Релиз
+## Релиз в Windows
 
-Для релиза есть скрипт release.cmd. В нём нужно прописать путь до системного 
-интерпретатора Python**3.6** **x64**. Для запуска в консоли набрать:
+Для релиза есть скрипт `release.bat`. В нём нужно прописать путь до системного интерпретатора Python. Для запуска в консоли набрать:
 
 ```
 release.bat
 ```
-Собранный релиз будет лежать в папке dist
+Собранный релиз будет лежать в папке `release`.
 
-На Linux нужно выполнить
+## Релиз в Linux
+
+Для выпуска релиза на Linux нужно запустить на исполнение скрипт `release.sh`:
 
 ```
-release.sh
+bash release.sh
 ```
+
+Собранный релиз будет лежать в папке `release`.
 
 ## Запуск тестов
 
