@@ -1,1 +1,1 @@
-./venv/bin/python3 main.py vitual --ref virtual
+./venv/bin/python3 main.py virtual --ref virtual
