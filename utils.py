@@ -71,9 +71,11 @@ def sort_devices_by_usb_numbers(measurers: Iterable, reverse: bool = False) -> L
         if address is None:
             return measurers
         addresses.append((address, measurer))
+    print("addresses = ", addresses)
 
     # Sort by addresses
     sorted_addresses = sorted(addresses, key=itemgetter(0), reverse=reverse)
+    print("sorted_addresses = ", sorted_addresses)
     return [item[1] for item in sorted_addresses]
 
 
