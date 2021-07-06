@@ -29,10 +29,10 @@ class SettingsWindow(QDialog):
         uic.loadUi(os.path.join("gui", "settings.ui"), self)
 
         self.auto_calibration_push_button.clicked.connect(parent._on_auto_calibration)
-        self.score_treshold_button_minus.clicked.connect(parent._on_threshold_dec)
-        self.score_treshold_button_plus.clicked.connect(parent._on_threshold_inc)
+        self.score_threshold_button_minus.clicked.connect(parent._on_threshold_dec)
+        self.score_threshold_button_plus.clicked.connect(parent._on_threshold_inc)
         validator = QRegExpValidator(QRegExp(r"^(\d|\d\d|100)%?"), self)
-        self.score_treshold_value_lineEdit.setValidator(validator)
+        self.score_threshold_value_lineEdit.setValidator(validator)
         self.load_settings_push_button.clicked.connect(parent._on_open_settings)
         self.save_settings_push_button.clicked.connect(parent._save_settings_to_file)
         self.apply_settings_push_button.clicked.connect(parent._load_settings)

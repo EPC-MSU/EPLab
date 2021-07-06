@@ -57,7 +57,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="score_treshold_button_minus">
+        <widget class="QPushButton" name="score_threshold_button_minus">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -85,7 +85,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="score_treshold_value_lineEdit">
+        <widget class="QLineEdit" name="score_threshold_value_lineEdit">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -107,7 +107,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="score_treshold_button_plus">
+        <widget class="QPushButton" name="score_threshold_button_plus">
          <property name="minimumSize">
           <size>
            <width>70</width>

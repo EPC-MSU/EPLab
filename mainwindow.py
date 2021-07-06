@@ -410,7 +410,7 @@ class EPLabWindow(QMainWindow):
         :return: score threshold value.
         """
 
-        value = self.__settings_window.score_treshold_value_lineEdit.text()
+        value = self.__settings_window.score_threshold_value_lineEdit.text()
         if not value:
             value = 0
         elif value[-1] == "%":
@@ -464,7 +464,7 @@ class EPLabWindow(QMainWindow):
             return
         self.__settings = Settings()
         self.__settings.import_(path=settings_path)
-        self._update_threshold_in_settings_wnd(self.__settings_window.score_threshold)
+        self._update_threshold_in_settings_wnd(self.__settings.score_threshold)
 
     @pyqtSlot()
     def _on_threshold_dec(self):
@@ -541,7 +541,7 @@ class EPLabWindow(QMainWindow):
         :param threshold: new score threshold value.
         """
 
-        self.__settings_window.score_treshold_value_lineEdit.setText(
+        self.__settings_window.score_threshold_value_lineEdit.setText(
             f"{round(threshold * 100.0)}%")
 
     @pyqtSlot(bool)
