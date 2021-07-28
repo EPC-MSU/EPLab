@@ -2,7 +2,6 @@
 File with class for dialog window with settings of measurer.
 """
 
-from functools import partial
 from inspect import getmembers, ismethod
 from typing import Any, Callable, Dict
 import PyQt5.QtWidgets as qt
