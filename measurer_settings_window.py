@@ -110,9 +110,6 @@ class MeasurerSettingsWindow(qt.QDialog):
         elif data["value_type"] == "int":
             validator = QRegExpValidator(QRegExp(r"^\d+$"))
             line_edit.setValidator(validator)
-        if "max" in data and "min" in data:
-            line_edit.textChanged.connect(
-                partial(self._process_line_edit, data, line_edit))
         # Set current value
         line_edit.setText(str(current_value))
         h_box = qt.QHBoxLayout()
@@ -162,8 +159,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         index = widget.currentIndex()
         return data["values"][index]["value"]
 
-    @staticmethod
-    def _get_value_from_line_edit(data: Dict):
+    def _get_value_from_line_edit(self, data: Dict):
         """
         Method gets value from line edit.
         :param data: dictionary with line edit.
@@ -171,7 +167,8 @@ class MeasurerSettingsWindow(qt.QDialog):
         """
 
         widget = data["widget"]
-        return widget.text()
+        text = widget.text()
+        return self._process_line_edit(data, text)
 
     @staticmethod
     def _get_value_from_radio(data):
@@ -218,30 +215,34 @@ class MeasurerSettingsWindow(qt.QDialog):
             self.buttonBox.rejected.connect(self.reject)
             v_box.addWidget(self.buttonBox)
         else:
+            self.setWindowTitle(qApp.translate("t", "Настройки для устройства"))
             v_box.addWidget(qt.QLabel(qApp.translate("t", "Нет настроек")))
         self.adjustSize()
         self.setLayout(v_box)
 
     @staticmethod
-    def _process_line_edit(data: Dict, line_edit: qt.QLineEdit,
-                           text: str):
+    def _process_line_edit(data: Dict, text: str) -> float:
         """
-        Method processes changing the text in the line edit.
-        :param data: data for parameter for which line edit is assigned.
-        :param line_edit: line edit;
+        Method processes the text in the line edit.
+        :param data: data for parameter for which line edit is assigned;
         :param text: text in line edit.
+        :return: number in line edit.
         """
 
         if not text:
-            return
+            return None
         convertor = get_convertor(data)
         min_value = convertor(data["min"])
         max_value = convertor(data["max"])
-        value = convertor(text)
+        try:
+            value = convertor(text)
+        except ValueError:
+            return None
         if min_value > value:
-            line_edit.setText(str(min_value))
+            value = min_value
         elif max_value < value:
-            line_edit.setText(str(max_value))
+            value = max_value
+        return value
 
     def set_parameters(self):
         """

@@ -3,91 +3,91 @@
     "frequency": [
       {
         "name": "1hz",
-        "value": [1, 100],
+        "value": [1, 197],
         "label_ru": "1 Гц",
         "label_en": "1 Hz"
       },
       {
         "name": "5hz",
-        "value": [5, 500],
+        "value": [5, 816],
         "label_ru": "5 Гц",
         "label_en": "5 Hz"
       },
       {
         "name": "10hz",
-        "value": [10, 1000],
+        "value": [10, 1750],
         "label_ru": "10 Гц",
         "label_en": "10 Hz"
       },
       {
         "name": "50hz",
-        "value": [50, 5000],
+        "value": [50, 12254],
         "label_ru": "50 Гц",
         "label_en": "50 Hz"
       },
       {
         "name": "100hz",
-        "value": [100, 10000],
+        "value": [100, 12254],
         "label_ru": "100 Гц",
         "label_en": "100 Hz"
       },
       {
         "name": "400hz",
-        "value": [400, 40000],
+        "value": [400, 49019],
         "label_ru": "400 Гц",
         "label_en": "400 Hz"
       },
       {
         "name": "1.5khz",
-        "value": [1500, 150000],
+        "value": [1500, 196078],
         "label_ru": "1.5 кГц",
         "label_en": "1.5 kHz"
       },
       {
         "name": "6khz",
-        "value": [6000, 600000],
+        "value": [6000, 787401],
         "label_ru": "6 кГц",
         "label_en": "6 kHz"
       },
       {
         "name": "25khz",
-        "value": [25000, 2500000],
+        "value": [25000, 3225806],
         "label_ru": "25 кГц",
         "label_en": "25 kHz"
       },
       {
         "name": "100khz",
-        "value": [100000, 10000000],
+        "value": [100000, 14285714],
         "label_ru": "100 кГц",
         "label_en": "100 kHz"
       },
       {
         "name": "400khz",
-        "value": [400000, 40000000],
+        "value": [400000, 100000000],
         "label_ru": "400 кГц",
         "label_en": "400 kHz"
       },
       {
         "name": "1.5mhz",
-        "value": [1500000, 150000000],
+        "value": [1500000, 100000000],
         "label_ru": "1.5 МГц",
         "label_en": "1.5 MHz"
       },
       {
         "name": "3mhz",
-        "value": [3000000, 300000000],
+        "value": [3000000, 100000000],
         "label_ru": "3 МГц",
         "label_en": "3 МHz"
       },
       {
         "name": "6mhz",
-        "value": [6000000, 600000000],
+        "value": [6000000, 100000000],
         "label_ru": "6 МГц",
         "label_en": "6 MHz"
       },
       {
         "name": "12mhz",
-        "value": [12000000, 1200000000],
+        "value": [12000000, 100000000],
         "label_ru": "12 МГц",
         "label_en": "12 MHz"
       }
@@ -174,10 +174,10 @@
         "label_en": "100 Ohm"
       },
       {
-        "name": "111.11ohm",
-        "value": 111.11,
-        "label_ru": "111.11 Ом",
-        "label_en": "111.11 Ohm"
+        "name": "111ohm",
+        "value": 111,
+        "label_ru": "111 Ом",
+        "label_en": "111 Ohm"
       },
       {
         "name": "200ohm",
