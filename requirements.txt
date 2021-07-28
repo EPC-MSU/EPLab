@@ -1,6 +1,7 @@
--e hg+https://hg.ximc.ru/eyepoint/epcore@t-48786#egg=epcore
-hg+https://hg.ximc.ru/eyepoint/ivviewer@Version0.1.7#egg=ivviewer
+hg+https://hg.ximc.ru/eyepoint/epcore@0de54ddcbc33#egg=epcore
+hg+https://hg.ximc.ru/eyepoint/ivviewer@54981e72958e#egg=ivviewer
 git+https://github.com/EPC-MSU/board-view@Version0.1.1#egg=boardview
 epsound==0.0.13
 PyQt5<=5.15.0
 PyQt5-stubs
+pyserial==3.5
