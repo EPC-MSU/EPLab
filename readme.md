@@ -147,19 +147,31 @@ venv/bin/python3 main.py xmlrpc:172.16.3.213 --ref virtualasa --config eplab_asa
 
 Для запуска ПО для работы с устройством ASA можно использовать скрипт `run_asa.sh`, в котором нужно прописать IP адрес сервера:
 
+```
+bash run_asa.sh
+```
+
 ## Запуск тестов в Windows
 
+Для запуска тестов нужно выполнить скрипт `testall.bat`:
+
 ```
-venv\Scripts\python -m unittest discover -s tests -p "test_*.py"
+testall.bat
 ```
 
 ## Запуск тестов в Linux
 
+Для запуска тестов нужно выполнить скрипт `testall.sh`:
 
+```
+bash testall.sh
+```
 
 ## Дополнительно
 
 Файл платы для тестов можно загрузить из папки  `tests\test_data\eyepoint_calibration_board`.
 
 Чтобы сконвертировать файлы плат, сделанные с помощью EyePoint Px, можно воспользоваться конвертером, который находится в модуле `epcore.utils`.
+
+Для работы с ASA нужно запустить сервер версии 4.2.7.
 
