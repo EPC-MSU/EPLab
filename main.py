@@ -65,12 +65,9 @@ def launch_eplab(app: QApplication, args):
         # But for better user experience we will add single virtual IVM.
         ivm_1 = IVMeasurerVirtual()
         measurers.append(ivm_1)
-
-    if len(measurers) == 2:
-
+    elif len(measurers) == 2:
         # Reorder measurers according to their addresses in USB hubs tree
         measurers = sort_devices_by_usb_numbers(measurers)
-
         # Reorder measurers according to their ranks if needed.
         # We swap IVMs only if both ranks are set correctly.
         # If ranks are not set order should be the same to the order of cmd args.
@@ -132,8 +129,8 @@ class ErrorWindow(QMainWindow):
 
 def start_err_app(app: QApplication, error: str = "", trace_back: str = ""):
     print(error)
-    ex = ErrorWindow(error, trace_back)
-    ex.show()
+    error_window = ErrorWindow(error, trace_back)
+    error_window.show()
     app.exec_()
 
 
@@ -151,6 +148,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     try:
         launch_eplab(app, args)
-    except Exception as e:
-        start_err_app(app, error=str(e),
+    except Exception as exc:
+        start_err_app(app, error=str(exc),
                       trace_back="".join(traceback.format_exception(*sys.exc_info())))

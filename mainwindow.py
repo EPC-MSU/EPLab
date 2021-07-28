@@ -1,4 +1,9 @@
+"""
+File with class for main window of application.
+"""
+
 import os
+import webbrowser
 from datetime import datetime
 from platform import system
 from typing import Dict
@@ -10,21 +15,21 @@ from PyQt5.QtWidgets import (QDialog, QFileDialog, QHBoxLayout, QLabel, QLineEdi
                              QMainWindow, QMessageBox, QPushButton, QRadioButton,
                              QVBoxLayout, QWidget)
 import epcore.filemanager as epfilemanager
+from epcore.elements import MeasurementSettings, Board, Pin, Element, IVCurve
 from epcore.measurementmanager import MeasurementSystem, MeasurementPlan
 from epcore.measurementmanager.utils import Searcher
-from epcore.elements import MeasurementSettings, Board, Pin, Element, IVCurve
 from epcore.measurementmanager.ivc_comparator import IVCComparator
 from epcore.product import EPLab
 from ivviewer import Viewer as IVViewer
 from boardwindow import BoardWidget
-from score import ScoreWrapper
-from version import Version
-from player import SoundPlayer
 from common import WorkMode, DeviceErrorsHandler
 from language import Language
+from player import SoundPlayer
+from score import ScoreWrapper
 from settings.settings import Settings
 from settings.settingswindow import SettingsWindow, LowSettingsPanel
 from utils import read_settings_auto, save_settings_auto
+from version import Version
 
 
 def show_exception(msg_title: str, msg_text: str, exc: str = ""):
@@ -349,7 +354,6 @@ class EPLabWindow(QMainWindow):
     def _about_product_message(self):
         def msgbtn(i):
             if i.text() == "Перейти" or i.text() == "Go":
-                import webbrowser
                 webbrowser.open_new_tab("http://eyepoint.physlab.ru")
 
         msg = QMessageBox()

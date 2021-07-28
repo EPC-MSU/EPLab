@@ -13,14 +13,19 @@ _FILENAME_FOR_AUTO_SETTINGS = "eplab_settings_for_auto_save_and_read.ini"
 
 
 def read_json(path: Optional[str] = None) -> Optional[Dict]:
+    """
+    Function reads file with content in json format.
+    :param path: path to file.
+    :return: content in json format.
+    """
+
     if not path:
         return None
-
-    with open(path, "r") as file:
+    with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
 
 
-def get_port(url) -> str:
+def get_port(url) -> Optional[str]:
     """
     Functions returns port name from URL.
     :return: port.
@@ -36,7 +41,7 @@ def get_port(url) -> str:
     return port[0]
 
 
-def find_address_in_usb_hubs_tree(url: str) -> str:
+def find_address_in_usb_hubs_tree(url: str) -> Optional[str]:
     """
     Function finds address of given URL in USB hubs tree.
     :param url: URL of device.
