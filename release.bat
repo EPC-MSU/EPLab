@@ -22,6 +22,8 @@ if %target_platform%==32 venv\Scripts\pyinstaller main.py ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\asa10\libasa-win32\libxmlrpc_xmltok.dll;." ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm02\ivm-win32\ivm.dll;epcore\ivmeasurer\ivm02" ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm10\ivm-win32\ivm.dll;epcore\ivmeasurer\ivm10" ^
+--add-data "venv\Lib\site-packages\epcore\ivmeasurer\ASA_device_settings.json;epcore\ivmeasurer" ^
+--add-data "venv\Lib\site-packages\epcore\ivmeasurer\EyePoint_virtual_device_settings.json;epcore\ivmeasurer" ^
 --add-data "venv\Lib\site-packages\epcore\doc\p10_elements.schema.json;epcore\doc" ^
 --add-data "venv\Lib\site-packages\epcore\doc\p10_elements_2.schema.json;epcore\doc" ^
 --add-data "venv\Lib\site-packages\epcore\doc\ufiv.schema.json;epcore\doc" ^
@@ -38,6 +40,7 @@ if %target_platform%==32 venv\Scripts\pyinstaller main.py ^
 if %target_platform%==64 venv\Scripts\pyinstaller main.py ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm02\ivm-win64\ivm.dll;epcore\ivmeasurer\ivm02" ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm10\ivm-win64\ivm.dll;epcore\ivmeasurer\ivm10" ^
+--add-data "venv\Lib\site-packages\epcore\ivmeasurer\EyePoint_virtual_device_settings.json;epcore\ivmeasurer" ^
 --add-data "venv\Lib\site-packages\epcore\doc\p10_elements.schema.json;epcore\doc" ^
 --add-data "venv\Lib\site-packages\epcore\doc\p10_elements_2.schema.json;epcore\doc" ^
 --add-data "venv\Lib\site-packages\epcore\doc\ufiv.schema.json;epcore\doc" ^
