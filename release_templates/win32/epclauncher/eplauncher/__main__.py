@@ -10,9 +10,7 @@ if __name__ == "__main__":
 
     logging.info("Get launch info")
     launch_info = get_launch_info_from_config()
-
     logging.info("Get command from existing file")
-
     launch_info.command = get_command_from_file()
 
     logging.info("Validate command")
