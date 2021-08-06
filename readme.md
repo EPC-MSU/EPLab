@@ -4,7 +4,7 @@
 
 ## Установка в Windows
 
-1. Установить MSVC 2013 redistributable (разрядность должна совпадать с разрядностью Python). Можно скачать по ссылке https://www.microsoft.com/en-us/download/details.aspx?id=40784.
+1. Установить MSVC 2013 redistributable и MSVC 2015 redistributable (разрядность должна совпадать с разрядностью Python). Можно скачать по ссылкам https://www.microsoft.com/en-us/download/details.aspx?id=40784 и https://www.microsoft.com/ru-ru/download/details.aspx?id=48145.
 
 2. Установить зависимости для Python, запустив скрипт `rebuild_venv.bat`:
 
