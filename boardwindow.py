@@ -1,10 +1,10 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
-from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtCore import QPointF
 from typing import Optional
+from PIL import Image
+from PyQt5.QtCore import QPointF
+from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from boardview.BoardViewWidget import BoardView
 from epcore.measurementmanager import MeasurementPlan
-from PIL import Image
 
 
 def pil_to_pixmap(im):

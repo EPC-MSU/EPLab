@@ -820,12 +820,11 @@ class EPLabWindow(QMainWindow):
             os.mkdir(os.path.join(self.default_path, "Reference"))
         dialog = QFileDialog()
         filename = dialog.getSaveFileName(
-            self, qApp.translate("t", "Сохранить плату"),
-            filter="UFIV Archived File (*.uzf)",
+            self, qApp.translate("t", "Сохранить плату"), filter="UFIV Archived File (*.uzf)",
             directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
         if filename:
-            self._current_file_path = epfilemanager.save_board_to_ufiv(
-                filename, self._measurement_plan)
+            self._current_file_path = epfilemanager.save_board_to_ufiv(filename,
+                                                                       self._measurement_plan)
 
     @pyqtSlot()
     def _on_save_board(self):
@@ -837,30 +836,28 @@ class EPLabWindow(QMainWindow):
             return
         if not self._current_file_path:
             return self._on_save_board_as()
-        self._current_file_path = epfilemanager.save_board_to_ufiv(
-            self._current_file_path, self._measurement_plan)
+        self._current_file_path = epfilemanager.save_board_to_ufiv(self._current_file_path,
+                                                                   self._measurement_plan)
 
     @pyqtSlot()
     def _on_load_board(self):
         """
         "Load board" button handler.
         """
+
         dialog = QFileDialog()
         filename = dialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
                                           filter="Board Files (*.json *.uzf)")[0]
         if filename:
             try:
-                board = epfilemanager.load_board_from_ufiv(
-                    filename, auto_convert_p10=True)
+                board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
             except Exception as exc:
-                show_exception(
-                    qApp.translate("t", "Ошибка"),
-                    qApp.translate("t", "Формат файла не подходит"), str(exc))
+                show_exception(qApp.translate("t", "Ошибка"),
+                               qApp.translate("t", "Формат файла не подходит"), str(exc))
                 return
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
             # New workspace will be created here
             self._board_window.set_board(self._measurement_plan)
-
             self._update_current_pin()
             self._open_board_window_if_needed()
 
@@ -869,6 +866,7 @@ class EPLabWindow(QMainWindow):
         """
         "Load board image" button handler.
         """
+
         dialog = QFileDialog()
         filename = dialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
                                           filter="Image Files (*.png *.jpg *.bmp)")[0]
