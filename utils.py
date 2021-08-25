@@ -119,10 +119,10 @@ def read_settings_auto(product: EPLab) -> Union[MeasurementSettings, None]:
     options = _get_options_from_config(config["DEFAULT"])
     if options is None:
         return None
-    settings = MeasurementSettings(0, 0, 0, 0)
+    settings = MeasurementSettings(-1, -1, -1, -1)
     settings = product.options_to_settings(options, settings)
-    if 0 in (settings.probe_signal_frequency, settings.sampling_rate,
-             settings.max_voltage, settings.internal_resistance):
+    if -1 in (settings.probe_signal_frequency, settings.sampling_rate,
+              settings.max_voltage, settings.internal_resistance):
         return None
     return settings
 

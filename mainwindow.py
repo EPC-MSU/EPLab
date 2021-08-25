@@ -11,12 +11,10 @@ from platform import system
 from typing import Dict
 import numpy as np
 from PyQt5 import uic
-from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QPointF,
-                          Qt as QtC, QTimer)
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPointF, Qt as QtC, QTimer
 from PyQt5.QtGui import QIcon, QColor
-from PyQt5.QtWidgets import (QAction, QDialog, QFileDialog, QHBoxLayout,
-                             QLabel, QLineEdit, QMainWindow, QMessageBox,
-                             QPushButton, QRadioButton, QScrollArea,
+from PyQt5.QtWidgets import (QAction, QDialog, QFileDialog, QHBoxLayout, QLabel, QLineEdit,
+                             QMainWindow, QMessageBox, QPushButton, QRadioButton, QScrollArea,
                              QVBoxLayout, QWidget)
 import epcore.filemanager as epfilemanager
 from epcore.elements import MeasurementSettings, Board, Pin, Element, IVCurve
@@ -118,21 +116,6 @@ class EPLabWindow(QMainWindow):
         self._reset_board()
         self._board_window.set_board(self._measurement_plan)
 
-        self._option_buttons = {
-            EPLab.Parameter.frequency: dict(),
-            EPLab.Parameter.voltage: dict(),
-            EPLab.Parameter.sensitive: dict()
-        }
-        # Radio buttons for frequency selection
-        scroll_area = self._fill_options_widget(EPLab.Parameter.frequency)
-        self.freqLayout.layout().addWidget(scroll_area)
-        # Radio buttons for voltage selection
-        scroll_area = self._fill_options_widget(EPLab.Parameter.voltage)
-        self.voltageLayout.layout().addWidget(scroll_area)
-        # Radio buttons for current/resistor selection
-        scroll_area = self._fill_options_widget(EPLab.Parameter.sensitive)
-        self.currentLayout.layout().addWidget(scroll_area)
-
         self.num_point_line_edit = QLineEdit(self)
         self.num_point_line_edit.setFixedWidth(40)
         self.num_point_line_edit.setEnabled(False)
@@ -180,9 +163,6 @@ class EPLabWindow(QMainWindow):
             for m in self._msystem.measurers:
                 m.open_device()
 
-        self._work_mode = None
-        self._change_work_mode(WorkMode.compare)  # default mode - compare two curves
-
         # Update plot settings at next measurement cycle (place settings here or None)
         self._settings_update_next_cycle = None
         # Set to True to skip next measured curves
@@ -197,17 +177,41 @@ class EPLabWindow(QMainWindow):
         # Set ui settings state to current device
         with self._device_errors_handler:
             settings = read_settings_auto(self._product)
+            print("Here settings ", settings)
             if settings is not None:
                 self._msystem.set_settings(settings)
             settings = self._msystem.get_settings()
-            options = self._product.settings_to_options(settings)
-            self._options_to_ui(options)
+            print("settings = ", settings)
+            # options = self._product.settings_to_options(settings)
+            # self._options_to_ui(options)
             self._adjust_plot_params(settings)
+
+        self._option_buttons = {
+            EPLab.Parameter.frequency: dict(),
+            EPLab.Parameter.voltage: dict(),
+            EPLab.Parameter.sensitive: dict()
+        }
+        # Radio buttons for frequency selection
+        scroll_area = self._fill_options_widget(EPLab.Parameter.frequency)
+        self.freqLayout.layout().addWidget(scroll_area)
+        # Radio buttons for voltage selection
+        scroll_area = self._fill_options_widget(EPLab.Parameter.voltage)
+        self.voltageLayout.layout().addWidget(scroll_area)
+        # Radio buttons for current/resistor selection
+        scroll_area = self._fill_options_widget(EPLab.Parameter.sensitive)
+        self.currentLayout.layout().addWidget(scroll_area)
+
+        self._work_mode = None
+        self._change_work_mode(WorkMode.compare)  # default mode - compare two curves
 
         self._update_current_pin()
         self._init_threshold()
 
         with self._device_errors_handler:
+            options = self._product.settings_to_options(settings)
+            print("options = ", options)
+            self._options_to_ui(options)
+            print("geeeeeeeeeee")
             self._msystem.trigger_measurements()
 
         self._current_file_path = None
@@ -234,12 +238,17 @@ class EPLabWindow(QMainWindow):
 
         lang = qApp.instance().property("language")
         v_box = QVBoxLayout()
-        for option in self._product.mparams[option_name].options:
+        available = self._product.parameters.get_available(self._msystem.get_settings())
+        # for option in self._product.mparams[option_name].options:
+        print("\n\navailable")
+        for option in available[option_name]:
+            print(option.label_ru)
             button = QRadioButton()
             v_box.addWidget(button)
             button.setText(option.label_ru if lang == Language.ru else option.label_en)
             button.clicked.connect(self._on_settings_btn_checked)
             self._option_buttons[option_name][option.name] = button
+        print("\n\n")
         widget = QWidget()
         widget.setLayout(v_box)
         scroll_area = QScrollArea()
@@ -257,8 +266,7 @@ class EPLabWindow(QMainWindow):
         for measurer in self._msystem.measurers:
             device_name = measurer.name
             action = QAction(device_name, self)
-            action.triggered.connect(partial(self._on_show_device_settings,
-                                             measurer))
+            action.triggered.connect(partial(self._on_show_device_settings, measurer))
             self.measurers_menu.addAction(action)
 
     @pyqtSlot()
@@ -314,30 +322,22 @@ class EPLabWindow(QMainWindow):
 
     def _change_work_mode(self, mode: WorkMode):
         self._player.set_work_mode(mode)
-
         if self._work_mode is mode:
             return
-
         # Comment is only for test and write mode
         self.line_comment_pin.setEnabled(mode is not WorkMode.compare)
-
         if mode is WorkMode.compare:
             # Remove reference curve in case we have only one IVMeasurer
             # in compare mode
             if len(self._msystem.measurers) < 2:
                 self._remove_ref_curve()
-
         # Drag allowed only in write mode
         self._board_window.workspace.allow_drag(mode is WorkMode.write)
-
         settings_enable = mode is not WorkMode.test  # Disable settings in test mode
-
         for group in self._option_buttons.values():
             for button in group.values():
                 button.setEnabled(settings_enable)
-
         self._work_mode = mode
-
         self._update_current_pin()
 
     def _open_board_window_if_needed(self):
@@ -994,19 +994,21 @@ class EPLabWindow(QMainWindow):
 
     def _set_msystem_settings(self, settings: MeasurementSettings):
         self._msystem.set_settings(settings)
-
         # Skip next measurement because it still have old settings
         self._skip_curve = True
-
         # When new curve will be received plot parameters will be adjusted
         self._settings_update_next_cycle = settings
 
+    @pyqtSlot(bool)
     def _on_settings_btn_checked(self, checked: bool):
         if checked:
             settings = self._msystem.get_settings()
+            print("old_settings = ", settings)
             old_settings = copy.deepcopy(settings)
             options = self._ui_to_options()
-            settings = self._product.options_to_settings(options, settings)
+            print("options to set = ", options)
+            settings = self._product.options_to_settings(options, settings, True)
+            print("new_settings ", settings)
             try:
                 self._set_msystem_settings(settings)
                 save_settings_auto(self._product, settings)

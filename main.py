@@ -97,8 +97,8 @@ class ErrorWindow(QMainWindow):
         exit_btn = QPushButton("OK",  self)
         error_lbl = QLabel(self)
         traceback_lbl = QLabel(self)
-        error_lbl.setText(error)
-        traceback_lbl.setText(trace_back)
+        error_lbl.setText(error[-500:])
+        traceback_lbl.setText(trace_back[-500:])
         self.v = QVBoxLayout(self.central_widget)
         self.v.addWidget(error_lbl)
         self.v.addWidget(traceback_lbl)
@@ -115,7 +115,7 @@ def start_err_app(app: QApplication, error: str = "", trace_back: str = ""):
     print(error)
     error_window = ErrorWindow(error, trace_back)
     error_window.show()
-    app.exec_()
+    app.exec()
 
 
 if __name__ == "__main__":
