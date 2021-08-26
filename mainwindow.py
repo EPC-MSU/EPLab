@@ -877,15 +877,15 @@ class EPLabWindow(QMainWindow):
             self._open_board_window_if_needed()
 
     @pyqtSlot()
-    def _update_curves(self, curves: Dict[str, IVCurve], settings=None):
+    def _update_curves(self, curves: Dict[str, IVCurve] = None,
+                       settings: MeasurementSettings = None):
         # TODO: let the function work with larger lists
         # Store last curves
-        if "test" in curves.keys():
-            self._test_curve = curves["test"]
-
-        if "ref" in curves.keys():
-            self._ref_curve = curves["ref"]
-
+        if curves is not None:
+            if "test" in curves.keys():
+                self._test_curve = curves["test"]
+            if "ref" in curves.keys():
+                self._ref_curve = curves["ref"]
         # Update plots
         if not self._hide_curve_test:
             self.test_curve_plot.set_curve(self._test_curve)
@@ -895,7 +895,6 @@ class EPLabWindow(QMainWindow):
             self.reference_curve_plot.set_curve(self._ref_curve)
         else:
             self.reference_curve_plot.set_curve(None)
-
         # Update score
         if self._ref_curve and self._test_curve:
             assert settings is not None
@@ -904,7 +903,8 @@ class EPLabWindow(QMainWindow):
             self._player.score_updated(score)
         else:
             self._score_wrapper.set_dummy_score()
-        self.plot_parameters(settings)
+        if settings is not None:
+            self.plot_parameters(settings)
 
     def plot_parameters(self, settings: MeasurementSettings):
         buttons = self._option_buttons[EPLab.Parameter.sensitive]
@@ -943,14 +943,15 @@ class EPLabWindow(QMainWindow):
         self.test_curve_plot.set_curve(None)
         # Draw text
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
-
         if self._msystem.reconnect():
             # Reconnection success!
             self._device_errors_handler.reset_error()
             self._iv_window.plot.clear_center_text()
             with self._device_errors_handler:
                 # Update current settings to reconnected device
-                settings = self._ui_to_settings()
+                options = self._ui_to_options()
+                settings = self._product.options_to_settings(options,
+                                                             MeasurementSettings(-1, -1, -1, -1))
                 self._set_msystem_settings(settings)
                 self._msystem.trigger_measurements()
 
@@ -959,19 +960,16 @@ class EPLabWindow(QMainWindow):
             # Get curves from devices
             curves = dict()
             curves["test"] = self._msystem.measurers[0].get_last_cached_iv_curve()
-
             if self._work_mode is WorkMode.compare and len(self._msystem.measurers) > 1:
                 # Display two current curves
                 curves["ref"] = self._msystem.measurers[1].get_last_cached_iv_curve()
             else:
                 # Reference curve will be read from measurement plan
                 pass
-
             if self._skip_curve:
                 self._skip_curve = False
             else:
-                self._update_curves(curves, settings=self._msystem.measurers[0].get_settings())
-
+                self._update_curves(curves, self._msystem.get_settings())
                 if self._settings_update_next_cycle:
                     # New curve with new settings - we must update plot parameters
                     self._adjust_plot_params(self._settings_update_next_cycle)
@@ -979,7 +977,6 @@ class EPLabWindow(QMainWindow):
                     # You need to redraw markers with new plot parameters
                     # (the scale of the plot has changed)
                     self._iv_window.plot.redraw_cursors()
-
             self._msystem.trigger_measurements()
 
     @pyqtSlot()
@@ -994,10 +991,8 @@ class EPLabWindow(QMainWindow):
 
     def _set_msystem_settings(self, settings: MeasurementSettings):
         self._msystem.set_settings(settings)
-
         # Skip next measurement because it still have old settings
         self._skip_curve = True
-
         # When new curve will be received plot parameters will be adjusted
         self._settings_update_next_cycle = settings
 
