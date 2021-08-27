@@ -103,6 +103,8 @@ class ErrorWindow(QMainWindow):
     Window with error message with traceback
     """
 
+    MAX_MESSAGE_LENGTH = 500
+
     def __init__(self, error: str, trace_back: str):
         super().__init__()
         self.init_ui(error, trace_back)
@@ -113,8 +115,8 @@ class ErrorWindow(QMainWindow):
         exit_btn = QPushButton("OK",  self)
         error_lbl = QLabel(self)
         traceback_lbl = QLabel(self)
-        error_lbl.setText(error)
-        traceback_lbl.setText(trace_back)
+        error_lbl.setText(error[-self.MAX_MESSAGE_LENGTH:])
+        traceback_lbl.setText(trace_back[-self.MAX_MESSAGE_LENGTH:])
         self.v = QVBoxLayout(self.central_widget)
         self.v.addWidget(error_lbl)
         self.v.addWidget(traceback_lbl)
