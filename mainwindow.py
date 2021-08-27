@@ -829,7 +829,7 @@ class EPLabWindow(QMainWindow):
         else:
             self.reference_curve_plot.set_curve(None)
         # Update score
-        if self._ref_curve and self._test_curve:
+        if self._ref_curve and self._test_curve and self._work_mode != WorkMode.write:
             assert settings is not None
             score = self._calculate_score(self._ref_curve, self._test_curve, settings)
             self._score_wrapper.set_score(score)
