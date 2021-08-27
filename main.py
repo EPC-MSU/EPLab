@@ -44,11 +44,14 @@ def launch_eplab(app: QApplication, args):
 
     measurers = []
     measurers_args = (args.test, args.ref)
+    virtual_already_has_been = False
     for measurer_arg in measurers_args:
         if measurer_arg == "virtual":
             measurer = IVMeasurerVirtual()
-            measurer.nominal = 1000
+            if virtual_already_has_been:
+                measurer.nominal = 1000
             measurers.append(measurer)
+            virtual_already_has_been = True
         elif measurer_arg == "virtualasa":
             measurer = IVMeasurerVirtualASA(defer_open=True)
             measurers.append(measurer)
