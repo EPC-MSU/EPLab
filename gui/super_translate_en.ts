@@ -254,7 +254,7 @@
     <message>
         <location filename="mainwindow.ui" line="581"/>
         <source>Сравнение</source>
-        <translation>Save</translation>
+        <translation>Comparison</translation>
     </message>
     <message>
         <location filename="pcmainwindow.ui" line="606"/>
