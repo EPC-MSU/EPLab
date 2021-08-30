@@ -25,7 +25,7 @@ This application failed to start because no Qt platform plugin could be initiali
 set QT_QPA_PLATFORM_PLUGIN_PATH=venv\Lib\site-packages\PyQt5\Qt\plugins\platforms
 ```
 
-Для работы нужно установить драйвер `ivm.inf` из папки `release_templates\win64\driver`.
+В зависимости от разрядности ОС для работы ПО нужно установить драйвер `ivm.inf` из папки `release_templates\win32\driver` или `release_templates\win64\driver`.
 
 ## Установка в Linux
 
@@ -54,9 +54,9 @@ export QT_DEBUG_PLUGINS=1
 sudo apt-get install --reinstall libxcb-xinerama0
 ```
 
-Также нужен доступ на hg.ximc.ru к репозиториям: epcore, ivviewer. Если при установке зависимостей через hg возникает ошибка авторизации, то нужно прописать в Hg логин и пароль от репозитория hg.ximc.ru. Это можно сделать через TortoiseHg, открыв любой репозиторий, перейдя во вкладку синхронизации (две стрелочки по кругу на верхней панели) и нажав на иконку с изображением замка (в середине страницы, слева от строки с адресом сервера). После этого нужно переоткрыть консоль.
+Также нужен доступ на `hg.ximc.ru` к репозиториям: `epcore`, `ivviewer`. Если при установке зависимостей через hg возникает ошибка авторизации, то нужно прописать в Hg логин и пароль от репозитория `hg.ximc.ru`. Это можно сделать через `TortoiseHg`, открыв любой репозиторий, перейдя во вкладку синхронизации (две стрелочки по кругу на верхней панели) и нажав на иконку с изображением замка (в середине страницы, слева от строки с адресом сервера). После этого нужно переоткрыть консоль.
 
-Если при подключении вахометров они не обнаруживаются , то стоит прописать в системе VID и PID устройства для драйвера виртуального COM-порта. 
+Если при подключении вахометров они не обнаруживаются, то стоит прописать в системе VID и PID устройства для драйвера виртуального COM-порта. 
 В Ubuntu это можно сделать так:
 
 ```
@@ -93,7 +93,7 @@ run_real.bat
 Чтобы запустить приложение для работы с сетевым вахометром ASA, нужно выполнить команду:
 
 ```
-venv\Scripts\python main.py xmlrpc:172.16.3.213 --ref virtualasa --config eplab_asa_options.json
+venv\Scripts\python main.py xmlrpc://172.16.3.213 --ref virtualasa --config eplab_asa_options.json
 ```
 
 Здесь предполагается, что:
@@ -136,7 +136,7 @@ bash run_real.sh
 Чтобы запустить приложение для работы с сетевым вахометром ASA, нужно выполнить команду:
 
 ```
-venv/bin/python3 main.py xmlrpc:172.16.3.213 --ref virtualasa --config eplab_asa_options.json
+venv/bin/python3 main.py xmlrpc://172.16.3.213 --ref virtualasa --config eplab_asa_options.json
 ```
 
 Здесь предполагается, что:
