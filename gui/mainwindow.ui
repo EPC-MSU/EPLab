@@ -172,6 +172,8 @@
     <property name="title">
      <string>Файл</string>
     </property>
+    <addaction name="connection_action"/>
+    <addaction name="separator"/>
     <addaction name="new_file_action"/>
     <addaction name="open_file_action"/>
     <addaction name="save_file_action"/>
@@ -679,6 +681,11 @@
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Скрыть канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="connection_action">
+   <property name="text">
+    <string>Подключение</string>
    </property>
   </action>
  </widget>
