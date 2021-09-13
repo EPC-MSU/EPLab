@@ -30,7 +30,8 @@ class SettingsWindow(QDialog):
         """
 
         super().__init__(parent=parent)
-        uic.loadUi(os.path.join("gui", "settings.ui"), self)
+        dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        uic.loadUi(os.path.join(dir_name, "gui", "settings.ui"), self)
         self.parent = parent
         self.auto_calibration_push_button.clicked.connect(parent.auto_calibrate)
         self.score_treshold_button_minus.clicked.connect(self._decrease_threshold)

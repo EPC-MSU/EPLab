@@ -18,7 +18,6 @@ def _check_config(file_name: str, log, port) -> str:
     :return: name of config file.
     """
 
-    file_name = os.curdir + "/" + file_name
     if not os.path.exists(file_name):
         _log_runtime(log, f"Try to open device on port {port.decode()}. Config file "
                           f"{file_name} not found:")

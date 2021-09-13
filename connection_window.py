@@ -4,6 +4,7 @@ File with class for dialog window to select devices for connection.
 
 import configparser
 import logging
+import os
 import re
 import select
 import socket
@@ -158,17 +159,19 @@ def find_urpc_ports(dev_type: str) -> list:
 
     config = configparser.ConfigParser()
     os_name = _get_platform()
-    config_name = "resources/{}/{}_config.ini".format(os_name, dev_type)
+    dir_name = os.path.dirname(os.path.abspath(__file__))
+    config_name = "{}/{}_config.ini".format(os_name, dev_type)
+    config_file = os.path.join(dir_name, "resources", config_name)
     try:
-        config.read(config_name)
+        config.read(config_file)
     except Exception:
-        logging.error("Cannot open %s", config_name)
+        logging.error("Cannot open %s", config_file)
         raise
     try:
         vid = config["Global"]["vid"]
         pid = config["Global"]["pid"]
     except Exception:
-        logging.error("Cannot read 'VID' and 'PID' fields from %s", config_name)
+        logging.error("Cannot read 'VID' and 'PID' fields from %s", config_file)
         raise
     serial_ports = _get_active_serial_ports()
     serial_ports = _filter_ports_by_vid_and_pid(serial_ports, vid, pid)
@@ -177,7 +180,7 @@ def find_urpc_ports(dev_type: str) -> list:
         device_name = _create_uri_name(port.device)
         device = lib.UrpcbaseDeviceHandle(device_name.encode(), True)
         try:
-            safe_opener.open_device_safely(device, config_name, lib._logging_callback)
+            safe_opener.open_device_safely(device, config_file, lib._logging_callback)
             ximc_ports.append(device_name)
         except RuntimeError:
             logging.error("%s is not XIMC controller", device_name)
@@ -365,9 +368,14 @@ class ConnectionWindow(qt.QDialog):
         Method initializes widgets in dialog window.
         """
 
-        uic.loadUi("gui/connection_window.ui", self)
+        dir_name = os.path.dirname(os.path.abspath(__file__))
+        ui_file_name = os.path.join(dir_name, "gui", "connection_window.ui")
+        uic.loadUi(ui_file_name, self)
         self.combo_boxes = self.combo_box_measurer_1, self.combo_box_measurer_2
         self.line_edits = self.line_edit_measurer_1, self.line_edit_measurer_2
+        if _get_platform() == "win64":
+            self.combo_box_measurer_type.clear()
+            self.combo_box_measurer_type.addItem("IVM10")
         self.combo_box_measurer_type.currentTextChanged.connect(self.init_available_ports)
         if self._initial_type is None:
             self._initial_type = MeasurerType.IVM10

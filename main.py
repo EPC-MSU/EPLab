@@ -92,7 +92,8 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="EyePoint Lab")
     parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual'"
                                       " for virtual mode)")
-    parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)")
+    parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)",
+                        nargs="?", default=None)
     parser.add_argument("--en", help="Use English version", action="store_true")
     parser.add_argument("--config", help="Path to specific EPLab config file", default=None)
     args = parser.parse_args()

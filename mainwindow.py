@@ -68,7 +68,10 @@ class EPLabWindow(QMainWindow):
 
         super().__init__()
         self._init_ui(product)
-        self.connect_devices(port_1, port_2)
+        if port_1 is None and port_2 is None:
+            self.disconnect_devices()
+        else:
+            self.connect_devices(port_1, port_2)
 
     @staticmethod
     def _clear_layout(layout: QLayout):
@@ -109,6 +112,7 @@ class EPLabWindow(QMainWindow):
         self._ref_curve = None
         self._test_curve = None
         self._current_file_path = None
+        self._score_wrapper.set_dummy_score()
 
     def _create_measurer_setting_actions(self):
         """
@@ -181,8 +185,11 @@ class EPLabWindow(QMainWindow):
         :param product:
         """
 
-        uic.loadUi("gui/mainwindow.ui", self)
-        self.setWindowIcon(QIcon("media/ico.png"))
+        dir_name = os.path.dirname(os.path.abspath(__file__))
+        ui_file_name = os.path.join(dir_name, "gui", "mainwindow.ui")
+        uic.loadUi(ui_file_name, self)
+        ico_file_name = os.path.join(dir_name, "media", "ico.png")
+        self.setWindowIcon(QIcon(ico_file_name))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
         self.setMinimumWidth(600)
         self.move(50, 50)
