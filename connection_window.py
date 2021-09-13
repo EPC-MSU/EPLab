@@ -4,26 +4,32 @@ File with class for dialog window to select devices for connection.
 
 import configparser
 import logging
+import re
 import select
 import socket
+import struct
 from datetime import datetime, timedelta
+from platform import system
 from typing import List, Optional, Tuple
 import psutil
 import PyQt5.QtWidgets as qt
 from PyQt5 import uic
-from PyQt5.QtCore import QCoreApplication as qApp, pyqtSignal, pyqtSlot, QObject, QRegExp
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp
 from PyQt5.QtGui import QRegExpValidator
 import serial
 import serial.tools.list_ports
 from epcore.ivmeasurer.measurerasa import IVMeasurerASA, IVMeasurerVirtualASA
 from epcore.ivmeasurer.measurerivm import IVMeasurerIVM10
 from epcore.ivmeasurer.virtual import IVMeasurerVirtual
-import safe_opener as safe_opener
+import safe_opener
 import urpcbase as lib
 from language import Language
 
 
 __all__ = ["ConnectionWindow"]
+
+
+IP_REG_EXP = r"^xmlrpc://((\d|\d\d|[0-1]\d\d|2[0-5][0-5])\.){3}(\d|\d\d|[0-1]\d\d|2[0-5][0-5])$"
 
 
 class MeasurerType:
@@ -32,7 +38,7 @@ class MeasurerType:
     """
 
     IVM10 = "IVM10"
-    IVM_VIRTUAL = "virtual"
+    IVM10_VIRTUAL = "virtual"
     ASA = "ASA"
     ASA_VIRTUAL = "virtualasa"
 
@@ -44,14 +50,72 @@ class MeasurerType:
         :return: general type of measurers.
         """
 
-        if cls.IVM10 in measurers_types or cls.IVM_VIRTUAL in measurers_types:
+        if cls.IVM10 in measurers_types or cls.IVM10_VIRTUAL in measurers_types:
             return cls.IVM10
         if cls.ASA in measurers_types or cls.ASA_VIRTUAL in measurers_types:
             return cls.ASA
         return None
 
+    @classmethod
+    def check_port_for_ivm10(cls, port: Optional[str]) -> bool:
+        """
+        Method checks if port can be of measurer of IVM10 type.
+        :param port: port.
+        :return: True if port can be of IVM10 measurer.
+        """
 
-def _get_active_serial_ports() -> list:
+        if system().lower() == "windows":
+            pattern = re.compile(r"^com:\\\\\.\\COM\d+$")
+        elif system().lower() == "linux":
+            pattern = re.compile(r"^com:///dev/tty/ttyACM\d+$")
+        else:
+            raise RuntimeError("Unexpected OS")
+        if port is None or (not pattern.match(port) and port != "virtual"):
+            return False
+        return True
+
+
+def _create_uri_name(port: str) -> str:
+    """
+    Function returns uri for port.
+    :param port: port.
+    :return: uri.
+    """
+
+    os_name = _get_platform()
+    if "win" in os_name:
+        return f"com:\\\\.\\{port}"
+    if os_name == "debian":
+        return f"com:///{port}"
+    raise RuntimeError("Unexpected OS")
+
+
+def _filter_ports_by_vid_and_pid(ports: List, vid: str, pid: str) -> list:
+    """
+    Function returns list of ports with specified VID and PID from given list.
+    :param ports: list of serial ports;
+    :param vid: desired VID as a hex string (example: "1CBC");
+    :param pid: desired PID as a hex string (example: "0007").
+    :return: list of ports.
+    """
+
+    filtered_ports = []
+    for port in ports:
+        try:
+            # Normal hwid string example:
+            # USB VID:PID=1CBC:0007 SER=7 LOCATION=1-4.1.1:x.0
+            vid_pid_info_block = port.hwid.split(" ")[1]
+            vid_pid = vid_pid_info_block.split("=")[1]
+            p_vid, p_pid = vid_pid.split(":")
+            if p_vid == vid and p_pid == pid:
+                filtered_ports.append(port)
+        except Exception:
+            # Some ports can have malformed information: simply ignore such devices
+            continue
+    return filtered_ports
+
+
+def _get_active_serial_ports() -> List:
     """
     Function returns lists of serial port names.
     :return: list of the serial ports available on the system.
@@ -69,75 +133,55 @@ def _get_active_serial_ports() -> list:
     return valid_ports
 
 
-def _filter_ports_by_vid_and_pid(ports: List, vid: str, pid: str) -> list:
+def _get_platform() -> Optional[str]:
     """
-    Function returns list of ports with specified vid and pid from given list.
-    :param ports: list of serial ports;
-    :param vid: desired vid as a hex string (example: "1CBC");
-    :param pid: desired vid as a hex string (example: "0007").
-    :return: list of ports.
+    Function returns name of OS.
+    :return: name of OS.
     """
 
-    filtered_ports = []
-    for port in ports:
-        try:
-            # Normal hwid string example:
-            # USB VID:PID=1CBC:0007 SER=7 LOCATION=1-4.1.1:x.0
-            p_vid_pid_info_block = port.hwid.split(" ")[1]
-            p_vid_pid = p_vid_pid_info_block.split("=")[1]
-            p_vid, p_pid = p_vid_pid.split(":")
-            if p_vid == vid and p_pid == pid:
-                filtered_ports.append(port)
-        except Exception:
-            # Some ports can have malformed information.
-            # We should simply ignore such devices.
-            continue
-    return filtered_ports
+    os_kind = system().lower()
+    if os_kind == "windows":
+        if 8 * struct.calcsize("P") == 32:
+            return "win32"
+        return "win64"
+    if os_kind == "linux":
+        return "debian"
+    raise RuntimeError("unexpected OS")
 
 
 def find_urpc_ports(dev_type: str) -> list:
     """
-    Function returns available com-ports for connect.
+    Function returns available COM-ports for connect.
+    :param dev_type: type of device that is connected to port.
     :return: list of ports.
     """
 
     config = configparser.ConfigParser()
-    config_name = "release_templates/win32/{}_config.ini".format(dev_type)
+    os_name = _get_platform()
+    config_name = "resources/{}/{}_config.ini".format(os_name, dev_type)
     try:
         config.read(config_name)
     except Exception:
-        logging.error("Cannot open {}".format(config_name))
+        logging.error("Cannot open %s", config_name)
         raise
     try:
         vid = config["Global"]["vid"]
         pid = config["Global"]["pid"]
     except Exception:
-        logging.error("Cannot read 'vid' and 'pid' fields from {}".format(config_name))
+        logging.error("Cannot read 'VID' and 'PID' fields from %s", config_name)
+        raise
     serial_ports = _get_active_serial_ports()
     serial_ports = _filter_ports_by_vid_and_pid(serial_ports, vid, pid)
     ximc_ports = []
     for port in serial_ports:
-        device_name = "com:\\\\.\\{}".format(port.device)
-        device = lib.UrpcbaseDeviceHandle(device_name.encode())
-        if device._handle is not None:
-            device.close()
+        device_name = _create_uri_name(port.device)
+        device = lib.UrpcbaseDeviceHandle(device_name.encode(), True)
         try:
-            safe_opener.open_device_safe(device, config_name, lib._logging_callback)
+            safe_opener.open_device_safely(device, config_name, lib._logging_callback)
             ximc_ports.append(device_name)
         except RuntimeError:
-            logging.error("{} is not XIMC controller".format(device_name))
-        device.close()
+            logging.error("%s is not XIMC controller", device_name)
     return ximc_ports
-
-
-def _check_asa(ip_address: str) -> bool:
-    """
-    Function checks if given IP address belongs to ASA device.
-    :param ip_address: IP address.
-    :return: True if IP address belongs to ASA device otherwise False.
-    """
-
-    return True
 
 
 def reveal_asa(timeout: float = None) -> List[str]:
@@ -147,7 +191,7 @@ def reveal_asa(timeout: float = None) -> List[str]:
     :return: list of IP addresses.
     """
 
-    waiting_time = 1.5
+    waiting_time = 1.0
     if timeout is None:
         timeout = waiting_time
     timeout = timedelta(seconds=timeout)
@@ -179,8 +223,7 @@ def reveal_asa(timeout: float = None) -> List[str]:
                                 ip_address = str(addr[0])
                                 ip_addresses.append(ip_address)
             except Exception:
-                print(f"Failed to update ASA: failed to bind to interface {iface_name}, "
-                      f"address {address.address}")
+                print(f"Failed to bind to interface {iface_name}, address {address.address}")
     return ip_addresses
 
 
@@ -195,12 +238,23 @@ class ConnectionWindow(qt.QDialog):
         """
 
         super().__init__(parent=parent)
-        lang = qApp.instance().property("language")
         self.parent = parent
+        lang = qApp.instance().property("language")
         self.lang = "ru" if lang == Language.ru else "en"
         self._urls = None
-        self.measurers_ports: list = []
+        self._initial_ports, self._initial_type = self._get_current_measurers_ports()
         self._init_ui()
+
+    @staticmethod
+    def _check_ip_address(ip_address: str) -> bool:
+        """
+        Method checks if given IP address is correct.
+        :return: True if IP address is correct.
+        """
+
+        if re.match(IP_REG_EXP, ip_address):
+            return True
+        return False
 
     def _get_current_measurers_ports(self) -> Tuple[List[str], str]:
         """
@@ -219,7 +273,7 @@ class ConnectionWindow(qt.QDialog):
             elif isinstance(measurer, IVMeasurerIVM10):
                 types[i_measurer] = MeasurerType.IVM10
             elif isinstance(measurer, IVMeasurerVirtual):
-                types[i_measurer] = MeasurerType.IVM_VIRTUAL
+                types[i_measurer] = MeasurerType.IVM10_VIRTUAL
             if measurer.url:
                 ports[i_measurer] = measurer.url
             else:
@@ -227,9 +281,8 @@ class ConnectionWindow(qt.QDialog):
         general_type = MeasurerType.get_general_measurers_type(types)
         return ports, general_type
 
-    @staticmethod
-    def _get_measurers_ports_ivm10(ports: list, port_1: str = None, port_2: str = None) ->\
-            Tuple[List[str], List[str]]:
+    def _get_ports_for_ivm10(self, ports: List, port_1: str = None, port_2: str = None) ->\
+            List[List[str]]:
         """
         Method returns lists of available ports for first and second measurers.
         :param ports: all available ports;
@@ -238,40 +291,29 @@ class ConnectionWindow(qt.QDialog):
         :return: lists of available ports for first and second measurers.
         """
 
-        if port_1 is None or "xmlrpc://" in port_1:
-            ports_for_first = []
-        else:
-            ports_for_first = [port_1]
-        if port_2 is None or "xmlrpc://" in port_2:
-            ports_for_second = []
-        else:
-            ports_for_second = [port_2]
-        if len(ports) > 0:
-            if port_1 in ports and port_1 != MeasurerType.IVM_VIRTUAL:
-                ports.remove(port_1)
-            if port_2 in ports and port_2 != MeasurerType.IVM_VIRTUAL:
-                ports.remove(port_2)
-            ports_for_first = [*ports_for_first, *ports]
-            ports_for_second = [*ports_for_second, *ports]
-        if MeasurerType.IVM_VIRTUAL not in ports_for_first:
-            ports_for_first.append(MeasurerType.IVM_VIRTUAL)
-        if MeasurerType.IVM_VIRTUAL not in ports_for_second:
-            ports_for_second.append(MeasurerType.IVM_VIRTUAL)
-        port_1 = ports_for_first[0]
-        if port_1 != MeasurerType.IVM_VIRTUAL:
-            try:
-                ports_for_second.remove(port_1)
-            except ValueError:
-                pass
-        port_2 = ports_for_second[0]
-        if port_2 != MeasurerType.IVM_VIRTUAL:
-            try:
-                ports_for_first.remove(port_2)
-            except ValueError:
-                pass
-        if "None" not in ports_for_second:
-            ports_for_second.append("None")
-        return ports_for_first, ports_for_second
+        selected_ports = port_1, port_2
+        ports_for_first_and_second = []
+        for port in selected_ports:
+            ports_list = [port] if MeasurerType.check_port_for_ivm10(port) else []
+            ports_for_first_and_second.append(ports_list)
+            if len(ports) > 0:
+                if port in ports and port != MeasurerType.IVM10_VIRTUAL:
+                    ports.remove(port)
+        for index in range(2):
+            ports_for_first_and_second[index] = [*ports_for_first_and_second[index], *ports]
+            if MeasurerType.IVM10_VIRTUAL not in ports_for_first_and_second[index]:
+                ports_for_first_and_second[index].append(MeasurerType.IVM10_VIRTUAL)
+            if selected_ports[index] not in (MeasurerType.IVM10_VIRTUAL, "None"):
+                try:
+                    ports_for_first_and_second[index - 1].remove(selected_ports[index])
+                except ValueError:
+                    pass
+            for port in self._initial_ports:
+                if port not in [*selected_ports, None] and MeasurerType.check_port_for_ivm10(port):
+                    ports_for_first_and_second[index].append(port)
+            ports_for_first_and_second[index] = sorted(ports_for_first_and_second[index])
+            ports_for_first_and_second[index].append("None")
+        return ports_for_first_and_second
 
     def _init_asa(self, url_1: str = None, url_2: str = None):
         """
@@ -282,7 +324,7 @@ class ConnectionWindow(qt.QDialog):
         """
 
         if self._urls is None:
-            self._urls = [f"xmlrpc://{host}" for host in reveal_asa()]
+            self._urls = [f"xmlrpc://{host}" for host in reveal_asa(0.05)]
             self._urls.append("Свой вариант")
         urls_for_first = self._urls
         urls_for_second = "virtualasa", "None"
@@ -294,6 +336,7 @@ class ConnectionWindow(qt.QDialog):
             current_url = "None" if urls[index] is None else urls[index]
             if current_url in urls_for_first_and_second[index]:
                 combo_box.setCurrentText(current_url)
+            self.line_edits[index].setText("xmlrpc://")
             self.line_edits[index].setVisible(current_url == "Свой вариант")
 
     def _init_ivm10(self, port_1: str = None, port_2: str = None):
@@ -304,16 +347,18 @@ class ConnectionWindow(qt.QDialog):
         :param port_2: selected port for second measurer.
         """
 
+        ports = [port_1, port_2]
+        for index, port in enumerate(ports):
+            if not MeasurerType.check_port_for_ivm10(port):
+                ports[index] = "None"
         available_ports = find_urpc_ports("ivm")
-        ports_for_first_and_second = self._get_measurers_ports_ivm10(
-            available_ports, port_1, port_2)
-        ports = port_1, port_2
+        ports_for_first_and_second = self._get_ports_for_ivm10(
+            available_ports, *ports)
         for index, combo_box in enumerate(self.combo_boxes):
             combo_box.clear()
             combo_box.addItems(ports_for_first_and_second[index])
-            current_port = "None" if ports[index] is None else ports[index]
-            if current_port in ports_for_first_and_second[index]:
-                combo_box.setCurrentText(current_port)
+            if ports[index] in ports_for_first_and_second[index]:
+                combo_box.setCurrentText(ports[index])
 
     def _init_ui(self):
         """
@@ -324,18 +369,16 @@ class ConnectionWindow(qt.QDialog):
         self.combo_boxes = self.combo_box_measurer_1, self.combo_box_measurer_2
         self.line_edits = self.line_edit_measurer_1, self.line_edit_measurer_2
         self.combo_box_measurer_type.currentTextChanged.connect(self.init_available_ports)
-        self.measurers_ports, general_measurers_type = self._get_current_measurers_ports()
-        if general_measurers_type is None:
-            general_measurers_type = MeasurerType.IVM10
-        self.combo_box_measurer_type.setCurrentText(general_measurers_type)
+        if self._initial_type is None:
+            self._initial_type = MeasurerType.IVM10
+        self.combo_box_measurer_type.setCurrentText(self._initial_type)
         for combo_box in self.combo_boxes:
             combo_box.textActivated.connect(self.change_port)
-        reg_exp = QRegExp(r"^xmlrpc://((\d|\d\d|[0-1]\d\d|2[0-5][0-5])\.){3}(\d|\d\d|[0-1]\d\d|2[0-5][0-5])$")
-        validator = QRegExpValidator(reg_exp, self)
+        validator = QRegExpValidator(QRegExp(IP_REG_EXP), self)
         for line_edit in self.line_edits:
             line_edit.setVisible(False)
             line_edit.setValidator(validator)
-        self.init_available_ports(general_measurers_type)
+        self.init_available_ports(self._initial_type)
         self.button_connect.clicked.connect(self.connect)
         self.button_disconnect.clicked.connect(self.disconnect)
         self.button_cancel.clicked.connect(self.close)
@@ -365,12 +408,15 @@ class ConnectionWindow(qt.QDialog):
                 port = combo_box.currentText()
                 if port == "Свой вариант":
                     port = self.line_edits[index].text()
-                    if not port:
+                    if not self._check_ip_address(port):
                         return
                 ports.append(port)
         else:
             ports = [combo_box.currentText() for combo_box in self.combo_boxes]
-        self.parent.connect_devices(*ports, self.combo_box_measurer_type.currentText())
+        if len(set(ports)) == 1 and "None" in ports:
+            self.disconnect()
+            return
+        self.parent.connect_devices(*ports)
         self.close()
 
     @pyqtSlot()
@@ -385,11 +431,11 @@ class ConnectionWindow(qt.QDialog):
     @pyqtSlot(str)
     def init_available_ports(self, general_measurers_type: str):
         """
-        Slot initializes avaivable ports for first and second measurers.
+        Slot initializes available ports for first and second measurers.
         :param general_measurers_type: general type for measurers.
         """
 
         if general_measurers_type == MeasurerType.IVM10:
-            self._init_ivm10(*self.measurers_ports)
+            self._init_ivm10(*self._initial_ports)
         elif general_measurers_type == MeasurerType.ASA:
-            self._init_asa(*self.measurers_ports)
+            self._init_asa(*self._initial_ports)

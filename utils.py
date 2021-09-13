@@ -59,7 +59,8 @@ def find_address_in_usb_hubs_tree(url: str) -> Optional[str]:
         if port in existing_port.device:
             hub = re.findall(r"LOCATION=(?P<hub>.+)", existing_port.hwid)
             if not hub:
-                raise ValueError("No hub found in " + existing_port.hwid)
+                return None
+                # raise ValueError("No hub found in " + existing_port.hwid)
             return hub[0]
     return None
 

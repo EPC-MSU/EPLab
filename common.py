@@ -1,6 +1,6 @@
-from enum import Enum, auto
-from epcore.ivmeasurer.ivm10.ivm import UrpcDeviceUndefinedError
+from enum import auto, Enum
 from epcore.ivmeasurer.asa10.asa import AsaConnectionError, AsaServerResponseError
+from epcore.ivmeasurer.ivm10.ivm import UrpcDeviceUndefinedError
 
 
 class WorkMode(Enum):

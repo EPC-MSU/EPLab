@@ -1,0 +1,224 @@
+{
+  "options": {
+    "frequency": [
+      {
+        "name": "1hz",
+        "value": [1, 197],
+        "label_ru": "1 Гц",
+        "label_en": "1 Hz"
+      },
+      {
+        "name": "5hz",
+        "value": [5, 816],
+        "label_ru": "5 Гц",
+        "label_en": "5 Hz"
+      },
+      {
+        "name": "10hz",
+        "value": [10, 1750],
+        "label_ru": "10 Гц",
+        "label_en": "10 Hz"
+      },
+      {
+        "name": "50hz",
+        "value": [50, 12254],
+        "label_ru": "50 Гц",
+        "label_en": "50 Hz"
+      },
+      {
+        "name": "100hz",
+        "value": [100, 12254],
+        "label_ru": "100 Гц",
+        "label_en": "100 Hz"
+      },
+      {
+        "name": "400hz",
+        "value": [400, 49019],
+        "label_ru": "400 Гц",
+        "label_en": "400 Hz"
+      },
+      {
+        "name": "1.5khz",
+        "value": [1500, 196078],
+        "label_ru": "1.5 кГц",
+        "label_en": "1.5 kHz"
+      },
+      {
+        "name": "6khz",
+        "value": [6000, 787401],
+        "label_ru": "6 кГц",
+        "label_en": "6 kHz"
+      },
+      {
+        "name": "25khz",
+        "value": [25000, 3225806],
+        "label_ru": "25 кГц",
+        "label_en": "25 kHz"
+      },
+      {
+        "name": "100khz",
+        "value": [100000, 14285714],
+        "label_ru": "100 кГц",
+        "label_en": "100 kHz"
+      },
+      {
+        "name": "400khz",
+        "value": [400000, 100000000],
+        "label_ru": "400 кГц",
+        "label_en": "400 kHz"
+      },
+      {
+        "name": "1.5mhz",
+        "value": [1500000, 100000000],
+        "label_ru": "1.5 МГц",
+        "label_en": "1.5 MHz"
+      },
+      {
+        "name": "3mhz",
+        "value": [3000000, 100000000],
+        "label_ru": "3 МГц",
+        "label_en": "3 МHz"
+      },
+      {
+        "name": "6mhz",
+        "value": [6000000, 100000000],
+        "label_ru": "6 МГц",
+        "label_en": "6 MHz"
+      },
+      {
+        "name": "12mhz",
+        "value": [12000000, 100000000],
+        "label_ru": "12 МГц",
+        "label_en": "12 MHz"
+      }
+    ],
+    "voltage": [
+      {
+        "name": "1v",
+        "value": 1,
+        "label_ru": "1 В",
+        "label_en": "1 V"
+      },
+      {
+        "name": "1.5v",
+        "value": 1.5,
+        "label_ru": "1.5 В",
+        "label_en": "1.5 V"
+      },
+      {
+        "name": "2v",
+        "value": 2,
+        "label_ru": "2 В",
+        "label_en": "2 V"
+      },
+      {
+        "name": "2.5v",
+        "value": 2.5,
+        "label_ru": "2.5 В",
+        "label_en": "2.5 V"
+      },
+      {
+        "name": "3v",
+        "value": 3,
+        "label_ru": "3 В",
+        "label_en": "3 V"
+      },
+      {
+        "name": "4v",
+        "value": 4,
+        "label_ru": "4 В",
+        "label_en": "4 V"
+      },
+      {
+        "name": "4.5v",
+        "value": 4.5,
+        "label_ru": "4.5 В",
+        "label_en": "4.5 V"
+      },
+      {
+        "name": "5v",
+        "value": 5,
+        "label_ru": "5 В",
+        "label_en": "5 V"
+      },
+      {
+        "name": "6v",
+        "value": 6,
+        "label_ru": "6 В",
+        "label_en": "6 V"
+      },
+      {
+        "name": "6.7v",
+        "value": 6.7,
+        "label_ru": "6.7 В",
+        "label_en": "6.7 V"
+      },
+      {
+        "name": "7.5v",
+        "value": 7.5,
+        "label_ru": "7.5 В",
+        "label_en": "7.5 V"
+      },
+      {
+        "name": "10v",
+        "value": 10,
+        "label_ru": "10 В",
+        "label_en": "10 V"
+      }
+    ],
+    "sensitive": [
+      {
+        "name": "100ohm",
+        "value": 100,
+        "label_ru": "100 Ом",
+        "label_en": "100 Ohm"
+      },
+      {
+        "name": "111ohm",
+        "value": 111,
+        "label_ru": "111 Ом",
+        "label_en": "111 Ohm"
+      },
+      {
+        "name": "200ohm",
+        "value": 200,
+        "label_ru": "200 Ом",
+        "label_en": "200 Ohm"
+      },
+      {
+        "name": "300ohm",
+        "value": 300,
+        "label_ru": "300 Ом",
+        "label_en": "300 Ohm"
+      },
+      {
+        "name": "400ohm",
+        "value": 400,
+        "label_ru": "400 Ом",
+        "label_en": "400 Ohm"
+      },
+      {
+        "name": "670ohm",
+        "value": 670,
+        "label_ru": "670 Ом",
+        "label_en": "670 Ohm"
+      },
+      {
+        "name": "1000ohm",
+        "value": 1000,
+        "label_ru": "1000 Ом",
+        "label_en": "1000 Ohm"
+      },
+      {
+        "name": "2000ohm",
+        "value": 2000,
+        "label_ru": "2000 Ом",
+        "label_en": "2000 Ohm"
+      }
+    ]
+  },
+  "plot_parameters": {
+    "test_color": "#0000FF",
+    "ref_color": "#FF0000"
+  }
+}

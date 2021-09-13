@@ -42,7 +42,7 @@ def launch_eplab(app: QApplication, args: Namespace):
         app.setProperty("language", Language.en)
     else:
         app.setProperty("language", Language.ru)
-    window = EPLabWindow(EPLab(args.config), args.test, args.ref)
+    window = EPLabWindow(EPLab(read_json(args.config)), args.test, args.ref)
     window.resize(1200, 600)
     window.show()
     app.exec()
@@ -98,9 +98,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.WARNING)
-
     app = QApplication(sys.argv)
     try:
         launch_eplab(app, args)
-    except Exception as exc:
+    except Exception:
         start_err_app(app, *sys.exc_info())

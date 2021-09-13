@@ -8,18 +8,19 @@ import webbrowser
 from datetime import datetime
 from functools import partial
 from platform import system
-from typing import Dict
+from typing import Dict, Optional
 import numpy as np
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPointF, Qt as QtC, QTimer
-from PyQt5.QtGui import QIcon, QColor
+from PyQt5.QtGui import QIcon, QCloseEvent, QColor, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QDialog, QFileDialog, QHBoxLayout, QLabel, QLayout, QLineEdit,
                              QMainWindow, QMessageBox, QPushButton, QRadioButton, QScrollArea,
                              QVBoxLayout, QWidget)
 import epcore.filemanager as epfilemanager
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, Pin
-from epcore.ivmeasurer import IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual
-from epcore.measurementmanager import MeasurementPlan, MeasurementSystem
+from epcore.ivmeasurer import (IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual,
+                               IVMeasurerVirtualASA)
+from epcore.measurementmanager import MeasurementPlan
 from epcore.measurementmanager.utils import Searcher
 from epcore.measurementmanager.ivc_comparator import IVCComparator
 from epcore.product import EPLab
@@ -80,11 +81,41 @@ class EPLabWindow(QMainWindow):
             item = layout.itemAt(i_item)
             layout.removeItem(item)
 
+    def _clear_widgets(self):
+        """
+        Method clears widgets on main window.
+        """
+
+        # Little bit hardcode here. See #39320
+        # TODO: separate config file
+        # Voltage in Volts, current in mA
+        self._comparator.set_min_ivc(0.6, 0.002)
+        self.__settings: Settings = None
+        self._option_buttons = {EPLab.Parameter.frequency: dict(),
+                                EPLab.Parameter.voltage: dict(),
+                                EPLab.Parameter.sensitive: dict()}
+        for dock_widget in (self.freqLayout, self.currentLayout, self.voltageLayout):
+            layout = dock_widget.layout()
+            self._clear_layout(layout)
+            layout.addWidget(QScrollArea())
+        self.measurers_menu.clear()
+        self._work_mode = None
+        # Update plot settings at next measurement cycle (place settings here or None)
+        self._settings_update_next_cycle = None
+        # Set to True to skip next measured curves
+        self._skip_curve = False
+        self._hide_curve_test = False
+        self._hide_curve_ref = False
+        self._ref_curve = None
+        self._test_curve = None
+        self._current_file_path = None
+
     def _create_measurer_setting_actions(self):
         """
         Method creates menu items to select settings for available measurers.
         """
 
+        self.measurers_menu.clear()
         for measurer in self._msystem.measurers:
             device_name = measurer.name
             action = QAction(device_name, self)
@@ -119,9 +150,34 @@ class EPLabWindow(QMainWindow):
         for widget in widgets:
             widget.setEnabled(enabled)
 
+    def _fill_options_widget(self, parameter: EPLab.Parameter) -> QScrollArea:
+        """
+        Method creates scroll area and fills it with main options for parameter
+        (frequency, voltage or internal resistance) of measuring system.
+        :param parameter: parameter type.
+        :return: scroll area.
+        """
+
+        lang = qApp.instance().property("language")
+        v_box = QVBoxLayout()
+        for option in self._product.mparams[parameter].options:
+            button = QRadioButton()
+            v_box.addWidget(button)
+            button.setText(option.label_ru if lang == Language.ru else option.label_en)
+            button.clicked.connect(self._on_settings_btn_checked)
+            self._option_buttons[parameter][option.name] = button
+        widget = QWidget()
+        widget.setLayout(v_box)
+        scroll_area = QScrollArea()
+        scroll_area.setVerticalScrollBarPolicy(QtC.ScrollBarAlwaysOn)
+        scroll_area.setHorizontalScrollBarPolicy(QtC.ScrollBarAlwaysOff)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(widget)
+        return scroll_area
+
     def _init_ui(self, product: EPLab):
         """
-        Method initializes widgets on main window.
+        Method initializes widgets on main window and objects.
         :param product:
         """
 
@@ -169,11 +225,9 @@ class EPLabWindow(QMainWindow):
         hbox = QHBoxLayout(self.main_widget)
         hbox.addLayout(vbox)
 
-        self._option_buttons = {
-            EPLab.Parameter.frequency: dict(),
-            EPLab.Parameter.voltage: dict(),
-            EPLab.Parameter.sensitive: dict()
-        }
+        self._option_buttons = {EPLab.Parameter.frequency: dict(),
+                                EPLab.Parameter.voltage: dict(),
+                                EPLab.Parameter.sensitive: dict()}
 
         self.connection_action.triggered.connect(self._on_connect_or_disconnect)
         self.open_window_board_action.triggered.connect(self._on_open_board_image)
@@ -227,30 +281,76 @@ class EPLabWindow(QMainWindow):
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._periodic_task)
 
-    def _fill_options_widget(self, parameter: EPLab.Parameter) -> QScrollArea:
+    def _read_options_from_json(self) -> Optional[Dict]:
         """
-        Method creates scroll area and fills it with main options for parameter
-        (frequency, voltage or internal resistance) of measuring system.
-        :param parameter: parameter type.
-        :return: scroll area.
+        Method returns dictionary with options for parameters of measurement
+        system.
+        :return: dictionary with options for parameters.
         """
 
-        lang = qApp.instance().property("language")
-        v_box = QVBoxLayout()
-        for option in self._product.mparams[parameter].options:
-            button = QRadioButton()
-            v_box.addWidget(button)
-            button.setText(option.label_ru if lang == Language.ru else option.label_en)
-            button.clicked.connect(self._on_settings_btn_checked)
-            self._option_buttons[parameter][option.name] = button
-        widget = QWidget()
-        widget.setLayout(v_box)
-        scroll_area = QScrollArea()
-        scroll_area.setVerticalScrollBarPolicy(QtC.ScrollBarAlwaysOn)
-        scroll_area.setHorizontalScrollBarPolicy(QtC.ScrollBarAlwaysOff)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setWidget(widget)
-        return scroll_area
+        for measurer in self.get_measurers():
+            if isinstance(measurer, (IVMeasurerASA, IVMeasurerVirtualASA)):
+                dir_name = os.path.dirname(os.path.abspath(__file__))
+                file_name = os.path.join(dir_name, "resources", "eplab_asa_options.json")
+                return ut.read_json(file_name)
+        return None
+
+    def _set_widgets_to_init_state(self):
+        """
+        Method initializes widgets on main window.
+        """
+
+        # Little bit hardcode here. See #39320
+        # TODO: separate config file
+        # Voltage in Volts, current in mA
+        self._comparator.set_min_ivc(0.6, 0.002)
+        self.__settings: Settings = None
+        self._reset_board()
+        self._board_window.set_board(self._measurement_plan)
+        self._option_buttons = {EPLab.Parameter.frequency: dict(),
+                                EPLab.Parameter.voltage: dict(),
+                                EPLab.Parameter.sensitive: dict()}
+        params = EPLab.Parameter.frequency, EPLab.Parameter.voltage, EPLab.Parameter.sensitive
+        dock_widgets = self.freqLayout, self.voltageLayout, self.currentLayout
+        for index, dock_widget in enumerate(dock_widgets):
+            layout = dock_widget.layout()
+            self._clear_layout(layout)
+            scroll_area = self._fill_options_widget(params[index])
+            layout.addWidget(scroll_area)
+        # Create menu items to select settings for available measurers
+        self._create_measurer_setting_actions()
+        # If necessary, deactivate the menu item for auto-selection
+        self._disable_optimal_parameter_searcher()
+        if len(self._msystem.measurers) < 2:
+            self.freeze_curve_b_action.setEnabled(False)
+            self.hide_curve_b_action.setEnabled(False)
+        with self._device_errors_handler:
+            for measurer in self._msystem.measurers:
+                measurer.open_device()
+        self._work_mode = None
+        self._change_work_mode(WorkMode.compare)  # default mode - compare two curves
+        # Update plot settings at next measurement cycle (place settings here or None)
+        self._settings_update_next_cycle = None
+        # Set to True to skip next measured curves
+        self._skip_curve = False
+        self._hide_curve_test = False
+        self._hide_curve_ref = False
+        self._ref_curve = None
+        self._test_curve = None
+        # Set ui settings state to current device
+        with self._device_errors_handler:
+            settings = ut.read_settings_auto(self._product)
+            if settings is not None:
+                self._msystem.set_settings(settings)
+            settings = self._msystem.get_settings()
+            options = self._product.settings_to_options(settings)
+            self._options_to_ui(options)
+            self._adjust_plot_params(settings)
+        self._update_current_pin()
+        self._init_threshold()
+        with self._device_errors_handler:
+            self._msystem.trigger_measurements()
+        self._current_file_path = None
 
     def _get_options_from_ui(self) -> Dict[EPLab.Parameter, str]:
         """
@@ -288,9 +388,6 @@ class EPLabWindow(QMainWindow):
         self._comparator.set_min_ivc(var_v, var_c)
         score = self._comparator.compare_ivc(curve_1, curve_2)
         return score
-
-    def closeEvent(self, ev):
-        self._board_window.close()
 
     def _change_work_mode(self, mode: WorkMode):
         self._player.set_work_mode(mode)
@@ -956,34 +1053,10 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan.get_current_pin().x = point.x()
         self._measurement_plan.get_current_pin().y = point.y()
 
-    def resizeEvent(self, event):
-        """
-        Method handles the resizing of the main window.
-        :param event: resizing event.
-        """
+    def closeEvent(self, event: QCloseEvent):
+        self._board_window.close()
 
-        # Determine the critical width of the window for given language and OS
-        lang = qApp.instance().property("language")
-        if system() == "Windows":
-            if lang == Language.en:
-                size = 1100
-            else:
-                size = 1350
-        else:
-            if lang == Language.en:
-                size = 1300
-            else:
-                size = 1600
-        # Change style of toolbars
-        tool_bars = (self.toolBar_write, self.toolBar_cursor, self.toolBar_mode)
-        for tool_bar in tool_bars:
-            if self.width() < size:
-                style = QtC.ToolButtonIconOnly
-            else:
-                style = QtC.ToolButtonTextBesideIcon
-            tool_bar.setToolButtonStyle(style)
-
-    def connect_devices(self, port_1: str, port_2: str, measurer_type: str = "IVM10"):
+    def connect_devices(self, port_1: str, port_2: str):
         """
         Method connects measurers with given ports.
         :param port_1: port for first measurer;
@@ -1000,10 +1073,10 @@ class EPLabWindow(QMainWindow):
             self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
             enable = False
         else:
-            print(11111111111)
             self._iv_window.plot.clear_center_text()
             enable = True
-            self._product.change_options(measurer_type)
+            options_data = self._read_options_from_json()
+            self._product.change_options(options_data)
             self._timer.start()
         self._enable_widgets(enable)
         self._set_widgets_to_init_state()
@@ -1017,87 +1090,10 @@ class EPLabWindow(QMainWindow):
         if self._msystem:
             for measurer in self._msystem.measurers:
                 measurer.close_device()
+        self._msystem = None
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
         self._enable_widgets(False)
-        self._set_widgets_to_init_state()
-
-    def _set_widgets_to_init_state(self):
-        """
-        Method initializes widgets on main window.
-        """
-
-        # Little bit hardcode here. See #39320
-        # TODO: separate config file
-        # Voltage in Volts, current in mA
-        self._comparator.set_min_ivc(0.6, 0.002)
-        self.__settings: Settings = None
-
-        self._reset_board()
-        self._board_window.set_board(self._measurement_plan)
-
-        self._option_buttons = {
-            EPLab.Parameter.frequency: dict(),
-            EPLab.Parameter.voltage: dict(),
-            EPLab.Parameter.sensitive: dict()
-        }
-        # Radio buttons for frequency selection
-        layout = self.freqLayout.layout()
-        self._clear_layout(layout)
-        scroll_area = self._fill_options_widget(EPLab.Parameter.frequency)
-        layout.addWidget(scroll_area)
-        # Radio buttons for voltage selection
-        layout = self.voltageLayout.layout()
-        self._clear_layout(layout)
-        scroll_area = self._fill_options_widget(EPLab.Parameter.voltage)
-        layout.addWidget(scroll_area)
-        # Radio buttons for current/resistor selection
-        layout = self.currentLayout.layout()
-        self._clear_layout(layout)
-        scroll_area = self._fill_options_widget(EPLab.Parameter.sensitive)
-        layout.addWidget(scroll_area)
-
-        # Create menu items to select settings for available measurers
-        self._create_measurer_setting_actions()
-        # If necessary, deactivate the menu item for auto-selection
-        self._disable_optimal_parameter_searcher()
-
-        if len(self._msystem.measurers) < 2:
-            self.freeze_curve_b_action.setEnabled(False)
-            self.hide_curve_b_action.setEnabled(False)
-
-        with self._device_errors_handler:
-            for measurer in self._msystem.measurers:
-                measurer.open_device()
-
-        self._work_mode = None
-        self._change_work_mode(WorkMode.compare)  # default mode - compare two curves
-
-        # Update plot settings at next measurement cycle (place settings here or None)
-        self._settings_update_next_cycle = None
-        # Set to True to skip next measured curves
-        self._skip_curve = False
-        self._hide_curve_test = False
-        self._hide_curve_ref = False
-        self._ref_curve = None
-        self._test_curve = None
-
-        # Set ui settings state to current device
-        with self._device_errors_handler:
-            settings = ut.read_settings_auto(self._product)
-            if settings is not None:
-                self._msystem.set_settings(settings)
-            settings = self._msystem.get_settings()
-            options = self._product.settings_to_options(settings)
-            self._options_to_ui(options)
-            self._adjust_plot_params(settings)
-
-        self._update_current_pin()
-        self._init_threshold()
-
-        with self._device_errors_handler:
-            self._msystem.trigger_measurements()
-
-        self._current_file_path = None
+        self._clear_widgets()
 
     def get_measurers(self) -> list:
         """
@@ -1107,3 +1103,24 @@ class EPLabWindow(QMainWindow):
 
         measurers = self._msystem.measurers if self._msystem else []
         return measurers
+
+    def resizeEvent(self, event: QResizeEvent):
+        """
+        Method handles the resizing of the main window.
+        :param event: resizing event.
+        """
+
+        # Determine the critical width of the window for given language and OS
+        lang = qApp.instance().property("language")
+        if system() == "Windows":
+            size = 1100 if lang == Language.en else 1350
+        else:
+            size = 1300 if lang == Language.en else 1600
+        # Change style of toolbars
+        tool_bars = self.toolBar_write, self.toolBar_cursor, self.toolBar_mode
+        for tool_bar in tool_bars:
+            if self.width() < size:
+                style = QtC.ToolButtonIconOnly
+            else:
+                style = QtC.ToolButtonTextBesideIcon
+            tool_bar.setToolButtonStyle(style)

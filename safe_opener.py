@@ -1,115 +1,101 @@
-import os
+"""
+File with functions to open device and read its library and firmware versions.
+"""
 
+import os
 try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
 
 
-def _log_Runtime(log, mes, err):
+def _check_config(file_name: str, log, port) -> str:
     """
-    Function log error if err is False or raise error
+    Checks right path to config file.
+    :param file_name: name of config file;
     :param log:
-    :param mes: message about error
-    :param err: raise error if True
-    :return:
+    :param port: port of device.
+    :return: name of config file.
     """
-    # Logging to the error output of
-    log(2, mes, 0)
-    if err:
-        raise RuntimeError(mes)
 
-
-def _chek_con(file_name, log, port):
-    """
-    check right path to config file
-    :param file_name: name of config file
-    :param log:
-    :param port: port of device
-    :return:
-    """
-    # Check for a configuration file.
     file_name = os.curdir + "/" + file_name
     if not os.path.exists(file_name):
-        _log_Runtime(log, "Try to open device on port " + port.decode() + ". Config file" + file_name + " not found:",
-                     True)
+        _log_runtime(log, f"Try to open device on port {port.decode()}. Config file "
+                          f"{file_name} not found:")
     return file_name
 
 
-def _read_conf(file_name, log, port):
+def _log_runtime(log, message: str, error: bool = True):
     """
-    Read config file and return his content, raise error if content is empty
-    :param file_name: name of config file
+    Function logs message and raises exception if error is True.
     :param log:
-    :param port: port of device
-    :return:
+    :param message: message about error;
+    :param error: raise error if True.
     """
-    # Read the project configuration file.
+
+    log(2, message, 0)
+    if error:
+        raise RuntimeError(message)
+
+
+def _read_conf(file_name: str, log, port) -> configparser.ConfigParser:
+    """
+    Reads config file and returns content, raises error if content is empty.
+    :param file_name: name of config file;
+    :param log:
+    :param port: port of device.
+    :return: object with data from config file.
+    """
+
     config = configparser.ConfigParser()
     config.read(file_name)
     name = config.has_option("Global", "Name")
     if not name:
-        _log_Runtime(log, "Try to open " + name + "-device on port " + port.decode() +
-                     ". There is no Name field in the config file " + file_name, True)
+        _log_runtime(log, f"Try to open {name}-device on port {port.decode()}. There is "
+                          f"no Name field in the config file {file_name}")
     return config
 
 
-def open_device_safe(device, conf, log):
+def open_device_safely(device, config_file: str, log):
     """
-    Function open device safe: check versions of firmware, library and programm soft
-    :param device: object
-    :param conf: config file
-    :param log: log level
-    :return:
+    Function opens device safely: checks versions of firmware, library and
+    program soft.
+    :param device: device object;
+    :param config_file: name of config file;
+    :param log: log level.
     """
 
-    config = _read_conf(_chek_con(conf, log, device.uri), log, device.uri)  # Read config file
-
-    # Load Lib version
-    version = device.lib_version()  # Reading the library version
-
-    Name = config.get("Global", "Name")
-    mes1 = "Try to open " + Name + "-device on port " + device.uri.decode()
-    if not config.has_section(version):  # Checking for a library partition
-        _log_Runtime(log, mes1 + ". Library version error " + version, True)
-
-    # Open device
+    config = _read_conf(_check_config(config_file, log, device.uri), log, device.uri)
+    version = device.lib_version()  # reading the library version
+    name = config.get("Global", "Name")
+    msg_base = f"Try to open {name}-device on port {device.uri.decode()}."
+    if not config.has_section(version):  # checking for a library partition
+        _log_runtime(log, f"{msg_base} Library version error {version}")
     try:
         device.open()
     except Exception:
-        _log_Runtime(log, mes1 + ". Device not found or cannot be opened.", True)
+        _log_runtime(log, f"{msg_base} Device not found or cannot be opened")
 
-    s = ""  # Read controller_name # eyepoint-devices hasn't correct name!!!
-    firmw = ""  # Software version.
+    device_name = ""  # Read controller_name. Eyepoint-devices hasn't correct name!!!
+    firmware = ""  # software version.
     try:
-        Identy = device.get_identity_information()  # Get identy inform
-        for i in Identy._controller_name:  # _product_name:
-            if (i != 0):
-                s = s + chr(i)
-        # Build version
-        firmw = str(Identy._firmware_major) + "." + str(Identy._firmware_minor) + "." + str(Identy._firmware_bugfix)
+        identity = device.get_identity_information()
+        for i in identity._controller_name:
+            if i != 0:
+                device_name = device_name + chr(i)
+        firmware = (f"{identity._firmware_major}.{identity._firmware_minor}."
+                    f"{identity._firmware_bugfix}")
     except Exception:
-        _log_Runtime(log, mes1 + ". Undefined device. GINF command not implemented.", True)
-    print(s.lower())
-    if Name.lower() != s.lower():
-        device.close()
-        _log_Runtime(log, mes1 + ". The device is not open because it is " + s.lower(), True)
-
-    # Build version
-    ind = 0
-    firms = []
-
+        _log_runtime(log, f"{msg_base} Undefined device. GINF command not implemented")
+    device.close()
+    if name.lower() != device_name.lower():
+        _log_runtime(log, f"{msg_base} The device is not open because it is {device_name.lower()}")
     # Information comparison
+    ind = 0
     for opt in config.options(version):
-        firms.append(config.get(version, opt))
-        if config.get(version, opt) == firmw:
+        if config.get(version, opt) == firmware:
             ind = 1
-
     if ind == 0:
-        device.close()
-        mes = mes1 + "Version of the device " + firmw + "does not match the version of the library " + version
-        _log_Runtime(log, mes, False)
-
-    _log_Runtime(log, "Devise " + Name + " Lib " + version + " Firmware " + firmw, False)
-
-    return ind, Name, version, firmw, firms
+        _log_runtime(log, f"{msg_base} Version of the device {firmware} does not match the version "
+                          f"of the library {version}", False)
+    _log_runtime(log, f"Device - {name}, library - {version}, firmware - {firmware}", False)
