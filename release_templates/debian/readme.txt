@@ -31,6 +31,11 @@
 Быстрый запуск на Linux
 -----------------------
 
+Установите библиотеку libcurl. Для этого выполните команды в терминале:
+sudo apt-get update
+sudo apt-get install libcurl3
+sudo apt-get install libcurl4-openssl-dev
+
 Перед первым запуском обычно нужно прописать в системе VID и PID устройства для драйвера виртуального COM-порта. 
 В Ubuntu это можно сделать так:
 

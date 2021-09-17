@@ -29,13 +29,21 @@ set QT_QPA_PLATFORM_PLUGIN_PATH=venv\Lib\site-packages\PyQt5\Qt\plugins\platform
 
 ## Установка в Linux
 
-1. Установить библиотеки для работы со звуком и для сборки пакетов Python:
+1. Установить библиотеку `libcurl`:
+
+   ```
+   sudo apt-get update
+   sudo apt-get install libcurl3
+   sudo apt-get install libcurl4-openssl-dev
+   ```
+
+2. Установить библиотеки для работы со звуком и для сборки пакетов Python:
 
    ```
    sudo apt-get install -y python3-dev libasound2-dev
    ```
 
-2. Установить зависимости для Python, выполнив скрипт rebuild_venv.sh:
+3. Установить зависимости для Python, выполнив скрипт `rebuild_venv.sh`:
 
    ```
    bash rebuild_venv.sh
@@ -165,6 +173,22 @@ testall.bat
 
 ```
 bash testall.sh
+```
+
+## Выпуск релиза в Windows
+
+Для выпуска релиза в Windows нужно выполнить скрипт `release.bat`:
+
+```
+release.bat
+```
+
+## Выпуск релиза в Linux
+
+Для выпуска релиза в Linux нужно выполнить скрипт `release.sh`:
+
+```
+bash release.sh
 ```
 
 ## Дополнительно
