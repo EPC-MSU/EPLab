@@ -4,11 +4,6 @@
 <context>
     <name>Dialog</name>
     <message>
-        <location filename="settings.ui" line="14"/>
-        <source>Settings</source>
-        <translation type="obsolete">Settings</translation>
-    </message>
-    <message>
         <location filename="settings.ui" line="20"/>
         <source>Настройки</source>
         <translation>Settings</translation>
@@ -56,11 +51,6 @@
 </context>
 <context>
     <name>ConnectionWindow</name>
-    <message>
-        <location filename="connection_window.ui" line="14"/>
-        <source>Connection setup</source>
-        <translation type="obsolete">Connection setup</translation>
-    </message>
     <message>
         <location filename="connection_window.ui" line="14"/>
         <source>Настройка подключения</source>
@@ -269,7 +259,7 @@
         <source>Новая точка</source>
         <translation>New point</translation>
     </message>
-	<message>
+    <message>
         <location filename="mainwindow.ui" line="582"/>
         <source> Новая точка</source>
         <translation> New point</translation>
@@ -279,7 +269,7 @@
         <source>Сохранить точку</source>
         <translation>Save point</translation>
     </message>
-	<message>
+    <message>
         <location filename="mainwindow.ui" line="597"/>
         <source> Сохранить точку</source>
         <translation>Save point</translation>
@@ -477,12 +467,12 @@
         <source>Нет настроек</source>
         <translation>No settings</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="821"/>
         <source>  Напряжение: </source>
         <translation>  Voltage: </translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="821"/>
         <source> В / дел.</source>
         <translation> V / div. </translation>
@@ -492,7 +482,7 @@
         <source>  Ток: </source>
         <translation>  Current: </translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="827"/>
         <source> мА / дел.</source>
         <translation> mA / div.</translation>
