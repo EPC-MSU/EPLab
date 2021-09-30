@@ -306,14 +306,6 @@ class UrpcbaseDeviceHandle:
         _validate_call(_lib.urpcbase_get_calibration_settings(self._handle, byref(dst_buffer)))
         return dst_buffer
 
-    @overload
-    def set_calibration_settings(self, reserved0: Union[Sequence[int], c_ubyte*4]):
-        pass
-
-    @overload
-    def set_calibration_settings(self, src_buffer: CalibrationSettingsRequest):
-        pass
-
     def set_calibration_settings(self, *args):
         if len(args) != 1 or not isinstance(args[0], self.CalibrationSettingsRequest):
             src_buffer = self.CalibrationSettingsRequest(reserved0=_normalize_arg(args[0],
