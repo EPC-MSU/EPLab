@@ -242,8 +242,8 @@ class ConnectionWindow(qt.QDialog):
 
         super().__init__(parent=parent)
         self.parent = parent
-        lang = qApp.instance().property("language")
-        self.lang = "ru" if lang == Language.ru else "en"
+        self.lang = qApp.instance().property("language")
+        self._your_variant = "Свой вариант" if self.lang is Language.ru else "Your variant"
         self._urls = None
         self._initial_ports, self._initial_type = self._get_current_measurers_ports()
         self._init_ui()
@@ -328,7 +328,7 @@ class ConnectionWindow(qt.QDialog):
 
         if self._urls is None:
             self._urls = [f"xmlrpc://{host}" for host in reveal_asa(0.05)]
-            self._urls.append("Свой вариант")
+            self._urls.append(self._your_variant)
         urls_for_first = self._urls
         urls_for_second = "virtualasa", "None"
         urls_for_first_and_second = urls_for_first, urls_for_second
@@ -340,7 +340,7 @@ class ConnectionWindow(qt.QDialog):
             if current_url in urls_for_first_and_second[index]:
                 combo_box.setCurrentText(current_url)
             self.line_edits[index].setText("xmlrpc://")
-            self.line_edits[index].setVisible(current_url == "Свой вариант")
+            self.line_edits[index].setVisible(current_url == self._your_variant)
 
     def _init_ivm10(self, port_1: str = None, port_2: str = None):
         """
@@ -414,7 +414,7 @@ class ConnectionWindow(qt.QDialog):
             ports = []
             for index, combo_box in enumerate(self.combo_boxes):
                 port = combo_box.currentText()
-                if port == "Свой вариант":
+                if port == self._your_variant:
                     port = self.line_edits[index].text()
                     if not self._check_ip_address(port):
                         return
