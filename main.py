@@ -1,18 +1,14 @@
 import logging
-import os
 import sys
 import traceback
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from PyQt5.QtCore import QTranslator
 from PyQt5.QtWidgets import (QMainWindow, QPushButton, QVBoxLayout, QLabel, qApp,
                              QApplication, QWidget, QDesktopWidget)
-from epcore.ivmeasurer import (IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual,
-                               IVMeasurerVirtualASA)
-from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EPLab
 from language import Language
 from mainwindow import EPLabWindow, show_exception
-from utils import read_json, sort_devices_by_usb_numbers
+from utils import read_json
 
 
 def exception_hook(exc_type: Exception, exc_value: Exception, exc_traceback: "traceback"):
@@ -32,7 +28,12 @@ def exception_hook(exc_type: Exception, exc_value: Exception, exc_traceback: "tr
 sys.excepthook = exception_hook
 
 
-def launch_eplab(app: QApplication, args):
+def launch_eplab(app: QApplication, args: Namespace):
+    """
+    Function to launch application.
+    :param app:
+    :param args: arguments from command line.
+    """
 
     if args.en:
         translator = QTranslator()
@@ -41,45 +42,7 @@ def launch_eplab(app: QApplication, args):
         app.setProperty("language", Language.en)
     else:
         app.setProperty("language", Language.ru)
-
-    measurers = []
-    measurers_args = (args.test, args.ref)
-    virtual_already_has_been = False
-    for measurer_arg in measurers_args:
-        if measurer_arg == "virtual":
-            measurer = IVMeasurerVirtual()
-            if virtual_already_has_been:
-                measurer.nominal = 1000
-            measurers.append(measurer)
-            virtual_already_has_been = True
-        elif measurer_arg == "virtualasa":
-            measurer = IVMeasurerVirtualASA(defer_open=True)
-            measurers.append(measurer)
-        elif measurer_arg is not None and "com:" in measurer_arg:
-            measurer = IVMeasurerIVM10(measurer_arg, config=os.path.abspath("cur.ini"),
-                                       defer_open=True)
-            measurers.append(measurer)
-        elif measurer_arg is not None and "xmlrpc:" in measurer_arg:
-            measurer = IVMeasurerASA(measurer_arg, defer_open=True)
-            measurers.append(measurer)
-
-    if len(measurers) == 0:
-        # Logically it will be correctly to abort here.
-        # But for better user experience we will add single virtual IVM.
-        ivm_1 = IVMeasurerVirtual()
-        measurers.append(ivm_1)
-    elif len(measurers) == 2:
-        # Reorder measurers according to their addresses in USB hubs tree
-        measurers = sort_devices_by_usb_numbers(measurers)
-
-    # Set pretty names for measurers
-    measurers[0].name = "test"
-    if len(measurers) == 2:
-        measurers[1].name = "ref"
-
-    measurement_system = MeasurementSystem(measurers)
-
-    window = EPLabWindow(measurement_system, EPLab(read_json(args.config)))
+    window = EPLabWindow(EPLab(read_json(args.config)), args.test, args.ref)
     window.resize(1200, 600)
     window.show()
     app.exec()
@@ -92,9 +55,11 @@ class ErrorWindow(QMainWindow):
 
     MAX_MESSAGE_LENGTH = 500
 
-    def __init__(self, error: str, trace_back: str):
+    def __init__(self, exc_type: Exception, exc_value: Exception, exc_traceback: "traceback"):
         super().__init__()
-        self.init_ui(error, trace_back)
+        traceback.print_exception(exc_type, exc_value, exc_traceback)
+        traceback_text = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        self.init_ui(str(exc_value), traceback_text)
 
     def init_ui(self, error: str, trace_back: str):
         self.central_widget = QWidget()
@@ -116,9 +81,9 @@ class ErrorWindow(QMainWindow):
         self.setWindowTitle("Error")
 
 
-def start_err_app(app: QApplication, error: str = "", trace_back: str = ""):
-    print(error)
-    error_window = ErrorWindow(error, trace_back)
+def start_err_app(app: QApplication, exc_type: Exception, exc_value: Exception,
+                  exc_traceback: "traceback"):
+    error_window = ErrorWindow(exc_type, exc_value, exc_traceback)
     error_window.show()
     app.exec_()
 
@@ -127,16 +92,15 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="EyePoint Lab")
     parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual'"
                                       " for virtual mode)")
-    parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)")
+    parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)",
+                        nargs="?", default=None)
     parser.add_argument("--en", help="Use English version", action="store_true")
     parser.add_argument("--config", help="Path to specific EPLab config file", default=None)
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.WARNING)
-
     app = QApplication(sys.argv)
     try:
         launch_eplab(app, args)
-    except Exception as exc:
-        start_err_app(app, error=str(exc),
-                      trace_back="".join(traceback.format_exception(*sys.exc_info())))
+    except Exception:
+        start_err_app(app, *sys.exc_info())

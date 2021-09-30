@@ -1,6 +1,6 @@
-from epsound import WavPlayer
 import logging
-from os.path import join as join_path
+import os
+from epsound import WavPlayer
 from common import WorkMode
 
 
@@ -17,9 +17,12 @@ class SoundPlayer:
             self._player.set_mute()
             self._sound_available = False
 
+        dir_name = os.path.dirname(os.path.abspath(__file__))
         for i in range(1, 11):
-            self._player.add_sound(join_path("media", f"{i}.wav"), f"{i}")
-        self._player.add_sound(join_path("media", "test.wav"), "test")
+            file_name = os.path.join(dir_name, "media", f"{i}.wav")
+            self._player.add_sound(file_name, f"{i}")
+        file_name = os.path.join(dir_name, "media", "test.wav")
+        self._player.add_sound(file_name, "test")
 
     def set_mute(self, mute: bool = True):
         if self._sound_available:  # We can't disable MUTE if sound driver is not available
