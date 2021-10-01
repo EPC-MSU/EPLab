@@ -174,7 +174,7 @@ def create_measurers(port_1: str, port_2: str) -> MeasurementSystem:
             elif measurer_arg == "virtualasa":
                 measurer = IVMeasurerVirtualASA(defer_open=True)
                 measurers.append(measurer)
-            elif measurer_arg is not None and "com:" in measurer_arg:
+            elif measurer_arg is not None and "com:" in measurer_arg or "xi-net:" in measurer_arg:
                 dir_name = os.path.dirname(os.path.abspath(__file__))
                 config_file = os.path.join(dir_name, "cur.ini")
                 measurer = IVMeasurerIVM10(measurer_arg, config=config_file, defer_open=True)

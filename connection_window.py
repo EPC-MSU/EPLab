@@ -17,6 +17,8 @@ import PyQt5.QtWidgets as qt
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp
 from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtWidgets import (QComboBox, QFormLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
+                             QVBoxLayout)
 import serial
 import serial.tools.list_ports
 from epcore.ivmeasurer.measurerasa import IVMeasurerASA, IVMeasurerVirtualASA
@@ -259,6 +261,39 @@ class ConnectionWindow(qt.QDialog):
             return True
         return False
 
+    def _create_widgets(self):
+        """
+        Method creates widgets in dialog window.
+        """
+
+        self.setWindowTitle(qApp.translate("t", "Настройка подключения"))
+        form_layout = QFormLayout()
+        label_measurer_type = QLabel(qApp.translate("t", "Тип ВАХометра"))
+        self.combo_box_measurer_type = QComboBox()
+        self.combo_box_measurer_type.addItems(["IVM10", "ASA"])
+        form_layout.addRow(label_measurer_type, self.combo_box_measurer_type)
+        label_measurer_1 = QLabel(qApp.translate("t", "ВАХометра #1"))
+        self.combo_box_measurer_1 = QComboBox()
+        form_layout.addRow(label_measurer_1, self.combo_box_measurer_1)
+        self.line_edit_measurer_1 = QLineEdit()
+        form_layout.addRow(QLabel(""), self.line_edit_measurer_1)
+        label_measurer_2 = QLabel(qApp.translate("t", "ВАХометра #2"))
+        self.combo_box_measurer_2 = QComboBox()
+        form_layout.addRow(label_measurer_2, self.combo_box_measurer_2)
+        self.line_edit_measurer_2 = QLineEdit()
+        form_layout.addRow(QLabel(""), self.line_edit_measurer_2)
+        self.button_connect = QPushButton(qApp.translate("t", "Подключить"))
+        self.button_disconnect = QPushButton(qApp.translate("t", "Отключить"))
+        self.button_cancel = QPushButton(qApp.translate("t", "Отмена"))
+        h_box_layout = QHBoxLayout()
+        h_box_layout.addWidget(self.button_connect)
+        h_box_layout.addWidget(self.button_disconnect)
+        h_box_layout.addWidget(self.button_cancel)
+        v_box_layout = QVBoxLayout(self)
+        v_box_layout.addLayout(form_layout)
+        v_box_layout.addLayout(h_box_layout)
+        self.setLayout(v_box_layout)
+
     def _get_current_measurers_ports(self) -> Tuple[List[str], str]:
         """
         Method returns ports of measurers connected to app and general type
@@ -368,9 +403,7 @@ class ConnectionWindow(qt.QDialog):
         Method initializes widgets in dialog window.
         """
 
-        dir_name = os.path.dirname(os.path.abspath(__file__))
-        ui_file_name = os.path.join(dir_name, "gui", "connection_window.ui")
-        uic.loadUi(ui_file_name, self)
+        self._create_widgets()
         self.combo_boxes = self.combo_box_measurer_1, self.combo_box_measurer_2
         self.line_edits = self.line_edit_measurer_1, self.line_edit_measurer_2
         if _get_platform() == "win64":

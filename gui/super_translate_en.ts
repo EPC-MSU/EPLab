@@ -453,21 +453,6 @@
         <translation>DISCONNECTED</translation>
     </message>
     <message>
-        <location filename="../measurer_settings_window.py" line="195"/>
-        <source>Настройки для </source>
-        <translation>Settings for </translation>
-    </message>
-    <message>
-        <location filename="../measurer_settings_window.py" line="217"/>
-        <source>Настройки для устройства</source>
-        <translation>Settings for device</translation>
-    </message>
-    <message>
-        <location filename="../measurer_settings_window.py" line="218"/>
-        <source>Нет настроек</source>
-        <translation>No settings</translation>
-    </message>
-    <message>
         <location filename="../mainwindow.py" line="821"/>
         <source>  Напряжение: </source>
         <translation>  Voltage: </translation>
@@ -516,6 +501,51 @@
         <location filename="../mainwindow.py" line="829"/>
         <source>Различие: </source>
         <translation>Difference: </translation>
+    </message>
+    <message>
+        <location filename="../measurer_settings_window.py" line="195"/>
+        <source>Настройки для </source>
+        <translation>Settings for </translation>
+    </message>
+    <message>
+        <location filename="../measurer_settings_window.py" line="217"/>
+        <source>Настройки для устройства</source>
+        <translation>Settings for device</translation>
+    </message>
+    <message>
+        <location filename="../measurer_settings_window.py" line="218"/>
+        <source>Нет настроек</source>
+        <translation>No settings</translation>
+    </message>
+	<message>
+        <location filename="../connection_window.py" line="373"/>
+        <source>Настройка подключения</source>
+        <translation>Connection setup</translation>
+    </message>
+	<message>
+        <location filename="../connection_window.py" line="375"/>
+        <source>Тип ВАХометра</source>
+        <translation>IV-measurer type</translation>
+    </message>
+	<message>
+        <location filename="../connection_window.py" line="379"/>
+        <source>ВАХометр #1</source>
+        <translation>IV-measurer #1</translation>
+    </message>
+    <message>
+        <location filename="../connection_window.py" line="384"/>
+        <source>ВАХометр #2</source>
+        <translation>IV-measurer #2</translation>
+    </message>
+    <message>
+        <location filename="../connection_window.py" line="389"/>
+        <source>Подключить</source>
+        <translation>Connect</translation>
+    </message>
+    <message>
+        <location filename="../connection_window.py" line="390"/>
+        <source>Отключить</source>
+        <translation>Disconnect</translation>
     </message>
 </context>
 </TS>
