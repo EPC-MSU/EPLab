@@ -14,7 +14,6 @@ from platform import system
 from typing import List, Optional, Tuple
 import psutil
 import PyQt5.QtWidgets as qt
-from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import (QComboBox, QFormLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
