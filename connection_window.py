@@ -271,12 +271,12 @@ class ConnectionWindow(qt.QDialog):
         self.combo_box_measurer_type = QComboBox()
         self.combo_box_measurer_type.addItems(["IVM10", "ASA"])
         form_layout.addRow(label_measurer_type, self.combo_box_measurer_type)
-        label_measurer_1 = QLabel(qApp.translate("t", "ВАХометра #1"))
+        label_measurer_1 = QLabel(qApp.translate("t", "ВАХометр #1"))
         self.combo_box_measurer_1 = QComboBox()
         form_layout.addRow(label_measurer_1, self.combo_box_measurer_1)
         self.line_edit_measurer_1 = QLineEdit()
         form_layout.addRow(QLabel(""), self.line_edit_measurer_1)
-        label_measurer_2 = QLabel(qApp.translate("t", "ВАХометра #2"))
+        label_measurer_2 = QLabel(qApp.translate("t", "ВАХометр #2"))
         self.combo_box_measurer_2 = QComboBox()
         form_layout.addRow(label_measurer_2, self.combo_box_measurer_2)
         self.line_edit_measurer_2 = QLineEdit()
@@ -475,6 +475,8 @@ class ConnectionWindow(qt.QDialog):
         :param general_measurers_type: general type for measurers.
         """
 
+        for line_edit in self.line_edits:
+            line_edit.setVisible(False)
         if general_measurers_type == MeasurerType.IVM10:
             self._init_ivm10(*self._initial_ports)
         elif general_measurers_type == MeasurerType.ASA:
