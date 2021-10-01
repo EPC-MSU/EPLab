@@ -42,21 +42,18 @@ def launch_eplab(app: QApplication, args):
         app.setProperty("language", Language.ru)
 
     measurers = []
-
     if args.test == "virtual":
         ivm_1 = IVMeasurerVirtual()
         ivm_1.nominal = 1000
         measurers.append(ivm_1)
-    elif "com:" in args.test:
+    elif "com:" in args.test or "xi-net:" in args.test:
         ivm_1 = IVMeasurerIVM10(args.test, config=os.path.abspath("cur.ini"), defer_open=True)
         measurers.append(ivm_1)
-
     if args.ref:
         if args.ref == "virtual":
             ivm_2 = IVMeasurerVirtual()
             measurers.append(ivm_2)
-        elif "com:" in args.ref:
-
+        elif "com:" in args.ref or "xi-net:" in args.ref:
             ivm_2 = IVMeasurerIVM10(args.ref, config=os.path.abspath("cur.ini"), defer_open=True)
             measurers.append(ivm_2)
 
