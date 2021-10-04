@@ -8,7 +8,7 @@ import webbrowser
 from datetime import datetime
 from functools import partial
 from platform import system
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 import numpy as np
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPointF, Qt as QtC, QTimer
@@ -314,16 +314,6 @@ class EPLabWindow(QMainWindow):
         self.__settings: Settings = None
         self._reset_board()
         self._board_window.set_board(self._measurement_plan)
-        self._option_buttons = {EPLab.Parameter.frequency: dict(),
-                                EPLab.Parameter.voltage: dict(),
-                                EPLab.Parameter.sensitive: dict()}
-        params = EPLab.Parameter.frequency, EPLab.Parameter.voltage, EPLab.Parameter.sensitive
-        dock_widgets = self.freqLayout, self.voltageLayout, self.currentLayout
-        for index, dock_widget in enumerate(dock_widgets):
-            layout = dock_widget.layout()
-            self._clear_layout(layout)
-            scroll_area = self._fill_options_widget(params[index])
-            layout.addWidget(scroll_area)
         # Create menu items to select settings for available measurers
         self._create_measurer_setting_actions()
         # If necessary, deactivate the menu item for auto-selection
@@ -350,14 +340,77 @@ class EPLabWindow(QMainWindow):
             if settings is not None:
                 self._msystem.set_settings(settings)
             settings = self._msystem.get_settings()
+            self._adjust_plot_params(settings)
+            self._option_buttons = {}
+            self._create_scroll_areas_for_parameters(settings)
             options = self._product.settings_to_options(settings)
             self._options_to_ui(options)
-            self._adjust_plot_params(settings)
         self._update_current_pin()
         self._init_threshold()
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
         self._current_file_path = None
+
+    def _create_radio_buttons_for_parameter(self, param_name: EPLab.Parameter,
+                                            available_options: List) -> QWidget:
+        """
+        Method creates radio buttons for options of given parameter and puts
+        them on widget.
+        :param param_name: name of parameter;
+        :param available_options: available options for parameter.
+        :return: widget with radio buttons.
+        """
+
+        lang = qApp.instance().property("language")
+        layout = QVBoxLayout()
+        self._option_buttons[param_name] = {}
+        for option in available_options:
+            button = QRadioButton()
+            layout.addWidget(button)
+            button.setText(option.label_ru if lang == Language.ru else option.label_en)
+            button.clicked.connect(self._on_settings_btn_checked)
+            self._option_buttons[param_name][option.name] = button
+        widget = QWidget()
+        widget.setLayout(layout)
+        return widget
+
+    def _create_scroll_areas_for_parameters(self, settings: MeasurementSettings):
+        """
+        Method creates scroll areas for different parameters of measuring
+        system. Scroll areas has radio buttons to choose options of parameters.
+        :param settings: measurement settings.
+        """
+
+        available = self._product.get_available_options(settings)
+        self._parameters_scroll_areas = {}
+        layouts = self.freqLayout.layout(), self.voltageLayout.layout(), self.currentLayout.layout()
+        parameters = EPLab.Parameter.frequency, EPLab.Parameter.voltage, EPLab.Parameter.sensitive
+        for i_parameter, parameter in enumerate(parameters):
+            widget_with_options = self._create_radio_buttons_for_parameter(parameter,
+                                                                           available[parameter])
+            scroll_area = QScrollArea()
+            scroll_area.setVerticalScrollBarPolicy(QtC.ScrollBarAlwaysOn)
+            scroll_area.setHorizontalScrollBarPolicy(QtC.ScrollBarAlwaysOff)
+            scroll_area.setWidgetResizable(True)
+            scroll_area.setWidget(widget_with_options)
+            self._parameters_scroll_areas[parameter] = scroll_area
+            self._clear_layout(layouts[i_parameter])
+            layouts[i_parameter].addWidget(scroll_area)
+
+    def _update_scroll_areas_for_parameters(self, settings: MeasurementSettings):
+        """
+        Method updates scroll areas for different parameters of measuring
+        system.
+        :param settings: measurement settings.
+        """
+
+        available = self._product.get_available_options(settings)
+        for parameter, scroll_area in self._parameters_scroll_areas.items():
+            widget_with_options = self._create_radio_buttons_for_parameter(parameter,
+                                                                           available[parameter])
+            old_widget = scroll_area.takeWidget()
+            del old_widget
+            scroll_area.setWidget(widget_with_options)
 
     def _get_options_from_ui(self) -> Dict[EPLab.Parameter, str]:
         """
@@ -378,8 +431,8 @@ class EPLabWindow(QMainWindow):
         Convert options to UI state.
         """
 
-        for group in options.keys():
-            self._option_buttons[group][options[group]].setChecked(True)
+        for parameter, value in options.items():
+            self._option_buttons[parameter][value].setChecked(True)
 
     def _get_min_var(self, settings: MeasurementSettings):
         """
@@ -1028,12 +1081,22 @@ class EPLabWindow(QMainWindow):
         # When new curve will be received plot parameters will be adjusted
         self._settings_update_next_cycle = settings
 
+    @pyqtSlot(bool)
     def _on_settings_btn_checked(self, checked: bool):
+        """
+        Slot handles selection of new option for parameter of measuring system.
+        :param checked: if True radio button corresponding to option was
+        selected.
+        """
+
         if checked:
             settings = self._msystem.get_settings()
             old_settings = copy.deepcopy(settings)
             options = self._get_options_from_ui()
             settings = self._product.options_to_settings(options, settings)
+            self._update_scroll_areas_for_parameters(settings)
+            options = self._product.settings_to_options(settings)
+            self._options_to_ui(options)
             try:
                 self._set_msystem_settings(settings)
                 ut.save_settings_auto(self._product, settings)
@@ -1041,6 +1104,7 @@ class EPLabWindow(QMainWindow):
                 show_exception(qApp.translate("t", "Ошибка"),
                                qApp.translate("t", "Ошибка при установке настроек устройства"),
                                str(exc))
+                self._update_scroll_areas_for_parameters(old_settings)
                 self._set_msystem_settings(old_settings)
                 old_options = self._product.settings_to_options(old_settings)
                 self._options_to_ui(old_options)
