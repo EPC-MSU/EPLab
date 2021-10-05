@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>871</width>
+    <width>1233</width>
     <height>841</height>
    </rect>
   </property>
@@ -164,8 +164,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>871</width>
-     <height>22</height>
+     <width>1233</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu_action">
@@ -371,6 +371,18 @@
    <addaction name="comparing_mode_action"/>
    <addaction name="writing_mode_action"/>
    <addaction name="testing_mode_action"/>
+  </widget>
+  <widget class="QToolBar" name="toolBar_language">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="select_language_action"/>
   </widget>
   <action name="new_file_action">
    <property name="icon">
@@ -684,8 +696,21 @@
    </property>
   </action>
   <action name="connection_action">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/connection.png</normaloff>../media/connection.png</iconset>
+   </property>
    <property name="text">
     <string>Подключение</string>
+   </property>
+  </action>
+  <action name="select_language_action">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/language.png</normaloff>../media/language.png</iconset>
+   </property>
+   <property name="text">
+    <string>Язык</string>
    </property>
   </action>
  </widget>

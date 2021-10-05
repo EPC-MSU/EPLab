@@ -10,12 +10,12 @@ from functools import partial
 from platform import system
 from typing import Dict, List, Optional
 import numpy as np
-from PyQt5 import uic
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPointF, Qt as QtC, QTimer
+from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt as QtC, QTimer,
+                          QTranslator)
 from PyQt5.QtGui import QIcon, QCloseEvent, QColor, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QDialog, QFileDialog, QHBoxLayout, QLabel, QLayout, QLineEdit,
-                             QMainWindow, QMessageBox, QPushButton, QRadioButton, QScrollArea,
-                             QVBoxLayout, QWidget)
+                             QMessageBox, QPushButton, QRadioButton, QScrollArea, QVBoxLayout,
+                             QWidget)
 import epcore.filemanager as epfilemanager
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, Pin
 from epcore.ivmeasurer import (IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual,
@@ -29,13 +29,14 @@ import utils as ut
 from boardwindow import BoardWidget
 from common import WorkMode, DeviceErrorsHandler
 from connection_window import ConnectionWindow
-from language import Language
+from language import Language, LanguageSelectionWindow
 from measurer_settings_window import MeasurerSettingsWindow
 from player import SoundPlayer
 from score import ScoreWrapper
 from settings.settings import Settings
 from settings.settingswindow import LowSettingsPanel, SettingsWindow
 from version import Version
+from gui.ui_mainwindow import Ui_MainWindow
 
 
 def show_exception(msg_title: str, msg_text: str, exc: str = ""):
@@ -56,7 +57,7 @@ def show_exception(msg_title: str, msg_text: str, exc: str = ""):
     msg.exec_()
 
 
-class EPLabWindow(QMainWindow):
+class EPLabWindow(Ui_MainWindow):
     default_path = "../EPLab-Files"
 
     def __init__(self, product: EPLab, port_1: str = None, port_2: str = None):
@@ -185,9 +186,10 @@ class EPLabWindow(QMainWindow):
         :param product:
         """
 
+        self.setupUi(self)
         dir_name = os.path.dirname(os.path.abspath(__file__))
         ui_file_name = os.path.join(dir_name, "gui", "mainwindow.ui")
-        uic.loadUi(ui_file_name, self)
+        # uic.loadUi(ui_file_name, self)
         ico_file_name = os.path.join(dir_name, "media", "ico.png")
         self.setWindowIcon(QIcon(ico_file_name))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
@@ -264,6 +266,7 @@ class EPLabWindow(QMainWindow):
         self.add_cursor_action.toggled.connect(self._on_add_cursor)
         self.remove_cursor_action.toggled.connect(self._on_del_cursor)
         self.save_screen_action.triggered.connect(self._on_save_image)
+        self.select_language_action.triggered.connect(self._on_select_language)
 
         self.comparing_mode_action.triggered.connect(
             lambda: self._on_work_mode_switch(WorkMode.compare))
@@ -287,6 +290,8 @@ class EPLabWindow(QMainWindow):
         self._timer.setInterval(10)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._periodic_task)
+
+        self._translator = QTranslator()
 
     def _read_options_from_json(self) -> Optional[Dict]:
         """
@@ -485,6 +490,28 @@ class EPLabWindow(QMainWindow):
 
         connection_wnd = ConnectionWindow(self)
         connection_wnd.exec()
+
+    @pyqtSlot()
+    def _on_select_language(self):
+        """
+        Slot shows dialog window to select language.
+        """
+
+        language_selection_wnd = LanguageSelectionWindow(self)
+        if language_selection_wnd.exec():
+            language = language_selection_wnd.get_language()
+            translator = language_selection_wnd.get_translator()
+            qApp.instance().removeTranslator(self._translator)
+            qApp.instance().setProperty("language", language)
+            if translator:
+                self._translator.load(translator)
+                qApp.instance().installTranslator(self._translator)
+
+    def changeEvent(self, event: QEvent):
+        print(23232323232)
+        if event.type() == QEvent.LanguageChange:
+            print(322323)
+            self.retranslateUi(self)
 
     @pyqtSlot(IVMeasurerBase, bool)
     def _on_show_device_settings(self, selected_measurer: IVMeasurerBase, checked: bool):
