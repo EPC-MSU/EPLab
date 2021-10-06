@@ -1212,7 +1212,7 @@ class EPLabWindow(Ui_MainWindow):
         if system() == "Windows":
             size = 1150 if lang is Language.EN else 1350
         else:
-            size = 1300 if lang is Language.EN else 1650
+            size = 1380 if lang is Language.EN else 1650
         # Change style of toolbars
         tool_bars = self.toolBar_write, self.toolBar_cursor, self.toolBar_mode
         for tool_bar in tool_bars:
