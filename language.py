@@ -2,6 +2,7 @@
 File with class for dialog window for language selection.
 """
 
+import os
 from enum import Enum, auto
 from typing import Optional, Tuple
 import PyQt5.QtWidgets as qt
@@ -62,9 +63,9 @@ class Language(Enum):
 
 _LANGUAGES = {Language.RU: "Русский",
               Language.EN: "English"}
-
+_DIR_NAME = os.path.dirname(os.path.abspath(__file__))
 _FILES = {Language.RU: "",
-          Language.EN: "gui/super_translate_en.qm"}
+          Language.EN: os.path.join(_DIR_NAME, "gui", "super_translate_en.qm")}
 
 
 class LanguageSelectionWindow(qt.QDialog):

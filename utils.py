@@ -6,6 +6,7 @@ import configparser
 import json
 import os
 import re
+import sys
 from operator import itemgetter
 from platform import system
 from typing import Dict, Iterable, List, Optional
@@ -105,6 +106,19 @@ def find_address_in_usb_hubs_tree(url: str) -> Optional[str]:
     return None
 
 
+def get_dir_name() -> str:
+    """
+    Function returns path to directory with executable file or code files.
+    :return: path to directory.
+    """
+
+    if getattr(sys, "frozen", False):
+        path = os.path.dirname(os.path.abspath(sys.executable))
+    else:
+        path = os.path.dirname(os.path.abspath(__file__))
+    return path
+
+
 def get_port(url) -> Optional[str]:
     """
     Functions returns port name from URL.
@@ -127,7 +141,7 @@ def read_language_auto() -> Optional[Language]:
     :return: language for interface.
     """
 
-    dir_name = os.path.dirname(os.path.abspath(__file__))
+    dir_name = get_dir_name()
     filename = os.path.join(dir_name, _FILENAME_FOR_AUTO_SETTINGS)
     if not os.path.exists(filename):
         return Language.EN
@@ -165,7 +179,7 @@ def read_settings_auto(product: EPLab) -> Optional[MeasurementSettings]:
     :return: previous settings for measurement system.
     """
 
-    dir_name = os.path.dirname(os.path.abspath(__file__))
+    dir_name = get_dir_name()
     filename = os.path.join(dir_name, _FILENAME_FOR_AUTO_SETTINGS)
     if not os.path.exists(filename):
         return None
@@ -194,14 +208,16 @@ def save_settings_auto(product: EPLab, settings: MeasurementSettings, language: 
     :param language: language for interface.
     """
 
-    options = product.settings_to_options(settings)
-    options = {"frequency": options[EPLab.Parameter.frequency],
-               "sensitive": options[EPLab.Parameter.sensitive],
-               "voltage": options[EPLab.Parameter.voltage],
-               "language": language}
+    options_config = {}
+    if settings is not None:
+        options = product.settings_to_options(settings)
+        options_config = {"frequency": options[EPLab.Parameter.frequency],
+                          "sensitive": options[EPLab.Parameter.sensitive],
+                          "voltage": options[EPLab.Parameter.voltage]}
+    options_config["language"] = language
     config = configparser.ConfigParser()
-    config["DEFAULT"] = options
-    dir_name = os.path.dirname(os.path.abspath(__file__))
+    config["DEFAULT"] = options_config
+    dir_name = get_dir_name()
     filename = os.path.join(dir_name, _FILENAME_FOR_AUTO_SETTINGS)
     with open(filename, "w") as configfile:
         config.write(configfile)

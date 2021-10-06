@@ -328,7 +328,10 @@ class EPLabWindow(Ui_MainWindow):
         ico_file_name = os.path.join(dir_name, "media", "ico.png")
         self.setWindowIcon(QIcon(ico_file_name))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
-        self.setMinimumWidth(650)
+        if system() == "Windows":
+            self.setMinimumWidth(650)
+        else:
+            self.setMinimumWidth(700)
         self.move(50, 50)
 
         self._device_errors_handler = DeviceErrorsHandler()
@@ -981,7 +984,11 @@ class EPLabWindow(Ui_MainWindow):
             qApp.instance().removeTranslator(self._translator)
             qApp.instance().setProperty("language", language)
             language_name = Language.get_language(language)
-            ut.save_settings_auto(self._product, self._msystem.get_settings(), language_name)
+            if self._msystem is not None:
+                settings = self._msystem.get_settings()
+            else:
+                settings = None
+            ut.save_settings_auto(self._product, settings, language_name)
             if translator:
                 self._translator.load(translator)
                 qApp.instance().installTranslator(self._translator)
@@ -1106,7 +1113,8 @@ class EPLabWindow(Ui_MainWindow):
     def changeEvent(self, event: QEvent):
         if event.type() == QEvent.LanguageChange:
             self.retranslateUi(self)
-            self._update_translation_for_scroll_areas_for_parameters()
+            if self._msystem is not None:
+                self._update_translation_for_scroll_areas_for_parameters()
             geometry = self.geometry()
             size = QSize(geometry.width(), geometry.height())
             event = QResizeEvent(size, size)
@@ -1204,7 +1212,7 @@ class EPLabWindow(Ui_MainWindow):
         if system() == "Windows":
             size = 1150 if lang is Language.EN else 1350
         else:
-            size = 1300 if lang is Language.EN else 1600
+            size = 1300 if lang is Language.EN else 1650
         # Change style of toolbars
         tool_bars = self.toolBar_write, self.toolBar_cursor, self.toolBar_mode
         for tool_bar in tool_bars:
