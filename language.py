@@ -32,6 +32,16 @@ class Language(Enum):
         for value, name in _LANGUAGES.items():
             yield value, name
 
+    @classmethod
+    def get_translator_file(cls, value: "Language") -> str:
+        """
+        Method returns path to file with translation for given language.
+        :param value: value of language.
+        :return: path to file with translation.
+        """
+
+        return _FILES.get(value)
+
 
 _LANGUAGES = {Language.ru: "Русский",
               Language.en: "English"}
@@ -84,7 +94,7 @@ class LanguageSelectionWindow(qt.QDialog):
 
         return self.combo_box_languages.currentData()
 
-    def get_translator(self) -> str:
+    def get_translator_file(self) -> str:
         """
         Method returns file with translation for selected language.
         :return: path to file with required translation.

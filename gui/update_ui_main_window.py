@@ -28,16 +28,16 @@ while True:
     new_path = f"os.path.join(self.dir_name, \"{file_name.group('file_name')}\")"
     text = text[:result.start()] + new_path + text[result.end():]
 
-# Retranslate unicodes
-text = text.replace("\\\"", "'")
+# Convert unicodes
+text = text.replace('"', "'")
 pattern_label = re.compile(r"translate\(\"MainWindow\", (?P<label>u\".+\")")
 while True:
     result = pattern_label.search(text)
     if not result:
         break
     label = result.group("label")[2:-1]
-    label = eval(f"u\"{label}\"")
-    text = text[:result.start()] + f"translate(\"MainWindow\", \"{label}\"" + text[result.end():]
+    label = eval(f'u"{label}"')
+    text = text[:result.start()] + f'translate("MainWindow", "{label}"' + text[result.end():]
 
 # Delete comments
 pattern = re.compile(r"\n\s*#.*")

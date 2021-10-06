@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
+"""
+File with class for main window of application. This class is created by Qt Designer.
+"""
 
 import os
-from PyQt5.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
-    QRect, QSize, QUrl, Qt)
-from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
-    QFontDatabase, QIcon, QLinearGradient, QPalette, QPainter, QPixmap,
-    QRadialGradient)
-from PyQt5.QtWidgets import *
+from PyQt5.QtCore import (QCoreApplication, QMetaObject, QRect, QSize, Qt)
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (QAction, QDockWidget, QLabel, QLineEdit, QMainWindow, QMenu, QMenuBar,
+                             QPushButton, QSizePolicy, QSpacerItem, QToolBar, QVBoxLayout, QWidget)
 
 
 class Ui_MainWindow(QMainWindow):
@@ -180,7 +180,7 @@ class Ui_MainWindow(QMainWindow):
         sizePolicy.setHeightForWidth(self.scoreDock.sizePolicy().hasHeightForWidth())
         self.scoreDock.setSizePolicy(sizePolicy)
         self.scoreDock.setMaximumSize(QSize(524287, 524287))
-        self.scoreDock.setFeatures(QDockWidget.DockWidgetFloatable|QDockWidget.DockWidgetMovable)
+        self.scoreDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
         self.dockWidgetContents = QWidget()
         self.dockWidgetContents.setObjectName(u"dockWidgetContents")
         self.verticalLayout_5 = QVBoxLayout(self.dockWidgetContents)
@@ -202,7 +202,7 @@ class Ui_MainWindow(QMainWindow):
         MainWindow.addDockWidget(Qt.RightDockWidgetArea, self.scoreDock)
         self.freqDock = QDockWidget(MainWindow)
         self.freqDock.setObjectName(u"freqDock")
-        self.freqDock.setFeatures(QDockWidget.DockWidgetFloatable|QDockWidget.DockWidgetMovable)
+        self.freqDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
         self.freqLayout = QWidget()
         self.freqLayout.setObjectName(u"freqLayout")
         self.verticalLayout_7 = QVBoxLayout(self.freqLayout)
@@ -213,7 +213,7 @@ class Ui_MainWindow(QMainWindow):
         self.currentDock.setObjectName(u"currentDock")
         sizePolicy.setHeightForWidth(self.currentDock.sizePolicy().hasHeightForWidth())
         self.currentDock.setSizePolicy(sizePolicy)
-        self.currentDock.setFeatures(QDockWidget.DockWidgetFloatable|QDockWidget.DockWidgetMovable)
+        self.currentDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
         self.currentLayout = QWidget()
         self.currentLayout.setObjectName(u"currentLayout")
         self.verticalLayout_8 = QVBoxLayout(self.currentLayout)
@@ -222,7 +222,7 @@ class Ui_MainWindow(QMainWindow):
         MainWindow.addDockWidget(Qt.RightDockWidgetArea, self.currentDock)
         self.voltageDock = QDockWidget(MainWindow)
         self.voltageDock.setObjectName(u"voltageDock")
-        self.voltageDock.setFeatures(QDockWidget.DockWidgetFloatable|QDockWidget.DockWidgetMovable)
+        self.voltageDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
         self.voltageLayout = QWidget()
         self.voltageLayout.setObjectName(u"voltageLayout")
         self.verticalLayout_9 = QVBoxLayout(self.voltageLayout)
@@ -231,7 +231,7 @@ class Ui_MainWindow(QMainWindow):
         MainWindow.addDockWidget(Qt.RightDockWidgetArea, self.voltageDock)
         self.commentDock = QDockWidget(MainWindow)
         self.commentDock.setObjectName(u"commentDock")
-        self.commentDock.setFeatures(QDockWidget.DockWidgetFloatable|QDockWidget.DockWidgetMovable)
+        self.commentDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
         self.dockWidgetContents_6 = QWidget()
         self.dockWidgetContents_6.setObjectName(u"dockWidgetContents_6")
         self.verticalLayout_10 = QVBoxLayout(self.dockWidgetContents_6)
@@ -362,13 +362,19 @@ class Ui_MainWindow(QMainWindow):
         self.new_file_action.setText(QCoreApplication.translate("MainWindow", "Создать план тестирования", None))
         self.open_file_action.setText(QCoreApplication.translate("MainWindow", "Открыть план тестирования", None))
         self.save_file_action.setText(QCoreApplication.translate("MainWindow", "Сохранить план тестирования", None))
-        self.save_as_file_action.setText(QCoreApplication.translate("MainWindow", "Сохранить план тестирования как", None))
+        self.save_as_file_action.setText(QCoreApplication.translate("MainWindow", "Сохранить план тестирования как",
+                                                                    None))
         self.save_screen_action.setText(QCoreApplication.translate("MainWindow", "Сохранить скриншот", None))
-        self.open_window_board_action.setText(QCoreApplication.translate("MainWindow", "Открыть окно просмотра платы", None))
+        self.open_window_board_action.setText(QCoreApplication.translate("MainWindow", "Открыть окно просмотра платы",
+                                                                         None))
         self.freeze_curve_a_action.setText(QCoreApplication.translate("MainWindow", "Заморозить канал А", None))
-        self.freeze_curve_a_action.setToolTip(QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#ff0000;'>Заморозить канал А</span></p></body></html>", None))
+        self.freeze_curve_a_action.setToolTip(
+            QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#ff0000;'>"
+                                                     "Заморозить канал А</span></p></body></html>", None))
         self.freeze_curve_b_action.setText(QCoreApplication.translate("MainWindow", "Заморозить канал B", None))
-        self.freeze_curve_b_action.setToolTip(QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#0000ff;'>Заморозить канал B</span></p></body></html>", None))
+        self.freeze_curve_b_action.setToolTip(
+            QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#0000ff;'>"
+                                                     "Заморозить канал B</span></p></body></html>", None))
         self.freeze_curve_b_action.setWhatsThis("")
         self.comparing_mode_action.setText(QCoreApplication.translate("MainWindow", "Сравнение", None))
         self.comparing_mode_action.setIconText(QCoreApplication.translate("MainWindow", "Сравнение", None))
@@ -391,13 +397,19 @@ class Ui_MainWindow(QMainWindow):
         self.remove_cursor_action.setText(QCoreApplication.translate("MainWindow", "Удалить метку", None))
         self.remove_cursor_action.setIconText(QCoreApplication.translate("MainWindow", " Удалить метку", None))
         self.hide_curve_a_action.setText(QCoreApplication.translate("MainWindow", "Скрыть канал А", None))
-        self.hide_curve_a_action.setToolTip(QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#0000ff;'>Скрыть канал А</span></p></body></html>", None))
+        self.hide_curve_a_action.setToolTip(
+            QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#0000ff;'>"
+                                                     "Скрыть канал А</span></p></body></html>", None))
         self.hide_curve_b_action.setText(QCoreApplication.translate("MainWindow", "Скрыть канал B", None))
-        self.hide_curve_b_action.setToolTip(QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#ff0000;'>Скрыть канал B</span></p></body></html>", None))
+        self.hide_curve_b_action.setToolTip(
+            QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#ff0000;'>"
+                                                     "Скрыть канал B</span></p></body></html>", None))
         self.connection_action.setText(QCoreApplication.translate("MainWindow", "Подключение", None))
         self.select_language_action.setText(QCoreApplication.translate("MainWindow", "Язык", None))
         self.scoreDock.setWindowTitle(QCoreApplication.translate("MainWindow", "Степень различия", None))
-        self.score_label.setText(QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' font-size:48pt; color:#73d216;'>0%</span></p></body></html>", None))
+        self.score_label.setText(
+            QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' font-size:48pt;"
+                                                     " color:#73d216;'>0%</span></p></body></html>", None))
         self.freqDock.setWindowTitle(QCoreApplication.translate("MainWindow", "Частота пробного сигнала", None))
         self.currentDock.setWindowTitle(QCoreApplication.translate("MainWindow", "Чувствительность по току", None))
         self.voltageDock.setWindowTitle(QCoreApplication.translate("MainWindow", "Амплитуда пробного сигнала", None))
@@ -422,4 +434,3 @@ class Ui_MainWindow(QMainWindow):
         self.toolBar_mode.setWindowTitle(QCoreApplication.translate("MainWindow", "Режим", None))
         self.toolBar_mode.setToolTip(QCoreApplication.translate("MainWindow", "Режим", None))
         self.toolBar_language.setWindowTitle(QCoreApplication.translate("MainWindow", "toolBar", None))
-

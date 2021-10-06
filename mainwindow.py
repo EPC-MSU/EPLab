@@ -8,27 +8,27 @@ import webbrowser
 from datetime import datetime
 from functools import partial
 from platform import system
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 import numpy as np
 from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt as QtC, QTimer,
                           QTranslator)
-from PyQt5.QtGui import QIcon, QCloseEvent, QColor, QResizeEvent
-from PyQt5.QtWidgets import (QAction, QDialog, QFileDialog, QHBoxLayout, QLabel, QLayout, QLineEdit,
-                             QMessageBox, QPushButton, QRadioButton, QScrollArea, QVBoxLayout,
-                             QWidget)
+from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
+from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMessageBox,
+                             QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 import epcore.filemanager as epfilemanager
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, Pin
 from epcore.ivmeasurer import (IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual,
                                IVMeasurerVirtualASA)
 from epcore.measurementmanager import MeasurementPlan
-from epcore.measurementmanager.utils import Searcher
 from epcore.measurementmanager.ivc_comparator import IVCComparator
+from epcore.measurementmanager.utils import Searcher
 from epcore.product import EPLab
 from ivviewer import Viewer as IVViewer
 import utils as ut
 from boardwindow import BoardWidget
-from common import WorkMode, DeviceErrorsHandler
+from common import DeviceErrorsHandler, WorkMode
 from connection_window import ConnectionWindow
+from gui.ui_mainwindow import Ui_MainWindow
 from language import Language, LanguageSelectionWindow
 from measurer_settings_window import MeasurerSettingsWindow
 from player import SoundPlayer
@@ -36,7 +36,6 @@ from score import ScoreWrapper
 from settings.settings import Settings
 from settings.settingswindow import LowSettingsPanel, SettingsWindow
 from version import Version
-from gui.ui_mainwindow import Ui_MainWindow
 
 
 def show_exception(msg_title: str, msg_text: str, exc: str = ""):
@@ -58,21 +57,106 @@ def show_exception(msg_title: str, msg_text: str, exc: str = ""):
 
 
 class EPLabWindow(Ui_MainWindow):
+    """
+    Class for main window of application.
+    """
+
     default_path = "../EPLab-Files"
 
-    def __init__(self, product: EPLab, port_1: str = None, port_2: str = None):
+    def __init__(self, product: EPLab, port_1: Optional[str] = None, port_2: Optional[str] = None,
+                 english: Optional[bool] = None):
         """
         :param product:
         :param port_1: port for first measurer;
-        :param port_2: port for second measurer.
+        :param port_2: port for second measurer;
+        :param english: if True then interface language will be English.
         """
 
         super().__init__()
-        self._init_ui(product)
+        self._init_ui(product, english)
         if port_1 is None and port_2 is None:
             self.disconnect_devices()
         else:
             self.connect_devices(port_1, port_2)
+
+    def _adjust_plot_params(self, settings: MeasurementSettings):
+        """
+        Adjust plot parameters.
+        :param settings: measurement settings.
+        """
+
+        borders = self._product.adjust_plot_borders(settings)
+        scale = self._product.adjust_plot_scale(settings)
+        self._iv_window.plot.set_scale(*scale)
+        self._iv_window.plot.set_min_borders(*borders)
+
+    def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve,
+                         settings: MeasurementSettings) -> float:
+        """
+        Method calculates score for given IV-curves and measurement settings.
+        :param curve_1: first curve;
+        :param curve_2: second curve;
+        :param settings: measurement settings.
+        :return: score.
+        """
+
+        var_v, var_c = self._get_noise_amplitude(settings)
+        # It is very important to set relevant noise levels
+        self._comparator.set_min_ivc(var_v, var_c)
+        score = self._comparator.compare_ivc(curve_1, curve_2)
+        return score
+
+    def _change_work_mode(self, mode: WorkMode):
+        """
+        Method sets window settings for given work mode.
+        :param mode: work mode.
+        """
+
+        self._player.set_work_mode(mode)
+        if self._work_mode is mode:
+            return
+        # Comment is only for test and write mode
+        self.line_comment_pin.setEnabled(mode is not WorkMode.compare)
+        if mode is WorkMode.compare:
+            # Remove reference curve in case we have only one IVMeasurer
+            # in compare mode
+            if len(self._msystem.measurers) < 2:
+                self._remove_ref_curve()
+        # Drag allowed only in write mode
+        self._board_window.workspace.allow_drag(mode is WorkMode.write)
+        # Disable settings in test mode
+        settings_enable = mode is not WorkMode.test
+        for group in self._option_buttons.values():
+            for button in group.values():
+                button.setEnabled(settings_enable)
+        self._work_mode = mode
+        self._update_current_pin()
+
+    def _check_measurement_plan(self) -> bool:
+        """
+        Method checks if there are pins without measurements.
+        :return: True if there are pins without measurements.
+        """
+
+        empty_pins = ""
+        for pin_index, pin in self._measurement_plan.all_pins_iterator():
+            if not pin.measurements:
+                if empty_pins:
+                    empty_pins += ", "
+                empty_pins += str(pin_index)
+        if empty_pins:
+            if "," in empty_pins:
+                text = qApp.translate("t", "Точки POINTS_PARAM не содержат сохраненных измерений. "
+                                           "Для сохранения плана тестирования все точки должны "
+                                           "содержать сохраненные измерения")
+            else:
+                text = qApp.translate("t", "Точка POINTS_PARAM не содержит сохраненных измерений. "
+                                           "Для сохранения плана тестирования все точки должны "
+                                           "содержать сохраненные измерения")
+            text = text.replace("POINTS_PARAM", empty_pins)
+            show_exception(qApp.translate("t", "Ошибка"), text, "")
+            return True
+        return False
 
     @staticmethod
     def _clear_layout(layout: QLayout):
@@ -127,6 +211,52 @@ class EPLabWindow(Ui_MainWindow):
             action.triggered.connect(partial(self._on_show_device_settings, measurer))
             self.measurers_menu.addAction(action)
 
+    def _create_radio_buttons_for_parameter(self, param_name: EPLab.Parameter,
+                                            available_options: List) -> QWidget:
+        """
+        Method creates radio buttons for options of given parameter and puts
+        them on widget.
+        :param param_name: name of parameter;
+        :param available_options: available options for parameter.
+        :return: widget with radio buttons.
+        """
+
+        lang = qApp.instance().property("language")
+        layout = QVBoxLayout()
+        self._option_buttons[param_name] = {}
+        for option in available_options:
+            button = QRadioButton()
+            layout.addWidget(button)
+            button.setText(option.label_ru if lang == Language.ru else option.label_en)
+            button.clicked.connect(self._on_select_option)
+            self._option_buttons[param_name][option.name] = button
+        widget = QWidget()
+        widget.setLayout(layout)
+        return widget
+
+    def _create_scroll_areas_for_parameters(self, settings: MeasurementSettings):
+        """
+        Method creates scroll areas for different parameters of measuring
+        system. Scroll areas has radio buttons to choose options of parameters.
+        :param settings: measurement settings.
+        """
+
+        available = self._product.get_available_options(settings)
+        self._parameters_scroll_areas = {}
+        layouts = self.freqLayout.layout(), self.voltageLayout.layout(), self.currentLayout.layout()
+        parameters = EPLab.Parameter.frequency, EPLab.Parameter.voltage, EPLab.Parameter.sensitive
+        for i_parameter, parameter in enumerate(parameters):
+            widget_with_options = self._create_radio_buttons_for_parameter(parameter,
+                                                                           available[parameter])
+            scroll_area = QScrollArea()
+            scroll_area.setVerticalScrollBarPolicy(QtC.ScrollBarAlwaysOn)
+            scroll_area.setHorizontalScrollBarPolicy(QtC.ScrollBarAlwaysOff)
+            scroll_area.setWidgetResizable(True)
+            scroll_area.setWidget(widget_with_options)
+            self._parameters_scroll_areas[parameter] = scroll_area
+            self._clear_layout(layouts[i_parameter])
+            layouts[i_parameter].addWidget(scroll_area)
+
     def _disable_optimal_parameter_searcher(self):
         """
         Method disables searcher of optimal parameters. Now searcher can work
@@ -155,41 +285,46 @@ class EPLabWindow(Ui_MainWindow):
         for widget in widgets:
             widget.setEnabled(enabled)
 
-    def _fill_options_widget(self, parameter: EPLab.Parameter) -> QScrollArea:
+    def _get_noise_amplitude(self, settings: MeasurementSettings) -> Tuple[float, float]:
         """
-        Method creates scroll area and fills it with main options for parameter
-        (frequency, voltage or internal resistance) of measuring system.
-        :param parameter: parameter type.
-        :return: scroll area.
+        Return noise amplitudes for given measurement settings.
+        :param settings: measurement settings.
+        :return: noise amplitudes for voltage and current.
         """
 
-        lang = qApp.instance().property("language")
-        v_box = QVBoxLayout()
-        for option in self._product.mparams[parameter].options:
-            button = QRadioButton()
-            v_box.addWidget(button)
-            button.setText(option.label_ru if lang == Language.ru else option.label_en)
-            button.clicked.connect(self._on_settings_btn_checked)
-            self._option_buttons[parameter][option.name] = button
-        widget = QWidget()
-        widget.setLayout(v_box)
-        scroll_area = QScrollArea()
-        scroll_area.setVerticalScrollBarPolicy(QtC.ScrollBarAlwaysOn)
-        scroll_area.setHorizontalScrollBarPolicy(QtC.ScrollBarAlwaysOff)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setWidget(widget)
-        return scroll_area
+        return self._product.adjust_noise_amplitude(settings)
 
-    def _init_ui(self, product: EPLab):
+    def _get_options_from_ui(self) -> Dict[EPLab.Parameter, str]:
+        """
+        Method returns current options for parameters of measuring system
+        from UI.
+        :return: dictionary with selected options for parameters.
+        """
+
+        def _get_checked_button(buttons: Dict) -> str:
+            for name, button in buttons.items():
+                if button.isChecked():
+                    return name
+        return {param: _get_checked_button(self._option_buttons[param])
+                for param in self._option_buttons}
+
+    def _init_threshold(self):
+        """
+        Method initializes initial value (50%) of score threshold.
+        """
+
+        threshold = self._score_wrapper.threshold
+        self._update_threshold(threshold)
+
+    def _init_ui(self, product: EPLab, english: Optional[bool] = None):
         """
         Method initializes widgets on main window and objects.
         :param product:
+        :param english: if True then interface language will be English.
         """
 
         self.setupUi(self)
         dir_name = os.path.dirname(os.path.abspath(__file__))
-        ui_file_name = os.path.join(dir_name, "gui", "mainwindow.ui")
-        # uic.loadUi(ui_file_name, self)
         ico_file_name = os.path.join(dir_name, "media", "ico.png")
         self.setWindowIcon(QIcon(ico_file_name))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
@@ -234,46 +369,42 @@ class EPLabWindow(Ui_MainWindow):
         hbox = QHBoxLayout(self.main_widget)
         hbox.addLayout(vbox)
 
-        self._option_buttons = {EPLab.Parameter.frequency: dict(),
-                                EPLab.Parameter.voltage: dict(),
-                                EPLab.Parameter.sensitive: dict()}
-
         self.connection_action.triggered.connect(self._on_connect_or_disconnect)
         self.open_window_board_action.triggered.connect(self._on_open_board_image)
         self.search_optimal_action.triggered.connect(self._on_search_optimal)
-        self.new_file_action.triggered.connect(self._on_new_board)
+        self.new_file_action.triggered.connect(self._on_create_new_board)
         self.open_file_action.triggered.connect(self._on_load_board)
         self.save_file_action.triggered.connect(self._on_save_board)
         self.save_as_file_action.triggered.connect(self._on_save_board_as)
-        self.last_point_action.triggered.connect(self._on_go_left_pin)
+        self.last_point_action.triggered.connect(self._on_go_to_left_or_right_pin)
         self.num_point_line_edit = QLineEdit(self)
         self.num_point_line_edit.setFixedWidth(40)
         self.num_point_line_edit.setEnabled(False)
         self.toolBar_test.insertWidget(self.next_point_action, self.num_point_line_edit)
         self.num_point_line_edit.returnPressed.connect(self._on_go_selected_pin)
-        self.next_point_action.triggered.connect(self._on_go_right_pin)
-        self.new_point_action.triggered.connect(self._on_new_pin)
+        self.next_point_action.triggered.connect(self._on_go_to_left_or_right_pin)
+        self.new_point_action.triggered.connect(self._on_create_new_pin)
         self.save_point_action.triggered.connect(self._on_save_pin)
         self.add_board_image_action.triggered.connect(self._on_load_board_image)
-        self.about_action.triggered.connect(self._about_product_message)
+        self.about_action.triggered.connect(self._on_show_product_info)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
-        self.sound_enabled_action.toggled.connect(self._on_sound_checked)
-        self.freeze_curve_a_action.toggled.connect(self._on_freeze_a)
-        self.freeze_curve_b_action.toggled.connect(self._on_freeze_b)
-        self.hide_curve_a_action.toggled.connect(self._on_hide_a)
-        self.hide_curve_b_action.toggled.connect(self._on_hide_b)
+        self.sound_enabled_action.toggled.connect(self._on_enable_sound)
+        self.freeze_curve_a_action.toggled.connect(partial(self._on_freeze_curve, 0))
+        self.freeze_curve_b_action.toggled.connect(partial(self._on_freeze_curve, 1))
+        self.hide_curve_a_action.toggled.connect(self._on_hide_curve)
+        self.hide_curve_b_action.toggled.connect(self._on_hide_curve)
         self.add_cursor_action.toggled.connect(self._on_add_cursor)
         self.remove_cursor_action.toggled.connect(self._on_del_cursor)
         self.save_screen_action.triggered.connect(self._on_save_image)
         self.select_language_action.triggered.connect(self._on_select_language)
 
         self.comparing_mode_action.triggered.connect(
-            lambda: self._on_work_mode_switch(WorkMode.compare))
+            lambda: self._on_switch_work_mode(WorkMode.compare))
         self.writing_mode_action.triggered.connect(
-            lambda: self._on_work_mode_switch(WorkMode.write))
-        self.testing_mode_action.triggered.connect(lambda: self._on_work_mode_switch(WorkMode.test))
-        self.settings_mode_action.triggered.connect(self._show_settings_window)
+            lambda: self._on_switch_work_mode(WorkMode.write))
+        self.testing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.test))
+        self.settings_mode_action.triggered.connect(self._on_show_settings_window)
 
         self._work_mode = None
         # Update plot settings at next measurement cycle (place settings here or None)
@@ -289,9 +420,44 @@ class EPLabWindow(Ui_MainWindow):
         self._timer = QTimer()
         self._timer.setInterval(10)
         self._timer.setSingleShot(True)
-        self._timer.timeout.connect(self._periodic_task)
+        self._timer.timeout.connect(self._on_periodic_task)
 
         self._translator = QTranslator()
+        if english:
+            translation_file = Language.get_translator_file(Language.en)
+            self._translator.load(translation_file)
+            qApp.instance().installTranslator(self._translator)
+            qApp.instance().setProperty("language", Language.en)
+        else:
+            qApp.instance().setProperty("language", Language.ru)
+
+    def _open_board_window_if_needed(self):
+        if self._measurement_plan.image:
+            self._board_window.show()
+
+    def _read_curves_periodic_task(self):
+        if self._msystem.measurements_are_ready():
+            # Get curves from devices
+            curves = dict()
+            curves["test"] = self._msystem.measurers[0].get_last_cached_iv_curve()
+            if self._work_mode is WorkMode.compare and len(self._msystem.measurers) > 1:
+                # Display two current curves
+                curves["ref"] = self._msystem.measurers[1].get_last_cached_iv_curve()
+            else:
+                # Reference curve will be read from measurement plan
+                pass
+            if self._skip_curve:
+                self._skip_curve = False
+            else:
+                self._update_curves(curves, self._msystem.get_settings())
+                if self._settings_update_next_cycle:
+                    # New curve with new settings - we must update plot parameters
+                    self._adjust_plot_params(self._settings_update_next_cycle)
+                    self._settings_update_next_cycle = None
+                    # You need to redraw markers with new plot parameters
+                    # (the scale of the plot has changed)
+                    self._iv_window.plot.redraw_cursors()
+            self._msystem.trigger_measurements()
 
     def _read_options_from_json(self) -> Optional[Dict]:
         """
@@ -306,6 +472,73 @@ class EPLabWindow(Ui_MainWindow):
                 file_name = os.path.join(dir_name, "resources", "eplab_asa_options.json")
                 return ut.read_json(file_name)
         return None
+
+    def _reconnect_periodic_task(self):
+        # Draw empty curves
+        self._test_curve = None
+        if self._work_mode is WorkMode.compare:
+            self._ref_curve = None
+        self._update_curves()
+        self.reference_curve_plot.set_curve(None)
+        self.test_curve_plot.set_curve(None)
+        # Draw text
+        self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
+        if self._msystem.reconnect():
+            # Reconnection success!
+            self._device_errors_handler.reset_error()
+            self._iv_window.plot.clear_center_text()
+            with self._device_errors_handler:
+                # Update current settings to reconnected device
+                options = self._get_options_from_ui()
+                settings = self._product.options_to_settings(options,
+                                                             MeasurementSettings(-1, -1, -1, -1))
+                self._set_msystem_settings(settings)
+                self._msystem.trigger_measurements()
+
+    def _reset_board(self):
+        """
+        Set measurement plan to default empty board.
+        """
+
+        # Create default board with 1 pin
+        self._measurement_plan = MeasurementPlan(
+            Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]),
+            measurer=self._msystem.measurers[0])
+
+    def _remove_ref_curve(self):
+        self._ref_curve = None
+
+    def _set_comment(self):
+        comment = self.line_comment_pin.text()
+        self._measurement_plan.get_current_pin().comment = comment
+
+    def _set_msystem_settings(self, settings: MeasurementSettings):
+        self._msystem.set_settings(settings)
+        # Skip next measurement because it still have old settings
+        self._skip_curve = True
+        # When new curve will be received plot parameters will be adjusted
+        self._settings_update_next_cycle = settings
+
+    def _set_options_to_ui(self, options: Dict[EPLab.Parameter, str]):
+        """
+        Method sets options of parameters to UI.
+        """
+
+        for parameter, value in options.items():
+            self._option_buttons[parameter][value].setChecked(True)
+
+    def _set_plot_parameters(self, settings: MeasurementSettings):
+        buttons = self._option_buttons[EPLab.Parameter.sensitive]
+        sensitive = buttons[self._product.settings_to_options(settings)[
+            EPLab.Parameter.sensitive]].text()
+        voltage, current = self._iv_window.plot.get_minor_axis_step()
+        param_dict = {"voltage": voltage,
+                      "current": current,
+                      "score": self._score_wrapper.get_score(),
+                      "sensity": sensitive,
+                      "max_voltage": np.round(settings.max_voltage, 1),
+                      "probe_signal_frequency": np.round(settings.probe_signal_frequency, 1)}
+        self.low_panel_settings.set_all_parameters(**param_dict)
 
     def _set_widgets_to_init_state(self):
         """
@@ -329,8 +562,6 @@ class EPLabWindow(Ui_MainWindow):
         with self._device_errors_handler:
             for measurer in self._msystem.measurers:
                 measurer.open_device()
-        self._work_mode = None
-        self._change_work_mode(WorkMode.compare)  # default mode - compare two curves
         # Update plot settings at next measurement cycle (place settings here or None)
         self._settings_update_next_cycle = None
         # Set to True to skip next measured curves
@@ -349,403 +580,15 @@ class EPLabWindow(Ui_MainWindow):
             self._option_buttons = {}
             self._create_scroll_areas_for_parameters(settings)
             options = self._product.settings_to_options(settings)
-            self._options_to_ui(options)
+            self._set_options_to_ui(options)
+        self._work_mode = None
+        self._change_work_mode(WorkMode.compare)  # default mode - compare two curves
         self._update_current_pin()
         self._init_threshold()
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
         self._current_file_path = None
 
-    def _create_radio_buttons_for_parameter(self, param_name: EPLab.Parameter,
-                                            available_options: List) -> QWidget:
-        """
-        Method creates radio buttons for options of given parameter and puts
-        them on widget.
-        :param param_name: name of parameter;
-        :param available_options: available options for parameter.
-        :return: widget with radio buttons.
-        """
-
-        lang = qApp.instance().property("language")
-        layout = QVBoxLayout()
-        self._option_buttons[param_name] = {}
-        for option in available_options:
-            button = QRadioButton()
-            layout.addWidget(button)
-            button.setText(option.label_ru if lang == Language.ru else option.label_en)
-            button.clicked.connect(self._on_settings_btn_checked)
-            self._option_buttons[param_name][option.name] = button
-        widget = QWidget()
-        widget.setLayout(layout)
-        return widget
-
-    def _create_scroll_areas_for_parameters(self, settings: MeasurementSettings):
-        """
-        Method creates scroll areas for different parameters of measuring
-        system. Scroll areas has radio buttons to choose options of parameters.
-        :param settings: measurement settings.
-        """
-
-        available = self._product.get_available_options(settings)
-        self._parameters_scroll_areas = {}
-        layouts = self.freqLayout.layout(), self.voltageLayout.layout(), self.currentLayout.layout()
-        parameters = EPLab.Parameter.frequency, EPLab.Parameter.voltage, EPLab.Parameter.sensitive
-        for i_parameter, parameter in enumerate(parameters):
-            widget_with_options = self._create_radio_buttons_for_parameter(parameter,
-                                                                           available[parameter])
-            scroll_area = QScrollArea()
-            scroll_area.setVerticalScrollBarPolicy(QtC.ScrollBarAlwaysOn)
-            scroll_area.setHorizontalScrollBarPolicy(QtC.ScrollBarAlwaysOff)
-            scroll_area.setWidgetResizable(True)
-            scroll_area.setWidget(widget_with_options)
-            self._parameters_scroll_areas[parameter] = scroll_area
-            self._clear_layout(layouts[i_parameter])
-            layouts[i_parameter].addWidget(scroll_area)
-
-    def _update_scroll_areas_for_parameters(self, settings: MeasurementSettings):
-        """
-        Method updates scroll areas for different parameters of measuring
-        system.
-        :param settings: measurement settings.
-        """
-
-        available = self._product.get_available_options(settings)
-        for parameter, scroll_area in self._parameters_scroll_areas.items():
-            widget_with_options = self._create_radio_buttons_for_parameter(parameter,
-                                                                           available[parameter])
-            old_widget = scroll_area.takeWidget()
-            del old_widget
-            scroll_area.setWidget(widget_with_options)
-
-    def _get_options_from_ui(self) -> Dict[EPLab.Parameter, str]:
-        """
-        Method returns current options for parameters of measuring system
-        from UI.
-        :return: dictionary with selected options for parameters.
-        """
-
-        def _get_checked_button(buttons: Dict) -> str:
-            for name, button in buttons.items():
-                if button.isChecked():
-                    return name
-        return {param: _get_checked_button(self._option_buttons[param])
-                for param in self._option_buttons}
-
-    def _options_to_ui(self, options: Dict[EPLab.Parameter, str]):
-        """
-        Convert options to UI state.
-        """
-
-        for parameter, value in options.items():
-            self._option_buttons[parameter][value].setChecked(True)
-
-    def _get_min_var(self, settings: MeasurementSettings):
-        """
-        Return 'noise' amplitude for specified mode.
-        """
-
-        return self._product.adjust_noise_amplitude(settings)
-
-    def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve,
-                         settings: MeasurementSettings) -> float:
-        var_v, var_c = self._get_min_var(settings)
-        # It is very important to set relevant noise levels
-        self._comparator.set_min_ivc(var_v, var_c)
-        score = self._comparator.compare_ivc(curve_1, curve_2)
-        return score
-
-    def _change_work_mode(self, mode: WorkMode):
-        self._player.set_work_mode(mode)
-        if self._work_mode is mode:
-            return
-        # Comment is only for test and write mode
-        self.line_comment_pin.setEnabled(mode is not WorkMode.compare)
-
-        if mode is WorkMode.compare:
-            # Remove reference curve in case we have only one IVMeasurer
-            # in compare mode
-            if len(self._msystem.measurers) < 2:
-                self._remove_ref_curve()
-
-        # Drag allowed only in write mode
-        self._board_window.workspace.allow_drag(mode is WorkMode.write)
-
-        settings_enable = mode is not WorkMode.test  # Disable settings in test mode
-        for group in self._option_buttons.values():
-            for button in group.values():
-                button.setEnabled(settings_enable)
-
-        self._work_mode = mode
-        self._update_current_pin()
-
-    def _open_board_window_if_needed(self):
-        if self._measurement_plan.image:
-            self._board_window.show()
-
-    @pyqtSlot()
-    def _on_connect_or_disconnect(self):
-        """
-        Slot shows dialog window to select devices for connection.
-        """
-
-        connection_wnd = ConnectionWindow(self)
-        connection_wnd.exec()
-
-    @pyqtSlot()
-    def _on_select_language(self):
-        """
-        Slot shows dialog window to select language.
-        """
-
-        language_selection_wnd = LanguageSelectionWindow(self)
-        if language_selection_wnd.exec():
-            language = language_selection_wnd.get_language()
-            translator = language_selection_wnd.get_translator()
-            qApp.instance().removeTranslator(self._translator)
-            qApp.instance().setProperty("language", language)
-            if translator:
-                self._translator.load(translator)
-                qApp.instance().installTranslator(self._translator)
-
-    def changeEvent(self, event: QEvent):
-        print(23232323232)
-        if event.type() == QEvent.LanguageChange:
-            print(322323)
-            self.retranslateUi(self)
-
-    @pyqtSlot(IVMeasurerBase, bool)
-    def _on_show_device_settings(self, selected_measurer: IVMeasurerBase, checked: bool):
-        """
-        Slot shows window to select device settings.
-        :param selected_measurer: measurer for which device settings should be
-        displayed;
-        :param checked: not used.
-        """
-
-        for measurer in self._msystem.measurers:
-            if measurer == selected_measurer:
-                all_settings = measurer.get_all_settings()
-                dialog = MeasurerSettingsWindow(self, all_settings, measurer)
-                if dialog.exec_():
-                    dialog.set_parameters()
-                return
-
-    @pyqtSlot(bool)
-    def _on_add_cursor(self, state: bool):
-        if state:
-            self.remove_cursor_action.setChecked(False)
-        self._iv_window.plot.set_state_adding_cursor(state)
-
-    @pyqtSlot(bool)
-    def _on_del_cursor(self, state: bool):
-        if state:
-            self.add_cursor_action.setChecked(False)
-        self._iv_window.plot.set_state_removing_cursor(state)
-
-    @pyqtSlot()
-    def _on_open_board_image(self):
-        self._open_board_window_if_needed()
-        if not self._measurement_plan.image:
-            msg = QMessageBox()
-            msg.setWindowTitle(qApp.translate("t", "Открытие изображения платы"))
-            msg.setText(qApp.translate("t", "Для данной платы изображение не задано!"))
-            msg.exec_()
-
-    @pyqtSlot()
-    def auto_calibrate(self):
-        with self._device_errors_handler:
-            self._msystem.calibrate()
-
-    @pyqtSlot(bool)
-    def _on_hide_a(self, state: bool):
-        self._hide_curve_test = state
-
-    @pyqtSlot(bool)
-    def _on_hide_b(self, state: bool):
-        self._hide_curve_ref = state
-
-    @pyqtSlot()
-    def _on_search_optimal(self):
-        with self._device_errors_handler:
-            searcher = Searcher(self._msystem.measurers[0], self._product.mparams)
-            optimal_settings = searcher.search_optimal_settings()
-            self._set_msystem_settings(optimal_settings)
-            options = self._product.settings_to_options(optimal_settings)
-            self._options_to_ui(options)
-
-    def _freeze_measurer(self, measurer_id: int, state: bool):
-        if measurer_id < len(self._msystem.measurers):
-            if state:
-                self._msystem.measurers[measurer_id].freeze()
-            else:
-                self._msystem.measurers[measurer_id].unfreeze()
-
-    @pyqtSlot(bool)
-    def _on_freeze_a(self, state: bool):
-        self._freeze_measurer(0, state)
-
-    @pyqtSlot(bool)
-    def _on_freeze_b(self, state: bool):
-        self._freeze_measurer(1, state)
-
-    @pyqtSlot(bool)
-    def _on_sound_checked(self, state: bool):
-        self._player.set_mute(not state)
-
-    @pyqtSlot(bool)
-    def _about_product_message(self):
-        def msgbtn(i):
-            if i.text() == "Перейти" or i.text() == "Go":
-                webbrowser.open_new_tab("http://eyepoint.physlab.ru")
-
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Information)
-        msg.setWindowTitle(qApp.translate("t", "Справка"))
-        msg.setText(self.windowTitle())
-        msg.setInformativeText(qApp.translate(
-            "t", "Программное обеспечение для работы с устройствами линейки EyePoint,"
-                 " предназначенными для поиска неисправностей на печатных платах в "
-                 "ручном режиме (при помощи ручных щупов). Для более подробной информации "
-                 "об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru."))
-        msg.addButton(qApp.translate("t", "Перейти"), QMessageBox.YesRole)
-        msg.addButton(qApp.translate("t", "ОК"), QMessageBox.NoRole)
-        msg.buttonClicked.connect(msgbtn)
-        msg.exec_()
-
-    @pyqtSlot()
-    def _on_save_comment(self):
-        comment = self.line_comment_pin.text()
-        self._measurement_plan.get_current_pin().comment = comment
-
-    @pyqtSlot()
-    def _on_save_image(self):
-        # Freeze image at first
-        image = self.grab(self.rect())
-
-        filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
-        dir_path = os.path.join(self.default_path, "Screenshot")
-        if not os.path.isdir(dir_path):
-            os.makedirs(dir_path)
-
-        filename = QFileDialog.getSaveFileName(
-            self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
-            directory=os.path.join(dir_path, filename))[0]
-        if filename:
-            if not filename.endswith(".png"):
-                filename += ".png"
-            image.save(filename)
-
-    def _init_threshold(self):
-        """
-        Method initializes initial value (50%) of score threshold.
-        """
-
-        threshold = self._score_wrapper.threshold
-        self._update_threshold(threshold)
-
-    @pyqtSlot()
-    def _show_settings_window(self):
-        """
-        Method is called when you click on 'Settings' button, it shows
-        settings window.
-        """
-
-        self.__settings = None
-        settings_window = SettingsWindow(self, self._score_wrapper.threshold)
-        settings_window.exec()
-
-    def _update_threshold(self, threshold: float):
-        """
-        Method updates score threshold value in _score_wrapper and _player.
-        :param threshold: score threshold value.
-        """
-
-        self._score_wrapper.set_threshold(threshold)
-        self._player.set_threshold(threshold)
-
-    def apply_settings(self, threshold: float):
-        """
-        Method applies settings from settings window.
-        :param threshold: threshold value.
-        """
-
-        if (self.__settings is None or
-                (self.__settings and self.__settings.score_threshold != threshold)):
-            # Settings were not loaded from file
-            self._update_threshold(threshold)
-            return
-        # Settings were loaded from file
-        self._on_work_mode_switch(self.__settings.work_mode)
-        settings = self.__settings.measurement_settings()
-        options = self._product.settings_to_options(settings)
-        self._options_to_ui(options)
-        self._set_msystem_settings(settings)
-        self.hide_curve_a_action.setChecked(self.__settings.hide_curve_a)
-        self.hide_curve_b_action.setChecked(self.__settings.hide_curve_b)
-        self.sound_enabled_action.setChecked(self.__settings.sound_enabled)
-        self._update_threshold(self.__settings.score_threshold)
-
-    def get_settings(self, threshold: float) -> Settings:
-        """
-        Method returns current applied settings in object.
-        :param threshold: threshold value.
-        :return: current settings.
-        """
-
-        settings = Settings()
-        settings.set_measurement_settings(self._msystem.get_settings())
-        if self.testing_mode_action.isChecked():
-            settings.work_mode = WorkMode.test
-        elif self.writing_mode_action.isChecked():
-            settings.work_mode = WorkMode.write
-        else:
-            settings.work_mode = WorkMode.compare
-        settings.score_threshold = threshold
-        settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
-        settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
-        settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
-        return settings
-
-    def open_settings_from_file(self, file_path: str) -> float:
-        """
-        Method reads settings from file with given path and returns score
-        threshold.
-        :param file_path: path to file with settings.
-        :return: score threshold.
-        """
-
-        self.__settings = Settings()
-        self.__settings.import_(path=file_path)
-        return self.__settings.score_threshold
-
-    @pyqtSlot(bool)
-    def _on_work_mode_switch(self, mode: WorkMode):
-        self.comparing_mode_action.setChecked(mode is WorkMode.compare)
-        self.writing_mode_action.setChecked(mode is WorkMode.write)
-        self.testing_mode_action.setChecked(mode is WorkMode.test)
-        self.next_point_action.setEnabled(mode is not WorkMode.compare)
-        self.last_point_action.setEnabled(mode is not WorkMode.compare)
-        self.num_point_line_edit.setEnabled(mode is not WorkMode.compare)
-        self.new_point_action.setEnabled(mode is WorkMode.write)
-        self.save_point_action.setEnabled(mode is WorkMode.write)
-        self.add_board_image_action.setEnabled(mode is WorkMode.write)
-        self._change_work_mode(mode)
-
-    @pyqtSlot(QPointF)
-    def _on_board_right_click(self, point: QPointF):
-        if self._work_mode is WorkMode.write:
-            # Create new pin
-            pin = Pin(x=point.x(), y=point.y(), measurements=[])
-            self._measurement_plan.append_pin(pin)
-            self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
-            self._update_current_pin()
-
-    def _set_comment(self):
-        comment = self.line_comment_pin.text()
-        self._measurement_plan.get_current_pin().comment = comment
-        self.line_comment_pin.setText(self._measurement_plan.get_current_pin().comment or "")
-
-    @pyqtSlot()
     def _update_current_pin(self):
         """
         Call this method when current pin index changed.
@@ -754,241 +597,23 @@ class EPLabWindow(Ui_MainWindow):
         index = self._measurement_plan.get_current_index()
         self.num_point_line_edit.setText(str(index))
         self._board_window.workspace.select_point(index)
-
         if self._work_mode in (WorkMode.test, WorkMode.write):
             current_pin = self._measurement_plan.get_current_pin()
             measurement = current_pin.get_reference_measurement()
             self.line_comment_pin.returnPressed.connect(self._set_comment)
             self.line_comment_pin.setText(current_pin.comment or "")
-
             if measurement:
                 with self._device_errors_handler:
                     settings = measurement.settings
                     self._set_msystem_settings(settings)
                     options = self._product.settings_to_options(settings)
-                    self._options_to_ui(options)
+                    self._set_options_to_ui(options)
                     self._update_curves({"ref": measurement.ivc},
                                         self._msystem.measurers[0].get_settings())
             else:
                 self._remove_ref_curve()
                 self._update_curves({}, self._msystem.measurers[0].get_settings())
 
-    @pyqtSlot()
-    def _on_go_selected_pin(self):
-        try:
-            num_point = int(self.num_point_line_edit.text())
-        except ValueError as exc:
-            show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                           qApp.translate("t", "Неверный формат номера точки. Номер точки может"
-                                               " принимать только целочисленное значение!"),
-                           str(exc))
-            return
-
-        try:
-            self._measurement_plan.go_pin(num_point)
-        except ValueError as exc:
-            show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                           qApp.translate("t", "Точка с таким номером не найдена на "
-                                               "данной плате."), str(exc))
-            return
-        self._update_current_pin()
-        self._open_board_window_if_needed()
-
-    @pyqtSlot()
-    def _on_go_left_pin(self):
-        self._measurement_plan.go_prev_pin()
-        self._update_current_pin()
-        self._open_board_window_if_needed()
-
-    @pyqtSlot()
-    def _on_go_right_pin(self):
-        self._measurement_plan.go_next_pin()
-        self._update_current_pin()
-        self._open_board_window_if_needed()
-
-    @pyqtSlot()
-    def _on_new_pin(self):
-        if self._measurement_plan.image:
-            # Place at the center of current viewpoint by default
-            width = self._board_window.workspace.width()
-            height = self._board_window.workspace.height()
-            point = self._board_window.workspace.mapToScene(int(width / 2), int(height / 2))
-            pin = Pin(point.x(), point.y(), measurements=[])
-        else:
-            pin = Pin(0, 0, measurements=[])
-
-        self._measurement_plan.append_pin(pin)
-        self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
-        self.line_comment_pin.setText(pin.comment or "")
-
-        # It is important to initialize pin with real measurement.
-        # Otherwise user can create several empty points and they will not be unique.
-        # This will cause some errors during ufiv validation.
-        # self._on_save_pin()
-        self._update_current_pin()
-
-    @pyqtSlot()
-    def _on_save_pin(self):
-        """
-        Save current pin IVC as reference for current pin.
-        """
-
-        with self._device_errors_handler:
-            self._measurement_plan.save_last_measurement_as_reference()
-        self._set_comment()
-        self._update_current_pin()
-
-    def _reset_board(self):
-        """
-        Set measurement plan to default empty board.
-        """
-
-        # Create default board with 1 pin
-        self._measurement_plan = MeasurementPlan(
-            Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]),
-            measurer=self._msystem.measurers[0])
-
-    @pyqtSlot()
-    def _on_new_board(self):
-        if self._current_file_path is not None:
-            d = QDialog()
-            d.setWindowTitle(qApp.translate("t", "Внимание"))
-            d.setWindowModality(QtC.ApplicationModal)
-            label = QLabel(qApp.translate("t", "Сохранить изменения в файл?"))
-            btn_yes = QPushButton(qApp.translate("t", "Да"))
-            btn_yes.clicked.connect(d.accept)
-            btn_no = QPushButton(qApp.translate("t", "Нет"))
-            btn_no.clicked.connect(lambda: d.done(10))
-            btn_cancel = QPushButton(qApp.translate("t", "Отмена"))
-            btn_cancel.clicked.connect(d.reject)
-            hl = QHBoxLayout()
-            hl.addWidget(btn_yes)
-            hl.addWidget(btn_no)
-            hl.addWidget(btn_cancel)
-            layout = QVBoxLayout()
-            layout.addWidget(label)
-            layout.addLayout(hl)
-            d.setLayout(layout)
-            resp = d.exec()
-            if resp == QDialog.Accepted:
-                self._on_save_board()
-            elif resp == 10:
-                pass
-            elif resp == QDialog.Rejected:
-                return
-        if not os.path.isdir(self.default_path):
-            os.mkdir(self.default_path)
-        if not os.path.isdir(os.path.join(self.default_path, "Reference")):
-            os.mkdir(os.path.join(self.default_path, "Reference"))
-        dialog = QFileDialog()
-        filename = dialog.getSaveFileName(
-            self, qApp.translate("t", "Создать новую плату"),
-            filter="UFIV Archived File (*.uzf)",
-            directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
-        if filename:
-            self._current_file_path = filename
-            self._reset_board()
-            epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
-            self._board_window.set_board(self._measurement_plan)
-            self._update_current_pin()
-
-    def _check_measurement_plan(self) -> bool:
-        """
-        Method checks if there are pins without measurements.
-        :return: True if there are pins without measurements.
-        """
-
-        empty_pins = ""
-        for pin_index, pin in self._measurement_plan.all_pins_iterator():
-            if not pin.measurements:
-                if empty_pins:
-                    empty_pins += ", "
-                empty_pins += str(pin_index)
-        if empty_pins:
-            if "," in empty_pins:
-                text = qApp.translate("t", "Точки POINTS_PARAM не содержат сохраненных измерений. "
-                                           "Для сохранения плана тестирования все точки должны "
-                                           "содержать сохраненные измерения")
-            else:
-                text = qApp.translate("t", "Точка POINTS_PARAM не содержит сохраненных измерений. "
-                                           "Для сохранения плана тестирования все точки должны "
-                                           "содержать сохраненные измерения")
-            text = text.replace("POINTS_PARAM", empty_pins)
-            show_exception(qApp.translate("t", "Ошибка"), text, "")
-            return True
-        return False
-
-    @pyqtSlot()
-    def _on_save_board_as(self):
-        """
-        Method saves board in new file.
-        """
-
-        if self._check_measurement_plan():
-            return
-        if not os.path.isdir(self.default_path):
-            os.mkdir(self.default_path)
-        if not os.path.isdir(os.path.join(self.default_path, "Reference")):
-            os.mkdir(os.path.join(self.default_path, "Reference"))
-        dialog = QFileDialog()
-        filename = dialog.getSaveFileName(
-            self, qApp.translate("t", "Сохранить плату"), filter="UFIV Archived File (*.uzf)",
-            directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
-        if filename:
-            self._current_file_path = epfilemanager.save_board_to_ufiv(filename,
-                                                                       self._measurement_plan)
-
-    @pyqtSlot()
-    def _on_save_board(self):
-        """
-        Method saves board in file.
-        """
-
-        if self._check_measurement_plan():
-            return
-        if not self._current_file_path:
-            return self._on_save_board_as()
-        self._current_file_path = epfilemanager.save_board_to_ufiv(self._current_file_path,
-                                                                   self._measurement_plan)
-
-    @pyqtSlot()
-    def _on_load_board(self):
-        """
-        'Load board' button handler.
-        """
-
-        dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
-                                          filter="Board Files (*.json *.uzf)")[0]
-        if filename:
-            try:
-                board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
-            except Exception as exc:
-                show_exception(qApp.translate("t", "Ошибка"),
-                               qApp.translate("t", "Формат файла не подходит"), str(exc))
-                return
-            self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
-            # New workspace will be created here
-            self._board_window.set_board(self._measurement_plan)
-            self._update_current_pin()
-            self._open_board_window_if_needed()
-
-    @pyqtSlot()
-    def _on_load_board_image(self):
-        """
-        'Load board image' button handler.
-        """
-
-        dialog = QFileDialog()
-        filename = dialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
-                                          filter="Image Files (*.png *.jpg *.bmp)")[0]
-        if filename:
-            epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
-            self._board_window.set_board(self._measurement_plan)
-            self._update_current_pin()
-            self._open_board_window_if_needed()
-
-    @pyqtSlot()
     def _update_curves(self, curves: Dict[str, IVCurve] = None,
                        settings: MeasurementSettings = None):
         # TODO: let the function work with larger lists
@@ -1016,83 +641,232 @@ class EPLabWindow(Ui_MainWindow):
         else:
             self._score_wrapper.set_dummy_score()
         if settings is not None:
-            self.plot_parameters(settings)
+            self._set_plot_parameters(settings)
 
-    def plot_parameters(self, settings: MeasurementSettings):
-        buttons = self._option_buttons[EPLab.Parameter.sensitive]
-        sensitive = buttons[self._product.settings_to_options(settings)[
-            EPLab.Parameter.sensitive]].text()
-        voltage, current = self._iv_window.plot.get_minor_axis_step()
-        param_dict = {"voltage": voltage,
-                      "current": current,
-                      "score": self._score_wrapper.get_score(),
-                      "sensity": sensitive,
-                      "max_voltage": np.round(settings.max_voltage, 1),
-                      "probe_signal_frequency": np.round(settings.probe_signal_frequency, 1)}
-        self.low_panel_settings.set_all_parameters(**param_dict)
-
-    def _remove_ref_curve(self):
-        self._ref_curve = None
-
-    def _adjust_plot_params(self, settings: MeasurementSettings):
+    def _update_scroll_areas_for_parameters(self, settings: MeasurementSettings):
         """
-        Adjust plot parameters.
+        Method updates scroll areas for different parameters of measuring
+        system.
         :param settings: measurement settings.
         """
 
-        borders = self._product.adjust_plot_borders(settings)
-        scale = self._product.adjust_plot_scale(settings)
-        self._iv_window.plot.set_scale(*scale)
-        self._iv_window.plot.set_min_borders(*borders)
+        available = self._product.get_available_options(settings)
+        for parameter, scroll_area in self._parameters_scroll_areas.items():
+            widget_with_options = self._create_radio_buttons_for_parameter(parameter,
+                                                                           available[parameter])
+            old_widget = scroll_area.takeWidget()
+            del old_widget
+            scroll_area.setWidget(widget_with_options)
 
-    def _reconnect_periodic_task(self):
-        # Draw empty curves
-        self._test_curve = None
-        if self._work_mode is WorkMode.compare:
-            self._ref_curve = None
-        self._update_curves()
-        self.reference_curve_plot.set_curve(None)
-        self.test_curve_plot.set_curve(None)
-        # Draw text
-        self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
-        if self._msystem.reconnect():
-            # Reconnection success!
-            self._device_errors_handler.reset_error()
-            self._iv_window.plot.clear_center_text()
-            with self._device_errors_handler:
-                # Update current settings to reconnected device
-                options = self._get_options_from_ui()
-                settings = self._product.options_to_settings(options,
-                                                             MeasurementSettings(-1, -1, -1, -1))
-                self._set_msystem_settings(settings)
-                self._msystem.trigger_measurements()
+    def _update_threshold(self, threshold: float):
+        """
+        Method updates score threshold value in _score_wrapper and _player.
+        :param threshold: score threshold value.
+        """
 
-    def _read_curves_periodic_task(self):
-        if self._msystem.measurements_are_ready():
-            # Get curves from devices
-            curves = dict()
-            curves["test"] = self._msystem.measurers[0].get_last_cached_iv_curve()
-            if self._work_mode is WorkMode.compare and len(self._msystem.measurers) > 1:
-                # Display two current curves
-                curves["ref"] = self._msystem.measurers[1].get_last_cached_iv_curve()
-            else:
-                # Reference curve will be read from measurement plan
-                pass
-            if self._skip_curve:
-                self._skip_curve = False
-            else:
-                self._update_curves(curves, self._msystem.get_settings())
-                if self._settings_update_next_cycle:
-                    # New curve with new settings - we must update plot parameters
-                    self._adjust_plot_params(self._settings_update_next_cycle)
-                    self._settings_update_next_cycle = None
-                    # You need to redraw markers with new plot parameters
-                    # (the scale of the plot has changed)
-                    self._iv_window.plot.redraw_cursors()
-            self._msystem.trigger_measurements()
+        self._score_wrapper.set_threshold(threshold)
+        self._player.set_threshold(threshold)
+
+    @pyqtSlot(bool)
+    def _on_add_cursor(self, state: bool):
+        if state:
+            self.remove_cursor_action.setChecked(False)
+        self._iv_window.plot.set_state_adding_cursor(state)
+
+    @pyqtSlot(int, QPointF)
+    def _on_board_pin_moved(self, number: int, point: QPointF):
+        self._measurement_plan.go_pin(number)
+        self._measurement_plan.get_current_pin().x = point.x()
+        self._measurement_plan.get_current_pin().y = point.y()
+
+    @pyqtSlot(int)
+    def _on_board_pin_selected(self, number: int):
+        self._measurement_plan.go_pin(number)
+        self._update_current_pin()
+
+    @pyqtSlot(QPointF)
+    def _on_board_right_click(self, point: QPointF):
+        if self._work_mode is WorkMode.write:
+            # Create new pin
+            pin = Pin(x=point.x(), y=point.y(), measurements=[])
+            self._measurement_plan.append_pin(pin)
+            self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
+            self._update_current_pin()
 
     @pyqtSlot()
-    def _periodic_task(self):
+    def _on_connect_or_disconnect(self):
+        """
+        Slot shows dialog window to select devices for connection.
+        """
+
+        connection_wnd = ConnectionWindow(self)
+        connection_wnd.exec()
+
+    @pyqtSlot()
+    def _on_create_new_board(self):
+        if self._current_file_path is not None:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setWindowTitle(qApp.translate("t", "Внимание"))
+            msg.setText(self.windowTitle())
+            msg.setInformativeText(qApp.translate("t", "Сохранить изменения в файл?"))
+            msg.addButton(qApp.translate("t", "Да"), QMessageBox.YesRole)
+            msg.addButton(qApp.translate("t", "Нет"), QMessageBox.NoRole)
+            msg.addButton(qApp.translate("t", "Отмена"), QMessageBox.RejectRole)
+            result = msg.exec_()
+            if result == 0:
+                self._on_save_board()
+            elif result == 1:
+                pass
+            else:
+                return
+        if not os.path.isdir(self.default_path):
+            os.mkdir(self.default_path)
+        if not os.path.isdir(os.path.join(self.default_path, "Reference")):
+            os.mkdir(os.path.join(self.default_path, "Reference"))
+        filename = QFileDialog.getSaveFileName(
+            self, qApp.translate("t", "Создать новую плату"), filter="UFIV Archived File (*.uzf)",
+            directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
+        if filename:
+            self._current_file_path = filename
+            self._reset_board()
+            epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
+            self._board_window.set_board(self._measurement_plan)
+            self._update_current_pin()
+
+    @pyqtSlot()
+    def _on_create_new_pin(self):
+        if self._measurement_plan.image:
+            # Place at the center of current viewpoint by default
+            width = self._board_window.workspace.width()
+            height = self._board_window.workspace.height()
+            point = self._board_window.workspace.mapToScene(int(width / 2), int(height / 2))
+            pin = Pin(point.x(), point.y(), measurements=[])
+        else:
+            pin = Pin(0, 0, measurements=[])
+
+        self._measurement_plan.append_pin(pin)
+        self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
+        self.line_comment_pin.setText(pin.comment or "")
+
+        # It is important to initialize pin with real measurement.
+        # Otherwise user can create several empty points and they will not be unique.
+        # This will cause some errors during ufiv validation.
+        # self._on_save_pin()
+        self._update_current_pin()
+
+    @pyqtSlot(bool)
+    def _on_del_cursor(self, state: bool):
+        if state:
+            self.add_cursor_action.setChecked(False)
+        self._iv_window.plot.set_state_removing_cursor(state)
+
+    @pyqtSlot(bool)
+    def _on_enable_sound(self, state: bool):
+        self._player.set_mute(not state)
+
+    @pyqtSlot(int, bool)
+    def _on_freeze_curve(self, measurer_id: int, state: bool):
+        """
+        Slot freezes or unfreezes curve for measurer with given index.
+        :param measurer_id: index of measurer;
+        :param state: if True then curve will be frozen.
+        """
+
+        if measurer_id < len(self._msystem.measurers):
+            if state:
+                self._msystem.measurers[measurer_id].freeze()
+            else:
+                self._msystem.measurers[measurer_id].unfreeze()
+
+    @pyqtSlot()
+    def _on_go_selected_pin(self):
+        try:
+            num_point = int(self.num_point_line_edit.text())
+        except ValueError as exc:
+            show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                           qApp.translate("t", "Неверный формат номера точки. Номер точки может"
+                                               " принимать только целочисленное значение!"),
+                           str(exc))
+            return
+        try:
+            self._measurement_plan.go_pin(num_point)
+        except ValueError as exc:
+            show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                           qApp.translate("t", "Точка с таким номером не найдена на "
+                                               "данной плате."), str(exc))
+            return
+        self._update_current_pin()
+        self._open_board_window_if_needed()
+
+    @pyqtSlot()
+    def _on_go_to_left_or_right_pin(self):
+        if self.sender() is self.last_point_action:
+            self._measurement_plan.go_prev_pin()
+        else:
+            self._measurement_plan.go_next_pin()
+        self._update_current_pin()
+        self._open_board_window_if_needed()
+
+    @pyqtSlot(bool)
+    def _on_hide_curve(self, state: bool):
+        """
+        Slot sets parameter to hide or show curve.
+        :param state: if True then curve will be hidden.
+        """
+
+        if self.sender() is self.hide_curve_a_action:
+            self._hide_curve_test = state
+        elif self.sender() is self.hide_curve_b_action:
+            self._hide_curve_ref = state
+
+    @pyqtSlot()
+    def _on_load_board(self):
+        """
+        Slot loads board from file.
+        """
+
+        filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
+                                               filter="Board Files (*.json *.uzf)")[0]
+        if filename:
+            try:
+                board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
+            except Exception as exc:
+                show_exception(qApp.translate("t", "Ошибка"),
+                               qApp.translate("t", "Формат файла не подходит"), str(exc))
+                return
+            self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
+            # New workspace will be created here
+            self._board_window.set_board(self._measurement_plan)
+            self._update_current_pin()
+            self._open_board_window_if_needed()
+
+    @pyqtSlot()
+    def _on_load_board_image(self):
+        """
+        Slot loads image for board from file.
+        """
+
+        filename = QFileDialog.getOpenFileName(
+            self, qApp.translate("t", "Открыть изображение платы"),
+            filter="Image Files (*.png *.jpg *.bmp)")[0]
+        if filename:
+            epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
+            self._board_window.set_board(self._measurement_plan)
+            self._update_current_pin()
+            self._open_board_window_if_needed()
+
+    @pyqtSlot()
+    def _on_open_board_image(self):
+        self._open_board_window_if_needed()
+        if not self._measurement_plan.image:
+            msg = QMessageBox()
+            msg.setWindowTitle(qApp.translate("t", "Открытие изображения платы"))
+            msg.setText(qApp.translate("t", "Для данной платы изображение не задано!"))
+            msg.exec_()
+
+    @pyqtSlot()
+    def _on_periodic_task(self):
         if self._device_errors_handler.all_ok:
             with self._device_errors_handler:
                 self._read_curves_periodic_task()
@@ -1101,19 +875,100 @@ class EPLabWindow(Ui_MainWindow):
         # Add this task to event loop
         self._timer.start()
 
-    def _set_msystem_settings(self, settings: MeasurementSettings):
-        self._msystem.set_settings(settings)
-        # Skip next measurement because it still have old settings
-        self._skip_curve = True
-        # When new curve will be received plot parameters will be adjusted
-        self._settings_update_next_cycle = settings
+    @pyqtSlot()
+    def _on_save_board(self):
+        """
+        Slot saves board in file.
+        """
+
+        if self._check_measurement_plan():
+            return
+        if not self._current_file_path:
+            return self._on_save_board_as()
+        self._current_file_path = epfilemanager.save_board_to_ufiv(self._current_file_path,
+                                                                   self._measurement_plan)
+
+    @pyqtSlot()
+    def _on_save_board_as(self):
+        """
+        Slot saves board in new file.
+        """
+
+        if self._check_measurement_plan():
+            return
+        if not os.path.isdir(self.default_path):
+            os.mkdir(self.default_path)
+        if not os.path.isdir(os.path.join(self.default_path, "Reference")):
+            os.mkdir(os.path.join(self.default_path, "Reference"))
+        filename = QFileDialog.getSaveFileName(
+            self, qApp.translate("t", "Сохранить плату"), filter="UFIV Archived File (*.uzf)",
+            directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
+        if filename:
+            self._current_file_path = epfilemanager.save_board_to_ufiv(filename,
+                                                                       self._measurement_plan)
+
+    @pyqtSlot()
+    def _on_save_comment(self):
+        comment = self.line_comment_pin.text()
+        self._measurement_plan.get_current_pin().comment = comment
+
+    @pyqtSlot()
+    def _on_save_pin(self):
+        """
+        Save current pin IV-curve as reference for current pin.
+        """
+
+        with self._device_errors_handler:
+            self._measurement_plan.save_last_measurement_as_reference()
+        self._set_comment()
+        self._update_current_pin()
+
+    @pyqtSlot()
+    def _on_save_image(self):
+        # Freeze image at first
+        image = self.grab(self.rect())
+        filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
+        dir_path = os.path.join(self.default_path, "Screenshot")
+        if not os.path.isdir(dir_path):
+            os.makedirs(dir_path)
+        filename = QFileDialog.getSaveFileName(
+            self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
+            directory=os.path.join(dir_path, filename))[0]
+        if filename:
+            if not filename.endswith(".png"):
+                filename += ".png"
+            image.save(filename)
+
+    @pyqtSlot()
+    def _on_search_optimal(self):
+        with self._device_errors_handler:
+            searcher = Searcher(self._msystem.measurers[0], self._product.mparams)
+            optimal_settings = searcher.search_optimal_settings()
+            self._set_msystem_settings(optimal_settings)
+            options = self._product.settings_to_options(optimal_settings)
+            self._set_options_to_ui(options)
+
+    @pyqtSlot()
+    def _on_select_language(self):
+        """
+        Slot shows dialog window to select language.
+        """
+
+        language_selection_wnd = LanguageSelectionWindow(self)
+        if language_selection_wnd.exec():
+            language = language_selection_wnd.get_language()
+            translator = language_selection_wnd.get_translator_file()
+            qApp.instance().removeTranslator(self._translator)
+            qApp.instance().setProperty("language", language)
+            if translator:
+                self._translator.load(translator)
+                qApp.instance().installTranslator(self._translator)
 
     @pyqtSlot(bool)
-    def _on_settings_btn_checked(self, checked: bool):
+    def _on_select_option(self, checked: bool):
         """
         Slot handles selection of new option for parameter of measuring system.
-        :param checked: if True radio button corresponding to option was
-        selected.
+        :param checked: if True radio button corresponding to option was selected.
         """
 
         if checked:
@@ -1123,7 +978,7 @@ class EPLabWindow(Ui_MainWindow):
             settings = self._product.options_to_settings(options, settings)
             self._update_scroll_areas_for_parameters(settings)
             options = self._product.settings_to_options(settings)
-            self._options_to_ui(options)
+            self._set_options_to_ui(options)
             try:
                 self._set_msystem_settings(settings)
                 ut.save_settings_auto(self._product, settings)
@@ -1134,25 +989,100 @@ class EPLabWindow(Ui_MainWindow):
                 self._update_scroll_areas_for_parameters(old_settings)
                 self._set_msystem_settings(old_settings)
                 old_options = self._product.settings_to_options(old_settings)
-                self._options_to_ui(old_options)
+                self._set_options_to_ui(old_options)
+
+    @pyqtSlot(IVMeasurerBase, bool)
+    def _on_show_device_settings(self, selected_measurer: IVMeasurerBase, checked: bool):
+        """
+        Slot shows window to select device settings.
+        :param selected_measurer: measurer for which device settings should be
+        displayed;
+        :param checked: not used.
+        """
+
+        for measurer in self._msystem.measurers:
+            if measurer == selected_measurer:
+                all_settings = measurer.get_all_settings()
+                dialog = MeasurerSettingsWindow(self, all_settings, measurer)
+                if dialog.exec_():
+                    dialog.set_parameters()
+                return
 
     @pyqtSlot()
-    def _on_view_board(self):
-        self._board_window.show()
+    def _on_show_product_info(self):
+        def handle_button_click(button):
+            if button.text() in ("Перейти", "Go"):
+                webbrowser.open_new_tab("http://eyepoint.physlab.ru")
 
-    @pyqtSlot(int)
-    def _on_board_pin_selected(self, number: int):
-        self._measurement_plan.go_pin(number)
-        self._update_current_pin()
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setWindowTitle(qApp.translate("t", "Справка"))
+        msg.setText(self.windowTitle())
+        msg.setInformativeText(qApp.translate(
+            "t", "Программное обеспечение для работы с устройствами линейки EyePoint,"
+                 " предназначенными для поиска неисправностей на печатных платах в "
+                 "ручном режиме (при помощи ручных щупов). Для более подробной информации "
+                 "об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru."))
+        msg.addButton(qApp.translate("t", "Перейти"), QMessageBox.YesRole)
+        msg.addButton(qApp.translate("t", "ОК"), QMessageBox.NoRole)
+        msg.buttonClicked.connect(handle_button_click)
+        msg.exec_()
 
-    @pyqtSlot(int, QPointF)
-    def _on_board_pin_moved(self, number: int, point: QPointF):
-        self._measurement_plan.go_pin(number)
-        self._measurement_plan.get_current_pin().x = point.x()
-        self._measurement_plan.get_current_pin().y = point.y()
+    @pyqtSlot()
+    def _on_show_settings_window(self):
+        """
+        Slot is called when you click on 'Settings' button, it shows settings window.
+        """
+
+        self.__settings = None
+        settings_window = SettingsWindow(self, self._score_wrapper.threshold)
+        settings_window.exec()
+
+    @pyqtSlot(WorkMode)
+    def _on_switch_work_mode(self, mode: WorkMode):
+        self.comparing_mode_action.setChecked(mode is WorkMode.compare)
+        self.writing_mode_action.setChecked(mode is WorkMode.write)
+        self.testing_mode_action.setChecked(mode is WorkMode.test)
+        self.next_point_action.setEnabled(mode is not WorkMode.compare)
+        self.last_point_action.setEnabled(mode is not WorkMode.compare)
+        self.num_point_line_edit.setEnabled(mode is not WorkMode.compare)
+        self.new_point_action.setEnabled(mode is WorkMode.write)
+        self.save_point_action.setEnabled(mode is WorkMode.write)
+        self.add_board_image_action.setEnabled(mode is WorkMode.write)
+        self._change_work_mode(mode)
+
+    def apply_settings(self, threshold: float):
+        """
+        Method applies settings from settings window.
+        :param threshold: threshold value.
+        """
+
+        if (self.__settings is None or
+                (self.__settings and self.__settings.score_threshold != threshold)):
+            # Settings were not loaded from file
+            self._update_threshold(threshold)
+            return
+        # Settings were loaded from file
+        self._on_switch_work_mode(self.__settings.work_mode)
+        settings = self.__settings.measurement_settings()
+        options = self._product.settings_to_options(settings)
+        self._set_options_to_ui(options)
+        self._set_msystem_settings(settings)
+        self.hide_curve_a_action.setChecked(self.__settings.hide_curve_a)
+        self.hide_curve_b_action.setChecked(self.__settings.hide_curve_b)
+        self.sound_enabled_action.setChecked(self.__settings.sound_enabled)
+        self._update_threshold(self.__settings.score_threshold)
+
+    def auto_calibrate(self):
+        with self._device_errors_handler:
+            self._msystem.calibrate()
 
     def closeEvent(self, event: QCloseEvent):
         self._board_window.close()
+
+    def changeEvent(self, event: QEvent):
+        if event.type() == QEvent.LanguageChange:
+            self.retranslateUi(self)
 
     def connect_devices(self, port_1: str, port_2: str):
         """
@@ -1201,6 +1131,39 @@ class EPLabWindow(Ui_MainWindow):
 
         measurers = self._msystem.measurers if self._msystem else []
         return measurers
+
+    def get_settings(self, threshold: float) -> Settings:
+        """
+        Method returns current applied settings in object.
+        :param threshold: threshold value.
+        :return: current settings.
+        """
+
+        settings = Settings()
+        settings.set_measurement_settings(self._msystem.get_settings())
+        if self.testing_mode_action.isChecked():
+            settings.work_mode = WorkMode.test
+        elif self.writing_mode_action.isChecked():
+            settings.work_mode = WorkMode.write
+        else:
+            settings.work_mode = WorkMode.compare
+        settings.score_threshold = threshold
+        settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
+        settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
+        settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
+        return settings
+
+    def open_settings_from_file(self, file_path: str) -> float:
+        """
+        Method reads settings from file with given path and returns score
+        threshold.
+        :param file_path: path to file with settings.
+        :return: score threshold.
+        """
+
+        self.__settings = Settings()
+        self.__settings.import_(path=file_path)
+        return self.__settings.score_threshold
 
     def resizeEvent(self, event: QResizeEvent):
         """
