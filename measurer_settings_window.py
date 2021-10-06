@@ -10,8 +10,6 @@ from PyQt5.QtGui import QRegExpValidator
 from epcore.ivmeasurer.base import IVMeasurerBase
 from language import Language
 
-__all__ = ["MeasurerSettingsWindow"]
-
 
 def get_convertor(data: Dict) -> Callable:
     """
@@ -45,7 +43,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         self._measurer = measurer
         self._widgets = dict()
         lang = qApp.instance().property("language")
-        self.lang = "ru" if lang == Language.ru else "en"
+        self.lang = "ru" if lang == Language.RU else "en"
         self._init_ui(settings)
 
     def _create_button(self, data: Dict) -> qt.QWidget:

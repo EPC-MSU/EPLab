@@ -179,8 +179,13 @@
         <source>Сравнение</source>
         <translation>Comparison</translation>
     </message>
+	<message>
+        <location filename="mainwindow.ui" line="377"/>
+        <source>Выбор языка</source>
+        <translation>Language selection</translation>
+    </message>
     <message>
-        <location filename="mainwindow.ui" line="381"/>
+        <location filename="mainwindow.ui" line="396"/>
         <source>Создать план тестирования</source>
         <translation>Create test plan</translation>
     </message>
@@ -300,34 +305,39 @@
         <translation>Delete marker</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="651"/>
+        <location filename="mainwindow.ui" line="663"/>
         <source> Удалить метку</source>
         <translation> Delete marker</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="664"/>
+        <location filename="mainwindow.ui" line="676"/>
         <source>Скрыть канал А</source>
         <translation>Hide curve A</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="667"/>
+        <location filename="mainwindow.ui" line="679"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Скрыть канал А&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Hide curve A&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="680"/>
+        <location filename="mainwindow.ui" line="692"/>
         <source>Скрыть канал B</source>
         <translation>Hide curve B</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="683"/>
+        <location filename="mainwindow.ui" line="695"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Скрыть канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Hide curve B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="688"/>
+        <location filename="mainwindow.ui" line="704"/>
         <source>Подключение</source>
         <translation>Connection</translation>
+    </message>
+	<message>
+        <location filename="mainwindow.ui" line="716"/>
+        <source>Язык</source>
+        <translation>Language</translation>
     </message>
 </context>
 <context>
@@ -546,6 +556,16 @@
         <location filename="../connection_window.py" line="390"/>
         <source>Отключить</source>
         <translation>Disconnect</translation>
+    </message>
+	<message>
+        <location filename="../language.py" line="88"/>
+        <source>Выбор языка</source>
+        <translation>Language selection</translation>
+    </message>
+	<message>
+        <location filename="../language.py" line="90"/>
+        <source>Выберите язык:</source>
+        <translation>Choose language:</translation>
     </message>
 </context>
 </TS>
