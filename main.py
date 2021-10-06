@@ -41,18 +41,31 @@ def launch_eplab(app: QApplication, args: Namespace):
 
 class ErrorWindow(QMainWindow):
     """
-    Window with error message with traceback
+    Window with error message with traceback.
     """
 
     MAX_MESSAGE_LENGTH = 500
 
     def __init__(self, exc_type: Exception, exc_value: Exception, exc_traceback: "traceback"):
+        """
+        :param exc_type: type of exception;
+        :param exc_value: exception instance;
+        :param exc_traceback: traceback object which encapsulates the call stack at
+        the point where the exception originally occurred.
+        """
+
         super().__init__()
         traceback.print_exception(exc_type, exc_value, exc_traceback)
         traceback_text = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-        self.init_ui(str(exc_value), traceback_text)
+        self._init_ui(str(exc_value), traceback_text)
 
-    def init_ui(self, error: str, trace_back: str):
+    def _init_ui(self, error: str, trace_back: str):
+        """
+        Method initializes widgets on window.
+        :param error: text of exception instance;
+        :param trace_back: full text of traceback.
+        """
+
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         exit_btn = QPushButton("OK",  self)
@@ -60,10 +73,10 @@ class ErrorWindow(QMainWindow):
         traceback_lbl = QLabel(self)
         error_lbl.setText(error[-self.MAX_MESSAGE_LENGTH:])
         traceback_lbl.setText(trace_back[-self.MAX_MESSAGE_LENGTH:])
-        self.v = QVBoxLayout(self.central_widget)
-        self.v.addWidget(error_lbl)
-        self.v.addWidget(traceback_lbl)
-        self.v.addWidget(exit_btn)
+        self.v_box = QVBoxLayout(self.central_widget)
+        self.v_box.addWidget(error_lbl)
+        self.v_box.addWidget(traceback_lbl)
+        self.v_box.addWidget(exit_btn)
         exit_btn.clicked.connect(qApp.quit)
         center_point = QDesktopWidget().availableGeometry().center()
         qt_rectangle = self.frameGeometry()
@@ -72,8 +85,17 @@ class ErrorWindow(QMainWindow):
         self.setWindowTitle("Error")
 
 
-def start_err_app(app: QApplication, exc_type: Exception, exc_value: Exception,
-                  exc_traceback: "traceback"):
+def show_error_window(app: QApplication, exc_type: Exception, exc_value: Exception,
+                      exc_traceback: "traceback"):
+    """
+    Function shows window with error.
+    :param app: application;
+    :param exc_type: type of exception;
+    :param exc_value: exception instance;
+    :param exc_traceback: traceback object which encapsulates the call stack at
+    the point where the exception originally occurred.
+    """
+
     error_window = ErrorWindow(exc_type, exc_value, exc_traceback)
     error_window.show()
     app.exec_()
@@ -94,4 +116,4 @@ if __name__ == "__main__":
     try:
         launch_eplab(app, args)
     except Exception:
-        start_err_app(app, *sys.exc_info())
+        show_error_window(app, *sys.exc_info())

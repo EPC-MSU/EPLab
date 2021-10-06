@@ -374,7 +374,10 @@
   </widget>
   <widget class="QToolBar" name="toolBar_language">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Выбор языка</string>
+   </property>
+   <property name="toolTip">
+    <string>Выбор языка</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>

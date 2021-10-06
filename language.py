@@ -3,14 +3,18 @@ File with class for dialog window for language selection.
 """
 
 from enum import Enum, auto
-from typing import Tuple
+from typing import Optional, Tuple
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import QCoreApplication as qApp
 
 
 class Language(Enum):
-    ru = auto()
-    en = auto()
+    """
+    Class for supported languages.
+    """
+
+    RU = auto()
+    EN = auto()
 
     @classmethod
     def get_language(cls, value: "Language") -> str:
@@ -21,6 +25,19 @@ class Language(Enum):
         """
 
         return _LANGUAGES.get(value)
+
+    @classmethod
+    def get_language_value(cls, language: str) -> Optional["Language"]:
+        """
+        Method returns value of language with given name.
+        :param language: name of language.
+        :return: value of language.
+        """
+
+        for value, name in _LANGUAGES.items():
+            if name == language:
+                return value
+        return None
 
     @classmethod
     def get_languages(cls) -> Tuple:
@@ -43,11 +60,11 @@ class Language(Enum):
         return _FILES.get(value)
 
 
-_LANGUAGES = {Language.ru: "Русский",
-              Language.en: "English"}
+_LANGUAGES = {Language.RU: "Русский",
+              Language.EN: "English"}
 
-_FILES = {Language.ru: "",
-          Language.en: "gui/super_translate_en.qm"}
+_FILES = {Language.RU: "",
+          Language.EN: "gui/super_translate_en.qm"}
 
 
 class LanguageSelectionWindow(qt.QDialog):

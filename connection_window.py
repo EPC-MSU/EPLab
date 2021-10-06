@@ -28,9 +28,6 @@ import urpcbase as lib
 from language import Language
 
 
-__all__ = ["ConnectionWindow"]
-
-
 IP_REG_EXP = r"^xmlrpc://((\d|\d\d|[0-1]\d\d|2[0-5][0-5])\.){3}(\d|\d\d|[0-1]\d\d|2[0-5][0-5])$"
 
 
@@ -244,7 +241,7 @@ class ConnectionWindow(qt.QDialog):
         super().__init__(parent=parent)
         self.parent = parent
         self.lang = qApp.instance().property("language")
-        self._your_variant = "Свой вариант" if self.lang is Language.ru else "Your variant"
+        self._your_variant = "Свой вариант" if self.lang is Language.RU else "Your variant"
         self._urls = None
         self._initial_ports, self._initial_type = self._get_current_measurers_ports()
         self._init_ui()

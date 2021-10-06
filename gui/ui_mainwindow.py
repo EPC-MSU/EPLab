@@ -3,10 +3,10 @@ File with class for main window of application. This class is created by Qt Desi
 """
 
 import os
-from PyQt5.QtCore import (QCoreApplication, QMetaObject, QRect, QSize, Qt)
+from PyQt5.QtCore import QCoreApplication, QMetaObject, QRect, QSize, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QAction, QDockWidget, QLabel, QLineEdit, QMainWindow, QMenu, QMenuBar,
-                             QPushButton, QSizePolicy, QSpacerItem, QToolBar, QVBoxLayout, QWidget)
+                             QSizePolicy, QSpacerItem, QPushButton, QToolBar, QVBoxLayout, QWidget)
 
 
 class Ui_MainWindow(QMainWindow):
@@ -191,13 +191,9 @@ class Ui_MainWindow(QMainWindow):
         self.score_label.setMaximumSize(QSize(16777215, 100))
         self.score_label.setTextFormat(Qt.RichText)
         self.score_label.setAlignment(Qt.AlignCenter)
-
         self.verticalLayout_5.addWidget(self.score_label)
-
         self.verticalSpacer_7 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
         self.verticalLayout_5.addItem(self.verticalSpacer_7)
-
         self.scoreDock.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(Qt.RightDockWidgetArea, self.scoreDock)
         self.freqDock = QDockWidget(MainWindow)
@@ -239,14 +235,10 @@ class Ui_MainWindow(QMainWindow):
         self.line_comment_pin = QLineEdit(self.dockWidgetContents_6)
         self.line_comment_pin.setObjectName(u"line_comment_pin")
         self.line_comment_pin.setClearButtonEnabled(False)
-
         self.verticalLayout_10.addWidget(self.line_comment_pin)
-
         self.save_comment_push_button = QPushButton(self.dockWidgetContents_6)
         self.save_comment_push_button.setObjectName(u"save_comment_push_button")
-
         self.verticalLayout_10.addWidget(self.save_comment_push_button)
-
         self.commentDock.setWidget(self.dockWidgetContents_6)
         MainWindow.addDockWidget(Qt.RightDockWidgetArea, self.commentDock)
         self.menuBar = QMenuBar(MainWindow)
@@ -352,9 +344,7 @@ class Ui_MainWindow(QMainWindow):
         self.toolBar_mode.addAction(self.writing_mode_action)
         self.toolBar_mode.addAction(self.testing_mode_action)
         self.toolBar_language.addAction(self.select_language_action)
-
         self.retranslateUi(MainWindow)
-
         QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -369,11 +359,11 @@ class Ui_MainWindow(QMainWindow):
                                                                          None))
         self.freeze_curve_a_action.setText(QCoreApplication.translate("MainWindow", "Заморозить канал А", None))
         self.freeze_curve_a_action.setToolTip(
-            QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#ff0000;'>"
+            QCoreApplication.translate("MainWindow", '<html><head/><body><p><span style=" color:#ff0000;">'
                                                      "Заморозить канал А</span></p></body></html>", None))
         self.freeze_curve_b_action.setText(QCoreApplication.translate("MainWindow", "Заморозить канал B", None))
         self.freeze_curve_b_action.setToolTip(
-            QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#0000ff;'>"
+            QCoreApplication.translate("MainWindow", '<html><head/><body><p><span style=" color:#0000ff;">'
                                                      "Заморозить канал B</span></p></body></html>", None))
         self.freeze_curve_b_action.setWhatsThis("")
         self.comparing_mode_action.setText(QCoreApplication.translate("MainWindow", "Сравнение", None))
@@ -398,18 +388,18 @@ class Ui_MainWindow(QMainWindow):
         self.remove_cursor_action.setIconText(QCoreApplication.translate("MainWindow", " Удалить метку", None))
         self.hide_curve_a_action.setText(QCoreApplication.translate("MainWindow", "Скрыть канал А", None))
         self.hide_curve_a_action.setToolTip(
-            QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#0000ff;'>"
+            QCoreApplication.translate("MainWindow", '<html><head/><body><p><span style=" color:#0000ff;">'
                                                      "Скрыть канал А</span></p></body></html>", None))
         self.hide_curve_b_action.setText(QCoreApplication.translate("MainWindow", "Скрыть канал B", None))
         self.hide_curve_b_action.setToolTip(
-            QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' color:#ff0000;'>"
+            QCoreApplication.translate("MainWindow", '<html><head/><body><p><span style=" color:#ff0000;">'
                                                      "Скрыть канал B</span></p></body></html>", None))
         self.connection_action.setText(QCoreApplication.translate("MainWindow", "Подключение", None))
         self.select_language_action.setText(QCoreApplication.translate("MainWindow", "Язык", None))
         self.scoreDock.setWindowTitle(QCoreApplication.translate("MainWindow", "Степень различия", None))
         self.score_label.setText(
-            QCoreApplication.translate("MainWindow", "<html><head/><body><p><span style=' font-size:48pt;"
-                                                     " color:#73d216;'>0%</span></p></body></html>", None))
+            QCoreApplication.translate("MainWindow", '<html><head/><body><p><span style=" font-size:48pt;'
+                                                     ' color:#73d216;">0%</span></p></body></html>', None))
         self.freqDock.setWindowTitle(QCoreApplication.translate("MainWindow", "Частота пробного сигнала", None))
         self.currentDock.setWindowTitle(QCoreApplication.translate("MainWindow", "Чувствительность по току", None))
         self.voltageDock.setWindowTitle(QCoreApplication.translate("MainWindow", "Амплитуда пробного сигнала", None))
@@ -433,4 +423,5 @@ class Ui_MainWindow(QMainWindow):
         self.toolBar_compare.setToolTip(QCoreApplication.translate("MainWindow", "Сравнение", None))
         self.toolBar_mode.setWindowTitle(QCoreApplication.translate("MainWindow", "Режим", None))
         self.toolBar_mode.setToolTip(QCoreApplication.translate("MainWindow", "Режим", None))
-        self.toolBar_language.setWindowTitle(QCoreApplication.translate("MainWindow", "toolBar", None))
+        self.toolBar_language.setWindowTitle(QCoreApplication.translate("MainWindow", "Выбор языка", None))
+        self.toolBar_language.setToolTip(QCoreApplication.translate("MainWindow", "Выбор языка", None))

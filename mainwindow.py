@@ -10,8 +10,8 @@ from functools import partial
 from platform import system
 from typing import Dict, List, Optional, Tuple
 import numpy as np
-from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt as QtC, QTimer,
-                          QTranslator)
+from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, QSize, Qt as QtC,
+                          QTimer, QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMessageBox,
                              QRadioButton, QScrollArea, QVBoxLayout, QWidget)
@@ -227,7 +227,7 @@ class EPLabWindow(Ui_MainWindow):
         for option in available_options:
             button = QRadioButton()
             layout.addWidget(button)
-            button.setText(option.label_ru if lang == Language.ru else option.label_en)
+            button.setText(option.label_ru if lang is Language.RU else option.label_en)
             button.clicked.connect(self._on_select_option)
             self._option_buttons[param_name][option.name] = button
         widget = QWidget()
@@ -328,7 +328,7 @@ class EPLabWindow(Ui_MainWindow):
         ico_file_name = os.path.join(dir_name, "media", "ico.png")
         self.setWindowIcon(QIcon(ico_file_name))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
-        self.setMinimumWidth(600)
+        self.setMinimumWidth(650)
         self.move(50, 50)
 
         self._device_errors_handler = DeviceErrorsHandler()
@@ -424,12 +424,16 @@ class EPLabWindow(Ui_MainWindow):
 
         self._translator = QTranslator()
         if english:
-            translation_file = Language.get_translator_file(Language.en)
+            language = Language.EN
+        else:
+            language = ut.read_language_auto()
+        if language is not Language.RU:
+            translation_file = Language.get_translator_file(language)
             self._translator.load(translation_file)
             qApp.instance().installTranslator(self._translator)
-            qApp.instance().setProperty("language", Language.en)
+            qApp.instance().setProperty("language", language)
         else:
-            qApp.instance().setProperty("language", Language.ru)
+            qApp.instance().setProperty("language", Language.RU)
 
     def _open_board_window_if_needed(self):
         if self._measurement_plan.image:
@@ -666,6 +670,22 @@ class EPLabWindow(Ui_MainWindow):
 
         self._score_wrapper.set_threshold(threshold)
         self._player.set_threshold(threshold)
+
+    def _update_translation_for_scroll_areas_for_parameters(self):
+        """
+        Method updates translation of options in scroll areas for different parameters
+        of measuring system.
+        """
+
+        lang = qApp.instance().property("language")
+        settings = self._msystem.get_settings()
+        available = self._product.get_available_options(settings)
+        for parameter, buttons in self._option_buttons.items():
+            for option_name, button in buttons.items():
+                options = available[parameter]
+                for option in options:
+                    if option.name == option_name:
+                        button.setText(option.label_ru if lang is Language.RU else option.label_en)
 
     @pyqtSlot(bool)
     def _on_add_cursor(self, state: bool):
@@ -960,6 +980,8 @@ class EPLabWindow(Ui_MainWindow):
             translator = language_selection_wnd.get_translator_file()
             qApp.instance().removeTranslator(self._translator)
             qApp.instance().setProperty("language", language)
+            language_name = Language.get_language(language)
+            ut.save_settings_auto(self._product, self._msystem.get_settings(), language_name)
             if translator:
                 self._translator.load(translator)
                 qApp.instance().installTranslator(self._translator)
@@ -981,7 +1003,8 @@ class EPLabWindow(Ui_MainWindow):
             self._set_options_to_ui(options)
             try:
                 self._set_msystem_settings(settings)
-                ut.save_settings_auto(self._product, settings)
+                language = Language.get_language(qApp.instance().property("language"))
+                ut.save_settings_auto(self._product, settings, language)
             except ValueError as exc:
                 show_exception(qApp.translate("t", "Ошибка"),
                                qApp.translate("t", "Ошибка при установке настроек устройства"),
@@ -1083,6 +1106,11 @@ class EPLabWindow(Ui_MainWindow):
     def changeEvent(self, event: QEvent):
         if event.type() == QEvent.LanguageChange:
             self.retranslateUi(self)
+            self._update_translation_for_scroll_areas_for_parameters()
+            geometry = self.geometry()
+            size = QSize(geometry.width(), geometry.height())
+            event = QResizeEvent(size, size)
+            self.resizeEvent(event)
 
     def connect_devices(self, port_1: str, port_2: str):
         """
@@ -1174,9 +1202,9 @@ class EPLabWindow(Ui_MainWindow):
         # Determine the critical width of the window for given language and OS
         lang = qApp.instance().property("language")
         if system() == "Windows":
-            size = 1100 if lang == Language.en else 1350
+            size = 1150 if lang is Language.EN else 1350
         else:
-            size = 1300 if lang == Language.en else 1600
+            size = 1300 if lang is Language.EN else 1600
         # Change style of toolbars
         tool_bars = self.toolBar_write, self.toolBar_cursor, self.toolBar_mode
         for tool_bar in tool_bars:
@@ -1185,3 +1213,4 @@ class EPLabWindow(Ui_MainWindow):
             else:
                 style = QtC.ToolButtonTextBesideIcon
             tool_bar.setToolButtonStyle(style)
+        super().resizeEvent(event)

@@ -29,7 +29,6 @@ while True:
     text = text[:result.start()] + new_path + text[result.end():]
 
 # Convert unicodes
-text = text.replace('"', "'")
 pattern_label = re.compile(r"translate\(\"MainWindow\", (?P<label>u\".+\")")
 while True:
     result = pattern_label.search(text)
@@ -38,6 +37,8 @@ while True:
     label = result.group("label")[2:-1]
     label = eval(f'u"{label}"')
     text = text[:result.start()] + f'translate("MainWindow", "{label}"' + text[result.end():]
+text = text.replace('"<html>', "'<html>")
+text = text.replace('</html>"', "</html>'")
 
 # Delete comments
 pattern = re.compile(r"\n\s*#.*")
