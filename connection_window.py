@@ -14,10 +14,10 @@ from platform import system
 from typing import List, Optional, Tuple
 import psutil
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import (QComboBox, QFormLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
-                             QVBoxLayout)
+from PyQt5.QtWidgets import (QComboBox, QFormLayout, QHBoxLayout, QLabel, QLayout, QLineEdit,
+                             QPushButton, QVBoxLayout)
 import serial
 import serial.tools.list_ports
 from epcore.ivmeasurer.measurerasa import IVMeasurerASA, IVMeasurerVirtualASA
@@ -238,7 +238,7 @@ class ConnectionWindow(qt.QDialog):
         :param parent: parent window.
         """
 
-        super().__init__(parent=parent)
+        super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self.parent = parent
         self.lang = qApp.instance().property("language")
         self._your_variant = "Свой вариант" if self.lang is Language.RU else "Your variant"
@@ -288,6 +288,7 @@ class ConnectionWindow(qt.QDialog):
         v_box_layout = QVBoxLayout(self)
         v_box_layout.addLayout(form_layout)
         v_box_layout.addLayout(h_box_layout)
+        v_box_layout.setSizeConstraint(QLayout.SetFixedSize)
         self.setLayout(v_box_layout)
 
     def _get_current_measurers_ports(self) -> Tuple[List[str], str]:

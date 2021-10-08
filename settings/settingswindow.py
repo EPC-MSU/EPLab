@@ -1,9 +1,9 @@
 import os
 from collections import namedtuple
 from PyQt5 import uic
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import QDialog, QFileDialog, QGridLayout, QLabel, QToolBar
+from PyQt5.QtWidgets import QDialog, QFileDialog, QGridLayout, QLabel, QLayout, QToolBar
 
 PanelParameters = namedtuple(
     "PanelParameters",
@@ -29,10 +29,11 @@ class SettingsWindow(QDialog):
         :param threshold: score threshold.
         """
 
-        super().__init__(parent=parent)
+        super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         uic.loadUi(os.path.join(dir_name, "gui", "settings.ui"), self)
         self.parent = parent
+        self.layout().setSizeConstraint(QLayout.SetFixedSize)
         self.auto_calibration_push_button.clicked.connect(parent.auto_calibrate)
         self.score_treshold_button_minus.clicked.connect(self._decrease_threshold)
         self.score_treshold_button_plus.clicked.connect(self._increase_threshold)

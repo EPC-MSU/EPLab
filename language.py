@@ -6,7 +6,7 @@ import os
 from enum import Enum, auto
 from typing import Optional, Tuple
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import QCoreApplication as qApp
+from PyQt5.QtCore import QCoreApplication as qApp, Qt
 
 
 class Language(Enum):
@@ -78,7 +78,7 @@ class LanguageSelectionWindow(qt.QDialog):
         :param parent: parent window.
         """
 
-        super().__init__(parent=parent)
+        super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self._init_ui()
 
     def _init_ui(self):
@@ -101,6 +101,7 @@ class LanguageSelectionWindow(qt.QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
         v_box.addWidget(self.buttonBox)
+        v_box.setSizeConstraint(qt.QLayout.SetFixedSize)
         self.adjustSize()
         self.setLayout(v_box)
 

@@ -5,7 +5,7 @@ File with class for dialog window with settings of measurer.
 from inspect import getmembers, ismethod
 from typing import Any, Callable, Dict
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import QCoreApplication as qApp, QRegExp
+from PyQt5.QtCore import QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QRegExpValidator
 from epcore.ivmeasurer.base import IVMeasurerBase
 from language import Language
@@ -39,7 +39,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         :param measurer: specific measurer for which settings will be intended.
         """
 
-        super().__init__(parent=parent)
+        super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self._measurer = measurer
         self._widgets = dict()
         lang = qApp.instance().property("language")
@@ -214,6 +214,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         else:
             self.setWindowTitle(qApp.translate("t", "Настройки для устройства"))
             v_box.addWidget(qt.QLabel(qApp.translate("t", "Нет настроек")))
+        v_box.setSizeConstraint(qt.QLayout.SetFixedSize)
         self.adjustSize()
         self.setLayout(v_box)
 

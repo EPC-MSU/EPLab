@@ -50,6 +50,9 @@ def show_exception(msg_title: str, msg_text: str, exc: str = ""):
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Warning)
     msg.setWindowTitle(msg_title)
+    dir_name = os.path.dirname(os.path.abspath(__file__))
+    icon_path = os.path.join(dir_name, "media", "ico.png")
+    msg.setWindowIcon(QIcon(icon_path))
     msg.setText(msg_text)
     if exc:
         msg.setInformativeText(str(exc)[-max_message_length:])
@@ -325,8 +328,8 @@ class EPLabWindow(Ui_MainWindow):
 
         self.setupUi(self)
         dir_name = os.path.dirname(os.path.abspath(__file__))
-        ico_file_name = os.path.join(dir_name, "media", "ico.png")
-        self.setWindowIcon(QIcon(ico_file_name))
+        self._icon_path = os.path.join(dir_name, "media", "ico.png")
+        self.setWindowIcon(QIcon(self._icon_path))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
         if system() == "Windows":
             self.setMinimumWidth(650)
@@ -511,6 +514,7 @@ class EPLabWindow(Ui_MainWindow):
         self._measurement_plan = MeasurementPlan(
             Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]),
             measurer=self._msystem.measurers[0])
+        self._last_saved_measurement_plan_data: Dict = self._measurement_plan.to_json()
 
     def _remove_ref_curve(self):
         self._ref_curve = None
@@ -590,6 +594,7 @@ class EPLabWindow(Ui_MainWindow):
             self._set_options_to_ui(options)
         self._work_mode = None
         self._change_work_mode(WorkMode.compare)  # default mode - compare two curves
+        self._on_switch_work_mode(self._work_mode)
         self._update_current_pin()
         self._init_threshold()
         with self._device_errors_handler:
@@ -731,8 +736,8 @@ class EPLabWindow(Ui_MainWindow):
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
             msg.setWindowTitle(qApp.translate("t", "Внимание"))
-            msg.setText(self.windowTitle())
-            msg.setInformativeText(qApp.translate("t", "Сохранить изменения в файл?"))
+            msg.setWindowIcon(QIcon(self._icon_path))
+            msg.setText(qApp.translate("t", "Сохранить изменения в файл?"))
             msg.addButton(qApp.translate("t", "Да"), QMessageBox.YesRole)
             msg.addButton(qApp.translate("t", "Нет"), QMessageBox.NoRole)
             msg.addButton(qApp.translate("t", "Отмена"), QMessageBox.RejectRole)
@@ -859,6 +864,7 @@ class EPLabWindow(Ui_MainWindow):
                                qApp.translate("t", "Формат файла не подходит"), str(exc))
                 return
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
+            self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
             self._board_window.set_board(self._measurement_plan)
             self._update_current_pin()
@@ -885,6 +891,7 @@ class EPLabWindow(Ui_MainWindow):
         if not self._measurement_plan.image:
             msg = QMessageBox()
             msg.setWindowTitle(qApp.translate("t", "Открытие изображения платы"))
+            msg.setWindowIcon(QIcon(self._icon_path))
             msg.setText(qApp.translate("t", "Для данной платы изображение не задано!"))
             msg.exec_()
 
@@ -899,26 +906,30 @@ class EPLabWindow(Ui_MainWindow):
         self._timer.start()
 
     @pyqtSlot()
-    def _on_save_board(self):
+    def _on_save_board(self) -> Optional[bool]:
         """
-        Slot saves board in file.
+        Slot saves measurement plan in file.
+        :return: True if measurement plan was saved otherwise False.
         """
 
         if self._check_measurement_plan():
-            return
+            return None
         if not self._current_file_path:
             return self._on_save_board_as()
+        self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
         self._current_file_path = epfilemanager.save_board_to_ufiv(self._current_file_path,
                                                                    self._measurement_plan)
+        return True
 
     @pyqtSlot()
-    def _on_save_board_as(self):
+    def _on_save_board_as(self) -> Optional[bool]:
         """
-        Slot saves board in new file.
+        Slot saves measurement plan in new file.
+        :return: True if measurement plan was saved otherwise False.
         """
 
         if self._check_measurement_plan():
-            return
+            return None
         if not os.path.isdir(self.default_path):
             os.mkdir(self.default_path)
         if not os.path.isdir(os.path.join(self.default_path, "Reference")):
@@ -927,8 +938,11 @@ class EPLabWindow(Ui_MainWindow):
             self, qApp.translate("t", "Сохранить плату"), filter="UFIV Archived File (*.uzf)",
             directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
         if filename:
+            self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             self._current_file_path = epfilemanager.save_board_to_ufiv(filename,
                                                                        self._measurement_plan)
+            return True
+        return False
 
     @pyqtSlot()
     def _on_save_comment(self):
@@ -1047,6 +1061,7 @@ class EPLabWindow(Ui_MainWindow):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setWindowTitle(qApp.translate("t", "Справка"))
+        msg.setWindowIcon(QIcon(self._icon_path))
         msg.setText(self.windowTitle())
         msg.setInformativeText(qApp.translate(
             "t", "Программное обеспечение для работы с устройствами линейки EyePoint,"
@@ -1109,6 +1124,20 @@ class EPLabWindow(Ui_MainWindow):
 
     def closeEvent(self, event: QCloseEvent):
         self._board_window.close()
+        if (self._measurement_plan and
+                self._measurement_plan.to_json() != self._last_saved_measurement_plan_data):
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setWindowTitle(qApp.translate("t", "Внимание"))
+            msg.setWindowIcon(QIcon(self._icon_path))
+            msg.setText(qApp.translate("t", "План тестирования не был сохранен. Сохранить "
+                                            "последние изменения?"))
+            msg.addButton(qApp.translate("t", "Да"), QMessageBox.YesRole)
+            msg.addButton(qApp.translate("t", "Нет"), QMessageBox.NoRole)
+            result = msg.exec_()
+            if result == 0:
+                if self._on_save_board() is None:
+                    event.ignore()
 
     def changeEvent(self, event: QEvent):
         if event.type() == QEvent.LanguageChange:
