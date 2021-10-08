@@ -342,125 +342,135 @@
 </context>
 <context>
     <name>t</name>
-    <message>
-        <location filename="../mainwindow.py" line="470"/>
-        <source>Открытие изображения платы</source>
-        <translation>Open board image</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="471"/>
-        <source>Для данной платы изображение не задано!</source>
-        <translation>Not found image for current board!</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="523"/>
-        <source>Справка</source>
-        <translation>Help</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="526"/>
-        <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Для более подробной информации об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru.</source>
-        <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). For more information on Eyepoint, follow the link http://eyepoint.physlab.ru.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="530"/>
-        <source>Перейти</source>
-        <translation>Go</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="531"/>
-        <source>ОК</source>
-        <translation>OK</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="551"/>
-        <source>Сохранить ВАХ</source>
-        <translation>Save IVC</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="701"/>
-        <source>Ошибка открытия точки</source>
-        <translation>Open pin error</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="702"/>
-        <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение!</source>
-        <translation>Incorrect format of pin number. Pin number must be integer!</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="775"/>
-        <source>Внимание</source>
-        <translation>Warning</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="777"/>
-        <source>Сохранить изменения в файл?</source>
-        <translation>Do you want to save changes in file?</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="778"/>
-        <source>Да</source>
-        <translation>Yes</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="780"/>
-        <source>Нет</source>
-        <translation>No</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="782"/>
-        <source>Отмена</source>
-        <translation>Cancel</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="805"/>
-        <source>Создать новую плату</source>
-        <translation>Create new board</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="829"/>
+	<message>
+        <location filename="../mainwindow.py" line="152"/>
         <source>Точки POINTS_PARAM не содержат сохраненных измерений. Для сохранения плана тестирования все точки должны содержать сохраненные измерения</source>
         <translation>Points POINTS_PARAM do not contain saved measurements. To save the test plan all points must contain saved measurements</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="833"/>
+        <location filename="../mainwindow.py" line="156"/>
         <source>Точка POINTS_PARAM не содержит сохраненных измерений. Для сохранения плана тестирования все точки должны содержать сохраненные измерения</source>
         <translation>Point POINTS_PARAM does not contain saved measurements. To save the test plan all points must contain saved measurements</translation>
     </message>
-    <message>
-        <location filename="../mainwindow.py" line="855"/>
-        <source>Сохранить плату</source>
-        <translation>Save board</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="881"/>
-        <source>Открыть плату</source>
-        <translation>Open board</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="887"/>
+	<message>
+        <location filename="../mainwindow.py" line="160"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="888"/>
+        <location filename="../mainwindow.py" line="495"/>
+        <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
+        <translation>DISCONNECTED</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="738"/>
+        <source>Внимание</source>
+        <translation>Warning</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="740"/>
+        <source>Сохранить изменения в файл?</source>
+        <translation>Do you want to save changes in file?</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="741"/>
+        <source>Да</source>
+        <translation>Yes</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="742"/>
+        <source>Нет</source>
+        <translation>No</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="743"/>
+        <source>Отмена</source>
+        <translation>Cancel</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="756"/>
+        <source>Создать новую плату</source>
+        <translation>Create new board</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="815"/>
+        <source>Ошибка открытия точки</source>
+        <translation>Open pin error</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="816"/>
+        <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение!</source>
+        <translation>Incorrect format of pin number. Pin number must be integer!</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="824"/>
+        <source>Точка с таким номером не найдена на данной плате.</source>
+        <translation>Pin with this number was not found on this board.</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="857"/>
+        <source>Открыть плату</source>
+        <translation>Open board</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="864"/>
         <source>Формат файла не подходит</source>
         <translation>Invalid input file</translation>
     </message>
-    <message>
-        <location filename="../mainwindow.py" line="903"/>
+	<message>
+        <location filename="../mainwindow.py" line="880"/>
         <source>Открыть изображение платы</source>
         <translation>Open board window</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1042"/>
+        <location filename="../mainwindow.py" line="893"/>
+        <source>Открытие изображения платы</source>
+        <translation>Open board image</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="895"/>
+        <source>Для данной платы изображение не задано!</source>
+        <translation>Not found image for current board!</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="938"/>
+        <source>Сохранить плату</source>
+        <translation>Save board</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="972"/>
+        <source>Сохранить ВАХ</source>
+        <translation>Save IVC</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1031"/>
         <source>Ошибка при установке настроек устройства</source>
         <translation>Error occurred while configuring device settings</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1080"/>
-        <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
-        <translation>DISCONNECTED</translation>
+        <location filename="../mainwindow.py" line="1063"/>
+        <source>Справка</source>
+        <translation>Help</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1067"/>
+        <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Для более подробной информации об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru.</source>
+        <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). For more information on Eyepoint, follow the link http://eyepoint.physlab.ru.</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1071"/>
+        <source>Перейти</source>
+        <translation>Go</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1072"/>
+        <source>ОК</source>
+        <translation>OK</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="1133"/>
+        <source>План тестирования не был сохранен. Сохранить последние изменения?</source>
+        <translation>The measurement plan was not saved. Save the latest changes?</translation>
     </message>
     <message>
         <location filename="../mainwindow.py" line="821"/>
