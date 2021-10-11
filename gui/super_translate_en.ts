@@ -447,6 +447,16 @@
         <source>Ошибка при установке настроек устройства</source>
         <translation>Error occurred while configuring device settings</translation>
     </message>
+	<message>
+        <location filename="../mainwindow.py" line="1066"/>
+        <source>Удалить маркер</source>
+        <translation>Delete cursor</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="1069"/>
+        <source>Удалить все маркеры</source>
+        <translation>Delete all cursors</translation>
+    </message>
     <message>
         <location filename="../mainwindow.py" line="1063"/>
         <source>Справка</source>
@@ -521,6 +531,21 @@
         <location filename="../mainwindow.py" line="829"/>
         <source>Различие: </source>
         <translation>Difference: </translation>
+    </message>
+	<message>
+        <location filename="../ivcviewer.py" line="485"/>
+        <source>Сохранить измерение</source>
+        <translation>Save image</translation>
+    </message>
+	<message>
+        <location filename="../ivcviewer.py" line="570"/>
+        <source>Сохранить график как изображение</source>
+        <translation>Save plot as image</translation>
+    </message>
+	<message>
+        <location filename="../ivcviewer.py" line="576"/>
+        <source>Добавить маркер</source>
+        <translation>Add cursor</translation>
     </message>
     <message>
         <location filename="../measurer_settings_window.py" line="195"/>

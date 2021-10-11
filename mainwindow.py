@@ -10,11 +10,11 @@ from functools import partial
 from platform import system
 from typing import Dict, List, Optional, Tuple
 import numpy as np
-from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, QSize, Qt as QtC,
-                          QTimer, QTranslator)
+from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPoint, QPointF, QSize,
+                          Qt as QtC, QTimer, QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
-from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMessageBox,
-                             QRadioButton, QScrollArea, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMenu,
+                             QMessageBox, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 import epcore.filemanager as epfilemanager
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, Pin
 from epcore.ivmeasurer import (IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual,
@@ -401,7 +401,8 @@ class EPLabWindow(Ui_MainWindow):
         self.hide_curve_a_action.toggled.connect(self._on_hide_curve)
         self.hide_curve_b_action.toggled.connect(self._on_hide_curve)
         self.add_cursor_action.toggled.connect(self._on_add_cursor)
-        self.remove_cursor_action.toggled.connect(self._on_del_cursor)
+        self.remove_cursor_action.setCheckable(False)
+        self.remove_cursor_action.triggered.connect(self._on_show_context_menu_for_cursor_deletion)
         self.save_screen_action.triggered.connect(self._on_save_image)
         self.select_language_action.triggered.connect(self._on_select_language)
 
@@ -783,11 +784,13 @@ class EPLabWindow(Ui_MainWindow):
         # self._on_save_pin()
         self._update_current_pin()
 
-    @pyqtSlot(bool)
-    def _on_del_cursor(self, state: bool):
-        if state:
-            self.add_cursor_action.setChecked(False)
-        self._iv_window.plot.set_state_removing_cursor(state)
+    @pyqtSlot()
+    def _on_delete_all_cursors(self):
+        """
+        Slot deletes all cursors from plot.
+        """
+
+        self._iv_window.plot.remove_all_cursors()
 
     @pyqtSlot(bool)
     def _on_enable_sound(self, state: bool):
@@ -1034,6 +1037,40 @@ class EPLabWindow(Ui_MainWindow):
                 self._set_msystem_settings(old_settings)
                 old_options = self._product.settings_to_options(old_settings)
                 self._set_options_to_ui(old_options)
+
+    @pyqtSlot()
+    def _on_set_cursor_deletion_mode(self):
+        """
+        Slot sets cursor deletion mode when one cursor at a time can be deleted.
+        """
+
+        self.remove_cursor_action.setCheckable(True)
+        self.remove_cursor_action.setChecked(True)
+        self.add_cursor_action.setChecked(False)
+        self._iv_window.plot.set_state_removing_cursor(True)
+
+    @pyqtSlot()
+    def _on_show_context_menu_for_cursor_deletion(self):
+        """
+        Slot shows context menu for choosing to delete markers one at a time or
+        all at once.
+        """
+
+        if self.remove_cursor_action.isCheckable():
+            self.remove_cursor_action.setCheckable(False)
+            self.remove_cursor_action.setChecked(False)
+            self._iv_window.plot.set_state_removing_cursor(False)
+            return
+        widget = self.toolBar_cursor.widgetForAction(self.remove_cursor_action)
+        menu = QMenu(widget)
+        action_remove_cursor = QAction(qApp.translate("t", "Удалить маркер"), menu)
+        action_remove_cursor.triggered.connect(self._on_set_cursor_deletion_mode)
+        menu.addAction(action_remove_cursor)
+        action_remove_all_cursors = QAction(qApp.translate("t", "Удалить все маркеры"), menu)
+        action_remove_all_cursors.triggered.connect(self._on_delete_all_cursors)
+        menu.addAction(action_remove_all_cursors)
+        position = widget.geometry()
+        menu.popup(widget.mapToGlobal(QPoint(position.x(), position.y())))
 
     @pyqtSlot(IVMeasurerBase, bool)
     def _on_show_device_settings(self, selected_measurer: IVMeasurerBase, checked: bool):
