@@ -534,7 +534,7 @@
     </message>
 	<message>
         <location filename="../ivcviewer.py" line="485"/>
-        <source>Сохранить измерение</source>
+        <source>Сохранить изображение</source>
         <translation>Save image</translation>
     </message>
 	<message>
