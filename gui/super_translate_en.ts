@@ -19,16 +19,6 @@
         <translation>Score threshold</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="80"/>
-        <source>-</source>
-        <translation>-</translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="124"/>
-        <source>+</source>
-        <translation>+</translation>
-    </message>
-    <message>
         <location filename="settings.ui" line="155"/>
         <source>Загрузить настройки</source>
         <translation>Load settings</translation>
@@ -45,44 +35,6 @@
     </message>
     <message>
         <location filename="settings.ui" line="216"/>
-        <source>Отмена</source>
-        <translation>Cancel</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionWindow</name>
-    <message>
-        <location filename="connection_window.ui" line="14"/>
-        <source>Настройка подключения</source>
-        <translation>Connection setup</translation>
-    </message>
-    <message>
-        <location filename="connection_window.ui" line="22"/>
-        <source>Тип ВАХометра</source>
-        <translation>IV-measurer type</translation>
-    </message>
-    <message>
-        <location filename="connection_window.ui" line="43"/>
-        <source>ВАХометр #1</source>
-        <translation>IV-measurer #1</translation>
-    </message>
-    <message>
-        <location filename="connection_window.ui" line="53"/>
-        <source>ВАХометр #2</source>
-        <translation>IV-measurer #2</translation>
-    </message>
-    <message>
-        <location filename="connection_window.ui" line="73"/>
-        <source>Подключить</source>
-        <translation>Connect</translation>
-    </message>
-    <message>
-        <location filename="connection_window.ui" line="80"/>
-        <source>Отключить</source>
-        <translation>Disconnect</translation>
-    </message>
-    <message>
-        <location filename="connection_window.ui" line="87"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>
@@ -165,7 +117,7 @@
         <translation>Plan testing</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="293"/>
+        <location filename="mainwindow.ui" line="296"/>
         <source>Запись плана тестирования</source>
         <translation>Write test plan</translation>
     </message>
@@ -190,147 +142,147 @@
         <translation>Create test plan</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="390"/>
+        <location filename="mainwindow.ui" line="405"/>
         <source>Открыть план тестирования</source>
         <translation>Open test plan</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="399"/>
+        <location filename="mainwindow.ui" line="414"/>
         <source>Сохранить план тестирования</source>
         <translation>Save test plan</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="408"/>
+        <location filename="mainwindow.ui" line="423"/>
         <source>Сохранить план тестирования как</source>
         <translation>Save test plan as</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="417"/>
+        <location filename="mainwindow.ui" line="432"/>
         <source>Сохранить скриншот</source>
         <translation>Screenshot</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="426"/>
+        <location filename="mainwindow.ui" line="441"/>
         <source>Открыть окно просмотра платы</source>
         <translation>Open board window</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="438"/>
+        <location filename="mainwindow.ui" line="453"/>
         <source>Заморозить канал А</source>
         <translation>Freeze A</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="441"/>
+        <location filename="mainwindow.ui" line="456"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Заморозить канал А&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Freeze A&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="453"/>
+        <location filename="mainwindow.ui" line="468"/>
         <source>Заморозить канал B</source>
         <translation>Freeze B</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="456"/>
+        <location filename="mainwindow.ui" line="471"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Заморозить канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Freeze B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="519"/>
+        <location filename="mainwindow.ui" line="534"/>
         <source>О программе</source>
         <translation>About product</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="534"/>
+        <location filename="mainwindow.ui" line="549"/>
         <source>Звук</source>
         <translation>Sound</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="543"/>
+        <location filename="mainwindow.ui" line="558"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="555"/>
+        <location filename="mainwindow.ui" line="570"/>
         <source>Следующая точка</source>
         <translation>Next point</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="567"/>
+        <location filename="mainwindow.ui" line="582"/>
         <source>Предыдущая точка</source>
         <translation>Last point</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="579"/>
+        <location filename="mainwindow.ui" line="594"/>
         <source>Новая точка</source>
         <translation>New point</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="582"/>
+        <location filename="mainwindow.ui" line="597"/>
         <source> Новая точка</source>
         <translation> New point</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="594"/>
+        <location filename="mainwindow.ui" line="609"/>
         <source>Сохранить точку</source>
         <translation>Save point</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="597"/>
+        <location filename="mainwindow.ui" line="612"/>
         <source> Сохранить точку</source>
         <translation>Save point</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="609"/>
+        <location filename="mainwindow.ui" line="624"/>
         <source>Добавить изображение</source>
         <translation>Add board window</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="618"/>
+        <location filename="mainwindow.ui" line="633"/>
         <source>Автоподбор параметров</source>
         <translation>Optimal  search of parameters</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="630"/>
+        <location filename="mainwindow.ui" line="645"/>
         <source>Добавить  метку</source>
         <translation>Add marker</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="633"/>
+        <location filename="mainwindow.ui" line="648"/>
         <source> Добавить метку</source>
         <translation> Add marker</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="648"/>
+        <location filename="mainwindow.ui" line="663"/>
         <source>Удалить метку</source>
         <translation>Delete marker</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="663"/>
+        <location filename="mainwindow.ui" line="666"/>
         <source> Удалить метку</source>
         <translation> Delete marker</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="676"/>
+        <location filename="mainwindow.ui" line="679"/>
         <source>Скрыть канал А</source>
         <translation>Hide curve A</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="679"/>
+        <location filename="mainwindow.ui" line="682"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Скрыть канал А&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Hide curve A&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="692"/>
+        <location filename="mainwindow.ui" line="695"/>
         <source>Скрыть канал B</source>
         <translation>Hide curve B</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="695"/>
+        <location filename="mainwindow.ui" line="698"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Скрыть канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Hide curve B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="704"/>
+        <location filename="mainwindow.ui" line="707"/>
         <source>Подключение</source>
         <translation>Connection</translation>
     </message>
@@ -358,179 +310,129 @@
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="495"/>
+        <location filename="../mainwindow.py" line="497"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="738"/>
+        <location filename="../mainwindow.py" line="740"/>
         <source>Внимание</source>
         <translation>Warning</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="740"/>
+        <location filename="../mainwindow.py" line="742"/>
         <source>Сохранить изменения в файл?</source>
         <translation>Do you want to save changes in file?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="741"/>
+        <location filename="../mainwindow.py" line="743"/>
         <source>Да</source>
         <translation>Yes</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="742"/>
+        <location filename="../mainwindow.py" line="744"/>
         <source>Нет</source>
         <translation>No</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="743"/>
+        <location filename="../mainwindow.py" line="745"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>
 	<message>
-        <location filename="../mainwindow.py" line="756"/>
+        <location filename="../mainwindow.py" line="758"/>
         <source>Создать новую плату</source>
         <translation>Create new board</translation>
     </message>
 	<message>
-        <location filename="../mainwindow.py" line="815"/>
+        <location filename="../mainwindow.py" line="819"/>
         <source>Ошибка открытия точки</source>
         <translation>Open pin error</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="816"/>
+        <location filename="../mainwindow.py" line="820"/>
         <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение!</source>
         <translation>Incorrect format of pin number. Pin number must be integer!</translation>
     </message>
 	<message>
-        <location filename="../mainwindow.py" line="824"/>
+        <location filename="../mainwindow.py" line="828"/>
         <source>Точка с таким номером не найдена на данной плате.</source>
         <translation>Pin with this number was not found on this board.</translation>
     </message>
 	<message>
-        <location filename="../mainwindow.py" line="857"/>
+        <location filename="../mainwindow.py" line="861"/>
         <source>Открыть плату</source>
         <translation>Open board</translation>
     </message>
 	<message>
-        <location filename="../mainwindow.py" line="864"/>
+        <location filename="../mainwindow.py" line="868"/>
         <source>Формат файла не подходит</source>
         <translation>Invalid input file</translation>
     </message>
 	<message>
-        <location filename="../mainwindow.py" line="880"/>
+        <location filename="../mainwindow.py" line="884"/>
         <source>Открыть изображение платы</source>
         <translation>Open board window</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="893"/>
+        <location filename="../mainwindow.py" line="897"/>
         <source>Открытие изображения платы</source>
         <translation>Open board image</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="895"/>
+        <location filename="../mainwindow.py" line="899"/>
         <source>Для данной платы изображение не задано!</source>
         <translation>Not found image for current board!</translation>
     </message>
 	<message>
-        <location filename="../mainwindow.py" line="938"/>
+        <location filename="../mainwindow.py" line="942"/>
         <source>Сохранить плату</source>
         <translation>Save board</translation>
     </message>
 	<message>
-        <location filename="../mainwindow.py" line="972"/>
+        <location filename="../mainwindow.py" line="976"/>
         <source>Сохранить ВАХ</source>
         <translation>Save IVC</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1031"/>
+        <location filename="../mainwindow.py" line="1047"/>
         <source>Ошибка при установке настроек устройства</source>
         <translation>Error occurred while configuring device settings</translation>
     </message>
 	<message>
-        <location filename="../mainwindow.py" line="1066"/>
+        <location filename="../mainwindow.py" line="1081"/>
         <source>Удалить маркер</source>
         <translation>Delete cursor</translation>
     </message>
 	<message>
-        <location filename="../mainwindow.py" line="1069"/>
+        <location filename="../mainwindow.py" line="1085"/>
         <source>Удалить все маркеры</source>
         <translation>Delete all cursors</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1063"/>
+        <location filename="../mainwindow.py" line="1116"/>
         <source>Справка</source>
         <translation>Help</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1067"/>
+        <location filename="../mainwindow.py" line="1120"/>
         <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Для более подробной информации об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru.</source>
         <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). For more information on Eyepoint, follow the link http://eyepoint.physlab.ru.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1071"/>
+        <location filename="../mainwindow.py" line="1124"/>
         <source>Перейти</source>
         <translation>Go</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1072"/>
+        <location filename="../mainwindow.py" line="1125"/>
         <source>ОК</source>
         <translation>OK</translation>
     </message>
 	<message>
-        <location filename="../mainwindow.py" line="1133"/>
+        <location filename="../mainwindow.py" line="1186"/>
         <source>План тестирования не был сохранен. Сохранить последние изменения?</source>
         <translation>The measurement plan was not saved. Save the latest changes?</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="821"/>
-        <source>  Напряжение: </source>
-        <translation>  Voltage: </translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="821"/>
-        <source> В / дел.</source>
-        <translation> V / div. </translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="827"/>
-        <source>  Ток: </source>
-        <translation>  Current: </translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="827"/>
-        <source> мА / дел.</source>
-        <translation> mA / div.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="823"/>
-        <source>Ампл. проб. сигнала: </source>
-        <translation>Probe signal amplitude: </translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="823"/>
-        <source> B</source>
-        <translation> V</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="828"/>
-        <source>Чувствительность: </source>
-        <translation>Sensitivity: </translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="825"/>
-        <source>Частота: </source>
-        <translation>Frequency: </translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="825"/>
-        <source> Гц</source>
-        <translation> Hz</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="829"/>
-        <source>Различие: </source>
-        <translation>Difference: </translation>
     </message>
 	<message>
         <location filename="../ivcviewer.py" line="485"/>
@@ -548,59 +450,119 @@
         <translation>Add cursor</translation>
     </message>
     <message>
-        <location filename="../measurer_settings_window.py" line="195"/>
+        <location filename="../measurer_settings_window.py" line="193"/>
         <source>Настройки для </source>
         <translation>Settings for </translation>
     </message>
     <message>
-        <location filename="../measurer_settings_window.py" line="217"/>
+        <location filename="../measurer_settings_window.py" line="215"/>
         <source>Настройки для устройства</source>
         <translation>Settings for device</translation>
     </message>
     <message>
-        <location filename="../measurer_settings_window.py" line="218"/>
+        <location filename="../measurer_settings_window.py" line="216"/>
         <source>Нет настроек</source>
         <translation>No settings</translation>
     </message>
 	<message>
-        <location filename="../connection_window.py" line="373"/>
+        <location filename="../connection_window.py" line="265"/>
         <source>Настройка подключения</source>
         <translation>Connection setup</translation>
     </message>
 	<message>
-        <location filename="../connection_window.py" line="375"/>
+        <location filename="../connection_window.py" line="267"/>
         <source>Тип ВАХометра</source>
         <translation>IV-measurer type</translation>
     </message>
 	<message>
-        <location filename="../connection_window.py" line="379"/>
+        <location filename="../connection_window.py" line="271"/>
         <source>ВАХометр #1</source>
         <translation>IV-measurer #1</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="384"/>
+        <location filename="../connection_window.py" line="276"/>
         <source>ВАХометр #2</source>
         <translation>IV-measurer #2</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="389"/>
+        <location filename="../connection_window.py" line="281"/>
         <source>Подключить</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="390"/>
+        <location filename="../connection_window.py" line="282"/>
         <source>Отключить</source>
         <translation>Disconnect</translation>
     </message>
 	<message>
-        <location filename="../language.py" line="88"/>
+        <location filename="../language.py" line="89"/>
         <source>Выбор языка</source>
         <translation>Language selection</translation>
     </message>
 	<message>
-        <location filename="../language.py" line="90"/>
+        <location filename="../language.py" line="91"/>
         <source>Выберите язык:</source>
         <translation>Choose language:</translation>
+    </message>
+	<message>
+        <location filename="../settings/settingswindow.py" line="99"/>
+        <source>Открыть файл</source>
+        <translation>Open file</translation>
+    </message>
+	<message>
+        <location filename="../settings/settingswindow.py" line="113"/>
+        <source>Сохранить файл</source>
+        <translation>Save file</translation>
+    </message>
+	<message>
+        <location filename="../settings/settingswindow.py" line="152"/>
+        <source>  Напряжение: </source>
+        <translation>  Voltage: </translation>
+    </message>
+    <message>
+        <location filename="../settings/settingswindow.py" line="153"/>
+        <source> В / дел.</source>
+        <translation> V / div. </translation>
+    </message>
+	<message>
+        <location filename="../settings/settingswindow.py" line="157"/>
+        <source>Ампл. проб. сигнала: </source>
+        <translation>Probe signal amplitude: </translation>
+    </message>
+    <message>
+        <location filename="../settings/settingswindow.py" line="157"/>
+        <source> B</source>
+        <translation> V</translation>
+    </message>
+	<message>
+        <location filename="../settings/settingswindow.py" line="160"/>
+        <source>Частота: </source>
+        <translation>Frequency: </translation>
+    </message>
+    <message>
+        <location filename="../settings/settingswindow.py" line="161"/>
+        <source> Гц</source>
+        <translation> Hz</translation>
+    </message>
+    <message>
+        <location filename="../settings/settingswindow.py" line="164"/>
+        <source>  Ток: </source>
+        <translation>  Current: </translation>
+    </message>
+    <message>
+        <location filename="../settings/settingswindow.py" line="165"/>
+        <source> мА / дел.</source>
+        <translation> mA / div.</translation>
+    </message>
+    <message>
+        <location filename="../settings/settingswindow.py" line="168"/>
+        <source>Чувствительность: </source>
+        <translation>Sensitivity: </translation>
+    </message>
+    <message>
+        <location filename="../settings/settingswindow.py" line="172"/>
+        <source>Различие: </source>
+        <translation>Difference: </translation>
     </message>
 </context>
 </TS>

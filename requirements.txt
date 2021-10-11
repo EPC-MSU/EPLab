@@ -1,5 +1,5 @@
-hg+https://hg.ximc.ru/eyepoint/epcore@t-53025#egg=epcore
-hg+https://hg.ximc.ru/eyepoint/ivviewer@dev-0.1#egg=ivviewer
+hg+https://hg.ximc.ru/eyepoint/epcore@538325ef9e92#egg=epcore
+hg+https://hg.ximc.ru/eyepoint/ivviewer@08810240f7cf#egg=ivviewer
 git+https://github.com/EPC-MSU/board-view@Version0.1.1#egg=boardview
 epsound==0.0.13
 psutil==5.8.0
