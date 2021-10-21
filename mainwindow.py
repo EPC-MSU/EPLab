@@ -32,6 +32,7 @@ from connection_window import ConnectionWindow
 from language import Language, LanguageSelectionWindow
 from measurer_settings_window import MeasurerSettingsWindow
 from player import SoundPlayer
+from report_window import ReportGenerationWindow
 from score import ScoreWrapper
 from settings.settings import Settings
 from settings.settingswindow import LowSettingsPanel, SettingsWindow
@@ -135,9 +136,11 @@ class EPLabWindow(QMainWindow):
         self._work_mode = mode
         self._update_current_pin()
 
-    def _check_measurement_plan(self) -> bool:
+    def _check_measurement_plan(self, for_saving: bool = True) -> bool:
         """
         Method checks if there are pins without measurements.
+        :param for_saving: if True then message box with warning will be shown
+        for saving measurement plan.
         :return: True if there are pins without measurements.
         """
 
@@ -148,15 +151,20 @@ class EPLabWindow(QMainWindow):
                     empty_pins += ", "
                 empty_pins += str(pin_index)
         if empty_pins:
+            if for_saving:
+                process_name = qApp.translate("t", "сохранения плана тестирования")
+            else:
+                process_name = qApp.translate("t", "создания отчета")
             if "," in empty_pins:
                 text = qApp.translate("t", "Точки POINTS_PARAM не содержат сохраненных измерений. "
-                                           "Для сохранения плана тестирования все точки должны "
-                                           "содержать сохраненные измерения")
+                                           "Для PROCESS_NAME все точки должны содержать сохраненные"
+                                           " измерения")
             else:
                 text = qApp.translate("t", "Точка POINTS_PARAM не содержит сохраненных измерений. "
-                                           "Для сохранения плана тестирования все точки должны "
-                                           "содержать сохраненные измерения")
+                                           "Для PROCESS_NAME все точки должны содержать сохраненные"
+                                           " измерения")
             text = text.replace("POINTS_PARAM", empty_pins)
+            text = text.replace("PROCESS_NAME", process_name)
             show_exception(qApp.translate("t", "Ошибка"), text, "")
             return True
         return False
@@ -283,8 +291,9 @@ class EPLabWindow(QMainWindow):
                    self.hide_curve_b_action, self.search_optimal_action, self.comparing_mode_action,
                    self.writing_mode_action, self.testing_mode_action, self.settings_mode_action,
                    self.next_point_action, self.last_point_action, self.new_point_action,
-                   self.save_point_action, self.add_board_image_action, self.add_cursor_action,
-                   self.remove_cursor_action, self.freqDock, self.currentDock, self.voltageDock)
+                   self.save_point_action, self.add_board_image_action, self.create_report_action,
+                   self.add_cursor_action, self.remove_cursor_action, self.freqDock,
+                   self.currentDock, self.voltageDock)
         for widget in widgets:
             widget.setEnabled(enabled)
 
@@ -406,6 +415,7 @@ class EPLabWindow(QMainWindow):
         self.new_point_action.triggered.connect(self._on_create_new_pin)
         self.save_point_action.triggered.connect(self._on_save_pin)
         self.add_board_image_action.triggered.connect(self._on_load_board_image)
+        self.create_report_action.triggered.connect(self._on_create_report)
         self.about_action.triggered.connect(self._on_show_product_info)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
@@ -436,7 +446,8 @@ class EPLabWindow(QMainWindow):
         self._hide_curve_ref = False
         self._ref_curve = None
         self._test_curve = None
-        self._current_file_path = None
+        self._current_file_path: str = None
+        self._report_directory: str = None
 
         self._timer = QTimer()
         self._timer.setInterval(10)
@@ -784,6 +795,19 @@ class EPLabWindow(QMainWindow):
         # This will cause some errors during ufiv validation.
         # self._on_save_pin()
         self._update_current_pin()
+
+    @pyqtSlot()
+    def _on_create_report(self):
+        """
+        Slot shows dialog window to create report for board.
+        """
+
+        threshold_score = self._score_wrapper.threshold
+        if self._check_measurement_plan(False):
+            return
+        report_generation_window = ReportGenerationWindow(
+            self, self._measurement_plan, self._report_directory, threshold_score)
+        report_generation_window.show()
 
     @pyqtSlot()
     def _on_delete_all_cursors(self):
@@ -1147,6 +1171,7 @@ class EPLabWindow(QMainWindow):
         self.new_point_action.setEnabled(mode is WorkMode.write)
         self.save_point_action.setEnabled(mode is WorkMode.write)
         self.add_board_image_action.setEnabled(mode is WorkMode.write)
+        self.create_report_action.setEnabled(mode is WorkMode.write)
         self._change_work_mode(mode)
 
     def apply_settings(self, threshold: float):
@@ -1303,3 +1328,11 @@ class EPLabWindow(QMainWindow):
                 style = QtC.ToolButtonTextBesideIcon
             tool_bar.setToolButtonStyle(style)
         super().resizeEvent(event)
+
+    def set_report_directory(self, directory: str):
+        """
+        Method sets new value for report directory.
+        :param directory: new report directory.
+        """
+
+        self._report_directory = directory

@@ -291,18 +291,33 @@
         <source>Язык</source>
         <translation>Language</translation>
     </message>
+	<message>
+        <location filename="mainwindow.ui" line="729"/>
+        <source>Создать отчет</source>
+        <translation>Create report</translation>
+    </message>
 </context>
 <context>
     <name>t</name>
 	<message>
-        <location filename="../mainwindow.py" line="152"/>
-        <source>Точки POINTS_PARAM не содержат сохраненных измерений. Для сохранения плана тестирования все точки должны содержать сохраненные измерения</source>
-        <translation>Points POINTS_PARAM do not contain saved measurements. To save the test plan all points must contain saved measurements</translation>
+        <location filename="../mainwindow.py" line="155"/>
+        <source>сохранения плана тестирования</source>
+        <translation>save the test plan</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="157"/>
+        <source>создания отчета</source>
+        <translation>create report</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="159"/>
+        <source>Точки POINTS_PARAM не содержат сохраненных измерений. Для PROCESS_NAME все точки должны содержать сохраненные измерения</source>
+        <translation>Points POINTS_PARAM do not contain saved measurements. To PROCESS_NAME all points must contain saved measurements</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="156"/>
-        <source>Точка POINTS_PARAM не содержит сохраненных измерений. Для сохранения плана тестирования все точки должны содержать сохраненные измерения</source>
-        <translation>Point POINTS_PARAM does not contain saved measurements. To save the test plan all points must contain saved measurements</translation>
+        <location filename="../mainwindow.py" line="163"/>
+        <source>Точка POINTS_PARAM не содержит сохраненных измерений. Для PROCESS_NAME все точки должны содержать сохраненные измерения</source>
+        <translation>Point POINTS_PARAM does not contain saved measurements. To PROCESS_NAME all points must contain saved measurements</translation>
     </message>
 	<message>
         <location filename="../mainwindow.py" line="160"/>
@@ -563,6 +578,36 @@
         <location filename="../settings/settingswindow.py" line="172"/>
         <source>Различие: </source>
         <translation>Difference: </translation>
+    </message>
+	<message>
+        <location filename="../report_window.py" line="41"/>
+        <source>Генератор отчетов</source>
+        <translation>Report generator</translation>
+    </message>
+	<message>
+        <location filename="../report_window.py" line="43"/>
+        <source>Выбрать папку для отчета</source>
+        <translation>Select directory for the report</translation>
+    </message>
+	<message>
+        <location filename="../report_window.py" line="46"/>
+        <source>Создать отчет</source>
+        <translation>Create report</translation>
+    </message>
+	<message>
+        <location filename="../report_window.py" line="92"/>
+        <source>Информация</source>
+        <translation>Information</translation>
+    </message>
+	<message>
+        <location filename="../report_window.py" line="93"/>
+        <source>Отчет создан</source>
+        <translation>Report created</translation>
+    </message>
+	<message>
+        <location filename="../report_window.py" line="101"/>
+        <source>Выбрать папку</source>
+        <translation>Select directory</translation>
     </message>
 </context>
 </TS>

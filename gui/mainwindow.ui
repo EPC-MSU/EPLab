@@ -221,6 +221,7 @@
     <addaction name="new_point_action"/>
     <addaction name="save_point_action"/>
     <addaction name="add_board_image_action"/>
+    <addaction name="create_report_action"/>
    </widget>
    <widget class="QMenu" name="measurers_menu">
     <property name="title">
@@ -714,6 +715,18 @@
    </property>
    <property name="text">
     <string>Язык</string>
+   </property>
+  </action>
+  <action name="create_report_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/create_report.png</normaloff>../media/create_report.png</iconset>
+   </property>
+   <property name="text">
+    <string>Создать отчет</string>
    </property>
   </action>
  </widget>
