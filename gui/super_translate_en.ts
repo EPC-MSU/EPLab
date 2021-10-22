@@ -293,8 +293,8 @@
     </message>
 	<message>
         <location filename="mainwindow.ui" line="729"/>
-        <source>Создать отчет</source>
-        <translation>Create report</translation>
+        <source>Сгенерировать отчет</source>
+        <translation>Generate report</translation>
     </message>
 </context>
 <context>
@@ -580,19 +580,24 @@
         <translation>Difference: </translation>
     </message>
 	<message>
-        <location filename="../report_window.py" line="41"/>
+        <location filename="../report_window.py" line="45"/>
         <source>Генератор отчетов</source>
         <translation>Report generator</translation>
     </message>
 	<message>
-        <location filename="../report_window.py" line="43"/>
+        <location filename="../report_window.py" line="47"/>
         <source>Выбрать папку для отчета</source>
         <translation>Select directory for the report</translation>
     </message>
 	<message>
-        <location filename="../report_window.py" line="46"/>
-        <source>Создать отчет</source>
-        <translation>Create report</translation>
+        <location filename="../report_window.py" line="51"/>
+        <source>Сгенерировать отчет</source>
+        <translation>Generate report</translation>
+    </message>
+	<message>
+        <location filename="../report_window.py" line="64"/>
+        <source>Шаги генерации отчета</source>
+        <translation>Steps to generate report</translation>
     </message>
 	<message>
         <location filename="../report_window.py" line="92"/>
@@ -600,12 +605,7 @@
         <translation>Information</translation>
     </message>
 	<message>
-        <location filename="../report_window.py" line="93"/>
-        <source>Отчет создан</source>
-        <translation>Report created</translation>
-    </message>
-	<message>
-        <location filename="../report_window.py" line="101"/>
+        <location filename="../report_window.py" line="131"/>
         <source>Выбрать папку</source>
         <translation>Select directory</translation>
     </message>

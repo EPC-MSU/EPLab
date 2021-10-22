@@ -2,8 +2,10 @@
 File with class for dialog window to create report for board.
 """
 
+import webbrowser
+from functools import partial
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from epcore.elements import Board
 from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator
 
@@ -32,6 +34,7 @@ class ReportGenerationWindow(qt.QDialog):
         self._threshold_score: float = threshold_score
         self._number_of_steps_done: int = 0
         self._total_number: int = None
+        self._thread: QThread = None
         self._init_ui()
 
     def _init_ui(self):
@@ -43,15 +46,31 @@ class ReportGenerationWindow(qt.QDialog):
         v_box_layout = qt.QVBoxLayout()
         self.button_select_folder = qt.QPushButton(qApp.translate("t", "Выбрать папку для отчета"))
         self.button_select_folder.clicked.connect(self.select_folder)
+        self.button_select_folder.setFixedWidth(300)
         v_box_layout.addWidget(self.button_select_folder)
-        self.button_create_report = qt.QPushButton(qApp.translate("t", "Создать отчет"))
+        self.button_create_report = qt.QPushButton(qApp.translate("t", "Сгенерировать отчет"))
         self.button_create_report.clicked.connect(self.create_report)
+        self.button_create_report.setFixedWidth(300)
         v_box_layout.addWidget(self.button_create_report)
         self.progress_bar = qt.QProgressBar()
         self.progress_bar.setVisible(False)
         self.progress_bar.setMinimum(0)
         self.progress_bar.setMaximum(100)
         v_box_layout.addWidget(self.progress_bar)
+        self.text_edit_info = qt.QTextEdit()
+        self.text_edit_info.setVisible(False)
+        self.text_edit_info.setMaximumHeight(100)
+        self.text_edit_info.setReadOnly(True)
+        self.group_box_info = qt.QGroupBox(qApp.translate("t", "Шаги генерации отчета"))
+        self.group_box_info.setFixedWidth(300)
+        self.group_box_info.setCheckable(True)
+        self.group_box_info.setChecked(False)
+        self.group_box_info.setVisible(False)
+        self.group_box_info.toggled.connect(self.text_edit_info.setVisible)
+        h_box_layout = qt.QHBoxLayout()
+        h_box_layout.addWidget(self.text_edit_info)
+        self.group_box_info.setLayout(h_box_layout)
+        v_box_layout.addWidget(self.group_box_info)
         v_box_layout.setSizeConstraint(qt.QLayout.SetFixedSize)
         self.setLayout(v_box_layout)
         self.adjustSize()
@@ -71,27 +90,37 @@ class ReportGenerationWindow(qt.QDialog):
         Slot creates report.
         """
 
+        if self._thread:
+            self._thread.quit()
+        self._thread = QThread(parent=self._parent)
+        self._thread.setTerminationEnabled(True)
         config = {ConfigAttributes.BOARD_TEST: self._board,
                   ConfigAttributes.DIRECTORY: self._folder_for_report,
                   ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
                   ConfigAttributes.THRESHOLD_SCORE: self._threshold_score}
         report_generator = ReportGenerator()
+        report_generator.moveToThread(self._thread)
         report_generator.total_number_of_steps_calculated.connect(self.set_total_number_of_steps)
         report_generator.step_done.connect(self.change_progress)
         report_generator.generation_finished.connect(self.finish_generation)
+        report_generator.exception_raised.connect(self.show_exception)
+        report_generator.step_started.connect(self.text_edit_info.append)
+        self._thread.started.connect(partial(report_generator.run, config))
         self._number_of_steps_done = 0
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(True)
-        report_generator.run(config)
+        self.text_edit_info.clear()
+        self.group_box_info.setVisible(True)
+        self._thread.start()
 
-    @pyqtSlot()
-    def finish_generation(self):
+    @pyqtSlot(str)
+    def finish_generation(self, report_path: str):
         """
-        Slot shows message box with information that report was generated.
+        Slot opens generated report.
+        :param report_path: path to generated report.
         """
 
-        qt.QMessageBox.information(self, qApp.translate("t", "Информация"),
-                                   qApp.translate("t", "Отчет создан"))
+        webbrowser.open(report_path, new=2)
 
     @pyqtSlot()
     def select_folder(self):
@@ -113,3 +142,12 @@ class ReportGenerationWindow(qt.QDialog):
         """
 
         self._total_number = number
+
+    @pyqtSlot(str)
+    def show_exception(self, exception_text: str):
+        """
+        Slot shows message box with exception thrown when generating report.
+        :param exception_text: text of exception.
+        """
+
+        qt.QMessageBox.warning(self, qApp.translate("t", "Ошибка"), exception_text)

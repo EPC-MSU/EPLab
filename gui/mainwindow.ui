@@ -726,7 +726,7 @@
      <normaloff>../media/create_report.png</normaloff>../media/create_report.png</iconset>
    </property>
    <property name="text">
-    <string>Создать отчет</string>
+    <string>Сгенерировать отчет</string>
    </property>
   </action>
  </widget>
