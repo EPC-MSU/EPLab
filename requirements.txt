@@ -1,4 +1,4 @@
-hg+https://hg.ximc.ru/eyepoint/epcore@538325ef9e92#egg=epcore
+hg+https://hg.ximc.ru/eyepoint/epcore@dev-0.1#egg=epcore
 hg+https://hg.ximc.ru/eyepoint/ivviewer@08810240f7cf#egg=ivviewer
 git+https://github.com/EPC-MSU/board-view@Version0.1.1#egg=boardview
 git+https://github.com/EPC-MSU/ep_report_generator#egg=ep_report_generator

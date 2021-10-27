@@ -2,12 +2,13 @@
 File with class for dialog window to create report for board.
 """
 
-import webbrowser
 from functools import partial
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
+from PyQt5.QtGui import QCloseEvent
 from epcore.elements import Board
-from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator
+from report_generator import (ConfigAttributes, create_test_and_ref_boards, ObjectsForReport,
+                              ReportGenerator)
 
 
 class ReportGenerationWindow(qt.QDialog):
@@ -84,6 +85,16 @@ class ReportGenerationWindow(qt.QDialog):
         self._number_of_steps_done += 1
         self.progress_bar.setValue(int(self._number_of_steps_done / self._total_number * 100))
 
+    def closeEvent(self, event: QCloseEvent):
+        """
+        Method handles signal to close dialog window.
+        :param event: close event.
+        """
+
+        if self._thread:
+            self._thread.quit()
+        super().closeEvent(event)
+
     @pyqtSlot()
     def create_report(self):
         """
@@ -94,17 +105,20 @@ class ReportGenerationWindow(qt.QDialog):
             self._thread.quit()
         self._thread = QThread(parent=self._parent)
         self._thread.setTerminationEnabled(True)
-        config = {ConfigAttributes.BOARD_TEST: self._board,
+        test_board, ref_board = create_test_and_ref_boards(self._board)
+        config = {ConfigAttributes.BOARD_TEST: test_board,
+                  ConfigAttributes.BOARD_REF: ref_board,
                   ConfigAttributes.DIRECTORY: self._folder_for_report,
                   ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
-                  ConfigAttributes.THRESHOLD_SCORE: self._threshold_score}
+                  ConfigAttributes.THRESHOLD_SCORE: self._threshold_score,
+                  ConfigAttributes.OPEN_REPORT_AT_FINISH: True}
         report_generator = ReportGenerator()
         report_generator.moveToThread(self._thread)
         report_generator.total_number_of_steps_calculated.connect(self.set_total_number_of_steps)
         report_generator.step_done.connect(self.change_progress)
-        report_generator.generation_finished.connect(self.finish_generation)
         report_generator.exception_raised.connect(self.show_exception)
         report_generator.step_started.connect(self.text_edit_info.append)
+        report_generator.generation_finished.connect(self.finish_generation)
         self._thread.started.connect(partial(report_generator.run, config))
         self._number_of_steps_done = 0
         self.progress_bar.setValue(0)
@@ -114,13 +128,19 @@ class ReportGenerationWindow(qt.QDialog):
         self._thread.start()
 
     @pyqtSlot(str)
-    def finish_generation(self, report_path: str):
+    def finish_generation(self, report_dir_path: str):
         """
-        Slot opens generated report.
-        :param report_path: path to generated report.
+        Slot finishes generation of report.
+        :param report_dir_path: path to directory with report.
         """
 
-        webbrowser.open(report_path, new=2)
+        self.progress_bar.setVisible(False)
+        self.group_box_info.setVisible(False)
+        self.group_box_info.setChecked(False)
+        self.text_edit_info.setVisible(False)
+        message = qApp.translate("t", "Отчет сгенерирован и сохранен в файл 'FOLDER'")
+        message = message.replace("FOLDER", report_dir_path)
+        qt.QMessageBox.information(self._parent, qApp.translate("t", "Информация"), message)
 
     @pyqtSlot()
     def select_folder(self):

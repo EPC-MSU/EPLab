@@ -580,32 +580,37 @@
         <translation>Difference: </translation>
     </message>
 	<message>
-        <location filename="../report_window.py" line="45"/>
+        <location filename="../report_window.py" line="46"/>
         <source>Генератор отчетов</source>
         <translation>Report generator</translation>
     </message>
 	<message>
-        <location filename="../report_window.py" line="47"/>
+        <location filename="../report_window.py" line="48"/>
         <source>Выбрать папку для отчета</source>
         <translation>Select directory for the report</translation>
     </message>
 	<message>
-        <location filename="../report_window.py" line="51"/>
+        <location filename="../report_window.py" line="52"/>
         <source>Сгенерировать отчет</source>
         <translation>Generate report</translation>
     </message>
 	<message>
-        <location filename="../report_window.py" line="64"/>
+        <location filename="../report_window.py" line="65"/>
         <source>Шаги генерации отчета</source>
         <translation>Steps to generate report</translation>
     </message>
 	<message>
-        <location filename="../report_window.py" line="92"/>
+        <location filename="../report_window.py" line="141"/>
+        <source>Отчет сгенерирован и сохранен в файл 'FOLDER'</source>
+        <translation>Report was generated and saved to file 'FOLDER'</translation>
+    </message>
+	<message>
+        <location filename="../report_window.py" line="143"/>
         <source>Информация</source>
         <translation>Information</translation>
     </message>
 	<message>
-        <location filename="../report_window.py" line="131"/>
+        <location filename="../report_window.py" line="151"/>
         <source>Выбрать папку</source>
         <translation>Select directory</translation>
     </message>
