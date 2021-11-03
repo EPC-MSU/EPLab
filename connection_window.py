@@ -343,8 +343,9 @@ class ConnectionWindow(qt.QDialog):
                     ports_for_first_and_second[index - 1].remove(selected_ports[index])
                 except ValueError:
                     pass
+            spec_ports = [*selected_ports, None, MeasurerType.IVM10_VIRTUAL]
             for port in self._initial_ports:
-                if port not in [*selected_ports, None] and MeasurerType.check_port_for_ivm10(port):
+                if port not in spec_ports and MeasurerType.check_port_for_ivm10(port):
                     ports_for_first_and_second[index].append(port)
             ports_for_first_and_second[index] = sorted(ports_for_first_and_second[index])
             ports_for_first_and_second[index].append("None")
@@ -387,8 +388,7 @@ class ConnectionWindow(qt.QDialog):
             if not MeasurerType.check_port_for_ivm10(port):
                 ports[index] = "None"
         available_ports = find_urpc_ports("ivm")
-        ports_for_first_and_second = self._get_ports_for_ivm10(
-            available_ports, *ports)
+        ports_for_first_and_second = self._get_ports_for_ivm10(available_ports, *ports)
         for index, combo_box in enumerate(self.combo_boxes):
             combo_box.clear()
             combo_box.addItems(ports_for_first_and_second[index])
