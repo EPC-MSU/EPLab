@@ -14,7 +14,8 @@ from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPoint, QP
                           Qt as QtC, QTimer, QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow,
-                             QMenu, QMessageBox, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
+                             QMenu, QMessageBox, QPushButton, QRadioButton, QScrollArea,
+                             QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, Pin
@@ -1132,9 +1133,23 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_show_product_info(self):
-        def handle_button_click(button):
+        """
+        Slot shows message box with information about application.
+        """
+
+        def handle_button_click(button: QPushButton):
+            """
+            Function handles click on button.
+            :param button: button that was clicked.
+            """
+
+            page_url = "https://eyepoint.physlab.ru/"
+            if qApp.instance().property("language") is Language.RU:
+                page_url += "ru/"
+            else:
+                page_url += "en/"
             if button.text() in ("Перейти", "Go"):
-                webbrowser.open_new_tab("http://eyepoint.physlab.ru")
+                webbrowser.open_new_tab(page_url)
 
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
