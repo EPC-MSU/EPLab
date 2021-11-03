@@ -4,7 +4,7 @@ import traceback
 from argparse import ArgumentParser, Namespace
 from PyQt5.QtWidgets import (qApp, QApplication, QDesktopWidget, QLabel, QMainWindow, QPushButton,
                              QVBoxLayout, QWidget)
-from epcore.product import EPLab
+from epcore.product import EyePointProduct
 from mainwindow import EPLabWindow, show_exception
 from utils import read_json
 
@@ -33,7 +33,7 @@ def launch_eplab(app: QApplication, args: Namespace):
     :param args: arguments from command line.
     """
 
-    window = EPLabWindow(EPLab(read_json(args.config)), args.test, args.ref, args.en)
+    window = EPLabWindow(EyePointProduct(read_json(args.config)), args.test, args.ref, args.en)
     window.resize(1200, 600)
     window.show()
     app.exec()

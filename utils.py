@@ -15,7 +15,7 @@ from epcore.elements import MeasurementSettings
 from epcore.ivmeasurer import (IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual,
                                IVMeasurerVirtualASA)
 from epcore.measurementmanager import MeasurementSystem
-from epcore.product import EPLab
+from epcore.product import EyePointProduct
 from language import Language
 
 _FILENAME_FOR_AUTO_SETTINGS = "eplab_settings_for_auto_save_and_read.ini"
@@ -33,9 +33,9 @@ def _get_options_from_config(config: configparser.ConfigParser) -> Optional[Dict
     voltage = config.get("voltage", None)
     if None in (frequency, resistance, voltage):
         return None
-    return {EPLab.Parameter.frequency: frequency,
-            EPLab.Parameter.sensitive: resistance,
-            EPLab.Parameter.voltage: voltage}
+    return {EyePointProduct.Parameter.frequency: frequency,
+            EyePointProduct.Parameter.sensitive: resistance,
+            EyePointProduct.Parameter.voltage: voltage}
 
 
 def create_measurers(port_1: str, port_2: str) -> MeasurementSystem:
@@ -171,7 +171,7 @@ def read_json(path: Optional[str] = None) -> Optional[Dict]:
         return json.load(file)
 
 
-def read_settings_auto(product: EPLab) -> Optional[MeasurementSettings]:
+def read_settings_auto(product: EyePointProduct) -> Optional[MeasurementSettings]:
     """
     Function searches measurement settings that were specified for device
     during previous work.
@@ -200,7 +200,7 @@ def read_settings_auto(product: EPLab) -> Optional[MeasurementSettings]:
     return settings
 
 
-def save_settings_auto(product: EPLab, settings: MeasurementSettings, language: str):
+def save_settings_auto(product: EyePointProduct, settings: MeasurementSettings, language: str):
     """
     Function saves current settings for device in file.
     :param product:
@@ -211,9 +211,9 @@ def save_settings_auto(product: EPLab, settings: MeasurementSettings, language: 
     options_config = {}
     if settings is not None:
         options = product.settings_to_options(settings)
-        options_config = {"frequency": options[EPLab.Parameter.frequency],
-                          "sensitive": options[EPLab.Parameter.sensitive],
-                          "voltage": options[EPLab.Parameter.voltage]}
+        options_config = {"frequency": options[EyePointProduct.Parameter.frequency],
+                          "sensitive": options[EyePointProduct.Parameter.sensitive],
+                          "voltage": options[EyePointProduct.Parameter.voltage]}
     options_config["language"] = language
     config = configparser.ConfigParser()
     config["DEFAULT"] = options_config

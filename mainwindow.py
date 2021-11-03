@@ -23,7 +23,7 @@ from epcore.ivmeasurer import (IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, I
 from epcore.measurementmanager import MeasurementPlan
 from epcore.measurementmanager.ivc_comparator import IVCComparator
 from epcore.measurementmanager.utils import Searcher
-from epcore.product import EPLab
+from epcore.product import EyePointProduct
 from ivviewer import Viewer as IVViewer
 import utils as ut
 from boardwindow import BoardWidget
@@ -67,10 +67,10 @@ class EPLabWindow(QMainWindow):
 
     default_path = "../EPLab-Files"
 
-    def __init__(self, product: EPLab, port_1: Optional[str] = None, port_2: Optional[str] = None,
-                 english: Optional[bool] = None):
+    def __init__(self, product: EyePointProduct, port_1: Optional[str] = None,
+                 port_2: Optional[str] = None, english: Optional[bool] = None):
         """
-        :param product:
+        :param product: product;
         :param port_1: port for first measurer;
         :param port_2: port for second measurer;
         :param english: if True then interface language will be English.
@@ -190,9 +190,9 @@ class EPLabWindow(QMainWindow):
         # Voltage in Volts, current in mA
         self._comparator.set_min_ivc(0.6, 0.002)
         self.__settings: Settings = None
-        self._option_buttons = {EPLab.Parameter.frequency: dict(),
-                                EPLab.Parameter.voltage: dict(),
-                                EPLab.Parameter.sensitive: dict()}
+        self._option_buttons = {EyePointProduct.Parameter.frequency: dict(),
+                                EyePointProduct.Parameter.voltage: dict(),
+                                EyePointProduct.Parameter.sensitive: dict()}
         for dock_widget in (self.freqLayout, self.currentLayout, self.voltageLayout):
             layout = dock_widget.layout()
             self._clear_layout(layout)
@@ -222,7 +222,7 @@ class EPLabWindow(QMainWindow):
             action.triggered.connect(partial(self._on_show_device_settings, measurer))
             self.measurers_menu.addAction(action)
 
-    def _create_radio_buttons_for_parameter(self, param_name: EPLab.Parameter,
+    def _create_radio_buttons_for_parameter(self, param_name: EyePointProduct.Parameter,
                                             available_options: List) -> QWidget:
         """
         Method creates radio buttons for options of given parameter and puts
@@ -255,7 +255,8 @@ class EPLabWindow(QMainWindow):
         available = self._product.get_available_options(settings)
         self._parameters_scroll_areas = {}
         layouts = self.freqLayout.layout(), self.voltageLayout.layout(), self.currentLayout.layout()
-        parameters = EPLab.Parameter.frequency, EPLab.Parameter.voltage, EPLab.Parameter.sensitive
+        parameters = (EyePointProduct.Parameter.frequency, EyePointProduct.Parameter.voltage,
+                      EyePointProduct.Parameter.sensitive)
         for i_parameter, parameter in enumerate(parameters):
             widget_with_options = self._create_radio_buttons_for_parameter(parameter,
                                                                            available[parameter])
@@ -306,7 +307,7 @@ class EPLabWindow(QMainWindow):
 
         return self._product.adjust_noise_amplitude(settings)
 
-    def _get_options_from_ui(self) -> Dict[EPLab.Parameter, str]:
+    def _get_options_from_ui(self) -> Dict[EyePointProduct.Parameter, str]:
         """
         Method returns current options for parameters of measuring system
         from UI.
@@ -328,10 +329,10 @@ class EPLabWindow(QMainWindow):
         threshold = self._score_wrapper.threshold
         self._update_threshold(threshold)
 
-    def _init_ui(self, product: EPLab, english: Optional[bool] = None):
+    def _init_ui(self, product: EyePointProduct, english: Optional[bool] = None):
         """
         Method initializes widgets on main window and objects.
-        :param product:
+        :param product: product;
         :param english: if True then interface language will be English.
         """
 
@@ -543,7 +544,7 @@ class EPLabWindow(QMainWindow):
         # When new curve will be received plot parameters will be adjusted
         self._settings_update_next_cycle = settings
 
-    def _set_options_to_ui(self, options: Dict[EPLab.Parameter, str]):
+    def _set_options_to_ui(self, options: Dict[EyePointProduct.Parameter, str]):
         """
         Method sets options of parameters to UI.
         """
@@ -552,9 +553,9 @@ class EPLabWindow(QMainWindow):
             self._option_buttons[parameter][value].setChecked(True)
 
     def _set_plot_parameters(self, settings: MeasurementSettings):
-        buttons = self._option_buttons[EPLab.Parameter.sensitive]
+        buttons = self._option_buttons[EyePointProduct.Parameter.sensitive]
         sensitive = buttons[self._product.settings_to_options(settings)[
-            EPLab.Parameter.sensitive]].text()
+            EyePointProduct.Parameter.sensitive]].text()
         voltage, current = self._iv_window.plot.get_minor_axis_step()
         param_dict = {"voltage": voltage,
                       "current": current,
