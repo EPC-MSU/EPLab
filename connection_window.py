@@ -29,7 +29,10 @@ from language import Language
 
 
 IP_ASA_REG_EXP = r"^xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
-IP_IVM10_REG_EXP = r"^xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+$"
+if system().lower() == "windows":
+    IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+)$"
+else:
+    IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/tty/ttyACM\d+)$"
 
 
 class MeasurerType:
@@ -416,7 +419,7 @@ class ConnectionWindow(qt.QDialog):
             combo_box.addItems(ports_for_first_and_second[index])
             if ports[index] in ports_for_first_and_second[index]:
                 combo_box.setCurrentText(ports[index])
-            self.line_edits[index].setText("xi-net://")
+            self.line_edits[index].setText("")
             self.line_edits[index].setVisible(ports[index] == self._your_variant)
 
     def _init_ui(self):
