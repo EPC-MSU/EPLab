@@ -32,7 +32,7 @@ IP_ASA_REG_EXP = r"^xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
 if system().lower() == "windows":
     IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+)$"
 else:
-    IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/tty/ttyACM\d+)$"
+    IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+)$"
 
 
 class MeasurerType:
@@ -70,7 +70,7 @@ class MeasurerType:
         if system().lower() == "windows":
             pattern = re.compile(r"^com:\\\\\.\\COM\d+$")
         elif system().lower() == "linux":
-            pattern = re.compile(r"^com:///dev/tty/ttyACM\d+$")
+            pattern = re.compile(r"^com:///dev/ttyACM\d+$")
         else:
             raise RuntimeError("Unexpected OS")
         if port is None or (not pattern.match(port) and port != "virtual"):
