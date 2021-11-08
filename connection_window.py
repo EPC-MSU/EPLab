@@ -28,7 +28,8 @@ import urpcbase as lib
 from language import Language
 
 
-IP_REG_EXP = r"^xmlrpc://((\d|\d\d|[0-1]\d\d|2[0-5][0-5])\.){3}(\d|\d\d|[0-1]\d\d|2[0-5][0-5])$"
+IP_ASA_REG_EXP = r"^xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
+IP_IVM10_REG_EXP = r"^xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+$"
 
 
 class MeasurerType:
@@ -246,14 +247,17 @@ class ConnectionWindow(qt.QDialog):
         self._initial_ports, self._initial_type = self._get_current_measurers_ports()
         self._init_ui()
 
-    @staticmethod
-    def _check_ip_address(ip_address: str) -> bool:
+    def _check_ip_address(self, ip_address: str) -> bool:
         """
         Method checks if given IP address is correct.
         :return: True if IP address is correct.
         """
 
-        if re.match(IP_REG_EXP, ip_address):
+        if self.combo_box_measurer_type.currentText() == "ASA":
+            reg_exp = IP_ASA_REG_EXP
+        else:
+            reg_exp = IP_IVM10_REG_EXP
+        if re.match(reg_exp, ip_address):
             return True
         return False
 
@@ -316,6 +320,22 @@ class ConnectionWindow(qt.QDialog):
         general_type = MeasurerType.get_general_measurers_type(types)
         return ports, general_type
 
+    @staticmethod
+    def _get_different_xi_net_ports(ports: List[str]) -> List[str]:
+        """
+        Method returns only different xi-net ports in the list of ports.
+        :param ports: initial list of ports.
+        :return: ports.
+        """
+
+        xi_net_ports = True
+        for port in ports:
+            if not re.match(IP_IVM10_REG_EXP, port):
+                xi_net_ports = False
+        if xi_net_ports:
+            return list(set(ports))
+        return ports
+
     def _get_ports_for_ivm10(self, ports: List, port_1: str = None, port_2: str = None) ->\
             List[List[str]]:
         """
@@ -338,7 +358,8 @@ class ConnectionWindow(qt.QDialog):
             ports_for_first_and_second[index] = [*ports_for_first_and_second[index], *ports]
             if MeasurerType.IVM10_VIRTUAL not in ports_for_first_and_second[index]:
                 ports_for_first_and_second[index].append(MeasurerType.IVM10_VIRTUAL)
-            if selected_ports[index] not in (MeasurerType.IVM10_VIRTUAL, "None"):
+            if selected_ports[index] not in (MeasurerType.IVM10_VIRTUAL, "None",
+                                             self._your_variant):
                 try:
                     ports_for_first_and_second[index - 1].remove(selected_ports[index])
                 except ValueError:
@@ -349,6 +370,7 @@ class ConnectionWindow(qt.QDialog):
                     ports_for_first_and_second[index].append(port)
             ports_for_first_and_second[index] = sorted(ports_for_first_and_second[index])
             ports_for_first_and_second[index].append("None")
+            ports_for_first_and_second[index].append(self._your_variant)
         return ports_for_first_and_second
 
     def _init_asa(self, url_1: str = None, url_2: str = None):
@@ -385,7 +407,7 @@ class ConnectionWindow(qt.QDialog):
 
         ports = [port_1, port_2]
         for index, port in enumerate(ports):
-            if not MeasurerType.check_port_for_ivm10(port):
+            if port != self._your_variant and not MeasurerType.check_port_for_ivm10(port):
                 ports[index] = "None"
         available_ports = find_urpc_ports("ivm")
         ports_for_first_and_second = self._get_ports_for_ivm10(available_ports, *ports)
@@ -394,6 +416,8 @@ class ConnectionWindow(qt.QDialog):
             combo_box.addItems(ports_for_first_and_second[index])
             if ports[index] in ports_for_first_and_second[index]:
                 combo_box.setCurrentText(ports[index])
+            self.line_edits[index].setText("xi-net://")
+            self.line_edits[index].setVisible(ports[index] == self._your_variant)
 
     def _init_ui(self):
         """
@@ -412,10 +436,8 @@ class ConnectionWindow(qt.QDialog):
         self.combo_box_measurer_type.setCurrentText(self._initial_type)
         for combo_box in self.combo_boxes:
             combo_box.textActivated.connect(self.change_port)
-        validator = QRegExpValidator(QRegExp(IP_REG_EXP), self)
         for line_edit in self.line_edits:
             line_edit.setVisible(False)
-            line_edit.setValidator(validator)
         self.init_available_ports(self._initial_type)
         self.button_connect.clicked.connect(self.connect)
         self.button_disconnect.clicked.connect(self.disconnect)
@@ -440,17 +462,15 @@ class ConnectionWindow(qt.QDialog):
         Slot connects new measurers.
         """
 
-        if self.combo_box_measurer_type.currentText() == "ASA":
-            ports = []
-            for index, combo_box in enumerate(self.combo_boxes):
-                port = combo_box.currentText()
-                if port == self._your_variant:
-                    port = self.line_edits[index].text()
-                    if not self._check_ip_address(port):
-                        return
-                ports.append(port)
-        else:
-            ports = [combo_box.currentText() for combo_box in self.combo_boxes]
+        ports = []
+        for index, combo_box in enumerate(self.combo_boxes):
+            port = combo_box.currentText()
+            if port == self._your_variant:
+                port = self.line_edits[index].text()
+                if not self._check_ip_address(port):
+                    return
+            ports.append(port)
+        ports = self._get_different_xi_net_ports(ports)
         if len(set(ports)) == 1 and "None" in ports:
             self.disconnect()
             return
@@ -476,6 +496,10 @@ class ConnectionWindow(qt.QDialog):
         for line_edit in self.line_edits:
             line_edit.setVisible(False)
         if general_measurers_type == MeasurerType.IVM10:
+            validator = QRegExpValidator(QRegExp(IP_IVM10_REG_EXP), self)
             self._init_ivm10(*self._initial_ports)
         elif general_measurers_type == MeasurerType.ASA:
+            validator = QRegExpValidator(QRegExp(IP_ASA_REG_EXP), self)
             self._init_asa(*self._initial_ports)
+        for line_edit in self.line_edits:
+            line_edit.setValidator(validator)
