@@ -20,6 +20,8 @@ python3 -m venv venv
 --add-data "./venv/lib/python3.6/site-packages/epcore/product/doc/eplab_schema.json:epcore/product/doc" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/measurementmanager/ivcmp-debian/libivcmp.so:." \
 --add-data "./venv/lib/python3.6/site-packages/epsound/void.wav:epsound" \
+--add-data "./venv/lib/python3.6/site-packages/ivviewer/media/*:ivviewer/media" \
+--add-data "./venv/lib/python3.6/site-packages/report_templates/*:report_templates" \
 --add-data "./resources/eplab_asa_options.json:resources" \
 --add-data "./resources/debian/*:resources/debian" \
 --add-data "./media/*:media" \
@@ -38,6 +40,7 @@ cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libx
 ln ./dist/libs/libxmlrpc_xmlparse.so.3.51 ./dist/libs/libxmlrpc_xmlparse.so.3
 cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmltok.so.3.51 ./dist/libs/libxmlrpc_xmltok.so.3.51
 ln ./dist/libs/libxmlrpc_xmltok.so.3.51 ./dist/libs/libxmlrpc_xmltok.so.3
+cp ./resources/readme.md ./dist/readme.md
 mv dist release
 mv ./release/main ./release/eplab
 rm -rf build

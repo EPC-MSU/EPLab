@@ -365,6 +365,7 @@ class EPLabWindow(QMainWindow):
         self._device_errors_handler = DeviceErrorsHandler()
         self._product = product
         self._msystem = None
+        self._measurement_plan = None
         self._comparator = IVCComparator()
 
         self._score_wrapper = ScoreWrapper(self.score_label)

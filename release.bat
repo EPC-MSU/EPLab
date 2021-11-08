@@ -31,6 +31,8 @@ if %target_platform%==32 venv\Scripts\pyinstaller main.py --clean --onefile ^
 --add-data "venv\Lib\site-packages\epcore\product\doc\eplab_schema.json;epcore\product\doc" ^
 --add-data "venv\Lib\site-packages\epcore\measurementmanager\ivcmp-win32\ivcmp.dll;." ^
 --add-data "venv\Lib\site-packages\epsound\void.wav;epsound" ^
+--add-data "venv\Lib\site-packages\ivviewer\media\*;ivviewer\media" ^
+--add-data "venv\Lib\site-packages\report_templates\*;report_templates" ^
 --add-data "resources\eplab_asa_options.json;resources" ^
 --add-data "resources\win32\*;resources\win32." ^
 --add-data "media\*;media" ^
@@ -50,6 +52,8 @@ if %target_platform%==64 venv\Scripts\pyinstaller main.py --clean --onefile ^
 --add-data "venv\Lib\site-packages\epcore\product\doc\eplab_schema.json;epcore\product\doc" ^
 --add-data "venv\Lib\site-packages\epcore\measurementmanager\ivcmp-win64\ivcmp.dll;." ^
 --add-data "venv\Lib\site-packages\epsound\void.wav;epsound" ^
+--add-data "venv\Lib\site-packages\ivviewer\media\*;ivviewer\media" ^
+--add-data "venv\Lib\site-packages\report_templates\*;report_templates" ^
 --add-data "resources\eplab_asa_options.json;resources" ^
 --add-data "resources\win64\*;resources\win64." ^
 --add-data "media\*;media" ^
@@ -59,7 +63,7 @@ if %target_platform%==64 venv\Scripts\pyinstaller main.py --clean --onefile ^
 --icon media\ico.ico
 
 xcopy resources\win%target_platform%\driver\* dist\driver\* /S /E
-copy readme.md dist
+copy resources\readme.md dist
 rename dist release
 cd release
 rename main.exe eplab.exe
