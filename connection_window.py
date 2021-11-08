@@ -89,7 +89,7 @@ def _create_uri_name(port: str) -> str:
     if "win" in os_name:
         return f"com:\\\\.\\{port}"
     if os_name == "debian":
-        return f"com:///{port}"
+        return f"com://{port}"
     raise RuntimeError("Unexpected OS")
 
 
