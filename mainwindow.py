@@ -1219,10 +1219,6 @@ class EPLabWindow(QMainWindow):
         self.sound_enabled_action.setChecked(self.__settings.sound_enabled)
         self._update_threshold(self.__settings.score_threshold)
 
-    def auto_calibrate(self):
-        with self._device_errors_handler:
-            self._msystem.calibrate()
-
     def closeEvent(self, event: QCloseEvent):
         self._board_window.close()
         if (self._measurement_plan and

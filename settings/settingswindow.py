@@ -34,7 +34,6 @@ class SettingsWindow(QDialog):
         uic.loadUi(os.path.join(dir_name, "gui", "settings.ui"), self)
         self.parent = parent
         self.layout().setSizeConstraint(QLayout.SetFixedSize)
-        self.auto_calibration_push_button.clicked.connect(parent.auto_calibrate)
         self.score_treshold_button_minus.clicked.connect(self._decrease_threshold)
         self.score_treshold_button_plus.clicked.connect(self._increase_threshold)
         validator = QRegExpValidator(QRegExp(r"^(\d|\d\d|100)%?"), self)
