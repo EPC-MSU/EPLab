@@ -3,7 +3,7 @@ File with class for dialog window to select devices for connection.
 """
 
 import configparser
-    import logging
+import logging
 import os
 import re
 import select

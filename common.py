@@ -8,7 +8,6 @@ class WorkMode(Enum):
     write = auto()
     test = auto()
 
-# test broken flake8 commit
 
 class DeviceErrorsHandler:
     """
