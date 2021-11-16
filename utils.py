@@ -11,7 +11,7 @@ from operator import itemgetter
 from platform import system
 from typing import Dict, Iterable, List, Optional
 import serial.tools.list_ports
-from epcore.elements import MeasurementSettings
+from epcore.elements import Board, MeasurementSettings
 from epcore.ivmeasurer import (IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual,
                                IVMeasurerVirtualASA)
 from epcore.measurementmanager import MeasurementSystem
@@ -36,6 +36,24 @@ def _get_options_from_config(config: configparser.ConfigParser) -> Optional[Dict
     return {EyePointProduct.Parameter.frequency: frequency,
             EyePointProduct.Parameter.sensitive: resistance,
             EyePointProduct.Parameter.voltage: voltage}
+
+
+def check_compatibility(product: EyePointProduct, board: Board) -> bool:
+    """
+    Function checks operating mode and loaded test plan for compatibility.
+    :param product: product;
+    :param board: board of loaded test plan.
+    :return: True if operating mode and loaded test plan are compatible.
+    """
+
+    for element in board.elements:
+        for pin in element.pins:
+            for measurement in pin.measurements:
+                measurement_settings = measurement.settings
+                options = product.settings_to_options(measurement_settings)
+                if len(options) < 3:
+                    return False
+    return True
 
 
 def create_measurers(port_1: str, port_2: str) -> MeasurementSystem:

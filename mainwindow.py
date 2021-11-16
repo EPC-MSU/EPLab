@@ -894,6 +894,12 @@ class EPLabWindow(QMainWindow):
                 show_exception(qApp.translate("t", "Ошибка"),
                                qApp.translate("t", "Формат файла не подходит"), str(exc))
                 return
+            if not ut.check_compatibility(self._product, board):
+                text = qApp.translate("t", "План тестирования TEST_PLAN нельзя загрузить, "
+                                           "поскольку он не соответствует режиму работы EPLab")
+                show_exception(qApp.translate("t", "Ошибка"),
+                               text.replace("TEST_PLAN", f"'{filename}'"))
+                return
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
