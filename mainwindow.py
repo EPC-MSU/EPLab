@@ -66,7 +66,7 @@ class EPLabWindow(QMainWindow):
     Class for main window of application.
     """
 
-    default_path = "../EPLab-Files"
+    default_path: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
 
     def __init__(self, product: EyePointProduct, port_1: Optional[str] = None,
                  port_2: Optional[str] = None, english: Optional[bool] = None):
