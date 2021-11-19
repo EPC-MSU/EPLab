@@ -111,7 +111,8 @@ class ReportGenerationWindow(qt.QDialog):
                   ConfigAttributes.DIRECTORY: self._folder_for_report,
                   ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
                   ConfigAttributes.THRESHOLD_SCORE: self._threshold_score,
-                  ConfigAttributes.OPEN_REPORT_AT_FINISH: True}
+                  ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
+                  ConfigAttributes.PIN_SIZE: 200}
         report_generator = ReportGenerator()
         report_generator.moveToThread(self._thread)
         report_generator.total_number_of_steps_calculated.connect(self.set_total_number_of_steps)
