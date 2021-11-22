@@ -86,28 +86,28 @@
                         "label_en": "1 V",
                         "sensitive": [
                             {
-                                "name": "100ohm",
-                                "value": 100,
-                                "label_ru": "100 Ом",
-                                "label_en": "100 Ohm"
-                            },
-                            {
-                                "name": "200ohm",
-                                "value": 200,
-                                "label_ru": "200 Ом",
-                                "label_en": "200 Ohm"
+                                "name": "2000ohm",
+                                "value": 2000,
+                                "label_ru": "0.5 мА",
+                                "label_en": "0.5 mA"
                             },
                             {
                                 "name": "1000ohm",
                                 "value": 1000,
-                                "label_ru": "1000 Ом",
-                                "label_en": "1000 Ohm"
+                                "label_ru": "1 мА",
+                                "label_en": "1 mA"
                             },
                             {
-                                "name": "2000ohm",
-                                "value": 2000,
-                                "label_ru": "2000 Ом",
-                                "label_en": "2000 Ohm"
+                                "name": "200ohm",
+                                "value": 200,
+                                "label_ru": "5 мА",
+                                "label_en": "5 mA"
+                            },
+                            {
+                                "name": "100ohm",
+                                "value": 100,
+                                "label_ru": "10 мА",
+                                "label_en": "10 mA"
                             }
                         ]
                     },
@@ -118,16 +118,16 @@
                         "label_en": "1.5 V",
                         "sensitive": [
                             {
-                                "name": "100ohm",
-                                "value": 100,
-                                "label_ru": "100 Ом",
-                                "label_en": "100 Ohm"
-                            },
-                            {
                                 "name": "300ohm",
                                 "value": 300,
-                                "label_ru": "300 Ом",
-                                "label_en": "300 Ohm"
+                                "label_ru": "5 мА",
+                                "label_en": "5 mA"
+                            },
+                            {
+                                "name": "100ohm",
+                                "value": 100,
+                                "label_ru": "15 мА",
+                                "label_en": "15 mA"
                             }
                         ]
                     },
@@ -138,28 +138,28 @@
                         "label_en": "2 V",
                         "sensitive": [
                             {
-                                "name": "200ohm",
-                                "value": 200,
-                                "label_ru": "200 Ом",
-                                "label_en": "200 Ohm"
-                            },
-                            {
-                                "name": "400ohm",
-                                "value": 400,
-                                "label_ru": "400 Ом",
-                                "label_en": "400 Ohm"
+                                "name": "2000ohm",
+                                "value": 2000,
+                                "label_ru": "1 мА",
+                                "label_en": "1 mA"
                             },
                             {
                                 "name": "1000ohm",
                                 "value": 1000,
-                                "label_ru": "1000 Ом",
-                                "label_en": "1000 Ohm"
+                                "label_ru": "2 мА",
+                                "label_en": "2 mA"
                             },
                             {
-                                "name": "2000ohm",
-                                "value": 2000,
-                                "label_ru": "2000 Ом",
-                                "label_en": "2000 Ohm"
+                                "name": "400ohm",
+                                "value": 400,
+                                "label_ru": "5 мА",
+                                "label_en": "5 mA"
+                            },
+                            {
+                                "name": "200ohm",
+                                "value": 200,
+                                "label_ru": "10 мА",
+                                "label_en": "10 mA"
                             }
                         ]
                     },
@@ -172,8 +172,8 @@
                             {
                                 "name": "100ohm",
                                 "value": 100,
-                                "label_ru": "100 Ом",
-                                "label_en": "100 Ohm"
+                                "label_ru": "25 мА",
+                                "label_en": "25 mA"
                             }
                         ]
                     },
@@ -184,16 +184,16 @@
                         "label_en": "3 V",
                         "sensitive": [
                             {
-                                "name": "200ohm",
-                                "value": 200,
-                                "label_ru": "200 Ом",
-                                "label_en": "200 Ohm"
-                            },
-                            {
                                 "name": "300ohm",
                                 "value": 300,
-                                "label_ru": "300 Ом",
-                                "label_en": "300 Ohm"
+                                "label_ru": "10 мА",
+                                "label_en": "10 mA"
+                            },
+                            {
+                                "name": "200ohm",
+                                "value": 200,
+                                "label_ru": "15 мА",
+                                "label_en": "15 mA"
                             }
                         ]
                     },
@@ -204,16 +204,16 @@
                         "label_en": "4 V",
                         "sensitive": [
                             {
-                                "name": "400ohm",
-                                "value": 400,
-                                "label_ru": "400 Ом",
-                                "label_en": "400 Ohm"
-                            },
-                            {
                                 "name": "2000ohm",
                                 "value": 2000,
-                                "label_ru": "2000 Ом",
-                                "label_en": "2000 Ohm"
+                                "label_ru": "2 мА",
+                                "label_en": "2 mA"
+                            },
+                            {
+                                "name": "400ohm",
+                                "value": 400,
+                                "label_ru": "10 мА",
+                                "label_en": "10 mA"
                             }
                         ]
                     },
@@ -226,8 +226,8 @@
                             {
                                 "name": "300ohm",
                                 "value": 300,
-                                "label_ru": "300 Ом",
-                                "label_en": "300 Ohm"
+                                "label_ru": "15 мА",
+                                "label_en": "15 mA"
                             }
                         ]
                     },
@@ -238,22 +238,22 @@
                         "label_en": "5 V",
                         "sensitive": [
                             {
-                                "name": "100ohm",
-                                "value": 100,
-                                "label_ru": "100 Ом",
-                                "label_en": "100 Ohm"
+                                "name": "1000ohm",
+                                "value": 1000,
+                                "label_ru": "5 мА",
+                                "label_en": "5 mA"
                             },
                             {
                                 "name": "200ohm",
                                 "value": 200,
-                                "label_ru": "200 Ом",
-                                "label_en": "200 Ohm"
+                                "label_ru": "25 мА",
+                                "label_en": "25 mA"
                             },
                             {
-                                "name": "1000ohm",
-                                "value": 1000,
-                                "label_ru": "1000 Ом",
-                                "label_en": "1000 Ohm"
+                                "name": "100ohm",
+                                "value": 100,
+                                "label_ru": "50 мА",
+                                "label_en": "50 mA"
                             }
                         ]
                     },
@@ -266,8 +266,8 @@
                             {
                                 "name": "400ohm",
                                 "value": 400,
-                                "label_ru": "400 Ом",
-                                "label_en": "400 Ohm"
+                                "label_ru": "15 мА",
+                                "label_en": "15 mA"
                             }
                         ]
                     },
@@ -280,8 +280,8 @@
                             {
                                 "name": "670ohm",
                                 "value": 670,
-                                "label_ru": "670 Ом",
-                                "label_en": "670 Ohm"
+                                "label_ru": "10 мА",
+                                "label_en": "10 mA"
                             }
                         ]
                     }
@@ -300,28 +300,28 @@
                         "label_en": "1 V",
                         "sensitive": [
                             {
-                                "name": "100ohm",
-                                "value": 100,
-                                "label_ru": "100 Ом",
-                                "label_en": "100 Ohm"
-                            },
-                            {
-                                "name": "200ohm",
-                                "value": 200,
-                                "label_ru": "200 Ом",
-                                "label_en": "200 Ohm"
+                                "name": "2000ohm",
+                                "value": 2000,
+                                "label_ru": "0.5 мА",
+                                "label_en": "0.5 mA"
                             },
                             {
                                 "name": "1000ohm",
                                 "value": 1000,
-                                "label_ru": "1000 Ом",
-                                "label_en": "1000 Ohm"
+                                "label_ru": "1 мА",
+                                "label_en": "1 mA"
                             },
                             {
-                                "name": "2000ohm",
-                                "value": 2000,
-                                "label_ru": "2000 Ом",
-                                "label_en": "2000 Ohm"
+                                "name": "200ohm",
+                                "value": 200,
+                                "label_ru": "5 мА",
+                                "label_en": "5 mA"
+                            },
+                            {
+                                "name": "100ohm",
+                                "value": 100,
+                                "label_ru": "10 мА",
+                                "label_en": "10 mA"
                             }
                         ]
                     },
@@ -332,16 +332,16 @@
                         "label_en": "1.5 V",
                         "sensitive": [
                             {
-                                "name": "100ohm",
-                                "value": 100,
-                                "label_ru": "100 Ом",
-                                "label_en": "100 Ohm"
-                            },
-                            {
                                 "name": "300ohm",
                                 "value": 300,
-                                "label_ru": "300 Ом",
-                                "label_en": "300 Ohm"
+                                "label_ru": "5 мА",
+                                "label_en": "5 mA"
+                            },
+                            {
+                                "name": "100ohm",
+                                "value": 100,
+                                "label_ru": "15 мА",
+                                "label_en": "15 mA"
                             }
                         ]
                     },
@@ -352,28 +352,28 @@
                         "label_en": "2 V",
                         "sensitive": [
                             {
-                                "name": "200ohm",
-                                "value": 200,
-                                "label_ru": "200 Ом",
-                                "label_en": "200 Ohm"
-                            },
-                            {
-                                "name": "400ohm",
-                                "value": 400,
-                                "label_ru": "400 Ом",
-                                "label_en": "400 Ohm"
+                                "name": "2000ohm",
+                                "value": 2000,
+                                "label_ru": "1 мА",
+                                "label_en": "1 mA"
                             },
                             {
                                 "name": "1000ohm",
                                 "value": 1000,
-                                "label_ru": "1000 Ом",
-                                "label_en": "1000 Ohm"
+                                "label_ru": "2 мА",
+                                "label_en": "2 mA"
                             },
                             {
-                                "name": "2000ohm",
-                                "value": 2000,
-                                "label_ru": "2000 Ом",
-                                "label_en": "2000 Ohm"
+                                "name": "400ohm",
+                                "value": 400,
+                                "label_ru": "5 мА",
+                                "label_en": "5 mA"
+                            },
+                            {
+                                "name": "200ohm",
+                                "value": 200,
+                                "label_ru": "10 мА",
+                                "label_en": "10 mA"
                             }
                         ]
                     },
@@ -386,8 +386,8 @@
                             {
                                 "name": "100ohm",
                                 "value": 100,
-                                "label_ru": "100 Ом",
-                                "label_en": "100 Ohm"
+                                "label_ru": "25 мА",
+                                "label_en": "25 mA"
                             }
                         ]
                     },
@@ -398,16 +398,16 @@
                         "label_en": "3 V",
                         "sensitive": [
                             {
-                                "name": "200ohm",
-                                "value": 200,
-                                "label_ru": "200 Ом",
-                                "label_en": "200 Ohm"
-                            },
-                            {
                                 "name": "300ohm",
                                 "value": 300,
-                                "label_ru": "300 Ом",
-                                "label_en": "300 Ohm"
+                                "label_ru": "10 мА",
+                                "label_en": "10 mA"
+                            },
+                            {
+                                "name": "200ohm",
+                                "value": 200,
+                                "label_ru": "15 мА",
+                                "label_en": "15 mA"
                             }
                         ]
                     }
@@ -426,28 +426,28 @@
                         "label_en": "1 V",
                         "sensitive": [
                             {
-                                "name": "100ohm",
-                                "value": 100,
-                                "label_ru": "100 Ом",
-                                "label_en": "100 Ohm"
-                            },
-                            {
-                                "name": "200ohm",
-                                "value": 200,
-                                "label_ru": "200 Ом",
-                                "label_en": "200 Ohm"
+                                "name": "2000ohm",
+                                "value": 2000,
+                                "label_ru": "0.5 мА",
+                                "label_en": "0.5 mA"
                             },
                             {
                                 "name": "1000ohm",
                                 "value": 1000,
-                                "label_ru": "1000 Ом",
-                                "label_en": "1000 Ohm"
+                                "label_ru": "1 мА",
+                                "label_en": "1 mA"
                             },
                             {
-                                "name": "2000ohm",
-                                "value": 2000,
-                                "label_ru": "2000 Ом",
-                                "label_en": "2000 Ohm"
+                                "name": "200ohm",
+                                "value": 200,
+                                "label_ru": "5 мА",
+                                "label_en": "5 mA"
+                            },
+                            {
+                                "name": "100ohm",
+                                "value": 100,
+                                "label_ru": "10 мА",
+                                "label_en": "10 mA"
                             }
                         ]
                     },
@@ -458,16 +458,16 @@
                         "label_en": "1.5 V",
                         "sensitive": [
                             {
-                                "name": "100ohm",
-                                "value": 100,
-                                "label_ru": "100 Ом",
-                                "label_en": "100 Ohm"
-                            },
-                            {
                                 "name": "300ohm",
                                 "value": 300,
-                                "label_ru": "300 Ом",
-                                "label_en": "300 Ohm"
+                                "label_ru": "5 мА",
+                                "label_en": "5 mA"
+                            },
+                            {
+                                "name": "100ohm",
+                                "value": 100,
+                                "label_ru": "15 мА",
+                                "label_en": "15 mA"
                             }
                         ]
                     },
@@ -478,28 +478,28 @@
                         "label_en": "2 V",
                         "sensitive": [
                             {
-                                "name": "200ohm",
-                                "value": 200,
-                                "label_ru": "200 Ом",
-                                "label_en": "200 Ohm"
-                            },
-                            {
-                                "name": "400ohm",
-                                "value": 400,
-                                "label_ru": "400 Ом",
-                                "label_en": "400 Ohm"
+                                "name": "2000ohm",
+                                "value": 2000,
+                                "label_ru": "1 мА",
+                                "label_en": "1 mA"
                             },
                             {
                                 "name": "1000ohm",
                                 "value": 1000,
-                                "label_ru": "1000 Ом",
-                                "label_en": "1000 Ohm"
+                                "label_ru": "2 мА",
+                                "label_en": "2 mA"
                             },
                             {
-                                "name": "2000ohm",
-                                "value": 2000,
-                                "label_ru": "2000 Ом",
-                                "label_en": "2000 Ohm"
+                                "name": "400ohm",
+                                "value": 400,
+                                "label_ru": "5 мА",
+                                "label_en": "5 mA"
+                            },
+                            {
+                                "name": "200ohm",
+                                "value": 200,
+                                "label_ru": "10 мА",
+                                "label_en": "10 mA"
                             }
                         ]
                     }
@@ -514,28 +514,28 @@
                 "label_en": "1 V",
                 "sensitive": [
                     {
-                        "name": "100ohm",
-                        "value": 100,
-                        "label_ru": "100 Ом",
-                        "label_en": "100 Ohm"
-                    },
-                    {
-                        "name": "200ohm",
-                        "value": 200,
-                        "label_ru": "200 Ом",
-                        "label_en": "200 Ohm"
+                        "name": "2000ohm",
+                        "value": 2000,
+                        "label_ru": "0.5 мА",
+                        "label_en": "0.5 mA"
                     },
                     {
                         "name": "1000ohm",
                         "value": 1000,
-                        "label_ru": "1000 Ом",
-                        "label_en": "1000 Ohm"
+                        "label_ru": "1 мА",
+                        "label_en": "1 mA"
                     },
                     {
-                        "name": "2000ohm",
-                        "value": 2000,
-                        "label_ru": "2000 Ом",
-                        "label_en": "2000 Ohm"
+                        "name": "200ohm",
+                        "value": 200,
+                        "label_ru": "5 мА",
+                        "label_en": "5 mA"
+                    },
+                    {
+                        "name": "100ohm",
+                        "value": 100,
+                        "label_ru": "10 мА",
+                        "label_en": "10 mA"
                     }
                 ]
             },
@@ -546,16 +546,16 @@
                 "label_en": "1.5 V",
                 "sensitive": [
                     {
-                        "name": "100ohm",
-                        "value": 100,
-                        "label_ru": "100 Ом",
-                        "label_en": "100 Ohm"
-                    },
-                    {
                         "name": "300ohm",
                         "value": 300,
-                        "label_ru": "300 Ом",
-                        "label_en": "300 Ohm"
+                        "label_ru": "5 мА",
+                        "label_en": "5 mA"
+                    },
+                    {
+                        "name": "100ohm",
+                        "value": 100,
+                        "label_ru": "15 мА",
+                        "label_en": "15 mA"
                     }
                 ]
             },
@@ -566,28 +566,28 @@
                 "label_en": "2 V",
                 "sensitive": [
                     {
-                        "name": "200ohm",
-                        "value": 200,
-                        "label_ru": "200 Ом",
-                        "label_en": "200 Ohm"
-                    },
-                    {
-                        "name": "400ohm",
-                        "value": 400,
-                        "label_ru": "400 Ом",
-                        "label_en": "400 Ohm"
+                        "name": "2000ohm",
+                        "value": 2000,
+                        "label_ru": "1 мА",
+                        "label_en": "1 mA"
                     },
                     {
                         "name": "1000ohm",
                         "value": 1000,
-                        "label_ru": "1000 Ом",
-                        "label_en": "1000 Ohm"
+                        "label_ru": "2 мА",
+                        "label_en": "2 mA"
                     },
                     {
-                        "name": "2000ohm",
-                        "value": 2000,
-                        "label_ru": "2000 Ом",
-                        "label_en": "2000 Ohm"
+                        "name": "400ohm",
+                        "value": 400,
+                        "label_ru": "5 мА",
+                        "label_en": "5 mA"
+                    },
+                    {
+                        "name": "200ohm",
+                        "value": 200,
+                        "label_ru": "10 мА",
+                        "label_en": "10 mA"
                     }
                 ]
             },
@@ -600,8 +600,8 @@
                     {
                         "name": "100ohm",
                         "value": 100,
-                        "label_ru": "100 Ом",
-                        "label_en": "100 Ohm"
+                        "label_ru": "25 мА",
+                        "label_en": "25 mA"
                     }
                 ]
             },
@@ -612,16 +612,16 @@
                 "label_en": "3 V",
                 "sensitive": [
                     {
-                        "name": "200ohm",
-                        "value": 200,
-                        "label_ru": "200 Ом",
-                        "label_en": "200 Ohm"
-                    },
-                    {
                         "name": "300ohm",
                         "value": 300,
-                        "label_ru": "300 Ом",
-                        "label_en": "300 Ohm"
+                        "label_ru": "10 мА",
+                        "label_en": "10 mA"
+                    },
+                    {
+                        "name": "200ohm",
+                        "value": 200,
+                        "label_ru": "15 мА",
+                        "label_en": "15 mA"
                     }
                 ]
             },
@@ -632,16 +632,16 @@
                 "label_en": "4 V",
                 "sensitive": [
                     {
-                        "name": "400ohm",
-                        "value": 400,
-                        "label_ru": "400 Ом",
-                        "label_en": "400 Ohm"
-                    },
-                    {
                         "name": "2000ohm",
                         "value": 2000,
-                        "label_ru": "2000 Ом",
-                        "label_en": "2000 Ohm"
+                        "label_ru": "2 мА",
+                        "label_en": "2 mA"
+                    },
+                    {
+                        "name": "400ohm",
+                        "value": 400,
+                        "label_ru": "10 мА",
+                        "label_en": "10 mA"
                     }
                 ]
             },
@@ -654,8 +654,8 @@
                     {
                         "name": "300ohm",
                         "value": 300,
-                        "label_ru": "300 Ом",
-                        "label_en": "300 Ohm"
+                        "label_ru": "15 мА",
+                        "label_en": "15 mA"
                     }
                 ]
             },
@@ -666,22 +666,22 @@
                 "label_en": "5 V",
                 "sensitive": [
                     {
-                        "name": "100ohm",
-                        "value": 100,
-                        "label_ru": "100 Ом",
-                        "label_en": "100 Ohm"
+                        "name": "1000ohm",
+                        "value": 1000,
+                        "label_ru": "5 мА",
+                        "label_en": "5 mA"
                     },
                     {
                         "name": "200ohm",
                         "value": 200,
-                        "label_ru": "200 Ом",
-                        "label_en": "200 Ohm"
+                        "label_ru": "25 мА",
+                        "label_en": "25 mA"
                     },
                     {
-                        "name": "1000ohm",
-                        "value": 1000,
-                        "label_ru": "1000 Ом",
-                        "label_en": "1000 Ohm"
+                        "name": "100ohm",
+                        "value": 100,
+                        "label_ru": "50 мА",
+                        "label_en": "50 mA"
                     }
                 ]
             },
@@ -694,8 +694,8 @@
                     {
                         "name": "400ohm",
                         "value": 400,
-                        "label_ru": "400 Ом",
-                        "label_en": "400 Ohm"
+                        "label_ru": "15 мА",
+                        "label_en": "15 mA"
                     }
                 ]
             },
@@ -708,8 +708,8 @@
                     {
                         "name": "670ohm",
                         "value": 670,
-                        "label_ru": "670 Ом",
-                        "label_en": "670 Ohm"
+                        "label_ru": "10 мА",
+                        "label_en": "10 mA"
                     }
                 ]
             },
@@ -720,16 +720,16 @@
                 "label_en": "7.5 V",
                 "sensitive": [
                     {
-                        "name": "100ohm",
-                        "value": 100,
-                        "label_ru": "100 Ом",
-                        "label_en": "100 Ohm"
-                    },
-                    {
                         "name": "300ohm",
                         "value": 300,
-                        "label_ru": "300 Ом",
-                        "label_en": "300 Ohm"
+                        "label_ru": "25 мА",
+                        "label_en": "25 mA"
+                    },
+                    {
+                        "name": "100ohm",
+                        "value": 100,
+                        "label_ru": "75 мА",
+                        "label_en": "75 mA"
                     }
                 ]
             },
@@ -740,34 +740,34 @@
                 "label_en": "10 V",
                 "sensitive": [
                     {
-                        "name": "111ohm",
-                        "value": 111,
-                        "label_ru": "111 Ом",
-                        "label_en": "111 Ohm"
-                    },
-                    {
-                        "name": "200ohm",
-                        "value": 200,
-                        "label_ru": "200 Ом",
-                        "label_en": "200 Ohm"
-                    },
-                    {
-                        "name": "400ohm",
-                        "value": 400,
-                        "label_ru": "400 Ом",
-                        "label_en": "400 Ohm"
+                        "name": "2000ohm",
+                        "value": 2000,
+                        "label_ru": "5 мА",
+                        "label_en": "5 mA"
                     },
                     {
                         "name": "1000ohm",
                         "value": 1000,
-                        "label_ru": "1000 Ом",
-                        "label_en": "1000 Ohm"
+                        "label_ru": "10 мА",
+                        "label_en": "10 mA"
                     },
                     {
-                        "name": "2000ohm",
-                        "value": 2000,
-                        "label_ru": "2000 Ом",
-                        "label_en": "2000 Ohm"
+                        "name": "400ohm",
+                        "value": 400,
+                        "label_ru": "25 мА",
+                        "label_en": "25 mA"
+                    },
+                    {
+                        "name": "200ohm",
+                        "value": 200,
+                        "label_ru": "50 мА",
+                        "label_en": "50 mA"
+                    },
+                    {
+                        "name": "111ohm",
+                        "value": 111,
+                        "label_ru": "90 мА",
+                        "label_en": "90 mA"
                     }
                 ]
             }
