@@ -243,7 +243,7 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="645"/>
-        <source>Добавить  метку</source>
+        <source>Добавить метку</source>
         <translation>Add marker</translation>
     </message>
     <message>
@@ -318,6 +318,16 @@
         <location filename="../mainwindow.py" line="163"/>
         <source>Точка POINTS_PARAM не содержит сохраненных измерений. Для PROCESS_NAME все точки должны содержать сохраненные измерения</source>
         <translation>Point POINTS_PARAM does not contain saved measurements. To PROCESS_NAME all points must contain saved measurements</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="224"/>
+        <source>Эмулятор</source>
+        <translation>Emulator</translation>
+    </message>
+	<message>
+        <location filename="../mainwindow.py" line="245"/>
+        <source>Неизвестный измеритель</source>
+        <translation>Unknown measurer</translation>
     </message>
 	<message>
         <location filename="../mainwindow.py" line="160"/>
@@ -421,13 +431,13 @@
     </message>
 	<message>
         <location filename="../mainwindow.py" line="1081"/>
-        <source>Удалить маркер</source>
-        <translation>Delete cursor</translation>
+        <source>Удалить метку</source>
+        <translation>Delete marker</translation>
     </message>
 	<message>
         <location filename="../mainwindow.py" line="1085"/>
-        <source>Удалить все маркеры</source>
-        <translation>Delete all cursors</translation>
+        <source>Удалить все метки</source>
+        <translation>Delete all markers</translation>
     </message>
     <message>
         <location filename="../mainwindow.py" line="1116"/>
@@ -466,13 +476,13 @@
     </message>
 	<message>
         <location filename="../ivcviewer.py" line="576"/>
-        <source>Добавить маркер</source>
-        <translation>Add cursor</translation>
+        <source>Добавить метку</source>
+        <translation>Add marker</translation>
     </message>
     <message>
-        <location filename="../measurer_settings_window.py" line="193"/>
-        <source>Настройки для </source>
-        <translation>Settings for </translation>
+        <location filename="../measurer_settings_window.py" line="191"/>
+        <source>Настройки. </source>
+        <translation>Settings. </translation>
     </message>
     <message>
         <location filename="../measurer_settings_window.py" line="215"/>

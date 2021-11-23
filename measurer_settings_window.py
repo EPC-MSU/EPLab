@@ -3,7 +3,7 @@ File with class for dialog window with settings of measurer.
 """
 
 from inspect import getmembers, ismethod
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QRegExpValidator
@@ -32,11 +32,12 @@ class MeasurerSettingsWindow(qt.QDialog):
     """
 
     def __init__(self, parent=None, settings: Dict = None,
-                 measurer: IVMeasurerBase = None):
+                 measurer: IVMeasurerBase = None, device_name: str = None):
         """
         :param parent: parent window;
         :param settings: dictionary with all settings of measurer;
-        :param measurer: specific measurer for which settings will be intended.
+        :param measurer: specific measurer for which settings will be intended;
+        :param device_name: name of measurer.
         """
 
         super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
@@ -44,7 +45,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         self._widgets = dict()
         lang = qApp.instance().property("language")
         self.lang = "ru" if lang == Language.RU else "en"
-        self._init_ui(settings)
+        self._init_ui(settings, device_name)
 
     def _create_button(self, data: Dict) -> qt.QWidget:
         """
@@ -181,18 +182,27 @@ class MeasurerSettingsWindow(qt.QDialog):
                 return data["values"][index]["value"]
         return None
 
-    def _init_ui(self, settings: Dict):
+    def _create_title(self, device_name: Optional[str] = None):
         """
-        Method initializes widgets in dialog window.
-        :param settings: dictionary with all settings of measurer.
+        Method creates title for dialog window.
+        :param device_name: name of measurer.
         """
 
+        title = qApp.translate("t", "Настройки. ")
+        if device_name is None:
+            device_name = qApp.translate("t", "Неизвестный измеритель")
+        return title + device_name
+
+    def _init_ui(self, settings: Optional[Dict] = None, device_name: Optional[str] = None):
+        """
+        Method initializes widgets in dialog window.
+        :param settings: dictionary with all settings of measurer;
+        :param device_name: name of measurer.
+        """
+
+        self.setWindowTitle(self._create_title(device_name))
         v_box = qt.QVBoxLayout()
         if settings:
-            device_name = self._measurer.get_identity_information().device_name
-            title = qApp.translate("t", "Настройки для ")
-            title += device_name
-            self.setWindowTitle(title)
             for element in settings["elements"]:
                 if "parameter" in element:
                     current_value = self._measurer.get_current_value_of_parameter(
@@ -212,7 +222,6 @@ class MeasurerSettingsWindow(qt.QDialog):
             self.buttonBox.rejected.connect(self.reject)
             v_box.addWidget(self.buttonBox)
         else:
-            self.setWindowTitle(qApp.translate("t", "Настройки для устройства"))
             v_box.addWidget(qt.QLabel(qApp.translate("t", "Нет настроек")))
         v_box.setSizeConstraint(qt.QLayout.SetFixedSize)
         self.adjustSize()

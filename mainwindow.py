@@ -4,6 +4,7 @@ File with class for main window of application.
 
 import copy
 import os
+import re
 import webbrowser
 from datetime import datetime
 from functools import partial
@@ -217,10 +218,34 @@ class EPLabWindow(QMainWindow):
         """
 
         self.measurers_menu.clear()
+        dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
         for measurer in self._msystem.measurers:
-            device_name = measurer.name
-            action = QAction(device_name, self)
-            action.triggered.connect(partial(self._on_show_device_settings, measurer))
+            if isinstance(measurer, (IVMeasurerVirtual, IVMeasurerVirtualASA)):
+                device_name = qApp.translate("t", "Эмулятор")
+                icon = QIcon(os.path.join(dir_name, f"emulator_{measurer.name}.png"))
+            elif isinstance(measurer, IVMeasurerIVM10):
+                result = re.search(r"(?P<port>(COM\d+|ttyACM\d+))", measurer.url)
+                if result:
+                    port = result.group("port")
+                    device_name = f"EyePoint IVM ({port})"
+                else:
+                    device_name = "EyePoint IVM"
+                icon = QIcon(os.path.join(dir_name, f"ivm_{measurer.name}.png"))
+            elif isinstance(measurer, IVMeasurerASA):
+                result = re.search(r"xmlrpc://(?P<url>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
+                                   r"(?P<port>(:\d+)?)", measurer.url)
+                if result:
+                    url = result.group("url")
+                    port = result.group("port")
+                    device_name = f"ASA ({url}:{port})" if port else f"ASA ({url})"
+                else:
+                    device_name = "ASA"
+                icon = QIcon(os.path.join(dir_name, f"asa_{measurer.name}.png"))
+            else:
+                device_name = qApp.translate("t", "Неизвестный измеритель")
+                icon = QIcon(os.path.join(dir_name, f"unknown_measurer_{measurer.name}.png"))
+            action = QAction(icon, device_name, self)
+            action.triggered.connect(partial(self._on_show_device_settings, measurer, device_name))
             self.measurers_menu.addAction(action)
 
     def _create_radio_buttons_for_parameter(self, param_name: EyePointProduct.Parameter,
@@ -1111,29 +1136,31 @@ class EPLabWindow(QMainWindow):
         menu = QMenu(widget)
         dir_name = os.path.dirname(os.path.abspath(__file__))
         icon = QIcon(os.path.join(dir_name, "media", "delete_cursor.png"))
-        action_remove_cursor = QAction(icon, qApp.translate("t", "Удалить маркер"), menu)
+        action_remove_cursor = QAction(icon, qApp.translate("t", "Удалить метку"), menu)
         action_remove_cursor.triggered.connect(self._on_set_cursor_deletion_mode)
         menu.addAction(action_remove_cursor)
         icon = QIcon(os.path.join(dir_name, "media", "delete_all.png"))
-        action_remove_all_cursors = QAction(icon, qApp.translate("t", "Удалить все маркеры"), menu)
+        action_remove_all_cursors = QAction(icon, qApp.translate("t", "Удалить все метки"), menu)
         action_remove_all_cursors.triggered.connect(self._on_delete_all_cursors)
         menu.addAction(action_remove_all_cursors)
         position = widget.geometry()
         menu.popup(widget.mapToGlobal(QPoint(position.x(), position.y())))
 
-    @pyqtSlot(IVMeasurerBase, bool)
-    def _on_show_device_settings(self, selected_measurer: IVMeasurerBase, _: bool):
+    @pyqtSlot(IVMeasurerBase, str, bool)
+    def _on_show_device_settings(self, selected_measurer: IVMeasurerBase, device_name: str,
+                                 _: bool):
         """
         Slot shows window to select device settings.
         :param selected_measurer: measurer for which device settings should be
         displayed;
+        :param device_name: name of measurer;
         :param _: not used.
         """
 
         for measurer in self._msystem.measurers:
             if measurer == selected_measurer:
                 all_settings = measurer.get_all_settings()
-                dialog = MeasurerSettingsWindow(self, all_settings, measurer)
+                dialog = MeasurerSettingsWindow(self, all_settings, measurer, device_name)
                 if dialog.exec_():
                     dialog.set_parameters()
                 return

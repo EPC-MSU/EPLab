@@ -643,13 +643,13 @@
      <normaloff>../media/add_label.png</normaloff>../media/add_label.png</iconset>
    </property>
    <property name="text">
-    <string>Добавить  метку</string>
+    <string>Добавить метку</string>
    </property>
    <property name="iconText">
     <string> Добавить метку</string>
    </property>
    <property name="toolTip">
-    <string>Добавить  метку</string>
+    <string>Добавить метку</string>
    </property>
   </action>
   <action name="remove_cursor_action">
