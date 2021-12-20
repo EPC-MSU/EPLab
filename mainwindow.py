@@ -11,17 +11,15 @@ from functools import partial
 from platform import system
 from typing import Dict, List, Optional, Tuple
 import numpy as np
-from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPoint, QPointF, QSize,
-                          Qt as QtC, QTimer, QTranslator)
+from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPoint, QPointF, QSize, Qt as QtC, QTimer,
+                          QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
-from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow,
-                             QMenu, QMessageBox, QPushButton, QRadioButton, QScrollArea,
-                             QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow, QMenu, QMessageBox,
+                             QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, Pin
-from epcore.ivmeasurer import (IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual,
-                               IVMeasurerVirtualASA)
+from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.measurementmanager import MeasurementPlan
 from epcore.measurementmanager.ivc_comparator import IVCComparator
 from epcore.measurementmanager.utils import Searcher
@@ -69,8 +67,8 @@ class EPLabWindow(QMainWindow):
 
     default_path: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
 
-    def __init__(self, product: EyePointProduct, port_1: Optional[str] = None,
-                 port_2: Optional[str] = None, english: Optional[bool] = None):
+    def __init__(self, product: EyePointProduct, port_1: Optional[str] = None, port_2: Optional[str] = None,
+                 english: Optional[bool] = None):
         """
         :param product: product;
         :param port_1: port for first measurer;
@@ -96,8 +94,7 @@ class EPLabWindow(QMainWindow):
         self._iv_window.plot.set_scale(*scale)
         self._iv_window.plot.set_min_borders(*borders)
 
-    def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve,
-                         settings: MeasurementSettings) -> float:
+    def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> float:
         """
         Method calculates score for given IV-curves and measurement settings.
         :param curve_1: first curve;
@@ -124,8 +121,7 @@ class EPLabWindow(QMainWindow):
         # Comment is only for test and write mode
         self.line_comment_pin.setEnabled(mode is not WorkMode.compare)
         if mode is WorkMode.compare:
-            # Remove reference curve in case we have only one IVMeasurer
-            # in compare mode
+            # Remove reference curve in case we have only one IVMeasurer in compare mode
             if len(self._msystem.measurers) < 2:
                 self._remove_ref_curve()
         # Drag allowed only in write mode
@@ -232,8 +228,8 @@ class EPLabWindow(QMainWindow):
                     device_name = "EyePoint IVM"
                 icon = QIcon(os.path.join(dir_name, f"ivm_{measurer.name}.png"))
             elif isinstance(measurer, IVMeasurerASA):
-                result = re.search(r"xmlrpc://(?P<url>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
-                                   r"(?P<port>(:\d+)?)", measurer.url)
+                result = re.search(r"xmlrpc://(?P<url>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?P<port>(:\d+)?)",
+                                   measurer.url)
                 if result:
                     url = result.group("url")
                     port = result.group("port")
@@ -458,10 +454,8 @@ class EPLabWindow(QMainWindow):
         self.save_screen_action.triggered.connect(self._on_save_image)
         self.select_language_action.triggered.connect(self._on_select_language)
 
-        self.comparing_mode_action.triggered.connect(
-            lambda: self._on_switch_work_mode(WorkMode.compare))
-        self.writing_mode_action.triggered.connect(
-            lambda: self._on_switch_work_mode(WorkMode.write))
+        self.comparing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.compare))
+        self.writing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.write))
         self.testing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.test))
         self.settings_mode_action.triggered.connect(self._on_show_settings_window)
 
@@ -541,8 +535,7 @@ class EPLabWindow(QMainWindow):
             with self._device_errors_handler:
                 # Update current settings to reconnected device
                 options = self._get_options_from_ui()
-                settings = self._product.options_to_settings(options,
-                                                             MeasurementSettings(-1, -1, -1, -1))
+                settings = self._product.options_to_settings(options, MeasurementSettings(-1, -1, -1, -1))
                 self._set_msystem_settings(settings)
                 self._msystem.trigger_measurements()
 
@@ -553,8 +546,7 @@ class EPLabWindow(QMainWindow):
 
         # Create default board with 1 pin
         self._measurement_plan = MeasurementPlan(
-            Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]),
-            measurer=self._msystem.measurers[0])
+            Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]), measurer=self._msystem.measurers[0])
         self._last_saved_measurement_plan_data: Dict = self._measurement_plan.to_json()
 
     def _remove_ref_curve(self):
@@ -581,8 +573,7 @@ class EPLabWindow(QMainWindow):
 
     def _set_plot_parameters(self, settings: MeasurementSettings):
         buttons = self._option_buttons[EyePointProduct.Parameter.sensitive]
-        sensitive = buttons[self._product.settings_to_options(settings)[
-            EyePointProduct.Parameter.sensitive]].text()
+        sensitive = buttons[self._product.settings_to_options(settings)[EyePointProduct.Parameter.sensitive]].text()
         voltage, current = self._iv_window.plot.get_minor_axis_step()
         param_dict = {"voltage": voltage,
                       "current": current,

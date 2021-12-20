@@ -10,14 +10,15 @@ import select
 import socket
 import struct
 from datetime import datetime, timedelta
+from functools import partial
 from platform import system
 from typing import List, Optional, Tuple
 import psutil
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
-from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import (QComboBox, QFormLayout, QHBoxLayout, QLabel, QLayout, QLineEdit,
-                             QPushButton, QVBoxLayout)
+from PyQt5.QtGui import QPixmap, QRegExpValidator
+from PyQt5.QtWidgets import (QComboBox, QFormLayout, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit,
+                             QPushButton, QRadioButton, QVBoxLayout)
 import serial
 import serial.tools.list_ports
 from epcore.ivmeasurer.measurerasa import IVMeasurerASA, IVMeasurerVirtualASA
@@ -25,7 +26,6 @@ from epcore.ivmeasurer.measurerivm import IVMeasurerIVM10
 from epcore.ivmeasurer.virtual import IVMeasurerVirtual
 import safe_opener
 import urpcbase as lib
-from language import Language
 
 
 IP_ASA_REG_EXP = r"^xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
@@ -33,6 +33,11 @@ if system().lower() == "windows":
     IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+)$"
 else:
     IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+)$"
+EYEPOINT_A2 = "EyePoint a2"
+EYEPOINT_H10 = "EyePoint H10"
+EYEPOINT_S2 = "EyePoint S2"
+EYEPOINT_U21 = "EyePoint u21"
+EYEPOINT_U22 = "EyePoint u22"
 
 
 class MeasurerType:
@@ -44,20 +49,6 @@ class MeasurerType:
     IVM10_VIRTUAL = "virtual"
     ASA = "ASA"
     ASA_VIRTUAL = "virtualasa"
-
-    @classmethod
-    def get_general_measurers_type(cls, measurers_types: List[str]) -> Optional[str]:
-        """
-        Method returns general type for measurers in list.
-        :param measurers_types: types of measurers.
-        :return: general type of measurers.
-        """
-
-        if cls.IVM10 in measurers_types or cls.IVM10_VIRTUAL in measurers_types:
-            return cls.IVM10
-        if cls.ASA in measurers_types or cls.ASA_VIRTUAL in measurers_types:
-            return cls.ASA
-        return None
 
     @classmethod
     def check_port_for_ivm10(cls, port: Optional[str]) -> bool:
@@ -76,6 +67,34 @@ class MeasurerType:
         if port is None or (not pattern.match(port) and port != "virtual"):
             return False
         return True
+
+    @classmethod
+    def get_general_measurers_type(cls, measurers_types: List[str]) -> Optional[str]:
+        """
+        Method returns general type for measurers in list.
+        :param measurers_types: types of measurers.
+        :return: general type of measurers.
+        """
+
+        if cls.IVM10 in measurers_types or cls.IVM10_VIRTUAL in measurers_types:
+            return cls.IVM10
+        if cls.ASA in measurers_types or cls.ASA_VIRTUAL in measurers_types:
+            return cls.ASA
+        return None
+
+    @classmethod
+    def get_measurer_type_by_product_name(cls, product_name: str) -> Optional[str]:
+        """
+        Method returns general type by name of product.
+        :param product_name: name of product.
+        :return: general type of measurer.
+        """
+
+        if product_name in (EYEPOINT_A2, EYEPOINT_U21, EYEPOINT_U22, EYEPOINT_S2):
+            return cls.IVM10
+        if product_name == EYEPOINT_H10:
+            return cls.ASA
+        return None
 
 
 def _create_uri_name(port: str) -> str:
@@ -162,8 +181,7 @@ def find_urpc_ports(dev_type: str) -> list:
     config = configparser.ConfigParser()
     os_name = _get_platform()
     dir_name = os.path.dirname(os.path.abspath(__file__))
-    config_name = "{}/{}_config.ini".format(os_name, dev_type)
-    config_file = os.path.join(dir_name, "resources", config_name)
+    config_file = os.path.join(dir_name, "resources", os_name, f"{dev_type}_config.ini")
     try:
         config.read(config_file)
     except Exception:
@@ -211,9 +229,8 @@ def reveal_asa(timeout: float = None) -> List[str]:
                 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
                     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
                     sock.bind((address.address, 0))
-                    sock.sendto(
-                        ("DISCOVER_CUBIELORD_REQUEST " + str(sock.getsockname()[1])).encode(),
-                        ("255.255.255.255", 8008))
+                    sock.sendto(("DISCOVER_CUBIELORD_REQUEST " + str(sock.getsockname()[1])).encode(),
+                                ("255.255.255.255", 8008))
                     sock.setblocking(0)
                     t_end = datetime.utcnow() + timeout
                     while True:
@@ -244,10 +261,11 @@ class ConnectionWindow(qt.QDialog):
 
         super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self.parent = parent
-        self.lang = qApp.instance().property("language")
-        self._your_variant = "Свой вариант" if self.lang is Language.RU else "Your variant"
-        self._urls = None
+        self._your_variant: str = qApp.translate("t", "Свой вариант")
+        self._urls: list = None
         self._initial_ports, self._initial_type = self._get_current_measurers_ports()
+        if self._initial_type is None:
+            self._initial_type = MeasurerType.IVM10
         self._init_ui()
 
     def _check_ip_address(self, ip_address: str) -> bool:
@@ -270,19 +288,31 @@ class ConnectionWindow(qt.QDialog):
         """
 
         self.setWindowTitle(qApp.translate("t", "Настройка подключения"))
+        grid_layout = QGridLayout()
+        group_box = QGroupBox(qApp.translate("t", "Тип ВАХометра"))
+        group_box.setLayout(grid_layout)
+        dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
+        products = [EYEPOINT_A2, EYEPOINT_U21, EYEPOINT_U22, EYEPOINT_S2]
+        if _get_platform() != "win64":
+            products.append(EYEPOINT_H10)
+        self.radio_buttons = {}
+        for row, product_name in enumerate(products):
+            radio_button = QRadioButton(product_name, self)
+            measurer_type = MeasurerType.get_measurer_type_by_product_name(product_name)
+            radio_button.toggled.connect(partial(self.init_available_ports, measurer_type))
+            product_image = QPixmap(os.path.join(dir_name, f"{product_name}.jpg"))
+            label = QLabel("")
+            label.setPixmap(product_image.scaled(100, 100, Qt.KeepAspectRatio))
+            grid_layout.addWidget(label, row, 0)
+            grid_layout.addWidget(radio_button, row, 1)
+            self.radio_buttons[product_name] = radio_button
         form_layout = QFormLayout()
-        label_measurer_type = QLabel(qApp.translate("t", "Тип ВАХометра"))
-        self.combo_box_measurer_type = QComboBox()
-        self.combo_box_measurer_type.addItems(["IVM10", "ASA"])
-        form_layout.addRow(label_measurer_type, self.combo_box_measurer_type)
-        label_measurer_1 = QLabel(qApp.translate("t", "ВАХометр #1"))
         self.combo_box_measurer_1 = QComboBox()
-        form_layout.addRow(label_measurer_1, self.combo_box_measurer_1)
+        form_layout.addRow(QLabel(qApp.translate("t", "ВАХометр #1")), self.combo_box_measurer_1)
         self.line_edit_measurer_1 = QLineEdit()
         form_layout.addRow(QLabel(""), self.line_edit_measurer_1)
-        label_measurer_2 = QLabel(qApp.translate("t", "ВАХометр #2"))
         self.combo_box_measurer_2 = QComboBox()
-        form_layout.addRow(label_measurer_2, self.combo_box_measurer_2)
+        form_layout.addRow(QLabel(qApp.translate("t", "ВАХометр #2")), self.combo_box_measurer_2)
         self.line_edit_measurer_2 = QLineEdit()
         form_layout.addRow(QLabel(""), self.line_edit_measurer_2)
         self.button_connect = QPushButton(qApp.translate("t", "Подключить"))
@@ -293,6 +323,7 @@ class ConnectionWindow(qt.QDialog):
         h_box_layout.addWidget(self.button_disconnect)
         h_box_layout.addWidget(self.button_cancel)
         v_box_layout = QVBoxLayout(self)
+        v_box_layout.addWidget(group_box)
         v_box_layout.addLayout(form_layout)
         v_box_layout.addLayout(h_box_layout)
         v_box_layout.setSizeConstraint(QLayout.SetFixedSize)
@@ -300,8 +331,7 @@ class ConnectionWindow(qt.QDialog):
 
     def _get_current_measurers_ports(self) -> Tuple[List[str], str]:
         """
-        Method returns ports of measurers connected to app and general type
-        of this measurers.
+        Method returns ports of measurers connected to app and general type of this measurers.
         :return: ports of measurers and general type.
         """
 
@@ -339,8 +369,7 @@ class ConnectionWindow(qt.QDialog):
             return list(set(ports))
         return ports
 
-    def _get_ports_for_ivm10(self, ports: List, port_1: str = None, port_2: str = None) ->\
-            List[List[str]]:
+    def _get_ports_for_ivm10(self, ports: List, port_1: str = None, port_2: str = None) -> List[List[str]]:
         """
         Method returns lists of available ports for first and second measurers.
         :param ports: all available ports;
@@ -361,8 +390,7 @@ class ConnectionWindow(qt.QDialog):
             ports_for_first_and_second[index] = [*ports_for_first_and_second[index], *ports]
             if MeasurerType.IVM10_VIRTUAL not in ports_for_first_and_second[index]:
                 ports_for_first_and_second[index].append(MeasurerType.IVM10_VIRTUAL)
-            if selected_ports[index] not in (MeasurerType.IVM10_VIRTUAL, "None",
-                                             self._your_variant):
+            if selected_ports[index] not in (MeasurerType.IVM10_VIRTUAL, "None", self._your_variant):
                 try:
                     ports_for_first_and_second[index - 1].remove(selected_ports[index])
                 except ValueError:
@@ -378,8 +406,7 @@ class ConnectionWindow(qt.QDialog):
 
     def _init_asa(self, url_1: str = None, url_2: str = None):
         """
-        Method initializes available ports for first and second measurers of
-        type ASA.
+        Method initializes available ports for first and second measurers of type ASA.
         :param url_1: selected address for first measurer;
         :param url_2: selected address for second measurer.
         """
@@ -402,8 +429,7 @@ class ConnectionWindow(qt.QDialog):
 
     def _init_ivm10(self, port_1: str = None, port_2: str = None):
         """
-        Method initializes available ports for first and second measurers of
-        type IVM10.
+        Method initializes available ports for first and second measurers of type IVM10.
         :param port_1: selected port for first measurer;
         :param port_2: selected port for second measurer.
         """
@@ -430,13 +456,10 @@ class ConnectionWindow(qt.QDialog):
         self._create_widgets()
         self.combo_boxes = self.combo_box_measurer_1, self.combo_box_measurer_2
         self.line_edits = self.line_edit_measurer_1, self.line_edit_measurer_2
-        if _get_platform() == "win64":
-            self.combo_box_measurer_type.clear()
-            self.combo_box_measurer_type.addItem("IVM10")
-        self.combo_box_measurer_type.currentTextChanged.connect(self.init_available_ports)
-        if self._initial_type is None:
-            self._initial_type = MeasurerType.IVM10
-        self.combo_box_measurer_type.setCurrentText(self._initial_type)
+        if self._initial_type is MeasurerType.IVM10:
+            self.radio_buttons[EYEPOINT_A2].setChecked(True)
+        elif self._initial_type is MeasurerType.ASA:
+            self.radio_buttons[EYEPOINT_H10].setChecked(True)
         for combo_box in self.combo_boxes:
             combo_box.textActivated.connect(self.change_port)
         for line_edit in self.line_edits:
@@ -490,18 +513,18 @@ class ConnectionWindow(qt.QDialog):
         self.close()
 
     @pyqtSlot(str)
-    def init_available_ports(self, general_measurers_type: str):
+    def init_available_ports(self, general_measurer_type: str):
         """
         Slot initializes available ports for first and second measurers.
-        :param general_measurers_type: general type for measurers.
+        :param general_measurer_type: measurer type.
         """
 
         for line_edit in self.line_edits:
             line_edit.setVisible(False)
-        if general_measurers_type == MeasurerType.IVM10:
+        if general_measurer_type == MeasurerType.IVM10:
             validator = QRegExpValidator(QRegExp(IP_IVM10_REG_EXP), self)
             self._init_ivm10(*self._initial_ports)
-        elif general_measurers_type == MeasurerType.ASA:
+        elif general_measurer_type == MeasurerType.ASA:
             validator = QRegExpValidator(QRegExp(IP_ASA_REG_EXP), self)
             self._init_asa(*self._initial_ports)
         for line_edit in self.line_edits:
