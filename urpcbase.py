@@ -7,8 +7,8 @@ import logging
 import os
 import struct
 from platform import system
-from ctypes import (Array, byref, c_char_p, c_int, c_size_t, c_ubyte, c_uint, c_ushort, c_void_p,
-                    c_wchar_p, cast, CDLL, CFUNCTYPE, create_string_buffer, Structure)
+from ctypes import (Array, byref, c_char_p, c_int, c_size_t, c_ubyte, c_uint, c_ushort, c_void_p, c_wchar_p, cast,
+                    CDLL, CFUNCTYPE, create_string_buffer, Structure)
 from sys import version_info
 try:
     from typing import overload, Sequence, Union
@@ -108,19 +108,19 @@ class _device_t(c_int):
 
 _lib = _load_lib()
 _lib.urpcbase_open_device.restype = _device_t
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger("eplab")
 
 
 @CFUNCTYPE(None, c_int, c_wchar_p, c_void_p)
 def _logging_callback(loglevel, message, user_data):
     if loglevel == 0x01:
-        _logger.error(message)
+        logger.error(message)
     elif loglevel == 0x02:
-        _logger.warning(message)
+        logger.warning(message)
     elif loglevel == 0x03:
-        _logger.info(message)
+        logger.info(message)
     elif loglevel == 0x04:
-        _logger.debug(message)
+        logger.debug(message)
 
 
 _lib.urpcbase_set_logging_callback(_logging_callback)
@@ -308,8 +308,7 @@ class UrpcbaseDeviceHandle:
 
     def set_calibration_settings(self, *args):
         if len(args) != 1 or not isinstance(args[0], self.CalibrationSettingsRequest):
-            src_buffer = self.CalibrationSettingsRequest(reserved0=_normalize_arg(args[0],
-                                                                                  c_ubyte*4))
+            src_buffer = self.CalibrationSettingsRequest(reserved0=_normalize_arg(args[0], c_ubyte*4))
         else:
             src_buffer = args[0]
         _validate_call(_lib.urpcbase_set_calibration_settings(self._handle, byref(src_buffer)))

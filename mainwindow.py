@@ -25,10 +25,10 @@ from epcore.measurementmanager.ivc_comparator import IVCComparator
 from epcore.measurementmanager.utils import Searcher
 from epcore.product import EyePointProduct
 from ivviewer import Viewer as IVViewer
+import connection_window as cw
 import utils as ut
 from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
-from connection_window import ConnectionWindow
 from language import Language, LanguageSelectionWindow
 from measurer_settings_window import MeasurerSettingsWindow
 from player import SoundPlayer
@@ -470,6 +470,7 @@ class EPLabWindow(QMainWindow):
         self._test_curve = None
         self._current_file_path: str = None
         self._report_directory: str = None
+        self._product_name: cw.ProductNames = None
 
         self._timer = QTimer()
         self._timer.setInterval(10)
@@ -759,7 +760,7 @@ class EPLabWindow(QMainWindow):
         Slot shows dialog window to select devices for connection.
         """
 
-        connection_wnd = ConnectionWindow(self)
+        connection_wnd = cw.ConnectionWindow(self, self._product_name)
         connection_wnd.exec()
 
     @pyqtSlot()
@@ -1263,11 +1264,12 @@ class EPLabWindow(QMainWindow):
             event = QResizeEvent(size, size)
             self.resizeEvent(event)
 
-    def connect_devices(self, port_1: str, port_2: str):
+    def connect_devices(self, port_1: str, port_2: str, product_name: Optional[cw.ProductNames] = None):
         """
         Method connects measurers with given ports.
         :param port_1: port for first measurer;
-        :param port_2: port for second measurer.
+        :param port_2: port for second measurer;
+        :param product_name: name of product to work with application.
         """
 
         if self._timer.isActive():
@@ -1279,11 +1281,16 @@ class EPLabWindow(QMainWindow):
         if not self._msystem:
             self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
             enable = False
+            self._product_name = None
         else:
             self._iv_window.plot.clear_center_text()
             enable = True
             options_data = self._read_options_from_json()
             self._product.change_options(options_data)
+            if product_name is None:
+                self._product_name = cw.ProductNames.get_default_product_name_for_measurers(self._msystem.measurers)
+            else:
+                self._product_name = product_name
             self._timer.start()
         self._enable_widgets(enable)
         self._set_widgets_to_init_state()
@@ -1301,6 +1308,7 @@ class EPLabWindow(QMainWindow):
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
         self._enable_widgets(False)
         self._clear_widgets()
+        self._product_name = None
 
     def get_measurers(self) -> list:
         """

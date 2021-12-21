@@ -495,32 +495,37 @@
         <translation>No settings</translation>
     </message>
 	<message>
-        <location filename="../connection_window.py" line="265"/>
+        <location filename="../connection_window.py" line="291"/>
+        <source>Свой вариант</source>
+        <translation>Your variant</translation>
+    </message>
+	<message>
+        <location filename="../connection_window.py" line="320"/>
         <source>Настройка подключения</source>
         <translation>Connection setup</translation>
     </message>
 	<message>
-        <location filename="../connection_window.py" line="267"/>
+        <location filename="../connection_window.py" line="322"/>
         <source>Тип ВАХометра</source>
         <translation>IV-measurer type</translation>
     </message>
 	<message>
-        <location filename="../connection_window.py" line="271"/>
+        <location filename="../connection_window.py" line="347"/>
         <source>ВАХометр #1</source>
         <translation>IV-measurer #1</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="276"/>
+        <location filename="../connection_window.py" line="351"/>
         <source>ВАХометр #2</source>
         <translation>IV-measurer #2</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="281"/>
+        <location filename="../connection_window.py" line="354"/>
         <source>Подключить</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="282"/>
+        <location filename="../connection_window.py" line="355"/>
         <source>Отключить</source>
         <translation>Disconnect</translation>
     </message>

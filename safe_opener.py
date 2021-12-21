@@ -3,10 +3,7 @@ File with functions to open device and read its library and firmware versions.
 """
 
 import os
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 
 
 def _check_config(file_name: str, log, port) -> str:
@@ -19,8 +16,7 @@ def _check_config(file_name: str, log, port) -> str:
     """
 
     if not os.path.exists(file_name):
-        _log_runtime(log, f"Try to open device on port {port.decode()}. Config file "
-                          f"{file_name} not found:")
+        _log_runtime(log, f"Try to open device on port {port.decode()}. Config file {file_name} not found:")
     return file_name
 
 
@@ -50,15 +46,14 @@ def _read_conf(file_name: str, log, port) -> configparser.ConfigParser:
     config.read(file_name)
     name = config.has_option("Global", "Name")
     if not name:
-        _log_runtime(log, f"Try to open {name}-device on port {port.decode()}. There is "
-                          f"no Name field in the config file {file_name}")
+        _log_runtime(log, f"Try to open {name}-device on port {port.decode()}. There is no Name field in the "
+                          f"config file {file_name}")
     return config
 
 
 def open_device_safely(device, config_file: str, log):
     """
-    Function opens device safely: checks versions of firmware, library and
-    program soft.
+    Function opens device safely: checks versions of firmware, library and program soft.
     :param device: device object;
     :param config_file: name of config file;
     :param log: log level.
