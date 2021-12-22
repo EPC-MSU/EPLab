@@ -29,18 +29,14 @@ python3 -m venv venv
 --add-data "./cur.ini:." \
 --icon media/ico.ico
 
-mkdir ./dist/libs
-cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc.so.3.51 ./dist/libs/libxmlrpc.so.3.51
-ln ./dist/libs/libxmlrpc.so.3.51 ./dist/libs/libxmlrpc.so.3
-cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_client.so.3.51 ./dist/libs/libxmlrpc_client.so.3.51
-ln ./dist/libs/libxmlrpc_client.so.3.51 ./dist/libs/libxmlrpc_client.so.3
-cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_util.so.4.51 ./dist/libs/libxmlrpc_util.so.4.51
-ln ./dist/libs/libxmlrpc_util.so.4.51 ./dist/libs/libxmlrpc_util.so.4
-cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmlparse.so.3.51 ./dist/libs/libxmlrpc_xmlparse.so.3.51
-ln ./dist/libs/libxmlrpc_xmlparse.so.3.51 ./dist/libs/libxmlrpc_xmlparse.so.3
-cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmltok.so.3.51 ./dist/libs/libxmlrpc_xmltok.so.3.51
-ln ./dist/libs/libxmlrpc_xmltok.so.3.51 ./dist/libs/libxmlrpc_xmltok.so.3
+mkdir ./dist/lib
+cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc.so.3.51 ./dist/lib/libxmlrpc.so.3.51
+cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_client.so.3.51 ./dist/lib/libxmlrpc_client.so.3.51
+cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_util.so.4.51 ./dist/lib/libxmlrpc_util.so.4.51
+cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmlparse.so.3.51 ./dist/lib/libxmlrpc_xmlparse.so.3.51
+cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmltok.so.3.51 ./dist/lib/libxmlrpc_xmltok.so.3.51
 cp ./resources/readme.md ./dist/readme.md
+cp ./resources/install_lib.sh ./dist/install_lib.sh
 mv dist release
 mv ./release/main ./release/eplab
 rm -rf build
