@@ -36,7 +36,7 @@ cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libx
 cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmlparse.so.3.51 ./dist/lib/libxmlrpc_xmlparse.so.3.51
 cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmltok.so.3.51 ./dist/lib/libxmlrpc_xmltok.so.3.51
 cp ./resources/readme.md ./dist/readme.md
-cp ./resources/install_lib.sh ./dist/install_lib.sh
+cp ./resources/debian/install_libs.sh ./dist/install_libs.sh
 mv dist release
 mv ./release/main ./release/eplab
 rm -rf build
