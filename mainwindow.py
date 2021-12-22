@@ -155,12 +155,10 @@ class EPLabWindow(QMainWindow):
                 process_name = qApp.translate("t", "создания отчета")
             if "," in empty_pins:
                 text = qApp.translate("t", "Точки POINTS_PARAM не содержат сохраненных измерений. "
-                                           "Для PROCESS_NAME все точки должны содержать сохраненные"
-                                           " измерения")
+                                           "Для PROCESS_NAME все точки должны содержать сохраненные измерения")
             else:
                 text = qApp.translate("t", "Точка POINTS_PARAM не содержит сохраненных измерений. "
-                                           "Для PROCESS_NAME все точки должны содержать сохраненные"
-                                           " измерения")
+                                           "Для PROCESS_NAME все точки должны содержать сохраненные измерения")
             text = text.replace("POINTS_PARAM", empty_pins)
             text = text.replace("PROCESS_NAME", process_name)
             show_exception(qApp.translate("t", "Ошибка"), text, "")
@@ -247,8 +245,7 @@ class EPLabWindow(QMainWindow):
     def _create_radio_buttons_for_parameter(self, param_name: EyePointProduct.Parameter,
                                             available_options: List) -> QWidget:
         """
-        Method creates radio buttons for options of given parameter and puts
-        them on widget.
+        Method creates radio buttons for options of given parameter and puts them on widget.
         :param param_name: name of parameter;
         :param available_options: available options for parameter.
         :return: widget with radio buttons.
@@ -269,8 +266,8 @@ class EPLabWindow(QMainWindow):
 
     def _create_scroll_areas_for_parameters(self, settings: MeasurementSettings):
         """
-        Method creates scroll areas for different parameters of measuring
-        system. Scroll areas has radio buttons to choose options of parameters.
+        Method creates scroll areas for different parameters of measuring system.
+        Scroll areas has radio buttons to choose options of parameters.
         :param settings: measurement settings.
         """
 
@@ -280,8 +277,7 @@ class EPLabWindow(QMainWindow):
         parameters = (EyePointProduct.Parameter.frequency, EyePointProduct.Parameter.voltage,
                       EyePointProduct.Parameter.sensitive)
         for i_parameter, parameter in enumerate(parameters):
-            widget_with_options = self._create_radio_buttons_for_parameter(parameter,
-                                                                           available[parameter])
+            widget_with_options = self._create_radio_buttons_for_parameter(parameter, available[parameter])
             scroll_area = QScrollArea()
             scroll_area.setVerticalScrollBarPolicy(QtC.ScrollBarAlwaysOn)
             scroll_area.setHorizontalScrollBarPolicy(QtC.ScrollBarAlwaysOff)
@@ -308,14 +304,13 @@ class EPLabWindow(QMainWindow):
         :param enabled: if True widgets will be set to enabled state.
         """
 
-        widgets = (self.new_file_action, self.open_file_action, self.save_file_action,
-                   self.save_as_file_action, self.save_screen_action, self.open_window_board_action,
-                   self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
-                   self.hide_curve_b_action, self.search_optimal_action, self.comparing_mode_action,
-                   self.writing_mode_action, self.testing_mode_action, self.settings_mode_action,
-                   self.next_point_action, self.last_point_action, self.new_point_action,
-                   self.save_point_action, self.add_board_image_action, self.create_report_action,
-                   self.add_cursor_action, self.remove_cursor_action, self.freqDock,
+        widgets = (self.new_file_action, self.open_file_action, self.save_file_action, self.save_as_file_action,
+                   self.save_screen_action, self.open_window_board_action, self.freeze_curve_a_action,
+                   self.freeze_curve_b_action, self.hide_curve_a_action, self.hide_curve_b_action,
+                   self.search_optimal_action, self.comparing_mode_action, self.writing_mode_action,
+                   self.testing_mode_action, self.settings_mode_action, self.next_point_action, self.last_point_action,
+                   self.new_point_action, self.save_point_action, self.add_board_image_action,
+                   self.create_report_action, self.add_cursor_action, self.remove_cursor_action, self.freqDock,
                    self.currentDock, self.voltageDock)
         for widget in widgets:
             widget.setEnabled(enabled)
@@ -331,8 +326,7 @@ class EPLabWindow(QMainWindow):
 
     def _get_options_from_ui(self) -> Dict[EyePointProduct.Parameter, str]:
         """
-        Method returns current options for parameters of measuring system
-        from UI.
+        Method returns current options for parameters of measuring system from UI.
         :return: dictionary with selected options for parameters.
         """
 
@@ -340,8 +334,7 @@ class EPLabWindow(QMainWindow):
             for name, button in buttons.items():
                 if button.isChecked():
                     return name
-        return {param: _get_checked_button(self._option_buttons[param])
-                for param in self._option_buttons}
+        return {param: _get_checked_button(self._option_buttons[param]) for param in self._option_buttons}
 
     def _init_threshold(self):
         """
@@ -500,8 +493,8 @@ class EPLabWindow(QMainWindow):
                     # New curve with new settings - we must update plot parameters
                     self._adjust_plot_params(self._settings_update_next_cycle)
                     self._settings_update_next_cycle = None
-                    # You need to redraw markers with new plot parameters
-                    # (the scale of the plot has changed)
+                    # You need to redraw markers with new plot parameters (the scale
+                    # of the plot has changed)
                     self._iv_window.plot.redraw_cursors()
             self._msystem.trigger_measurements()
 
@@ -653,8 +646,7 @@ class EPLabWindow(QMainWindow):
                     self._set_msystem_settings(settings)
                     options = self._product.settings_to_options(settings)
                     self._set_options_to_ui(options)
-                    self._update_curves({"ref": measurement.ivc},
-                                        self._msystem.measurers[0].get_settings())
+                    self._update_curves({"ref": measurement.ivc}, self._msystem.measurers[0].get_settings())
             else:
                 self._remove_ref_curve()
                 self._update_curves({}, self._msystem.measurers[0].get_settings())
@@ -697,8 +689,7 @@ class EPLabWindow(QMainWindow):
 
         available = self._product.get_available_options(settings)
         for parameter, scroll_area in self._parameters_scroll_areas.items():
-            widget_with_options = self._create_radio_buttons_for_parameter(parameter,
-                                                                           available[parameter])
+            widget_with_options = self._create_radio_buttons_for_parameter(parameter, available[parameter])
             old_widget = scroll_area.takeWidget()
             del old_widget
             scroll_area.setWidget(widget_with_options)
@@ -711,22 +702,6 @@ class EPLabWindow(QMainWindow):
 
         self._score_wrapper.set_threshold(threshold)
         self._player.set_threshold(threshold)
-
-    def _update_translation_for_scroll_areas_for_parameters(self):
-        """
-        Method updates translation of options in scroll areas for different parameters
-        of measuring system.
-        """
-
-        lang = qApp.instance().property("language")
-        settings = self._msystem.get_settings()
-        available = self._product.get_available_options(settings)
-        for parameter, buttons in self._option_buttons.items():
-            for option_name, button in buttons.items():
-                options = available[parameter]
-                for option in options:
-                    if option.name == option_name:
-                        button.setText(option.label_ru if lang is Language.RU else option.label_en)
 
     @pyqtSlot(bool)
     def _on_add_cursor(self, state: bool):
@@ -810,9 +785,9 @@ class EPLabWindow(QMainWindow):
         self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
         self.line_comment_pin.setText(pin.comment or "")
 
-        # It is important to initialize pin with real measurement.
-        # Otherwise user can create several empty points and they will not be unique.
-        # This will cause some errors during ufiv validation.
+        # It is important to initialize pin with real measurement. Otherwise user can create
+        # several empty points and they will not be unique. This will cause some errors during
+        # ufiv validation.
         # self._on_save_pin()
         self._update_current_pin()
 
@@ -825,8 +800,8 @@ class EPLabWindow(QMainWindow):
         threshold_score = self._score_wrapper.threshold
         if self._check_measurement_plan(False):
             return
-        report_generation_window = ReportGenerationWindow(
-            self, self._measurement_plan, self._report_directory, threshold_score)
+        report_generation_window = ReportGenerationWindow(self, self._measurement_plan, self._report_directory,
+                                                          threshold_score)
         report_generation_window.show()
 
     @pyqtSlot()
@@ -861,16 +836,14 @@ class EPLabWindow(QMainWindow):
             num_point = int(self.num_point_line_edit.text())
         except ValueError as exc:
             show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                           qApp.translate("t", "Неверный формат номера точки. Номер точки может"
-                                               " принимать только целочисленное значение!"),
-                           str(exc))
+                           qApp.translate("t", "Неверный формат номера точки. Номер точки может принимать только "
+                                               "целочисленное значение!"), str(exc))
             return
         try:
             self._measurement_plan.go_pin(num_point)
         except ValueError as exc:
             show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                           qApp.translate("t", "Точка с таким номером не найдена на "
-                                               "данной плате."), str(exc))
+                           qApp.translate("t", "Точка с таким номером не найдена на данной плате."), str(exc))
             return
         self._update_current_pin()
         self._open_board_window_if_needed()
@@ -908,14 +881,12 @@ class EPLabWindow(QMainWindow):
             try:
                 board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
             except Exception as exc:
-                show_exception(qApp.translate("t", "Ошибка"),
-                               qApp.translate("t", "Формат файла не подходит"), str(exc))
+                show_exception(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит"), str(exc))
                 return
             if not ut.check_compatibility(self._product, board):
-                text = qApp.translate("t", "План тестирования TEST_PLAN нельзя загрузить, "
-                                           "поскольку он не соответствует режиму работы EPLab")
-                show_exception(qApp.translate("t", "Ошибка"),
-                               text.replace("TEST_PLAN", f"'{filename}'"))
+                text = qApp.translate("t", "План тестирования TEST_PLAN нельзя загрузить, поскольку он не "
+                                           "соответствует режиму работы EPLab")
+                show_exception(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
                 return
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
@@ -930,9 +901,8 @@ class EPLabWindow(QMainWindow):
         Slot loads image for board from file.
         """
 
-        filename = QFileDialog.getOpenFileName(
-            self, qApp.translate("t", "Открыть изображение платы"),
-            filter="Image Files (*.png *.jpg *.bmp)")[0]
+        filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
+                                               filter="Image Files (*.png *.jpg *.bmp)")[0]
         if filename:
             epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
             self._board_window.set_board(self._measurement_plan)
@@ -971,8 +941,7 @@ class EPLabWindow(QMainWindow):
         if not self._current_file_path:
             return self._on_save_board_as()
         self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
-        self._current_file_path = epfilemanager.save_board_to_ufiv(self._current_file_path,
-                                                                   self._measurement_plan)
+        self._current_file_path = epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
         return True
 
     @pyqtSlot()
@@ -993,8 +962,7 @@ class EPLabWindow(QMainWindow):
             directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
         if filename:
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
-            self._current_file_path = epfilemanager.save_board_to_ufiv(filename,
-                                                                       self._measurement_plan)
+            self._current_file_path = epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             return True
         return False
 
@@ -1022,9 +990,8 @@ class EPLabWindow(QMainWindow):
         dir_path = os.path.join(self.default_path, "Screenshot")
         if not os.path.isdir(dir_path):
             os.makedirs(dir_path)
-        filename = QFileDialog.getSaveFileName(
-            self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
-            directory=os.path.join(dir_path, filename))[0]
+        filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
+                                               directory=os.path.join(dir_path, filename))[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
@@ -1047,22 +1014,20 @@ class EPLabWindow(QMainWindow):
 
         language_selection_wnd = LanguageSelectionWindow(self)
         if language_selection_wnd.exec():
-            language = language_selection_wnd.get_language()
+            language = language_selection_wnd.get_language_value()
             if language != qApp.instance().property("language"):
                 if self._msystem is not None:
                     settings = self._msystem.get_settings()
                 else:
                     settings = None
-                self._language_to_set = Language.get_language(language)
+                self._language_to_set = Language.get_language_name(language)
                 ut.save_settings_auto(self._product, settings, self._language_to_set)
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Information)
                 msg.setWindowTitle(qApp.translate("t", "Внимание"))
                 msg.setWindowIcon(QIcon(self._icon_path))
-                text_ru = ("Настройки языка сохранены. Чтобы изменения вступили в силу, "
-                           "перезапустите программу.")
-                text_en = ("The language settings are saved. Restart the program for the changes to"
-                           " take effect.")
+                text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
+                text_en = "The language settings are saved. Restart the program for the changes to take effect."
                 if qApp.instance().property("language") is Language.RU:
                     text = text_ru + "\n" + text_en
                 else:
@@ -1090,12 +1055,11 @@ class EPLabWindow(QMainWindow):
                 if self._language_to_set is not None:
                     language = self._language_to_set
                 else:
-                    language = Language.get_language(qApp.instance().property("language"))
+                    language = Language.get_language_name(qApp.instance().property("language"))
                 ut.save_settings_auto(self._product, settings, language)
             except ValueError as exc:
                 show_exception(qApp.translate("t", "Ошибка"),
-                               qApp.translate("t", "Ошибка при установке настроек устройства"),
-                               str(exc))
+                               qApp.translate("t", "Ошибка при установке настроек устройства"), str(exc))
                 self._update_scroll_areas_for_parameters(old_settings)
                 self._set_msystem_settings(old_settings)
                 old_options = self._product.settings_to_options(old_settings)
@@ -1139,12 +1103,10 @@ class EPLabWindow(QMainWindow):
         menu.popup(widget.mapToGlobal(QPoint(position.x(), position.y())))
 
     @pyqtSlot(IVMeasurerBase, str, bool)
-    def _on_show_device_settings(self, selected_measurer: IVMeasurerBase, device_name: str,
-                                 _: bool):
+    def _on_show_device_settings(self, selected_measurer: IVMeasurerBase, device_name: str, _: bool):
         """
         Slot shows window to select device settings.
-        :param selected_measurer: measurer for which device settings should be
-        displayed;
+        :param selected_measurer: measurer for which device settings should be displayed;
         :param device_name: name of measurer;
         :param _: not used.
         """
@@ -1182,11 +1144,11 @@ class EPLabWindow(QMainWindow):
         msg.setWindowTitle(qApp.translate("t", "Справка"))
         msg.setWindowIcon(QIcon(self._icon_path))
         msg.setText(self.windowTitle())
-        msg.setInformativeText(qApp.translate(
-            "t", "Программное обеспечение для работы с устройствами линейки EyePoint,"
-                 " предназначенными для поиска неисправностей на печатных платах в "
-                 "ручном режиме (при помощи ручных щупов). Для более подробной информации "
-                 "об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru."))
+        msg.setInformativeText(
+            qApp.translate("t", "Программное обеспечение для работы с устройствами линейки EyePoint,"
+                                " предназначенными для поиска неисправностей на печатных платах в ручном режиме "
+                                "(при помощи ручных щупов). Для более подробной информации об Eyepoint, перейдите "
+                                "по ссылке http://eyepoint.physlab.ru."))
         msg.addButton(qApp.translate("t", "Перейти"), QMessageBox.YesRole)
         msg.addButton(qApp.translate("t", "ОК"), QMessageBox.NoRole)
         msg.buttonClicked.connect(handle_button_click)
@@ -1222,8 +1184,7 @@ class EPLabWindow(QMainWindow):
         :param threshold: threshold value.
         """
 
-        if (self.__settings is None or
-                (self.__settings and self.__settings.score_threshold != threshold)):
+        if self.__settings is None or (self.__settings and self.__settings.score_threshold != threshold):
             # Settings were not loaded from file
             self._update_threshold(threshold)
             return
@@ -1240,14 +1201,12 @@ class EPLabWindow(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent):
         self._board_window.close()
-        if (self._measurement_plan and
-                self._measurement_plan.to_json() != self._last_saved_measurement_plan_data):
+        if self._measurement_plan and self._measurement_plan.to_json() != self._last_saved_measurement_plan_data:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
             msg.setWindowTitle(qApp.translate("t", "Внимание"))
             msg.setWindowIcon(QIcon(self._icon_path))
-            msg.setText(qApp.translate("t", "План тестирования не был сохранен. Сохранить "
-                                            "последние изменения?"))
+            msg.setText(qApp.translate("t", "План тестирования не был сохранен. Сохранить последние изменения?"))
             msg.addButton(qApp.translate("t", "Да"), QMessageBox.YesRole)
             msg.addButton(qApp.translate("t", "Нет"), QMessageBox.NoRole)
             result = msg.exec_()
@@ -1257,8 +1216,6 @@ class EPLabWindow(QMainWindow):
 
     def changeEvent(self, event: QEvent):
         if event.type() == QEvent.LanguageChange:
-            if self._msystem is not None:
-                self._update_translation_for_scroll_areas_for_parameters()
             geometry = self.geometry()
             size = QSize(geometry.width(), geometry.height())
             event = QResizeEvent(size, size)
@@ -1342,8 +1299,7 @@ class EPLabWindow(QMainWindow):
 
     def open_settings_from_file(self, file_path: str) -> float:
         """
-        Method reads settings from file with given path and returns score
-        threshold.
+        Method reads settings from file with given path and returns score threshold.
         :param file_path: path to file with settings.
         :return: score threshold.
         """

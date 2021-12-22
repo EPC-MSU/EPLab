@@ -18,7 +18,7 @@ class Language(Enum):
     EN = auto()
 
     @classmethod
-    def get_language(cls, value: "Language") -> str:
+    def get_language_name(cls, value: "Language") -> str:
         """
         Method returns name of language for given value.
         :param value: value of language.
@@ -93,7 +93,7 @@ class LanguageSelectionWindow(qt.QDialog):
         self.combo_box_languages = qt.QComboBox()
         for value, language in Language.get_languages():
             self.combo_box_languages.addItem(language, value)
-        language = Language.get_language(qApp.instance().property("language"))
+        language = Language.get_language_name(qApp.instance().property("language"))
         self.combo_box_languages.setCurrentText(language)
         v_box.addWidget(self.combo_box_languages)
         btns = qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel
@@ -105,10 +105,10 @@ class LanguageSelectionWindow(qt.QDialog):
         self.adjustSize()
         self.setLayout(v_box)
 
-    def get_language(self) -> Language:
+    def get_language_value(self) -> Language:
         """
         Method returns selected language.
-        :return: language.
+        :return: value of language.
         """
 
         return self.combo_box_languages.currentData()

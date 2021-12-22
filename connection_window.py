@@ -271,6 +271,7 @@ def reveal_asa(timeout: float = None) -> List[str]:
                                 ip_addresses.append(str(addr[0]))
             except Exception as exc:
                 logger.error("Failed to bind to interface %s and address %s: %s", iface_name, address.address, exc)
+    print(ip_addresses)
     return ip_addresses
 
 
@@ -458,7 +459,7 @@ class ConnectionWindow(qt.QDialog):
         :param url_2: selected address for second measurer.
         """
 
-        urls_for_first = [f"xmlrpc://{host}" for host in reveal_asa(0.05)]
+        urls_for_first = [f"xmlrpc://{host}" for host in reveal_asa()]
         urls_for_first.append(self._your_variant)
         urls_for_second = "virtualasa", "None"
         urls_for_first_and_second = urls_for_first, urls_for_second
