@@ -3,6 +3,8 @@ import os
 from epsound import WavPlayer
 from common import WorkMode
 
+logger = logging.getLogger("eplab")
+
 
 class SoundPlayer:
     def __init__(self):
@@ -13,7 +15,7 @@ class SoundPlayer:
         self._threshold = 0
 
         if not self._player.check_sound_available():
-            logging.error("Sound is not available on your system; mute")
+            logger.error("Sound is not available on your system; mute")
             self._player.set_mute()
             self._sound_available = False
 

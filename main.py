@@ -1,9 +1,8 @@
-import logging
+import logger
 import sys
 import traceback
 from argparse import ArgumentParser, Namespace
-from PyQt5.QtWidgets import (qApp, QApplication, QDesktopWidget, QLabel, QMainWindow, QPushButton,
-                             QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import qApp, QApplication, QDesktopWidget, QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget
 from epcore.product import EyePointProduct
 from mainwindow import EPLabWindow, show_exception
 from utils import read_json
@@ -85,8 +84,7 @@ class ErrorWindow(QMainWindow):
         self.setWindowTitle("Error")
 
 
-def show_error_window(app: QApplication, exc_type: Exception, exc_value: Exception,
-                      exc_traceback: "traceback"):
+def show_error_window(app: QApplication, exc_type: Exception, exc_value: Exception, exc_traceback: "traceback"):
     """
     Function shows window with error.
     :param app: application;
@@ -102,16 +100,14 @@ def show_error_window(app: QApplication, exc_type: Exception, exc_value: Excepti
 
 
 if __name__ == "__main__":
+    logger.logger
     parser = ArgumentParser(description="EyePoint Lab")
-    parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual'"
-                                      " for virtual mode)")
-    parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)",
-                        nargs="?", default=None)
+    parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual' for virtual mode)")
+    parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)", nargs="?", default=None)
     parser.add_argument("--en", help="Use English version", action="store_true")
     parser.add_argument("--config", help="Path to specific EPLab config file", default=None)
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.WARNING)
     app = QApplication(sys.argv)
     try:
         launch_eplab(app, args)

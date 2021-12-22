@@ -173,7 +173,7 @@ def _get_active_serial_ports() -> List[serial.tools.list_ports_common.ListPortIn
     valid_ports = []
     for port in sorted(com_ports):
         try:
-            serial_port = serial.Serial(port.device)
+            serial_port = serial.Serial(port.device, timeout=0)
             serial_port.close()
             valid_ports.append(port)
         except (OSError, serial.SerialException):
