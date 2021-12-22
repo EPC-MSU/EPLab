@@ -320,7 +320,7 @@ class ConnectionWindow(qt.QDialog):
         self.setWindowTitle(qApp.translate("t", "Настройка подключения"))
         layout = qt.QVBoxLayout()
         group_box = qt.QGroupBox(qApp.translate("t", "Тип ВАХометра"))
-        group_box.setFixedWidth(300)
+        group_box.setFixedSize(300, 300)
         group_box.setLayout(layout)
         widget = qt.QWidget()
         scroll_area = qt.QScrollArea(self)
