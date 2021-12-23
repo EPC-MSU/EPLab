@@ -3,7 +3,7 @@ File with class for dialog window with settings of measurer.
 """
 
 from inspect import getmembers, ismethod
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Union
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QRegExpValidator
@@ -153,7 +153,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         return title + device_name
 
     @staticmethod
-    def _get_value_from_combo(data: Dict):
+    def _get_value_from_combo(data: Dict) -> Union[float, int, str]:
         """
         Method gets value from combobox.
         :param data: dictionary with combobox widget and available values.
@@ -164,7 +164,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         index = widget.currentIndex()
         return data["values"][index]["value"]
 
-    def _get_value_from_line_edit(self, data: Dict):
+    def _get_value_from_line_edit(self, data: Dict) -> Optional[float]:
         """
         Method gets value from line edit.
         :param data: dictionary with line edit.
@@ -176,7 +176,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         return self._process_line_edit(data, text)
 
     @staticmethod
-    def _get_value_from_radio(data):
+    def _get_value_from_radio(data) -> Optional[Union[float, int, str]]:
         """
         Method gets value from group of radio buttons.
         :param data: dictionary with radio buttons and available values.
@@ -223,7 +223,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         self.setLayout(v_box)
 
     @staticmethod
-    def _process_line_edit(data: Dict, text: str) -> float:
+    def _process_line_edit(data: Dict, text: str) -> Optional[float]:
         """
         Method processes the text in the line edit.
         :param data: data for parameter for which line edit is assigned;

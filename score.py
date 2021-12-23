@@ -11,8 +11,7 @@ class ScoreWrapper:
         self._color_bad = "#cc0000"
 
     def _set_score_text(self, text: str, color: str):
-        text = f'<html><head/><body><p><span style="font-size:48pt;color:{color};">' \
-               f"{text}</span></p></body></html>"
+        text = f'<html><head/><body><p><span style="font-size:48pt;color:{color};">{text}</span></p></body></html>'
         self._label.setText(text)
 
     def set_score(self, score: float):

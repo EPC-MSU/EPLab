@@ -77,8 +77,7 @@ def open_device_safely(device, config_file: str, log):
         for i in identity._controller_name:
             if i != 0:
                 device_name = device_name + chr(i)
-        firmware = (f"{identity._firmware_major}.{identity._firmware_minor}."
-                    f"{identity._firmware_bugfix}")
+        firmware = f"{identity._firmware_major}.{identity._firmware_minor}.{identity._firmware_bugfix}"
     except Exception:
         _log_runtime(log, f"{msg_base} Undefined device. GINF command not implemented")
     device.close()

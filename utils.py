@@ -4,6 +4,7 @@ File with useful functions.
 
 import configparser
 import json
+import logging
 import os
 import re
 import sys
@@ -18,6 +19,7 @@ from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EyePointProduct
 from language import Language
 
+logger = logging.getLogger("eplab")
 _FILENAME_FOR_AUTO_SETTINGS = "eplab_settings_for_auto_save_and_read.ini"
 
 
@@ -68,26 +70,31 @@ def create_measurers(port_1: str, port_2: str) -> MeasurementSystem:
     measurers_args = port_1, port_2
     virtual_already_has_been = False
     for measurer_arg in measurers_args:
+        measurer_type = ""
         try:
             if measurer_arg == "virtual":
+                measurer_type = "IVMeasurerVirtual"
                 measurer = IVMeasurerVirtual()
                 if virtual_already_has_been:
                     measurer.nominal = 1000
                 measurers.append(measurer)
                 virtual_already_has_been = True
             elif measurer_arg == "virtualasa":
+                measurer_type = "IVMeasurerVirtualASA"
                 measurer = IVMeasurerVirtualASA(defer_open=True)
                 measurers.append(measurer)
             elif measurer_arg is not None and "com:" in measurer_arg or "xi-net:" in measurer_arg:
+                measurer_type = "IVMeasurerIVM10"
                 dir_name = os.path.dirname(os.path.abspath(__file__))
                 config_file = os.path.join(dir_name, "cur.ini")
                 measurer = IVMeasurerIVM10(measurer_arg, config=config_file, defer_open=True)
                 measurers.append(measurer)
             elif measurer_arg is not None and "xmlrpc:" in measurer_arg:
+                measurer_type = "IVMeasurerASA"
                 measurer = IVMeasurerASA(measurer_arg, defer_open=True)
                 measurers.append(measurer)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.error("Error occurred while creating measurer of type '%s': %s", measurer_type, exc)
     if len(measurers) == 0:
         # Logically it will be correctly to abort here.
         # But for better user experience we will add single virtual IVM.
@@ -166,8 +173,7 @@ def read_language_auto() -> Optional[Language]:
     config = configparser.ConfigParser()
     try:
         config.read(filename)
-    except (configparser.ParsingError, configparser.DuplicateSectionError,
-            configparser.DuplicateOptionError):
+    except (configparser.ParsingError, configparser.DuplicateSectionError, configparser.DuplicateOptionError):
         return Language.EN
     language_name = config["DEFAULT"].get("language")
     language = Language.get_language_value(language_name)
@@ -204,8 +210,7 @@ def read_settings_auto(product: EyePointProduct) -> Optional[MeasurementSettings
     config = configparser.ConfigParser()
     try:
         config.read(filename)
-    except (configparser.ParsingError, configparser.DuplicateSectionError,
-            configparser.DuplicateOptionError):
+    except (configparser.ParsingError, configparser.DuplicateSectionError, configparser.DuplicateOptionError):
         return None
     options = _get_options_from_config(config["DEFAULT"])
     if options is None:

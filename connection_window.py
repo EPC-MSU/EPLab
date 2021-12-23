@@ -62,7 +62,7 @@ class ProductNames(Enum):
                   product_name in (None, cls.EYEPOINT_A2)):
                 product_name = cls.EYEPOINT_A2
             else:
-                raise ValueError("")
+                raise ValueError("Unknown default name of product")
         return product_name
 
     @classmethod
@@ -157,9 +157,9 @@ def _filter_ports_by_vid_and_pid(com_ports: List[serial.tools.list_ports_common.
             p_vid, p_pid = vid_pid.split(":")
             if p_vid == vid and p_pid == pid:
                 filtered_ports.append(com_port)
-        except Exception:
+        except Exception as exc:
             # Some ports can have malformed information: simply ignore such devices
-            continue
+            logger.error("Error occurred while filtering COM-ports by VID and PID: %s", exc)
     return filtered_ports
 
 
@@ -176,8 +176,8 @@ def _get_active_serial_ports() -> List[serial.tools.list_ports_common.ListPortIn
             serial_port = serial.Serial(port.device, timeout=0)
             serial_port.close()
             valid_ports.append(port)
-        except (OSError, serial.SerialException):
-            pass
+        except (OSError, serial.SerialException) as exc:
+            logger.error("Error occurred while trying to open COM-port '%s': %s", port.device, exc)
     return valid_ports
 
 
@@ -194,7 +194,7 @@ def _get_platform() -> Optional[str]:
         return "win64"
     if os_kind == "linux":
         return "debian"
-    raise RuntimeError("unexpected OS")
+    raise RuntimeError("Unexpected OS")
 
 
 def find_urpc_ports(device_type: str) -> List[str]:
@@ -229,7 +229,7 @@ def find_urpc_ports(device_type: str) -> List[str]:
             safe_opener.open_device_safely(device, config_file, lib._logging_callback)
             ximc_ports.append(device_name)
         except RuntimeError as exc:
-            logger.error("%s is not XIMC controller: %s", device_name, exc)
+            logger.error("'%s' is not XIMC controller: %s", device_name, exc)
     return ximc_ports
 
 
@@ -271,7 +271,6 @@ def reveal_asa(timeout: float = None) -> List[str]:
                                 ip_addresses.append(str(addr[0]))
             except Exception as exc:
                 logger.error("Failed to bind to interface %s and address %s: %s", iface_name, address.address, exc)
-    print(ip_addresses)
     return ip_addresses
 
 
