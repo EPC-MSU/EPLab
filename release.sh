@@ -30,6 +30,7 @@ python3 -m venv venv
 --icon media/ico.ico
 
 mkdir ./dist/lib
+cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libasa.so ./dist/lib/libasa.so
 cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc.so.3.51 ./dist/lib/libxmlrpc.so.3.51
 cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_client.so.3.51 ./dist/lib/libxmlrpc_client.so.3.51
 cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_util.so.4.51 ./dist/lib/libxmlrpc_util.so.4.51
