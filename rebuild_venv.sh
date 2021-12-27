@@ -6,6 +6,7 @@ python3 -m venv venv
 ./venv/bin/python3 -m pip install -r requirements.txt
 
 mkdir ./lib
+cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libasa.so ./lib/libasa.so
 cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc.so.3.51 ./lib/libxmlrpc.so.3.51
 cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_client.so.3.51 ./lib/libxmlrpc_client.so.3.51
 cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_util.so.4.51 ./lib/libxmlrpc_util.so.4.51
