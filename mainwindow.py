@@ -387,7 +387,7 @@ class EPLabWindow(QMainWindow):
         self._player = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
 
-        self._board_window = BoardWidget()
+        self._board_window: BoardWidget = BoardWidget()
         self._board_window.resize(600, 600)
         self._board_window.setWindowIcon(QIcon("media/ico.png"))
         self._board_window.setWindowTitle("EPLab - Board")
@@ -395,7 +395,7 @@ class EPLabWindow(QMainWindow):
         self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
         self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
 
-        self.low_panel_settings = LowSettingsPanel(self)
+        self.low_panel_settings: LowSettingsPanel = LowSettingsPanel(self)
         self.main_widget = QWidget(self)
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -566,6 +566,7 @@ class EPLabWindow(QMainWindow):
             self._option_buttons[parameter][value].setChecked(True)
 
     def _set_plot_parameters(self, settings: MeasurementSettings):
+
         buttons = self._option_buttons[EyePointProduct.Parameter.sensitive]
         sensitive = buttons[self._product.settings_to_options(settings)[EyePointProduct.Parameter.sensitive]].text()
         voltage, current = self._iv_window.plot.get_minor_axis_step()
@@ -651,8 +652,7 @@ class EPLabWindow(QMainWindow):
                 self._remove_ref_curve()
                 self._update_curves({}, self._msystem.measurers[0].get_settings())
 
-    def _update_curves(self, curves: Dict[str, IVCurve] = None,
-                       settings: MeasurementSettings = None):
+    def _update_curves(self, curves: Dict[str, IVCurve] = None, settings: MeasurementSettings = None):
         # TODO: let the function work with larger lists
         # Store last curves
         if curves is not None:
@@ -682,8 +682,7 @@ class EPLabWindow(QMainWindow):
 
     def _update_scroll_areas_for_parameters(self, settings: MeasurementSettings):
         """
-        Method updates scroll areas for different parameters of measuring
-        system.
+        Method updates scroll areas for different parameters of measuring system.
         :param settings: measurement settings.
         """
 
