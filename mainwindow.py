@@ -3,6 +3,7 @@ File with class for main window of application.
 """
 
 import copy
+import logging
 import os
 import re
 import webbrowser
@@ -20,7 +21,7 @@ from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, Pin
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
-from epcore.measurementmanager import MeasurementPlan
+from epcore.measurementmanager import MeasurementPlan, MeasurementSystem
 from epcore.measurementmanager.ivc_comparator import IVCComparator
 from epcore.measurementmanager.utils import Searcher
 from epcore.product import EyePointProduct
@@ -37,6 +38,8 @@ from score import ScoreWrapper
 from settings.settings import Settings
 from settings.settingswindow import LowSettingsPanel, SettingsWindow
 from version import Version
+
+logger = logging.getLogger("eplab")
 
 
 def show_exception(msg_title: str, msg_text: str, exc: str = ""):
@@ -351,7 +354,7 @@ class EPLabWindow(QMainWindow):
         :param english: if True then interface language will be English.
         """
 
-        self._translator = QTranslator()
+        self._translator: QTranslator = QTranslator()
         self._language_to_set: str = None
         if english:
             language = Language.EN
@@ -367,7 +370,7 @@ class EPLabWindow(QMainWindow):
 
         dir_name = os.path.dirname(os.path.abspath(__file__))
         loadUi(os.path.join(dir_name, "gui", "mainwindow.ui"), self)
-        self._icon_path = os.path.join(dir_name, "media", "ico.png")
+        self._icon_path: str = os.path.join(dir_name, "media", "ico.png")
         self.setWindowIcon(QIcon(self._icon_path))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
         if system() == "Windows":
@@ -376,15 +379,15 @@ class EPLabWindow(QMainWindow):
             self.setMinimumWidth(700)
         self.move(50, 50)
 
-        self._device_errors_handler = DeviceErrorsHandler()
-        self._product = product
-        self._msystem = None
-        self._measurement_plan = None
-        self._comparator = IVCComparator()
+        self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
+        self._product: EyePointProduct = product
+        self._msystem: MeasurementSystem = None
+        self._measurement_plan: MeasurementPlan = None
+        self._comparator: IVCComparator = IVCComparator()
 
-        self._score_wrapper = ScoreWrapper(self.score_label)
+        self._score_wrapper: ScoreWrapper = ScoreWrapper(self.score_label)
         self.__settings: Settings = None
-        self._player = SoundPlayer()
+        self._player: SoundPlayer = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
 
         self._board_window: BoardWidget = BoardWidget()
@@ -396,13 +399,13 @@ class EPLabWindow(QMainWindow):
         self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
 
         self.low_panel_settings: LowSettingsPanel = LowSettingsPanel(self)
-        self.main_widget = QWidget(self)
+        self.main_widget: QWidget = QWidget(self)
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
 
         vbox = QVBoxLayout()
-        self._iv_window = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
-                                   solid_axis_enabled=False, axis_sign_enabled=False)
+        self._iv_window: IVViewer = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
+                                             solid_axis_enabled=False, axis_sign_enabled=False)
         self.reference_curve_plot = self._iv_window.plot.add_curve()
         self.test_curve_plot = self._iv_window.plot.add_curve()
         self.reference_curve_plot.set_curve_params(QColor(0, 128, 255, 200))
@@ -452,20 +455,20 @@ class EPLabWindow(QMainWindow):
         self.testing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.test))
         self.settings_mode_action.triggered.connect(self._on_show_settings_window)
 
-        self._work_mode = None
+        self._work_mode: WorkMode = None
         # Update plot settings at next measurement cycle (place settings here or None)
         self._settings_update_next_cycle = None
         # Set to True to skip next measured curves
-        self._skip_curve = False
-        self._hide_curve_test = False
-        self._hide_curve_ref = False
+        self._skip_curve: bool = False
+        self._hide_curve_test: bool = False
+        self._hide_curve_ref: bool = False
         self._ref_curve = None
         self._test_curve = None
         self._current_file_path: str = None
         self._report_directory: str = None
         self._product_name: cw.ProductNames = None
 
-        self._timer = QTimer()
+        self._timer: QTimer = QTimer()
         self._timer.setInterval(10)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._on_periodic_task)
@@ -1235,20 +1238,17 @@ class EPLabWindow(QMainWindow):
                 measurer.close_device()
         self._msystem = ut.create_measurers(port_1, port_2)
         if not self._msystem:
-            self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
-            enable = False
-            self._product_name = None
+            self.disconnect_devices()
+            return
+        self._iv_window.plot.clear_center_text()
+        options_data = self._read_options_from_json()
+        self._product.change_options(options_data)
+        if product_name is None:
+            self._product_name = cw.ProductNames.get_default_product_name_for_measurers(self._msystem.measurers)
         else:
-            self._iv_window.plot.clear_center_text()
-            enable = True
-            options_data = self._read_options_from_json()
-            self._product.change_options(options_data)
-            if product_name is None:
-                self._product_name = cw.ProductNames.get_default_product_name_for_measurers(self._msystem.measurers)
-            else:
-                self._product_name = product_name
-            self._timer.start()
-        self._enable_widgets(enable)
+            self._product_name = product_name
+        self._timer.start()
+        self._enable_widgets(True)
         self._set_widgets_to_init_state()
 
     def disconnect_devices(self):

@@ -26,12 +26,11 @@ except ImportError:
     class Sequence(metaclass=_GenericTypeMeta):
         pass
 
+logger = logging.getLogger("eplab")
 URPC_BUILDER_VERSION_MAJOR = 0
 URPC_BUILDER_VERSION_MINOR = 6
 URPC_BUILDER_VERSION_BUGFIX = 5
-URPC_BUILDER_VERSION = "{}.{}.{}".format(URPC_BUILDER_VERSION_MAJOR,
-                                         URPC_BUILDER_VERSION_MINOR,
-                                         URPC_BUILDER_VERSION_BUGFIX)
+URPC_BUILDER_VERSION = f"{URPC_BUILDER_VERSION_MAJOR}.{URPC_BUILDER_VERSION_MINOR}.{URPC_BUILDER_VERSION_BUGFIX}"
 
 _OK = 0
 _ERROR = -1
@@ -106,13 +105,8 @@ class _device_t(c_int):
         return self
 
 
-_lib = _load_lib()
-_lib.urpcbase_open_device.restype = _device_t
-logger = logging.getLogger("eplab")
-
-
 @CFUNCTYPE(None, c_int, c_wchar_p, c_void_p)
-def _logging_callback(loglevel, message, user_data):
+def logging_callback(loglevel, message, user_data):
     if loglevel == 0x01:
         logger.error(message)
     elif loglevel == 0x02:
@@ -123,7 +117,9 @@ def _logging_callback(loglevel, message, user_data):
         logger.debug(message)
 
 
-_lib.urpcbase_set_logging_callback(_logging_callback)
+_lib = _load_lib()
+_lib.urpcbase_open_device.restype = _device_t
+_lib.urpcbase_set_logging_callback(logging_callback)
 atexit.register(lambda: _lib.urpcbase_set_logging_callback(None))
 
 
@@ -136,47 +132,46 @@ def fix_usbser_sys():
 
 
 class UrpcbaseDeviceHandle:
+
     class GetIdentityInformationResponse(_IterableStructure):
-        _fields_ = (
-            ("_manufacturer", c_ubyte*16),
-            ("_product_name", c_ubyte*16),
-            ("_controller_name", c_ubyte*16),
-            ("_hardware_major", c_ubyte),
-            ("_hardware_minor", c_ubyte),
-            ("_hardware_bugfix", c_ushort),
-            ("_bootloader_major", c_ubyte),
-            ("_bootloader_minor", c_ubyte),
-            ("_bootloader_bugfix", c_ushort),
-            ("_firmware_major", c_ubyte),
-            ("_firmware_minor", c_ubyte),
-            ("_firmware_bugfix", c_ushort),
-            ("_serial_number", c_uint),
-            ("_reserved", c_ubyte*8),
-        )
+        _fields_ = (("_manufacturer", c_ubyte * 16),
+                    ("_product_name", c_ubyte * 16),
+                    ("_controller_name", c_ubyte * 16),
+                    ("_hardware_major", c_ubyte),
+                    ("_hardware_minor", c_ubyte),
+                    ("_hardware_bugfix", c_ushort),
+                    ("_bootloader_major", c_ubyte),
+                    ("_bootloader_minor", c_ubyte),
+                    ("_bootloader_bugfix", c_ushort),
+                    ("_firmware_major", c_ubyte),
+                    ("_firmware_minor", c_ubyte),
+                    ("_firmware_bugfix", c_ushort),
+                    ("_serial_number", c_uint),
+                    ("_reserved", c_ubyte * 8))
 
         @property
         def manufacturer(self) -> c_ubyte*16:
             return self._manufacturer
 
         @manufacturer.setter
-        def manufacturer(self, value: Union[Sequence[int], c_ubyte*16]):
-            self._manufacturer = _normalize_arg(value, c_ubyte*16)
+        def manufacturer(self, value: Union[Sequence[int], c_ubyte * 16]):
+            self._manufacturer = _normalize_arg(value, c_ubyte * 16)
 
         @property
-        def product_name(self) -> c_ubyte*16:
+        def product_name(self) -> c_ubyte * 16:
             return self._product_name
 
         @product_name.setter
-        def product_name(self, value: Union[Sequence[int], c_ubyte*16]):
-            self._product_name = _normalize_arg(value, c_ubyte*16)
+        def product_name(self, value: Union[Sequence[int], c_ubyte * 16]):
+            self._product_name = _normalize_arg(value, c_ubyte * 16)
 
         @property
-        def controller_name(self) -> c_ubyte*16:
+        def controller_name(self) -> c_ubyte * 16:
             return self._controller_name
 
         @controller_name.setter
-        def controller_name(self, value: Union[Sequence[int], c_ubyte*16]):
-            self._controller_name = _normalize_arg(value, c_ubyte*16)
+        def controller_name(self, value: Union[Sequence[int], c_ubyte * 16]):
+            self._controller_name = _normalize_arg(value, c_ubyte * 16)
 
         @property
         def hardware_major(self) -> c_ubyte:
@@ -259,12 +254,37 @@ class UrpcbaseDeviceHandle:
             self._serial_number = _normalize_arg(value, c_uint)
 
         @property
-        def reserved(self) -> c_ubyte*8:
+        def reserved(self) -> c_ubyte * 8:
             return self._reserved
 
         @reserved.setter
-        def reserved(self, value: Union[Sequence[int], c_ubyte*8]):
-            self._reserved = _normalize_arg(value, c_ubyte*8)
+        def reserved(self, value: Union[Sequence[int], c_ubyte * 8]):
+            self._reserved = _normalize_arg(value, c_ubyte * 8)
+
+    class CalibrationSettingsRequest(_IterableStructure):
+        _fields_ = (("_reserved0", c_ubyte*4),)
+
+        @property
+        def reserved0(self) -> c_ubyte*4:
+            return self._reserved0
+
+        @reserved0.setter
+        def reserved0(self, value: Union[Sequence[int], c_ubyte * 4]):
+            self._reserved0 = _normalize_arg(value, c_ubyte * 4)
+
+    def __init__(self, uri: Union[bytes, bytearray, str], defer_open: bool = False):
+        if isinstance(uri, str):
+            uri = uri.encode("utf-8")
+        if not isinstance(uri, (bytes, bytearray)):
+            raise ValueError()
+        self._uri = uri
+        self._handle = None
+        if not defer_open:
+            self.open()
+    if version_info >= (3, 4):
+        def __del__(self):
+            if self._handle:
+                self.close()
 
     def get_identity_information(self, **kwargs) -> GetIdentityInformationResponse:
         dst_buffer = kwargs.get("dst_buffer", self.GetIdentityInformationResponse())
@@ -286,19 +306,6 @@ class UrpcbaseDeviceHandle:
     def read_robust_settings(self):
         _validate_call(_lib.urpcbase_read_robust_settings(self._handle))
 
-    class CalibrationSettingsRequest(_IterableStructure):
-        _fields_ = (
-            ("_reserved0", c_ubyte*4),
-        )
-
-        @property
-        def reserved0(self) -> c_ubyte*4:
-            return self._reserved0
-
-        @reserved0.setter
-        def reserved0(self, value: Union[Sequence[int], c_ubyte*4]):
-            self._reserved0 = _normalize_arg(value, c_ubyte*4)
-
     CalibrationSettingsResponse = CalibrationSettingsRequest
 
     def get_calibration_settings(self, **kwargs) -> "CalibrationSettingsResponse":
@@ -313,25 +320,11 @@ class UrpcbaseDeviceHandle:
             src_buffer = args[0]
         _validate_call(_lib.urpcbase_set_calibration_settings(self._handle, byref(src_buffer)))
 
-    def __init__(self, uri, defer_open=False):
-        if isinstance(uri, str):
-            uri = uri.encode("utf-8")
-        if not isinstance(uri, (bytes, bytearray)):
-            raise ValueError()
-        self._uri = uri
-        self._handle = None
-        if not defer_open:
-            self.open()
-    if version_info >= (3, 4):
-        def __del__(self):
-            if self._handle:
-                self.close()
-
     @property
-    def uri(self):
+    def uri(self) -> bytes:
         return self._uri
 
-    def open(self):
+    def open(self) -> bool:
         if self._handle is not None:
             return False
 
@@ -342,7 +335,8 @@ class UrpcbaseDeviceHandle:
         self._handle = handle
         return True
 
-    def lib_version(self):
+    @staticmethod
+    def lib_version() -> str:
         ver_lib = create_string_buffer(str.encode("00.00.00"))
         result = _lib.urpcbase_libversion(ver_lib)
         if result != _OK:
@@ -350,7 +344,7 @@ class UrpcbaseDeviceHandle:
         version_lib = ver_lib.value.decode("utf-8")
         return version_lib
 
-    def close(self):
+    def close(self) -> bool:
         if self._handle is None:
             return False
         try:
@@ -364,7 +358,7 @@ class UrpcbaseDeviceHandle:
         finally:
             self._handle = None
 
-    def get_profile(self):
+    def get_profile(self) -> str:
         buffer = c_char_p()
 
         @CFUNCTYPE(c_void_p, c_size_t)

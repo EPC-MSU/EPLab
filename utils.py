@@ -58,7 +58,7 @@ def check_compatibility(product: EyePointProduct, board: Board) -> bool:
     return True
 
 
-def create_measurers(port_1: str, port_2: str) -> MeasurementSystem:
+def create_measurers(port_1: str, port_2: str) -> Optional[MeasurementSystem]:
     """
     Function creates measurers and measurement system.
     :param port_1: port for first measurer;
@@ -93,13 +93,13 @@ def create_measurers(port_1: str, port_2: str) -> MeasurementSystem:
                 measurer_type = "IVMeasurerASA"
                 measurer = IVMeasurerASA(measurer_arg, defer_open=True)
                 measurers.append(measurer)
-        except Exception as exc:
-            logger.error("Error occurred while creating measurer of type '%s': %s", measurer_type, exc)
+        except Exception:
+            logger.error("Error occurred while creating measurer of type '%s'", measurer_type)
     if len(measurers) == 0:
-        # Logically it will be correctly to abort here.
-        # But for better user experience we will add single virtual IVM.
-        ivm_1 = IVMeasurerVirtual()
-        measurers.append(ivm_1)
+        # Logically it will be correctly to abort here. But for better user
+        # experience we will add single virtual IVM
+        # measurers.append(IVMeasurerVirtual())
+        return None
     elif len(measurers) == 2:
         # Reorder measurers according to their addresses in USB hubs tree
         measurers = sort_devices_by_usb_numbers(measurers)

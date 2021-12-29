@@ -11,3 +11,4 @@ stream_handler.setLevel(logging.INFO)
 logger = logging.getLogger("eplab")
 logger.addHandler(stream_handler)
 logger.setLevel(logging.INFO)
+logger.propagate = False

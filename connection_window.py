@@ -150,8 +150,7 @@ def _filter_ports_by_vid_and_pid(com_ports: List[serial.tools.list_ports_common.
     filtered_ports = []
     for com_port in com_ports:
         try:
-            # Normal hwid string example:
-            # USB VID:PID=1CBC:0007 SER=7 LOCATION=1-4.1.1:x.0
+            # Normal hwid string example: USB VID:PID=1CBC:0007 SER=7 LOCATION=1-4.1.1:x.0
             vid_pid_info_block = com_port.hwid.split(" ")[1]
             vid_pid = vid_pid_info_block.split("=")[1]
             p_vid, p_pid = vid_pid.split(":")
@@ -159,7 +158,7 @@ def _filter_ports_by_vid_and_pid(com_ports: List[serial.tools.list_ports_common.
                 filtered_ports.append(com_port)
         except Exception as exc:
             # Some ports can have malformed information: simply ignore such devices
-            logger.error("Error occurred while filtering COM-ports by VID and PID: %s", exc)
+            logger.warning("Error occurred while filtering COM-port '%s' by VID and PID: %s", com_port, exc)
     return filtered_ports
 
 
@@ -226,7 +225,7 @@ def find_urpc_ports(device_type: str) -> List[str]:
         device_name = _create_uri_name(com_port.device)
         device = lib.UrpcbaseDeviceHandle(device_name.encode(), True)
         try:
-            safe_opener.open_device_safely(device, config_file, lib._logging_callback)
+            safe_opener.open_device_safely(device, config_file)
             ximc_ports.append(device_name)
         except RuntimeError as exc:
             logger.error("'%s' is not XIMC controller: %s", device_name, exc)
@@ -504,9 +503,7 @@ class ConnectionWindow(qt.QDialog):
         self.radio_buttons_products[self._initial_product_name].setChecked(True)
         for combo_box in self.combo_boxes:
             combo_box.textActivated.connect(self.change_port)
-        for line_edit in self.line_edits:
-            line_edit.setVisible(False)
-        self.init_available_ports(self._initial_type)
+        self.init_available_ports(self._initial_type, True)
         self.button_connect.clicked.connect(self.connect)
         self.button_disconnect.clicked.connect(self.disconnect)
         self.button_cancel.clicked.connect(self.close)
@@ -556,13 +553,15 @@ class ConnectionWindow(qt.QDialog):
         self.parent.disconnect_devices()
         self.close()
 
-    @pyqtSlot(str)
-    def init_available_ports(self, measurer_type: str):
+    @pyqtSlot(str, bool)
+    def init_available_ports(self, measurer_type: MeasurerType, status: bool):
         """
         Slot initializes available ports for first and second measurers.
         :param measurer_type: type of measurers.
         """
 
+        if not status:
+            return
         for line_edit in self.line_edits:
             line_edit.setVisible(False)
         if measurer_type == MeasurerType.IVM10:
@@ -571,5 +570,7 @@ class ConnectionWindow(qt.QDialog):
         elif measurer_type == MeasurerType.ASA:
             validator = QRegExpValidator(QRegExp(IP_ASA_REG_EXP), self)
             self._init_asa(*self._initial_ports)
+        else:
+            validator = QRegExpValidator(QRegExp(r""), self)
         for line_edit in self.line_edits:
             line_edit.setValidator(validator)
