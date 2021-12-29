@@ -2,13 +2,11 @@
 File with class for dialog window to create report for board.
 """
 
-from functools import partial
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
-from PyQt5.QtGui import QCloseEvent
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from epcore.elements import Board
-from report_generator import (ConfigAttributes, create_test_and_ref_boards, ObjectsForReport,
-                              ReportGenerator)
+from report_generator import ConfigAttributes, create_test_and_ref_boards, ObjectsForReport, ReportGenerator
+from language import Language
 
 
 class ReportGenerationWindow(qt.QDialog):
@@ -16,10 +14,13 @@ class ReportGenerationWindow(qt.QDialog):
     Class for dialog window to create report for board.
     """
 
-    def __init__(self, parent: "EPLabWindow", board: Board, folder_for_report: str = None,
+    generation_started = pyqtSignal(dict)
+
+    def __init__(self, parent: "EPLabWindow", thread: QThread, board: Board, folder_for_report: str = None,
                  threshold_score: float = None):
         """
         :param parent: parent window;
+        :param thread: thread for report generation;
         :param board: board for which report should be generated;
         :param folder_for_report: folder where report should be saved;
         :param threshold_score: threshold score for board report.
@@ -35,7 +36,7 @@ class ReportGenerationWindow(qt.QDialog):
         self._threshold_score: float = threshold_score
         self._number_of_steps_done: int = 0
         self._total_number: int = None
-        self._thread: QThread = None
+        self._thread: QThread = thread
         self._init_ui()
 
     def _init_ui(self):
@@ -85,34 +86,21 @@ class ReportGenerationWindow(qt.QDialog):
         self._number_of_steps_done += 1
         self.progress_bar.setValue(int(self._number_of_steps_done / self._total_number * 100))
 
-    def closeEvent(self, event: QCloseEvent):
-        """
-        Method handles signal to close dialog window.
-        :param event: close event.
-        """
-
-        if self._thread:
-            self._thread.quit()
-        super().closeEvent(event)
-
     @pyqtSlot()
     def create_report(self):
         """
         Slot creates report.
         """
 
-        if self._thread:
-            self._thread.quit()
-        self._thread = QThread(parent=self._parent)
-        self._thread.setTerminationEnabled(True)
         test_board, ref_board = create_test_and_ref_boards(self._board)
-        config = {ConfigAttributes.BOARD_TEST: test_board,
-                  ConfigAttributes.BOARD_REF: ref_board,
+        config = {ConfigAttributes.BOARD_REF: ref_board,
+                  ConfigAttributes.BOARD_TEST: test_board,
                   ConfigAttributes.DIRECTORY: self._folder_for_report,
+                  ConfigAttributes.ENGLISH: qApp.instance().property("language") == Language.EN,
                   ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
-                  ConfigAttributes.THRESHOLD_SCORE: self._threshold_score,
                   ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
-                  ConfigAttributes.PIN_SIZE: 200}
+                  ConfigAttributes.PIN_SIZE: 200,
+                  ConfigAttributes.THRESHOLD_SCORE: self._threshold_score}
         report_generator = ReportGenerator()
         report_generator.moveToThread(self._thread)
         report_generator.total_number_of_steps_calculated.connect(self.set_total_number_of_steps)
@@ -120,13 +108,13 @@ class ReportGenerationWindow(qt.QDialog):
         report_generator.exception_raised.connect(self.show_exception)
         report_generator.step_started.connect(self.text_edit_info.append)
         report_generator.generation_finished.connect(self.finish_generation)
-        self._thread.started.connect(partial(report_generator.run, config))
         self._number_of_steps_done = 0
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(True)
         self.text_edit_info.clear()
         self.group_box_info.setVisible(True)
-        self._thread.start()
+        self.generation_started.connect(report_generator.run)
+        self.generation_started.emit(config)
 
     @pyqtSlot(str)
     def finish_generation(self, report_dir_path: str):

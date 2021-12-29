@@ -12,8 +12,8 @@ from functools import partial
 from platform import system
 from typing import Dict, List, Optional, Tuple
 import numpy as np
-from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPoint, QPointF, QSize, Qt as QtC, QTimer,
-                          QTranslator)
+from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPoint, QPointF, QSize, Qt as QtC, QThread,
+                          QTimer, QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow, QMenu, QMessageBox,
                              QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
@@ -472,6 +472,9 @@ class EPLabWindow(QMainWindow):
         self._timer.setInterval(10)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._on_periodic_task)
+        self._thread: QThread = QThread(parent=self)
+        self._thread.setTerminationEnabled(True)
+        self._thread.start()
 
     def _open_board_window_if_needed(self):
         if self._measurement_plan.image:
@@ -802,8 +805,8 @@ class EPLabWindow(QMainWindow):
         threshold_score = self._score_wrapper.threshold
         if self._check_measurement_plan(False):
             return
-        report_generation_window = ReportGenerationWindow(self, self._measurement_plan, self._report_directory,
-                                                          threshold_score)
+        report_generation_window = ReportGenerationWindow(self, self._thread, self._measurement_plan,
+                                                          self._report_directory, threshold_score)
         report_generation_window.show()
 
     @pyqtSlot()
@@ -1201,6 +1204,13 @@ class EPLabWindow(QMainWindow):
         self.sound_enabled_action.setChecked(self.__settings.sound_enabled)
         self._update_threshold(self.__settings.score_threshold)
 
+    def changeEvent(self, event: QEvent):
+        if event.type() == QEvent.LanguageChange:
+            geometry = self.geometry()
+            size = QSize(geometry.width(), geometry.height())
+            event = QResizeEvent(size, size)
+            self.resizeEvent(event)
+
     def closeEvent(self, event: QCloseEvent):
         self._board_window.close()
         if self._measurement_plan and self._measurement_plan.to_json() != self._last_saved_measurement_plan_data:
@@ -1215,13 +1225,8 @@ class EPLabWindow(QMainWindow):
             if result == 0:
                 if self._on_save_board() is None:
                     event.ignore()
-
-    def changeEvent(self, event: QEvent):
-        if event.type() == QEvent.LanguageChange:
-            geometry = self.geometry()
-            size = QSize(geometry.width(), geometry.height())
-            event = QResizeEvent(size, size)
-            self.resizeEvent(event)
+        if self._thread:
+            self._thread.quit()
 
     def connect_devices(self, port_1: str, port_2: str, product_name: Optional[cw.ProductNames] = None):
         """
