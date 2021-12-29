@@ -2,12 +2,49 @@
 File with class for dialog window to create report for board.
 """
 
+import queue
+import time
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QThread
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from PyQt5.QtGui import QCloseEvent
 from epcore.elements import Board
 from report_generator import ConfigAttributes, create_test_and_ref_boards, ObjectsForReport, ReportGenerator
 from language import Language
+
+
+class ReportGenerationThread(QThread):
+    """
+    Class for thread to generate reports.
+    """
+
+    def __init__(self, parent):
+        super().__init__(parent=parent)
+        self._task: queue.Queue = queue.Queue()
+        self.report_generator: ReportGenerator = ReportGenerator()
+
+    def add_task(self, config: dict):
+        """
+        Method adds task.
+        :param config: config dictionary to create report.
+        """
+
+        self.report_generator.stop = False
+        self._task.put(lambda: self.report_generator.run(config))
+
+    def run(self):
+        while True:
+            if not self._task.empty():
+                task = self._task.get()
+                task()
+            else:
+                time.sleep(0.1)
+
+    def stop_generation(self):
+        """
+        Method stops report generation.
+        """
+
+        self.report_generator.stop_process()
 
 
 class ReportGenerationWindow(qt.QDialog):
@@ -15,11 +52,8 @@ class ReportGenerationWindow(qt.QDialog):
     Class for dialog window to create report for board.
     """
 
-    generation_started = pyqtSignal(dict)
-    generation_stopped = pyqtSignal()
-
-    def __init__(self, parent: "EPLabWindow", thread: QThread, board: Board, folder_for_report: str = None,
-                 threshold_score: float = None):
+    def __init__(self, parent: "EPLabWindow", thread: ReportGenerationThread, board: Board,
+                 folder_for_report: str = None, threshold_score: float = None):
         """
         :param parent: parent window;
         :param thread: thread for report generation;
@@ -35,29 +69,56 @@ class ReportGenerationWindow(qt.QDialog):
             self._folder_for_report: str = folder_for_report
         else:
             self._folder_for_report: str = "."
-        self._threshold_score: float = threshold_score
         self._number_of_steps_done: int = 0
+        self._software_change_of_button_state: bool = False
+        self._threshold_score: float = threshold_score
         self._total_number: int = None
         self._init_ui()
-        self._thread: QThread = thread
-        self._report_generator: ReportGenerator = ReportGenerator()
-        self._report_generator.moveToThread(self._thread)
-        self._report_generator.total_number_of_steps_calculated.connect(self.set_total_number_of_steps)
-        self._report_generator.step_done.connect(self.change_progress)
-        self._report_generator.exception_raised.connect(self.show_exception)
-        self._report_generator.step_started.connect(self.text_edit_info.append)
-        self._report_generator.generation_finished.connect(self.finish_generation)
-        self.generation_started.connect(self._report_generator.run)
-        self.generation_stopped.connect(self._report_generator.stop_process)
+        self._thread: ReportGenerationThread = thread
+        self._thread.report_generator.total_number_of_steps_calculated.connect(self.set_total_number_of_steps)
+        self._thread.report_generator.step_done.connect(self.change_progress)
+        self._thread.report_generator.step_started.connect(self.text_edit_info.append)
+        self._thread.report_generator.generation_finished.connect(self.finish_generation)
+        self._thread.report_generator.exception_raised.connect(self.handle_generation_break)
 
-    def _enable_buttons(self, state: bool):
+    def _create_report(self):
         """
-        Method enables buttons.
-        :param state: if True then buttons will be enabled.
+        Method creates report.
         """
 
-        self.button_create_report.setEnabled(state)
-        self.button_select_folder.setEnabled(state)
+        test_board, ref_board = create_test_and_ref_boards(self._board)
+        config = {ConfigAttributes.BOARD_REF: ref_board,
+                  ConfigAttributes.BOARD_TEST: test_board,
+                  ConfigAttributes.DIRECTORY: self._folder_for_report,
+                  ConfigAttributes.ENGLISH: qApp.instance().property("language") == Language.EN,
+                  ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
+                  ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
+                  ConfigAttributes.PIN_SIZE: 200,
+                  ConfigAttributes.THRESHOLD_SCORE: self._threshold_score}
+        self._number_of_steps_done = 0
+        self.progress_bar.setValue(0)
+        self.progress_bar.setVisible(True)
+        self.text_edit_info.clear()
+        self.group_box_info.setVisible(True)
+        self._thread.add_task(config)
+
+    def _finish_generation(self, report_dir_path: str = "", report_was_generated: bool = True):
+        """
+        Method finishes generation of report.
+        :param report_dir_path: path to directory with report;
+        :param report_was_generated: if True then report was generated.
+        """
+
+        self.progress_bar.setVisible(False)
+        self.group_box_info.setVisible(False)
+        self.group_box_info.setChecked(False)
+        self.text_edit_info.setVisible(False)
+        if report_was_generated:
+            message = qApp.translate("t", "Отчет сгенерирован и сохранен в файл 'FOLDER'")
+            message = message.replace("FOLDER", report_dir_path)
+        else:
+            message = qApp.translate("t", "Отчет не был сгенерирован")
+        qt.QMessageBox.information(self._parent, qApp.translate("t", "Информация"), message)
 
     def _init_ui(self):
         """
@@ -71,7 +132,8 @@ class ReportGenerationWindow(qt.QDialog):
         self.button_select_folder.setFixedWidth(300)
         v_box_layout.addWidget(self.button_select_folder)
         self.button_create_report = qt.QPushButton(qApp.translate("t", "Сгенерировать отчет"))
-        self.button_create_report.clicked.connect(self.create_report)
+        self.button_create_report.setCheckable(True)
+        self.button_create_report.toggled.connect(self.start_or_stop)
         self.button_create_report.setFixedWidth(300)
         v_box_layout.addWidget(self.button_create_report)
         self.progress_bar = qt.QProgressBar()
@@ -97,6 +159,20 @@ class ReportGenerationWindow(qt.QDialog):
         self.setLayout(v_box_layout)
         self.adjustSize()
 
+    def _set_state_to_buttons(self, state: bool):
+        """
+        Method sets properties for buttons.
+        :param state: if True then buttons need to be passed properties when generating
+        report.
+        """
+
+        self.button_select_folder.setEnabled(not state)
+        if state:
+            self.button_create_report.setText(qApp.translate("t", "Завершить генерацию отчетов"))
+        else:
+            self.button_create_report.setText(qApp.translate("t", "Сгенерировать отчет"))
+            self.button_create_report.setChecked(False)
+
     @pyqtSlot()
     def change_progress(self):
         """
@@ -112,30 +188,7 @@ class ReportGenerationWindow(qt.QDialog):
         :param event: close event.
         """
 
-        self.generation_stopped.emit()
-
-    @pyqtSlot()
-    def create_report(self):
-        """
-        Slot creates report.
-        """
-
-        test_board, ref_board = create_test_and_ref_boards(self._board)
-        config = {ConfigAttributes.BOARD_REF: ref_board,
-                  ConfigAttributes.BOARD_TEST: test_board,
-                  ConfigAttributes.DIRECTORY: self._folder_for_report,
-                  ConfigAttributes.ENGLISH: qApp.instance().property("language") == Language.EN,
-                  ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
-                  ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
-                  ConfigAttributes.PIN_SIZE: 200,
-                  ConfigAttributes.THRESHOLD_SCORE: self._threshold_score}
-        self._number_of_steps_done = 0
-        self.progress_bar.setValue(0)
-        self.progress_bar.setVisible(True)
-        self.text_edit_info.clear()
-        self.group_box_info.setVisible(True)
-        self.generation_started.emit(config)
-        self._enable_buttons(False)
+        self._thread.stop_generation()
 
     @pyqtSlot(str)
     def finish_generation(self, report_dir_path: str):
@@ -144,14 +197,19 @@ class ReportGenerationWindow(qt.QDialog):
         :param report_dir_path: path to directory with report.
         """
 
-        self.progress_bar.setVisible(False)
-        self.group_box_info.setVisible(False)
-        self.group_box_info.setChecked(False)
-        self.text_edit_info.setVisible(False)
-        message = qApp.translate("t", "Отчет сгенерирован и сохранен в файл 'FOLDER'")
-        message = message.replace("FOLDER", report_dir_path)
-        qt.QMessageBox.information(self._parent, qApp.translate("t", "Информация"), message)
-        self._enable_buttons(True)
+        self._finish_generation(report_dir_path)
+        self._software_change_of_button_state = True
+        self._set_state_to_buttons(False)
+
+    @pyqtSlot(str)
+    def handle_generation_break(self, _: str):
+        """
+        Slot handles break of report generation.
+        :param _: message of exception.
+        """
+
+        self._finish_generation(report_was_generated=False)
+        self.button_create_report.setEnabled(True)
 
     @pyqtSlot()
     def select_folder(self):
@@ -174,11 +232,19 @@ class ReportGenerationWindow(qt.QDialog):
 
         self._total_number = number
 
-    @pyqtSlot(str)
-    def show_exception(self, exception_text: str):
+    @pyqtSlot(bool)
+    def start_or_stop(self, status: bool):
         """
-        Slot shows message box with exception thrown when generating report.
-        :param exception_text: text of exception.
+        Slot starts or stops report generation.
+        :param status: if True then report generation should be started.
         """
 
-        qt.QMessageBox.warning(self, qApp.translate("t", "Ошибка"), exception_text)
+        if self._software_change_of_button_state:
+            self._software_change_of_button_state = False
+            return
+        if status:
+            self._create_report()
+        else:
+            self._thread.stop_generation()
+            self.button_create_report.setEnabled(False)
+        self._set_state_to_buttons(status)

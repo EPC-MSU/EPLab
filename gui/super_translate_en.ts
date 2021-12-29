@@ -625,6 +625,11 @@
         <translation>Report was generated and saved to file 'FOLDER'</translation>
     </message>
 	<message>
+        <location filename="../report_window.py" line="141"/>
+        <source>Отчет не был сгенерирован</source>
+        <translation>Report was not generated</translation>
+    </message>
+	<message>
         <location filename="../report_window.py" line="143"/>
         <source>Информация</source>
         <translation>Information</translation>
@@ -633,6 +638,11 @@
         <location filename="../report_window.py" line="151"/>
         <source>Выбрать папку</source>
         <translation>Select directory</translation>
+    </message>
+	<message>
+        <location filename="../report_window.py" line="151"/>
+        <source>Завершить генерацию отчетов</source>
+        <translation>Finish report generation</translation>
     </message>
 </context>
 </TS>

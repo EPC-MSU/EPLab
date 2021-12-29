@@ -12,8 +12,8 @@ from functools import partial
 from platform import system
 from typing import Dict, List, Optional, Tuple
 import numpy as np
-from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPoint, QPointF, QSize, Qt as QtC, QThread,
-                          QTimer, QTranslator)
+from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPoint, QPointF, QSize, Qt as QtC, QTimer,
+                          QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow, QMenu, QMessageBox,
                              QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
@@ -33,7 +33,7 @@ from common import DeviceErrorsHandler, WorkMode
 from language import Language, LanguageSelectionWindow
 from measurer_settings_window import MeasurerSettingsWindow
 from player import SoundPlayer
-from report_window import ReportGenerationWindow
+from report_window import ReportGenerationThread, ReportGenerationWindow
 from score import ScoreWrapper
 from settings.settings import Settings
 from settings.settingswindow import LowSettingsPanel, SettingsWindow
@@ -472,9 +472,9 @@ class EPLabWindow(QMainWindow):
         self._timer.setInterval(10)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._on_periodic_task)
-        self._thread: QThread = QThread(parent=self)
-        self._thread.setTerminationEnabled(True)
-        self._thread.start()
+        self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(parent=self)
+        self._report_generation_thread.setTerminationEnabled(True)
+        self._report_generation_thread.start()
 
     def _open_board_window_if_needed(self):
         if self._measurement_plan.image:
@@ -805,7 +805,7 @@ class EPLabWindow(QMainWindow):
         threshold_score = self._score_wrapper.threshold
         if self._check_measurement_plan(False):
             return
-        report_generation_window = ReportGenerationWindow(self, self._thread, self._measurement_plan,
+        report_generation_window = ReportGenerationWindow(self, self._report_generation_thread, self._measurement_plan,
                                                           self._report_directory, threshold_score)
         report_generation_window.show()
 
@@ -1225,8 +1225,8 @@ class EPLabWindow(QMainWindow):
             if result == 0:
                 if self._on_save_board() is None:
                     event.ignore()
-        if self._thread:
-            self._thread.quit()
+        if self._report_generation_thread:
+            self._report_generation_thread.quit()
 
     def connect_devices(self, port_1: str, port_2: str, product_name: Optional[cw.ProductNames] = None):
         """
