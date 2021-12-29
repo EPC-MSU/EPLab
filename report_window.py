@@ -4,6 +4,7 @@ File with class for dialog window to create report for board.
 
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QThread
+from PyQt5.QtGui import QCloseEvent
 from epcore.elements import Board
 from report_generator import ConfigAttributes, create_test_and_ref_boards, ObjectsForReport, ReportGenerator
 from language import Language
@@ -15,6 +16,7 @@ class ReportGenerationWindow(qt.QDialog):
     """
 
     generation_started = pyqtSignal(dict)
+    generation_stopped = pyqtSignal()
 
     def __init__(self, parent: "EPLabWindow", thread: QThread, board: Board, folder_for_report: str = None,
                  threshold_score: float = None):
@@ -36,8 +38,26 @@ class ReportGenerationWindow(qt.QDialog):
         self._threshold_score: float = threshold_score
         self._number_of_steps_done: int = 0
         self._total_number: int = None
-        self._thread: QThread = thread
         self._init_ui()
+        self._thread: QThread = thread
+        self._report_generator: ReportGenerator = ReportGenerator()
+        self._report_generator.moveToThread(self._thread)
+        self._report_generator.total_number_of_steps_calculated.connect(self.set_total_number_of_steps)
+        self._report_generator.step_done.connect(self.change_progress)
+        self._report_generator.exception_raised.connect(self.show_exception)
+        self._report_generator.step_started.connect(self.text_edit_info.append)
+        self._report_generator.generation_finished.connect(self.finish_generation)
+        self.generation_started.connect(self._report_generator.run)
+        self.generation_stopped.connect(self._report_generator.stop_process)
+
+    def _enable_buttons(self, state: bool):
+        """
+        Method enables buttons.
+        :param state: if True then buttons will be enabled.
+        """
+
+        self.button_create_report.setEnabled(state)
+        self.button_select_folder.setEnabled(state)
 
     def _init_ui(self):
         """
@@ -86,6 +106,14 @@ class ReportGenerationWindow(qt.QDialog):
         self._number_of_steps_done += 1
         self.progress_bar.setValue(int(self._number_of_steps_done / self._total_number * 100))
 
+    def closeEvent(self, event: QCloseEvent):
+        """
+        Method handles close event.
+        :param event: close event.
+        """
+
+        self.generation_stopped.emit()
+
     @pyqtSlot()
     def create_report(self):
         """
@@ -101,20 +129,13 @@ class ReportGenerationWindow(qt.QDialog):
                   ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
                   ConfigAttributes.PIN_SIZE: 200,
                   ConfigAttributes.THRESHOLD_SCORE: self._threshold_score}
-        report_generator = ReportGenerator()
-        report_generator.moveToThread(self._thread)
-        report_generator.total_number_of_steps_calculated.connect(self.set_total_number_of_steps)
-        report_generator.step_done.connect(self.change_progress)
-        report_generator.exception_raised.connect(self.show_exception)
-        report_generator.step_started.connect(self.text_edit_info.append)
-        report_generator.generation_finished.connect(self.finish_generation)
         self._number_of_steps_done = 0
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(True)
         self.text_edit_info.clear()
         self.group_box_info.setVisible(True)
-        self.generation_started.connect(report_generator.run)
         self.generation_started.emit(config)
+        self._enable_buttons(False)
 
     @pyqtSlot(str)
     def finish_generation(self, report_dir_path: str):
@@ -130,6 +151,7 @@ class ReportGenerationWindow(qt.QDialog):
         message = qApp.translate("t", "Отчет сгенерирован и сохранен в файл 'FOLDER'")
         message = message.replace("FOLDER", report_dir_path)
         qt.QMessageBox.information(self._parent, qApp.translate("t", "Информация"), message)
+        self._enable_buttons(True)
 
     @pyqtSlot()
     def select_folder(self):
