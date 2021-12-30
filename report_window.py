@@ -19,6 +19,7 @@ class ReportGenerationThread(QThread):
 
     def __init__(self, parent):
         super().__init__(parent=parent)
+        self._stop_thread: bool = False
         self._task: queue.Queue = queue.Queue()
         self.report_generator: ReportGenerator = ReportGenerator()
 
@@ -32,7 +33,7 @@ class ReportGenerationThread(QThread):
         self._task.put(lambda: self.report_generator.run(config))
 
     def run(self):
-        while True:
+        while not self._stop_thread:
             if not self._task.empty():
                 task = self._task.get()
                 task()
@@ -45,6 +46,13 @@ class ReportGenerationThread(QThread):
         """
 
         self.report_generator.stop_process()
+
+    def stop_thread(self):
+        """
+        Method stops thread.
+        """
+
+        self._stop_thread = True
 
 
 class ReportGenerationWindow(qt.QDialog):

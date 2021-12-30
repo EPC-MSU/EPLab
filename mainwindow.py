@@ -1226,7 +1226,8 @@ class EPLabWindow(QMainWindow):
                 if self._on_save_board() is None:
                     event.ignore()
         if self._report_generation_thread:
-            self._report_generation_thread.quit()
+            self._report_generation_thread.stop_thread()
+            self._report_generation_thread.wait()
 
     def connect_devices(self, port_1: str, port_2: str, product_name: Optional[cw.ProductNames] = None):
         """
