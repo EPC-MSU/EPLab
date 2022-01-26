@@ -13,7 +13,7 @@ if exist venv rd /S /Q venv
 venv\Scripts\python -m pip install --upgrade pip
 venv\Scripts\python -m pip install -r requirements.txt
 venv\Scripts\python -m pip install pyinstaller
-if %target_platform%==32 venv\Scripts\pyinstaller main.py --clean --onefile ^
+if %target_platform%==32 venv\Scripts\pyinstaller main.py --clean --onefile --noconsole ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\asa10\libasa-win32\asa.dll;." ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\asa10\libasa-win32\libxmlrpc.dll;." ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\asa10\libasa-win32\libxmlrpc_client.dll;." ^
@@ -41,7 +41,7 @@ if %target_platform%==32 venv\Scripts\pyinstaller main.py --clean --onefile ^
 --hidden-import=PyQt5.sip ^
 --icon media\ico.ico
 
-if %target_platform%==64 venv\Scripts\pyinstaller main.py --clean --onefile ^
+if %target_platform%==64 venv\Scripts\pyinstaller main.py --clean --onefile --noconsole ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm02\ivm-win64\ivm.dll;epcore\ivmeasurer\ivm02" ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\ivm10\ivm-win64\ivm.dll;epcore\ivmeasurer\ivm10" ^
 --add-data "venv\Lib\site-packages\epcore\ivmeasurer\EyePoint_virtual_device_settings.json;epcore\ivmeasurer" ^
