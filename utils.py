@@ -12,9 +12,10 @@ from operator import itemgetter
 from platform import system
 from typing import Dict, Iterable, List, Optional
 import serial.tools.list_ports
+from PyQt5.QtCore import QCoreApplication as qApp
 from epcore.elements import Board, MeasurementSettings
-from epcore.ivmeasurer import (IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual,
-                               IVMeasurerVirtualASA)
+from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
+from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EyePointProduct
 from language import Language
@@ -93,8 +94,14 @@ def create_measurers(port_1: str, port_2: str) -> Optional[MeasurementSystem]:
                 measurer_type = "IVMeasurerASA"
                 measurer = IVMeasurerASA(measurer_arg, defer_open=True)
                 measurers.append(measurer)
-        except Exception:
-            logger.error("Error occurred while creating measurer of type '%s'", measurer_type)
+        except BadFirmwareVersion as exc:
+            logger.error("%s firmware version %s is not compatible with this version of EPLab", exc.args[0],
+                         exc.args[2])
+            from mainwindow import show_exception
+            text = qApp.translate("t", "Версия прошивки {} {} несовместима с данной версией EPLab")
+            show_exception(qApp.translate("t", "Ошибка"), text.format(exc.args[0], exc.args[2]), "")
+        except Exception as exc:
+            logger.error("Error occurred while creating measurer of type '%s': %s", measurer_type, exc)
     if len(measurers) == 0:
         # Logically it will be correctly to abort here. But for better user
         # experience we will add single virtual IVM

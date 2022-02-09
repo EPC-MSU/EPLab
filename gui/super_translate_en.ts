@@ -644,5 +644,10 @@
         <source>Завершить генерацию отчетов</source>
         <translation>Finish report generation</translation>
     </message>
+	<message>
+        <location filename="../utils.py" line="100"/>
+        <source>Версия прошивки {} {} несовместима с данной версией EPLab</source>
+        <translation>{} firmware version {} is not compatible with this version of EPLab</translation>
+    </message>
 </context>
 </TS>
