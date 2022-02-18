@@ -318,7 +318,7 @@ class EPLabWindow(QMainWindow):
                    self.testing_mode_action, self.settings_mode_action, self.next_point_action, self.last_point_action,
                    self.new_point_action, self.save_point_action, self.add_board_image_action,
                    self.create_report_action, self.add_cursor_action, self.remove_cursor_action, self.freqDock,
-                   self.currentDock, self.voltageDock)
+                   self.currentDock, self.voltageDock, self.measurers_menu)
         for widget in widgets:
             widget.setEnabled(enabled)
 
