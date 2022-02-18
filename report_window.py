@@ -8,8 +8,30 @@ import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from PyQt5.QtGui import QCloseEvent
 from epcore.elements import Board
-from report_generator import ConfigAttributes, create_test_and_ref_boards, ObjectsForReport, ReportGenerator
+from epcore.product import EyePointProduct
+from report_generator import (ConfigAttributes, create_test_and_ref_boards, ObjectsForReport, ReportGenerator,
+                              ScalingTypes)
 from language import Language
+
+
+def get_scales_for_iv_curves(board: Board, product: EyePointProduct) -> list:
+    """
+    Function returns scales for IV-curves in pins of board.
+    :param board: board;
+    :param product: product.
+    :return: list with scales.
+    """
+
+    scales = []
+    for element in board.elements:
+        for pin in element.pins:
+            if pin.measurements:
+                voltage, current = product.adjust_plot_scale(pin.measurements[0].settings)
+                current /= 1000
+                scales.append((voltage, current))
+            else:
+                scales.append(None)
+    return scales
 
 
 class ReportGenerationThread(QThread):
@@ -95,6 +117,7 @@ class ReportGenerationWindow(qt.QDialog):
         """
 
         test_board, ref_board = create_test_and_ref_boards(self._board)
+        scales = get_scales_for_iv_curves(self._board, self._parent.product)
         config = {ConfigAttributes.BOARD_REF: ref_board,
                   ConfigAttributes.BOARD_TEST: test_board,
                   ConfigAttributes.DIRECTORY: self._folder_for_report,
@@ -102,7 +125,9 @@ class ReportGenerationWindow(qt.QDialog):
                   ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
                   ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
                   ConfigAttributes.PIN_SIZE: 200,
-                  ConfigAttributes.THRESHOLD_SCORE: self._threshold_score}
+                  ConfigAttributes.SCALING_TYPE: ScalingTypes.USER_DEFINED,
+                  ConfigAttributes.THRESHOLD_SCORE: self._threshold_score,
+                  ConfigAttributes.USER_DEFINED_SCALES: scales}
         self._number_of_steps_done = 0
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(True)

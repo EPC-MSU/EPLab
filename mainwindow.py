@@ -86,6 +86,10 @@ class EPLabWindow(QMainWindow):
         else:
             self.connect_devices(port_1, port_2)
 
+    @property
+    def product(self) -> EyePointProduct:
+        return self._product
+
     def _adjust_plot_params(self, settings: MeasurementSettings):
         """
         Adjust plot parameters.
