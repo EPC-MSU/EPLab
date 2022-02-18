@@ -13,6 +13,7 @@ python3 -m venv venv
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ivm10/ivm-debian/libivm.so:epcore/ivmeasurer/ivm10" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ASA_device_settings.json:epcore/ivmeasurer" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/EyePoint_virtual_device_settings.json:epcore/ivmeasurer" \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/EyePoint_settings.json:epcore/ivmeasurer" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/p10_elements.schema.json:epcore/doc" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/p10_elements_2.schema.json:epcore/doc" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/ufiv.schema.json:epcore/doc" \
