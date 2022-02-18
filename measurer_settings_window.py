@@ -197,9 +197,12 @@ class MeasurerSettingsWindow(qt.QDialog):
         """
 
         self.setWindowTitle(self._create_title(device_name))
+        self.setMinimumWidth(300)
+        self.setMaximumSize(400, 500)
         v_box = qt.QVBoxLayout()
         if settings:
             for element in settings["elements"]:
+                widget = None
                 if "parameter" in element:
                     current_value = self._measurer.get_current_value_of_parameter(element["parameter"])
                 if element["type"] == "button":
@@ -210,16 +213,15 @@ class MeasurerSettingsWindow(qt.QDialog):
                     widget = self._create_combobox(element, current_value)
                 elif element["type"] == "line_edit":
                     widget = self._create_line_edit(element, current_value)
-                v_box.addWidget(widget)
+                if widget is not None:
+                    v_box.addWidget(widget)
             buttons = qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel
             self.buttonBox = qt.QDialogButtonBox(buttons)
             self.buttonBox.accepted.connect(self.accept)
             self.buttonBox.rejected.connect(self.reject)
             v_box.addWidget(self.buttonBox)
         else:
-            v_box.addWidget(qt.QLabel(qApp.translate("t", "Нет настроек")))
-        v_box.setSizeConstraint(qt.QLayout.SetFixedSize)
-        self.adjustSize()
+            v_box.addWidget(qt.QLabel(qApp.translate("t", "Нет настроек")), alignment=Qt.AlignHCenter)
         self.setLayout(v_box)
 
     @staticmethod
