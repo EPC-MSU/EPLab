@@ -105,6 +105,14 @@ class ReportGenerationWindow(qt.QDialog):
         self._total_number: int = None
         self._init_ui()
         self._thread: ReportGenerationThread = thread
+        try:
+            self._thread.report_generator.total_number_of_steps_calculated.disconnect()
+            self._thread.report_generator.step_done.disconnect()
+            self._thread.report_generator.step_started.disconnect()
+            self._thread.report_generator.generation_finished.disconnect()
+            self._thread.report_generator.exception_raised.disconnect()
+        except Exception:
+            pass
         self._thread.report_generator.total_number_of_steps_calculated.connect(self.set_total_number_of_steps)
         self._thread.report_generator.step_done.connect(self.change_progress)
         self._thread.report_generator.step_started.connect(self.text_edit_info.append)
