@@ -6,7 +6,6 @@ import copy
 import logging
 import os
 import re
-import webbrowser
 from datetime import datetime
 from functools import partial
 from platform import system
@@ -16,7 +15,7 @@ from PyQt5.QtCore import (pyqtSlot, QCoreApplication as qApp, QEvent, QPoint, QP
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow, QMenu, QMessageBox,
-                             QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
+                             QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, Pin
@@ -28,6 +27,7 @@ from epcore.product import EyePointProduct
 from ivviewer import Viewer as IVViewer
 import connection_window as cw
 import utils as ut
+from about_window import AboutWindow
 from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
 from language import Language, LanguageSelectionWindow
@@ -1134,34 +1134,8 @@ class EPLabWindow(QMainWindow):
         Slot shows message box with information about application.
         """
 
-        def handle_button_click(button: QPushButton):
-            """
-            Function handles click on button.
-            :param button: button that was clicked.
-            """
-
-            page_url = "https://eyepoint.physlab.ru/"
-            if qApp.instance().property("language") is Language.RU:
-                page_url += "ru/"
-            else:
-                page_url += "en/"
-            if button.text() in ("Перейти", "Go"):
-                webbrowser.open_new_tab(page_url)
-
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Information)
-        msg.setWindowTitle(qApp.translate("t", "Справка"))
-        msg.setWindowIcon(QIcon(self._icon_path))
-        msg.setText(self.windowTitle())
-        msg.setInformativeText(
-            qApp.translate("t", "Программное обеспечение для работы с устройствами линейки EyePoint,"
-                                " предназначенными для поиска неисправностей на печатных платах в ручном режиме "
-                                "(при помощи ручных щупов). Для более подробной информации об Eyepoint, перейдите "
-                                "по ссылке http://eyepoint.physlab.ru."))
-        msg.addButton(qApp.translate("t", "Перейти"), QMessageBox.YesRole)
-        msg.addButton(qApp.translate("t", "ОК"), QMessageBox.NoRole)
-        msg.buttonClicked.connect(handle_button_click)
-        msg.exec_()
+        window = AboutWindow()
+        window.exec_()
 
     @pyqtSlot()
     def _on_show_settings_window(self):
