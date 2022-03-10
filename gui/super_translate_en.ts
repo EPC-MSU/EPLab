@@ -439,26 +439,6 @@
         <source>Удалить все метки</source>
         <translation>Delete all markers</translation>
     </message>
-    <message>
-        <location filename="../mainwindow.py" line="1116"/>
-        <source>Справка</source>
-        <translation>Help</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="1120"/>
-        <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Для более подробной информации об Eyepoint, перейдите по ссылке http://eyepoint.physlab.ru.</source>
-        <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). For more information on Eyepoint, follow the link http://eyepoint.physlab.ru.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="1124"/>
-        <source>Перейти</source>
-        <translation>Go</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="1125"/>
-        <source>ОК</source>
-        <translation>OK</translation>
-    </message>
 	<message>
         <location filename="../mainwindow.py" line="1186"/>
         <source>План тестирования не был сохранен. Сохранить последние изменения?</source>
@@ -648,6 +628,21 @@
         <location filename="../utils.py" line="100"/>
         <source>Версия прошивки {} {} несовместима с данной версией EPLab</source>
         <translation>{} firmware version {} is not compatible with this version of EPLab</translation>
+    </message>
+	<message>
+        <location filename="../about_window.py" line="26"/>
+        <source>О программе</source>
+        <translation>About product</translation>
+    </message>
+    <message>
+        <location filename="../about_window.py" line="35"/>
+        <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Более подробную информацию вы можете найти {}</source>
+        <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). You can find more information about EyePoint product {}</translation>
+    </message>
+	<message>
+        <location filename="../about_window.py" line="43"/>
+        <source>на нашем сайте.</source>
+        <translation>on our website.</translation>
     </message>
 </context>
 </TS>
