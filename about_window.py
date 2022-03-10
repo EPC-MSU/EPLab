@@ -3,6 +3,7 @@ File with class for dialog window to show main information about application.
 """
 
 import os
+import platform
 from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon, QPalette, QPixmap
 from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QLayout, QPushButton, QTextBrowser, QVBoxLayout
@@ -46,7 +47,8 @@ class AboutWindow(QDialog):
         self.text_edit_info.setStyleSheet(f"background: {color.name()}")
         self.text_edit_info.setOpenExternalLinks(True)
         self.text_edit_info.setHtml(text.format(link))
-        self.text_edit_info.setFixedSize(300, pixmap.height())
+        width = 300 if platform.system().lower() == "windows" else 400
+        self.text_edit_info.setFixedSize(width, pixmap.height())
         h_layout_1 = QHBoxLayout()
         h_layout_1.addWidget(self.label_logo)
         h_layout_1.addWidget(self.text_edit_info)
