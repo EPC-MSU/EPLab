@@ -3,15 +3,13 @@ File with class for dialog window to show main information about application.
 """
 
 import os
-import platform
 from typing import Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp
 from PyQt5.QtGui import QIcon, QPalette
 from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QLayout, QPushButton, QTextBrowser, QVBoxLayout
 from language import Language
 
-TEXT_HEIGHT_WINDOW = 100
-TEXT_HEIGHT_LINUX = 200
+TEXT_HEIGHT = 100
 WINDOW_WIDTH = 400
 
 
@@ -63,8 +61,7 @@ class AboutWindow(QDialog):
         self.text_edit_info.setStyleSheet(f"background: {color.name()}")
         self.text_edit_info.setOpenExternalLinks(True)
         self.text_edit_info.setHtml(text)
-        height = TEXT_HEIGHT_WINDOW if platform.system().lower() == "windows" else TEXT_HEIGHT_LINUX
-        self.text_edit_info.setFixedSize(WINDOW_WIDTH, height)
+        self.text_edit_info.setFixedSize(WINDOW_WIDTH, TEXT_HEIGHT)
         self.button_copy: QPushButton = QPushButton()
         self.button_copy.setIcon(QIcon(os.path.join(dir_name, "copy.png")))
         self.button_copy.setToolTip(qApp.translate("t", "Копировать"))
