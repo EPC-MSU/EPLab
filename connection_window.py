@@ -101,7 +101,7 @@ class ProductNames(Enum):
         :return: names of products.
         """
 
-        return cls.EYEPOINT_A2.value, cls.EYEPOINT_U21.value, cls.EYEPOINT_H10.value
+        return cls.EYEPOINT_A2, cls.EYEPOINT_U21, cls.EYEPOINT_H10
 
 
 class MeasurerType(Enum):
@@ -520,7 +520,12 @@ class ConnectionWindow(qt.QDialog):
         :param port_2: selected port for second measurer.
         """
 
-        ports = [port_1, port_2]
+        product_name, _ = self._get_checked_product_name()
+        show_two_channels = product_name not in ProductNames.get_single_channel_products()
+        if show_two_channels:
+            ports = [port_1, port_2]
+        else:
+            ports = [port_1, None]
         for index, port in enumerate(ports):
             if port != self._your_variant and not MeasurerType.check_port_for_ivm10(port):
                 ports[index] = "None"
@@ -608,8 +613,7 @@ class ConnectionWindow(qt.QDialog):
 
         if not status:
             return
-        product_name = self._initial_product_name.value if self.sender() is None else self.sender().text()
-        show_two_channels = product_name not in ProductNames.get_single_channel_products()
+        show_two_channels = self._get_checked_product_name()[0] not in ProductNames.get_single_channel_products()
         self.combo_box_measurer_2.setVisible(show_two_channels)
         self.label_measurer_2.setVisible(show_two_channels)
         for index, line_edit in enumerate(self.line_edits):
@@ -641,11 +645,8 @@ class ConnectionWindow(qt.QDialog):
         msg.setWindowTitle(qApp.translate("t", "Помощь"))
         icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media", "ico.png")
         msg.setWindowIcon(QIcon(icon_path))
-        measurer_type = None
-        for product_name, radio_button in self.radio_buttons_products.items():
-            if radio_button.isChecked():
-                measurer_type = ProductNames.get_measurer_type_by_product_name(product_name)
-                break
+        product_name, _ = self._get_checked_product_name()
+        measurer_type = ProductNames.get_measurer_type_by_product_name(product_name)
         if measurer_type == MeasurerType.IVM10 and "win" in _get_platform():
             info = qApp.translate("t", "Введите значение последовательного порта в формате com:\\\\.\\COMx или "
                                        "адрес XiNet сервера в формате xi-net://x.x.x.x/x.")
