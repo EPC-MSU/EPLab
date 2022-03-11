@@ -580,6 +580,8 @@ class ConnectionWindow(qt.QDialog):
 
         ports = []
         for index, combo_box in enumerate(self.combo_boxes):
+            if not combo_box.isVisible():
+                continue
             port = combo_box.currentText()
             if port == self._your_variant:
                 port = self.line_edits[index].text()
