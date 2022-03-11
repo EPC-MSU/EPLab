@@ -514,6 +514,26 @@
         <source>Отключить</source>
         <translation>Disconnect</translation>
     </message>
+    <message>
+        <location filename="../connection_window.py" line="637"/>
+        <source>Помощь</source>
+        <translation>Help</translation>
+    </message>
+    <message>
+        <location filename="../connection_window.py" line="646"/>
+        <source>Введите значение последовательного порта в формате com:\\.\COMx или адрес XiNet сервера в формате xi-net://x.x.x.x/x.</source>
+        <translation>Enter serial port value in format com:\\.\COMx or XiNet server address in format xi-net://x.x.x.x/x.</translation>
+    </message>
+	<message>
+        <location filename="../connection_window.py" line="649"/>
+        <source>Введите значение последовательного порта в формате com:///dev/ttyACMx или адрес XiNet сервера в формате xi-net://x.x.x.x/x.</source>
+        <translation>Enter serial port value in format com:///dev/ttyACMx or XiNet server address in format xi-net://x.x.x.x/x.</translation>
+    </message>
+	<message>
+        <location filename="../connection_window.py" line="652"/>
+        <source>Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.</source>
+        <translation>Enter H10 server address in format xmlrpc://x.x.x.x.</translation>
+    </message>
 	<message>
         <location filename="../language.py" line="89"/>
         <source>Выбор языка</source>

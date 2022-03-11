@@ -17,7 +17,7 @@ from typing import Dict, List, Optional, Tuple
 import psutil
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
-from PyQt5.QtGui import QPixmap, QRegExpValidator
+from PyQt5.QtGui import QIcon, QPixmap, QRegExpValidator
 import serial
 import serial.tools.list_ports
 import serial.tools.list_ports_common
@@ -83,7 +83,7 @@ class ProductNames(Enum):
         return None
 
     @classmethod
-    def get_product_names_for_platform(cls) -> list:
+    def get_product_names_for_platform(cls) -> List["ProductNames"]:
         """
         Method returns names of products for platform of system.
         :return: names of products.
@@ -93,6 +93,15 @@ class ProductNames(Enum):
         if _get_platform() != "win64":
             products.append(cls.EYEPOINT_H10)
         return products
+
+    @classmethod
+    def get_single_channel_products(cls) -> Tuple:
+        """
+        Method returns names of products with single channel (measurer).
+        :return: names of products.
+        """
+
+        return cls.EYEPOINT_A2.value, cls.EYEPOINT_U21.value, cls.EYEPOINT_H10.value
 
 
 class MeasurerType(Enum):
@@ -352,18 +361,35 @@ class ConnectionWindow(qt.QDialog):
         form_layout = qt.QFormLayout()
         self.combo_box_measurer_1: qt.QComboBox = qt.QComboBox()
         self.combo_box_measurer_1.setToolTip(qApp.translate("t", "Канал #1"))
-        form_layout.addRow(qt.QLabel(qApp.translate("t", "Канал #1")), self.combo_box_measurer_1)
+        self.label_measurer_1: qt.QLabel = qt.QLabel(qApp.translate("t", "Канал #1"))
+        form_layout.addRow(self.label_measurer_1, self.combo_box_measurer_1)
         self.line_edit_measurer_1: qt.QLineEdit = qt.QLineEdit()
         self.line_edit_measurer_1.setToolTip(self._your_variant)
-        form_layout.addRow(qt.QLabel(""), self.line_edit_measurer_1)
+        self.button_show_info_1 = qt.QPushButton()
+        self.button_show_info_1.setIcon(QIcon(os.path.join(dir_name, "info.png")))
+        self.button_show_info_1.setToolTip(qApp.translate("t", "Помощь"))
+        self.button_show_info_1.clicked.connect(self.show_help_info)
+        layout = qt.QHBoxLayout()
+        layout.addWidget(self.line_edit_measurer_1)
+        layout.addWidget(self.button_show_info_1)
+        form_layout.addRow(qt.QLabel(""), layout)
         self.combo_box_measurer_2: qt.QComboBox = qt.QComboBox()
         self.combo_box_measurer_2.setToolTip(qApp.translate("t", "Канал #2"))
-        form_layout.addRow(qt.QLabel(qApp.translate("t", "Канал #2")), self.combo_box_measurer_2)
+        self.label_measurer_2: qt.QLabel = qt.QLabel(qApp.translate("t", "Канал #2"))
+        form_layout.addRow(self.label_measurer_2, self.combo_box_measurer_2)
         self.line_edit_measurer_2: qt.QLineEdit = qt.QLineEdit()
         self.line_edit_measurer_2.setToolTip(self._your_variant)
-        form_layout.addRow(qt.QLabel(""), self.line_edit_measurer_2)
+        self.button_show_info_2 = qt.QPushButton()
+        self.button_show_info_2.setIcon(QIcon(os.path.join(dir_name, "info.png")))
+        self.button_show_info_2.setToolTip(qApp.translate("t", "Помощь"))
+        self.button_show_info_2.clicked.connect(self.show_help_info)
+        layout = qt.QHBoxLayout()
+        layout.addWidget(self.line_edit_measurer_2)
+        layout.addWidget(self.button_show_info_2)
+        form_layout.addRow(qt.QLabel(""), layout)
         self.button_connect: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Подключить"))
         self.button_connect.setToolTip(qApp.translate("t", "Подключить"))
+        self.button_connect.setDefault(True)
         self.button_disconnect: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Отключить"))
         self.button_disconnect.setToolTip(qApp.translate("t", "Отключить"))
         self.button_cancel: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Отмена"))
@@ -485,6 +511,7 @@ class ConnectionWindow(qt.QDialog):
                 combo_box.setCurrentText(current_url)
             self.line_edits[index].setText("xmlrpc://")
             self.line_edits[index].setVisible(current_url == self._your_variant)
+            self.buttons_show_info[index].setVisible(current_url == self._your_variant)
 
     def _init_ivm10(self, port_1: str = None, port_2: str = None):
         """
@@ -506,6 +533,7 @@ class ConnectionWindow(qt.QDialog):
                 combo_box.setCurrentText(ports[index])
             self.line_edits[index].setText("")
             self.line_edits[index].setVisible(ports[index] == self._your_variant)
+            self.buttons_show_info[index].setVisible(ports[index] == self._your_variant)
 
     def _init_ui(self):
         """
@@ -515,6 +543,7 @@ class ConnectionWindow(qt.QDialog):
         self._create_widgets()
         self.combo_boxes = self.combo_box_measurer_1, self.combo_box_measurer_2
         self.line_edits = self.line_edit_measurer_1, self.line_edit_measurer_2
+        self.buttons_show_info = self.button_show_info_1, self.button_show_info_2
         self.radio_buttons_products[self._initial_product_name].setChecked(True)
         for combo_box in self.combo_boxes:
             combo_box.textActivated.connect(self.change_port)
@@ -579,8 +608,13 @@ class ConnectionWindow(qt.QDialog):
 
         if not status:
             return
-        for line_edit in self.line_edits:
+        product_name = self._initial_product_name.value if self.sender() is None else self.sender().text()
+        show_two_channels = product_name not in ProductNames.get_single_channel_products()
+        self.combo_box_measurer_2.setVisible(show_two_channels)
+        self.label_measurer_2.setVisible(show_two_channels)
+        for index, line_edit in enumerate(self.line_edits):
             line_edit.setVisible(False)
+            self.buttons_show_info[index].setVisible(False)
         if measurer_type == MeasurerType.IVM10:
             placeholder_text = PLACEHOLDER_IVM.format(qApp.translate("t", "или"))
             validator = QRegExpValidator(QRegExp(IP_IVM10_REG_EXP), self)
@@ -595,3 +629,33 @@ class ConnectionWindow(qt.QDialog):
         for line_edit in self.line_edits:
             line_edit.setValidator(validator)
             line_edit.setPlaceholderText(placeholder_text)
+
+    @pyqtSlot()
+    def show_help_info(self):
+        """
+        Slot shows help information how to enter user's COM-port or server address.
+        """
+
+        msg = qt.QMessageBox()
+        msg.setIcon(qt.QMessageBox.Information)
+        msg.setWindowTitle(qApp.translate("t", "Помощь"))
+        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media", "ico.png")
+        msg.setWindowIcon(QIcon(icon_path))
+        measurer_type = None
+        for product_name, radio_button in self.radio_buttons_products.items():
+            if radio_button.isChecked():
+                measurer_type = ProductNames.get_measurer_type_by_product_name(product_name)
+                break
+        if measurer_type == MeasurerType.IVM10 and "win" in _get_platform():
+            info = qApp.translate("t", "Введите значение последовательного порта в формате com:\\\\.\\COMx или "
+                                       "адрес XiNet сервера в формате xi-net://x.x.x.x/x.")
+        elif measurer_type == MeasurerType.IVM10 and _get_platform() == "debian":
+            info = qApp.translate("t", "Введите значение последовательного порта в формате com:///dev/ttyACMx или "
+                                       "адрес XiNet сервера в формате xi-net://x.x.x.x/x.")
+        elif measurer_type == MeasurerType.ASA:
+            info = qApp.translate("t", "Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.")
+        else:
+            info = None
+        if info:
+            msg.setText(info)
+            msg.exec_()
