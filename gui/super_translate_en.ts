@@ -485,19 +485,19 @@
         <translation>Connection setup</translation>
     </message>
 	<message>
-        <location filename="../connection_window.py" line="322"/>
-        <source>Тип ВАХометра</source>
-        <translation>IV-measurer type</translation>
+        <location filename="../connection_window.py" line="321"/>
+        <source>Тип измерителя</source>
+        <translation>Measurer type</translation>
     </message>
 	<message>
-        <location filename="../connection_window.py" line="347"/>
-        <source>ВАХометр #1</source>
-        <translation>IV-measurer #1</translation>
+        <location filename="../connection_window.py" line="346"/>
+        <source>Канал #1</source>
+        <translation>Channel #1</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="351"/>
-        <source>ВАХометр #2</source>
-        <translation>IV-measurer #2</translation>
+        <location filename="../connection_window.py" line="350"/>
+        <source>Канал #2</source>
+        <translation>Channel #2</translation>
     </message>
     <message>
         <location filename="../connection_window.py" line="354"/>

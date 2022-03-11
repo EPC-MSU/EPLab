@@ -318,7 +318,7 @@ class ConnectionWindow(qt.QDialog):
 
         self.setWindowTitle(qApp.translate("t", "Настройка подключения"))
         layout = qt.QVBoxLayout()
-        group_box = qt.QGroupBox(qApp.translate("t", "Тип ВАХометра"))
+        group_box = qt.QGroupBox(qApp.translate("t", "Тип измерителя"))
         group_box.setFixedSize(300, 300)
         group_box.setLayout(layout)
         widget = qt.QWidget()
@@ -343,11 +343,11 @@ class ConnectionWindow(qt.QDialog):
             self.radio_buttons_products[product_name] = radio_button
         form_layout = qt.QFormLayout()
         self.combo_box_measurer_1 = qt.QComboBox()
-        form_layout.addRow(qt.QLabel(qApp.translate("t", "ВАХометр #1")), self.combo_box_measurer_1)
+        form_layout.addRow(qt.QLabel(qApp.translate("t", "Канал #1")), self.combo_box_measurer_1)
         self.line_edit_measurer_1 = qt.QLineEdit()
         form_layout.addRow(qt.QLabel(""), self.line_edit_measurer_1)
         self.combo_box_measurer_2 = qt.QComboBox()
-        form_layout.addRow(qt.QLabel(qApp.translate("t", "ВАХометр #2")), self.combo_box_measurer_2)
+        form_layout.addRow(qt.QLabel(qApp.translate("t", "Канал #2")), self.combo_box_measurer_2)
         self.line_edit_measurer_2 = qt.QLineEdit()
         form_layout.addRow(qt.QLabel(""), self.line_edit_measurer_2)
         self.button_connect = qt.QPushButton(qApp.translate("t", "Подключить"))
