@@ -475,6 +475,11 @@
         <translation>No settings</translation>
     </message>
 	<message>
+        <location filename="../connection_window.py" line="34"/>
+        <source>или</source>
+        <translation>or</translation>
+    </message>
+	<message>
         <location filename="../connection_window.py" line="291"/>
         <source>Свой вариант</source>
         <translation>Your variant</translation>

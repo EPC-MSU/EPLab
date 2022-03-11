@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from functools import partial
 from platform import system
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 import psutil
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
@@ -31,8 +31,11 @@ logger = logging.getLogger("eplab")
 IP_ASA_REG_EXP = r"^xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
 if system().lower() == "windows":
     IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+)$"
+    PLACEHOLDER_IVM = "com:\\\\.\\COMx {} xi-net://x.x.x.x/x"
 else:
     IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+)$"
+    PLACEHOLDER_IVM = "com:///dev/ttyACMx {} xi-net://x.x.x.x/x"
+PLACEHOLDER_ASA = "xmlrpc://x.x.x.x"
 
 
 class ProductNames(Enum):
@@ -291,6 +294,8 @@ class ConnectionWindow(qt.QDialog):
         if initial_product_name is None:
             initial_product_name = ProductNames.EYEPOINT_A2
         self._initial_product_name: ProductNames = initial_product_name
+        self._initial_ports: List[str] = None
+        self._initial_type: MeasurerType = None
         self._initial_ports, self._initial_type = self._get_current_measurers_ports()
         if self._initial_type is None:
             self._initial_type = MeasurerType.IVM10
@@ -317,8 +322,10 @@ class ConnectionWindow(qt.QDialog):
         """
 
         self.setWindowTitle(qApp.translate("t", "Настройка подключения"))
+        self.setToolTip(qApp.translate("t", "Настройка подключения"))
         layout = qt.QVBoxLayout()
         group_box = qt.QGroupBox(qApp.translate("t", "Тип измерителя"))
+        group_box.setToolTip(qApp.translate("t", "Тип измерителя"))
         group_box.setFixedSize(300, 300)
         group_box.setLayout(layout)
         widget = qt.QWidget()
@@ -329,30 +336,38 @@ class ConnectionWindow(qt.QDialog):
         grid_layout = qt.QGridLayout()
         widget.setLayout(grid_layout)
         dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
-        products = ProductNames.get_product_names_for_platform()
-        self.radio_buttons_products = {}
-        for row, product_name in enumerate(products):
+        self.radio_buttons_products: Dict[ProductNames, qt.QRadioButton] = {}
+        for row, product_name in enumerate(ProductNames.get_product_names_for_platform()):
             radio_button = qt.QRadioButton(product_name.value, self)
+            radio_button.setToolTip(product_name.value)
             measurer_type = ProductNames.get_measurer_type_by_product_name(product_name)
             radio_button.toggled.connect(partial(self.init_available_ports, measurer_type))
             product_image = QPixmap(os.path.join(dir_name, f"{product_name.value}.png"))
             label = qt.QLabel("")
             label.setPixmap(product_image.scaled(100, 100, Qt.KeepAspectRatio))
+            label.setToolTip(product_name.value)
             grid_layout.addWidget(label, row, 0)
             grid_layout.addWidget(radio_button, row, 1)
             self.radio_buttons_products[product_name] = radio_button
         form_layout = qt.QFormLayout()
-        self.combo_box_measurer_1 = qt.QComboBox()
+        self.combo_box_measurer_1: qt.QComboBox = qt.QComboBox()
+        self.combo_box_measurer_1.setToolTip(qApp.translate("t", "Канал #1"))
         form_layout.addRow(qt.QLabel(qApp.translate("t", "Канал #1")), self.combo_box_measurer_1)
-        self.line_edit_measurer_1 = qt.QLineEdit()
+        self.line_edit_measurer_1: qt.QLineEdit = qt.QLineEdit()
+        self.line_edit_measurer_1.setToolTip(self._your_variant)
         form_layout.addRow(qt.QLabel(""), self.line_edit_measurer_1)
-        self.combo_box_measurer_2 = qt.QComboBox()
+        self.combo_box_measurer_2: qt.QComboBox = qt.QComboBox()
+        self.combo_box_measurer_2.setToolTip(qApp.translate("t", "Канал #2"))
         form_layout.addRow(qt.QLabel(qApp.translate("t", "Канал #2")), self.combo_box_measurer_2)
-        self.line_edit_measurer_2 = qt.QLineEdit()
+        self.line_edit_measurer_2: qt.QLineEdit = qt.QLineEdit()
+        self.line_edit_measurer_2.setToolTip(self._your_variant)
         form_layout.addRow(qt.QLabel(""), self.line_edit_measurer_2)
-        self.button_connect = qt.QPushButton(qApp.translate("t", "Подключить"))
-        self.button_disconnect = qt.QPushButton(qApp.translate("t", "Отключить"))
-        self.button_cancel = qt.QPushButton(qApp.translate("t", "Отмена"))
+        self.button_connect: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Подключить"))
+        self.button_connect.setToolTip(qApp.translate("t", "Подключить"))
+        self.button_disconnect: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Отключить"))
+        self.button_disconnect.setToolTip(qApp.translate("t", "Отключить"))
+        self.button_cancel: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Отмена"))
+        self.button_cancel.setToolTip(qApp.translate("t", "Отмена"))
         h_box_layout = qt.QHBoxLayout()
         h_box_layout.addWidget(self.button_connect)
         h_box_layout.addWidget(self.button_disconnect)
@@ -557,7 +572,9 @@ class ConnectionWindow(qt.QDialog):
     def init_available_ports(self, measurer_type: MeasurerType, status: bool):
         """
         Slot initializes available ports for first and second measurers.
-        :param measurer_type: type of measurers.
+        :param measurer_type: type of measurers;
+        :param status: if True then ports should be initialized for given type
+        of measurers.
         """
 
         if not status:
@@ -565,12 +582,16 @@ class ConnectionWindow(qt.QDialog):
         for line_edit in self.line_edits:
             line_edit.setVisible(False)
         if measurer_type == MeasurerType.IVM10:
+            placeholder_text = PLACEHOLDER_IVM.format(qApp.translate("t", "или"))
             validator = QRegExpValidator(QRegExp(IP_IVM10_REG_EXP), self)
             self._init_ivm10(*self._initial_ports)
         elif measurer_type == MeasurerType.ASA:
+            placeholder_text = PLACEHOLDER_ASA
             validator = QRegExpValidator(QRegExp(IP_ASA_REG_EXP), self)
             self._init_asa(*self._initial_ports)
         else:
+            placeholder_text = ""
             validator = QRegExpValidator(QRegExp(r""), self)
         for line_edit in self.line_edits:
             line_edit.setValidator(validator)
+            line_edit.setPlaceholderText(placeholder_text)
