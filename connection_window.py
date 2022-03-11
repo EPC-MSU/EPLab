@@ -477,7 +477,7 @@ class ConnectionWindow(qt.QDialog):
             ports_for_first_and_second[index] = [*ports_for_first_and_second[index], *ports]
             if MeasurerType.IVM10_VIRTUAL.value not in ports_for_first_and_second[index]:
                 ports_for_first_and_second[index].append(MeasurerType.IVM10_VIRTUAL.value)
-            if selected_ports[index] not in (MeasurerType.IVM10_VIRTUAL.value, "None", self._your_variant):
+            if selected_ports[index] not in (MeasurerType.IVM10_VIRTUAL.value, self._your_variant):
                 try:
                     ports_for_first_and_second[index - 1].remove(selected_ports[index])
                 except ValueError:
@@ -487,7 +487,6 @@ class ConnectionWindow(qt.QDialog):
                 if port not in spec_ports and MeasurerType.check_port_for_ivm10(port):
                     ports_for_first_and_second[index].append(port)
             ports_for_first_and_second[index] = sorted(ports_for_first_and_second[index])
-            ports_for_first_and_second[index].append("None")
             ports_for_first_and_second[index].append(self._your_variant)
         return ports_for_first_and_second
 
@@ -528,7 +527,7 @@ class ConnectionWindow(qt.QDialog):
             ports = [port_1, None]
         for index, port in enumerate(ports):
             if port != self._your_variant and not MeasurerType.check_port_for_ivm10(port):
-                ports[index] = "None"
+                ports[index] = None
         available_ports = find_urpc_ports("ivm")
         ports_for_first_and_second = self._get_ports_for_ivm10(available_ports, *ports)
         for index, combo_box in enumerate(self.combo_boxes):
@@ -536,6 +535,8 @@ class ConnectionWindow(qt.QDialog):
             combo_box.addItems(ports_for_first_and_second[index])
             if ports[index] in ports_for_first_and_second[index]:
                 combo_box.setCurrentText(ports[index])
+            else:
+                combo_box.setCurrentText("virtual")
             self.line_edits[index].setText("")
             self.line_edits[index].setVisible(ports[index] == self._your_variant)
             self.buttons_show_info[index].setVisible(ports[index] == self._your_variant)
@@ -564,7 +565,7 @@ class ConnectionWindow(qt.QDialog):
         Slot handles signal that port for measurer was changed.
         """
 
-        ports = [combo_box.currentText() for combo_box in self.combo_boxes]
+        ports = [combo_box.currentText() for combo_box in self.combo_boxes if combo_box.isVisible()]
         product_name, radio_button = self._get_checked_product_name()
         if ProductNames.get_measurer_type_by_product_name(product_name) == MeasurerType.IVM10:
             self._init_ivm10(*ports)
