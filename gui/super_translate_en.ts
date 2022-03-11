@@ -629,20 +629,25 @@
         <source>Версия прошивки {} {} несовместима с данной версией EPLab</source>
         <translation>{} firmware version {} is not compatible with this version of EPLab</translation>
     </message>
-	<message>
-        <location filename="../about_window.py" line="26"/>
-        <source>О программе</source>
-        <translation>About product</translation>
-    </message>
     <message>
-        <location filename="../about_window.py" line="35"/>
+        <location filename="../about_window.py" line="34"/>
         <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Более подробную информацию вы можете найти {}</source>
         <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). You can find more information about EyePoint product {}</translation>
     </message>
 	<message>
-        <location filename="../about_window.py" line="43"/>
+        <location filename="../about_window.py" line="42"/>
         <source>на нашем сайте.</source>
         <translation>on our website.</translation>
+    </message>
+	<message>
+        <location filename="../about_window.py" line="50"/>
+        <source>О программе</source>
+        <translation>About product</translation>
+    </message>
+	<message>
+        <location filename="../about_window.py" line="70"/>
+        <source>Копировать</source>
+        <translation>Copy</translation>
     </message>
 </context>
 </TS>
