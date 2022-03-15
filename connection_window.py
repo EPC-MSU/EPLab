@@ -498,19 +498,20 @@ class ConnectionWindow(qt.QDialog):
         """
 
         urls_for_first = [f"xmlrpc://{host}" for host in reveal_asa()]
-        urls_for_first.append(self._your_variant)
-        urls_for_second = "virtualasa", "None"
+        urls_for_first.extend((self._your_variant, "virtual"))
+        urls_for_second = ("virtual",)
         urls_for_first_and_second = urls_for_first, urls_for_second
         urls = url_1, url_2
         for index, combo_box in enumerate(self.combo_boxes):
             combo_box.clear()
             combo_box.addItems(urls_for_first_and_second[index])
-            current_url = "None" if urls[index] is None else urls[index]
-            if current_url in urls_for_first_and_second[index]:
-                combo_box.setCurrentText(current_url)
+            if urls[index] in urls_for_first_and_second[index]:
+                combo_box.setCurrentText(urls[index])
+            else:
+                combo_box.setCurrentText("virtual")
             self.line_edits[index].setText("xmlrpc://")
-            self.line_edits[index].setVisible(current_url == self._your_variant)
-            self.buttons_show_info[index].setVisible(current_url == self._your_variant)
+            self.line_edits[index].setVisible(urls[index] == self._your_variant)
+            self.buttons_show_info[index].setVisible(urls[index] == self._your_variant)
 
     def _init_ivm10(self, port_1: str = None, port_2: str = None):
         """
@@ -589,10 +590,13 @@ class ConnectionWindow(qt.QDialog):
                     return
             ports.append(port)
         ports = self._get_different_xi_net_ports(ports)
-        if len(set(ports)) == 1 and "None" in ports:
-            self.disconnect()
-            return
+        while len(ports) < 2:
+            ports.append("")
         selected_product_name, _ = self._get_checked_product_name()
+        for index, port in enumerate(ports):
+            if (port == "virtual" and
+                    ProductNames.get_measurer_type_by_product_name(selected_product_name) == MeasurerType.ASA):
+                ports[index] = "virtualasa"
         self.parent.connect_devices(*ports, selected_product_name)
         self.close()
 
