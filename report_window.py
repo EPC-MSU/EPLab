@@ -82,8 +82,8 @@ class ReportGenerationWindow(qt.QDialog):
     Class for dialog window to create report for board.
     """
 
-    def __init__(self, parent: "EPLabWindow", thread: ReportGenerationThread, board: Board,
-                 folder_for_report: str = None, threshold_score: float = None):
+    def __init__(self, parent, thread: ReportGenerationThread, board: Board, folder_for_report: str = None,
+                 threshold_score: float = None):
         """
         :param parent: parent window;
         :param thread: thread for report generation;

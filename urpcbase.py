@@ -280,7 +280,7 @@ class UrpcbaseDeviceHandle:
         self._uri = uri
         self._handle = None
         if not defer_open:
-            self.open()
+            self.open_device()
     if version_info >= (3, 4):
         def __del__(self):
             if self._handle:
@@ -324,7 +324,7 @@ class UrpcbaseDeviceHandle:
     def uri(self) -> bytes:
         return self._uri
 
-    def open(self) -> bool:
+    def open_device(self) -> bool:
         if self._handle is not None:
             return False
 

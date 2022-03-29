@@ -59,7 +59,7 @@ def open_device_safely(device: UrpcbaseDeviceHandle, config_file: str):
     if not config.has_section(version):  # checking for a library partition
         _log_runtime(f"{msg_base} Library version error {version}")
     try:
-        device.open()
+        device.open_device()
     except Exception:
         _log_runtime(f"{msg_base} Device was not found or cannot be opened")
 
