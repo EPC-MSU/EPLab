@@ -396,7 +396,7 @@ class EPLabWindow(QMainWindow):
 
         self._board_window: BoardWidget = BoardWidget()
         self._board_window.resize(600, 600)
-        self._board_window.setWindowIcon(QIcon("media/ico.png"))
+        self._board_window.setWindowIcon(QIcon(os.path.join(dir_name, "media", "ico.png")))
         self._board_window.setWindowTitle("EPLab - Board")
         self._board_window.workspace.point_selected.connect(self._on_board_pin_selected)
         self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
@@ -503,11 +503,17 @@ class EPLabWindow(QMainWindow):
                     # You need to redraw markers with new plot parameters (the scale of the plot has changed)
                     self._iv_window.plot.redraw_cursors()
             self._msystem.trigger_measurements()
+            if self._default_settings:
+                print("Default settings")
+                settings = ut.read_settings_auto(self._product)
+                if settings is None:
+                    settings = self._msystem.get_settings()
+                self._set_msystem_settings(settings)
+                self._default_settings = False
 
     def _read_options_from_json(self) -> Optional[Dict]:
         """
-        Method returns dictionary with options for parameters of measurement
-        system.
+        Method returns dictionary with options for parameters of measurement system.
         :return: dictionary with options for parameters.
         """
 
@@ -517,6 +523,24 @@ class EPLabWindow(QMainWindow):
                 file_name = os.path.join(dir_name, "resources", "eplab_asa_options.json")
                 return ut.read_json(file_name)
         return None
+
+    def _reconnect(self):
+        if self._timer.isActive():
+            self._timer.stop()
+        if self._msystem:
+            for measurer in self._msystem.measurers:
+                measurer.close_device()
+        self._msystem = ut.create_measurers(self._port_1, self._port_2)
+        if not self._msystem:
+            return False
+        with self._device_errors_handler:
+            for measurer in self._msystem.measurers:
+                measurer.open_device()
+        self._msystem.set_default_settings()
+        self._default_settings = True
+        self._skip_curve = True
+        self._timer.start()
+        return True
 
     def _reconnect_periodic_task(self):
         # Draw empty curves
@@ -528,7 +552,8 @@ class EPLabWindow(QMainWindow):
         self.test_curve_plot.set_curve(None)
         # Draw text
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
-        if self._msystem.reconnect():
+        # if self._msystem.reconnect():
+        if self._reconnect():
             # Reconnection success!
             self._device_errors_handler.reset_error()
             self._iv_window.plot.clear_center_text()
@@ -536,7 +561,7 @@ class EPLabWindow(QMainWindow):
                 # Update current settings to reconnected device
                 options = self._get_options_from_ui()
                 settings = self._product.options_to_settings(options, MeasurementSettings(-1, -1, -1, -1))
-                self._set_msystem_settings(settings)
+                # self._set_msystem_settings(settings)
                 self._msystem.trigger_measurements()
 
     def _reset_board(self):
@@ -592,6 +617,7 @@ class EPLabWindow(QMainWindow):
         # Little bit hardcode here. See #39320
         # TODO: separate config file
         # Voltage in Volts, current in mA
+        logger.info("Inside set widgets to init state")
         self._comparator.set_min_ivc(0.6, 0.002)
         self.__settings: Settings = None
         self._reset_board()
@@ -609,16 +635,14 @@ class EPLabWindow(QMainWindow):
         # Update plot settings at next measurement cycle (place settings here or None)
         self._settings_update_next_cycle = None
         # Set to True to skip next measured curves
-        self._skip_curve = False
+        self._skip_curve = True
         self._hide_curve_test = False
         self._hide_curve_ref = False
         self._ref_curve = None
         self._test_curve = None
         # Set ui settings state to current device
+        self._msystem.set_default_settings()
         with self._device_errors_handler:
-            settings = ut.read_settings_auto(self._product)
-            if settings is not None:
-                self._msystem.set_settings(settings)
             settings = self._msystem.get_settings()
             self._adjust_plot_params(settings)
             self._option_buttons = {}
@@ -633,6 +657,8 @@ class EPLabWindow(QMainWindow):
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
         self._current_file_path = None
+        self._default_settings = True
+        logger.info("End set to init state")
 
     def _update_current_pin(self):
         """
@@ -927,9 +953,12 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_periodic_task(self):
+        logger.info("periodic")
         if self._device_errors_handler.all_ok:
             with self._device_errors_handler:
+                logger.info("Before read curves")
                 self._read_curves_periodic_task()
+                logger.info("After read curves")
         else:
             self._reconnect_periodic_task()
         # Add this task to event loop
@@ -1212,6 +1241,8 @@ class EPLabWindow(QMainWindow):
         :param product_name: name of product to work with application.
         """
 
+        self._port_1 = port_1
+        self._port_2 = port_2
         if self._timer.isActive():
             self._timer.stop()
         if self._msystem:
