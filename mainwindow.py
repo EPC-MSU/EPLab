@@ -486,25 +486,21 @@ class EPLabWindow(QMainWindow):
 
     def _read_curves_periodic_task(self):
         if self._msystem.measurements_are_ready():
-            # Get curves from devices
-            curves = dict()
-            curves["test"] = self._msystem.measurers[0].get_last_cached_iv_curve()
-            if self._work_mode is WorkMode.compare and len(self._msystem.measurers) > 1:
-                # Display two current curves
-                curves["ref"] = self._msystem.measurers[1].get_last_cached_iv_curve()
-            else:
-                # Reference curve will be read from measurement plan
-                pass
             if self._skip_curve:
                 self._skip_curve = False
             else:
+                # Get curves from devices
+                curves = dict()
+                curves["test"] = self._msystem.measurers[0].get_last_cached_iv_curve()
+                if self._work_mode is WorkMode.compare and len(self._msystem.measurers) > 1:
+                    # Display two current curves
+                    curves["ref"] = self._msystem.measurers[1].get_last_cached_iv_curve()
                 self._update_curves(curves, self._msystem.get_settings())
                 if self._settings_update_next_cycle:
                     # New curve with new settings - we must update plot parameters
                     self._adjust_plot_params(self._settings_update_next_cycle)
                     self._settings_update_next_cycle = None
-                    # You need to redraw markers with new plot parameters (the scale
-                    # of the plot has changed)
+                    # You need to redraw markers with new plot parameters (the scale of the plot has changed)
                     self._iv_window.plot.redraw_cursors()
             self._msystem.trigger_measurements()
 
@@ -838,6 +834,7 @@ class EPLabWindow(QMainWindow):
                 self._msystem.measurers[measurer_id].freeze()
             else:
                 self._msystem.measurers[measurer_id].unfreeze()
+                self._skip_curve = True
 
     @pyqtSlot()
     def _on_go_selected_pin(self):
