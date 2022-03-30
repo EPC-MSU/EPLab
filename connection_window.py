@@ -174,24 +174,6 @@ def _filter_ports_by_vid_and_pid(com_ports: List[serial.tools.list_ports_common.
     return filtered_ports
 
 
-def _get_active_serial_ports() -> List[serial.tools.list_ports_common.ListPortInfo]:
-    """
-    Function returns lists of serial port names.
-    :return: list of the serial ports available on the system.
-    """
-
-    com_ports = serial.tools.list_ports.comports()
-    valid_ports = []
-    for port in sorted(com_ports):
-        try:
-            serial_port = serial.Serial(port.device, timeout=0)
-            serial_port.close()
-            valid_ports.append(port)
-        except (OSError, serial.SerialException) as exc:
-            logger.error("Error occurred while trying to open COM-port '%s': %s", port.device, exc)
-    return valid_ports
-
-
 def _get_platform() -> Optional[str]:
     """
     Function returns name of OS.
@@ -230,7 +212,7 @@ def find_urpc_ports(device_type: str) -> List[str]:
     except Exception as exc:
         logger.error("Cannot read 'VID' and 'PID' fields from '%s': %s", config_file, exc)
         raise
-    serial_ports = _get_active_serial_ports()
+    serial_ports = serial.tools.list_ports.comports()
     serial_ports = _filter_ports_by_vid_and_pid(serial_ports, vid, pid)
     ximc_ports = []
     for com_port in serial_ports:
