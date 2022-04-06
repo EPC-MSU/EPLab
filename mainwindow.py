@@ -377,7 +377,7 @@ class EPLabWindow(QMainWindow):
         self._icon_path: str = os.path.join(dir_name, "media", "ico.png")
         self.setWindowIcon(QIcon(self._icon_path))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
-        if system() == "Windows":
+        if system().lower() == "windows":
             self.setMinimumWidth(650)
         else:
             self.setMinimumWidth(700)
@@ -409,7 +409,8 @@ class EPLabWindow(QMainWindow):
 
         vbox = QVBoxLayout()
         self._iv_window: IVViewer = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
-                                             solid_axis_enabled=False, axis_sign_enabled=False)
+                                             solid_axis_enabled=False, axis_sign_enabled=False,
+                                             screenshot_file_name_base="eplab")
         self.reference_curve_plot = self._iv_window.plot.add_curve()
         self.test_curve_plot = self._iv_window.plot.add_curve()
         self.reference_curve_plot.set_curve_params(QColor(0, 128, 255, 200))
@@ -996,8 +997,13 @@ class EPLabWindow(QMainWindow):
         dir_path = os.path.join(self.default_path, "Screenshot")
         if not os.path.isdir(dir_path):
             os.makedirs(dir_path)
-        filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
-                                               directory=os.path.join(dir_path, filename))[0]
+        if system().lower() == "windows":
+            filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
+                                                   directory=os.path.join(dir_path, filename))[0]
+        else:
+            filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
+                                                   directory=os.path.join(dir_path, filename),
+                                                   options=QFileDialog.DontUseNativeDialog)[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
@@ -1296,7 +1302,7 @@ class EPLabWindow(QMainWindow):
 
         # Determine the critical width of the window for given language and OS
         lang = qApp.instance().property("language")
-        if system() == "Windows":
+        if system().lower() == "windows":
             size = 1150 if lang is Language.EN else 1350
         else:
             size = 1380 if lang is Language.EN else 1650
