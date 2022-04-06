@@ -604,73 +604,73 @@
         <source>Различие: </source>
         <translation>Difference: </translation>
     </message>
-	<message>
-        <location filename="../report_window.py" line="46"/>
-        <source>Генератор отчетов</source>
-        <translation>Report generator</translation>
+    <message>
+        <location filename="../report_window.py" line="159"/>
+        <source>Отчет сгенерирован и сохранен в директорию 'FOLDER'</source>
+        <translation>Report was generated and saved to directory 'FOLDER'</translation>
     </message>
-	<message>
-        <location filename="../report_window.py" line="48"/>
-        <source>Выбрать папку для отчета</source>
-        <translation>Select directory for the report</translation>
-    </message>
-	<message>
-        <location filename="../report_window.py" line="52"/>
-        <source>Сгенерировать отчет</source>
-        <translation>Generate report</translation>
-    </message>
-	<message>
-        <location filename="../report_window.py" line="65"/>
-        <source>Шаги генерации отчета</source>
-        <translation>Steps to generate report</translation>
-    </message>
-	<message>
-        <location filename="../report_window.py" line="141"/>
-        <source>Отчет сгенерирован и сохранен в файл 'FOLDER'</source>
-        <translation>Report was generated and saved to file 'FOLDER'</translation>
-    </message>
-	<message>
-        <location filename="../report_window.py" line="141"/>
+    <message>
+        <location filename="../report_window.py" line="162"/>
         <source>Отчет не был сгенерирован</source>
         <translation>Report was not generated</translation>
     </message>
-	<message>
-        <location filename="../report_window.py" line="143"/>
+    <message>
+        <location filename="../report_window.py" line="163"/>
         <source>Информация</source>
         <translation>Information</translation>
     </message>
-	<message>
-        <location filename="../report_window.py" line="151"/>
-        <source>Выбрать папку</source>
-        <translation>Select directory</translation>
+    <message>
+        <location filename="../report_window.py" line="170"/>
+        <source>Генератор отчетов</source>
+        <translation>Report generator</translation>
     </message>
-	<message>
-        <location filename="../report_window.py" line="151"/>
+    <message>
+        <location filename="../report_window.py" line="172"/>
+        <source>Выбрать папку для отчета</source>
+        <translation>Select directory for the report</translation>
+    </message>
+    <message>
+        <location filename="../report_window.py" line="176"/>
+        <source>Сгенерировать отчет</source>
+        <translation>Generate report</translation>
+    </message>
+    <message>
+        <location filename="../report_window.py" line="190"/>
+        <source>Шаги генерации отчета</source>
+        <translation>Steps to generate report</translation>
+    </message>
+    <message>
+        <location filename="../report_window.py" line="213"/>
         <source>Завершить генерацию отчетов</source>
         <translation>Finish report generation</translation>
     </message>
-	<message>
-        <location filename="../utils.py" line="100"/>
+    <message>
+        <location filename="../report_window.py" line="262"/>
+        <source>Выбрать папку</source>
+        <translation>Select directory</translation>
+    </message>
+    <message>
+        <location filename="../utils.py" line="101"/>
         <source>Версия прошивки {} {} несовместима с данной версией EPLab</source>
         <translation>{} firmware version {} is not compatible with this version of EPLab</translation>
     </message>
     <message>
-        <location filename="../about_window.py" line="34"/>
+        <location filename="../about_window.py" line="32"/>
         <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Более подробную информацию вы можете найти {}</source>
         <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). You can find more information about EyePoint product {}</translation>
     </message>
-	<message>
-        <location filename="../about_window.py" line="42"/>
+    <message>
+        <location filename="../about_window.py" line="40"/>
         <source>на нашем сайте.</source>
         <translation>on our website.</translation>
     </message>
-	<message>
-        <location filename="../about_window.py" line="50"/>
+    <message>
+        <location filename="../about_window.py" line="48"/>
         <source>О программе</source>
         <translation>About product</translation>
     </message>
-	<message>
-        <location filename="../about_window.py" line="70"/>
+    <message>
+        <location filename="../about_window.py" line="67"/>
         <source>Копировать</source>
         <translation>Copy</translation>
     </message>

@@ -10,7 +10,7 @@ from PyQt5.QtGui import QCloseEvent
 from epcore.elements import Board
 from epcore.product import EyePointProduct
 from report_generator import (ConfigAttributes, create_test_and_ref_boards, ObjectsForReport, ReportGenerator,
-                              ScalingTypes)
+                              ReportTypes, ScalingTypes)
 from language import Language
 
 
@@ -133,6 +133,7 @@ class ReportGenerationWindow(qt.QDialog):
                   ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
                   ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
                   ConfigAttributes.PIN_SIZE: 200,
+                  ConfigAttributes.REPORTS_TO_OPEN: [ReportTypes.FULL_REPORT],
                   ConfigAttributes.SCALING_TYPE: ScalingTypes.USER_DEFINED,
                   ConfigAttributes.THRESHOLD_SCORE: self._threshold_score,
                   ConfigAttributes.USER_DEFINED_SCALES: scales}
@@ -155,7 +156,7 @@ class ReportGenerationWindow(qt.QDialog):
         self.group_box_info.setChecked(False)
         self.text_edit_info.setVisible(False)
         if report_was_generated:
-            message = qApp.translate("t", "Отчет сгенерирован и сохранен в файл 'FOLDER'")
+            message = qApp.translate("t", "Отчет сгенерирован и сохранен в директорию 'FOLDER'")
             message = message.replace("FOLDER", report_dir_path)
         else:
             message = qApp.translate("t", "Отчет не был сгенерирован")
