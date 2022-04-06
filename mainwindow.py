@@ -411,6 +411,11 @@ class EPLabWindow(QMainWindow):
         self._iv_window: IVViewer = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
                                              solid_axis_enabled=False, axis_sign_enabled=False,
                                              screenshot_file_name_base="eplab")
+        self._iv_window.plot.set_constant_screenshot_directory(True)
+        dir_path = os.path.join(self.default_path, "Screenshot")
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        self._iv_window.plot.set_path_to_screenshot_directory(dir_path)
         self.reference_curve_plot = self._iv_window.plot.add_curve()
         self.test_curve_plot = self._iv_window.plot.add_curve()
         self.reference_curve_plot.set_curve_params(QColor(0, 128, 255, 200))
@@ -995,7 +1000,7 @@ class EPLabWindow(QMainWindow):
         image = self.grab(self.rect())
         filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
         dir_path = os.path.join(self.default_path, "Screenshot")
-        if not os.path.isdir(dir_path):
+        if not os.path.exists(dir_path):
             os.makedirs(dir_path)
         if system().lower() == "windows":
             filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
