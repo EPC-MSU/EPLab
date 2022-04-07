@@ -9,6 +9,7 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from PyQt5.QtGui import QCloseEvent
 from epcore.elements import Board
 from epcore.product import EyePointProduct
+import utils as ut
 from report_generator import (ConfigAttributes, create_test_and_ref_boards, ObjectsForReport, ReportGenerator,
                               ReportTypes, ScalingTypes)
 from language import Language
@@ -98,7 +99,7 @@ class ReportGenerationWindow(qt.QDialog):
         if folder_for_report:
             self._folder_for_report: str = folder_for_report
         else:
-            self._folder_for_report: str = "."
+            self._folder_for_report: str = ut.get_dir_name()
         self._number_of_steps_done: int = 0
         self._software_change_of_button_state: bool = False
         self._threshold_score: float = threshold_score
