@@ -1,13 +1,13 @@
 from typing import Optional
 from PIL import Image
 from PyQt5.QtCore import QPointF
-from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView
 from epcore.measurementmanager import MeasurementPlan
 
 
-def pil_to_pixmap(im):
+def pil_to_pixmap(im: Image) -> QPixmap:
     # See https://stackoverflow.com/questions/34697559/pil-image-to-qpixmap-conversion-issue
     if im.mode == "RGB":
         r, g, b = im.split()
@@ -30,26 +30,21 @@ class BoardWidget(QWidget):
 
     def __init__(self, parent=None):
         super(BoardWidget, self).__init__(parent)
-
         layout = QVBoxLayout(self)
         self.setStyleSheet("background-color:black;")
-
         self._scene = BoardView()
         layout.addWidget(self._scene)
 
+    def add_point(self, x: float, y: float, number: int):
+        self._scene.add_point(QPointF(x, y), number)
+
     def set_board(self, board: MeasurementPlan):
-
         self._scene.clear_scene()
-
         if board.image:
             self._scene.set_background(pil_to_pixmap(board.image))
             self._scene.scale_to_window_size(self.width(), self.height())
-
         for number, pin in board.all_pins_iterator():
             self._scene.add_point(QPointF(pin.x, pin.y), number=number)
-
-    def add_point(self, x: float, y: float, number: int):
-        self._scene.add_point(QPointF(x, y), number)
 
     @property
     def workspace(self) -> BoardView:
