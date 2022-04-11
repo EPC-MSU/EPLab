@@ -212,6 +212,7 @@ class EPLabWindow(QMainWindow):
         self._test_curve = None
         self._current_file_path = None
         self._score_wrapper.set_dummy_score()
+        self.line_comment_pin.clear()
 
     def _create_measurer_setting_actions(self):
         """
