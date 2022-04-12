@@ -11,11 +11,11 @@ from epcore.ivmeasurer.base import IVMeasurerBase
 from language import Language
 
 
-def get_convertor(data: Dict) -> Callable:
+def get_converter(data: Dict) -> Callable:
     """
-    Function returns suitable convertor.
+    Function returns suitable converter function.
     :param data: dictionary with type name for converter.
-    :return: convertor.
+    :return: converter.
     """
 
     value_type = data.get("value_type")
@@ -46,22 +46,26 @@ class MeasurerSettingsWindow(qt.QDialog):
         self.lang: str = "ru" if lang == Language.RU else "en"
         self._init_ui(settings, device_name)
 
-    def _create_button(self, data: Dict) -> qt.QWidget:
+    def _create_button(self, data: Dict) -> Optional[qt.QWidget]:
         """
         Method creates button that will call method of measurer for execution.
         :param data: information about created button.
         :return: created button.
         """
 
-        label = data[f"label_{self.lang}"]
+        label = data.get(f"label_{self.lang}")
+        if not label:
+            return None
         button = qt.QPushButton(label)
+        if data.get(f"tooltip_{self.lang}"):
+            button.setToolTip(data.get(f"tooltip_{self.lang}"))
         for member_name, member in getmembers(self._measurer):
-            if member_name == data["func"] and ismethod(member):
+            if member_name == data.get("func", None) and ismethod(member):
                 button.clicked.connect(member)
-                break
-        return button
+                return button
+        return None
 
-    def _create_combobox(self, data: Dict, current_value: Any) -> qt.QWidget:
+    def _create_combobox(self, data: Dict, current_value: Any) -> Optional[qt.QWidget]:
         """
         Method creates combobox to select one of several available values of
         parameter of measurer.
@@ -70,26 +74,31 @@ class MeasurerSettingsWindow(qt.QDialog):
         :return: created combobox.
         """
 
-        label = qt.QLabel(data[f"parameter_name_{self.lang}"])
+        label = data.get(f"parameter_name_{self.lang}")
+        labels = [item[f"label_{self.lang}"] for item in data.get("values", [])]
+        parameter = data.get("parameter")
+        if not label or not labels or not parameter:
+            return None
         combo = qt.QComboBox()
-        labels = [item[f"label_{self.lang}"] for item in data["values"]]
         combo.addItems(labels)
         # Find index of current value of parameter in list of available values
-        convertor = get_convertor(data)
-        for index, item in enumerate(data["values"]):
-            if convertor(item["value"]) == current_value:
+        converter = get_converter(data)
+        for index, item in enumerate(data.get("values", [])):
+            if converter(item["value"]) == current_value:
                 combo.setCurrentIndex(index)
                 break
         h_box = qt.QHBoxLayout()
-        h_box.addWidget(label)
+        h_box.addWidget(qt.QLabel(label))
         h_box.addWidget(combo)
         widget = qt.QWidget()
         widget.setLayout(h_box)
         data["widget"] = combo
-        self._widgets[data["parameter"]] = data
+        self._widgets[parameter] = data
+        if data.get(f"tooltip_{self.lang}"):
+            widget.setToolTip(data.get(f"tooltip_{self.lang}"))
         return widget
 
-    def _create_line_edit(self, data: Dict, current_value: Any) -> qt.QWidget:
+    def _create_line_edit(self, data: Dict, current_value: Any) -> Optional[qt.QWidget]:
         """
         Method creates line edit to input value of parameter of measurer.
         :param data: information about created line edit;
@@ -97,26 +106,31 @@ class MeasurerSettingsWindow(qt.QDialog):
         :return: created line edit.
         """
 
-        label = qt.QLabel(data[f"parameter_name_{self.lang}"])
+        label = data.get(f"parameter_name_{self.lang}")
+        parameter = data.get("parameter")
+        if not label or not parameter:
+            return None
         line_edit = qt.QLineEdit()
-        if data["value_type"] == "float":
+        if data.get("value_type") == "float":
             validator = QRegExpValidator(QRegExp(r"^\d*\.\d*$"))
             line_edit.setValidator(validator)
-        elif data["value_type"] == "int":
+        elif data.get("value_type") == "int":
             validator = QRegExpValidator(QRegExp(r"^\d+$"))
             line_edit.setValidator(validator)
         # Set current value
         line_edit.setText(str(current_value))
         h_box = qt.QHBoxLayout()
-        h_box.addWidget(label)
+        h_box.addWidget(qt.QLabel(label))
         h_box.addWidget(line_edit)
         widget = qt.QWidget()
         widget.setLayout(h_box)
         data["widget"] = line_edit
-        self._widgets[data["parameter"]] = data
+        self._widgets[parameter] = data
+        if data.get(f"tooltip_{self.lang}"):
+            widget.setToolTip(data.get(f"tooltip_{self.lang}"))
         return widget
 
-    def _create_radio_button(self, data: Dict, current_value: Any) -> qt.QWidget:
+    def _create_radio_button(self, data: Dict, current_value: Any) -> Optional[qt.QWidget]:
         """
         Method creates radio buttons to select one of several available values
         of parameter of measurer.
@@ -125,19 +139,30 @@ class MeasurerSettingsWindow(qt.QDialog):
         :return: created radio buttons.
         """
 
+        label = data.get(f"parameter_name_{self.lang}")
+        parameter = data.get("parameter")
+        values = data.get("values", [])
+        if not label or not parameter or not values:
+            return None
         v_box = qt.QVBoxLayout()
         radios = []
-        convertor = get_convertor(data)
-        for item in data["values"]:
+        converter = get_converter(data)
+        for item in values:
+            if not item.get(f"label_{self.lang}") or item.get("value") is None:
+                continue
             radio = qt.QRadioButton(item[f"label_{self.lang}"])
             v_box.addWidget(radio)
             radios.append(radio)
-            if convertor(item["value"]) == current_value:
+            if converter(item["value"]) == current_value:
                 radio.setChecked(True)
-        group = qt.QGroupBox(data[f"parameter_name_{self.lang}"])
+        if not radios:
+            return None
+        group = qt.QGroupBox(label)
         group.setLayout(v_box)
         data["widget"] = radios
-        self._widgets[data["parameter"]] = data
+        self._widgets[parameter] = data
+        if data.get(f"tooltip_{self.lang}"):
+            group.setToolTip(data.get(f"tooltip_{self.lang}"))
         return group
 
     @staticmethod
@@ -200,8 +225,8 @@ class MeasurerSettingsWindow(qt.QDialog):
         self.setMinimumWidth(300)
         self.setMaximumSize(400, 500)
         v_box = qt.QVBoxLayout()
-        if settings:
-            for element in settings["elements"]:
+        if isinstance(settings, dict) and settings.get("elements"):
+            for element in settings.get("elements", []):
                 widget = None
                 if "parameter" in element:
                     current_value = self._measurer.get_current_value_of_parameter(element["parameter"])
@@ -215,10 +240,10 @@ class MeasurerSettingsWindow(qt.QDialog):
                     widget = self._create_line_edit(element, current_value)
                 if widget is not None:
                     v_box.addWidget(widget)
-            buttons = qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel
-            self.buttonBox = qt.QDialogButtonBox(buttons)
+            self.buttonBox = qt.QDialogButtonBox(qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel)
             self.buttonBox.accepted.connect(self.accept)
             self.buttonBox.rejected.connect(self.reject)
+            v_box.addStretch(1)
             v_box.addWidget(self.buttonBox)
         else:
             v_box.addWidget(qt.QLabel(qApp.translate("t", "Нет настроек")), alignment=Qt.AlignHCenter)
@@ -235,11 +260,11 @@ class MeasurerSettingsWindow(qt.QDialog):
 
         if not text:
             return None
-        convertor = get_convertor(data)
-        min_value = convertor(data["min"])
-        max_value = convertor(data["max"])
+        converter = get_converter(data)
+        min_value = converter(data["min"])
+        max_value = converter(data["max"])
         try:
-            value = convertor(text)
+            value = converter(text)
         except ValueError:
             return None
         if min_value > value:
@@ -255,7 +280,7 @@ class MeasurerSettingsWindow(qt.QDialog):
 
         for parameter_name, data in self._widgets.items():
             value = None
-            convertor = get_convertor(data)
+            converter = get_converter(data)
             if data["type"] == "combo":
                 value = self._get_value_from_combo(data)
             elif data["type"] == "line_edit":
@@ -263,6 +288,6 @@ class MeasurerSettingsWindow(qt.QDialog):
             elif data["type"] == "radio_button":
                 value = self._get_value_from_radio(data)
             if value:
-                value = convertor(value)
+                value = converter(value)
                 self._measurer.set_value_to_parameter(parameter_name, value)
         self._measurer.set_settings()
