@@ -527,6 +527,7 @@ class EPLabWindow(QMainWindow):
 
     def _reconnect_periodic_task(self):
         # Draw empty curves
+        self._enable_widgets(False)
         self._test_curve = None
         if self._work_mode is WorkMode.compare:
             self._ref_curve = None
@@ -536,6 +537,7 @@ class EPLabWindow(QMainWindow):
         # Draw text
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
         if self._msystem.reconnect():
+            self._enable_widgets(True)
             # Reconnection success!
             self._device_errors_handler.reset_error()
             self._iv_window.plot.clear_center_text()
