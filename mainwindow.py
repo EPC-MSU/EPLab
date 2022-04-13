@@ -1331,3 +1331,17 @@ class EPLabWindow(QMainWindow):
         """
 
         self._report_directory = directory
+
+    def start_periodic_task(self):
+        """
+        Method starts periodic task to measure IV-curves on measurer.
+        """
+
+        self._timer.start()
+
+    def stop_periodic_task(self):
+        """
+        Method stops periodic task to measure IV-curves on measurer.
+        """
+
+        self._timer.stop()

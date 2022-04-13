@@ -2,11 +2,12 @@
 File with class for dialog window with settings of measurer.
 """
 
+import logging
 from inspect import getmembers, ismethod
 from typing import Any, Callable, Dict, Optional, Union
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import QCoreApplication as qApp, QRegExp, Qt
-from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtGui import QCloseEvent, QRegExpValidator, QTextCursor
 from epcore.ivmeasurer.base import IVMeasurerBase
 from language import Language
 
@@ -26,6 +27,19 @@ def get_converter(data: Dict) -> Callable:
     return str
 
 
+class LoggerHandler(logging.Handler):
+    """
+    Class to intercept messages from required logger.
+    """
+
+    def __init__(self, parent):
+        super().__init__()
+        self.parent: MeasurerSettingsWindow = parent
+
+    def emit(self, record: logging.LogRecord):
+        self.parent.show_message(self.format(record))
+
+
 class MeasurerSettingsWindow(qt.QDialog):
     """
     Class for dialog window with settings of measurer.
@@ -40,11 +54,16 @@ class MeasurerSettingsWindow(qt.QDialog):
         """
 
         super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        self._function_to_stop: Callable = None
+        self._handler: LoggerHandler = None
         self._measurer: IVMeasurerBase = measurer
+        self._parent = parent
         self._widgets: Dict = dict()
+        self.text_edit_logs: qt.QTextEdit = None
         lang = qApp.instance().property("language")
         self.lang: str = "ru" if lang == Language.RU else "en"
         self._init_ui(settings, device_name)
+        parent.stop_periodic_task()
 
     def _create_button(self, data: Dict) -> Optional[qt.QWidget]:
         """
@@ -59,6 +78,16 @@ class MeasurerSettingsWindow(qt.QDialog):
         button = qt.QPushButton(label)
         if data.get(f"tooltip_{self.lang}"):
             button.setToolTip(data.get(f"tooltip_{self.lang}"))
+        if data.get("logger_name") and self._handler is None:
+            self.text_edit_logs = qt.QTextEdit()
+            self.text_edit_logs.setReadOnly(True)
+            logger = logging.getLogger(data["logger_name"])
+            self._handler = LoggerHandler(self)
+            logger.addHandler(self._handler)
+        if data.get("func_to_stop"):
+            for member_name, member in getmembers(self._measurer):
+                if member_name == data["func_to_stop"] and ismethod(member):
+                    self._function_to_stop = member
         for member_name, member in getmembers(self._measurer):
             if member_name == data.get("func", None) and ismethod(member):
                 button.clicked.connect(member)
@@ -240,6 +269,8 @@ class MeasurerSettingsWindow(qt.QDialog):
                     widget = self._create_line_edit(element, current_value)
                 if widget is not None:
                     v_box.addWidget(widget)
+            if self.text_edit_logs:
+                v_box.addWidget(self.text_edit_logs)
             self.buttonBox = qt.QDialogButtonBox(qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel)
             self.buttonBox.accepted.connect(self.accept)
             self.buttonBox.rejected.connect(self.reject)
@@ -273,6 +304,17 @@ class MeasurerSettingsWindow(qt.QDialog):
             value = max_value
         return value
 
+    def closeEvent(self, event: QCloseEvent):
+        """
+        Method handles event to close dialog window.
+        :param event: event to close dialog window.
+        """
+
+        self._parent.start_periodic_task()
+        if self._function_to_stop:
+            self._function_to_stop()
+        super().closeEvent(event)
+
     def set_parameters(self):
         """
         Method sets values from dialog window to parameters of measurer.
@@ -291,3 +333,12 @@ class MeasurerSettingsWindow(qt.QDialog):
                 value = converter(value)
                 self._measurer.set_value_to_parameter(parameter_name, value)
         self._measurer.set_settings()
+
+    def show_message(self, message: str):
+        """
+        Slot shows message from measurer.
+        :param message: log.
+        """
+
+        self.text_edit_logs.append(message)
+        self.text_edit_logs.moveCursor(QTextCursor.End)
