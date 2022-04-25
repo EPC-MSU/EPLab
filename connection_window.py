@@ -289,6 +289,34 @@ class ComboBoxForDevices(qt.QComboBox):
     """
 
 
+class ComboBoxForMux(qt.QComboBox):
+    """
+    Class for combo box to show list of COM-ports for multiplexer.
+    """
+
+    MIN_WIDTH = 100
+
+    def __init__(self):
+        super().__init__()
+        self.setEditable(True)
+        self.setMinimumWidth(self.MIN_WIDTH)
+        if _get_platform() == "linux":
+            reg_exp = r"^(com:///dev/ttyACM\d+|virtual)$"
+            placeholder = "com:///dev/ttyACMx"
+        else:
+            reg_exp = r"^(com:\\\\\.\\COM\d+|virtual)$"
+            placeholder = "com:\\\\.\\COMx"
+        self.lineEdit().setValidator(QRegExpValidator(QRegExp(reg_exp)))
+        self.lineEdit().setPlaceholderText(placeholder)
+
+    def showPopup(self):
+        self.clear()
+        ports = sorted(comport.device for comport in serial.tools.list_ports.comports())
+        ports.append("virtual")
+        self.addItems(ports)
+        super().showPopup()
+
+
 class ConnectionWindow(qt.QDialog):
     """
     Class for dialog window to select devices for connection.
@@ -313,17 +341,45 @@ class ConnectionWindow(qt.QDialog):
             self._initial_type = MeasurerType.IVM10
         self._init_ui()
 
-    def _create_group_box_with_measurer_types(self) -> qt.QGroupBox:
+    def _create_group_box_with_multiplexer(self) -> qt.QGroupBox:
         """
-        Method creates group box to select measurer type.
-        :return: group box to select measurer type.
+        Method creates group box to select multiplexer.
+        :return: group box to select multiplexer.
+        """
+
+        dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
+        mux_image = QPixmap(os.path.join(dir_name, "mux.png"))
+        label = qt.QLabel("")
+        label.setPixmap(mux_image.scaled(200, 200, Qt.KeepAspectRatio))
+        label.setToolTip(qApp.translate("t", "Мультиплексор"))
+        self.combo_box_mux: ComboBoxForMux = ComboBoxForMux()
+        button_show_info = qt.QPushButton()
+        button_show_info.setIcon(QIcon(os.path.join(dir_name, "info.png")))
+        button_show_info.setToolTip(qApp.translate("t", "Помощь"))
+        button_show_info.setFixedWidth(20)
+        button_show_info.clicked.connect(lambda: self.show_help_info(False))
+        h_box_layout = qt.QHBoxLayout()
+        h_box_layout.addWidget(self.combo_box_mux)
+        h_box_layout.addWidget(button_show_info)
+        layout = qt.QVBoxLayout()
+        layout.addWidget(label)
+        layout.addLayout(h_box_layout)
+        layout.addStretch(1)
+        group_box = qt.QGroupBox(qApp.translate("t", "Мультиплексор"))
+        group_box.setLayout(layout)
+        return group_box
+
+    def _create_widget_with_measurer_types(self) -> qt.QWidget:
+        """
+        Method creates widget to select measurer type.
+        :return: widget to select measurer type.
         """
 
         layout = qt.QVBoxLayout()
-        group_box_measurer_type = qt.QGroupBox(qApp.translate("t", "Тип измерителя"))
-        group_box_measurer_type.setToolTip(qApp.translate("t", "Тип измерителя"))
-        group_box_measurer_type.setFixedSize(300, 300)
-        group_box_measurer_type.setLayout(layout)
+        widget_measurer_type = qt.QWidget()
+        widget_measurer_type.setToolTip(qApp.translate("t", "Тип измерителя"))
+        widget_measurer_type.setFixedSize(300, 300)
+        widget_measurer_type.setLayout(layout)
         widget = qt.QWidget()
         scroll_area = qt.QScrollArea(self)
         scroll_area.setWidgetResizable(True)
@@ -345,27 +401,7 @@ class ConnectionWindow(qt.QDialog):
             grid_layout.addWidget(label, row, 0)
             grid_layout.addWidget(radio_button, row, 1)
             self.radio_buttons_products[product_name] = radio_button
-        return group_box_measurer_type
-
-    def _create_group_box_with_multiplexer(self) -> qt.QGroupBox:
-        """
-        Method creates group box to select multiplexer.
-        :return: group box to select multiplexer.
-        """
-
-        dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
-        mux_image = QPixmap(os.path.join(dir_name, "mux.png"))
-        label = qt.QLabel("")
-        label.setPixmap(mux_image.scaled(150, 150, Qt.KeepAspectRatio))
-        label.setToolTip(qApp.translate("t", "Мультиплексор"))
-        self.combo_box_mux: ComboBoxForDevices = ComboBoxForDevices()
-        layout = qt.QVBoxLayout()
-        layout.addWidget(label)
-        layout.addWidget(self.combo_box_mux)
-        layout.addStretch(1)
-        group_box = qt.QGroupBox(qApp.translate("t", "Мультиплексор"))
-        group_box.setLayout(layout)
-        return group_box
+        return widget_measurer_type
 
     def _create_widgets(self):
         """
@@ -377,7 +413,7 @@ class ConnectionWindow(qt.QDialog):
         v_box_layout = qt.QVBoxLayout()
         group_box_measurers = qt.QGroupBox(qApp.translate("t", "Измерители"))
         group_box_measurers.setLayout(v_box_layout)
-        v_box_layout.addWidget(self._create_group_box_with_measurer_types())
+        v_box_layout.addWidget(self._create_widget_with_measurer_types())
         v_box_layout.addLayout(self._create_widgets_for_measurer_ports())
         h_box_layout = qt.QHBoxLayout()
         h_box_layout.addWidget(group_box_measurers)
@@ -413,7 +449,7 @@ class ConnectionWindow(qt.QDialog):
         self.button_show_info_1.setIcon(QIcon(os.path.join(dir_name, "info.png")))
         self.button_show_info_1.setToolTip(qApp.translate("t", "Помощь"))
         self.button_show_info_1.setFixedWidth(20)
-        self.button_show_info_1.clicked.connect(self.show_help_info)
+        self.button_show_info_1.clicked.connect(lambda: self.show_help_info(True))
         layout = qt.QHBoxLayout()
         layout.addWidget(self.combo_box_measurer_1)
         layout.addWidget(self.button_show_info_1)
@@ -426,7 +462,7 @@ class ConnectionWindow(qt.QDialog):
         self.button_show_info_2.setIcon(QIcon(os.path.join(dir_name, "info.png")))
         self.button_show_info_2.setToolTip(qApp.translate("t", "Помощь"))
         self.button_show_info_2.setFixedWidth(20)
-        self.button_show_info_2.clicked.connect(self.show_help_info)
+        self.button_show_info_2.clicked.connect(lambda: self.show_help_info(True))
         layout = qt.QHBoxLayout()
         layout.addWidget(self.combo_box_measurer_2)
         layout.addWidget(self.button_show_info_2)
@@ -656,10 +692,12 @@ class ConnectionWindow(qt.QDialog):
             combo_box.setValidator(validator)
             combo_box.lineEdit().setPlaceholderText(placeholder_text)
 
-    @pyqtSlot()
-    def show_help_info(self):
+    @pyqtSlot(bool)
+    def show_help_info(self, info_for_measurer: bool):
         """
         Slot shows help information how to enter user's COM-port or server address.
+        :param info_for_measurer: if True then help information for measurer
+        will be shown. Otherwise for multiplexer.
         """
 
         msg = qt.QMessageBox()
@@ -667,6 +705,14 @@ class ConnectionWindow(qt.QDialog):
         msg.setWindowTitle(qApp.translate("t", "Помощь"))
         icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media", "ico.png")
         msg.setWindowIcon(QIcon(icon_path))
+        if not info_for_measurer:
+            if "win" in _get_platform():
+                info = qApp.translate("t", "Введите значение последовательного порта в формате com:\\\\.\\COMx.")
+            else:
+                info = qApp.translate("t", "Введите значение последовательного порта в формате com:///dev/ttyACMx.")
+            msg.setText(info)
+            msg.exec_()
+            return
         product_name, _ = self._get_checked_product_name()
         measurer_type = ProductNames.get_measurer_type_by_product_name(product_name)
         if measurer_type == MeasurerType.IVM10 and "win" in _get_platform():
