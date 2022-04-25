@@ -313,18 +313,17 @@ class ConnectionWindow(qt.QDialog):
             self._initial_type = MeasurerType.IVM10
         self._init_ui()
 
-    def _create_widgets(self):
+    def _create_group_box_with_measurer_types(self) -> qt.QGroupBox:
         """
-        Method creates widgets in dialog window.
+        Method creates group box to select measurer type.
+        :return: group box to select measurer type.
         """
 
-        self.setWindowTitle(qApp.translate("t", "Настройка подключения"))
-        self.setToolTip(qApp.translate("t", "Настройка подключения"))
         layout = qt.QVBoxLayout()
-        group_box = qt.QGroupBox(qApp.translate("t", "Тип измерителя"))
-        group_box.setToolTip(qApp.translate("t", "Тип измерителя"))
-        group_box.setFixedSize(300, 300)
-        group_box.setLayout(layout)
+        group_box_measurer_type = qt.QGroupBox(qApp.translate("t", "Тип измерителя"))
+        group_box_measurer_type.setToolTip(qApp.translate("t", "Тип измерителя"))
+        group_box_measurer_type.setFixedSize(300, 300)
+        group_box_measurer_type.setLayout(layout)
         widget = qt.QWidget()
         scroll_area = qt.QScrollArea(self)
         scroll_area.setWidgetResizable(True)
@@ -346,6 +345,67 @@ class ConnectionWindow(qt.QDialog):
             grid_layout.addWidget(label, row, 0)
             grid_layout.addWidget(radio_button, row, 1)
             self.radio_buttons_products[product_name] = radio_button
+        return group_box_measurer_type
+
+    def _create_group_box_with_multiplexer(self) -> qt.QGroupBox:
+        """
+        Method creates group box to select multiplexer.
+        :return: group box to select multiplexer.
+        """
+
+        dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
+        mux_image = QPixmap(os.path.join(dir_name, "mux.png"))
+        label = qt.QLabel("")
+        label.setPixmap(mux_image.scaled(150, 150, Qt.KeepAspectRatio))
+        label.setToolTip(qApp.translate("t", "Мультиплексор"))
+        self.combo_box_mux: ComboBoxForDevices = ComboBoxForDevices()
+        layout = qt.QVBoxLayout()
+        layout.addWidget(label)
+        layout.addWidget(self.combo_box_mux)
+        layout.addStretch(1)
+        group_box = qt.QGroupBox(qApp.translate("t", "Мультиплексор"))
+        group_box.setLayout(layout)
+        return group_box
+
+    def _create_widgets(self):
+        """
+        Method creates widgets in dialog window.
+        """
+
+        self.setWindowTitle(qApp.translate("t", "Настройка подключения"))
+        self.setToolTip(qApp.translate("t", "Настройка подключения"))
+        v_box_layout = qt.QVBoxLayout()
+        group_box_measurers = qt.QGroupBox(qApp.translate("t", "Измерители"))
+        group_box_measurers.setLayout(v_box_layout)
+        v_box_layout.addWidget(self._create_group_box_with_measurer_types())
+        v_box_layout.addLayout(self._create_widgets_for_measurer_ports())
+        h_box_layout = qt.QHBoxLayout()
+        h_box_layout.addWidget(group_box_measurers)
+        h_box_layout.addWidget(self._create_group_box_with_multiplexer())
+        self.button_connect: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Подключить"))
+        self.button_connect.setToolTip(qApp.translate("t", "Подключить"))
+        self.button_connect.setDefault(True)
+        self.button_disconnect: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Отключить"))
+        self.button_disconnect.setToolTip(qApp.translate("t", "Отключить"))
+        self.button_cancel: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Отмена"))
+        self.button_cancel.setToolTip(qApp.translate("t", "Отмена"))
+        layout = qt.QHBoxLayout()
+        layout.addWidget(self.button_connect)
+        layout.addWidget(self.button_disconnect)
+        layout.addWidget(self.button_cancel)
+        v_box_layout = qt.QVBoxLayout(self)
+        v_box_layout.addLayout(h_box_layout)
+        v_box_layout.addLayout(layout)
+        v_box_layout.setSizeConstraint(qt.QLayout.SetFixedSize)
+        self.setLayout(v_box_layout)
+
+    def _create_widgets_for_measurer_ports(self) -> qt.QLayout:
+        """
+        Method creates widgets to select measurer ports.
+        :return: layout with created widgets.
+        """
+
+        dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
         self.combo_box_measurer_1: ComboBoxForDevices = ComboBoxForDevices()
         self.combo_box_measurer_1.setToolTip(qApp.translate("t", "Канал #1"))
         self.label_measurer_1: qt.QLabel = qt.QLabel(qApp.translate("t", "Канал #1"))
@@ -371,23 +431,7 @@ class ConnectionWindow(qt.QDialog):
         layout.addWidget(self.combo_box_measurer_2)
         layout.addWidget(self.button_show_info_2)
         form_layout.addRow(self.label_measurer_2, layout)
-        self.button_connect: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Подключить"))
-        self.button_connect.setToolTip(qApp.translate("t", "Подключить"))
-        self.button_connect.setDefault(True)
-        self.button_disconnect: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Отключить"))
-        self.button_disconnect.setToolTip(qApp.translate("t", "Отключить"))
-        self.button_cancel: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Отмена"))
-        self.button_cancel.setToolTip(qApp.translate("t", "Отмена"))
-        h_box_layout = qt.QHBoxLayout()
-        h_box_layout.addWidget(self.button_connect)
-        h_box_layout.addWidget(self.button_disconnect)
-        h_box_layout.addWidget(self.button_cancel)
-        v_box_layout = qt.QVBoxLayout(self)
-        v_box_layout.addWidget(group_box)
-        v_box_layout.addLayout(form_layout)
-        v_box_layout.addLayout(h_box_layout)
-        v_box_layout.setSizeConstraint(qt.QLayout.SetFixedSize)
-        self.setLayout(v_box_layout)
+        return form_layout
 
     def _get_checked_product_name(self) -> Tuple[ProductNames, qt.QRadioButton]:
         """
