@@ -21,9 +21,8 @@ from PyQt5.QtGui import QIcon, QPixmap, QRegExpValidator
 import serial
 import serial.tools.list_ports
 import serial.tools.list_ports_common
-from epcore.ivmeasurer.measurerasa import IVMeasurerASA, IVMeasurerVirtualASA
-from epcore.ivmeasurer.measurerivm import IVMeasurerIVM10
-from epcore.ivmeasurer.virtual import IVMeasurerVirtual
+from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerVirtual
+from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 import safe_opener
 import urpcbase as lib
 
@@ -289,32 +288,116 @@ class ComboBoxForDevices(qt.QComboBox):
     """
 
 
-class ComboBoxForMux(qt.QComboBox):
+class MuxWidget(qt.QGroupBox):
     """
-    Class for combo box to show list of COM-ports for multiplexer.
+    Class for widget to show list of COM-ports for multiplexer.
     """
 
-    MIN_WIDTH = 100
+    BUTTON_SHOW_HELP_WIDTH: int = 20
+    COMBO_BOX_MIN_WIDTH: int = 200
+    IMAGE_SIZE: int = 200
 
     def __init__(self):
         super().__init__()
-        self.setEditable(True)
-        self.setMinimumWidth(self.MIN_WIDTH)
+        self.combo_box_com_ports: qt.QComboBox = None
+        self._dir_name: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
+        self._init_ui()
+
+    def _init_combo_box(self) -> qt.QComboBox:
+        """
+        Method initializes combo box widget for COM-ports.
+        :return: combo box widget created for multiplexer.
+        """
+
+        combo_box = qt.QComboBox()
+        combo_box.setEditable(True)
+        combo_box.setMinimumWidth(self.COMBO_BOX_MIN_WIDTH)
         if _get_platform() == "linux":
             reg_exp = r"^(com:///dev/ttyACM\d+|virtual)$"
             placeholder = "com:///dev/ttyACMx"
         else:
             reg_exp = r"^(com:\\\\\.\\COM\d+|virtual)$"
             placeholder = "com:\\\\.\\COMx"
-        self.lineEdit().setValidator(QRegExpValidator(QRegExp(reg_exp)))
-        self.lineEdit().setPlaceholderText(placeholder)
+        combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(reg_exp)))
+        combo_box.lineEdit().setPlaceholderText(placeholder)
+        combo_box.setToolTip(placeholder)
+        return combo_box
 
-    def showPopup(self):
-        self.clear()
-        ports = sorted(comport.device for comport in serial.tools.list_ports.comports())
+    def _init_ui(self):
+        """
+        Method initializes widgets on main widget for multiplexer.
+        """
+
+        self.setTitle(qApp.translate("t", "Мультиплексор"))
+        mux_image = QPixmap(os.path.join(self._dir_name, "mux.png"))
+        label = qt.QLabel("")
+        label.setPixmap(mux_image.scaled(self.IMAGE_SIZE, self.IMAGE_SIZE, Qt.KeepAspectRatio))
+        label.setToolTip(qApp.translate("t", "Мультиплексор"))
+        self.combo_box_com_ports = self._init_combo_box()
+        self.update_com_ports()
+        button_show_help = qt.QPushButton()
+        button_show_help.setIcon(QIcon(os.path.join(self._dir_name, "info.png")))
+        button_show_help.setToolTip(qApp.translate("t", "Помощь"))
+        button_show_help.setFixedWidth(self.BUTTON_SHOW_HELP_WIDTH)
+        button_show_help.clicked.connect(self.show_help)
+        h_box_layout = qt.QHBoxLayout()
+        h_box_layout.addWidget(self.combo_box_com_ports)
+        h_box_layout.addWidget(button_show_help)
+        v_box_layout = qt.QVBoxLayout()
+        v_box_layout.addWidget(label)
+        v_box_layout.addLayout(h_box_layout)
+        v_box_layout.addStretch(1)
+        self.setLayout(v_box_layout)
+
+    @staticmethod
+    def _find_multiplexer(ports: List[str]) -> Optional[str]:
+        """
+        Method looks for COM-port of multiplexer.
+        :return: COM-port of multiplexer.
+        """
+
+        for port in ports:
+            try:
+                multiplexer = AnalogMultiplexer(port, True)
+                multiplexer.open_device()
+                multiplexer.get_identity_information()
+                return port
+            except Exception:
+                continue
+        return None
+
+    @pyqtSlot()
+    def show_help(self):
+        """
+        Slot shows help information how to enter COM-port.
+        """
+
+        msg_box = qt.QMessageBox()
+        msg_box.setIcon(qt.QMessageBox.Information)
+        msg_box.setWindowTitle(qApp.translate("t", "Помощь"))
+        msg_box.setWindowIcon(QIcon(os.path.join(self._dir_name, "ico.png")))
+        if "win" in _get_platform():
+            info = qApp.translate("t", "Введите значение последовательного порта в формате com:\\\\.\\COMx.")
+        else:
+            info = qApp.translate("t", "Введите значение последовательного порта в формате com:///dev/ttyACMx.")
+        msg_box.setText(info)
+        msg_box.exec_()
+
+    @pyqtSlot()
+    def update_com_ports(self):
+        """
+        Method updates list of COM-ports.
+        """
+
+        self.combo_box_com_ports.clear()
+        ports = sorted(_create_uri_name(comport.device) for comport in serial.tools.list_ports.comports())
+        multiplexer_port = self._find_multiplexer(ports)
         ports.append("virtual")
-        self.addItems(ports)
-        super().showPopup()
+        self.combo_box_com_ports.addItems(ports)
+        if multiplexer_port:
+            self.combo_box_com_ports.setCurrentText(multiplexer_port)
+        else:
+            self.combo_box_com_ports.setCurrentText("virtual")
 
 
 class ConnectionWindow(qt.QDialog):
@@ -340,34 +423,6 @@ class ConnectionWindow(qt.QDialog):
         if self._initial_type is None:
             self._initial_type = MeasurerType.IVM10
         self._init_ui()
-
-    def _create_group_box_with_multiplexer(self) -> qt.QGroupBox:
-        """
-        Method creates group box to select multiplexer.
-        :return: group box to select multiplexer.
-        """
-
-        dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
-        mux_image = QPixmap(os.path.join(dir_name, "mux.png"))
-        label = qt.QLabel("")
-        label.setPixmap(mux_image.scaled(200, 200, Qt.KeepAspectRatio))
-        label.setToolTip(qApp.translate("t", "Мультиплексор"))
-        self.combo_box_mux: ComboBoxForMux = ComboBoxForMux()
-        button_show_info = qt.QPushButton()
-        button_show_info.setIcon(QIcon(os.path.join(dir_name, "info.png")))
-        button_show_info.setToolTip(qApp.translate("t", "Помощь"))
-        button_show_info.setFixedWidth(20)
-        button_show_info.clicked.connect(lambda: self.show_help_info(False))
-        h_box_layout = qt.QHBoxLayout()
-        h_box_layout.addWidget(self.combo_box_mux)
-        h_box_layout.addWidget(button_show_info)
-        layout = qt.QVBoxLayout()
-        layout.addWidget(label)
-        layout.addLayout(h_box_layout)
-        layout.addStretch(1)
-        group_box = qt.QGroupBox(qApp.translate("t", "Мультиплексор"))
-        group_box.setLayout(layout)
-        return group_box
 
     def _create_widget_with_measurer_types(self) -> qt.QWidget:
         """
@@ -417,7 +472,8 @@ class ConnectionWindow(qt.QDialog):
         v_box_layout.addLayout(self._create_widgets_for_measurer_ports())
         h_box_layout = qt.QHBoxLayout()
         h_box_layout.addWidget(group_box_measurers)
-        h_box_layout.addWidget(self._create_group_box_with_multiplexer())
+        self.widget_mux: MuxWidget = MuxWidget()
+        h_box_layout.addWidget(self.widget_mux)
         self.button_connect: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Подключить"))
         self.button_connect.setToolTip(qApp.translate("t", "Подключить"))
         self.button_connect.setDefault(True)
