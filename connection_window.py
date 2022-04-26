@@ -350,17 +350,21 @@ class MuxWidget(qt.QGroupBox):
         self.setLayout(v_box_layout)
 
     @staticmethod
-    def _find_multiplexer(ports: List[str]) -> Optional[str]:
+    def _find_multiplexer_com_port(ports: List[str]) -> Optional[str]:
         """
         Method looks for COM-port of multiplexer.
+        :param ports: available COM-ports.
         :return: COM-port of multiplexer.
         """
 
         for port in ports:
             try:
+                if port == "virtual":
+                    return port
                 multiplexer = AnalogMultiplexer(port, True)
                 multiplexer.open_device()
                 multiplexer.get_identity_information()
+                multiplexer.close_device()
                 return port
             except Exception:
                 continue
@@ -391,13 +395,10 @@ class MuxWidget(qt.QGroupBox):
 
         self.combo_box_com_ports.clear()
         ports = sorted(_create_uri_name(comport.device) for comport in serial.tools.list_ports.comports())
-        multiplexer_port = self._find_multiplexer(ports)
         ports.append("virtual")
+        multiplexer_port = self._find_multiplexer_com_port(ports)
         self.combo_box_com_ports.addItems(ports)
-        if multiplexer_port:
-            self.combo_box_com_ports.setCurrentText(multiplexer_port)
-        else:
-            self.combo_box_com_ports.setCurrentText("virtual")
+        self.combo_box_com_ports.setCurrentText(multiplexer_port)
 
 
 class ConnectionWindow(qt.QDialog):
