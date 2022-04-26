@@ -316,10 +316,11 @@ class EPLabWindow(QMainWindow):
                    self.save_screen_action, self.open_window_board_action, self.freeze_curve_a_action,
                    self.freeze_curve_b_action, self.hide_curve_a_action, self.hide_curve_b_action,
                    self.search_optimal_action, self.comparing_mode_action, self.writing_mode_action,
-                   self.testing_mode_action, self.settings_mode_action, self.next_point_action, self.last_point_action,
-                   self.new_point_action, self.save_point_action, self.add_board_image_action,
-                   self.create_report_action, self.add_cursor_action, self.remove_cursor_action, self.scoreDock,
-                   self.freqDock, self.currentDock, self.voltageDock, self.commentDock, self.measurers_menu)
+                   self.testing_mode_action, self.settings_mode_action, self.next_point_action,
+                   self.previous_point_action, self.new_point_action, self.save_point_action,
+                   self.add_board_image_action, self.create_report_action, self.add_cursor_action,
+                   self.remove_cursor_action, self.scoreDock, self.freqDock, self.currentDock, self.voltageDock,
+                   self.commentDock, self.measurers_menu)
         for widget in widgets:
             widget.setEnabled(enabled)
 
@@ -436,7 +437,7 @@ class EPLabWindow(QMainWindow):
         self.open_file_action.triggered.connect(self._on_load_board)
         self.save_file_action.triggered.connect(self._on_save_board)
         self.save_as_file_action.triggered.connect(self._on_save_board_as)
-        self.last_point_action.triggered.connect(self._on_go_to_left_or_right_pin)
+        self.previous_point_action.triggered.connect(self._on_go_to_left_or_right_pin)
         self.num_point_line_edit = QLineEdit(self)
         self.num_point_line_edit.setFixedWidth(40)
         self.num_point_line_edit.setEnabled(False)
@@ -581,7 +582,6 @@ class EPLabWindow(QMainWindow):
             self._option_buttons[parameter][value].setChecked(True)
 
     def _set_plot_parameters(self, settings: MeasurementSettings):
-
         buttons = self._option_buttons[EyePointProduct.Parameter.sensitive]
         sensitive = buttons[self._product.settings_to_options(settings)[EyePointProduct.Parameter.sensitive]].text()
         voltage, current = self._iv_window.plot.get_minor_axis_step()
@@ -865,7 +865,7 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_go_to_left_or_right_pin(self):
-        if self.sender() is self.last_point_action:
+        if self.sender() is self.previous_point_action:
             self._measurement_plan.go_prev_pin()
         else:
             self._measurement_plan.go_next_pin()
@@ -1164,7 +1164,7 @@ class EPLabWindow(QMainWindow):
         self.writing_mode_action.setChecked(mode is WorkMode.write)
         self.testing_mode_action.setChecked(mode is WorkMode.test)
         self.next_point_action.setEnabled(mode is not WorkMode.compare)
-        self.last_point_action.setEnabled(mode is not WorkMode.compare)
+        self.previous_point_action.setEnabled(mode is not WorkMode.compare)
         self.num_point_line_edit.setEnabled(mode is not WorkMode.compare)
         self.new_point_action.setEnabled(mode is WorkMode.write)
         self.save_point_action.setEnabled(mode is WorkMode.write)

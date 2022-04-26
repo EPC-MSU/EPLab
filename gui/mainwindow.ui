@@ -216,7 +216,7 @@
      <string>План тестирования</string>
     </property>
     <addaction name="next_point_action"/>
-    <addaction name="last_point_action"/>
+    <addaction name="previous_point_action"/>
     <addaction name="separator"/>
     <addaction name="new_point_action"/>
     <addaction name="save_point_action"/>
@@ -286,7 +286,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="last_point_action"/>
+   <addaction name="previous_point_action"/>
    <addaction name="next_point_action"/>
   </widget>
   <widget class="QToolBar" name="toolBar_write">
@@ -571,7 +571,7 @@
     <string>Следующая точка</string>
    </property>
   </action>
-  <action name="last_point_action">
+  <action name="previous_point_action">
    <property name="enabled">
     <bool>false</bool>
    </property>

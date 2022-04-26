@@ -209,7 +209,7 @@
     <message>
         <location filename="mainwindow.ui" line="582"/>
         <source>Предыдущая точка</source>
-        <translation>Last point</translation>
+        <translation>Previous point</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="594"/>
