@@ -21,7 +21,7 @@ from PyQt5.QtGui import QIcon, QPixmap, QRegExpValidator
 import serial
 import serial.tools.list_ports
 import serial.tools.list_ports_common
-from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerVirtual
+from epcore.analogmultiplexer import AnalogMultiplexer
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 import safe_opener
 import urpcbase as lib
