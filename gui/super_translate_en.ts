@@ -474,67 +474,82 @@
         <source>Нет настроек</source>
         <translation>No settings</translation>
     </message>
-	<message>
-        <location filename="../connection_window.py" line="34"/>
-        <source>или</source>
-        <translation>or</translation>
+    <message>
+        <location filename="../connection_window.py" line="354"/>
+        <source>Мультиплексор</source>
+        <translation>Multiplexer</translation>
     </message>
-	<message>
-        <location filename="../connection_window.py" line="291"/>
-        <source>Свой вариант</source>
-        <translation>Your variant</translation>
-    </message>
-	<message>
-        <location filename="../connection_window.py" line="320"/>
-        <source>Настройка подключения</source>
-        <translation>Connection setup</translation>
-    </message>
-	<message>
-        <location filename="../connection_window.py" line="321"/>
+    <message>
+        <location filename="../connection_window.py" line="380"/>
         <source>Тип измерителя</source>
         <translation>Measurer type</translation>
     </message>
-	<message>
-        <location filename="../connection_window.py" line="346"/>
-        <source>Канал #1</source>
-        <translation>Channel #1</translation>
+    <message>
+        <location filename="../connection_window.py" line="411"/>
+        <source>Настройка подключения</source>
+        <translation>Connection setup</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="350"/>
-        <source>Канал #2</source>
-        <translation>Channel #2</translation>
+        <location filename="../connection_window.py" line="414"/>
+        <source>Измерители</source>
+        <translation>Measurers</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="354"/>
+        <location filename="../connection_window.py" line="421"/>
         <source>Подключить</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="355"/>
+        <location filename="../connection_window.py" line="424"/>
         <source>Отключить</source>
         <translation>Disconnect</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="637"/>
+        <location filename="../connection_window.py" line="446"/>
+        <source>Канал #1</source>
+        <translation>Channel #1</translation>
+    </message>
+    <message>
+        <location filename="../connection_window.py" line="450"/>
         <source>Помощь</source>
         <translation>Help</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="646"/>
+        <location filename="../connection_window.py" line="459"/>
+        <source>Канал #2</source>
+        <translation>Channel #2</translation>
+    </message>
+    <message>
+        <location filename="../connection_window.py" line="681"/>
+        <source>или</source>
+        <translation>or</translation>
+    </message>
+    <message>
+        <location filename="../connection_window.py" line="710"/>
+        <source>Введите значение последовательного порта в формате com:\\.\COMx.</source>
+        <translation>Enter serial port value in format com:\\.\COMx.</translation>
+    </message>
+    <message>
+        <location filename="../connection_window.py" line="712"/>
+        <source>Введите значение последовательного порта в формате com:///dev/ttyACMx.</source>
+        <translation>Enter serial port value in format com:///dev/ttyACMx.</translation>
+    </message>
+    <message>
+        <location filename="../connection_window.py" line="719"/>
         <source>Введите значение последовательного порта в формате com:\\.\COMx или адрес XiNet сервера в формате xi-net://x.x.x.x/x.</source>
         <translation>Enter serial port value in format com:\\.\COMx or XiNet server address in format xi-net://x.x.x.x/x.</translation>
     </message>
-	<message>
-        <location filename="../connection_window.py" line="649"/>
+    <message>
+        <location filename="../connection_window.py" line="722"/>
         <source>Введите значение последовательного порта в формате com:///dev/ttyACMx или адрес XiNet сервера в формате xi-net://x.x.x.x/x.</source>
         <translation>Enter serial port value in format com:///dev/ttyACMx or XiNet server address in format xi-net://x.x.x.x/x.</translation>
     </message>
-	<message>
-        <location filename="../connection_window.py" line="652"/>
+    <message>
+        <location filename="../connection_window.py" line="725"/>
         <source>Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.</source>
         <translation>Enter H10 server address in format xmlrpc://x.x.x.x.</translation>
     </message>
-	<message>
+    <message>
         <location filename="../language.py" line="89"/>
         <source>Выбор языка</source>
         <translation>Language selection</translation>

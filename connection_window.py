@@ -21,21 +21,20 @@ from PyQt5.QtGui import QIcon, QPixmap, QRegExpValidator
 import serial
 import serial.tools.list_ports
 import serial.tools.list_ports_common
-from epcore.ivmeasurer.measurerasa import IVMeasurerASA, IVMeasurerVirtualASA
-from epcore.ivmeasurer.measurerivm import IVMeasurerIVM10
-from epcore.ivmeasurer.virtual import IVMeasurerVirtual
+from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerVirtual
+from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 import safe_opener
 import urpcbase as lib
 
 logger = logging.getLogger("eplab")
-IP_ASA_REG_EXP = r"^xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
+IP_ASA_REG_EXP = r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual)$"
+PLACEHOLDER_ASA = "xmlrpc://x.x.x.x"
 if system().lower() == "windows":
-    IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+)$"
+    IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+|virtual)$"
     PLACEHOLDER_IVM = "com:\\\\.\\COMx {} xi-net://x.x.x.x/x"
 else:
-    IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+)$"
+    IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+|virtual)$"
     PLACEHOLDER_IVM = "com:///dev/ttyACMx {} xi-net://x.x.x.x/x"
-PLACEHOLDER_ASA = "xmlrpc://x.x.x.x"
 
 
 class ProductNames(Enum):
@@ -267,6 +266,140 @@ def reveal_asa(timeout: float = None) -> List[str]:
     return ip_addresses
 
 
+class ComboBoxForDevices(qt.QComboBox):
+    """
+    Class for combo box to show list of COM-ports or URLs.
+    """
+
+    MIN_WIDTH = 100
+
+    def __init__(self):
+        super().__init__()
+        self.setEditable(True)
+        self.setMinimumWidth(self.MIN_WIDTH)
+
+    """
+    def showPopup(self):
+        self.clear()
+        ports = sorted(comport.device for comport in serial.tools.list_ports.comports())
+        ports.append("virtual")
+        self.addItems(ports)
+        super().showPopup()
+    """
+
+
+class MuxWidget(qt.QGroupBox):
+    """
+    Class for widget to show list of COM-ports for multiplexer.
+    """
+
+    BUTTON_SHOW_HELP_WIDTH: int = 20
+    COMBO_BOX_MIN_WIDTH: int = 200
+    IMAGE_SIZE: int = 200
+
+    def __init__(self):
+        super().__init__()
+        self.combo_box_com_ports: qt.QComboBox = None
+        self._dir_name: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
+        self._init_ui()
+
+    def _init_combo_box(self) -> qt.QComboBox:
+        """
+        Method initializes combo box widget for COM-ports.
+        :return: combo box widget created for multiplexer.
+        """
+
+        combo_box = qt.QComboBox()
+        combo_box.setEditable(True)
+        combo_box.setMinimumWidth(self.COMBO_BOX_MIN_WIDTH)
+        if _get_platform() == "linux":
+            reg_exp = r"^(com:///dev/ttyACM\d+|virtual)$"
+            placeholder = "com:///dev/ttyACMx"
+        else:
+            reg_exp = r"^(com:\\\\\.\\COM\d+|virtual)$"
+            placeholder = "com:\\\\.\\COMx"
+        combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(reg_exp)))
+        combo_box.lineEdit().setPlaceholderText(placeholder)
+        combo_box.setToolTip(placeholder)
+        return combo_box
+
+    def _init_ui(self):
+        """
+        Method initializes widgets on main widget for multiplexer.
+        """
+
+        self.setTitle(qApp.translate("t", "Мультиплексор"))
+        mux_image = QPixmap(os.path.join(self._dir_name, "mux.png"))
+        label = qt.QLabel("")
+        label.setPixmap(mux_image.scaled(self.IMAGE_SIZE, self.IMAGE_SIZE, Qt.KeepAspectRatio))
+        label.setToolTip(qApp.translate("t", "Мультиплексор"))
+        self.combo_box_com_ports = self._init_combo_box()
+        self.update_com_ports()
+        button_show_help = qt.QPushButton()
+        button_show_help.setIcon(QIcon(os.path.join(self._dir_name, "info.png")))
+        button_show_help.setToolTip(qApp.translate("t", "Помощь"))
+        button_show_help.setFixedWidth(self.BUTTON_SHOW_HELP_WIDTH)
+        button_show_help.clicked.connect(self.show_help)
+        h_box_layout = qt.QHBoxLayout()
+        h_box_layout.addWidget(self.combo_box_com_ports)
+        h_box_layout.addWidget(button_show_help)
+        v_box_layout = qt.QVBoxLayout()
+        v_box_layout.addWidget(label)
+        v_box_layout.addLayout(h_box_layout)
+        v_box_layout.addStretch(1)
+        self.setLayout(v_box_layout)
+
+    @staticmethod
+    def _find_multiplexer(ports: List[str]) -> Optional[str]:
+        """
+        Method looks for COM-port of multiplexer.
+        :return: COM-port of multiplexer.
+        """
+
+        for port in ports:
+            try:
+                multiplexer = AnalogMultiplexer(port, True)
+                multiplexer.open_device()
+                multiplexer.get_identity_information()
+                return port
+            except Exception:
+                continue
+        return None
+
+    @pyqtSlot()
+    def show_help(self):
+        """
+        Slot shows help information how to enter COM-port.
+        """
+
+        msg_box = qt.QMessageBox()
+        msg_box.setIcon(qt.QMessageBox.Information)
+        msg_box.setWindowTitle(qApp.translate("t", "Помощь"))
+        msg_box.setWindowIcon(QIcon(os.path.join(self._dir_name, "ico.png")))
+        if "win" in _get_platform():
+            info = qApp.translate("t", "Введите значение последовательного порта в формате com:\\\\.\\COMx.")
+        else:
+            info = qApp.translate("t", "Введите значение последовательного порта в формате com:///dev/ttyACMx.")
+        msg_box.setText(info)
+        msg_box.exec_()
+
+    @pyqtSlot()
+    def update_com_ports(self):
+        """
+        Method updates list of COM-ports.
+        """
+
+        self.combo_box_com_ports.clear()
+        ports = sorted(_create_uri_name(comport.device) for comport in serial.tools.list_ports.comports())
+        multiplexer_port = self._find_multiplexer(ports)
+        ports.append("virtual")
+        self.combo_box_com_ports.addItems(ports)
+        if multiplexer_port:
+            self.combo_box_com_ports.setCurrentText(multiplexer_port)
+        else:
+            self.combo_box_com_ports.setCurrentText("virtual")
+
+
 class ConnectionWindow(qt.QDialog):
     """
     Class for dialog window to select devices for connection.
@@ -281,7 +414,6 @@ class ConnectionWindow(qt.QDialog):
         super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self.parent = parent
         self._urls: list = None
-        self._your_variant: str = qApp.translate("t", "Свой вариант")
         if initial_product_name is None:
             initial_product_name = ProductNames.EYEPOINT_A2
         self._initial_product_name: ProductNames = initial_product_name
@@ -292,33 +424,17 @@ class ConnectionWindow(qt.QDialog):
             self._initial_type = MeasurerType.IVM10
         self._init_ui()
 
-    def _check_ip_address(self, ip_address: str) -> bool:
+    def _create_widget_with_measurer_types(self) -> qt.QWidget:
         """
-        Method checks if given IP address is correct.
-        :return: True if IP address is correct.
-        """
-
-        checked_product_name, _ = self._get_checked_product_name()
-        if checked_product_name == ProductNames.EYEPOINT_H10:
-            reg_exp = IP_ASA_REG_EXP
-        else:
-            reg_exp = IP_IVM10_REG_EXP
-        if re.match(reg_exp, ip_address):
-            return True
-        return False
-
-    def _create_widgets(self):
-        """
-        Method creates widgets in dialog window.
+        Method creates widget to select measurer type.
+        :return: widget to select measurer type.
         """
 
-        self.setWindowTitle(qApp.translate("t", "Настройка подключения"))
-        self.setToolTip(qApp.translate("t", "Настройка подключения"))
         layout = qt.QVBoxLayout()
-        group_box = qt.QGroupBox(qApp.translate("t", "Тип измерителя"))
-        group_box.setToolTip(qApp.translate("t", "Тип измерителя"))
-        group_box.setFixedSize(300, 300)
-        group_box.setLayout(layout)
+        widget_measurer_type = qt.QWidget()
+        widget_measurer_type.setToolTip(qApp.translate("t", "Тип измерителя"))
+        widget_measurer_type.setFixedSize(300, 300)
+        widget_measurer_type.setLayout(layout)
         widget = qt.QWidget()
         scroll_area = qt.QScrollArea(self)
         scroll_area.setWidgetResizable(True)
@@ -340,35 +456,24 @@ class ConnectionWindow(qt.QDialog):
             grid_layout.addWidget(label, row, 0)
             grid_layout.addWidget(radio_button, row, 1)
             self.radio_buttons_products[product_name] = radio_button
-        form_layout = qt.QFormLayout()
-        self.combo_box_measurer_1: qt.QComboBox = qt.QComboBox()
-        self.combo_box_measurer_1.setToolTip(qApp.translate("t", "Канал #1"))
-        self.label_measurer_1: qt.QLabel = qt.QLabel(qApp.translate("t", "Канал #1"))
-        form_layout.addRow(self.label_measurer_1, self.combo_box_measurer_1)
-        self.line_edit_measurer_1: qt.QLineEdit = qt.QLineEdit()
-        self.line_edit_measurer_1.setToolTip(self._your_variant)
-        self.button_show_info_1 = qt.QPushButton()
-        self.button_show_info_1.setIcon(QIcon(os.path.join(dir_name, "info.png")))
-        self.button_show_info_1.setToolTip(qApp.translate("t", "Помощь"))
-        self.button_show_info_1.clicked.connect(self.show_help_info)
-        layout = qt.QHBoxLayout()
-        layout.addWidget(self.line_edit_measurer_1)
-        layout.addWidget(self.button_show_info_1)
-        form_layout.addRow(qt.QLabel(""), layout)
-        self.combo_box_measurer_2: qt.QComboBox = qt.QComboBox()
-        self.combo_box_measurer_2.setToolTip(qApp.translate("t", "Канал #2"))
-        self.label_measurer_2: qt.QLabel = qt.QLabel(qApp.translate("t", "Канал #2"))
-        form_layout.addRow(self.label_measurer_2, self.combo_box_measurer_2)
-        self.line_edit_measurer_2: qt.QLineEdit = qt.QLineEdit()
-        self.line_edit_measurer_2.setToolTip(self._your_variant)
-        self.button_show_info_2 = qt.QPushButton()
-        self.button_show_info_2.setIcon(QIcon(os.path.join(dir_name, "info.png")))
-        self.button_show_info_2.setToolTip(qApp.translate("t", "Помощь"))
-        self.button_show_info_2.clicked.connect(self.show_help_info)
-        layout = qt.QHBoxLayout()
-        layout.addWidget(self.line_edit_measurer_2)
-        layout.addWidget(self.button_show_info_2)
-        form_layout.addRow(qt.QLabel(""), layout)
+        return widget_measurer_type
+
+    def _create_widgets(self):
+        """
+        Method creates widgets in dialog window.
+        """
+
+        self.setWindowTitle(qApp.translate("t", "Настройка подключения"))
+        self.setToolTip(qApp.translate("t", "Настройка подключения"))
+        v_box_layout = qt.QVBoxLayout()
+        group_box_measurers = qt.QGroupBox(qApp.translate("t", "Измерители"))
+        group_box_measurers.setLayout(v_box_layout)
+        v_box_layout.addWidget(self._create_widget_with_measurer_types())
+        v_box_layout.addLayout(self._create_widgets_for_measurer_ports())
+        h_box_layout = qt.QHBoxLayout()
+        h_box_layout.addWidget(group_box_measurers)
+        self.widget_mux: MuxWidget = MuxWidget()
+        h_box_layout.addWidget(self.widget_mux)
         self.button_connect: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Подключить"))
         self.button_connect.setToolTip(qApp.translate("t", "Подключить"))
         self.button_connect.setDefault(True)
@@ -376,16 +481,49 @@ class ConnectionWindow(qt.QDialog):
         self.button_disconnect.setToolTip(qApp.translate("t", "Отключить"))
         self.button_cancel: qt.QPushButton = qt.QPushButton(qApp.translate("t", "Отмена"))
         self.button_cancel.setToolTip(qApp.translate("t", "Отмена"))
-        h_box_layout = qt.QHBoxLayout()
-        h_box_layout.addWidget(self.button_connect)
-        h_box_layout.addWidget(self.button_disconnect)
-        h_box_layout.addWidget(self.button_cancel)
+        layout = qt.QHBoxLayout()
+        layout.addWidget(self.button_connect)
+        layout.addWidget(self.button_disconnect)
+        layout.addWidget(self.button_cancel)
         v_box_layout = qt.QVBoxLayout(self)
-        v_box_layout.addWidget(group_box)
-        v_box_layout.addLayout(form_layout)
         v_box_layout.addLayout(h_box_layout)
+        v_box_layout.addLayout(layout)
         v_box_layout.setSizeConstraint(qt.QLayout.SetFixedSize)
         self.setLayout(v_box_layout)
+
+    def _create_widgets_for_measurer_ports(self) -> qt.QLayout:
+        """
+        Method creates widgets to select measurer ports.
+        :return: layout with created widgets.
+        """
+
+        dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
+        self.combo_box_measurer_1: ComboBoxForDevices = ComboBoxForDevices()
+        self.combo_box_measurer_1.setToolTip(qApp.translate("t", "Канал #1"))
+        self.label_measurer_1: qt.QLabel = qt.QLabel(qApp.translate("t", "Канал #1"))
+        self.button_show_info_1 = qt.QPushButton()
+        self.button_show_info_1.setIcon(QIcon(os.path.join(dir_name, "info.png")))
+        self.button_show_info_1.setToolTip(qApp.translate("t", "Помощь"))
+        self.button_show_info_1.setFixedWidth(20)
+        self.button_show_info_1.clicked.connect(lambda: self.show_help_info(True))
+        layout = qt.QHBoxLayout()
+        layout.addWidget(self.combo_box_measurer_1)
+        layout.addWidget(self.button_show_info_1)
+        form_layout = qt.QFormLayout()
+        form_layout.addRow(self.label_measurer_1, layout)
+        self.combo_box_measurer_2: ComboBoxForDevices = ComboBoxForDevices()
+        self.combo_box_measurer_2.setToolTip(qApp.translate("t", "Канал #2"))
+        self.label_measurer_2: qt.QLabel = qt.QLabel(qApp.translate("t", "Канал #2"))
+        self.button_show_info_2 = qt.QPushButton()
+        self.button_show_info_2.setIcon(QIcon(os.path.join(dir_name, "info.png")))
+        self.button_show_info_2.setToolTip(qApp.translate("t", "Помощь"))
+        self.button_show_info_2.setFixedWidth(20)
+        self.button_show_info_2.clicked.connect(lambda: self.show_help_info(True))
+        layout = qt.QHBoxLayout()
+        layout.addWidget(self.combo_box_measurer_2)
+        layout.addWidget(self.button_show_info_2)
+        form_layout.addRow(self.label_measurer_2, layout)
+        return form_layout
 
     def _get_checked_product_name(self) -> Tuple[ProductNames, qt.QRadioButton]:
         """
@@ -423,20 +561,18 @@ class ConnectionWindow(qt.QDialog):
         return ports, general_type
 
     @staticmethod
-    def _get_different_xi_net_ports(ports: List[str]) -> List[str]:
+    def _get_different_ports(ports: List[str]) -> List[str]:
         """
-        Method returns only different xi-net ports in the list of ports.
+        Method returns only different real ports in list of ports.
         :param ports: initial list of ports.
         :return: ports.
         """
 
-        xi_net_ports = True
+        different_ports = []
         for port in ports:
-            if not re.match(IP_IVM10_REG_EXP, port):
-                xi_net_ports = False
-        if xi_net_ports:
-            return list(set(ports))
-        return ports
+            if port == "virtual" or port not in different_ports:
+                different_ports.append(port)
+        return different_ports
 
     def _get_ports_for_ivm10(self, ports: List, port_1: str = None, port_2: str = None) -> List[List[str]]:
         """
@@ -459,7 +595,7 @@ class ConnectionWindow(qt.QDialog):
             ports_for_first_and_second[index] = [*ports_for_first_and_second[index], *ports]
             if MeasurerType.IVM10_VIRTUAL.value not in ports_for_first_and_second[index]:
                 ports_for_first_and_second[index].append(MeasurerType.IVM10_VIRTUAL.value)
-            if selected_ports[index] not in (MeasurerType.IVM10_VIRTUAL.value, self._your_variant):
+            if selected_ports[index] != MeasurerType.IVM10_VIRTUAL.value:
                 try:
                     ports_for_first_and_second[index - 1].remove(selected_ports[index])
                 except ValueError:
@@ -469,31 +605,22 @@ class ConnectionWindow(qt.QDialog):
                 if port not in spec_ports and MeasurerType.check_port_for_ivm10(port):
                     ports_for_first_and_second[index].append(port)
             ports_for_first_and_second[index] = sorted(ports_for_first_and_second[index])
-            ports_for_first_and_second[index].append(self._your_variant)
         return ports_for_first_and_second
 
-    def _init_asa(self, url_1: str = None, url_2: str = None):
+    def _init_asa(self, url_1: str = None):
         """
-        Method initializes available ports for first and second measurers of type ASA.
-        :param url_1: selected address for first measurer;
-        :param url_2: selected address for second measurer.
+        Method initializes available ports for first measurer of type ASA.
+        :param url_1: selected address for first measurer.
         """
 
         urls_for_first = [f"xmlrpc://{host}" for host in reveal_asa()]
-        urls_for_first.extend((self._your_variant, "virtual"))
-        urls_for_second = ("virtual",)
-        urls_for_first_and_second = urls_for_first, urls_for_second
-        urls = url_1, url_2
-        for index, combo_box in enumerate(self.combo_boxes):
-            combo_box.clear()
-            combo_box.addItems(urls_for_first_and_second[index])
-            if urls[index] in urls_for_first_and_second[index]:
-                combo_box.setCurrentText(urls[index])
-            else:
-                combo_box.setCurrentText("virtual")
-            self.line_edits[index].setText("xmlrpc://")
-            self.line_edits[index].setVisible(urls[index] == self._your_variant)
-            self.buttons_show_info[index].setVisible(urls[index] == self._your_variant)
+        urls_for_first.append("virtual")
+        self.combo_box_measurer_1.clear()
+        self.combo_box_measurer_1.addItems(urls_for_first)
+        if url_1 in urls_for_first:
+            self.combo_box_measurer_1.setCurrentText(url_1)
+        else:
+            self.combo_box_measurer_1.setCurrentText("virtual")
 
     def _init_ivm10(self, port_1: str = None, port_2: str = None):
         """
@@ -509,7 +636,7 @@ class ConnectionWindow(qt.QDialog):
         else:
             ports = [port_1, None]
         for index, port in enumerate(ports):
-            if port != self._your_variant and not MeasurerType.check_port_for_ivm10(port):
+            if not MeasurerType.check_port_for_ivm10(port):
                 ports[index] = None
         available_ports = find_urpc_ports("ivm")
         ports_for_first_and_second = self._get_ports_for_ivm10(available_ports, *ports)
@@ -520,9 +647,6 @@ class ConnectionWindow(qt.QDialog):
                 combo_box.setCurrentText(ports[index])
             else:
                 combo_box.setCurrentText("virtual")
-            self.line_edits[index].setText("")
-            self.line_edits[index].setVisible(ports[index] == self._your_variant)
-            self.buttons_show_info[index].setVisible(ports[index] == self._your_variant)
 
     def _init_ui(self):
         """
@@ -531,8 +655,6 @@ class ConnectionWindow(qt.QDialog):
 
         self._create_widgets()
         self.combo_boxes = self.combo_box_measurer_1, self.combo_box_measurer_2
-        self.line_edits = self.line_edit_measurer_1, self.line_edit_measurer_2
-        self.buttons_show_info = self.button_show_info_1, self.button_show_info_2
         self.radio_buttons_products[self._initial_product_name].setChecked(True)
         for combo_box in self.combo_boxes:
             combo_box.textActivated.connect(self.change_port)
@@ -541,6 +663,16 @@ class ConnectionWindow(qt.QDialog):
         self.button_disconnect.clicked.connect(self.disconnect)
         self.button_cancel.clicked.connect(self.close)
         self.adjustSize()
+
+    def _show_or_hide_second_measurer(self, status: bool = True):
+        """
+        Method shows or hides combo box for second measurer.
+        :param status: if True then combo box will be shown.
+        """
+
+        self.button_show_info_2.setVisible(status)
+        self.combo_box_measurer_2.setVisible(status)
+        self.label_measurer_2.setVisible(status)
 
     @pyqtSlot()
     def change_port(self):
@@ -553,7 +685,7 @@ class ConnectionWindow(qt.QDialog):
         if ProductNames.get_measurer_type_by_product_name(product_name) == MeasurerType.IVM10:
             self._init_ivm10(*ports)
         else:
-            self._init_asa(*ports)
+            self._init_asa(ports[0])
 
     @pyqtSlot()
     def connect(self):
@@ -565,13 +697,10 @@ class ConnectionWindow(qt.QDialog):
         for index, combo_box in enumerate(self.combo_boxes):
             if not combo_box.isVisible():
                 continue
-            port = combo_box.currentText()
-            if port == self._your_variant:
-                port = self.line_edits[index].text()
-                if not self._check_ip_address(port):
-                    return
-            ports.append(port)
-        ports = self._get_different_xi_net_ports(ports)
+            elif not combo_box.lineEdit().hasAcceptableInput():
+                return
+            ports.append(combo_box.currentText())
+        ports = self._get_different_ports(ports)
         while len(ports) < 2:
             ports.append("")
         selected_product_name, _ = self._get_checked_product_name()
@@ -603,11 +732,7 @@ class ConnectionWindow(qt.QDialog):
         if not status:
             return
         show_two_channels = self._get_checked_product_name()[0] not in ProductNames.get_single_channel_products()
-        self.combo_box_measurer_2.setVisible(show_two_channels)
-        self.label_measurer_2.setVisible(show_two_channels)
-        for index, line_edit in enumerate(self.line_edits):
-            line_edit.setVisible(False)
-            self.buttons_show_info[index].setVisible(False)
+        self._show_or_hide_second_measurer(show_two_channels)
         if measurer_type == MeasurerType.IVM10:
             placeholder_text = PLACEHOLDER_IVM.format(qApp.translate("t", "или"))
             validator = QRegExpValidator(QRegExp(IP_IVM10_REG_EXP), self)
@@ -615,18 +740,20 @@ class ConnectionWindow(qt.QDialog):
         elif measurer_type == MeasurerType.ASA:
             placeholder_text = PLACEHOLDER_ASA
             validator = QRegExpValidator(QRegExp(IP_ASA_REG_EXP), self)
-            self._init_asa(*self._initial_ports)
+            self._init_asa(self._initial_ports[0])
         else:
             placeholder_text = ""
             validator = QRegExpValidator(QRegExp(r""), self)
-        for line_edit in self.line_edits:
-            line_edit.setValidator(validator)
-            line_edit.setPlaceholderText(placeholder_text)
+        for combo_box in self.combo_boxes:
+            combo_box.setValidator(validator)
+            combo_box.lineEdit().setPlaceholderText(placeholder_text)
 
-    @pyqtSlot()
-    def show_help_info(self):
+    @pyqtSlot(bool)
+    def show_help_info(self, info_for_measurer: bool):
         """
         Slot shows help information how to enter user's COM-port or server address.
+        :param info_for_measurer: if True then help information for measurer
+        will be shown. Otherwise for multiplexer.
         """
 
         msg = qt.QMessageBox()
@@ -634,6 +761,14 @@ class ConnectionWindow(qt.QDialog):
         msg.setWindowTitle(qApp.translate("t", "Помощь"))
         icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media", "ico.png")
         msg.setWindowIcon(QIcon(icon_path))
+        if not info_for_measurer:
+            if "win" in _get_platform():
+                info = qApp.translate("t", "Введите значение последовательного порта в формате com:\\\\.\\COMx.")
+            else:
+                info = qApp.translate("t", "Введите значение последовательного порта в формате com:///dev/ttyACMx.")
+            msg.setText(info)
+            msg.exec_()
+            return
         product_name, _ = self._get_checked_product_name()
         measurer_type = ProductNames.get_measurer_type_by_product_name(product_name)
         if measurer_type == MeasurerType.IVM10 and "win" in _get_platform():
