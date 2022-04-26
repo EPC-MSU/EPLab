@@ -475,79 +475,79 @@
         <translation>No settings</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="354"/>
-        <source>Мультиплексор</source>
-        <translation>Multiplexer</translation>
-    </message>
-    <message>
-        <location filename="../connection_window.py" line="380"/>
-        <source>Тип измерителя</source>
-        <translation>Measurer type</translation>
-    </message>
-    <message>
-        <location filename="../connection_window.py" line="411"/>
+        <location filename="../connection_window/connection_window.py" line="68"/>
         <source>Настройка подключения</source>
         <translation>Connection setup</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="414"/>
+        <location filename="../connection_window/connection_window.py" line="77"/>
         <source>Измерители</source>
         <translation>Measurers</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="421"/>
+        <location filename="../connection_window/connection_window.py" line="83"/>
         <source>Подключить</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="424"/>
+        <location filename="../connection_window/connection_window.py" line="87"/>
         <source>Отключить</source>
         <translation>Disconnect</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="446"/>
-        <source>Канал #1</source>
-        <translation>Channel #1</translation>
+        <location filename="../connection_window/connection_window.py" line="96"/>
+        <source>Обновить</source>
+        <translation>Update</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="450"/>
+        <location filename="../connection_window/measurer_widget.py" line="61"/>
+        <source>Тип измерителя</source>
+        <translation>Measurer type</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/measurer_widget.py" line="207"/>
+        <source>Канал #{}</source>
+        <translation>Channel #{}</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/measurer_widget.py" line="215"/>
         <source>Помощь</source>
         <translation>Help</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="459"/>
-        <source>Канал #2</source>
-        <translation>Channel #2</translation>
-    </message>
-    <message>
-        <location filename="../connection_window.py" line="681"/>
+        <location filename="../connection_window/measurer_widget.py" line="260"/>
         <source>или</source>
         <translation>or</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="710"/>
-        <source>Введите значение последовательного порта в формате com:\\.\COMx.</source>
-        <translation>Enter serial port value in format com:\\.\COMx.</translation>
-    </message>
-    <message>
-        <location filename="../connection_window.py" line="712"/>
-        <source>Введите значение последовательного порта в формате com:///dev/ttyACMx.</source>
-        <translation>Enter serial port value in format com:///dev/ttyACMx.</translation>
-    </message>
-    <message>
-        <location filename="../connection_window.py" line="719"/>
+        <location filename="../connection_window/measurer_widget.py" line="286"/>
         <source>Введите значение последовательного порта в формате com:\\.\COMx или адрес XiNet сервера в формате xi-net://x.x.x.x/x.</source>
         <translation>Enter serial port value in format com:\\.\COMx or XiNet server address in format xi-net://x.x.x.x/x.</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="722"/>
+        <location filename="../connection_window/measurer_widget.py" line="289"/>
         <source>Введите значение последовательного порта в формате com:///dev/ttyACMx или адрес XiNet сервера в формате xi-net://x.x.x.x/x.</source>
         <translation>Enter serial port value in format com:///dev/ttyACMx or XiNet server address in format xi-net://x.x.x.x/x.</translation>
     </message>
     <message>
-        <location filename="../connection_window.py" line="725"/>
+        <location filename="../connection_window/measurer_widget.py" line="292"/>
         <source>Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.</source>
         <translation>Enter H10 server address in format xmlrpc://x.x.x.x.</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/mux_widget.py" line="54"/>
+        <source>Мультиплексор</source>
+        <translation>Multiplexer</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/mux_widget.py" line="96"/>
+        <source>Введите значение последовательного порта в формате com:\\.\COMx.</source>
+        <translation>Enter serial port value in format com:\\.\COMx.</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/mux_widget.py" line="98"/>
+        <source>Введите значение последовательного порта в формате com:///dev/ttyACMx.</source>
+        <translation>Enter serial port value in format com:///dev/ttyACMx.</translation>
     </message>
     <message>
         <location filename="../language.py" line="89"/>
