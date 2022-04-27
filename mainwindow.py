@@ -1032,9 +1032,7 @@ class EPLabWindow(QMainWindow):
 
         with self._device_errors_handler:
             if self._work_mode == WorkMode.write:
-                pin = self._measurement_plan.get_current_pin()
-                pin.measurements = []
-                self._measurement_plan.save_last_measurement_as_reference()
+                self._measurement_plan.save_last_measurement_as_reference(True)
             elif self._work_mode == WorkMode.test:
                 self._measurement_plan.save_last_measurement_as_test()
         self._on_save_comment()
