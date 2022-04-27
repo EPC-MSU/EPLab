@@ -12,6 +12,7 @@ from epcore.product import EyePointProduct
 import utils as ut
 from report_generator import (ConfigAttributes, create_test_and_ref_boards, ObjectsForReport, ReportGenerator,
                               ReportTypes, ScalingTypes)
+from common import WorkMode
 from language import Language
 
 
@@ -127,6 +128,8 @@ class ReportGenerationWindow(qt.QDialog):
 
         test_board, ref_board = create_test_and_ref_boards(self._board)
         scales = get_scales_for_iv_curves(self._board, self._parent.product)
+        report_to_open = ReportTypes.FULL_REPORT if self._parent.work_mode == WorkMode.write else\
+            ReportTypes.SHORT_REPORT
         config = {ConfigAttributes.BOARD_REF: ref_board,
                   ConfigAttributes.BOARD_TEST: test_board,
                   ConfigAttributes.DIRECTORY: self._folder_for_report,
@@ -134,7 +137,7 @@ class ReportGenerationWindow(qt.QDialog):
                   ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
                   ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
                   ConfigAttributes.PIN_SIZE: 200,
-                  ConfigAttributes.REPORTS_TO_OPEN: [ReportTypes.FULL_REPORT],
+                  ConfigAttributes.REPORTS_TO_OPEN: [report_to_open],
                   ConfigAttributes.SCALING_TYPE: ScalingTypes.USER_DEFINED,
                   ConfigAttributes.THRESHOLD_SCORE: self._threshold_score,
                   ConfigAttributes.USER_DEFINED_SCALES: scales}

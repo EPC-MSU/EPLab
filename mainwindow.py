@@ -103,6 +103,10 @@ class EPLabWindow(QMainWindow):
     def product(self) -> EyePointProduct:
         return self._product
 
+    @property
+    def work_mode(self) -> WorkMode:
+        return self._work_mode
+
     def _adjust_plot_params(self, settings: MeasurementSettings):
         """
         Method adjusts plot parameters.
