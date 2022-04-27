@@ -14,7 +14,7 @@
    <string>EPLab</string>
   </property>
   <widget class="QWidget" name="centralwidget"/>
-  <widget class="QDockWidget" name="scoreDock">
+  <widget class="QDockWidget" name="score_dock">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
      <horstretch>0</horstretch>
@@ -79,7 +79,7 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="freqDock">
+  <widget class="QDockWidget" name="freq_dock">
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -89,11 +89,11 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="freqLayout">
+   <widget class="QWidget" name="freq_layout">
     <layout class="QVBoxLayout" name="verticalLayout_7"/>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="currentDock">
+  <widget class="QDockWidget" name="current_dock">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
      <horstretch>0</horstretch>
@@ -109,11 +109,11 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="currentLayout">
+   <widget class="QWidget" name="current_layout">
     <layout class="QVBoxLayout" name="verticalLayout_8"/>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="voltageDock">
+  <widget class="QDockWidget" name="voltage_dock">
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -123,11 +123,11 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="voltageLayout">
+   <widget class="QWidget" name="voltage_layout">
     <layout class="QVBoxLayout" name="verticalLayout_9"/>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="commentDock">
+  <widget class="QDockWidget" name="comment_dock">
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
