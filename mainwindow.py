@@ -31,6 +31,7 @@ from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
 from language import Language, LanguageSelectionWindow
 from measurer_settings_window import MeasurerSettingsWindow
+from multiplexer import EntirePlanRunner
 from player import SoundPlayer
 from report_window import ReportGenerationThread, ReportGenerationWindow
 from score import ScoreWrapper
@@ -97,6 +98,10 @@ class EPLabWindow(QMainWindow):
             self.disconnect_devices()
         else:
             self.connect_devices(port_1, port_2)
+
+    @property
+    def measurement_plan(self) -> MeasurementPlan:
+        return self._measurement_plan
 
     @property
     def product(self) -> EyePointProduct:
@@ -219,6 +224,28 @@ class EPLabWindow(QMainWindow):
         self._current_file_path = None
         self._score_wrapper.set_dummy_score()
         self.line_comment_pin.clear()
+
+    def _continue_entire_plan_measurement(self) -> bool:
+        """
+        Method looks for pins in measurement plan that do not match configuration
+        of connected multiplexer. If there are such pins, then message is displayed
+        and user must decide whether to take measurements.
+        :return: True if measurements should be continued.
+        """
+
+        uncorrect_pins = self._measurement_plan.get_pins_without_multiplexer_outputs()
+        if not uncorrect_pins:
+            return True
+        print(uncorrect_pins)
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Information)
+        msg_box.setWindowTitle(qApp.translate("t", "Внимание"))
+        msg_box.setWindowIcon(self._icon)
+        msg_box.setText(qApp.translate("t", "Не во всех точках из плана тестирования будут проведены измерения."
+                                            " Продолжить?"))
+        msg_box.addButton(qApp.translate("t", "Да"), QMessageBox.YesRole)
+        msg_box.addButton(qApp.translate("t", "Нет"), QMessageBox.NoRole)
+        return not msg_box.exec_()
 
     def _create_measurer_setting_actions(self):
         """
@@ -485,6 +512,7 @@ class EPLabWindow(QMainWindow):
         self._current_file_path: str = None
         self._report_directory: str = None
         self._product_name: cw.ProductNames = None
+        self._entire_plan_runner: EntirePlanRunner = EntirePlanRunner(self)
 
         self._timer: QTimer = QTimer()
         self._timer.setInterval(10)
@@ -500,6 +528,8 @@ class EPLabWindow(QMainWindow):
 
     def _read_curves_periodic_task(self):
         if self._msystem.measurements_are_ready():
+            if self._entire_plan_runner.is_running:
+                self._entire_plan_runner.go_to_next_pin()
             if self._skip_curve:
                 self._skip_curve = False
             else:
@@ -1230,15 +1260,21 @@ class EPLabWindow(QMainWindow):
         """
 
         if status:
-            icon_name = "stop_auto_test.png"
+            if not self._continue_entire_plan_measurement():
+                self.start_or_stop_entire_plan_measurement_action.setChecked(False)
+                return
             menu_text = qApp.translate("t", "Остановить измерение всего плана")
+            icon = QIcon(os.path.join(self._dir_path_with_media, "stop_auto_test.png"))
+            self.start_or_stop_entire_plan_measurement_action.setIcon(icon)
+            self.start_or_stop_entire_plan_measurement_action.setText(menu_text)
+            self.start_or_stop_entire_plan_measurement_action.setToolTip(menu_text)
+            self._entire_plan_runner.start_measurements()
         else:
-            icon_name = "start_auto_test.png"
             menu_text = qApp.translate("t", "Запустить измерение всего плана")
-        icon = QIcon(os.path.join(self._dir_path_with_media, icon_name))
-        self.start_or_stop_entire_plan_measurement_action.setIcon(icon)
-        self.start_or_stop_entire_plan_measurement_action.setText(menu_text)
-        self.start_or_stop_entire_plan_measurement_action.setToolTip(menu_text)
+            icon = QIcon(os.path.join(self._dir_path_with_media, "start_auto_test.png"))
+            self.start_or_stop_entire_plan_measurement_action.setIcon(icon)
+            self.start_or_stop_entire_plan_measurement_action.setText(menu_text)
+            self.start_or_stop_entire_plan_measurement_action.setToolTip(menu_text)
 
     @pyqtSlot(WorkMode)
     def _on_switch_work_mode(self, mode: WorkMode):
