@@ -17,11 +17,10 @@ from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEd
                              QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
+from epcore.analogmultiplexer import BadMultiplexerOutputError
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, Pin
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
-from epcore.measurementmanager import MeasurementPlan, MeasurementSystem
-from epcore.measurementmanager.ivc_comparator import IVCComparator
-from epcore.measurementmanager.utils import Searcher
+from epcore.measurementmanager import IVCComparator, MeasurementPlan, MeasurementSystem, Searcher
 from epcore.product import EyePointProduct
 from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
@@ -565,7 +564,8 @@ class EPLabWindow(QMainWindow):
         """
 
         self._measurement_plan = MeasurementPlan(
-            Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]), measurer=self._msystem.measurers[0])
+            Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]), measurer=self._msystem.measurers[0],
+            multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
         self._last_saved_measurement_plan_data: Dict = self._measurement_plan.to_json()
 
     def _remove_ref_curve(self):
@@ -898,6 +898,10 @@ class EPLabWindow(QMainWindow):
             return
         try:
             self._measurement_plan.go_pin(num_point)
+        except BadMultiplexerOutputError:
+            show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                           qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход точки не "
+                                               "был установлен."))
         except ValueError as exc:
             show_exception(qApp.translate("t", "Ошибка открытия точки"),
                            qApp.translate("t", "Точка с таким номером не найдена на данной плате."), str(exc))
@@ -907,10 +911,15 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_go_to_left_or_right_pin(self):
-        if self.sender() is self.previous_point_action:
-            self._measurement_plan.go_prev_pin()
-        else:
-            self._measurement_plan.go_next_pin()
+        try:
+            if self.sender() is self.previous_point_action:
+                self._measurement_plan.go_prev_pin()
+            else:
+                self._measurement_plan.go_next_pin()
+        except BadMultiplexerOutputError:
+            show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                           qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход точки не "
+                                               "был установлен."))
         self._update_current_pin()
         self._open_board_window_if_needed()
 
@@ -945,7 +954,9 @@ class EPLabWindow(QMainWindow):
                                            "соответствует режиму работы EPLab")
                 show_exception(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
                 return
-            self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
+            self._measurement_plan = MeasurementPlan(
+                board, measurer=self._msystem.measurers[0],
+                multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
             self._board_window.set_board(self._measurement_plan)
@@ -1266,12 +1277,14 @@ class EPLabWindow(QMainWindow):
             self._report_generation_thread.stop_thread()
             self._report_generation_thread.wait()
 
-    def connect_devices(self, port_1: str, port_2: str, product_name: Optional[cw.ProductNames] = None):
+    def connect_devices(self, port_1: str, port_2: str, product_name: Optional[cw.ProductNames] = None,
+                        mux_port: str = None):
         """
         Method connects measurers with given ports.
         :param port_1: port for first measurer;
         :param port_2: port for second measurer;
-        :param product_name: name of product to work with application.
+        :param product_name: name of product to work with application;
+        :param mux_port: port for multiplexer.
         """
 
         if self._timer.isActive():
@@ -1279,7 +1292,7 @@ class EPLabWindow(QMainWindow):
         if self._msystem:
             for measurer in self._msystem.measurers:
                 measurer.close_device()
-        self._msystem = ut.create_measurers(port_1, port_2)
+        self._msystem = ut.create_measurement_system(port_1, port_2, mux_port)
         if not self._msystem:
             self.disconnect_devices()
             return

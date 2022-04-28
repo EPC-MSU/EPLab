@@ -126,9 +126,7 @@ class ConnectionWindow(qt.QDialog):
             if (port == "virtual" and
                     ut.ProductNames.get_measurer_type_by_product_name(selected_product_name) == ut.MeasurerType.ASA):
                 measurer_ports[index] = "virtualasa"
-        self.parent.connect_devices(*measurer_ports, selected_product_name)
-        mux_port = self.widget_mux.get_com_port()
-        print(mux_port)
+        self.parent.connect_devices(*measurer_ports, selected_product_name, self.widget_mux.get_com_port())
         self.close()
 
     @pyqtSlot()

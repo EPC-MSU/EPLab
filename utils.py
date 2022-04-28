@@ -13,8 +13,9 @@ from platform import system
 from typing import Dict, Iterable, List, Optional
 import serial.tools.list_ports
 from PyQt5.QtCore import QCoreApplication as qApp
+from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerBase, AnalogMultiplexerVirtual
 from epcore.elements import Board, MeasurementSettings
-from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
+from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EyePointProduct
@@ -59,16 +60,16 @@ def check_compatibility(product: EyePointProduct, board: Board) -> bool:
     return True
 
 
-def create_measurers(port_1: str, port_2: str) -> Optional[MeasurementSystem]:
+def create_measurers(url_1: str, url_2: str) -> Optional[List[IVMeasurerBase]]:
     """
-    Function creates measurers and measurement system.
-    :param port_1: port for first measurer;
-    :param port_2: port for second measurer.
-    :return: measurement system.
+    Function creates measurers.
+    :param url_1: port for first measurer;
+    :param url_2: port for second measurer.
+    :return: created measurers.
     """
 
     measurers = []
-    measurers_args = port_1, port_2
+    measurers_args = url_1, url_2
     virtual_already_has_been = False
     for measurer_arg in measurers_args:
         measurer_type = ""
@@ -114,7 +115,40 @@ def create_measurers(port_1: str, port_2: str) -> Optional[MeasurementSystem]:
     measurers[0].name = "test"
     if len(measurers) == 2:
         measurers[1].name = "ref"
-    return MeasurementSystem(measurers)
+    return measurers
+
+
+def create_measurement_system(measurer_url_1: str, measurer_url_2: str, mux_url: Optional[str] = None
+                              ) -> Optional[MeasurementSystem]:
+    """
+    Function creates measurement system.
+    :param measurer_url_1: URL for first measurer;
+    :param measurer_url_2: URL for second measurer;
+    :param mux_url: URL for multiplexer.
+    :return: measurement system.
+    """
+
+    measurers = create_measurers(measurer_url_1, measurer_url_2)
+    if measurers:
+        multiplexer = create_multiplexer(mux_url)
+        if multiplexer:
+            return MeasurementSystem(measurers=measurers, multiplexers=[multiplexer])
+        return MeasurementSystem(measurers=measurers)
+    return None
+
+
+def create_multiplexer(mux_url: Optional[str] = None) -> Optional[AnalogMultiplexerBase]:
+    """
+    Function creates multiplexer.
+    :param mux_url: URL for multiplexer.
+    :return: created multiplexer.
+    """
+
+    if mux_url == "virtual":
+        return AnalogMultiplexerVirtual(mux_url, defer_open=True)
+    elif "com:" in mux_url:
+        return AnalogMultiplexer(mux_url, defer_open=True)
+    return None
 
 
 def find_address_in_usb_hubs_tree(url: str) -> Optional[str]:
