@@ -168,15 +168,13 @@ class EPLabWindow(QMainWindow):
                     empty_pins += ", "
                 empty_pins += str(pin_index)
         if empty_pins:
-            process_name = qApp.translate("t", "сохранения плана тестирования")
             if "," in empty_pins:
-                text = qApp.translate("t", "Точки POINTS_PARAM не содержат сохраненных измерений. "
-                                           "Для PROCESS_NAME все точки должны содержать сохраненные измерения")
+                text = qApp.translate("t", "Точки POINTS_PARAM не содержат сохраненных измерений. Для сохранения "
+                                           "плана тестирования все точки должны содержать сохраненные измерения")
             else:
-                text = qApp.translate("t", "Точка POINTS_PARAM не содержит сохраненных измерений. "
-                                           "Для PROCESS_NAME все точки должны содержать сохраненные измерения")
+                text = qApp.translate("t", "Точка POINTS_PARAM не содержит сохраненных измерений. Для сохранения "
+                                           "плана тестирования все точки должны содержать сохраненные измерения")
             text = text.replace("POINTS_PARAM", empty_pins)
-            text = text.replace("PROCESS_NAME", process_name)
             show_exception(qApp.translate("t", "Ошибка"), text, "")
             return True
         return False
@@ -321,9 +319,10 @@ class EPLabWindow(QMainWindow):
                    self.search_optimal_action, self.comparing_mode_action, self.writing_mode_action,
                    self.testing_mode_action, self.settings_mode_action, self.next_point_action,
                    self.previous_point_action, self.new_point_action, self.save_point_action,
-                   self.add_board_image_action, self.create_report_action, self.add_cursor_action,
-                   self.remove_cursor_action, self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock,
-                   self.comment_dock, self.measurers_menu)
+                   self.add_board_image_action, self.create_report_action,
+                   self.start_or_stop_entire_plan_measurement_action, self.add_cursor_action, self.remove_cursor_action,
+                   self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock, self.comment_dock,
+                   self.measurers_menu)
         for widget in widgets:
             widget.setEnabled(enabled)
 
@@ -452,6 +451,8 @@ class EPLabWindow(QMainWindow):
         self.save_point_action.triggered.connect(self._on_save_pin)
         self.add_board_image_action.triggered.connect(self._on_load_board_image)
         self.create_report_action.triggered.connect(self._on_create_report)
+        self.start_or_stop_entire_plan_measurement_action.toggled.connect(
+            self._on_start_or_stop_entire_plan_measurement)
         self.about_action.triggered.connect(self._on_show_product_info)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
@@ -1220,6 +1221,25 @@ class EPLabWindow(QMainWindow):
         settings_window = SettingsWindow(self, self._score_wrapper.threshold)
         settings_window.exec()
 
+    @pyqtSlot(bool)
+    def _on_start_or_stop_entire_plan_measurement(self, status: bool):
+        """
+        Slot starts or stops measurements by multiplexer according to existing
+        measurement plan.
+        :param status: if True then measurements should be started.
+        """
+
+        if status:
+            icon_name = "stop_auto_test.png"
+            menu_text = qApp.translate("t", "Остановить измерение всего плана")
+        else:
+            icon_name = "start_auto_test.png"
+            menu_text = qApp.translate("t", "Запустить измерение всего плана")
+        icon = QIcon(os.path.join(self._dir_path_with_media, icon_name))
+        self.start_or_stop_entire_plan_measurement_action.setIcon(icon)
+        self.start_or_stop_entire_plan_measurement_action.setText(menu_text)
+        self.start_or_stop_entire_plan_measurement_action.setToolTip(menu_text)
+
     @pyqtSlot(WorkMode)
     def _on_switch_work_mode(self, mode: WorkMode):
         """
@@ -1237,6 +1257,8 @@ class EPLabWindow(QMainWindow):
         self.save_point_action.setEnabled(mode is not WorkMode.compare)
         self.add_board_image_action.setEnabled(mode is WorkMode.write)
         self.create_report_action.setEnabled(mode is not WorkMode.compare)
+        self.start_or_stop_entire_plan_measurement_action.setEnabled(mode is not WorkMode.compare and
+                                                                     self._measurement_plan.multiplexer is not None)
         self._change_work_mode(mode)
 
     def apply_settings(self, threshold: float):
@@ -1289,6 +1311,8 @@ class EPLabWindow(QMainWindow):
 
         if self._timer.isActive():
             self._timer.stop()
+        if self.start_or_stop_entire_plan_measurement_action.isChecked():
+            self.start_or_stop_entire_plan_measurement_action.setChecked(False)
         if self._msystem:
             for measurer in self._msystem.measurers:
                 measurer.close_device()
@@ -1313,6 +1337,8 @@ class EPLabWindow(QMainWindow):
         """
 
         self._timer.stop()
+        if self.start_or_stop_entire_plan_measurement_action.isChecked():
+            self.start_or_stop_entire_plan_measurement_action.setChecked(False)
         if self._msystem:
             for measurer in self._msystem.measurers:
                 measurer.close_device()

@@ -222,6 +222,7 @@
     <addaction name="save_point_action"/>
     <addaction name="add_board_image_action"/>
     <addaction name="create_report_action"/>
+    <addaction name="start_or_stop_entire_plan_measurement_action"/>
    </widget>
    <widget class="QMenu" name="measurers_menu">
     <property name="title">
@@ -727,6 +728,21 @@
    </property>
    <property name="text">
     <string>Сгенерировать отчет</string>
+   </property>
+  </action>
+  <action name="start_or_stop_entire_plan_measurement_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/start_auto_test.png</normaloff>../media/start_auto_test.png</iconset>
+   </property>
+   <property name="text">
+    <string>Запустить измерение всего плана</string>
    </property>
   </action>
  </widget>
