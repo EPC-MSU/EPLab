@@ -3,5 +3,6 @@ Module with widgets to work with multiplexer.
 """
 
 from multiplexer.entire_plan_measurement import EntirePlanRunner
+from multiplexer.mux_and_plan_window import MuxAndPlanWindow
 
-__all__ = ["EntirePlanRunner"]
+__all__ = ["EntirePlanRunner", "MuxAndPlanWindow"]

@@ -31,7 +31,7 @@ from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
 from language import Language, LanguageSelectionWindow
 from measurer_settings_window import MeasurerSettingsWindow
-from multiplexer import EntirePlanRunner
+from multiplexer import EntirePlanRunner, MuxAndPlanWindow
 from player import SoundPlayer
 from report_window import ReportGenerationThread, ReportGenerationWindow
 from score import ScoreWrapper
@@ -341,11 +341,11 @@ class EPLabWindow(QMainWindow):
         """
 
         widgets = (self.new_file_action, self.open_file_action, self.save_file_action, self.save_as_file_action,
-                   self.save_screen_action, self.open_window_board_action, self.freeze_curve_a_action,
-                   self.freeze_curve_b_action, self.hide_curve_a_action, self.hide_curve_b_action,
-                   self.search_optimal_action, self.comparing_mode_action, self.writing_mode_action,
-                   self.testing_mode_action, self.settings_mode_action, self.next_point_action,
-                   self.previous_point_action, self.new_point_action, self.save_point_action,
+                   self.save_screen_action, self.open_window_board_action, self.open_mux_window_action,
+                   self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
+                   self.hide_curve_b_action, self.search_optimal_action, self.comparing_mode_action,
+                   self.writing_mode_action, self.testing_mode_action, self.settings_mode_action,
+                   self.next_point_action, self.previous_point_action, self.new_point_action, self.save_point_action,
                    self.add_board_image_action, self.create_report_action,
                    self.start_or_stop_entire_plan_measurement_action, self.add_cursor_action, self.remove_cursor_action,
                    self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock, self.comment_dock,
@@ -462,6 +462,7 @@ class EPLabWindow(QMainWindow):
 
         self.connection_action.triggered.connect(self._on_connect_or_disconnect)
         self.open_window_board_action.triggered.connect(self._on_open_board_image)
+        self.open_mux_window_action.triggered.connect(self._on_open_mux_window)
         self.search_optimal_action.triggered.connect(self._on_search_optimal)
         self.new_file_action.triggered.connect(self._on_create_new_board)
         self.open_file_action.triggered.connect(self._on_load_board)
@@ -513,6 +514,7 @@ class EPLabWindow(QMainWindow):
         self._report_directory: str = None
         self._product_name: cw.ProductNames = None
         self._entire_plan_runner: EntirePlanRunner = EntirePlanRunner(self)
+        self._mux_and_plan_window: MuxAndPlanWindow = None
 
         self._timer: QTimer = QTimer()
         self._timer.setInterval(10)
@@ -662,6 +664,8 @@ class EPLabWindow(QMainWindow):
         with self._device_errors_handler:
             for measurer in self._msystem.measurers:
                 measurer.open_device()
+            for multiplexer in self._msystem.multiplexers:
+                multiplexer.open_device()
         self._settings_update_next_cycle = None
         self._skip_curve = False
         self._hide_curve_test = False
@@ -1020,6 +1024,16 @@ class EPLabWindow(QMainWindow):
             self._open_board_window_if_needed()
 
     @pyqtSlot()
+    def _on_open_mux_window(self):
+        """
+        Slot shows window with measurement plan and multiplexer pinout.
+        """
+
+        if not self._mux_and_plan_window:
+            self._mux_and_plan_window = MuxAndPlanWindow(self)
+            self._mux_and_plan_window.show()
+
+    @pyqtSlot()
     def _on_periodic_task(self):
         if self._device_errors_handler.all_ok:
             with self._device_errors_handler:
@@ -1283,6 +1297,7 @@ class EPLabWindow(QMainWindow):
         :param mode: work mode to set.
         """
 
+        self.open_mux_window_action.setEnabled(self._measurement_plan.multiplexer is not None)
         self.comparing_mode_action.setChecked(mode is WorkMode.compare)
         self.writing_mode_action.setChecked(mode is WorkMode.write)
         self.testing_mode_action.setChecked(mode is WorkMode.test)

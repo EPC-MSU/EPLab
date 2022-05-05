@@ -186,6 +186,7 @@
      <string>Вид</string>
     </property>
     <addaction name="open_window_board_action"/>
+    <addaction name="open_mux_window_action"/>
     <addaction name="freeze_curve_a_action"/>
     <addaction name="freeze_curve_b_action"/>
     <addaction name="hide_curve_a_action"/>
@@ -743,6 +744,15 @@
    </property>
    <property name="text">
     <string>Запустить измерение всего плана</string>
+   </property>
+  </action>
+  <action name="open_mux_window_action">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/open_mux.png</normaloff>../media/open_mux.png</iconset>
+   </property>
+   <property name="text">
+    <string>Открыть окно просмотра мультиплексора</string>
    </property>
   </action>
  </widget>
