@@ -9,7 +9,6 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp
 from PyQt5.QtGui import QRegExpValidator
 from epcore.analogmultiplexer import AnalogMultiplexerBase
 from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, MIN_CHANNEL_NUMBER
-from epcore.elements import MultiplexerOutput
 from epcore.measurementmanager import MeasurementPlan
 
 

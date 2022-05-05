@@ -2,7 +2,7 @@
 File with class for widget to show multiplexer pinout.
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, List
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from epcore.analogmultiplexer import AnalogMultiplexerBase, ModuleTypes
