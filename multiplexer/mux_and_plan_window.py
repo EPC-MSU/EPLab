@@ -5,7 +5,7 @@ measurement plan.
 
 import os
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp
+from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtGui import QIcon
 from multiplexer.measurement_plan_widget import MeasurementPlanWidget
 from multiplexer.multiplexer_pinout_widget import MultiplexerPinoutWidget
