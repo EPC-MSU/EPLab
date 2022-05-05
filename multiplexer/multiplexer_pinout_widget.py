@@ -2,7 +2,7 @@
 File with class for widget to show multiplexer pinout.
 """
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from epcore.analogmultiplexer import AnalogMultiplexerBase, ModuleTypes
@@ -191,6 +191,14 @@ class ModuleWidget(qt.QWidget):
         tooltip = qApp.translate("t", "Модуль {} {}")
         self.setToolTip(tooltip.format(self._module_type, self._module_number))
 
+    def set_connected_channel(self, channel_number: int):
+        """
+        Method sets given channel of module as turned on.
+        :param channel_number: channel number.
+        """
+
+        self._channels[channel_number].radio_button_turn_on_off.setChecked(True)
+
     @pyqtSlot(bool, int)
     def turn_on_off_channel(self, state: bool, channel_number: int):
         """
@@ -271,6 +279,10 @@ class MultiplexerPinoutWidget(qt.QWidget):
                 self._modules[module_index] = module
                 v_box_layout.addWidget(module)
                 module_index -= 1
+            connected_output = self._multiplexer.get_connected_channel()
+            if connected_output:
+                self._modules[connected_output.module_number].set_connected_channel(connected_output.channel_number)
+                self._turned_on_output = connected_output
             scroll_area = qt.QScrollArea()
             scroll_area.setWidgetResizable(True)
             widget = qt.QWidget()

@@ -1029,7 +1029,7 @@ class EPLabWindow(QMainWindow):
         Slot shows window with measurement plan and multiplexer pinout.
         """
 
-        if not self._mux_and_plan_window:
+        if not self._mux_and_plan_window or not self._mux_and_plan_window.isVisible():
             self._mux_and_plan_window = MuxAndPlanWindow(self)
             self._mux_and_plan_window.show()
 

@@ -5,7 +5,7 @@ measurement plan.
 
 import os
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import QCoreApplication as qApp
+from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon
 from multiplexer.measurement_plan_widget import MeasurementPlanWidget
 from multiplexer.multiplexer_pinout_widget import MultiplexerPinoutWidget
@@ -21,7 +21,7 @@ class MuxAndPlanWindow(qt.QDialog):
         :param parent: parent main window.
         """
 
-        super().__init__(parent)
+        super().__init__(parent, Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.measurement_plan_widget: MeasurementPlanWidget = None
         self.multiplexer_pinout_widget: MultiplexerPinoutWidget = None
         self._dir_name: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
@@ -39,7 +39,7 @@ class MuxAndPlanWindow(qt.QDialog):
         self.multiplexer_pinout_widget = MultiplexerPinoutWidget(self._parent)
         v_box_layout = qt.QVBoxLayout()
         v_box_layout.addWidget(self.multiplexer_pinout_widget)
-        # v_box_layout.addWidget(self.measurement_plan_widget)
+        v_box_layout.addWidget(self.measurement_plan_widget)
         v_box_layout.setSpacing(0)
         v_box_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(v_box_layout)
