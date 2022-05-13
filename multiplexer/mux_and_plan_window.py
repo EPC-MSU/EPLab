@@ -40,6 +40,8 @@ class MuxAndPlanWindow(qt.QWidget):
         self.multiplexer_pinout_widget = MultiplexerPinoutWidget(self._parent)
         self.multiplexer_pinout_widget.channel_added.connect(
             self.measurement_plan_widget.add_pin_with_mux_output_to_plan)
+        self.multiplexer_pinout_widget.process_finished.connect(self.measurement_plan_widget.turn_off_standby_mode)
+        self.multiplexer_pinout_widget.process_started.connect(self.measurement_plan_widget.turn_on_standby_mode)
         splitter = qt.QSplitter(Qt.Vertical)
         splitter.setContentsMargins(0, 0, 0, 0)
         splitter.addWidget(self.multiplexer_pinout_widget)
@@ -58,7 +60,7 @@ class MuxAndPlanWindow(qt.QWidget):
         :param new_work_mode: new work mode.
         """
 
-        self.measurement_plan_widget.enable_widgets(new_work_mode)
+        self.measurement_plan_widget.set_work_mode(new_work_mode)
         self.multiplexer_pinout_widget.set_work_mode(new_work_mode)
 
     def select_current_pin(self):

@@ -52,6 +52,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self._line_edits_module_numbers: List[qt.QLineEdit] = []
         # self._measurement_plan.add_callback_func_for_pin_changes(self.set_new_pin_parameters)
         self._selected_row: int = None
+        self._standby_mode: bool = False
         self._init_ui()
 
     def _add_pin_to_table(self, pin_index: int, pin: Pin):
@@ -276,6 +277,8 @@ class MeasurementPlanWidget(qt.QWidget):
         """
 
         self._parent.create_new_pin(channel)
+        value = self.progress_bar.value()
+        self.progress_bar.setValue(value + 1)
 
     @pyqtSlot(int, str)
     def check_channel_and_module_numbers(self, pin_index: int, _: str):
@@ -301,16 +304,6 @@ class MeasurementPlanWidget(qt.QWidget):
         if self._parent.measurement_plan:
             self._parent.measurement_plan.remove_all_callback_funcs_for_pin_changes()
         super().closeEvent(event)
-
-    def enable_widgets(self, work_mode: WorkMode):
-        """
-        Method enables or disables widgets on measurement plan widget according
-        to given work mode.
-        :param work_mode: work mode.
-        """
-
-        self.setEnabled(work_mode != WorkMode.COMPARE)
-        self.button_new_pin.setEnabled(work_mode == WorkMode.WRITE)
 
     @pyqtSlot(int)
     def save_comment(self, pin_index: int):
@@ -376,6 +369,41 @@ class MeasurementPlanWidget(qt.QWidget):
 
         row = self.table_widget_info.currentRow()
         self._parent.go_to_selected_pin(row)
+
+    def set_work_mode(self, work_mode: WorkMode):
+        """
+        Method enables or disables widgets on measurement plan widget according
+        to given work mode.
+        :param work_mode: work mode.
+        """
+
+        if not self._standby_mode:
+            self.setEnabled(work_mode != WorkMode.COMPARE)
+            self.button_new_pin.setEnabled(work_mode == WorkMode.WRITE)
+
+    @pyqtSlot()
+    def turn_off_standby_mode(self):
+        """
+        Slot turns off standby mode.
+        """
+
+        self._standby_mode = False
+        self.button_new_pin.setEnabled(not self._standby_mode)
+        self.progress_bar.setVisible(False)
+
+    @pyqtSlot(int)
+    def turn_on_standby_mode(self, total_number: int):
+        """
+        Method turns on standby mode.
+        :param total_number: number of steps in standby mode.
+        """
+
+        self._standby_mode = True
+        self.button_new_pin.setEnabled(not self._standby_mode)
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setMaximum(total_number)
+        self.progress_bar.setValue(0)
 
     def update_info(self):
         """

@@ -282,6 +282,8 @@ class MultiplexerPinoutWidget(qt.QWidget):
     """
 
     channel_added = pyqtSignal(MultiplexerOutput)
+    process_started = pyqtSignal(int)
+    process_finished = pyqtSignal()
 
     def __init__(self, parent):
         """
@@ -425,7 +427,9 @@ class MultiplexerPinoutWidget(qt.QWidget):
         for module_number in sorted(self._modules.keys()):
             module = self._modules[module_number]
             self._selected_channels.extend(module.get_selected_channels())
-        self._timer.start()
+        if self._selected_channels:
+            self.process_started.emit(len(self._selected_channels))
+            self._timer.start()
 
     @pyqtSlot(int)
     def select_all_channels(self, state: int):
@@ -443,12 +447,12 @@ class MultiplexerPinoutWidget(qt.QWidget):
         Method sends selected channel.
         """
 
-        if not self._selected_channels:
-            return
         channel = self._selected_channels.pop(0)
         self.channel_added.emit(channel)
         if self._selected_channels:
             self._timer.start()
+        else:
+            self.process_finished.emit()
 
     def set_connected_channel(self, channel: MultiplexerOutput):
         """
