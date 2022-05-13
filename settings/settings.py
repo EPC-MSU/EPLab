@@ -8,7 +8,7 @@ from PyQt5 import QtCore
 __all__ = ["Settings"]
 
 
-Modes = {"Compare": WorkMode.compare, "Write": WorkMode.write, "Test": WorkMode.test}
+Modes = {"Compare": WorkMode.COMPARE, "Write": WorkMode.WRITE, "Test": WorkMode.TEST}
 
 
 class SettingsEditor:
@@ -33,7 +33,7 @@ class Settings(SettingsHandler):
     sound_enabled = False
     hide_curve_a = False
     hide_curve_b = False
-    work_mode = WorkMode.compare
+    work_mode = WorkMode.COMPARE
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)

@@ -11,7 +11,7 @@ from functools import partial
 from platform import system
 from typing import Dict, List, Optional, Tuple
 import numpy as np
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QPointF, Qt as QtC, QTimer, QTranslator
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QPoint, QPointF, Qt as QtC, QTimer, QTranslator
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow, QMenu, QMessageBox,
                              QRadioButton, QScrollArea, QVBoxLayout, QWidget)
@@ -80,6 +80,7 @@ class EPLabWindow(QMainWindow):
     DEFAULT_POS_Y: int = 50
     DEFAULT_WIDTH_IN_LINUX: int = 700
     DEFAULT_WIDTH_IN_WINDOWS: int = 650
+    work_mode_changed = pyqtSignal(WorkMode)
 
     def __init__(self, product: EyePointProduct, port_1: Optional[str] = None, port_2: Optional[str] = None,
                  english: Optional[bool] = None):
@@ -146,19 +147,19 @@ class EPLabWindow(QMainWindow):
         if self._work_mode is mode:
             return
         # Comment is only for test and write mode
-        self.line_comment_pin.setEnabled(mode is not WorkMode.compare)
-        if mode is WorkMode.compare and len(self._msystem.measurers) < 2:
+        self.line_comment_pin.setEnabled(mode is not WorkMode.COMPARE)
+        if mode is WorkMode.COMPARE and len(self._msystem.measurers) < 2:
             # Remove reference curve in case we have only one IVMeasurer in compare mode
             self._remove_ref_curve()
         # Drag allowed only in write mode
-        self._board_window.workspace.allow_drag(mode is WorkMode.write)
+        self._board_window.workspace.allow_drag(mode is WorkMode.WRITE)
         # Disable settings in test mode
-        settings_enable = mode is not WorkMode.test
+        settings_enable = mode is not WorkMode.TEST
         for group in self._option_buttons.values():
             for button in group.values():
                 button.setEnabled(settings_enable)
         self._work_mode = mode
-        self._update_current_pin()
+        self.update_current_pin()
 
     def _check_measurement_plan_for_empty_pins(self) -> bool:
         """
@@ -224,6 +225,7 @@ class EPLabWindow(QMainWindow):
         self._current_file_path = None
         self._score_wrapper.set_dummy_score()
         self.line_comment_pin.clear()
+        self._mux_and_plan_window.close()
 
     def _continue_entire_plan_measurement(self) -> bool:
         """
@@ -236,7 +238,6 @@ class EPLabWindow(QMainWindow):
         uncorrect_pins = self._measurement_plan.get_pins_without_multiplexer_outputs()
         if not uncorrect_pins:
             return True
-        print(uncorrect_pins)
         msg_box = QMessageBox()
         msg_box.setIcon(QMessageBox.Information)
         msg_box.setWindowTitle(qApp.translate("t", "Внимание"))
@@ -473,10 +474,10 @@ class EPLabWindow(QMainWindow):
         self.num_point_line_edit.setFixedWidth(40)
         self.num_point_line_edit.setEnabled(False)
         self.toolBar_test.insertWidget(self.next_point_action, self.num_point_line_edit)
-        self.num_point_line_edit.returnPressed.connect(self._on_go_selected_pin)
+        self.num_point_line_edit.returnPressed.connect(self.go_to_selected_pin)
         self.next_point_action.triggered.connect(self._on_go_to_left_or_right_pin)
-        self.new_point_action.triggered.connect(self._on_create_new_pin)
-        self.save_point_action.triggered.connect(self._on_save_pin)
+        self.new_point_action.triggered.connect(self.create_new_pin)
+        self.save_point_action.triggered.connect(self.save_pin)
         self.add_board_image_action.triggered.connect(self._on_load_board_image)
         self.create_report_action.triggered.connect(self._on_create_report)
         self.start_or_stop_entire_plan_measurement_action.toggled.connect(
@@ -495,9 +496,9 @@ class EPLabWindow(QMainWindow):
         self.save_screen_action.triggered.connect(self._on_save_image)
         self.select_language_action.triggered.connect(self._on_select_language)
 
-        self.comparing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.compare))
-        self.writing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.write))
-        self.testing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.test))
+        self.comparing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.COMPARE))
+        self.writing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.WRITE))
+        self.testing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.TEST))
         self.settings_mode_action.triggered.connect(self._on_show_settings_window)
 
         self._work_mode: WorkMode = None
@@ -514,7 +515,8 @@ class EPLabWindow(QMainWindow):
         self._report_directory: str = None
         self._product_name: cw.ProductNames = None
         self._entire_plan_runner: EntirePlanRunner = EntirePlanRunner(self)
-        self._mux_and_plan_window: MuxAndPlanWindow = None
+        self._mux_and_plan_window: MuxAndPlanWindow = MuxAndPlanWindow(self)
+        self.work_mode_changed.connect(self._mux_and_plan_window.change_work_mode)
 
         self._timer: QTimer = QTimer()
         self._timer.setInterval(10)
@@ -538,7 +540,7 @@ class EPLabWindow(QMainWindow):
                 # Get curves from devices
                 curves = dict()
                 curves["test"] = self._msystem.measurers[0].get_last_cached_iv_curve()
-                if self._work_mode is WorkMode.compare and len(self._msystem.measurers) > 1:
+                if self._work_mode is WorkMode.COMPARE and len(self._msystem.measurers) > 1:
                     # Display two current curves
                     curves["ref"] = self._msystem.measurers[1].get_last_cached_iv_curve()
                 self._update_curves(curves, self._msystem.get_settings())
@@ -571,7 +573,7 @@ class EPLabWindow(QMainWindow):
         # Draw empty curves
         self._enable_widgets(False)
         self._test_curve = None
-        if self._work_mode is WorkMode.compare:
+        if self._work_mode is WorkMode.COMPARE:
             self._ref_curve = None
         self._update_curves()
         self.reference_curve_plot.set_curve(None)
@@ -684,37 +686,15 @@ class EPLabWindow(QMainWindow):
             self._create_scroll_areas_for_parameters(settings)
             options = self._product.settings_to_options(settings)
             self._set_options_to_ui(options)
+        self._mux_and_plan_window.update_info()
         self._work_mode = None
-        self._change_work_mode(WorkMode.compare)  # default mode - compare two curves
+        self._change_work_mode(WorkMode.COMPARE)  # default mode - compare two curves
         self._on_switch_work_mode(self._work_mode)
-        self._update_current_pin()
+        self.update_current_pin()
         self._init_threshold()
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
         self._current_file_path = None
-
-    def _update_current_pin(self):
-        """
-        Call this method when current pin index changed.
-        """
-
-        index = self._measurement_plan.get_current_index()
-        self.num_point_line_edit.setText(str(index))
-        self._board_window.workspace.select_point(index)
-        if self._work_mode in (WorkMode.test, WorkMode.write):
-            current_pin = self._measurement_plan.get_current_pin()
-            self.line_comment_pin.setText(current_pin.comment or "")
-            ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
-            if settings:
-                with self._device_errors_handler:
-                    curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
-                              "test_for_plan": None if not test_for_plan else test_for_plan.ivc}
-                    self._set_msystem_settings(settings)
-                    options = self._product.settings_to_options(settings)
-                    self._set_options_to_ui(options)
-                    self._update_curves(curves, self._msystem.measurers[0].get_settings())
-            else:
-                self._update_curves({"ref": None, "test_for_plan": None}, self._msystem.measurers[0].get_settings())
 
     def _update_curves(self, curves: Dict[str, Optional[IVCurve]] = None, settings: MeasurementSettings = None):
         """
@@ -743,7 +723,7 @@ class EPLabWindow(QMainWindow):
             self.test_curve_plot.set_curve(None)
         self.test_curve_plot_from_plan.set_curve(self._test_curve_from_plan)
         # Update score
-        if self._ref_curve and self._test_curve and self._work_mode != WorkMode.write:
+        if self._ref_curve and self._test_curve and self._work_mode != WorkMode.WRITE:
             assert settings is not None
             score = self._calculate_score(self._ref_curve, self._test_curve, settings)
             self._score_wrapper.set_score(score)
@@ -799,16 +779,16 @@ class EPLabWindow(QMainWindow):
         """
 
         self._measurement_plan.go_pin(number)
-        self._update_current_pin()
+        self.update_current_pin()
 
     @pyqtSlot(QPointF)
     def _on_board_right_click(self, point: QPointF):
-        if self._work_mode is WorkMode.write:
+        if self._work_mode is WorkMode.WRITE:
             # Create new pin
             pin = Pin(x=point.x(), y=point.y(), measurements=[])
             self._measurement_plan.append_pin(pin)
             self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
-            self._update_current_pin()
+            self.update_current_pin()
 
     @pyqtSlot()
     def _on_connect_or_disconnect(self):
@@ -854,31 +834,7 @@ class EPLabWindow(QMainWindow):
             self._reset_board()
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._board_window.set_board(self._measurement_plan)
-            self._update_current_pin()
-
-    @pyqtSlot()
-    def _on_create_new_pin(self):
-        """
-        Slot creates new pin.
-        """
-
-        if self._measurement_plan.image:
-            # Place at the center of current viewpoint by default
-            width = self._board_window.workspace.width()
-            height = self._board_window.workspace.height()
-            point = self._board_window.workspace.mapToScene(int(width / 2), int(height / 2))
-            pin = Pin(point.x(), point.y(), measurements=[])
-        else:
-            pin = Pin(0, 0, measurements=[])
-        self._measurement_plan.append_pin(pin)
-        self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
-        self.line_comment_pin.setText(pin.comment or "")
-
-        # It is important to initialize pin with real measurement. Otherwise user can create
-        # several empty points and they will not be unique. This will cause some errors during
-        # ufiv validation.
-        # self._on_save_pin()
-        self._update_current_pin()
+            self.update_current_pin()
 
     @pyqtSlot()
     def _on_create_report(self):
@@ -923,28 +879,6 @@ class EPLabWindow(QMainWindow):
                 self._skip_curve = True
 
     @pyqtSlot()
-    def _on_go_selected_pin(self):
-        try:
-            num_point = int(self.num_point_line_edit.text())
-        except ValueError:
-            show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                           qApp.translate("t", "Неверный формат номера точки. Номер точки может принимать только "
-                                               "целочисленное значение!"))
-            return
-        try:
-            self._measurement_plan.go_pin(num_point)
-        except BadMultiplexerOutputError:
-            show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                           qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход точки не "
-                                               "был установлен."))
-        except ValueError as exc:
-            show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                           qApp.translate("t", "Точка с таким номером не найдена на данной плате."), str(exc))
-            return
-        self._update_current_pin()
-        self._open_board_window_if_needed()
-
-    @pyqtSlot()
     def _on_go_to_left_or_right_pin(self):
         try:
             if self.sender() is self.previous_point_action:
@@ -955,7 +889,7 @@ class EPLabWindow(QMainWindow):
             show_exception(qApp.translate("t", "Ошибка открытия точки"),
                            qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход точки не "
                                                "был установлен."))
-        self._update_current_pin()
+        self.update_current_pin()
         self._open_board_window_if_needed()
 
     @pyqtSlot(bool)
@@ -995,7 +929,7 @@ class EPLabWindow(QMainWindow):
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
             self._board_window.set_board(self._measurement_plan)
-            self._update_current_pin()
+            self.update_current_pin()
             self._open_board_window_if_needed()
 
     @pyqtSlot()
@@ -1009,7 +943,7 @@ class EPLabWindow(QMainWindow):
         if filename:
             epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
             self._board_window.set_board(self._measurement_plan)
-            self._update_current_pin()
+            self.update_current_pin()
             self._open_board_window_if_needed()
 
     @pyqtSlot()
@@ -1029,8 +963,7 @@ class EPLabWindow(QMainWindow):
         Slot shows window with measurement plan and multiplexer pinout.
         """
 
-        if not self._mux_and_plan_window or not self._mux_and_plan_window.isVisible():
-            self._mux_and_plan_window = MuxAndPlanWindow(self)
+        if not self._mux_and_plan_window.isVisible():
             self._mux_and_plan_window.show()
 
     @pyqtSlot()
@@ -1082,21 +1015,8 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_save_comment(self):
-        self._measurement_plan.get_current_pin().comment = self.line_comment_pin.text()
-
-    @pyqtSlot()
-    def _on_save_pin(self):
-        """
-        Slot saves IV-curve to current pin.
-        """
-
-        with self._device_errors_handler:
-            if self._work_mode == WorkMode.write:
-                self._measurement_plan.save_last_measurement_as_reference(True)
-            elif self._work_mode == WorkMode.test:
-                self._measurement_plan.save_last_measurement_as_test()
-        self._on_save_comment()
-        self._update_current_pin()
+        pin_index = self._measurement_plan.get_current_index()
+        self._measurement_plan.save_comment_to_pin_with_index(pin_index, self.line_comment_pin.text())
 
     @pyqtSlot()
     def _on_save_image(self):
@@ -1297,20 +1217,23 @@ class EPLabWindow(QMainWindow):
         :param mode: work mode to set.
         """
 
-        self.open_mux_window_action.setEnabled(self._measurement_plan.multiplexer is not None)
-        self.comparing_mode_action.setChecked(mode is WorkMode.compare)
-        self.writing_mode_action.setChecked(mode is WorkMode.write)
-        self.testing_mode_action.setChecked(mode is WorkMode.test)
-        self.next_point_action.setEnabled(mode is not WorkMode.compare)
-        self.previous_point_action.setEnabled(mode is not WorkMode.compare)
-        self.num_point_line_edit.setEnabled(mode is not WorkMode.compare)
-        self.new_point_action.setEnabled(mode is WorkMode.write)
-        self.save_point_action.setEnabled(mode is not WorkMode.compare)
-        self.add_board_image_action.setEnabled(mode is WorkMode.write)
-        self.create_report_action.setEnabled(mode is not WorkMode.compare)
-        self.start_or_stop_entire_plan_measurement_action.setEnabled(mode is not WorkMode.compare and
+        # self.open_mux_window_action.setEnabled(self._measurement_plan.multiplexer is not None)
+        self.comparing_mode_action.setChecked(mode is WorkMode.COMPARE)
+        self.writing_mode_action.setChecked(mode is WorkMode.WRITE)
+        self.testing_mode_action.setChecked(mode is WorkMode.TEST)
+        self.next_point_action.setEnabled(mode is not WorkMode.COMPARE)
+        self.previous_point_action.setEnabled(mode is not WorkMode.COMPARE)
+        self.num_point_line_edit.setEnabled(mode is not WorkMode.COMPARE)
+        self.new_point_action.setEnabled(mode is WorkMode.WRITE)
+        self.save_point_action.setEnabled(mode is not WorkMode.COMPARE)
+        self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
+        self.create_report_action.setEnabled(mode is not WorkMode.COMPARE)
+        self.start_or_stop_entire_plan_measurement_action.setEnabled(mode is not WorkMode.COMPARE and
                                                                      self._measurement_plan.multiplexer is not None)
         self._change_work_mode(mode)
+        self.work_mode_changed.emit(mode)
+        if mode in (WorkMode.TEST, WorkMode.WRITE) and self._measurement_plan.multiplexer:
+            self._on_open_mux_window()
 
     def apply_settings(self, threshold: float):
         """
@@ -1346,6 +1269,7 @@ class EPLabWindow(QMainWindow):
             if msg_box.exec_() == 0:
                 if self._on_save_board() is None:
                     event.ignore()
+        self._mux_and_plan_window.close()
         if self._report_generation_thread:
             self._report_generation_thread.stop_thread()
             self._report_generation_thread.wait()
@@ -1367,6 +1291,8 @@ class EPLabWindow(QMainWindow):
         if self._msystem:
             for measurer in self._msystem.measurers:
                 measurer.close_device()
+            for multiplexer in self._msystem.multiplexers:
+                multiplexer.close_device()
         self._msystem = ut.create_measurement_system(port_1, port_2, mux_port)
         if not self._msystem:
             self.disconnect_devices()
@@ -1381,6 +1307,31 @@ class EPLabWindow(QMainWindow):
         self._timer.start()
         self._enable_widgets(True)
         self._set_widgets_to_init_state()
+
+    @pyqtSlot()
+    def create_new_pin(self, multiplexer_output=None):
+        """
+        Slot creates new pin.
+        :param multiplexer_output: multiplexer output for new pin.
+        """
+
+        if self._measurement_plan.image:
+            # Place at the center of current viewpoint by default
+            width = self._board_window.workspace.width()
+            height = self._board_window.workspace.height()
+            point = self._board_window.workspace.mapToScene(int(width / 2), int(height / 2))
+            pin = Pin(point.x(), point.y(), measurements=[], multiplexer_output=multiplexer_output)
+        else:
+            pin = Pin(0, 0, measurements=[], multiplexer_output=multiplexer_output)
+        self._measurement_plan.append_pin(pin)
+        self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
+        self.line_comment_pin.setText(pin.comment or "")
+
+        # It is important to initialize pin with real measurement. Otherwise user can create
+        # several empty points and they will not be unique. This will cause some errors during
+        # ufiv validation.
+        # self._on_save_pin()
+        self.update_current_pin()
 
     def disconnect_devices(self):
         """
@@ -1417,16 +1368,45 @@ class EPLabWindow(QMainWindow):
         settings = Settings()
         settings.set_measurement_settings(self._msystem.get_settings())
         if self.testing_mode_action.isChecked():
-            settings.work_mode = WorkMode.test
+            settings.work_mode = WorkMode.TEST
         elif self.writing_mode_action.isChecked():
-            settings.work_mode = WorkMode.write
+            settings.work_mode = WorkMode.WRITE
         else:
-            settings.work_mode = WorkMode.compare
+            settings.work_mode = WorkMode.COMPARE
         settings.score_threshold = threshold
         settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
         return settings
+
+    @pyqtSlot()
+    def go_to_selected_pin(self, num_point: int = None):
+        """
+        Slot sets given pin as current.
+        :param num_point: index of pin to be set as current.
+        """
+
+        if num_point is not None:
+            self.num_point_line_edit.setText(str(num_point))
+        try:
+            num_point = int(self.num_point_line_edit.text())
+        except ValueError:
+            show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                           qApp.translate("t", "Неверный формат номера точки. Номер точки может принимать только "
+                                               "целочисленное значение!"))
+            return
+        try:
+            self._measurement_plan.go_pin(num_point)
+        except BadMultiplexerOutputError:
+            show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                           qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход точки не "
+                                               "был установлен."))
+        except ValueError as exc:
+            show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                           qApp.translate("t", "Точка с таким номером не найдена на данной плате."), str(exc))
+            return
+        self.update_current_pin()
+        self._open_board_window_if_needed()
 
     def open_settings_from_file(self, file_path: str) -> float:
         """
@@ -1461,6 +1441,20 @@ class EPLabWindow(QMainWindow):
             tool_bar.setToolButtonStyle(style)
         super().resizeEvent(event)
 
+    @pyqtSlot()
+    def save_pin(self):
+        """
+        Slot saves IV-curve to current pin.
+        """
+
+        with self._device_errors_handler:
+            if self._work_mode == WorkMode.WRITE:
+                self._measurement_plan.save_last_measurement_as_reference(True)
+            elif self._work_mode == WorkMode.TEST:
+                self._measurement_plan.save_last_measurement_as_test()
+        self._on_save_comment()
+        self.update_current_pin()
+
     def set_report_directory(self, directory: str):
         """
         Method sets new value for report directory.
@@ -1468,3 +1462,28 @@ class EPLabWindow(QMainWindow):
         """
 
         self._report_directory = directory
+
+    def update_current_pin(self):
+        """
+        Call this method when current pin index changed.
+        """
+
+        index = self._measurement_plan.get_current_index()
+        self.num_point_line_edit.setText(str(index))
+        self._board_window.workspace.select_point(index)
+        if self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
+            current_pin = self._measurement_plan.get_current_pin()
+            self.line_comment_pin.setText(current_pin.comment or "")
+            ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
+            if settings:
+                with self._device_errors_handler:
+                    curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
+                              "test_for_plan": None if not test_for_plan else test_for_plan.ivc}
+                    self._set_msystem_settings(settings)
+                    options = self._product.settings_to_options(settings)
+                    self._set_options_to_ui(options)
+                    self._update_curves(curves, self._msystem.measurers[0].get_settings())
+            else:
+                self._update_curves({"ref": None, "test_for_plan": None}, self._msystem.measurers[0].get_settings())
+        if self._mux_and_plan_window:
+            self._mux_and_plan_window.select_current_pin()

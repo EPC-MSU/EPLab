@@ -4,9 +4,10 @@ File with class for widget to show multiplexer pinout.
 
 from typing import Dict, List
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
-from epcore.analogmultiplexer import AnalogMultiplexerBase, ModuleTypes
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QTimer
+from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
+from common import WorkMode
 
 
 class ChannelWidget(qt.QWidget):
@@ -19,7 +20,6 @@ class ChannelWidget(qt.QWidget):
     COLOR_SELECTED = "green"
     COLOR_TURNED_ON = "red"
     SIZE = 5
-    selected = pyqtSignal(bool, int)
     turned_on = pyqtSignal(bool, int)
 
     def __init__(self, channel_number: int, up: bool = True):
@@ -64,7 +64,6 @@ class ChannelWidget(qt.QWidget):
         self.check_box_select_channel = qt.QCheckBox()
         tooltip = qApp.translate("t", "Выбрать канал {}")
         self.check_box_select_channel.setToolTip(tooltip.format(self._channel_number))
-        self.check_box_select_channel.stateChanged.connect(self.send_to_select_channel)
         self.check_box_select_channel.setStyleSheet(
             "QCheckBox {border: none; spacing: 0px;}"
             f"QCheckBox::indicator {{width: {self.SIZE}px; height: {self.SIZE}px; border: 1px solid "
@@ -91,14 +90,29 @@ class ChannelWidget(qt.QWidget):
         tooltip = qApp.translate("t", "Канал {}")
         self.setToolTip(tooltip.format(self._channel_number))
 
-    @pyqtSlot(int)
-    def send_to_select_channel(self, state: int):
+    def is_selected(self) -> bool:
         """
-        Slot sends signal that channel was selected.
-        :param state: state.
+        Method returns True if channel was selected.
+        :return: True if channel was selected.
         """
 
-        self.selected.emit(state == Qt.Checked, self._channel_number)
+        return self.check_box_select_channel.isChecked()
+
+    def enable_select_widget(self, state):
+        """
+        Method enables or disables check box widget to select channel.
+        :param state: if True then check box will be enabled.
+        """
+
+        self.check_box_select_channel.setEnabled(state)
+
+    def select_channel(self, state):
+        """
+        Method selects or unselects channel.
+        :param state: if True then channel should be selected.
+        """
+
+        self.check_box_select_channel.setChecked(state)
 
     @pyqtSlot(bool)
     def send_to_turn_on_off(self, state: bool):
@@ -143,7 +157,6 @@ class ModuleWidget(qt.QWidget):
         self._module_number: int = module_number
         self._module_type: ModuleTypes = module_type
         self._channels: Dict[int, ChannelWidget] = {}
-        self._selected_channels: List[ChannelWidget] = []
         self._turned_on_channel: ChannelWidget = None
         self._init_ui()
 
@@ -191,6 +204,38 @@ class ModuleWidget(qt.QWidget):
         tooltip = qApp.translate("t", "Модуль {} {}")
         self.setToolTip(tooltip.format(self._module_type, self._module_number))
 
+    def enable_select_channels(self, state: bool):
+        """
+        Method enables or disables widgets on channel widgets to select channel.
+        :param state: if True then select widgets will be enabled.
+        """
+
+        for channel in self._channels.values():
+            channel.enable_select_widget(state)
+
+    def get_selected_channels(self) -> List[MultiplexerOutput]:
+        """
+        Method returns selected channels for given module.
+        :return: list with selected channels.
+        """
+
+        selected_channels = []
+        for channel_number in sorted(self._channels.keys()):
+            channel = self._channels[channel_number]
+            if channel.is_selected():
+                selected_channels.append(MultiplexerOutput(channel_number=channel_number,
+                                                           module_number=self._module_number))
+        return selected_channels
+
+    def select_all_channels(self, state: bool):
+        """
+        Method selects or unselects all channels of module.
+        :param state: if True then all channels should be selected.
+        """
+
+        for channel in self._channels.values():
+            channel.select_channel(state)
+
     def set_connected_channel(self, channel_number: int):
         """
         Method sets given channel of module as turned on.
@@ -236,6 +281,8 @@ class MultiplexerPinoutWidget(qt.QWidget):
     Class to show multiplexer pinout.
     """
 
+    channel_added = pyqtSignal(MultiplexerOutput)
+
     def __init__(self, parent):
         """
         :param parent: parent main window.
@@ -245,9 +292,16 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self.check_box_select_all: qt.QCheckBox = None
         self.button_add_points_to_plan: qt.QPushButton = None
         self.button_start_or_stop_entire_plan_measurement: qt.QPushButton = None
+        self.label_no_mux: qt.QLabel = None
+        self.layout_for_modules: qt.QVBoxLayout = None
+        self.scroll_area: qt.QScrollArea = None
         self._parent = parent
         self._modules: Dict[int, ModuleWidget] = {}
-        self._multiplexer: AnalogMultiplexerBase = self._parent.measurement_plan.multiplexer
+        self._selected_channels: List[MultiplexerOutput] = []
+        self._timer: QTimer = QTimer()
+        self._timer.setInterval(10)
+        self._timer.setSingleShot(True)
+        self._timer.timeout.connect(self.send_selected_channel)
         self._turned_on_output: MultiplexerOutput = None
         self._init_ui()
 
@@ -256,69 +310,168 @@ class MultiplexerPinoutWidget(qt.QWidget):
         Method creates empty widget.
         """
 
-        label = qt.QLabel(qApp.translate("t", "Нет мультиплексора"))
-        label.setStyleSheet("font-weight: bold; font-size: x-large;")
-        layout = qt.QVBoxLayout()
-        layout.addWidget(label, alignment=Qt.AlignHCenter)
-        self.setLayout(layout)
+        self.label_no_mux = qt.QLabel(qApp.translate("t", "Нет мультиплексора"))
+        self.label_no_mux.setStyleSheet("font-weight: bold; font-size: 25px;")
+
+    def _create_widgets_for_multiplexer(self) -> qt.QLayout:
+        """
+        Method creates widgets to work with multiplexer.
+        """
+
+        self.layout_for_modules = qt.QVBoxLayout()
+        self.layout_for_modules.addStretch(1)
+
+        self.scroll_area = qt.QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        widget = qt.QWidget()
+        widget.setLayout(self.layout_for_modules)
+        self.scroll_area.setWidget(widget)
+        self.check_box_select_all = qt.QCheckBox(qApp.translate("t", "Выбрать все"))
+        self.check_box_select_all.stateChanged.connect(self.select_all_channels)
+        self.check_box_select_all.setChecked(True)
+        name_and_tooltip = qApp.translate("t", "Добавить точки в план тестирования")
+        self.button_add_points_to_plan = qt.QPushButton(name_and_tooltip)
+        self.button_add_points_to_plan.setToolTip(name_and_tooltip)
+        self.button_add_points_to_plan.clicked.connect(self.collect_selected_channels)
+        name_and_tooltip = qApp.translate("t", "Запустить измерение всего плана")
+        self.button_start_or_stop_entire_plan_measurement = qt.QPushButton(name_and_tooltip)
+        self.button_start_or_stop_entire_plan_measurement.setToolTip(name_and_tooltip)
+        self.button_start_or_stop_entire_plan_measurement.setCheckable(True)
+        self.button_start_or_stop_entire_plan_measurement.toggled.connect(self.start_or_stop_plan_measurement)
+
+    def _enable_widgets(self, state: bool):
+        """
+        Method enables or disables widgets on multiplexer pinout widget.
+        :param state: if True then widgets will be enabled.
+        """
+
+        widgets = (self.button_add_points_to_plan, self.button_start_or_stop_entire_plan_measurement,
+                   self.check_box_select_all)
+        for widget in widgets:
+            widget.setEnabled(state)
+        for module in self._modules.values():
+            module.enable_select_channels(state)
 
     def _init_ui(self):
         """
         Method initializes widgets on main widget.
         """
 
-        if self._multiplexer:
-            v_box_layout = qt.QVBoxLayout()
-            chain = self._multiplexer.get_chain_info()
-            chain.reverse()
-            module_index = len(chain)
-            for module_type in chain:
-                module = ModuleWidget(module_type, module_index)
-                module.module_turned_on.connect(self.turn_on_output)
-                module.module_turned_off.connect(self.turn_off_output)
-                self._modules[module_index] = module
-                v_box_layout.addWidget(module)
-                module_index -= 1
-            connected_output = self._multiplexer.get_connected_channel()
-            if connected_output:
-                self._modules[connected_output.module_number].set_connected_channel(connected_output.channel_number)
-                self._turned_on_output = connected_output
-            scroll_area = qt.QScrollArea()
-            scroll_area.setWidgetResizable(True)
-            widget = qt.QWidget()
-            widget.setLayout(v_box_layout)
-            scroll_area.setWidget(widget)
-            self.check_box_select_all = qt.QCheckBox(qApp.translate("t", "Выбрать все"))
-            self.check_box_select_all.setChecked(True)
-            name_and_tooltip = qApp.translate("t", "Добавить точки в план тестирования")
-            self.button_add_points_to_plan = qt.QPushButton(name_and_tooltip)
-            self.button_add_points_to_plan.setToolTip(name_and_tooltip)
-            self.button_add_points_to_plan.clicked.connect(self.add_points_to_plan)
-            name_and_tooltip = qApp.translate("t", "Запустить измерение всего плана")
-            self.button_start_or_stop_entire_plan_measurement = qt.QPushButton(name_and_tooltip)
-            self.button_start_or_stop_entire_plan_measurement.setToolTip(name_and_tooltip)
-            self.button_start_or_stop_entire_plan_measurement.setCheckable(True)
-            self.button_start_or_stop_entire_plan_measurement.toggled.connect(self.start_or_stop_plan_measurement)
-            h_box_layout = qt.QHBoxLayout()
-            h_box_layout.addWidget(self.check_box_select_all)
-            h_box_layout.addStretch(1)
-            h_box_layout.addWidget(self.button_add_points_to_plan)
-            h_box_layout.addWidget(self.button_start_or_stop_entire_plan_measurement)
-            layout = qt.QVBoxLayout()
-            layout.addWidget(scroll_area)
-            layout.addLayout(h_box_layout)
-            layout.addStretch(1)
-            self.setLayout(layout)
-        else:
-            self._create_empty_widget()
+        self._create_widgets_for_multiplexer()
+        self._create_empty_widget()
+        h_box_layout = qt.QHBoxLayout()
+        h_box_layout.addWidget(self.check_box_select_all)
+        h_box_layout.addStretch(1)
+        h_box_layout.addWidget(self.button_add_points_to_plan)
+        h_box_layout.addWidget(self.button_start_or_stop_entire_plan_measurement)
+        layout = qt.QVBoxLayout()
+        layout.addWidget(self.scroll_area)
+        layout.addLayout(h_box_layout)
+        layout.addWidget(self.label_no_mux, alignment=Qt.AlignHCenter)
+        self.setLayout(layout)
+
+    def _remove_all_modules(self):
+        """
+        Method removes all modules from widget.
+        """
+
+        for module in self._modules.values():
+            self.layout_for_modules.removeWidget(module)
+            module.deleteLater()
+        self._modules = {}
+
+    def _set_visible(self):
+        """
+        Method sets widgets to visible state.
+        """
+
+        widgets = (self.button_add_points_to_plan, self.button_start_or_stop_entire_plan_measurement,
+                   self.check_box_select_all, self.scroll_area)
+        visible = bool(self._parent.measurement_plan and self._parent.measurement_plan.multiplexer)
+        for widget in widgets:
+            widget.setVisible(visible)
+        self.label_no_mux.setVisible(not visible)
+
+    def _update_modules(self):
+        """
+        Method updates modules for widget.
+        """
+
+        self._remove_all_modules()
+        if not self._parent.measurement_plan.multiplexer:
+            return
+        chain = self._parent.measurement_plan.multiplexer.get_chain_info()
+        module_index = 1
+        for module_type in chain:
+            module = ModuleWidget(module_type, module_index)
+            module.module_turned_on.connect(self.turn_on_output)
+            module.module_turned_off.connect(self.turn_off_output)
+            self._modules[module_index] = module
+            self.layout_for_modules.insertWidget(0, module)
+            module_index += 1
+        connected_output = self._parent.measurement_plan.multiplexer.get_connected_channel()
+        if connected_output:
+            self._modules[connected_output.module_number].set_connected_channel(connected_output.channel_number)
+            self._turned_on_output = connected_output
+        self._enable_widgets(len(chain) != 0)
 
     @pyqtSlot()
-    def add_points_to_plan(self):
+    def collect_selected_channels(self):
         """
-        Slot adds selected multiplexer channels to measurement plan.
+        Slot collects selected multiplexer channels.
         """
 
-        pass
+        self._selected_channels = []
+        for module_number in sorted(self._modules.keys()):
+            module = self._modules[module_number]
+            self._selected_channels.extend(module.get_selected_channels())
+        self._timer.start()
+
+    @pyqtSlot(int)
+    def select_all_channels(self, state: int):
+        """
+        Slot selects or unselects all channels of modules.
+        :param state: state of check box.
+        """
+
+        state = state == Qt.Checked
+        for module in self._modules.values():
+            module.select_all_channels(state)
+
+    def send_selected_channel(self):
+        """
+        Method sends selected channel.
+        """
+
+        if not self._selected_channels:
+            return
+        channel = self._selected_channels.pop(0)
+        self.channel_added.emit(channel)
+        if self._selected_channels:
+            self._timer.start()
+
+    def set_connected_channel(self, channel: MultiplexerOutput):
+        """
+        Method sets given channel of multiplexer as turned on.
+        :param channel: connected channel.
+        """
+
+        if channel.module_number in self._modules:
+            self._modules[channel.module_number].set_connected_channel(channel.channel_number)
+
+    def set_work_mode(self, work_mode: WorkMode):
+        """
+        Method enables or disables widgets on multiplexer pinout widget according
+        to given work mode.
+        :param work_mode: work mode.
+        """
+
+        if work_mode != WorkMode.COMPARE and self._parent.measurement_plan and\
+                self._parent.measurement_plan.multiplexer and\
+                len(self._parent.measurement_plan.multiplexer.get_chain_info()):
+            self._enable_widgets(True)
+        else:
+            self._enable_widgets(False)
 
     @pyqtSlot()
     def start_or_stop_plan_measurement(self):
@@ -331,7 +484,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         :param output: output to turn on.
         """
 
-        self._multiplexer.connect_channel(output)
+        self._parent.measurement_plan.multiplexer.connect_channel(output)
         if self._turned_on_output and output.module_number != self._turned_on_output.module_number:
             self._modules[self._turned_on_output.module_number].turn_off()
         self._turned_on_output = output
@@ -344,5 +497,17 @@ class MultiplexerPinoutWidget(qt.QWidget):
         """
 
         if self._turned_on_output == output:
-            self._multiplexer.disconnect_all_channels()
+            self._parent.measurement_plan.multiplexer.disconnect_all_channels()
             self._turned_on_output = None
+
+    def update_info(self):
+        """
+        Method updates information about multiplexer.
+        """
+
+        self._parent.measurement_plan.remove_all_callback_funcs_for_mux_output_change()
+        self._parent.measurement_plan.add_callback_func_for_mux_output_change(self.set_connected_channel)
+        self._turned_on_output = None
+        self._update_modules()
+        self._set_visible()
+        self.select_all_channels(Qt.Checked)

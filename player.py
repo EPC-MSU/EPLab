@@ -11,7 +11,7 @@ class SoundPlayer:
         self._player = WavPlayer(wait=False)
         self._sound_available = True
         self._score = 0
-        self._work_mode: WorkMode = WorkMode.compare
+        self._work_mode: WorkMode = WorkMode.COMPARE
         self._threshold = 0
 
         if not self._player.check_sound_available():
@@ -45,7 +45,7 @@ class SoundPlayer:
     def score_updated(self, score: float):
         # Logic described here #39296
         # FIXME: in case of *very fast* score update in asynchronous mode here may be big stack of wav files
-        if self._work_mode is WorkMode.compare:
+        if self._work_mode is WorkMode.COMPARE:
             if score > self._threshold:
                 try:
                     sound_num = self._score_to_sound_n(self._score)

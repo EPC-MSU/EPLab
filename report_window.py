@@ -128,7 +128,7 @@ class ReportGenerationWindow(qt.QDialog):
 
         test_board, ref_board = create_test_and_ref_boards(self._board)
         scales = get_scales_for_iv_curves(self._board, self._parent.product)
-        report_to_open = ReportTypes.FULL_REPORT if self._parent.work_mode == WorkMode.write else\
+        report_to_open = ReportTypes.FULL_REPORT if self._parent.work_mode == WorkMode.WRITE else\
             ReportTypes.SHORT_REPORT
         config = {ConfigAttributes.BOARD_REF: ref_board,
                   ConfigAttributes.BOARD_TEST: test_board,
