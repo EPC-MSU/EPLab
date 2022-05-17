@@ -2,9 +2,11 @@
 File with class for widget to show multiplexer pinout.
 """
 
+import os
 from typing import Dict, List
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QTimer
+from PyQt5.QtGui import QIcon
 from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
 from common import WorkMode
@@ -15,12 +17,12 @@ class ChannelWidget(qt.QWidget):
     Class to show single channel of module.
     """
 
-    COLOR_BORDER = "blue"
-    COLOR_NORMAL = "white"
-    COLOR_SELECTED = "green"
-    COLOR_TURNED_ON = "red"
-    SIZE = 5
-    turned_on = pyqtSignal(bool, int)
+    COLOR_BORDER: str = "blue"
+    COLOR_NORMAL: str = "white"
+    COLOR_SELECTED: str = "green"
+    COLOR_TURNED_ON: str = "red"
+    SIZE: int = 5
+    turned_on: pyqtSignal = pyqtSignal(bool, int)
 
     def __init__(self, channel_number: int, up: bool = True):
         """
@@ -140,11 +142,11 @@ class ModuleWidget(qt.QWidget):
     Class to show single module of multiplexer.
     """
 
-    COLOR_NORMAL = "blue"
-    COLOR_SELECTED = "red"
-    MAX_CHANNEL_NUMBER = 64
-    module_turned_on = pyqtSignal(MultiplexerOutput)
-    module_turned_off = pyqtSignal(MultiplexerOutput)
+    COLOR_NORMAL: str = "blue"
+    COLOR_SELECTED: str = "red"
+    MAX_CHANNEL_NUMBER: int = 64
+    module_turned_off: pyqtSignal = pyqtSignal(MultiplexerOutput)
+    module_turned_on: pyqtSignal = pyqtSignal(MultiplexerOutput)
 
     def __init__(self, module_type: ModuleTypes, module_number: int):
         """
@@ -281,9 +283,13 @@ class MultiplexerPinoutWidget(qt.QWidget):
     Class to show multiplexer pinout.
     """
 
-    channel_added = pyqtSignal(MultiplexerOutput)
-    process_started = pyqtSignal(int)
-    process_finished = pyqtSignal()
+    MIN_WIDTH: int = 600
+    SCROLL_AREA_MIN_HEIGHT: int = 220
+    adding_channels_finished: pyqtSignal = pyqtSignal()
+    adding_channels_started: pyqtSignal = pyqtSignal(int)
+    channel_added: pyqtSignal = pyqtSignal(MultiplexerOutput)
+    measurement_started: pyqtSignal = pyqtSignal()
+    measurement_stopped: pyqtSignal = pyqtSignal()
 
     def __init__(self, parent):
         """
@@ -297,6 +303,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self.label_no_mux: qt.QLabel = None
         self.layout_for_modules: qt.QVBoxLayout = None
         self.scroll_area: qt.QScrollArea = None
+        self._dir_name: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
         self._parent = parent
         self._modules: Dict[int, ModuleWidget] = {}
         self._selected_channels: List[MultiplexerOutput] = []
@@ -322,9 +329,9 @@ class MultiplexerPinoutWidget(qt.QWidget):
 
         self.layout_for_modules = qt.QVBoxLayout()
         self.layout_for_modules.addStretch(1)
-
         self.scroll_area = qt.QScrollArea()
         self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setMinimumHeight(self.SCROLL_AREA_MIN_HEIGHT)
         widget = qt.QWidget()
         widget.setLayout(self.layout_for_modules)
         self.scroll_area.setWidget(widget)
@@ -335,11 +342,12 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self.button_add_points_to_plan = qt.QPushButton(name_and_tooltip)
         self.button_add_points_to_plan.setToolTip(name_and_tooltip)
         self.button_add_points_to_plan.clicked.connect(self.collect_selected_channels)
-        name_and_tooltip = qApp.translate("t", "Запустить измерение всего плана")
-        self.button_start_or_stop_entire_plan_measurement = qt.QPushButton(name_and_tooltip)
-        self.button_start_or_stop_entire_plan_measurement.setToolTip(name_and_tooltip)
+        self.button_start_or_stop_entire_plan_measurement = qt.QPushButton()
+        self.button_start_or_stop_entire_plan_measurement.setIcon(
+            QIcon(os.path.join(self._dir_name, "start_auto_test.png")))
+        self.button_start_or_stop_entire_plan_measurement.setToolTip(
+            qApp.translate("t", "Запустить измерение всего плана"))
         self.button_start_or_stop_entire_plan_measurement.setCheckable(True)
-        self.button_start_or_stop_entire_plan_measurement.toggled.connect(self.start_or_stop_plan_measurement)
 
     def _enable_widgets(self, state: bool):
         """
@@ -361,6 +369,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
 
         self._create_widgets_for_multiplexer()
         self._create_empty_widget()
+        self.setMinimumWidth(self.MIN_WIDTH)
         h_box_layout = qt.QHBoxLayout()
         h_box_layout.addWidget(self.check_box_select_all)
         h_box_layout.addStretch(1)
@@ -428,7 +437,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
             module = self._modules[module_number]
             self._selected_channels.extend(module.get_selected_channels())
         if self._selected_channels:
-            self.process_started.emit(len(self._selected_channels))
+            self.adding_channels_started.emit(len(self._selected_channels))
             self._timer.start()
 
     @pyqtSlot(int)
@@ -452,7 +461,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         if self._selected_channels:
             self._timer.start()
         else:
-            self.process_finished.emit()
+            self.adding_channels_finished.emit()
 
     def set_connected_channel(self, channel: MultiplexerOutput):
         """
@@ -476,10 +485,6 @@ class MultiplexerPinoutWidget(qt.QWidget):
             self._enable_widgets(True)
         else:
             self._enable_widgets(False)
-
-    @pyqtSlot()
-    def start_or_stop_plan_measurement(self):
-        pass
 
     @pyqtSlot(MultiplexerOutput)
     def turn_on_output(self, output: MultiplexerOutput):

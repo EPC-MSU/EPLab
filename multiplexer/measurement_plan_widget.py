@@ -29,12 +29,12 @@ class MeasurementPlanWidget(qt.QWidget):
     Class to show short information from measurement plan.
     """
 
-    COLOR_ERROR = "pink"
-    COLOR_NORMAL = "white"
-    COLOR_WARNING = "#E7F5FE"
-    HEADERS = ["№", qApp.translate("t", "Модуль MUX"), qApp.translate("t", "Канал MUX"),
-               qApp.translate("t", "Частота"), qApp.translate("t", "Напряжение"),
-               qApp.translate("t", "Чувствительность"), qApp.translate("t", "Комментарий")]
+    COLOR_ERROR: str = "pink"
+    COLOR_NORMAL: str = "white"
+    COLOR_WARNING: str = "#E7F5FE"
+    HEADERS: List[str] = ["№", qApp.translate("t", "Модуль MUX"), qApp.translate("t", "Канал MUX"),
+                          qApp.translate("t", "Частота"), qApp.translate("t", "Напряжение"),
+                          qApp.translate("t", "Чувствительность"), qApp.translate("t", "Комментарий")]
 
     def __init__(self, parent):
         """
@@ -187,7 +187,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self.progress_bar = qt.QProgressBar()
         self.progress_bar.setVisible(False)
         h_box_layout = qt.QHBoxLayout()
-        h_box_layout.addWidget(self.progress_bar)
+        h_box_layout.addWidget(self.progress_bar, 2)
         h_box_layout.addStretch(1)
         h_box_layout.addWidget(self.button_new_pin)
         v_box_layout = qt.QVBoxLayout()
@@ -246,19 +246,19 @@ class MeasurementPlanWidget(qt.QWidget):
         channel_number = "" if not pin.multiplexer_output else str(pin.multiplexer_output.channel_number)
         self._line_edits_channel_numbers[pin_index].setText(channel_number)
         settings = pin.get_reference_and_test_measurements()[-1]
+        label_frequency = self.table_widget_info.cellWidget(pin_index, 3)
+        label_voltage = self.table_widget_info.cellWidget(pin_index, 4)
+        label_resistance = self.table_widget_info.cellWidget(pin_index, 5)
         if settings:
             freq_unit = qApp.translate("t", " Гц")
-            label_frequency = qt.QLabel(f"{settings.probe_signal_frequency}{freq_unit}")
-            self.table_widget_info.setCellWidget(pin_index, 3, label_frequency)
+            label_frequency.setText(f"{settings.probe_signal_frequency}{freq_unit}")
             voltage_unit = qApp.translate("t", " В")
-            label_voltage = qt.QLabel(f"{settings.max_voltage}{voltage_unit}")
-            self.table_widget_info.setCellWidget(pin_index, 4, label_voltage)
-            label_resistance = qt.QLabel(str(settings.internal_resistance))
-            self.table_widget_info.setCellWidget(pin_index, 5, label_resistance)
+            label_voltage.setText(f"{settings.max_voltage}{voltage_unit}")
+            label_resistance.setText(str(settings.internal_resistance))
         else:
-            self.table_widget_info.setCellWidget(pin_index, 3, qt.QLabel())
-            self.table_widget_info.setCellWidget(pin_index, 4, qt.QLabel())
-            self.table_widget_info.setCellWidget(pin_index, 5, qt.QLabel())
+            label_frequency.setText("")
+            label_voltage.setText("")
+            label_resistance.setText("")
         self._line_edits_comments[pin_index].setText(pin.comment)
 
     @pyqtSlot()
@@ -277,6 +277,14 @@ class MeasurementPlanWidget(qt.QWidget):
         """
 
         self._parent.create_new_pin(channel)
+        self.change_progress()
+
+    @pyqtSlot()
+    def change_progress(self):
+        """
+        Slots changes value for progress bar.
+        """
+
         value = self.progress_bar.value()
         self.progress_bar.setValue(value + 1)
 
@@ -304,6 +312,14 @@ class MeasurementPlanWidget(qt.QWidget):
         if self._parent.measurement_plan:
             self._parent.measurement_plan.remove_all_callback_funcs_for_pin_changes()
         super().closeEvent(event)
+
+    def get_amount_of_pins(self) -> int:
+        """
+        Method returns amount of pins in measurement plan.
+        :return: amount of pins.
+        """
+
+        return self.table_widget_info.rowCount()
 
     @pyqtSlot(int)
     def save_comment(self, pin_index: int):
