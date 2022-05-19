@@ -9,9 +9,9 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from PyQt5.QtGui import QCloseEvent
 from epcore.elements import Board
 from epcore.product import EyePointProduct
-import utils as ut
 from report_generator import (ConfigAttributes, create_test_and_ref_boards, ObjectsForReport, ReportGenerator,
                               ReportTypes, ScalingTypes)
+import utils as ut
 from common import WorkMode
 from language import Language
 
@@ -84,26 +84,19 @@ class ReportGenerationWindow(qt.QDialog):
     Class for dialog window to create report for board.
     """
 
-    def __init__(self, parent, thread: ReportGenerationThread, board: Board, folder_for_report: str = None,
-                 threshold_score: float = None):
+    def __init__(self, parent, thread: ReportGenerationThread):
         """
         :param parent: parent window;
-        :param thread: thread for report generation;
-        :param board: board for which report should be generated;
-        :param folder_for_report: folder where report should be saved;
-        :param threshold_score: threshold score for board report.
+        :param thread: thread for report generation.
         """
 
         super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self._parent = parent
-        self._board = board
-        if folder_for_report:
-            self._folder_for_report: str = folder_for_report
-        else:
-            self._folder_for_report: str = ut.get_dir_name()
+        self._board: Board = None
+        self._folder_for_report: str = ut.get_dir_name()
         self._number_of_steps_done: int = 0
         self._software_change_of_button_state: bool = False
-        self._threshold_score: float = threshold_score
+        self._threshold_score: float = None
         self._total_number: int = None
         self._init_ui()
         self._thread: ReportGenerationThread = thread
@@ -120,6 +113,18 @@ class ReportGenerationWindow(qt.QDialog):
         self._thread.report_generator.step_started.connect(self.text_edit_info.append)
         self._thread.report_generator.generation_finished.connect(self.finish_generation)
         self._thread.report_generator.exception_raised.connect(self.handle_generation_break)
+
+    def update_info(self, board: Board, folder_for_report: str = None, threshold_score: float = None):
+        """
+        Method updates info
+        :param board: board for which report should be generated;
+        :param folder_for_report: folder where report should be saved;
+        :param threshold_score: threshold score for board report.
+        """
+
+        self._board = board
+        self._folder_for_report = folder_for_report if folder_for_report else ut.get_dir_name()
+        self._threshold_score = threshold_score
 
     def _create_report(self):
         """
@@ -235,6 +240,7 @@ class ReportGenerationWindow(qt.QDialog):
         """
 
         self._thread.stop_generation()
+        super().closeEvent(event)
 
     @pyqtSlot(str)
     def finish_generation(self, report_dir_path: str):

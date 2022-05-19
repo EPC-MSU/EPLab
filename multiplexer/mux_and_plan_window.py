@@ -13,10 +13,6 @@ from multiplexer.measurement_plan_widget import MeasurementPlanWidget
 from multiplexer.multiplexer_pinout_widget import MultiplexerPinoutWidget
 
 DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
-HEIGHT: int = 400
-POS_X: int = 200
-POS_Y: int = 200
-WIDTH: int = 700
 
 
 class MuxAndPlanWindow(qt.QWidget):
@@ -39,7 +35,35 @@ class MuxAndPlanWindow(qt.QWidget):
                                                                                     self.measurement_plan_widget)
         self.measurement_plan_runner.measurement_done.connect(self.measurement_plan_widget.change_progress)
         self.measurement_plan_runner.measurements_finished.connect(self.turn_off_standby_mode)
+        self.measurement_plan_runner.measurements_finished.connect(lambda: self._parent.create_report(True))
         self.measurement_plan_runner.measurements_started.connect(self.turn_on_standby_mode)
+
+    def _change_widgets_to_start_plan_measurement(self, status: bool):
+        """
+        Method changes widgets to start or stop plan measurements according
+        status of one of them.
+        :param status: status of one of widgets to start plan measurements.
+        """
+
+        widgets = (self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement,
+                   self._parent.start_or_stop_entire_plan_measurement_action)
+        if status:
+            if self.measurement_plan_runner.get_pins_without_multiplexer_outputs() and \
+                    not self._continue_plan_measurement():
+                self.sender().setChecked(False)
+                return
+            text = qApp.translate("t", "Остановить измерение всего плана")
+            icon = QIcon(os.path.join(DIR_MEDIA, "stop_auto_test.png"))
+        else:
+            text = qApp.translate("t", "Запустить измерение всего плана")
+            icon = QIcon(os.path.join(DIR_MEDIA, "start_auto_test.png"))
+        for widget in widgets:
+            widget.setIcon(icon)
+            widget.setToolTip(text)
+            if widget != self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement:
+                widget.setText(text)
+            if widget.isChecked() != status:
+                widget.setChecked(status)
 
     @staticmethod
     def _continue_plan_measurement() -> bool:
@@ -132,25 +156,7 @@ class MuxAndPlanWindow(qt.QWidget):
         :param status: if True then measurements should be started.
         """
 
-        widgets = (self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement,
-                   self._parent.start_or_stop_entire_plan_measurement_action)
-        if status:
-            if self.measurement_plan_runner.get_pins_without_multiplexer_outputs() and\
-                    not self._continue_plan_measurement():
-                self.sender().setChecked(False)
-                return
-            text = qApp.translate("t", "Остановить измерение всего плана")
-            icon = QIcon(os.path.join(DIR_MEDIA, "stop_auto_test.png"))
-        else:
-            text = qApp.translate("t", "Запустить измерение всего плана")
-            icon = QIcon(os.path.join(DIR_MEDIA, "start_auto_test.png"))
-        for widget in widgets:
-            widget.setIcon(icon)
-            widget.setToolTip(text)
-            if widget != self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement:
-                widget.setText(text)
-            if widget.isChecked() != status:
-                widget.setChecked(status)
+        self._change_widgets_to_start_plan_measurement(status)
         self.measurement_plan_runner.start_or_stop_measurements(status)
 
     @pyqtSlot()
@@ -160,7 +166,7 @@ class MuxAndPlanWindow(qt.QWidget):
         """
 
         if self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement.isChecked():
-            self.start_or_stop_plan_measurement(False)
+            self._change_widgets_to_start_plan_measurement(False)
         self.measurement_plan_widget.turn_off_standby_mode()
         self.multiplexer_pinout_widget.enable_widgets(True)
         self._parent.enable_widgets(True)

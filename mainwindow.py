@@ -439,7 +439,7 @@ class EPLabWindow(QMainWindow):
         self.new_point_action.triggered.connect(self.create_new_pin)
         self.save_point_action.triggered.connect(self.save_pin)
         self.add_board_image_action.triggered.connect(self._on_load_board_image)
-        self.create_report_action.triggered.connect(self._on_create_report)
+        self.create_report_action.triggered.connect(lambda: self.create_report(False))
         self.about_action.triggered.connect(self._on_show_product_info)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
@@ -484,6 +484,8 @@ class EPLabWindow(QMainWindow):
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(parent=self)
         self._report_generation_thread.setTerminationEnabled(True)
         self._report_generation_thread.start()
+        self._report_generation_window: ReportGenerationWindow = ReportGenerationWindow(self,
+                                                                                        self._report_generation_thread)
 
     def _open_board_window_if_needed(self):
         if self._measurement_plan.image:
@@ -794,16 +796,6 @@ class EPLabWindow(QMainWindow):
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._board_window.set_board(self._measurement_plan)
             self.update_current_pin()
-
-    @pyqtSlot()
-    def _on_create_report(self):
-        """
-        Slot shows dialog window to create report for board.
-        """
-
-        report_generation_window = ReportGenerationWindow(self, self._report_generation_thread, self._measurement_plan,
-                                                          self._report_directory, self._score_wrapper.threshold)
-        report_generation_window.show()
 
     @pyqtSlot()
     def _on_delete_all_cursors(self):
@@ -1268,6 +1260,22 @@ class EPLabWindow(QMainWindow):
         # ufiv validation.
         # self._on_save_pin()
         self.update_current_pin()
+
+    @pyqtSlot(bool)
+    def create_report(self, auto_start: bool = False):
+        """
+        Slot shows dialog window to create report for board.
+        :param auto_start: if True then generation of report will start automatically.
+        """
+
+        self._report_generation_window.update_info(self._measurement_plan, self._report_directory,
+                                                   self._score_wrapper.threshold)
+        if auto_start:
+            self._report_generation_window.start_or_stop(True)
+        if not self._report_generation_window.isVisible():
+            self._report_generation_window.show()
+        else:
+            self._report_generation_window.activateWindow()
 
     def disconnect_devices(self):
         """

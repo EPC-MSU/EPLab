@@ -11,7 +11,6 @@ from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
 from common import WorkMode
 
-
 DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 
 
