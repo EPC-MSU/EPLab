@@ -284,6 +284,13 @@ class ReportGenerationWindow(qt.QDialog):
 
         self._total_number = number
 
+    def start_generation(self):
+        """
+        Method starts report generation.
+        """
+
+        self.button_create_report.setChecked(True)
+
     @pyqtSlot(bool)
     def start_or_stop(self, status: bool):
         """

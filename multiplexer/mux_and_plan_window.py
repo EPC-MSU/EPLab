@@ -35,7 +35,7 @@ class MuxAndPlanWindow(qt.QWidget):
                                                                                     self.measurement_plan_widget)
         self.measurement_plan_runner.measurement_done.connect(self.measurement_plan_widget.change_progress)
         self.measurement_plan_runner.measurements_finished.connect(self.turn_off_standby_mode)
-        self.measurement_plan_runner.measurements_finished.connect(lambda: self._parent.create_report(True))
+        self.measurement_plan_runner.measurements_finished.connect(self.create_report)
         self.measurement_plan_runner.measurements_started.connect(self.turn_on_standby_mode)
 
     def _change_widgets_to_start_plan_measurement(self, status: bool):
@@ -140,6 +140,15 @@ class MuxAndPlanWindow(qt.QWidget):
 
         self.measurement_plan_widget.set_work_mode(new_work_mode)
         self.multiplexer_pinout_widget.set_work_mode(new_work_mode)
+
+    @pyqtSlot()
+    def create_report(self):
+        """
+        Slot generates report after testing according to plan.
+        """
+
+        if self._parent.work_mode is WorkMode.TEST:
+            self._parent.create_report(True)
 
     def select_current_pin(self):
         """

@@ -439,7 +439,7 @@ class EPLabWindow(QMainWindow):
         self.new_point_action.triggered.connect(self.create_new_pin)
         self.save_point_action.triggered.connect(self.save_pin)
         self.add_board_image_action.triggered.connect(self._on_load_board_image)
-        self.create_report_action.triggered.connect(lambda: self.create_report(False))
+        self.create_report_action.triggered.connect(self.create_report)
         self.about_action.triggered.connect(self._on_show_product_info)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
@@ -1261,7 +1261,7 @@ class EPLabWindow(QMainWindow):
         # self._on_save_pin()
         self.update_current_pin()
 
-    @pyqtSlot(bool)
+    @pyqtSlot()
     def create_report(self, auto_start: bool = False):
         """
         Slot shows dialog window to create report for board.
@@ -1270,8 +1270,8 @@ class EPLabWindow(QMainWindow):
 
         self._report_generation_window.update_info(self._measurement_plan, self._report_directory,
                                                    self._score_wrapper.threshold)
-        if auto_start and self.work_mode is WorkMode.TEST:
-            self._report_generation_window.start_or_stop(True)
+        if auto_start:
+            self._report_generation_window.start_generation()
         if not self._report_generation_window.isVisible():
             self._report_generation_window.show()
         else:
