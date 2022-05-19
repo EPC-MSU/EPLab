@@ -2,15 +2,19 @@
 File with class for widget to show short information from measurement plan.
 """
 
+import os
 from enum import auto, Enum
 from functools import partial
 from typing import List, Tuple
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp
-from PyQt5.QtGui import QCloseEvent, QRegExpValidator
+from PyQt5.QtGui import QCloseEvent, QIcon, QRegExpValidator
 from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, MIN_CHANNEL_NUMBER
 from epcore.elements import MultiplexerOutput, Pin
 from common import WorkMode
+
+
+DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 
 
 class ChannelAndModuleErrors(Enum):
@@ -50,7 +54,6 @@ class MeasurementPlanWidget(qt.QWidget):
         self._line_edits_channel_numbers: List[qt.QLineEdit] = []
         self._line_edits_comments: List[qt.QLineEdit] = []
         self._line_edits_module_numbers: List[qt.QLineEdit] = []
-        # self._measurement_plan.add_callback_func_for_pin_changes(self.set_new_pin_parameters)
         self._selected_row: int = None
         self._standby_mode: bool = False
         self._init_ui()
@@ -147,6 +150,15 @@ class MeasurementPlanWidget(qt.QWidget):
             self.table_widget_info.removeRow(row)
         self.table_widget_info.clearContents()
 
+    def _enable_widgets(self, state: bool):
+        """
+        Method enables or disables widgets.
+        :param state: if True then widgets will be enabled.
+        """
+
+        for widget in (self.button_new_pin, self.table_widget_info):
+            widget.setEnabled(state)
+
     def _fill_table(self):
         """
         Method fills table for measurement plan.
@@ -183,6 +195,7 @@ class MeasurementPlanWidget(qt.QWidget):
         name_and_tooltip = qApp.translate("t", "Новая точка")
         self.button_new_pin = qt.QPushButton(name_and_tooltip)
         self.button_new_pin.setToolTip(name_and_tooltip)
+        self.button_new_pin.setIcon(QIcon(os.path.join(DIR_MEDIA, "newpoint.png")))
         self.button_new_pin.clicked.connect(self.add_pin_to_plan)
         self.progress_bar = qt.QProgressBar()
         self.progress_bar.setVisible(False)
@@ -397,17 +410,15 @@ class MeasurementPlanWidget(qt.QWidget):
             self.setEnabled(work_mode != WorkMode.COMPARE)
             self.button_new_pin.setEnabled(work_mode == WorkMode.WRITE)
 
-    @pyqtSlot()
     def turn_off_standby_mode(self):
         """
-        Slot turns off standby mode.
+        Method turns off standby mode.
         """
 
         self._standby_mode = False
-        self.button_new_pin.setEnabled(not self._standby_mode)
+        self._enable_widgets(True)
         self.progress_bar.setVisible(False)
 
-    @pyqtSlot(int)
     def turn_on_standby_mode(self, total_number: int):
         """
         Method turns on standby mode.
@@ -415,7 +426,7 @@ class MeasurementPlanWidget(qt.QWidget):
         """
 
         self._standby_mode = True
-        self.button_new_pin.setEnabled(not self._standby_mode)
+        self._enable_widgets(False)
         self.progress_bar.setVisible(True)
         self.progress_bar.setMinimum(0)
         self.progress_bar.setMaximum(total_number)

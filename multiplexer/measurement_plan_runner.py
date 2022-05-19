@@ -28,9 +28,6 @@ class MeasurementPlanRunner(QObject):
         self._current_pin_index: int = None
         self._is_running: bool = False
         self._measurement_plan_widget: MeasurementPlanWidget = measurement_plan_widget
-        self.measurement_done.connect(self._measurement_plan_widget.change_progress)
-        self.measurements_finished.connect(self._measurement_plan_widget.turn_off_standby_mode)
-        self.measurements_started.connect(self._measurement_plan_widget.turn_on_standby_mode)
         self._measurement_saved: bool = False
         self._need_to_save_measurement: bool = False
         self._parent = parent

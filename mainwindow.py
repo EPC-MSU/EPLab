@@ -314,25 +314,6 @@ class EPLabWindow(QMainWindow):
                 self.search_optimal_action.setEnabled(False)
                 return
 
-    def _enable_widgets(self, enabled: bool):
-        """
-        Method sets widgets to given state (enabled or disabled).
-        :param enabled: if True widgets will be set to enabled state.
-        """
-
-        widgets = (self.new_file_action, self.open_file_action, self.save_file_action, self.save_as_file_action,
-                   self.save_screen_action, self.open_window_board_action, self.open_mux_window_action,
-                   self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
-                   self.hide_curve_b_action, self.search_optimal_action, self.comparing_mode_action,
-                   self.writing_mode_action, self.testing_mode_action, self.settings_mode_action,
-                   self.next_point_action, self.previous_point_action, self.new_point_action, self.save_point_action,
-                   self.add_board_image_action, self.create_report_action,
-                   self.start_or_stop_entire_plan_measurement_action, self.add_cursor_action, self.remove_cursor_action,
-                   self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock, self.comment_dock,
-                   self.measurers_menu)
-        for widget in widgets:
-            widget.setEnabled(enabled)
-
     def _get_noise_amplitude(self, settings: MeasurementSettings) -> Tuple[float, float]:
         """
         Method returns noise amplitudes for given measurement settings.
@@ -493,7 +474,7 @@ class EPLabWindow(QMainWindow):
         self._product_name: cw.ProductNames = None
         self._mux_and_plan_window: MuxAndPlanWindow = MuxAndPlanWindow(self)
         self.work_mode_changed.connect(self._mux_and_plan_window.change_work_mode)
-        self.start_or_stop_entire_plan_measurement_action.toggled.connect(
+        self.start_or_stop_entire_plan_measurement_action.triggered.connect(
             self._mux_and_plan_window.start_or_stop_plan_measurement)
 
         self._timer: QTimer = QTimer()
@@ -549,7 +530,7 @@ class EPLabWindow(QMainWindow):
         """
 
         # Draw empty curves
-        self._enable_widgets(False)
+        self.enable_widgets(False)
         self._test_curve = None
         if self._work_mode is WorkMode.COMPARE:
             self._ref_curve = None
@@ -560,7 +541,7 @@ class EPLabWindow(QMainWindow):
         # Draw text
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
         if self._msystem.reconnect():
-            self._enable_widgets(True)
+            self.enable_widgets(True)
             # Reconnection success!
             self._device_errors_handler.reset_error()
             self._iv_window.plot.clear_center_text()
@@ -1260,7 +1241,7 @@ class EPLabWindow(QMainWindow):
         else:
             self._product_name = product_name
         self._timer.start()
-        self._enable_widgets(True)
+        self.enable_widgets(True)
         self._set_widgets_to_init_state()
 
     @pyqtSlot()
@@ -1301,9 +1282,28 @@ class EPLabWindow(QMainWindow):
                 measurer.close_device()
         self._msystem = None
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
-        self._enable_widgets(False)
+        self.enable_widgets(False)
         self._clear_widgets()
         self._product_name = None
+
+    def enable_widgets(self, enabled: bool):
+        """
+        Method sets widgets to given state (enabled or disabled).
+        :param enabled: if True widgets will be set to enabled state.
+        """
+
+        widgets = (self.new_file_action, self.open_file_action, self.save_file_action, self.save_as_file_action,
+                   self.save_screen_action, self.open_window_board_action, self.open_mux_window_action,
+                   self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
+                   self.hide_curve_b_action, self.search_optimal_action, self.comparing_mode_action,
+                   self.writing_mode_action, self.testing_mode_action, self.settings_mode_action,
+                   self.next_point_action, self.previous_point_action, self.new_point_action, self.save_point_action,
+                   self.add_board_image_action, self.create_report_action,
+                   self.start_or_stop_entire_plan_measurement_action, self.add_cursor_action, self.remove_cursor_action,
+                   self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock, self.comment_dock,
+                   self.measurers_menu)
+        for widget in widgets:
+            widget.setEnabled(enabled)
 
     def get_measurers(self) -> list:
         """

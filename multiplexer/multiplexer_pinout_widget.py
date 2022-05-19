@@ -12,6 +12,9 @@ from epcore.elements import MultiplexerOutput
 from common import WorkMode
 
 
+DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
+
+
 class ChannelWidget(qt.QWidget):
     """
     Class to show single channel of module.
@@ -22,6 +25,7 @@ class ChannelWidget(qt.QWidget):
     COLOR_SELECTED: str = "green"
     COLOR_TURNED_ON: str = "red"
     SIZE: int = 5
+    selected: pyqtSignal = pyqtSignal(bool)
     turned_on: pyqtSignal = pyqtSignal(bool, int)
 
     def __init__(self, channel_number: int, up: bool = True):
@@ -36,9 +40,6 @@ class ChannelWidget(qt.QWidget):
         self.label_channel_number: qt.QLabel = None
         self.radio_button_turn_on_off: qt.QRadioButton = None
         self._channel_number: int = channel_number
-        self._selected: bool = False
-        self._dont_send_signal: bool = False
-        self._turned_on: bool = False
         self._init_ui(up)
 
     def _init_ui(self, up: bool):
@@ -53,7 +54,7 @@ class ChannelWidget(qt.QWidget):
         self.radio_button_turn_on_off = qt.QRadioButton()
         tooltip = qApp.translate("t", "Включить/выключить канал {}")
         self.radio_button_turn_on_off.setToolTip(tooltip.format(self._channel_number))
-        self.radio_button_turn_on_off.toggled.connect(self.send_to_turn_on_off)
+        self.radio_button_turn_on_off.clicked.connect(self.send_to_turn_on_off)
         self.radio_button_turn_on_off.setStyleSheet(
             "QRadioButton {border: none;}"
             f"QRadioButton::indicator {{width: {self.SIZE}px; height: {self.SIZE}px; border: 1px solid "
@@ -66,6 +67,7 @@ class ChannelWidget(qt.QWidget):
         self.check_box_select_channel = qt.QCheckBox()
         tooltip = qApp.translate("t", "Выбрать канал {}")
         self.check_box_select_channel.setToolTip(tooltip.format(self._channel_number))
+        self.check_box_select_channel.stateChanged.connect(self.send_to_select)
         self.check_box_select_channel.setStyleSheet(
             "QCheckBox {border: none; spacing: 0px;}"
             f"QCheckBox::indicator {{width: {self.SIZE}px; height: {self.SIZE}px; border: 1px solid "
@@ -116,6 +118,15 @@ class ChannelWidget(qt.QWidget):
 
         self.check_box_select_channel.setChecked(state)
 
+    @pyqtSlot(int)
+    def send_to_select(self, state: int):
+        """
+        Slot sends signal that channel was selected or unselected.
+        :param state: state of check box widget.
+        """
+
+        self.selected.emit(state == Qt.Checked)
+
     @pyqtSlot(bool)
     def send_to_turn_on_off(self, state: bool):
         """
@@ -123,9 +134,6 @@ class ChannelWidget(qt.QWidget):
         :param state: if True then channel was turned on.
         """
 
-        if self._dont_send_signal:
-            self._dont_send_signal = False
-            return
         self.turned_on.emit(state, self._channel_number)
 
     def turn_off(self):
@@ -133,7 +141,6 @@ class ChannelWidget(qt.QWidget):
         Method turns off channel.
         """
 
-        self._dont_send_signal = True
         self.radio_button_turn_on_off.setChecked(False)
 
 
@@ -145,6 +152,7 @@ class ModuleWidget(qt.QWidget):
     COLOR_NORMAL: str = "blue"
     COLOR_SELECTED: str = "red"
     MAX_CHANNEL_NUMBER: int = 64
+    all_channels_selected: pyqtSignal = pyqtSignal(bool)
     module_turned_off: pyqtSignal = pyqtSignal(MultiplexerOutput)
     module_turned_on: pyqtSignal = pyqtSignal(MultiplexerOutput)
 
@@ -155,6 +163,7 @@ class ModuleWidget(qt.QWidget):
         """
 
         super().__init__()
+        self.action_select_all_channels: qt.QAction = None
         self.frame_module: qt.QFrame = None
         self._module_number: int = module_number
         self._module_type: ModuleTypes = module_type
@@ -170,6 +179,18 @@ class ModuleWidget(qt.QWidget):
         color = self.COLOR_SELECTED if self._turned_on_channel else self.COLOR_NORMAL
         self.frame_module.setStyleSheet(f"border: 2px solid {color};")
 
+    def _create_context_menu(self):
+        """
+        Method creates context menu for module.
+        """
+
+        self.action_select_all_channels = qt.QAction(QIcon(os.path.join(DIR_MEDIA, "select.png")),
+                                                     qApp.translate("t", "Выбрать все каналы"))
+        self.action_select_all_channels.setCheckable(True)
+        self.action_select_all_channels.triggered.connect(self.select_all_channels)
+        self.addAction(self.action_select_all_channels)
+        self.setContextMenuPolicy(Qt.ActionsContextMenu)
+
     def _create_pinout(self):
         """
         Method creates widgets for channels in module.
@@ -183,6 +204,7 @@ class ModuleWidget(qt.QWidget):
             column = index // 2
             row = index % 2
             channel = ChannelWidget(index + 1, row == 0)
+            channel.selected.connect(self.send_are_all_channels_selected)
             channel.turned_on.connect(self.turn_on_off_channel)
             self._channels[index + 1] = channel
             grid_layout.addWidget(channel, row, column)
@@ -193,6 +215,7 @@ class ModuleWidget(qt.QWidget):
         Method initializes widgets on module widget.
         """
 
+        self._create_context_menu()
         self._create_pinout()
         label_module_number = qt.QLabel(str(self._module_number))
         label_module_number.setStyleSheet("border: none; font-weight: bold; font-size: large;")
@@ -203,8 +226,21 @@ class ModuleWidget(qt.QWidget):
         h_box_layout.addWidget(self.frame_module)
         h_box_layout.addStretch(1)
         self.setLayout(h_box_layout)
-        tooltip = qApp.translate("t", "Модуль {} {}")
-        self.setToolTip(tooltip.format(self._module_type, self._module_number))
+        tooltip = qApp.translate("t", "Модуль {}")
+        self.setToolTip(tooltip.format(self._module_number))
+
+    def check_selected_channels(self) -> bool:
+        """
+        Method checks if all channels of module are selected.
+        :return: True if all channels are selected.
+        """
+
+        all_channels_selected = True
+        for channel in self._channels.values():
+            if not channel.is_selected():
+                all_channels_selected = False
+                break
+        return all_channels_selected
 
     def enable_select_channels(self, state: bool):
         """
@@ -212,6 +248,7 @@ class ModuleWidget(qt.QWidget):
         :param state: if True then select widgets will be enabled.
         """
 
+        self.action_select_all_channels.setEnabled(state)
         for channel in self._channels.values():
             channel.enable_select_widget(state)
 
@@ -238,6 +275,18 @@ class ModuleWidget(qt.QWidget):
         for channel in self._channels.values():
             channel.select_channel(state)
 
+    @pyqtSlot(bool)
+    def send_are_all_channels_selected(self, state: bool):
+        """
+        Slot checks if all channels of module are selected and sends
+        appropriate signal.
+        :param state: new state of one of module's channel.
+        """
+
+        all_channels_selected = False if not state else self.check_selected_channels()
+        self.action_select_all_channels.setChecked(all_channels_selected)
+        self.all_channels_selected.emit(all_channels_selected)
+
     def set_connected_channel(self, channel_number: int):
         """
         Method sets given channel of module as turned on.
@@ -245,6 +294,7 @@ class ModuleWidget(qt.QWidget):
         """
 
         self._channels[channel_number].radio_button_turn_on_off.setChecked(True)
+        self.turn_on_off_channel(True, channel_number)
 
     @pyqtSlot(bool, int)
     def turn_on_off_channel(self, state: bool, channel_number: int):
@@ -255,7 +305,7 @@ class ModuleWidget(qt.QWidget):
         """
 
         if state:
-            if self._turned_on_channel:
+            if self._turned_on_channel and self._turned_on_channel != self._channels[channel_number]:
                 self._turned_on_channel.turn_off()
             self._turned_on_channel = self._channels[channel_number]
             output = MultiplexerOutput(channel_number=channel_number, module_number=self._module_number)
@@ -284,12 +334,10 @@ class MultiplexerPinoutWidget(qt.QWidget):
     """
 
     MIN_WIDTH: int = 600
-    SCROLL_AREA_MIN_HEIGHT: int = 220
+    SCROLL_AREA_MIN_HEIGHT: int = 190
     adding_channels_finished: pyqtSignal = pyqtSignal()
     adding_channels_started: pyqtSignal = pyqtSignal(int)
     channel_added: pyqtSignal = pyqtSignal(MultiplexerOutput)
-    measurement_started: pyqtSignal = pyqtSignal()
-    measurement_stopped: pyqtSignal = pyqtSignal()
 
     def __init__(self, parent):
         """
@@ -303,7 +351,6 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self.label_no_mux: qt.QLabel = None
         self.layout_for_modules: qt.QVBoxLayout = None
         self.scroll_area: qt.QScrollArea = None
-        self._dir_name: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
         self._parent = parent
         self._modules: Dict[int, ModuleWidget] = {}
         self._selected_channels: List[MultiplexerOutput] = []
@@ -335,23 +382,23 @@ class MultiplexerPinoutWidget(qt.QWidget):
         widget = qt.QWidget()
         widget.setLayout(self.layout_for_modules)
         self.scroll_area.setWidget(widget)
-        self.check_box_select_all = qt.QCheckBox(qApp.translate("t", "Выбрать все"))
-        self.check_box_select_all.stateChanged.connect(self.select_all_channels)
+        self.check_box_select_all = qt.QCheckBox(qApp.translate("t", "Выбрать все каналы"))
+        self.check_box_select_all.clicked.connect(self.select_all_channels)
         self.check_box_select_all.setChecked(True)
         name_and_tooltip = qApp.translate("t", "Добавить точки в план тестирования")
         self.button_add_points_to_plan = qt.QPushButton(name_and_tooltip)
         self.button_add_points_to_plan.setToolTip(name_and_tooltip)
+        self.button_add_points_to_plan.setIcon(QIcon(os.path.join(DIR_MEDIA, "add_channels.png")))
         self.button_add_points_to_plan.clicked.connect(self.collect_selected_channels)
         self.button_start_or_stop_entire_plan_measurement = qt.QPushButton()
-        self.button_start_or_stop_entire_plan_measurement.setIcon(
-            QIcon(os.path.join(self._dir_name, "start_auto_test.png")))
+        self.button_start_or_stop_entire_plan_measurement.setIcon(QIcon(os.path.join(DIR_MEDIA, "start_auto_test.png")))
         self.button_start_or_stop_entire_plan_measurement.setToolTip(
             qApp.translate("t", "Запустить измерение всего плана"))
         self.button_start_or_stop_entire_plan_measurement.setCheckable(True)
 
     def _enable_widgets(self, state: bool):
         """
-        Method enables or disables widgets on multiplexer pinout widget.
+        Method enables or disables some widgets on multiplexer pinout widget.
         :param state: if True then widgets will be enabled.
         """
 
@@ -415,6 +462,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         module_index = 1
         for module_type in chain:
             module = ModuleWidget(module_type, module_index)
+            module.all_channels_selected.connect(self.check_selected_channels)
             module.module_turned_on.connect(self.turn_on_output)
             module.module_turned_off.connect(self.turn_off_output)
             self._modules[module_index] = module
@@ -425,6 +473,22 @@ class MultiplexerPinoutWidget(qt.QWidget):
             self._modules[connected_output.module_number].set_connected_channel(connected_output.channel_number)
             self._turned_on_output = connected_output
         self._enable_widgets(len(chain) != 0)
+
+    @pyqtSlot(bool)
+    def check_selected_channels(self, state: bool):
+        """
+        Method checks if all channels of multiplexer are selected.
+        :param state: new state of one of multiplexer's module.
+        """
+
+        all_channels_selected = False
+        if state:
+            all_channels_selected = True
+            for module in self._modules.values():
+                if not module.check_selected_channels():
+                    all_channels_selected = False
+                    break
+        self.check_box_select_all.setChecked(all_channels_selected)
 
     @pyqtSlot()
     def collect_selected_channels(self):
@@ -440,14 +504,23 @@ class MultiplexerPinoutWidget(qt.QWidget):
             self.adding_channels_started.emit(len(self._selected_channels))
             self._timer.start()
 
-    @pyqtSlot(int)
-    def select_all_channels(self, state: int):
+    def enable_widgets(self, state: bool):
+        """
+        Method enables or disables all widgets on multiplexer pinout widget.
+        :param state: if True then widgets will be enabled.
+        """
+
+        self._enable_widgets(state)
+        for module in self._modules.values():
+            module.setEnabled(state)
+
+    @pyqtSlot(bool)
+    def select_all_channels(self, state: bool):
         """
         Slot selects or unselects all channels of modules.
         :param state: state of check box.
         """
 
-        state = state == Qt.Checked
         for module in self._modules.values():
             module.select_all_channels(state)
 
@@ -519,4 +592,4 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self._turned_on_output = None
         self._update_modules()
         self._set_visible()
-        self.select_all_channels(Qt.Checked)
+        self.select_all_channels(True)
