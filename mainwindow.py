@@ -1270,7 +1270,7 @@ class EPLabWindow(QMainWindow):
 
         self._report_generation_window.update_info(self._measurement_plan, self._report_directory,
                                                    self._score_wrapper.threshold)
-        if auto_start:
+        if auto_start and self.work_mode is WorkMode.TEST:
             self._report_generation_window.start_or_stop(True)
         if not self._report_generation_window.isVisible():
             self._report_generation_window.show()
