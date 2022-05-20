@@ -16,6 +16,10 @@ class MeasurerTypeWidget(qt.QWidget):
     Class for widget to select measurer type.
     """
 
+    IMAGE_HEIGHT: int = 100
+    IMAGE_WIDTH: int = 100
+    WIDGET_HEIGHT: int = 300
+    WIDGET_WIDTH: int = 300
     measurer_type_changed: pyqtSignal = pyqtSignal(ut.MeasurerType, bool)
 
     def __init__(self, initial_product_name: ut.ProductNames = None):
@@ -25,7 +29,6 @@ class MeasurerTypeWidget(qt.QWidget):
 
         super().__init__()
         self.radio_buttons_products: Dict[ut.ProductNames, qt.QRadioButton] = None
-        self._dir_name: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
         if initial_product_name is None:
             initial_product_name = ut.ProductNames.EYEPOINT_A2
         self._initial_product_name: ut.ProductNames = initial_product_name
@@ -50,16 +53,16 @@ class MeasurerTypeWidget(qt.QWidget):
             radio_button.setToolTip(product_name.value)
             measurer_type = ut.ProductNames.get_measurer_type_by_product_name(product_name)
             radio_button.toggled.connect(partial(self.select_measurer_type, measurer_type))
-            product_image = QPixmap(os.path.join(self._dir_name, f"{product_name.value}.png"))
+            product_image = QPixmap(os.path.join(ut.DIR_MEDIA, f"{product_name.value}.png"))
             label = qt.QLabel("")
-            label.setPixmap(product_image.scaled(100, 100, Qt.KeepAspectRatio))
+            label.setPixmap(product_image.scaled(self.IMAGE_WIDTH, self.IMAGE_HEIGHT, Qt.KeepAspectRatio))
             label.setToolTip(product_name.value)
             grid_layout.addWidget(label, row, 0)
             grid_layout.addWidget(radio_button, row, 1)
             self.radio_buttons_products[product_name] = radio_button
         self.radio_buttons_products[self._initial_product_name].setChecked(True)
         self.setToolTip(qApp.translate("t", "Тип измерителя"))
-        self.setFixedSize(300, 300)
+        self.setFixedSize(self.WIDGET_WIDTH, self.WIDGET_HEIGHT)
         self.setLayout(layout)
 
     def get_product_name(self) -> ut.ProductNames:
@@ -118,7 +121,6 @@ class MeasurerURLsWidget(qt.QWidget):
         self.buttons_show_help: List[qt.QPushButton] = []
         self.combo_boxes_measurers: List[qt.QComboBox] = []
         self.labels_measurers: List[qt.QLabel] = []
-        self._dir_name: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
         self._initial_ports: List[str] = initial_ports
         self._measurer_type: ut.MeasurerType = None
         self._init_ui()
@@ -135,7 +137,7 @@ class MeasurerURLsWidget(qt.QWidget):
         selected_ports = port_1, port_2
         ports_for_first_and_second = []
         for port in selected_ports:
-            ports_list = [port] if ut.MeasurerType.check_port_for_ivm10(port) else []
+            ports_list = [port] if port is not None and ut.IVM10_PATTERN[ut.get_platform()].match(port) else []
             ports_for_first_and_second.append(ports_list)
             if len(ports) > 0:
                 if port in ports and port != ut.MeasurerType.IVM10_VIRTUAL.value:
@@ -151,7 +153,7 @@ class MeasurerURLsWidget(qt.QWidget):
                     pass
             spec_ports = [*selected_ports, None, ut.MeasurerType.IVM10_VIRTUAL.value]
             for port in self._initial_ports:
-                if port not in spec_ports and ut.MeasurerType.check_port_for_ivm10(port):
+                if port not in spec_ports and port is not None and ut.IVM10_PATTERN[ut.get_platform()].match(port):
                     ports_for_first_and_second[index].append(port)
             ports_for_first_and_second[index] = sorted(ports_for_first_and_second[index])
         return ports_for_first_and_second
@@ -183,7 +185,7 @@ class MeasurerURLsWidget(qt.QWidget):
         else:
             ports = [port_1, None]
         for index, port in enumerate(ports):
-            if not ut.MeasurerType.check_port_for_ivm10(port):
+            if port is None or not ut.IVM10_PATTERN[ut.get_platform()].match(port):
                 ports[index] = None
         available_ports = ut.find_urpc_ports("ivm")
         ports_for_first_and_second = self._get_ports_for_ivm10(available_ports, *ports)
@@ -211,7 +213,7 @@ class MeasurerURLsWidget(qt.QWidget):
             label = qt.QLabel(label_text.format(index))
             self.labels_measurers.append(label)
             button = qt.QPushButton()
-            button.setIcon(QIcon(os.path.join(self._dir_name, "info.png")))
+            button.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "info.png")))
             button.setToolTip(qApp.translate("t", "Помощь"))
             button.setFixedWidth(self.BUTTON_WIDTH)
             button.clicked.connect(self.show_help)
@@ -280,7 +282,7 @@ class MeasurerURLsWidget(qt.QWidget):
         msg_box = qt.QMessageBox()
         msg_box.setIcon(qt.QMessageBox.Information)
         msg_box.setWindowTitle(qApp.translate("t", "Помощь"))
-        msg_box.setWindowIcon(QIcon(os.path.join(self._dir_name, "ico.png")))
+        msg_box.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "ico.png")))
         if self._measurer_type == ut.MeasurerType.IVM10:
             if "win" in ut.get_platform():
                 info = qApp.translate("t", "Введите значение последовательного порта в формате com:\\\\.\\COMx или "

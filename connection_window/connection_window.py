@@ -38,7 +38,6 @@ class ConnectionWindow(qt.QDialog):
         self.widget_measurer_type: MeasurerTypeWidget = None
         self.widget_measurer_urls: MeasurerURLsWidget = None
         self.widget_mux: MuxWidget = None
-        self._dir_name: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
         self._initial_ports: List[str] = self._get_current_measurers_ports()
         self._initial_product_name: ut.ProductNames = initial_product_name
         self._urls: list = None
@@ -92,7 +91,7 @@ class ConnectionWindow(qt.QDialog):
         self.button_cancel.clicked.connect(self.close)
         self.button_update = qt.QPushButton()
         self.button_update.setFixedWidth(self.BUTTON_WIDTH)
-        self.button_update.setIcon(QIcon(os.path.join(self._dir_name, "update.png")))
+        self.button_update.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "update.png")))
         self.button_update.setToolTip(qApp.translate("t", "Обновить"))
         self.button_update.clicked.connect(self.widget_mux.update_com_ports)
         self.button_update.clicked.connect(self.widget_measurer_urls.update_ports)
@@ -120,13 +119,13 @@ class ConnectionWindow(qt.QDialog):
         measurer_ports = self.widget_measurer_urls.get_selected_ports()
         measurer_ports = ut.get_different_ports(measurer_ports)
         while len(measurer_ports) < 2:
-            measurer_ports.append("")
+            measurer_ports.append(None)
         selected_product_name = self.widget_measurer_type.get_product_name()
         for index, port in enumerate(measurer_ports):
             if (port == "virtual" and
                     ut.ProductNames.get_measurer_type_by_product_name(selected_product_name) == ut.MeasurerType.ASA):
                 measurer_ports[index] = "virtualasa"
-        self.parent.connect_devices(*measurer_ports, selected_product_name, self.widget_mux.get_com_port())
+        self.parent.connect_devices(*measurer_ports, selected_product_name, self.widget_mux.get_com_port() or None)
         self.close()
 
     @pyqtSlot()

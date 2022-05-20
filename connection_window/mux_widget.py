@@ -23,7 +23,6 @@ class MuxWidget(qt.QGroupBox):
         super().__init__()
         self.button_show_help: qt.QPushButton = None
         self.combo_box_com_ports: qt.QComboBox = None
-        self._dir_name: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
         self._init_ui()
 
     def _init_combo_box(self) -> qt.QComboBox:
@@ -52,14 +51,14 @@ class MuxWidget(qt.QGroupBox):
         """
 
         self.setTitle(qApp.translate("t", "Мультиплексор"))
-        mux_image = QPixmap(os.path.join(self._dir_name, "mux.png"))
+        mux_image = QPixmap(os.path.join(ut.DIR_MEDIA, "mux.png"))
         label = qt.QLabel("")
         label.setPixmap(mux_image.scaled(self.IMAGE_SIZE, self.IMAGE_SIZE, Qt.KeepAspectRatio))
         label.setToolTip(qApp.translate("t", "Мультиплексор"))
         self.combo_box_com_ports = self._init_combo_box()
         self.update_com_ports()
         self.button_show_help = qt.QPushButton()
-        self.button_show_help.setIcon(QIcon(os.path.join(self._dir_name, "info.png")))
+        self.button_show_help.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "info.png")))
         self.button_show_help.setToolTip(qApp.translate("t", "Помощь"))
         self.button_show_help.setFixedWidth(self.BUTTON_WIDTH)
         self.button_show_help.clicked.connect(self.show_help)
@@ -91,7 +90,7 @@ class MuxWidget(qt.QGroupBox):
         msg_box = qt.QMessageBox()
         msg_box.setIcon(qt.QMessageBox.Information)
         msg_box.setWindowTitle(qApp.translate("t", "Помощь"))
-        msg_box.setWindowIcon(QIcon(os.path.join(self._dir_name, "ico.png")))
+        msg_box.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "ico.png")))
         if "win" in ut.get_platform():
             info = qApp.translate("t", "Введите значение последовательного порта в формате com:\\\\.\\COMx.")
         else:

@@ -7,10 +7,11 @@ from typing import Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp
 from PyQt5.QtGui import QIcon, QPalette
 from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QLayout, QPushButton, QTextBrowser, QVBoxLayout
+import utils as ut
 from language import Language
 
-TEXT_HEIGHT = 100
-WINDOW_WIDTH = 400
+TEXT_HEIGHT: int = 100
+WINDOW_WIDTH: int = 400
 
 
 class AboutWindow(QDialog):
@@ -47,13 +48,12 @@ class AboutWindow(QDialog):
 
         self.setWindowTitle(qApp.translate("t", "О программе"))
         self.setToolTip(qApp.translate("t", "О программе"))
-        dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
-        self.setWindowIcon(QIcon(os.path.join(dir_name, "ico.png")))
+        self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "ico.png")))
         self.setFixedWidth(WINDOW_WIDTH)
         color = self.palette().color(QPalette.Background)
         text, page_url = self._create_info_text_and_link()
         self.label_logo = QLabel()
-        self.label_logo.setText(f'<a href="{page_url}"><img src="{os.path.join(dir_name, "logo.png")}" '
+        self.label_logo.setText(f'<a href="{page_url}"><img src="{os.path.join(ut.DIR_MEDIA, "logo.png")}" '
                                 f'width="{WINDOW_WIDTH}"></a>')
         self.label_logo.setOpenExternalLinks(True)
         self.text_edit_info: QTextBrowser = QTextBrowser()
@@ -63,7 +63,7 @@ class AboutWindow(QDialog):
         self.text_edit_info.setHtml(text)
         self.text_edit_info.setFixedSize(WINDOW_WIDTH, TEXT_HEIGHT)
         self.button_copy: QPushButton = QPushButton()
-        self.button_copy.setIcon(QIcon(os.path.join(dir_name, "copy.png")))
+        self.button_copy.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "copy.png")))
         self.button_copy.setToolTip(qApp.translate("t", "Копировать"))
         self.button_copy.clicked.connect(self.copy_info)
         self.button_ok: QPushButton = QPushButton("OK")
@@ -91,3 +91,12 @@ class AboutWindow(QDialog):
         app = qApp.instance()
         clipboard = app.clipboard()
         clipboard.setText(self.text_edit_info.toPlainText())
+
+
+def show_product_info():
+    """
+    Function shows window with information about application.
+    """
+
+    window = AboutWindow()
+    window.exec_()

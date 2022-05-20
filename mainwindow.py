@@ -11,7 +11,7 @@ from functools import partial
 from platform import system
 from typing import Dict, List, Optional, Tuple
 import numpy as np
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QPoint, QPointF, Qt as QtC, QTimer, QTranslator
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QPoint, Qt as QtC, QTimer, QTranslator
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow, QMenu, QMessageBox,
                              QRadioButton, QScrollArea, QVBoxLayout, QWidget)
@@ -26,7 +26,7 @@ from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
 import connection_window as cw
 import utils as ut
-from about_window import AboutWindow
+from about_window import show_product_info
 from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
 from language import Language, LanguageSelectionWindow
@@ -40,27 +40,6 @@ from settings.settingswindow import LowSettingsPanel, SettingsWindow
 from version import Version
 
 logger = logging.getLogger("eplab")
-
-
-def show_exception(msg_title: str, msg_text: str, exc: str = ""):
-    """
-    Function shows message box with error.
-    :param msg_title: title of message box;
-    :param msg_text: message text;
-    :param exc: text of exception.
-    """
-
-    max_message_length = 500
-    msg = QMessageBox()
-    msg.setIcon(QMessageBox.Warning)
-    msg.setWindowTitle(msg_title)
-    dir_name = os.path.dirname(os.path.abspath(__file__))
-    icon_path = os.path.join(dir_name, "media", "ico.png")
-    msg.setWindowIcon(QIcon(icon_path))
-    msg.setText(msg_text)
-    if exc:
-        msg.setInformativeText(str(exc)[-max_message_length:])
-    msg.exec_()
 
 
 class EPLabWindow(QMainWindow):
@@ -92,8 +71,7 @@ class EPLabWindow(QMainWindow):
         """
 
         super().__init__()
-        self._dir_path_with_media: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
-        self._icon: QIcon = QIcon(os.path.join(self._dir_path_with_media, "ico.png"))
+        self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "ico.png"))
         self._init_ui(product, english)
         if port_1 is None and port_2 is None:
             self.disconnect_devices()
@@ -181,7 +159,7 @@ class EPLabWindow(QMainWindow):
                 text = qApp.translate("t", "Точка POINTS_PARAM не содержит сохраненных измерений. Для сохранения "
                                            "плана тестирования все точки должны содержать сохраненные измерения")
             text = text.replace("POINTS_PARAM", empty_pins)
-            show_exception(qApp.translate("t", "Ошибка"), text, "")
+            ut.show_exception(qApp.translate("t", "Ошибка"), text, "")
             return True
         return False
 
@@ -236,11 +214,11 @@ class EPLabWindow(QMainWindow):
         for measurer in self._msystem.measurers:
             if isinstance(measurer, (IVMeasurerVirtual, IVMeasurerVirtualASA)):
                 device_name = qApp.translate("t", "Эмулятор")
-                icon = QIcon(os.path.join(self._dir_path_with_media, f"emulator_{measurer.name}.png"))
+                icon = QIcon(os.path.join(ut.DIR_MEDIA, f"emulator_{measurer.name}.png"))
             elif isinstance(measurer, IVMeasurerIVM10):
                 result = re.search(r"(?P<port>(COM\d+|ttyACM\d+))", measurer.url)
                 device_name = "EyePoint IVM" if not result else f"EyePoint IVM ({result.group('port')})"
-                icon = QIcon(os.path.join(self._dir_path_with_media, f"ivm_{measurer.name}.png"))
+                icon = QIcon(os.path.join(ut.DIR_MEDIA, f"ivm_{measurer.name}.png"))
             elif isinstance(measurer, IVMeasurerASA):
                 result = re.search(r"xmlrpc://(?P<url>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?P<port>(:\d+)?)",
                                    measurer.url)
@@ -250,10 +228,10 @@ class EPLabWindow(QMainWindow):
                     device_name = f"ASA ({url}:{port})" if port else f"ASA ({url})"
                 else:
                     device_name = "ASA"
-                icon = QIcon(os.path.join(self._dir_path_with_media, f"asa_{measurer.name}.png"))
+                icon = QIcon(os.path.join(ut.DIR_MEDIA, f"asa_{measurer.name}.png"))
             else:
                 device_name = qApp.translate("t", "Неизвестный измеритель")
-                icon = QIcon(os.path.join(self._dir_path_with_media, f"unknown_measurer_{measurer.name}.png"))
+                icon = QIcon(os.path.join(ut.DIR_MEDIA, f"unknown_measurer_{measurer.name}.png"))
             action = QAction(icon, device_name, self)
             action.triggered.connect(partial(self._on_show_device_settings, measurer, device_name))
             self.measurers_menu.addAction(action)
@@ -385,14 +363,7 @@ class EPLabWindow(QMainWindow):
         self._player: SoundPlayer = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
 
-        self._board_window: BoardWidget = BoardWidget()
-        self._board_window.resize(600, 600)
-        self._board_window.setWindowIcon(self._icon)
-        self._board_window.setWindowTitle("EPLab - Board")
-        self._board_window.workspace.point_selected.connect(self._on_board_pin_selected)
-        self._board_window.workspace.on_right_click.connect(self._on_board_right_click)
-        self._board_window.workspace.point_moved.connect(self._on_board_pin_moved)
-
+        self._board_window: BoardWidget = BoardWidget(self)
         self.low_panel_settings: LowSettingsPanel = LowSettingsPanel(self)
         self.main_widget: QWidget = QWidget(self)
         self.main_widget.setFocus()
@@ -440,7 +411,7 @@ class EPLabWindow(QMainWindow):
         self.save_point_action.triggered.connect(self.save_pin)
         self.add_board_image_action.triggered.connect(self._on_load_board_image)
         self.create_report_action.triggered.connect(self.create_report)
-        self.about_action.triggered.connect(self._on_show_product_info)
+        self.about_action.triggered.connect(show_product_info)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
         self.sound_enabled_action.toggled.connect(self._on_enable_sound)
@@ -722,35 +693,6 @@ class EPLabWindow(QMainWindow):
             self.remove_cursor_action.setChecked(False)
         self._iv_window.plot.set_state_adding_cursor(state)
 
-    @pyqtSlot(int, QPointF)
-    def _on_board_pin_moved(self, number: int, point: QPointF):
-        """
-        :param number: pin index;
-        :param point: new coordinates of pin.
-        """
-
-        self._measurement_plan.go_pin(number)
-        self._measurement_plan.get_current_pin().x = point.x()
-        self._measurement_plan.get_current_pin().y = point.y()
-
-    @pyqtSlot(int)
-    def _on_board_pin_selected(self, number: int):
-        """
-        :param number: pin index.
-        """
-
-        self._measurement_plan.go_pin(number)
-        self.update_current_pin()
-
-    @pyqtSlot(QPointF)
-    def _on_board_right_click(self, point: QPointF):
-        if self._work_mode is WorkMode.WRITE:
-            # Create new pin
-            pin = Pin(x=point.x(), y=point.y(), measurements=[])
-            self._measurement_plan.append_pin(pin)
-            self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
-            self.update_current_pin()
-
     @pyqtSlot()
     def _on_connect_or_disconnect(self):
         """
@@ -838,9 +780,9 @@ class EPLabWindow(QMainWindow):
                 self._measurement_plan.go_next_pin()
         except BadMultiplexerOutputError:
             if not self._mux_and_plan_window.measurement_plan_runner.is_running:
-                show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                               qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход точки"
-                                                   " не был установлен."))
+                ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                                  qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
+                                                      "точки не был установлен."))
         self.update_current_pin()
         self._open_board_window_if_needed()
 
@@ -868,12 +810,13 @@ class EPLabWindow(QMainWindow):
             try:
                 board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
             except Exception as exc:
-                show_exception(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит"), str(exc))
+                ut.show_exception(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит"),
+                                  str(exc))
                 return
             if not ut.check_compatibility(self._product, board):
                 text = qApp.translate("t", "План тестирования TEST_PLAN нельзя загрузить, поскольку он не "
                                            "соответствует режиму работы EPLab")
-                show_exception(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
+                ut.show_exception(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
                 return
             self._measurement_plan = MeasurementPlan(
                 board, measurer=self._msystem.measurers[0],
@@ -902,11 +845,8 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _on_open_board_image(self):
         if not self._measurement_plan.image:
-            msg_box = QMessageBox()
-            msg_box.setWindowTitle(qApp.translate("t", "Открытие изображения платы"))
-            msg_box.setWindowIcon(self._icon)
-            msg_box.setText(qApp.translate("t", "Для данной платы изображение не задано!"))
-            msg_box.exec_()
+            ut.show_exception(qApp.translate("t", "Открытие изображения платы"),
+                              qApp.translate("t", "Для данной платы изображение не задано!"))
         else:
             self._open_board_window_if_needed()
 
@@ -1024,18 +964,13 @@ class EPLabWindow(QMainWindow):
                     settings = None
                 self._language_to_set = Language.get_language_name(language)
                 ut.save_settings_auto(self._product, settings, self._language_to_set)
-                msg_box = QMessageBox()
-                msg_box.setIcon(QMessageBox.Information)
-                msg_box.setWindowTitle(qApp.translate("t", "Внимание"))
-                msg_box.setWindowIcon(self._icon)
                 text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
                 text_en = "The language settings are saved. Restart the program for the changes to take effect."
                 if qApp.instance().property("language") is Language.RU:
                     text = text_ru + "\n" + text_en
                 else:
                     text = text_en + "\n" + text_ru
-                msg_box.setText(text)
-                msg_box.exec_()
+                ut.show_exception(qApp.translate("t", "Внимание"), text)
 
     @pyqtSlot(bool)
     def _on_select_option(self, checked: bool):
@@ -1060,8 +995,8 @@ class EPLabWindow(QMainWindow):
                     language = Language.get_language_name(qApp.instance().property("language"))
                 ut.save_settings_auto(self._product, settings, language)
             except ValueError as exc:
-                show_exception(qApp.translate("t", "Ошибка"),
-                               qApp.translate("t", "Ошибка при установке настроек устройства"), str(exc))
+                ut.show_exception(qApp.translate("t", "Ошибка"),
+                                  qApp.translate("t", "Ошибка при установке настроек устройства"), str(exc))
                 self._update_scroll_areas_for_parameters(old_settings)
                 self._set_msystem_settings(old_settings)
                 old_options = self._product.settings_to_options(old_settings)
@@ -1092,11 +1027,11 @@ class EPLabWindow(QMainWindow):
             return
         widget = self.toolBar_cursor.widgetForAction(self.remove_cursor_action)
         menu = QMenu(widget)
-        icon = QIcon(os.path.join(self._dir_path_with_media, "delete_cursor.png"))
+        icon = QIcon(os.path.join(ut.DIR_MEDIA, "delete_cursor.png"))
         action_remove_cursor = QAction(icon, qApp.translate("t", "Удалить метку"), menu)
         action_remove_cursor.triggered.connect(self._on_set_cursor_deletion_mode)
         menu.addAction(action_remove_cursor)
-        icon = QIcon(os.path.join(self._dir_path_with_media, "delete_all.png"))
+        icon = QIcon(os.path.join(ut.DIR_MEDIA, "delete_all.png"))
         action_remove_all_cursors = QAction(icon, qApp.translate("t", "Удалить все метки"), menu)
         action_remove_all_cursors.triggered.connect(self._on_delete_all_cursors)
         menu.addAction(action_remove_all_cursors)
@@ -1119,15 +1054,6 @@ class EPLabWindow(QMainWindow):
                 if dialog.exec_():
                     dialog.set_parameters()
                 return
-
-    @pyqtSlot()
-    def _on_show_product_info(self):
-        """
-        Slot shows message box with information about application.
-        """
-
-        window = AboutWindow()
-        window.exec_()
 
     @pyqtSlot()
     def _on_show_settings_window(self):
@@ -1222,7 +1148,18 @@ class EPLabWindow(QMainWindow):
                 measurer.close_device()
             for multiplexer in self._msystem.multiplexers:
                 multiplexer.close_device()
-        self._msystem = ut.create_measurement_system(port_1, port_2, mux_port)
+        good_com_ports, bad_com_ports = cw.utils.check_com_ports([port_1, port_2, mux_port])
+        if bad_com_ports:
+            if len(bad_com_ports) == 1:
+                text = qApp.translate("t", "Вы попытались запустить приложение с использованием устройства {}, но "
+                                           "такое устройство не было найдено в системе. Подключить устройства "
+                                           "можно с помощью меню Файл -> Подключение.")
+            else:
+                text = qApp.translate("t", "Вы попытались запустить приложение с использованием устройств {}, но "
+                                           "такие устройства не были найдены в системе. Подключить устройства "
+                                           "можно с помощью меню Файл -> Подключение.")
+            ut.show_exception(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
+        self._msystem = ut.create_measurement_system(*good_com_ports)
         if not self._msystem:
             self.disconnect_devices()
             return
@@ -1253,7 +1190,7 @@ class EPLabWindow(QMainWindow):
         else:
             pin = Pin(0, 0, measurements=[], multiplexer_output=multiplexer_output)
         self._measurement_plan.append_pin(pin)
-        self._board_window.add_point(pin.x, pin.y, self._measurement_plan.get_current_index())
+        self._board_window.add_pin(pin.x, pin.y, self._measurement_plan.get_current_index())
         self.line_comment_pin.setText(pin.comment or "")
 
         # It is important to initialize pin with real measurement. Otherwise user can create
@@ -1355,20 +1292,20 @@ class EPLabWindow(QMainWindow):
         try:
             num_point = int(self.num_point_line_edit.text())
         except ValueError:
-            show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                           qApp.translate("t", "Неверный формат номера точки. Номер точки может принимать только "
-                                               "целочисленное значение!"))
+            ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                              qApp.translate("t", "Неверный формат номера точки. Номер точки может принимать только "
+                                                  "целочисленное значение!"))
             return
         try:
             self._measurement_plan.go_pin(num_point)
         except BadMultiplexerOutputError:
             if not self._mux_and_plan_window.measurement_plan_runner.is_running:
-                show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                               qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
-                                                   "точки не был установлен."))
+                ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                                  qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
+                                                      "точки не был установлен."))
         except ValueError as exc:
-            show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                           qApp.translate("t", "Точка с таким номером не найдена на данной плате."), str(exc))
+            ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                              qApp.translate("t", "Точка с таким номером не найдена на данной плате."), str(exc))
             return
         self.update_current_pin()
         self._open_board_window_if_needed()

@@ -19,6 +19,27 @@ import serial.tools.list_ports_common
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 
 logger = logging.getLogger("eplab")
+DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
+EXCLUSIVE_COM_PORT = {
+    "linux": "com:///dev/ttyACMx",
+    "win32": "com:\\\\.\\COMx",
+    "win64": "com:\\\\.\\COMx"}
+COM_PATTERN = {
+    "linux": re.compile(r"^com:///dev/ttyACM\d+$"),
+    "win32": re.compile(r"^com:\\\\\.\\COM\d+$"),
+    "win64": re.compile(r"^com:\\\\\.\\COM\d+$")}
+IVM10_PATTERN = {
+    "linux": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+|virtual)$"),
+    "win32": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+|virtual)$"),
+    "win64": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+|virtual)$")}
+IVMASA_PATTERN = {
+    "linux": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$"),
+    "win32": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$"),
+    "win64": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$")}
+MUX_PATTERN = {
+    "linux": re.compile(r"^(com:///dev/ttyACM\d+|virtual)$"),
+    "win32": re.compile(r"^(com:\\\\\.\\COM\d+|virtual)$"),
+    "win64": re.compile(r"^(com:\\\\\.\\COM\d+|virtual)$")}
 
 
 class ProductNames(Enum):
@@ -97,24 +118,67 @@ class MeasurerType(Enum):
     IVM10 = "IVM10"
     IVM10_VIRTUAL = "virtual"
 
-    @classmethod
-    def check_port_for_ivm10(cls, port: Optional[str]) -> bool:
-        """
-        Method checks if port can be of measurer of IVM10 type.
-        :param port: port.
-        :return: True if port can be of IVM10 measurer.
-        """
 
-        platform_name = get_platform()
-        if "win" in platform_name:
-            pattern = re.compile(r"^com:\\\\\.\\COM\d+$")
-        elif platform_name == "debian":
-            pattern = re.compile(r"^com:///dev/ttyACM\d+$")
+def check_com_port(com_port: str) -> bool:
+    """
+    Function checks that given COM-port can be used for IV-measurer.
+    :param com_port: COM-port to check.
+    :return: True if COM-port can be used.
+    """
+
+    available_ports_in_required_format = [create_uri_name(port.device) for port in serial.tools.list_ports.comports()]
+    if com_port not in available_ports_in_required_format:
+        raise ValueError(f"COM-port {com_port} was not found in system")
+    return True
+
+
+def check_com_ports(com_ports: List[str]) -> Tuple[List[str], List[str]]:
+    """
+    Function checks that given COM-ports can be used for IV-measurer.
+    :param com_ports: list of COM-ports.
+    :return: list of good COM-ports that can be used for IV-measurers and
+    list of bad COM-ports.
+    """
+
+    bad_com_ports = []
+    good_com_ports = []
+    for com_port in com_ports:
+        if not check_port_name(com_port):
+            bad_com_ports.append(com_port)
+            good_com_ports.append(None)
+        elif com_port is not None and COM_PATTERN[get_platform()].match(com_port) and com_port != "virtual":
+            try:
+                check_com_port(com_port)
+                good_com_ports.append(com_port)
+            except ValueError:
+                bad_com_ports.append(com_port)
+                good_com_ports.append(None)
         else:
-            raise RuntimeError("Unexpected OS")
-        if port is None or (not pattern.match(port) and port != "virtual"):
-            return False
+            good_com_ports.append(com_port)
+    while True:
+        try:
+            bad_com_ports.remove(EXCLUSIVE_COM_PORT[get_platform()])
+            logger.info("Wildcard name com:\\\\.\\COMx passed that is not a real device. If you need to open a real "
+                        "device, then instead of com:\\\\.\\COMx you need to enter the real port name")
+        except ValueError:
+            break
+    return good_com_ports, bad_com_ports
+
+
+def check_port_name(port: str) -> bool:
+    """
+    Function checks that port name is correct.
+    :param port: port name.
+    :return: True if port name is correct.
+    """
+
+    platform_name = get_platform()
+    if port is None:
         return True
+    if IVM10_PATTERN[platform_name].match(port) or IVMASA_PATTERN[platform_name].match(port) or\
+            MUX_PATTERN[platform_name].match(port):
+        return True
+    return False
 
 
 def create_uri_name(com_port: str) -> str:
@@ -132,24 +196,23 @@ def create_uri_name(com_port: str) -> str:
     raise RuntimeError("Unexpected OS")
 
 
-def filter_ports_by_vid_and_pid(com_ports: List[serial.tools.list_ports_common.ListPortInfo], vid: str, pid: str
+def filter_ports_by_vid_and_pid(com_ports: List[serial.tools.list_ports_common.ListPortInfo], vid: int, pid: int
                                 ) -> List[serial.tools.list_ports_common.ListPortInfo]:
     """
     Function returns list of COM-ports with specified VID and PID from given list.
     :param com_ports: list of serial ports;
-    :param vid: desired VID as a hex string (example: "1CBC");
-    :param pid: desired PID as a hex string (example: "0007").
+    :param vid: desired VID;
+    :param pid: desired PID.
     :return: list of ports.
     """
 
     filtered_ports = []
     for com_port in com_ports:
-        try:
-            if com_port.vid == int(vid, base=16) and com_port.pid == int(pid, base=16):
-                filtered_ports.append(com_port)
-        except Exception as exc:
-            # Some ports can have malformed information: simply ignore such devices
-            logger.warning("Error occurred while filtering COM-port '%s' by VID and PID: %s", com_port, exc)
+        if com_port.vid == vid and com_port.pid == pid:
+            filtered_ports.append(com_port)
+        else:
+            # Hardware COM-port (not USB) without metainformation. It is not our device
+            pass
     return filtered_ports
 
 
@@ -170,8 +233,8 @@ def find_urpc_ports(device_type: str) -> List[str]:
         logger.error("Cannot open '%s': %s", config_file, exc)
         raise
     try:
-        vid = config["Global"]["vid"]
-        pid = config["Global"]["pid"]
+        vid = int(config["Global"]["vid"], base=16)
+        pid = int(config["Global"]["pid"], base=16)
     except Exception as exc:
         logger.error("Cannot read 'VID' and 'PID' fields from '%s': %s", config_file, exc)
         raise
