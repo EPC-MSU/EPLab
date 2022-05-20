@@ -145,11 +145,7 @@ def filter_ports_by_vid_and_pid(com_ports: List[serial.tools.list_ports_common.L
     filtered_ports = []
     for com_port in com_ports:
         try:
-            # Normal hwid string example: USB VID:PID=1CBC:0007 SER=7 LOCATION=1-4.1.1:x.0
-            vid_pid_info_block = com_port.hwid.split(" ")[1]
-            vid_pid = vid_pid_info_block.split("=")[1]
-            p_vid, p_pid = vid_pid.split(":")
-            if p_vid == vid and p_pid == pid:
+            if com_port.vid == int(vid, base=16) and com_port.pid == int(pid, base=16):
                 filtered_ports.append(com_port)
         except Exception as exc:
             # Some ports can have malformed information: simply ignore such devices
