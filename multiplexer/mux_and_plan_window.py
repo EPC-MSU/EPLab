@@ -122,10 +122,22 @@ class MuxAndPlanWindow(qt.QWidget):
         desktop = qApp.instance().desktop()
         height = desktop.availableGeometry().height()
         width = desktop.availableGeometry().width()
+        if 1280 < width:
+            main_window_width = width // 2
+            window_width = width // 2
+            window_pos_x = width // 2
+        elif width < 1280:
+            main_window_width = self._parent.minimumWidth()
+            window_width = self.minimumWidth()
+            window_pos_x = width - window_width
+        else:
+            main_window_width = self._parent.minimumWidth()
+            window_width = width - main_window_width
+            window_pos_x = main_window_width
         self._parent.move(0, 0)
-        self._parent.resize(width // 2, height - 50)
-        self.move(width // 2, 0)
-        self.resize(width // 2, height - 50)
+        self._parent.resize(main_window_width, height - 50)
+        self.move(window_pos_x, 0)
+        self.resize(window_width, height - 50)
 
     @pyqtSlot(WorkMode)
     def change_work_mode(self, new_work_mode: WorkMode):

@@ -57,8 +57,8 @@ class EPLabWindow(QMainWindow):
     DEFAULT_PATH: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
     DEFAULT_POS_X: int = 50
     DEFAULT_POS_Y: int = 50
-    DEFAULT_WIDTH_IN_LINUX: int = 700
-    DEFAULT_WIDTH_IN_WINDOWS: int = 650
+    MIN_WIDTH_IN_LINUX: int = 700
+    MIN_WIDTH_IN_WINDOWS: int = 650
     work_mode_changed: pyqtSignal = pyqtSignal(WorkMode)
 
     def __init__(self, product: EyePointProduct, port_1: Optional[str] = None, port_2: Optional[str] = None,
@@ -347,9 +347,9 @@ class EPLabWindow(QMainWindow):
         self.setWindowIcon(self._icon)
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
         if system().lower() == "windows":
-            self.setMinimumWidth(self.DEFAULT_WIDTH_IN_WINDOWS)
+            self.setMinimumWidth(self.MIN_WIDTH_IN_WINDOWS)
         else:
-            self.setMinimumWidth(self.DEFAULT_WIDTH_IN_LINUX)
+            self.setMinimumWidth(self.MIN_WIDTH_IN_LINUX)
         self.move(self.DEFAULT_POS_X, self.DEFAULT_POS_Y)
 
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
