@@ -38,7 +38,7 @@ class MuxAndPlanWindow(qt.QWidget):
         self.measurement_plan_runner.measurements_finished.connect(self.create_report)
         self.measurement_plan_runner.measurements_started.connect(self.turn_on_standby_mode)
 
-    def _change_widgets_to_start_plan_measurement(self, status: bool):
+    def _change_widgets_to_start_plan_measurement(self, status: bool) -> bool:
         """
         Method changes widgets to start or stop plan measurements according
         status of one of them.
@@ -48,10 +48,6 @@ class MuxAndPlanWindow(qt.QWidget):
         widgets = (self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement,
                    self._parent.start_or_stop_entire_plan_measurement_action)
         if status:
-            if self.measurement_plan_runner.get_pins_without_multiplexer_outputs() and \
-                    not self._continue_plan_measurement():
-                self.sender().setChecked(False)
-                return
             text = qApp.translate("t", "Остановить измерение всего плана")
             icon = QIcon(os.path.join(DIR_MEDIA, "stop_auto_test.png"))
         else:
@@ -165,6 +161,10 @@ class MuxAndPlanWindow(qt.QWidget):
         :param status: if True then measurements should be started.
         """
 
+        if status and self.measurement_plan_runner.get_pins_without_multiplexer_outputs() and \
+                not self._continue_plan_measurement():
+            self.sender().setChecked(False)
+            return
         self._change_widgets_to_start_plan_measurement(status)
         self.measurement_plan_runner.start_or_stop_measurements(status)
 
