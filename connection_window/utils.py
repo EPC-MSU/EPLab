@@ -191,7 +191,7 @@ def create_uri_name(com_port: str) -> str:
     os_name = get_platform()
     if "win" in os_name:
         return f"com:\\\\.\\{com_port}"
-    if os_name == "debian":
+    if os_name == "linux":
         return f"com://{com_port}"
     raise RuntimeError("Unexpected OS")
 
@@ -269,7 +269,7 @@ def get_platform() -> Optional[str]:
             return "win32"
         return "win64"
     if os_kind == "linux":
-        return "debian"
+        return "linux"
     raise RuntimeError("Unexpected OS")
 
 
