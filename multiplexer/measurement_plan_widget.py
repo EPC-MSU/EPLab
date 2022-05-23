@@ -113,6 +113,9 @@ class MeasurementPlanWidget(qt.QWidget):
         errors = []
         if not channel_number and not module_number:
             return correct, errors
+        if not self._parent.measurement_plan.multiplexer:
+            errors.append(ChannelAndModuleErrors.UNSUITABLE_CHANNEL)
+            errors.append(ChannelAndModuleErrors.UNSUITABLE_MODULE)
         # Check channel number
         try:
             channel_number = int(channel_number)
@@ -125,7 +128,8 @@ class MeasurementPlanWidget(qt.QWidget):
         # Check module number
         try:
             module_number = int(module_number)
-            if len(self._parent.measurement_plan.multiplexer.get_chain_info()) < module_number:
+            if self._parent.measurement_plan.multiplexer and\
+                    len(self._parent.measurement_plan.multiplexer.get_chain_info()) < module_number:
                 errors.append(ChannelAndModuleErrors.UNSUITABLE_MODULE)
             elif module_number < 1:
                 correct = False
@@ -234,6 +238,9 @@ class MeasurementPlanWidget(qt.QWidget):
         if ChannelAndModuleErrors.INVALID_CHANNEL in errors:
             color = self.COLOR_ERROR
             tooltip = qApp.translate("t", "Неверный номер канала модуля (допустимые значения от 1 до 64 включительно)")
+        elif ChannelAndModuleErrors.UNSUITABLE_CHANNEL in errors:
+            color = self.COLOR_WARNING
+            tooltip = qApp.translate("t", "Нет мультиплексора")
         else:
             color = self.COLOR_NORMAL
             tooltip = ""
@@ -251,6 +258,9 @@ class MeasurementPlanWidget(qt.QWidget):
         if ChannelAndModuleErrors.INVALID_MODULE in errors:
             color = self.COLOR_ERROR
             tooltip = qApp.translate("t", "Неверный номер модуля")
+        elif ChannelAndModuleErrors.UNSUITABLE_MODULE in errors and not self._parent.measurement_plan.multiplexer:
+            color = self.COLOR_WARNING
+            tooltip = qApp.translate("t", "Нет мультиплексора")
         elif ChannelAndModuleErrors.UNSUITABLE_MODULE in errors:
             color = self.COLOR_WARNING
             tooltip = qApp.translate("t", "Неверный номер модуля для текущей конфигурации мультиплексора (допустимые "
