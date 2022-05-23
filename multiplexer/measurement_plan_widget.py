@@ -166,6 +166,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self.table_widget_info.itemSelectionChanged.connect(self.set_pin_as_current)
         for pin_index, pin in self._parent.measurement_plan.all_pins_iterator():
             self._add_pin_to_table(pin_index, pin)
+            self.check_channel_and_module_numbers(pin_index, "")
         self.select_row_for_current_pin()
 
     def _get_values_for_parameters(self, settings: MeasurementSettings) -> Generator:
