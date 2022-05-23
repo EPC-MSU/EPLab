@@ -1,14 +1,12 @@
 import os
-
-from PyQt5 import QtCore
-from PyQt5.QtCore import QObject, QSettings
-
+from PyQt5.QtCore import pyqtSignal, QObject, QSettings
 
 __all__ = ["SettingsHandler"]
 
 
 class SettingsHandler(QObject):
-    changed = QtCore.pyqtSignal()
+
+    changed = pyqtSignal()
 
     def __init__(self, parent=None, *args, settings=None, path=None):
         super().__init__(parent=parent)

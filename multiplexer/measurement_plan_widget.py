@@ -5,13 +5,15 @@ File with class for widget to show short information from measurement plan.
 import os
 from enum import auto, Enum
 from functools import partial
-from typing import List, Tuple
+from typing import Generator, List, Tuple
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp
 from PyQt5.QtGui import QCloseEvent, QIcon, QRegExpValidator
 from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, MIN_CHANNEL_NUMBER
-from epcore.elements import MultiplexerOutput, Pin
+from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
+from epcore.product import EyePointProduct
 from common import WorkMode
+from language import Language
 
 DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 
@@ -35,9 +37,7 @@ class MeasurementPlanWidget(qt.QWidget):
     COLOR_ERROR: str = "pink"
     COLOR_NORMAL: str = "white"
     COLOR_WARNING: str = "#E7F5FE"
-    HEADERS: List[str] = ["№", qApp.translate("t", "Модуль MUX"), qApp.translate("t", "Канал MUX"),
-                          qApp.translate("t", "Частота"), qApp.translate("t", "Напряжение"),
-                          qApp.translate("t", "Чувствительность"), qApp.translate("t", "Комментарий")]
+    HEADERS: List[str] = []
 
     def __init__(self, parent):
         """
@@ -46,10 +46,14 @@ class MeasurementPlanWidget(qt.QWidget):
 
         super().__init__()
         self.button_new_pin: qt.QPushButton = None
+        self.HEADERS: List[str] = ["№", qApp.translate("t", "Модуль MUX"), qApp.translate("t", "Канал MUX"),
+                                   qApp.translate("t", "Частота"), qApp.translate("t", "Напряжение"),
+                                   qApp.translate("t", "Чувствительность"), qApp.translate("t", "Комментарий")]
         self.progress_bar: qt.QProgressBar = None
         self.table_widget_info: qt.QTableWidget = None
         self._parent = parent
         self._dont_save_measurement: bool = False
+        self._lang: Language = qApp.instance().property("language")
         self._line_edits_channel_numbers: List[qt.QLineEdit] = []
         self._line_edits_comments: List[qt.QLineEdit] = []
         self._line_edits_module_numbers: List[qt.QLineEdit] = []
@@ -85,18 +89,12 @@ class MeasurementPlanWidget(qt.QWidget):
         self._line_edits_channel_numbers.append(line_edit_channel_number)
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
-            freq_unit = qApp.translate("t", " Гц")
-            label_frequency = qt.QLabel(f"{settings.probe_signal_frequency}{freq_unit}")
-            self.table_widget_info.setCellWidget(pin_index, 3, label_frequency)
-            voltage_unit = qApp.translate("t", " В")
-            label_voltage = qt.QLabel(f"{settings.max_voltage}{voltage_unit}")
-            self.table_widget_info.setCellWidget(pin_index, 4, label_voltage)
-            label_resistance = qt.QLabel(str(settings.internal_resistance))
-            self.table_widget_info.setCellWidget(pin_index, 5, label_resistance)
+            for index, value in enumerate(self._get_values_for_parameters(settings)):
+                label = qt.QLabel(value)
+                self.table_widget_info.setCellWidget(pin_index, 3 + index, label)
         else:
-            self.table_widget_info.setCellWidget(pin_index, 3, qt.QLabel())
-            self.table_widget_info.setCellWidget(pin_index, 4, qt.QLabel())
-            self.table_widget_info.setCellWidget(pin_index, 5, qt.QLabel())
+            for index in range(3):
+                self.table_widget_info.setCellWidget(pin_index, 3 + index, qt.QLabel())
         line_edit_comment = qt.QLineEdit()
         line_edit_comment.editingFinished.connect(lambda: self.save_comment(pin_index))
         line_edit_comment.setText(pin.comment)
@@ -169,6 +167,23 @@ class MeasurementPlanWidget(qt.QWidget):
         for pin_index, pin in self._parent.measurement_plan.all_pins_iterator():
             self._add_pin_to_table(pin_index, pin)
         self.select_row_for_current_pin()
+
+    def _get_values_for_parameters(self, settings: MeasurementSettings) -> Generator:
+        """
+        Method returns values of frequency, voltage and sensitivity for given
+        measurement settings.
+        :param settings: measurement settings.
+        :return: values of frequency, voltage and sensitivity.
+        """
+
+        options = self._parent.product.settings_to_options(settings)
+        available = self._parent.product.get_available_options(settings)
+        parameters = (EyePointProduct.Parameter.frequency, EyePointProduct.Parameter.voltage,
+                      EyePointProduct.Parameter.sensitive)
+        for parameter in parameters:
+            for available_option in available[parameter]:
+                if available_option.name == options[parameter]:
+                    yield available_option.label_ru if self._lang is Language.RU else available_option.label_en
 
     def _init_table(self):
         """
@@ -258,19 +273,14 @@ class MeasurementPlanWidget(qt.QWidget):
         channel_number = "" if not pin.multiplexer_output else str(pin.multiplexer_output.channel_number)
         self._line_edits_channel_numbers[pin_index].setText(channel_number)
         settings = pin.get_reference_and_test_measurements()[-1]
-        label_frequency = self.table_widget_info.cellWidget(pin_index, 3)
-        label_voltage = self.table_widget_info.cellWidget(pin_index, 4)
-        label_resistance = self.table_widget_info.cellWidget(pin_index, 5)
         if settings:
-            freq_unit = qApp.translate("t", " Гц")
-            label_frequency.setText(f"{settings.probe_signal_frequency}{freq_unit}")
-            voltage_unit = qApp.translate("t", " В")
-            label_voltage.setText(f"{settings.max_voltage}{voltage_unit}")
-            label_resistance.setText(str(settings.internal_resistance))
+            for index, value in enumerate(self._get_values_for_parameters(settings)):
+                label = self.table_widget_info.cellWidget(pin_index, 3 + index)
+                label.setText(value)
         else:
-            label_frequency.setText("")
-            label_voltage.setText("")
-            label_resistance.setText("")
+            for index in range(3):
+                label = self.table_widget_info.cellWidget(pin_index, 3 + index)
+                label.setText("")
         self._line_edits_comments[pin_index].setText(pin.comment)
 
     @pyqtSlot()

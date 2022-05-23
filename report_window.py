@@ -114,18 +114,6 @@ class ReportGenerationWindow(qt.QDialog):
         self._thread.report_generator.generation_finished.connect(self.finish_generation)
         self._thread.report_generator.exception_raised.connect(self.handle_generation_break)
 
-    def update_info(self, board: Board, folder_for_report: str = None, threshold_score: float = None):
-        """
-        Method updates info
-        :param board: board for which report should be generated;
-        :param folder_for_report: folder where report should be saved;
-        :param threshold_score: threshold score for board report.
-        """
-
-        self._board = board
-        self._folder_for_report = folder_for_report if folder_for_report else ut.get_dir_name()
-        self._threshold_score = threshold_score
-
     def _create_report(self):
         """
         Method creates report.
@@ -273,7 +261,6 @@ class ReportGenerationWindow(qt.QDialog):
                                                      self._folder_for_report)
         if folder:
             self._folder_for_report = folder
-            self._parent.set_report_directory(folder)
 
     @pyqtSlot(int)
     def set_total_number_of_steps(self, number: int):
@@ -307,3 +294,13 @@ class ReportGenerationWindow(qt.QDialog):
             self._thread.stop_generation()
             self.button_create_report.setEnabled(False)
         self._set_state_to_buttons(status)
+
+    def update_info(self, board: Board, threshold_score: float = None):
+        """
+        Method updates info for report generator.
+        :param board: board for which report should be generated;
+        :param threshold_score: threshold score for board report.
+        """
+
+        self._board = board
+        self._threshold_score = threshold_score

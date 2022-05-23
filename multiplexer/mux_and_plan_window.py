@@ -192,6 +192,7 @@ class MuxAndPlanWindow(qt.QWidget):
         self.multiplexer_pinout_widget.enable_widgets(False)
         self._parent.enable_widgets(False)
         self._parent.connection_action.setEnabled(False)
+        self._parent.open_mux_window_action.setEnabled(True)
         if self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement.isChecked():
             self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement.setEnabled(True)
             self._parent.start_or_stop_entire_plan_measurement_action.setEnabled(True)

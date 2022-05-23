@@ -47,19 +47,19 @@ class EPLabWindow(QMainWindow):
     Class for main window of application.
     """
 
-    COLOR_FOR_REFERENCE = QColor(0, 128, 255, 200)
-    COLOR_FOR_TEST = QColor(255, 0, 0, 200)
-    COLOR_FOR_TEST_FROM_PLAN = QColor(121, 6, 4, 200)
-    CRITICAL_WIDTH_FOR_LINUX_EN = 1380
-    CRITICAL_WIDTH_FOR_LINUX_RU = 1650
-    CRITICAL_WIDTH_FOR_WINDOWS_EN = 1150
-    CRITICAL_WIDTH_FOR_WINDOWS_RU = 1350
+    COLOR_FOR_REFERENCE: QColor = QColor(0, 128, 255, 200)
+    COLOR_FOR_TEST: QColor = QColor(255, 0, 0, 200)
+    COLOR_FOR_TEST_FROM_PLAN: QColor = QColor(121, 6, 4, 200)
+    CRITICAL_WIDTH_FOR_LINUX_EN: int = 1380
+    CRITICAL_WIDTH_FOR_LINUX_RU: int = 1650
+    CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1150
+    CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1350
     DEFAULT_PATH: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
     DEFAULT_POS_X: int = 50
     DEFAULT_POS_Y: int = 50
     DEFAULT_WIDTH_IN_LINUX: int = 700
     DEFAULT_WIDTH_IN_WINDOWS: int = 650
-    work_mode_changed = pyqtSignal(WorkMode)
+    work_mode_changed: pyqtSignal = pyqtSignal(WorkMode)
 
     def __init__(self, product: EyePointProduct, port_1: Optional[str] = None, port_2: Optional[str] = None,
                  english: Optional[bool] = None):
@@ -441,7 +441,6 @@ class EPLabWindow(QMainWindow):
         self._test_curve: IVCurve = None
         self._test_curve_from_plan: IVCurve = None
         self._current_file_path: str = None
-        self._report_directory: str = None
         self._product_name: cw.ProductNames = None
         self._mux_and_plan_window: MuxAndPlanWindow = MuxAndPlanWindow(self)
         self.work_mode_changed.connect(self._mux_and_plan_window.change_work_mode)
@@ -457,6 +456,7 @@ class EPLabWindow(QMainWindow):
         self._report_generation_thread.start()
         self._report_generation_window: ReportGenerationWindow = ReportGenerationWindow(self,
                                                                                         self._report_generation_thread)
+        self._settings_path: str = ut.get_dir_name()
 
     def _open_board_window_if_needed(self):
         if self._measurement_plan.image:
@@ -1062,8 +1062,9 @@ class EPLabWindow(QMainWindow):
         """
 
         self.__settings = None
-        settings_window = SettingsWindow(self, self._score_wrapper.threshold)
+        settings_window = SettingsWindow(self, self._score_wrapper.threshold, self._settings_path)
         settings_window.exec()
+        self._settings_path = settings_window.settings_directory
 
     @pyqtSlot(WorkMode)
     def _on_switch_work_mode(self, mode: WorkMode):
@@ -1206,8 +1207,7 @@ class EPLabWindow(QMainWindow):
         :param auto_start: if True then generation of report will start automatically.
         """
 
-        self._report_generation_window.update_info(self._measurement_plan, self._report_directory,
-                                                   self._score_wrapper.threshold)
+        self._report_generation_window.update_info(self._measurement_plan, self._score_wrapper.threshold)
         if auto_start:
             self._report_generation_window.start_generation()
         if not self._report_generation_window.isVisible():
@@ -1356,14 +1356,6 @@ class EPLabWindow(QMainWindow):
                 self._measurement_plan.save_last_measurement_as_test()
         self._on_save_comment()
         self.update_current_pin()
-
-    def set_report_directory(self, directory: str):
-        """
-        Method sets new value for report directory.
-        :param directory: new report directory.
-        """
-
-        self._report_directory = directory
 
     def update_current_pin(self):
         """
