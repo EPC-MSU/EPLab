@@ -1,0 +1,50 @@
+{
+  "version": "1.1.2",
+  "elements": [
+    {
+      "pins": [
+        {
+          "x": 0,
+          "y": 0,
+          "iv_curves": [
+            {
+              "measurement_settings": {
+                "sampling_rate": 10000,
+                "internal_resistance": 4750,
+                "max_voltage": 5,
+                "probe_signal_frequency": 100
+              },
+              "currents": [0, 0, 0, 0],
+              "voltages": [1, 1, 1, 1]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pins": [
+        {
+          "comment": "Some comment for pin",
+          "x": 1,
+          "y": 1,
+          "iv_curves": [
+            {
+              "measurement_settings": {
+                "sampling_rate": 10000,
+                "internal_resistance": 4750,
+                "max_voltage": 5,
+                "probe_signal_frequency": 100
+              },
+              "currents": [8, 7, 6, 5],
+              "voltages": [4, 3, 2, 1]
+            }
+          ],
+          "multiplexer_output": {
+            "module_number": 2,
+            "channel_number": 45
+          }
+        }
+      ]
+    }
+  ]
+}

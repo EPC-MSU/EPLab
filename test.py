@@ -1,5 +1,5 @@
 """
-Python wrap for running unittest and exit with error code
+Python wrap for running unittest and exit with error code.
 """
 
 import sys
