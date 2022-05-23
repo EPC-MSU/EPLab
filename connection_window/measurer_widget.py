@@ -105,7 +105,7 @@ class MeasurerURLsWidget(qt.QWidget):
     BUTTON_WIDTH: int = 20
     IP_ASA_REG_EXP = r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual)$"
     PLACEHOLDER_ASA = "xmlrpc://x.x.x.x"
-    if ut.get_platform() == "linux":
+    if ut.get_platform() == "debian":
         IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+|virtual)$"
         PLACEHOLDER_IVM = "com:///dev/ttyACMx {} xi-net://x.x.x.x/x"
     else:

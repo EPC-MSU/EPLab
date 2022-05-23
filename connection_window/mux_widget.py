@@ -34,7 +34,7 @@ class MuxWidget(qt.QGroupBox):
         combo_box = qt.QComboBox()
         combo_box.setEditable(True)
         combo_box.setMinimumWidth(self.COMBO_BOX_MIN_WIDTH)
-        if ut.get_platform() == "linux":
+        if ut.get_platform() == "debian":
             reg_exp = r"^(com:///dev/ttyACM\d+|virtual)$"
             placeholder = "com:///dev/ttyACMx"
         else:

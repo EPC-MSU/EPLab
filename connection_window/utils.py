@@ -21,23 +21,23 @@ from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual,
 logger = logging.getLogger("eplab")
 DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 EXCLUSIVE_COM_PORT = {
-    "linux": "com:///dev/ttyACMx",
+    "debian": "com:///dev/ttyACMx",
     "win32": "com:\\\\.\\COMx",
     "win64": "com:\\\\.\\COMx"}
 COM_PATTERN = {
-    "linux": re.compile(r"^com:///dev/ttyACM\d+$"),
+    "debian": re.compile(r"^com:///dev/ttyACM\d+$"),
     "win32": re.compile(r"^com:\\\\\.\\COM\d+$"),
     "win64": re.compile(r"^com:\\\\\.\\COM\d+$")}
 IVM10_PATTERN = {
-    "linux": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+|virtual)$"),
+    "debian": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+|virtual)$"),
     "win32": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+|virtual)$"),
     "win64": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+|virtual)$")}
 IVMASA_PATTERN = {
-    "linux": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$"),
+    "debian": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$"),
     "win32": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$"),
     "win64": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$")}
 MUX_PATTERN = {
-    "linux": re.compile(r"^(com:///dev/ttyACM\d+|virtual)$"),
+    "debian": re.compile(r"^(com:///dev/ttyACM\d+|virtual)$"),
     "win32": re.compile(r"^(com:\\\\\.\\COM\d+|virtual)$"),
     "win64": re.compile(r"^(com:\\\\\.\\COM\d+|virtual)$")}
 
@@ -191,7 +191,7 @@ def create_uri_name(com_port: str) -> str:
     os_name = get_platform()
     if "win" in os_name:
         return f"com:\\\\.\\{com_port}"
-    if os_name == "linux":
+    if os_name == "debian":
         return f"com://{com_port}"
     raise RuntimeError("Unexpected OS")
 
@@ -269,7 +269,7 @@ def get_platform() -> Optional[str]:
             return "win32"
         return "win64"
     if os_kind == "linux":
-        return "linux"
+        return "debian"
     raise RuntimeError("Unexpected OS")
 
 
