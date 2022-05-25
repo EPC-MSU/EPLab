@@ -9,7 +9,7 @@ from epcore.filemanager import load_board_from_ufiv
 from epcore.ivmeasurer import IVMeasurerVirtual
 from epcore.measurementmanager import MeasurementPlan
 from epcore.product import EyePointProduct
-from common import WorkMode
+from common import DeviceErrorsHandler, WorkMode
 
 
 def create_dummy_main_window():
@@ -22,6 +22,7 @@ def create_dummy_main_window():
 
         def __init__(self):
             super().__init__()
+            self.device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
             self.measurer: IVMeasurerVirtual = IVMeasurerVirtual()
             self.multiplexer: AnalogMultiplexerVirtual = AnalogMultiplexerVirtual()
             board = Board(elements=[Element(pins=[Pin(x=0, y=0, measurements=[])])])
