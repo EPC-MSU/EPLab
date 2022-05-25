@@ -783,17 +783,18 @@ class EPLabWindow(QMainWindow):
         Slot moves to next or previous pin in measurement plan.
         """
 
-        with self._device_errors_handler:
-            try:
-                if self.sender() is self.previous_point_action:
-                    self._measurement_plan.go_prev_pin()
-                else:
-                    self._measurement_plan.go_next_pin()
-            except BadMultiplexerOutputError:
-                if not self._mux_and_plan_window.measurement_plan_runner.is_running:
-                    ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                                      qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
-                                                          "точки не был установлен."))
+        try:
+            if self.sender() is self.previous_point_action:
+                self._measurement_plan.go_prev_pin()
+            else:
+                self._measurement_plan.go_next_pin()
+        except BadMultiplexerOutputError:
+            if not self._mux_and_plan_window.measurement_plan_runner.is_running:
+                ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                                  qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
+                                                      "точки не был установлен."))
+        except Exception:
+            self._device_errors_handler.all_ok = False
         self.update_current_pin()
         self._open_board_window_if_needed()
 

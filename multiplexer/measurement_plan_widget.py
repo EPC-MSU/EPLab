@@ -52,12 +52,11 @@ class MeasurementPlanWidget(qt.QWidget):
         self.progress_bar: qt.QProgressBar = None
         self.table_widget_info: qt.QTableWidget = None
         self._parent = parent
-        self._dont_save_measurement: bool = False
+        self._dont_go_to_selected_pin: bool = False
         self._lang: Language = qApp.instance().property("language")
         self._line_edits_channel_numbers: List[qt.QLineEdit] = []
         self._line_edits_comments: List[qt.QLineEdit] = []
         self._line_edits_module_numbers: List[qt.QLineEdit] = []
-        self._selected_row: int = None
         self._standby_mode: bool = False
         self._init_ui()
 
@@ -394,12 +393,9 @@ class MeasurementPlanWidget(qt.QWidget):
         Method selects row in table for current pin index.
         """
 
-        if self._parent.work_mode != WorkMode.COMPARE:
-            pin_index = self._parent.measurement_plan.get_current_index()
-            self._selected_row = pin_index
-            self.table_widget_info.selectRow(pin_index)
-        else:
-            self.table_widget_info.clearSelection()
+        self._dont_go_to_selected_pin = True
+        pin_index = self._parent.measurement_plan.get_current_index()
+        self.table_widget_info.selectRow(pin_index)
 
     def set_new_pin_parameters(self, pin_index: int):
         """
@@ -419,8 +415,11 @@ class MeasurementPlanWidget(qt.QWidget):
         Slot sets pin activated on measurement plan table as current.
         """
 
-        row = self.table_widget_info.currentRow()
-        self._parent.go_to_selected_pin(row)
+        if not self._dont_go_to_selected_pin or self._standby_mode:
+            row = self.table_widget_info.currentRow()
+            self._parent.go_to_selected_pin(row)
+        elif self._dont_go_to_selected_pin:
+            self._dont_go_to_selected_pin = False
 
     def set_work_mode(self, work_mode: WorkMode):
         """
