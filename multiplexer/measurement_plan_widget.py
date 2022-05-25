@@ -105,6 +105,8 @@ class MeasurementPlanWidget(qt.QWidget):
     def _check_mux_output(self, channel_number: str, module_number: str) -> Tuple[bool, List[ChannelAndModuleErrors]]:
         """
         Method checks that given channel and module numbers are correct.
+        :param channel_number: channel number;
+        :param module_number: module number.
         :return: tuple with bool value and errors. If bool value is True then
         channel and module numbers are correct.
         """
@@ -402,6 +404,7 @@ class MeasurementPlanWidget(qt.QWidget):
     def set_new_pin_parameters(self, pin_index: int):
         """
         Method updates pin parameters in measurement plan table.
+        :param pin_index: index of pin whose parameters need to be updated.
         """
 
         pin = self._parent.measurement_plan.get_pin_with_index(pin_index)

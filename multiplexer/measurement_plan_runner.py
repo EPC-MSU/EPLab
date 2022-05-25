@@ -109,6 +109,7 @@ class MeasurementPlanRunner(QObject):
     def start_or_stop_measurements(self, start: bool):
         """
         Method starts or stops measurements according measurement plan.
+        :param start: if True then measurements will be started.
         """
 
         if start:

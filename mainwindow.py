@@ -79,6 +79,10 @@ class EPLabWindow(QMainWindow):
             self.connect_devices(port_1, port_2)
 
     @property
+    def device_errors_handler(self) -> DeviceErrorsHandler:
+        return self._device_errors_handler
+
+    @property
     def measurement_plan(self) -> MeasurementPlan:
         return self._measurement_plan
 
@@ -502,6 +506,7 @@ class EPLabWindow(QMainWindow):
         Method try to reconnect measurer devices to app.
         """
 
+        self._mux_and_plan_window.set_disconnection_mode()
         # Draw empty curves
         self.enable_widgets(False)
         self._test_curve = None
@@ -515,6 +520,7 @@ class EPLabWindow(QMainWindow):
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
         if self._msystem.reconnect():
             self.enable_widgets(True)
+            self._mux_and_plan_window.set_connection_mode()
             # Reconnection success!
             self._device_errors_handler.reset_error()
             self._iv_window.plot.clear_center_text()
@@ -773,16 +779,21 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _on_go_to_left_or_right_pin(self):
-        try:
-            if self.sender() is self.previous_point_action:
-                self._measurement_plan.go_prev_pin()
-            else:
-                self._measurement_plan.go_next_pin()
-        except BadMultiplexerOutputError:
-            if not self._mux_and_plan_window.measurement_plan_runner.is_running:
-                ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                                  qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
-                                                      "точки не был установлен."))
+        """
+        Slot moves to next or previous pin in measurement plan.
+        """
+
+        with self._device_errors_handler:
+            try:
+                if self.sender() is self.previous_point_action:
+                    self._measurement_plan.go_prev_pin()
+                else:
+                    self._measurement_plan.go_next_pin()
+            except BadMultiplexerOutputError:
+                if not self._mux_and_plan_window.measurement_plan_runner.is_running:
+                    ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                                      qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
+                                                          "точки не был установлен."))
         self.update_current_pin()
         self._open_board_window_if_needed()
 
@@ -1281,23 +1292,24 @@ class EPLabWindow(QMainWindow):
         return settings
 
     @pyqtSlot()
-    def go_to_selected_pin(self, num_point: int = None):
+    def go_to_selected_pin(self, pin_index: int = None):
         """
         Slot sets given pin as current.
-        :param num_point: index of pin to be set as current.
+        :param pin_index: index of pin to be set as current.
         """
 
-        if num_point is not None:
-            self.num_point_line_edit.setText(str(num_point))
+        if pin_index is not None:
+            self.num_point_line_edit.setText(str(pin_index))
         try:
-            num_point = int(self.num_point_line_edit.text())
+            pin_index = int(self.num_point_line_edit.text())
         except ValueError:
             ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
                               qApp.translate("t", "Неверный формат номера точки. Номер точки может принимать только "
                                                   "целочисленное значение!"))
             return
         try:
-            self._measurement_plan.go_pin(num_point)
+            with self._device_errors_handler:
+                self._measurement_plan.go_pin(pin_index)
         except BadMultiplexerOutputError:
             if not self._mux_and_plan_window.measurement_plan_runner.is_running:
                 ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
@@ -1369,15 +1381,15 @@ class EPLabWindow(QMainWindow):
             current_pin = self._measurement_plan.get_current_pin()
             self.line_comment_pin.setText(current_pin.comment or "")
             ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
-            if settings:
-                with self._device_errors_handler:
+            with self._device_errors_handler:
+                if settings:
                     curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
                               "test_for_plan": None if not test_for_plan else test_for_plan.ivc}
                     self._set_msystem_settings(settings)
                     options = self._product.settings_to_options(settings)
                     self._set_options_to_ui(options)
                     self._update_curves(curves, self._msystem.measurers[0].get_settings())
-            else:
-                self._update_curves({"ref": None, "test_for_plan": None}, self._msystem.measurers[0].get_settings())
+                else:
+                    self._update_curves({"ref": None, "test_for_plan": None}, self._msystem.measurers[0].get_settings())
         if self._mux_and_plan_window:
             self._mux_and_plan_window.select_current_pin()

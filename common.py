@@ -1,4 +1,5 @@
 from enum import auto, Enum
+from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError as MuxUrpcDeviceUndefinedError
 from epcore.ivmeasurer.asa10.asa import AsaConnectionError, AsaServerResponseError
 from epcore.ivmeasurer.ivm10.ivm import UrpcDeviceUndefinedError
 
@@ -38,7 +39,7 @@ class DeviceErrorsHandler:
           _deice_context.reset_error()
     """
 
-    _device_errors = (OSError, RuntimeError, AsaConnectionError, AsaServerResponseError,
+    _device_errors = (OSError, RuntimeError, AsaConnectionError, AsaServerResponseError, MuxUrpcDeviceUndefinedError,
                       UrpcDeviceUndefinedError)
 
     def __init__(self):
@@ -48,6 +49,10 @@ class DeviceErrorsHandler:
     @property
     def all_ok(self):
         return self._all_ok
+
+    @all_ok.setter
+    def all_ok(self, all_ok: bool):
+        self._all_ok = all_ok
 
     def reset_error(self):
         self._all_ok = True
