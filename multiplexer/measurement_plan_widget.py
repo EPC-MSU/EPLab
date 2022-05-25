@@ -280,10 +280,11 @@ class MeasurementPlanWidget(qt.QWidget):
         :param pin: pin to be updated.
         """
 
-        module_number = "" if not pin.multiplexer_output else str(pin.multiplexer_output.module_number)
-        self._line_edits_module_numbers[pin_index].setText(module_number)
-        channel_number = "" if not pin.multiplexer_output else str(pin.multiplexer_output.channel_number)
-        self._line_edits_channel_numbers[pin_index].setText(channel_number)
+        if pin.multiplexer_output:
+            module_number = str(pin.multiplexer_output.module_number)
+            self._line_edits_module_numbers[pin_index].setText(module_number)
+            channel_number = str(pin.multiplexer_output.channel_number)
+            self._line_edits_channel_numbers[pin_index].setText(channel_number)
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
             for index, value in enumerate(self._get_values_for_parameters(settings)):
@@ -393,9 +394,10 @@ class MeasurementPlanWidget(qt.QWidget):
         Method selects row in table for current pin index.
         """
 
-        self._dont_go_to_selected_pin = True
         pin_index = self._parent.measurement_plan.get_current_index()
-        self.table_widget_info.selectRow(pin_index)
+        if pin_index != self.table_widget_info.currentRow():
+            self._dont_go_to_selected_pin = True
+            self.table_widget_info.selectRow(pin_index)
 
     def set_new_pin_parameters(self, pin_index: int):
         """
