@@ -91,6 +91,10 @@ class EPLabWindow(QMainWindow):
         return self._product
 
     @property
+    def threshold(self) -> float:
+        return self._score_wrapper.threshold
+
+    @property
     def work_mode(self) -> WorkMode:
         return self._work_mode
 
@@ -208,6 +212,7 @@ class EPLabWindow(QMainWindow):
         self._score_wrapper.set_dummy_score()
         self.line_comment_pin.clear()
         self._mux_and_plan_window.close()
+        self._report_generation_window.close()
 
     def _create_measurer_setting_actions(self):
         """
@@ -1219,7 +1224,6 @@ class EPLabWindow(QMainWindow):
         :param auto_start: if True then generation of report will start automatically.
         """
 
-        self._report_generation_window.update_info(self._measurement_plan, self._score_wrapper.threshold)
         if auto_start:
             self._report_generation_window.start_generation()
         if not self._report_generation_window.isVisible():

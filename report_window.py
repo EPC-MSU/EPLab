@@ -105,6 +105,7 @@ class ReportGenerationWindow(qt.QDialog):
             self._thread.report_generator.step_done.disconnect()
             self._thread.report_generator.step_started.disconnect()
             self._thread.report_generator.generation_finished.disconnect()
+            self._thread.report_generator.generation_stopped.disconnect()
             self._thread.report_generator.exception_raised.disconnect()
         except Exception:
             pass
@@ -112,7 +113,8 @@ class ReportGenerationWindow(qt.QDialog):
         self._thread.report_generator.step_done.connect(self.change_progress)
         self._thread.report_generator.step_started.connect(self.text_edit_info.append)
         self._thread.report_generator.generation_finished.connect(self.finish_generation)
-        self._thread.report_generator.exception_raised.connect(self.handle_generation_break)
+        self._thread.report_generator.generation_stopped.connect(lambda: self.handle_generation_break_or_stop(""))
+        self._thread.report_generator.exception_raised.connect(self.handle_generation_break_or_stop)
 
     def _create_report(self):
         """
@@ -242,7 +244,7 @@ class ReportGenerationWindow(qt.QDialog):
         self._set_state_to_buttons(False)
 
     @pyqtSlot(str)
-    def handle_generation_break(self, _: str):
+    def handle_generation_break_or_stop(self, _: str):
         """
         Slot handles break of report generation.
         :param _: message of exception.
@@ -276,6 +278,7 @@ class ReportGenerationWindow(qt.QDialog):
         Method starts report generation.
         """
 
+        self.update_info()
         self.button_create_report.setChecked(True)
 
     @pyqtSlot(bool)
@@ -289,18 +292,17 @@ class ReportGenerationWindow(qt.QDialog):
             self._software_change_of_button_state = False
             return
         if status:
+            self.update_info()
             self._create_report()
         else:
             self._thread.stop_generation()
             self.button_create_report.setEnabled(False)
         self._set_state_to_buttons(status)
 
-    def update_info(self, board: Board, threshold_score: float = None):
+    def update_info(self):
         """
         Method updates info for report generator.
-        :param board: board for which report should be generated;
-        :param threshold_score: threshold score for board report.
         """
 
-        self._board = board
-        self._threshold_score = threshold_score
+        self._board = self._parent.measurement_plan
+        self._threshold_score = self._parent.threshold
