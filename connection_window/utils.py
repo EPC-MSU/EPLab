@@ -211,7 +211,8 @@ def filter_ports_by_vid_and_pid(com_ports: List[serial.tools.list_ports_common.L
         if com_port.vid == vid and com_port.pid == pid:
             filtered_ports.append(com_port)
         else:
-            # Hardware COM-port (not USB) without metainformation. It is not our device
+            # VID or PID does not match or Hardware COM-port (not USB) without metainformation (VID and PID).
+            # It is not our device. Skip it.
             pass
     return filtered_ports
 
