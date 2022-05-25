@@ -71,21 +71,20 @@ class MeasurementPlanWidget(qt.QWidget):
         self.table_widget_info.insertRow(row_number)
         self.table_widget_info.setCellWidget(pin_index, 0, qt.QLabel(str(pin_index)))
         line_edit_module_number = qt.QLineEdit()
-        line_edit_module_number.textEdited.connect(partial(self.check_channel_and_module_numbers, pin_index))
+        line_edit_module_number.textChanged.connect(partial(self.check_channel_and_module_numbers, pin_index))
         line_edit_module_number.editingFinished.connect(lambda: self.save_mux_output(pin_index))
         line_edit_module_number.setValidator(QRegExpValidator(QRegExp(r"\d+")))
-        if pin.multiplexer_output:
-            line_edit_module_number.setText(str(pin.multiplexer_output.module_number))
         self.table_widget_info.setCellWidget(pin_index, 1, line_edit_module_number)
         self._line_edits_module_numbers.append(line_edit_module_number)
         line_edit_channel_number = qt.QLineEdit()
-        line_edit_channel_number.textEdited.connect(partial(self.check_channel_and_module_numbers, pin_index))
+        line_edit_channel_number.textChanged.connect(partial(self.check_channel_and_module_numbers, pin_index))
         line_edit_channel_number.editingFinished.connect(lambda: self.save_mux_output(pin_index))
         line_edit_channel_number.setValidator(QRegExpValidator(QRegExp(r"\d+")))
-        if pin.multiplexer_output:
-            line_edit_channel_number.setText(str(pin.multiplexer_output.channel_number))
         self.table_widget_info.setCellWidget(pin_index, 2, line_edit_channel_number)
         self._line_edits_channel_numbers.append(line_edit_channel_number)
+        if pin.multiplexer_output:
+            line_edit_module_number.setText(str(pin.multiplexer_output.module_number))
+            line_edit_channel_number.setText(str(pin.multiplexer_output.channel_number))
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
             for index, value in enumerate(self._get_values_for_parameters(settings)):
@@ -173,6 +172,22 @@ class MeasurementPlanWidget(qt.QWidget):
             self._add_pin_to_table(pin_index, pin)
             self.check_channel_and_module_numbers(pin_index, "")
         self.select_row_for_current_pin()
+
+    def _fix_bad_multiplexer_output(self, pin_index: int):
+        """
+        Method fixes bad multiplexer output for pin with given index.
+        :param pin_index: pin index.
+        """
+
+        if not self._check_mux_output(self._line_edits_channel_numbers[pin_index].text(),
+                                      self._line_edits_module_numbers[pin_index].text())[0]:
+            pin = self._parent.measurement_plan.get_pin_with_index(pin_index)
+            if pin.multiplexer_output:
+                self._line_edits_channel_numbers[pin_index].setText(str(pin.multiplexer_output.channel_number))
+                self._line_edits_module_numbers[pin_index].setText(str(pin.multiplexer_output.module_number))
+            else:
+                self._line_edits_channel_numbers[pin_index].clear()
+                self._line_edits_module_numbers[pin_index].clear()
 
     def _get_values_for_parameters(self, settings: MeasurementSettings) -> Generator:
         """
@@ -418,8 +433,9 @@ class MeasurementPlanWidget(qt.QWidget):
         """
 
         if not self._dont_go_to_selected_pin or self._standby_mode:
-            row = self.table_widget_info.currentRow()
-            self._parent.go_to_selected_pin(row)
+            row_index = self.table_widget_info.currentRow()
+            self._fix_bad_multiplexer_output(row_index)
+            self._parent.go_to_selected_pin(row_index)
         elif self._dont_go_to_selected_pin:
             self._dont_go_to_selected_pin = False
 
