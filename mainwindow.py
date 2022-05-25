@@ -603,9 +603,6 @@ class EPLabWindow(QMainWindow):
         self._create_measurer_setting_actions()
         # If necessary, deactivate the menu item for auto-selection
         self._disable_optimal_parameter_searcher()
-        if len(self._msystem.measurers) < 2:
-            self.freeze_curve_b_action.setEnabled(False)
-            self.hide_curve_b_action.setEnabled(False)
         with self._device_errors_handler:
             for measurer in self._msystem.measurers:
                 measurer.open_device()
@@ -664,7 +661,10 @@ class EPLabWindow(QMainWindow):
             self.test_curve_plot.set_curve(self._test_curve)
         else:
             self.test_curve_plot.set_curve(None)
-        self.test_curve_plot_from_plan.set_curve(self._test_curve_from_plan)
+        if self._work_mode != WorkMode.COMPARE:
+            self.test_curve_plot_from_plan.set_curve(self._test_curve_from_plan)
+        else:
+            self.test_curve_plot_from_plan.set_curve(None)
         # Update score
         if self._ref_curve and self._test_curve and self._work_mode != WorkMode.WRITE:
             assert settings is not None
@@ -1266,6 +1266,9 @@ class EPLabWindow(QMainWindow):
                    self.measurers_menu)
         for widget in widgets:
             widget.setEnabled(enabled)
+        if enabled and len(self._msystem.measurers) < 2:
+            self.freeze_curve_b_action.setEnabled(False)
+            self.hide_curve_b_action.setEnabled(False)
 
     def get_measurers(self) -> list:
         """
