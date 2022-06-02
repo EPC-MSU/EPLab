@@ -123,6 +123,7 @@ class MeasurerURLsWidget(qt.QWidget):
         self.labels_measurers: List[qt.QLabel] = []
         self._initial_ports: List[str] = initial_ports
         self._measurer_type: ut.MeasurerType = None
+        self._show_two_channels: bool = None
         self._init_ui()
 
     def _get_ports_for_ivm10(self, ports: List, port_1: str = None, port_2: str = None) -> List[List[str]]:
@@ -153,7 +154,8 @@ class MeasurerURLsWidget(qt.QWidget):
                     pass
             spec_ports = [*selected_ports, None, ut.MeasurerType.IVM10_VIRTUAL.value]
             for port in self._initial_ports:
-                if port not in spec_ports and port is not None and ut.IVM10_PATTERN[ut.get_platform()].match(port):
+                if port not in spec_ports and port is not None and ut.IVM10_PATTERN[ut.get_platform()].match(port) and\
+                        port not in ports_for_first_and_second[index]:
                     ports_for_first_and_second[index].append(port)
             ports_for_first_and_second[index] = sorted(ports_for_first_and_second[index])
         return ports_for_first_and_second
@@ -180,10 +182,7 @@ class MeasurerURLsWidget(qt.QWidget):
         :param port_2: selected port for second measurer.
         """
 
-        if self.combo_boxes_measurers[1].isVisible():
-            ports = [port_1, port_2]
-        else:
-            ports = [port_1, None]
+        ports = [port_1, port_2] if self._show_two_channels else [port_1, None]
         for index, port in enumerate(ports):
             if port is None or not ut.IVM10_PATTERN[ut.get_platform()].match(port):
                 ports[index] = None
@@ -196,6 +195,8 @@ class MeasurerURLsWidget(qt.QWidget):
                 combo_box.setCurrentText(ports[index])
             else:
                 combo_box.setCurrentText("virtual")
+        if port_1 is None and port_2 is None:
+            self._set_real_ivm10_ports()
 
     def _init_ui(self):
         """
@@ -223,6 +224,29 @@ class MeasurerURLsWidget(qt.QWidget):
             layout.addWidget(button)
             form_layout.addRow(label, layout)
         self.setLayout(form_layout)
+
+    def _set_real_ivm10_ports(self):
+        """
+        Method sets real IVM10 device to current ports.
+        """
+
+        ports = ["virtual", "virtual"]
+        initial_current_ports = [combo_box.currentText() for combo_box in self.combo_boxes_measurers]
+        for combo_box_index, combo_box in enumerate(self.combo_boxes_measurers):
+            if not self._show_two_channels and combo_box_index == 1:
+                continue
+            current_port = combo_box.currentText()
+            if current_port == "virtual":
+                for index in range(combo_box.count()):
+                    if combo_box.itemText(index) != "virtual" and combo_box.itemText(index) not in ports:
+                        ports[combo_box_index] = combo_box.itemText(index)
+                        break
+                else:
+                    ports[combo_box_index] = "virtual"
+            else:
+                ports[combo_box_index] = current_port
+        if initial_current_ports != ports:
+            self._init_ivm10(*ports)
 
     @pyqtSlot()
     def change_ports(self):
@@ -257,6 +281,7 @@ class MeasurerURLsWidget(qt.QWidget):
         :param show_two_channels: True if two channels (ports for measurers) should be shown.
         """
 
+        self._show_two_channels = show_two_channels
         self._measurer_type = measurer_type
         if measurer_type == ut.MeasurerType.IVM10:
             placeholder_text = self.PLACEHOLDER_IVM.format(qApp.translate("t", "или"))
@@ -313,6 +338,6 @@ class MeasurerURLsWidget(qt.QWidget):
         """
 
         if self._measurer_type == ut.MeasurerType.IVM10:
-            self._init_ivm10()
+            self._init_ivm10(*self._initial_ports)
         else:
             self._init_asa()

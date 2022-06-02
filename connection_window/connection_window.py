@@ -21,7 +21,7 @@ class ConnectionWindow(qt.QDialog):
     Class for dialog window to select devices for connection.
     """
 
-    BUTTON_WIDTH: int = 20
+    BUTTON_WIDTH: int = 25
 
     def __init__(self, parent=None, initial_product_name: Optional[ut.ProductNames] = None):
         """
