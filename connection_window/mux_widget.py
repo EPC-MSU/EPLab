@@ -40,7 +40,7 @@ class MuxWidget(qt.QGroupBox):
         else:
             reg_exp = r"^(com:\\\\\.\\COM\d+|virtual)$"
             placeholder = "com:\\\\.\\COMx"
-        combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(reg_exp)))
+        combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(reg_exp), self))
         combo_box.lineEdit().setPlaceholderText(placeholder)
         combo_box.setToolTip(placeholder)
         return combo_box

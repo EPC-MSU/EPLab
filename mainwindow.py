@@ -1175,7 +1175,15 @@ class EPLabWindow(QMainWindow):
                 text = qApp.translate("t", "Проверьте, что устройства {} подключены к компьютеру и не удерживаются "
                                            "другой программой.")
             ut.show_exception(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
-        self._msystem = ut.create_measurement_system(*good_com_ports)
+        self._msystem, bad_com_ports = ut.create_measurement_system(*good_com_ports)
+        if bad_com_ports:
+            if len(bad_com_ports) == 1:
+                text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство "
+                                           "EyePoint, а не какое-то другое устройство.")
+            else:
+                text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства "
+                                           "EyePoint, а не какие-то другие устройства.")
+            ut.show_exception(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
         if not self._msystem:
             self.disconnect_devices()
             return

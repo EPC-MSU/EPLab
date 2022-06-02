@@ -10,7 +10,7 @@ import re
 import sys
 from operator import itemgetter
 from platform import system
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Tuple
 import serial.tools.list_ports
 from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtGui import QIcon
@@ -63,14 +63,15 @@ def check_compatibility(product: EyePointProduct, board: Board) -> bool:
     return True
 
 
-def create_measurers(url_1: str, url_2: str) -> Optional[List[IVMeasurerBase]]:
+def create_measurers(url_1: str, url_2: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str]]:
     """
     Function creates measurers.
     :param url_1: port for first measurer;
     :param url_2: port for second measurer.
-    :return: created measurers.
+    :return: created measurers and list with bad ports.
     """
 
+    bad_ports = []
     measurers = []
     measurers_args = url_1, url_2
     virtual_already_has_been = False
@@ -104,12 +105,13 @@ def create_measurers(url_1: str, url_2: str) -> Optional[List[IVMeasurerBase]]:
             text = qApp.translate("t", "Версия прошивки {} {} несовместима с данной версией EPLab")
             show_exception(qApp.translate("t", "Ошибка"), text.format(exc.args[0], exc.args[2]), "")
         except Exception as exc:
+            bad_ports.append(measurer_arg)
             logger.error("Error occurred while creating measurer of type '%s': %s", measurer_type, exc)
     if len(measurers) == 0:
         # Logically it will be correctly to abort here. But for better user
         # experience we will add single virtual IVM
         # measurers.append(IVMeasurerVirtual())
-        return None
+        return None, bad_ports
     elif len(measurers) == 2:
         # Reorder measurers according to their addresses in USB hubs tree
         measurers = sort_devices_by_usb_numbers(measurers)
@@ -117,40 +119,46 @@ def create_measurers(url_1: str, url_2: str) -> Optional[List[IVMeasurerBase]]:
     measurers[0].name = "test"
     if len(measurers) == 2:
         measurers[1].name = "ref"
-    return measurers
+    return measurers, bad_ports
 
 
 def create_measurement_system(measurer_url_1: str, measurer_url_2: str, mux_url: Optional[str] = None
-                              ) -> Optional[MeasurementSystem]:
+                              ) -> Tuple[Optional[MeasurementSystem], List[str]]:
     """
     Function creates measurement system.
     :param measurer_url_1: URL for first measurer;
     :param measurer_url_2: URL for second measurer;
     :param mux_url: URL for multiplexer.
-    :return: measurement system.
+    :return: measurement system and list with bad ports.
     """
 
-    measurers = create_measurers(measurer_url_1, measurer_url_2)
+    measurers, bad_ports = create_measurers(measurer_url_1, measurer_url_2)
     if measurers:
-        multiplexer = create_multiplexer(mux_url)
+        multiplexer, mux_bad_ports = create_multiplexer(mux_url)
+        bad_ports.extend(mux_bad_ports)
         if multiplexer:
-            return MeasurementSystem(measurers=measurers, multiplexers=[multiplexer])
-        return MeasurementSystem(measurers=measurers)
-    return None
+            return MeasurementSystem(measurers=measurers, multiplexers=[multiplexer]), bad_ports
+        return MeasurementSystem(measurers=measurers), bad_ports
+    return None, bad_ports
 
 
-def create_multiplexer(mux_url: Optional[str] = None) -> Optional[AnalogMultiplexerBase]:
+def create_multiplexer(mux_url: Optional[str] = None) -> Tuple[Optional[AnalogMultiplexerBase], List[str]]:
     """
     Function creates multiplexer.
     :param mux_url: URL for multiplexer.
-    :return: created multiplexer.
+    :return: created multiplexer and list with bad ports.
     """
 
-    if mux_url == "virtual":
-        return AnalogMultiplexerVirtual(mux_url, defer_open=True)
-    elif mux_url is not None and "com:" in mux_url:
-        return AnalogMultiplexer(mux_url, defer_open=True)
-    return None
+    try:
+        if mux_url == "virtual":
+            return AnalogMultiplexerVirtual(mux_url, defer_open=True), []
+        elif mux_url is not None and "com:" in mux_url:
+            mux = AnalogMultiplexer(mux_url)
+            mux.close_device()
+            return mux, []
+    except Exception:
+        return None, [mux_url]
+    return None, []
 
 
 def find_address_in_usb_hubs_tree(url: str) -> Optional[str]:

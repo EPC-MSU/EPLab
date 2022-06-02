@@ -440,6 +440,16 @@
         <translation>Connection error</translation>
     </message>
     <message>
+        <location filename="../mainwindow.py" line="1181"/>
+        <source>Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство EyePoint, а не какое-то другое устройство.</source>
+        <translation>Failed to connect to {0}. Make sure {0} is an EyePoint device and not some other device.</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1184"/>
+        <source>Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства EyePoint, а не какие-то другие устройства.</source>
+        <translation>Failed to connect to {0}. Make sure {0} is EyePoint devices and not some other devices.</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.py" line="1296"/>
         <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение!</source>
         <translation>Incorrect format of pin number. Pin number must be integer!</translation>
