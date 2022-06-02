@@ -425,6 +425,21 @@
         <translation>The measurement plan was not saved. Save the latest changes?</translation>
     </message>
     <message>
+        <location filename="../mainwindow.py" line="1172"/>
+        <source>Проверьте, что устройство {} подключено к компьютеру и не удерживается другой программой.</source>
+        <translation>Check that device {} is connected to the computer and is not being held by another program.</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1175"/>
+        <source>Проверьте, что устройства {} подключены к компьютеру и не удерживаются другой программой.</source>
+        <translation>Check that devices {} are connected to the computer and are not being held by another program.</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1177"/>
+        <source>Ошибка подключения</source>
+        <translation>Connection error</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.py" line="1296"/>
         <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение!</source>
         <translation>Incorrect format of pin number. Pin number must be integer!</translation>

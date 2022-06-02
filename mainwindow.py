@@ -1169,13 +1169,11 @@ class EPLabWindow(QMainWindow):
         good_com_ports, bad_com_ports = cw.utils.check_com_ports([port_1, port_2, mux_port])
         if bad_com_ports:
             if len(bad_com_ports) == 1:
-                text = qApp.translate("t", "Вы попытались запустить приложение с использованием устройства {}, но "
-                                           "такое устройство не было найдено в системе. Подключить устройства "
-                                           "можно с помощью меню Файл -> Подключение.")
+                text = qApp.translate("t", "Проверьте, что устройство {} подключено к компьютеру и не удерживается "
+                                           "другой программой.")
             else:
-                text = qApp.translate("t", "Вы попытались запустить приложение с использованием устройств {}, но "
-                                           "такие устройства не были найдены в системе. Подключить устройства "
-                                           "можно с помощью меню Файл -> Подключение.")
+                text = qApp.translate("t", "Проверьте, что устройства {} подключены к компьютеру и не удерживаются "
+                                           "другой программой.")
             ut.show_exception(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
         self._msystem = ut.create_measurement_system(*good_com_ports)
         if not self._msystem:
