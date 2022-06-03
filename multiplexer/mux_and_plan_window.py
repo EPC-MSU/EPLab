@@ -5,7 +5,7 @@ measurement plan.
 
 import os
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
 from common import WorkMode
@@ -30,8 +30,12 @@ class MuxAndPlanWindow(qt.QWidget):
         self.button_arrange_windows: qt.QPushButton = None
         self.measurement_plan_widget: MeasurementPlanWidget = None
         self.multiplexer_pinout_widget: MultiplexerPinoutWidget = None
-        self._parent = parent
         self._manual_stop: bool = True
+        self._parent = parent
+        self._previous_main_window_pos: QPoint = None
+        self._previous_main_window_size: QSize = None
+        self._previous_window_pos: QPoint = None
+        self._previous_window_size: QSize = None
         self._init_ui()
         self.measurement_plan_runner: MeasurementPlanRunner = MeasurementPlanRunner(parent,
                                                                                     self.measurement_plan_widget)
@@ -118,6 +122,7 @@ class MuxAndPlanWindow(qt.QWidget):
             self.start_or_stop_plan_measurement)
         splitter = qt.QSplitter(Qt.Vertical)
         splitter.setContentsMargins(0, 0, 0, 0)
+        splitter.setChildrenCollapsible(False)
         splitter.addWidget(self.multiplexer_pinout_widget)
         splitter.addWidget(self.measurement_plan_widget)
         layout = qt.QVBoxLayout()
@@ -147,24 +152,41 @@ class MuxAndPlanWindow(qt.QWidget):
         desktop = qApp.instance().desktop()
         height = desktop.availableGeometry().height()
         width = desktop.availableGeometry().width()
-        main_window_pos_x = desktop.availableGeometry().x()
-        pos_y = desktop.availableGeometry().y()
+        main_window_pos = QPoint()
+        main_window_pos.x = desktop.availableGeometry().x()
+        main_window_pos.y = desktop.availableGeometry().y()
+        height -= 50
         if 1280 < width:
-            main_window_width = width // 2
-            window_pos_x = main_window_pos_x + main_window_width
-            window_width = width // 2
+            main_window_size = QSize(width // 2, height)
+            window_pos = QPoint(main_window_pos.x + main_window_size.width(), main_window_pos.y)
+            window_size = QSize(width // 2, height)
         elif width < 1280:
-            main_window_width = self._parent.minimumWidth()
-            window_width = self.minimumWidth()
-            window_pos_x = main_window_pos_x + width - window_width
+            main_window_size = QSize(self._parent.minimumWidth(), height)
+            window_size = QSize(self.minimumWidth(), height)
+            window_pos = QPoint(main_window_pos.x + width - window_size.width(), main_window_pos.y)
         else:
-            main_window_width = self._parent.minimumWidth()
-            window_pos_x = main_window_pos_x + main_window_width
-            window_width = width - main_window_width
-        self._parent.move(main_window_pos_x, pos_y)
-        self._parent.resize(main_window_width, height - 50)
-        self.move(window_pos_x, pos_y)
-        self.resize(window_width, height - 50)
+            main_window_size = QSize(self._parent.minimumWidth(), height)
+            window_pos = QPoint(main_window_pos.x + main_window_size.width(), main_window_pos.y)
+            window_size = QSize(width - main_window_size.width(), height)
+        current_main_window_pos = self._parent.pos()
+        current_main_window_size = self._parent.size()
+        current_window_pos = self.pos()
+        current_window_size = self.size()
+        if current_main_window_pos != main_window_pos or current_main_window_size != main_window_size or\
+                current_window_pos != window_pos or current_window_size != window_size:
+            self._previous_main_window_pos = current_main_window_pos
+            self._previous_main_window_size = current_main_window_size
+            self._previous_window_pos = current_window_pos
+            self._previous_window_size = current_window_size
+        else:
+            main_window_pos = self._previous_main_window_pos
+            main_window_size = self._previous_main_window_size
+            window_pos = self._previous_window_pos
+            window_size = self._previous_window_size
+        self._parent.move(main_window_pos)
+        self._parent.resize(main_window_size)
+        self.move(window_pos)
+        self.resize(window_size)
 
     @pyqtSlot(WorkMode)
     def change_work_mode(self, new_work_mode: WorkMode):
