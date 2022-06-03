@@ -749,6 +749,7 @@ class EPLabWindow(QMainWindow):
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._board_window.set_board(self._measurement_plan)
             self.update_current_pin()
+            self._mux_and_plan_window.update_info()
 
     @pyqtSlot()
     def _on_delete_all_cursors(self):
