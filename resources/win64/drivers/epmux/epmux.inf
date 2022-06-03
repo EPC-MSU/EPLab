@@ -1,0 +1,37 @@
+[Version]
+Signature="$Windows NT$"
+Class=Ports
+ClassGuid={4d36e978-e325-11ce-bfc1-08002be10318}
+Provider=%MFGNAME%
+LayoutFile=layout.inf
+DriverVer=12/24/2021,1.0.0.0
+CatalogFile.NTx86=epmux.cat
+CatalogFile.NTamd64=epmux.cat
+
+[DefaultInstall]
+CopyINF=epmux.inf
+
+[Manufacturer]
+%MFGNAME%=CommunicationDevice,NT,NTamd64
+
+[CommunicationDevice.NT]
+%DESCR%=DriverInstall,USB\VID_1CBC&PID_0008
+
+[CommunicationDevice.NTamd64]
+%DESCR%=DriverInstall,USB\VID_1CBC&PID_0008
+
+[DriverInstall]
+Include=mdmcpq.inf
+CopyFiles=FakeModemCopyFileSection
+
+[DriverInstall.Services]
+Include=mdmcpq.inf
+AddService=usbser,0x00000002,LowerFilter_Service_Inst
+
+[DriverInstall.HW]
+Include=mdmcpq.inf
+AddReg=LowerFilterAddReg
+
+[Strings]
+MFGNAME="EPC MSU"
+DESCR="EyePoint Analog Multiplexor"
