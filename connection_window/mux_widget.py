@@ -15,13 +15,15 @@ class MuxWidget(qt.QGroupBox):
     Class for widget to show list of COM-ports for multiplexer.
     """
 
-    BUTTON_WIDTH: int = 20
+    BUTTON_HELP_WIDTH: int = 20
+    BUTTON_UPDATE_WIDTH: int = 25
     COMBO_BOX_MIN_WIDTH: int = 200
     IMAGE_SIZE: int = 200
 
     def __init__(self):
         super().__init__()
         self.button_show_help: qt.QPushButton = None
+        self.button_update: qt.QPushButton = None
         self.combo_box_com_ports: qt.QComboBox = None
         self._init_ui()
 
@@ -57,13 +59,19 @@ class MuxWidget(qt.QGroupBox):
         label.setToolTip(qApp.translate("t", "Мультиплексор"))
         self.combo_box_com_ports = self._init_combo_box()
         self.update_com_ports()
+        self.button_update = qt.QPushButton()
+        self.button_update.setFixedWidth(self.BUTTON_UPDATE_WIDTH)
+        self.button_update.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "update.png")))
+        self.button_update.setToolTip(qApp.translate("t", "Обновить"))
+        self.button_update.clicked.connect(self.update_com_ports)
         self.button_show_help = qt.QPushButton()
         self.button_show_help.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "info.png")))
         self.button_show_help.setToolTip(qApp.translate("t", "Помощь"))
-        self.button_show_help.setFixedWidth(self.BUTTON_WIDTH)
+        self.button_show_help.setFixedWidth(self.BUTTON_HELP_WIDTH)
         self.button_show_help.clicked.connect(self.show_help)
         h_box_layout = qt.QHBoxLayout()
         h_box_layout.addWidget(self.combo_box_com_ports)
+        h_box_layout.addWidget(self.button_update)
         h_box_layout.addWidget(self.button_show_help)
         v_box_layout = qt.QVBoxLayout()
         v_box_layout.addWidget(label, alignment=Qt.AlignHCenter)

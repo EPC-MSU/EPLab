@@ -505,22 +505,22 @@
         <translation>Disconnect</translation>
     </message>
     <message>
-        <location filename="../connection_window/connection_window.py" line="95"/>
-        <source>Обновить</source>
-        <translation>Update</translation>
-    </message>
-    <message>
         <location filename="../connection_window/measurer_widget.py" line="64"/>
         <source>Тип измерителя</source>
         <translation>Measurer type</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurer_widget.py" line="209"/>
+        <location filename="../connection_window/measurer_widget.py" line="211"/>
         <source>Канал #{}</source>
         <translation>Channel #{}</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurer_widget.py" line="217"/>
+        <location filename="../connection_window/measurer_widget.py" line="226"/>
+        <source>Обновить</source>
+        <translation>Update</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/measurer_widget.py" line="231"/>
         <source>Помощь</source>
         <translation>Help</translation>
     </message>
@@ -711,8 +711,8 @@
     </message>
     <message>
         <location filename="../report_window.py" line="156"/>
-        <source>Отчет сгенерирован и сохранен в директорию 'FOLDER'</source>
-        <translation>Report was generated and saved to directory 'FOLDER'</translation>
+        <source>Отчет сгенерирован и сохранен в директорию &apos;FOLDER&apos;</source>
+        <translation>Report was generated and saved to directory &apos;FOLDER&apos;</translation>
     </message>
     <message>
         <location filename="../report_window.py" line="159"/>

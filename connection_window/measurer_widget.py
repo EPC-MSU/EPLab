@@ -102,7 +102,9 @@ class MeasurerURLsWidget(qt.QWidget):
     Class for widget to select URLs for measurers.
     """
 
-    BUTTON_WIDTH: int = 20
+    BUTTON_HELP_WIDTH: int = 20
+    BUTTON_UPDATE_WIDTH: int = 25
+    COMBO_BOX_MIN_WIDTH: int = 160
     IP_ASA_REG_EXP = r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual)$"
     PLACEHOLDER_ASA = "xmlrpc://x.x.x.x"
     if ut.get_platform() == "debian":
@@ -118,6 +120,7 @@ class MeasurerURLsWidget(qt.QWidget):
         """
 
         super().__init__()
+        self.button_update: qt.QPushButton = None
         self.buttons_show_help: List[qt.QPushButton] = []
         self.combo_boxes_measurers: List[qt.QComboBox] = []
         self.labels_measurers: List[qt.QLabel] = []
@@ -203,27 +206,34 @@ class MeasurerURLsWidget(qt.QWidget):
         Method initializes widgets on main widget.
         """
 
-        form_layout = qt.QFormLayout()
+        grid_layout = qt.QGridLayout()
         for index in range(1, 3):
-            combo_box = qt.QComboBox()
-            combo_box.setEditable(True)
             label_text = qApp.translate("t", "Канал #{}")
+            label = qt.QLabel(label_text.format(index))
+            grid_layout.addWidget(label, index - 1, 0)
+            self.labels_measurers.append(label)
+            combo_box = qt.QComboBox()
+            combo_box.setMinimumWidth(self.COMBO_BOX_MIN_WIDTH)
+            combo_box.setEditable(True)
             combo_box.setToolTip(label_text.format(index))
             combo_box.textActivated.connect(self.change_ports)
+            grid_layout.addWidget(combo_box, index - 1, 1)
             self.combo_boxes_measurers.append(combo_box)
-            label = qt.QLabel(label_text.format(index))
-            self.labels_measurers.append(label)
+            if index == 1:
+                self.button_update = qt.QPushButton()
+                self.button_update.setFixedWidth(self.BUTTON_UPDATE_WIDTH)
+                self.button_update.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "update.png")))
+                self.button_update.setToolTip(qApp.translate("t", "Обновить"))
+                self.button_update.clicked.connect(self.update_ports)
+                grid_layout.addWidget(self.button_update, index - 1, 2)
             button = qt.QPushButton()
             button.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "info.png")))
             button.setToolTip(qApp.translate("t", "Помощь"))
-            button.setFixedWidth(self.BUTTON_WIDTH)
+            button.setFixedWidth(self.BUTTON_HELP_WIDTH)
             button.clicked.connect(self.show_help)
+            grid_layout.addWidget(button, index - 1, 3)
             self.buttons_show_help.append(button)
-            layout = qt.QHBoxLayout()
-            layout.addWidget(combo_box)
-            layout.addWidget(button)
-            form_layout.addRow(label, layout)
-        self.setLayout(form_layout)
+        self.setLayout(grid_layout)
 
     def _set_real_ivm10_ports(self):
         """

@@ -3,11 +3,9 @@ File with class for dialog window to select devices for connection.
 """
 
 import logging
-import os
 from typing import List, Optional
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtGui import QIcon
 from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerVirtualASA
 import connection_window.utils as ut
 from connection_window.measurer_widget import MeasurerTypeWidget, MeasurerURLsWidget
@@ -21,8 +19,6 @@ class ConnectionWindow(qt.QDialog):
     Class for dialog window to select devices for connection.
     """
 
-    BUTTON_WIDTH: int = 25
-
     def __init__(self, parent=None, initial_product_name: Optional[ut.ProductNames] = None):
         """
         :param parent: parent window;
@@ -34,7 +30,6 @@ class ConnectionWindow(qt.QDialog):
         self.button_connect: qt.QPushButton = None
         self.button_cancel: qt.QPushButton = None
         self.button_disconnect: qt.QPushButton = None
-        self.button_update: qt.QPushButton = None
         self.widget_measurer_type: MeasurerTypeWidget = None
         self.widget_measurer_urls: MeasurerURLsWidget = None
         self.widget_mux: MuxWidget = None
@@ -89,17 +84,10 @@ class ConnectionWindow(qt.QDialog):
         self.button_cancel = qt.QPushButton(qApp.translate("t", "Отмена"))
         self.button_cancel.setToolTip(qApp.translate("t", "Отмена"))
         self.button_cancel.clicked.connect(self.close)
-        self.button_update = qt.QPushButton()
-        self.button_update.setFixedWidth(self.BUTTON_WIDTH)
-        self.button_update.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "update.png")))
-        self.button_update.setToolTip(qApp.translate("t", "Обновить"))
-        self.button_update.clicked.connect(self.widget_mux.update_com_ports)
-        self.button_update.clicked.connect(self.widget_measurer_urls.update_ports)
         layout = qt.QHBoxLayout()
         layout.addWidget(self.button_connect)
         layout.addWidget(self.button_disconnect)
         layout.addWidget(self.button_cancel)
-        layout.addWidget(self.button_update)
         v_box_layout = qt.QVBoxLayout(self)
         v_box_layout.addLayout(h_box_layout)
         v_box_layout.addLayout(layout)
