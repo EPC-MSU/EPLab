@@ -61,9 +61,8 @@ class MuxAndPlanWindow(qt.QWidget):
             icon = QIcon(os.path.join(DIR_MEDIA, "start_auto_test.png"))
         for widget in widgets:
             widget.setIcon(icon)
+            widget.setText(text)
             widget.setToolTip(text)
-            if widget != self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement:
-                widget.setText(text)
             if widget.isChecked() != status:
                 widget.setChecked(status)
 

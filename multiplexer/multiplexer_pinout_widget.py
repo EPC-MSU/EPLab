@@ -390,10 +390,10 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self.button_add_points_to_plan.setToolTip(name_and_tooltip)
         self.button_add_points_to_plan.setIcon(QIcon(os.path.join(DIR_MEDIA, "add_channels.png")))
         self.button_add_points_to_plan.clicked.connect(self.collect_selected_channels)
-        self.button_start_or_stop_entire_plan_measurement = qt.QPushButton()
+        name_and_tooltip = qApp.translate("t", "Запустить измерение всего плана")
+        self.button_start_or_stop_entire_plan_measurement = qt.QPushButton(name_and_tooltip)
         self.button_start_or_stop_entire_plan_measurement.setIcon(QIcon(os.path.join(DIR_MEDIA, "start_auto_test.png")))
-        self.button_start_or_stop_entire_plan_measurement.setToolTip(
-            qApp.translate("t", "Запустить измерение всего плана"))
+        self.button_start_or_stop_entire_plan_measurement.setToolTip(name_and_tooltip)
         self.button_start_or_stop_entire_plan_measurement.setCheckable(True)
 
     def _enable_widgets(self, state: bool):
