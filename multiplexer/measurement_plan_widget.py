@@ -7,8 +7,8 @@ from enum import auto, Enum
 from functools import partial
 from typing import Generator, List, Tuple
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp
-from PyQt5.QtGui import QCloseEvent, QIcon, QRegExpValidator
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
+from PyQt5.QtGui import QCloseEvent, QIcon, QKeyEvent, QRegExpValidator
 from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, MIN_CHANNEL_NUMBER
 from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
 from epcore.product import EyePointProduct
@@ -27,6 +27,39 @@ class ChannelAndModuleErrors(Enum):
     INVALID_MODULE = auto()
     UNSUITABLE_CHANNEL = auto()
     UNSUITABLE_MODULE = auto()
+
+
+class LeftRight(Enum):
+    """
+    Class to denote left and right.
+    """
+
+    LEFT = auto()
+    RIGHT = auto()
+
+
+class ModifiedLineEdit(qt.QLineEdit):
+    """
+    Class for line edit widget with additional handling of left and right keystrokes.
+    """
+
+    left_pressed: pyqtSignal = pyqtSignal()
+    right_pressed: pyqtSignal = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+
+    def keyPressEvent(self, key_press_event: QKeyEvent):
+        """
+        Method handles key press event.
+        :param key_press_event: key press event.
+        """
+
+        super().keyPressEvent(key_press_event)
+        if key_press_event.key() == Qt.Key_Left and self.cursorPosition() == 0:
+            self.left_pressed.emit()
+        elif key_press_event.key() == Qt.Key_Right and self.cursorPosition() == len(self.text()):
+            self.right_pressed.emit()
 
 
 class MeasurementPlanWidget(qt.QWidget):
@@ -70,15 +103,19 @@ class MeasurementPlanWidget(qt.QWidget):
         row_number = self.table_widget_info.rowCount()
         self.table_widget_info.insertRow(row_number)
         self.table_widget_info.setCellWidget(pin_index, 0, qt.QLabel(str(pin_index)))
-        line_edit_module_number = qt.QLineEdit()
+        line_edit_module_number = ModifiedLineEdit()
         line_edit_module_number.textChanged.connect(partial(self.check_channel_and_module_numbers, pin_index))
         line_edit_module_number.editingFinished.connect(lambda: self.save_mux_output(pin_index))
+        line_edit_module_number.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))
+        line_edit_module_number.right_pressed.connect(lambda: self.move_left_or_right(LeftRight.RIGHT))
         line_edit_module_number.setValidator(QRegExpValidator(QRegExp(r"\d+")))
         self.table_widget_info.setCellWidget(pin_index, 1, line_edit_module_number)
         self._line_edits_module_numbers.append(line_edit_module_number)
-        line_edit_channel_number = qt.QLineEdit()
+        line_edit_channel_number = ModifiedLineEdit()
         line_edit_channel_number.textChanged.connect(partial(self.check_channel_and_module_numbers, pin_index))
         line_edit_channel_number.editingFinished.connect(lambda: self.save_mux_output(pin_index))
+        line_edit_channel_number.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))
+        line_edit_channel_number.right_pressed.connect(lambda: self.move_left_or_right(LeftRight.RIGHT))
         line_edit_channel_number.setValidator(QRegExpValidator(QRegExp(r"\d+")))
         self.table_widget_info.setCellWidget(pin_index, 2, line_edit_channel_number)
         self._line_edits_channel_numbers.append(line_edit_channel_number)
@@ -93,8 +130,10 @@ class MeasurementPlanWidget(qt.QWidget):
         else:
             for index in range(3):
                 self.table_widget_info.setCellWidget(pin_index, 3 + index, qt.QLabel())
-        line_edit_comment = qt.QLineEdit()
+        line_edit_comment = ModifiedLineEdit()
         line_edit_comment.editingFinished.connect(lambda: self.save_comment(pin_index))
+        line_edit_comment.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))
+        line_edit_comment.right_pressed.connect(lambda: self.move_left_or_right(LeftRight.RIGHT))
         line_edit_comment.setText(pin.comment)
         self.table_widget_info.setCellWidget(pin_index, 6, line_edit_comment)
         self._line_edits_comments.append(line_edit_comment)
@@ -370,6 +409,44 @@ class MeasurementPlanWidget(qt.QWidget):
         """
 
         return self.table_widget_info.rowCount()
+
+    def keyPressEvent(self, key_press_event: QKeyEvent):
+        """
+        Method handles
+        :param key_press_event:
+        """
+
+        super().keyPressEvent(key_press_event)
+        if key_press_event.key() == Qt.Key_Left and self.table_widget_info.currentColumn() == 0:
+            self.move_left_or_right(LeftRight.LEFT)
+
+    @pyqtSlot(LeftRight)
+    def move_left_or_right(self, direction: LeftRight):
+        """
+        Slot moves focus in table between columns.
+        :param direction: left or right direction in which to move focus.
+        """
+
+        column = self.table_widget_info.currentColumn()
+        row = self.table_widget_info.currentRow()
+        if direction == LeftRight.LEFT and column > 0:
+            self.table_widget_info.setFocus()
+            self.table_widget_info.setCurrentCell(row, column - 1)
+        elif direction == LeftRight.LEFT and column == 0:
+            if row > 0:
+                row -= 1
+                column = self.table_widget_info.columnCount() - 1
+            self.table_widget_info.setFocus()
+            self.table_widget_info.setCurrentCell(row, column)
+        elif direction == LeftRight.RIGHT and column < self.table_widget_info.columnCount() - 1:
+            self.table_widget_info.setFocus()
+            self.table_widget_info.setCurrentCell(row, column + 1)
+        elif direction == LeftRight.RIGHT and column == self.table_widget_info.columnCount() - 1:
+            if row < self.table_widget_info.rowCount() - 1:
+                row += 1
+                column = 0
+            self.table_widget_info.setFocus()
+            self.table_widget_info.setCurrentCell(row, column)
 
     @pyqtSlot(int)
     def save_comment(self, pin_index: int):
