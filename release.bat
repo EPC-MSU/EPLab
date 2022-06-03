@@ -67,7 +67,7 @@ if %target_platform%==64 venv\Scripts\pyinstaller main.py --clean --onefile --no
 --hidden-import=PyQt5.sip ^
 --icon media\ico.ico
 
-xcopy resources\win%target_platform%\driver\* dist\driver\* /S /E
+xcopy resources\win%target_platform%\drivers\* dist\drivers\* /S /E
 copy resources\readme.md dist
 rename dist release
 cd release
