@@ -311,8 +311,8 @@ class MultiplexerPinoutWidget(qt.QWidget):
     Class to show multiplexer pinout.
     """
 
-    MIN_WIDTH: int = 600
-    SCROLL_AREA_MIN_HEIGHT: int = 200
+    MIN_WIDTH: int = 500
+    SCROLL_AREA_MIN_HEIGHT: int = 100
     TIMEOUT: int = 10
     adding_channels_finished: pyqtSignal = pyqtSignal()
     adding_channels_started: pyqtSignal = pyqtSignal(int)
@@ -367,7 +367,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self.check_box_select_all = qt.QCheckBox(qApp.translate("t", "Выбрать все каналы"))
         self.check_box_select_all.clicked.connect(self.select_all_channels)
         self.check_box_select_all.setChecked(True)
-        name_and_tooltip = qApp.translate("t", "Добавить точки в план тестирования")
+        name_and_tooltip = qApp.translate("t", "Добавить выбранные каналы в план")
         self.button_add_points_to_plan = qt.QPushButton(name_and_tooltip)
         self.button_add_points_to_plan.setToolTip(name_and_tooltip)
         self.button_add_points_to_plan.setIcon(QIcon(os.path.join(DIR_MEDIA, "add_channels.png")))

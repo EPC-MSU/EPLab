@@ -4,6 +4,7 @@ measurement plan.
 """
 
 import os
+from typing import Tuple
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
@@ -21,6 +22,10 @@ class MuxAndPlanWindow(qt.QWidget):
     Class for dialog window to show information about multiplexer and measurement plan.
     """
 
+    DEFAULT_HEIGHT: int = 500
+    DEFAULT_MUX_HEIGHT: int = 300
+    DEFAULT_WIDTH: int = 700
+
     def __init__(self, parent):
         """
         :param parent: parent main window.
@@ -30,6 +35,7 @@ class MuxAndPlanWindow(qt.QWidget):
         self.button_arrange_windows: qt.QPushButton = None
         self.measurement_plan_widget: MeasurementPlanWidget = None
         self.multiplexer_pinout_widget: MultiplexerPinoutWidget = None
+        self.splitter: qt.QSplitter = None
         self._manual_stop: bool = True
         self._parent = parent
         self._previous_main_window_pos: QPoint = None
@@ -119,33 +125,24 @@ class MuxAndPlanWindow(qt.QWidget):
             self.measurement_plan_widget.add_pin_with_mux_output_to_plan)
         self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement.clicked.connect(
             self.start_or_stop_plan_measurement)
-        splitter = qt.QSplitter(Qt.Vertical)
-        splitter.setContentsMargins(0, 0, 0, 0)
-        splitter.setChildrenCollapsible(False)
-        splitter.addWidget(self.multiplexer_pinout_widget)
-        splitter.addWidget(self.measurement_plan_widget)
+        self.splitter = qt.QSplitter(Qt.Vertical)
+        self.splitter.setContentsMargins(0, 0, 0, 0)
+        self.splitter.setChildrenCollapsible(False)
+        self.splitter.addWidget(self.multiplexer_pinout_widget)
+        self.splitter.addWidget(self.measurement_plan_widget)
         layout = qt.QVBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(h_box_layout)
-        layout.addWidget(splitter)
+        layout.addWidget(self.splitter)
         self.setLayout(layout)
         self.change_work_mode(self._parent.work_mode)
 
-    def _stop_plan_measurement(self):
+    def _is_arranged(self) -> Tuple:
         """
-        Method stops measurements by multiplexer according to measurement plan.
-        """
-
-        self._manual_stop = True
-        self._change_widgets_to_start_plan_measurement(False)
-        self.measurement_plan_runner.start_or_stop_measurements(False)
-        self.setEnabled(False)
-
-    @pyqtSlot()
-    def arrange_windows(self):
-        """
-        Slot arranges windows.
+        Method checks if windows are arranged.
+        :return: True if windows are arranged, position and size for main window,
+        position and size for dialog window.
         """
 
         desktop = qApp.instance().desktop()
@@ -173,15 +170,47 @@ class MuxAndPlanWindow(qt.QWidget):
         current_window_size = self.size()
         if current_main_window_pos != main_window_pos or current_main_window_size != main_window_size or\
                 current_window_pos != window_pos or current_window_size != window_size:
+            arranged = False
             self._previous_main_window_pos = current_main_window_pos
             self._previous_main_window_size = current_main_window_size
             self._previous_window_pos = current_window_pos
             self._previous_window_size = current_window_size
         else:
+            arranged = True
             main_window_pos = self._previous_main_window_pos
             main_window_size = self._previous_main_window_size
             window_pos = self._previous_window_pos
             window_size = self._previous_window_size
+        return arranged, main_window_pos, main_window_size, window_pos, window_size
+
+    def _resize_window(self):
+        """
+        Method resizes window depending on presence of multiplexer.
+        """
+
+        if not self._parent.measurement_plan or not self._parent.measurement_plan.multiplexer or\
+                self._is_arranged()[0] or self.isVisible():
+            return
+        self.resize(self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT)
+        self.splitter.setSizes([self.DEFAULT_MUX_HEIGHT, self.DEFAULT_HEIGHT - self.DEFAULT_MUX_HEIGHT])
+
+    def _stop_plan_measurement(self):
+        """
+        Method stops measurements by multiplexer according to measurement plan.
+        """
+
+        self._manual_stop = True
+        self._change_widgets_to_start_plan_measurement(False)
+        self.measurement_plan_runner.start_or_stop_measurements(False)
+        self.setEnabled(False)
+
+    @pyqtSlot()
+    def arrange_windows(self):
+        """
+        Slot arranges windows.
+        """
+
+        main_window_pos, main_window_size, window_pos, window_size = self._is_arranged()[1:]
         self._parent.move(main_window_pos)
         self._parent.resize(main_window_size)
         self.move(window_pos)
@@ -282,3 +311,4 @@ class MuxAndPlanWindow(qt.QWidget):
 
         self.measurement_plan_widget.update_info()
         self.multiplexer_pinout_widget.update_info()
+        self._resize_window()

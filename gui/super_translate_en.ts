@@ -660,7 +660,7 @@
         <translation>Channel {}</translation>
     </message>
     <message>
-        <location filename="../multiplexer/multiplexer_pinout_widget.py" line="187"/>
+        <location filename="../multiplexer/multiplexer_pinout_widget.py" line="166"/>
         <source>Выбрать все каналы</source>
         <translation>Select all channels</translation>
     </message>
@@ -681,8 +681,8 @@
     </message>
     <message>
         <location filename="../multiplexer/multiplexer_pinout_widget.py" line="387"/>
-        <source>Добавить точки в план тестирования</source>
-        <translation>Add points to measurement plan</translation>
+        <source>Добавить выбранные каналы в план</source>
+        <translation>Add selected channels to plan</translation>
     </message>
     <message>
         <location filename="../multiplexer/multiplexer_pinout_widget.py" line="395"/>
