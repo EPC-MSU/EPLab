@@ -268,6 +268,7 @@ class MuxAndPlanWindow(qt.QWidget):
         :param status: if True then measurements should be started.
         """
 
+        self.measurement_plan_widget.validate_mux_outputs_for_pins()
         if status and self.measurement_plan_runner.get_pins_without_multiplexer_outputs() and \
                 not self._continue_plan_measurement():
             self.sender().setChecked(False)
