@@ -19,11 +19,9 @@ class ChannelWidget(qt.QWidget):
     Class to show single channel of module.
     """
 
-    COLOR_BORDER: str = "blue"
-    COLOR_NORMAL: str = "white"
-    COLOR_SELECTED: str = "green"
-    COLOR_TURNED_ON: str = "red"
-    SIZE: int = 5
+    COLOR_TURNED_OFF: str = "#9ADAEB"
+    COLOR_TURNED_ON: str = "#F9E154"
+    SIZE: int = 13
     selected: pyqtSignal = pyqtSignal(bool)
     turned_on: pyqtSignal = pyqtSignal(bool, int)
 
@@ -34,9 +32,8 @@ class ChannelWidget(qt.QWidget):
         """
 
         super().__init__()
+        self.button_turn_on_off: qt.QPushButton = None
         self.check_box_select_channel: qt.QCheckBox = None
-        self.label_channel_number: qt.QLabel = None
-        self.radio_button_turn_on_off: qt.QRadioButton = None
         self._channel_number: int = channel_number
         self._init_ui(up)
 
@@ -46,45 +43,29 @@ class ChannelWidget(qt.QWidget):
         :param up: if True then channel number should be displayed on top of widget.
         """
 
-        self.label_channel_number = qt.QLabel(str(self._channel_number))
-        self.label_channel_number.setStyleSheet("border: none;")
-        self.radio_button_turn_on_off = qt.QRadioButton()
+        self.button_turn_on_off = qt.QPushButton(str(self._channel_number))
+        self.button_turn_on_off.setCheckable(True)
         tooltip = qApp.translate("t", "Включить/выключить канал {}")
-        self.radio_button_turn_on_off.setToolTip(tooltip.format(self._channel_number))
-        self.radio_button_turn_on_off.clicked.connect(self.send_to_turn_on_off)
-        self.radio_button_turn_on_off.setStyleSheet(
-            "QRadioButton {border: none;}"
-            f"QRadioButton::indicator {{width: {self.SIZE}px; height: {self.SIZE}px; border: 1px solid "
-            f"{self.COLOR_BORDER}; border-radius: {self.SIZE / 2}px;}}"
-            f"QRadioButton::indicator:checked {{border: 1px solid {self.COLOR_TURNED_ON};"
-            f" background-color: {self.COLOR_TURNED_ON}}}"
-            f"QRadioButton::indicator:unchecked {{border: 1px solid {self.COLOR_BORDER};"
-            f" background-color: {self.COLOR_NORMAL}}}")
-        self.radio_button_turn_on_off.setFixedSize(self.SIZE + 2, self.SIZE + 2)
+        self.button_turn_on_off.setToolTip(tooltip.format(self._channel_number))
+        self.button_turn_on_off.clicked.connect(self.send_to_turn_on_off)
+        self.button_turn_on_off.setStyleSheet(
+            f"QPushButton {{background-color: {self.COLOR_TURNED_OFF}; border: none; font: 10px; font-weight: bold;"
+            f" spacing: 0px;}}"
+            f"QPushButton:checked {{background-color: {self.COLOR_TURNED_ON}; border: none;}}")
+        self.button_turn_on_off.setFixedSize(self.SIZE, self.SIZE)
         self.check_box_select_channel = qt.QCheckBox()
         tooltip = qApp.translate("t", "Выбрать канал {}")
         self.check_box_select_channel.setToolTip(tooltip.format(self._channel_number))
         self.check_box_select_channel.stateChanged.connect(self.send_to_select)
-        self.check_box_select_channel.setStyleSheet(
-            "QCheckBox {border: none; spacing: 0px;}"
-            f"QCheckBox::indicator {{width: {self.SIZE}px; height: {self.SIZE}px; border: 1px solid "
-            f"{self.COLOR_BORDER}}}"
-            f"QCheckBox::indicator:checked {{border: 1px solid {self.COLOR_SELECTED};"
-            f" background-color: {self.COLOR_SELECTED}}}"
-            f"QCheckBox::indicator:unchecked {{border: 1px solid {self.COLOR_BORDER};"
-            f" background-color: {self.COLOR_NORMAL}}}")
-        self.check_box_select_channel.setFixedSize(self.SIZE + 2, self.SIZE + 2)
-        h_box_layout = qt.QHBoxLayout()
-        h_box_layout.setSpacing(0)
-        h_box_layout.addWidget(self.radio_button_turn_on_off)
-        h_box_layout.addWidget(self.check_box_select_channel)
+        self.check_box_select_channel.setStyleSheet("QCheckBox {border: none; spacing: 0px;}")
+        self.check_box_select_channel.setFixedSize(self.SIZE, self.SIZE)
         v_box_layout = qt.QVBoxLayout()
         if up:
-            v_box_layout.addWidget(self.label_channel_number, alignment=Qt.AlignHCenter)
-            v_box_layout.addLayout(h_box_layout)
+            v_box_layout.addWidget(self.button_turn_on_off, alignment=Qt.AlignHCenter)
+            v_box_layout.addWidget(self.check_box_select_channel, alignment=Qt.AlignHCenter)
         else:
-            v_box_layout.addLayout(h_box_layout)
-            v_box_layout.addWidget(self.label_channel_number, alignment=Qt.AlignHCenter)
+            v_box_layout.addWidget(self.check_box_select_channel, alignment=Qt.AlignHCenter)
+            v_box_layout.addWidget(self.button_turn_on_off, alignment=Qt.AlignHCenter)
         v_box_layout.setSpacing(0)
         v_box_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(v_box_layout)
@@ -138,7 +119,7 @@ class ChannelWidget(qt.QWidget):
         Method turns off channel.
         """
 
-        self.radio_button_turn_on_off.setChecked(False)
+        self.button_turn_on_off.setChecked(False)
 
 
 class ModuleWidget(qt.QWidget):
@@ -146,8 +127,8 @@ class ModuleWidget(qt.QWidget):
     Class to show single module of multiplexer.
     """
 
-    COLOR_NORMAL: str = "blue"
-    COLOR_SELECTED: str = "red"
+    COLOR_TURNED_OFF: str = "#186DB6"
+    COLOR_TURNED_ON: str = "#D21404"
     MAX_CHANNEL_NUMBER: int = 64
     all_channels_selected: pyqtSignal = pyqtSignal(bool)
     module_turned_off: pyqtSignal = pyqtSignal(MultiplexerOutput)
@@ -161,10 +142,10 @@ class ModuleWidget(qt.QWidget):
 
         super().__init__()
         self.action_select_all_channels: qt.QAction = None
-        self.frame_module: qt.QFrame = None
+        self.frame_module: qt.QWidget = None
+        self._channels: Dict[int, ChannelWidget] = {}
         self._module_number: int = module_number
         self._module_type: ModuleTypes = module_type
-        self._channels: Dict[int, ChannelWidget] = {}
         self._turned_on_channel: ChannelWidget = None
         self._init_ui()
 
@@ -173,8 +154,8 @@ class ModuleWidget(qt.QWidget):
         Method changes color of module.
         """
 
-        color = self.COLOR_SELECTED if self._turned_on_channel else self.COLOR_NORMAL
-        self.frame_module.setStyleSheet(f"border: 2px solid {color};")
+        color = self.COLOR_TURNED_ON if self._turned_on_channel else self.COLOR_TURNED_OFF
+        self.frame_module.setStyleSheet(f"QWidget {{border: 2px solid {color}; border-radius: 3px;}}")
 
     def _create_context_menu(self):
         """
@@ -194,14 +175,14 @@ class ModuleWidget(qt.QWidget):
         """
 
         self.frame_module = qt.QWidget()
-        self.frame_module.setStyleSheet(f"border: 2px solid {self.COLOR_NORMAL};")
+        self.frame_module.setStyleSheet(f"QWidget {{border: 2px solid {self.COLOR_TURNED_OFF}; border-radius: 3px;}}")
         grid_layout = qt.QGridLayout()
-        grid_layout.setContentsMargins(0, 0, 0, 0)
+        grid_layout.setContentsMargins(2, 2, 2, 2)
         for index in range(self.MAX_CHANNEL_NUMBER):
             column = index // 2
             row = index % 2
             channel = ChannelWidget(index + 1, row == 0)
-            channel.selected.connect(self.send_are_all_channels_selected)
+            channel.selected.connect(self.send_that_all_channels_selected)
             channel.turned_on.connect(self.turn_on_off_channel)
             self._channels[index + 1] = channel
             grid_layout.addWidget(channel, row, column)
@@ -215,7 +196,7 @@ class ModuleWidget(qt.QWidget):
         self._create_context_menu()
         self._create_pinout()
         label_module_number = qt.QLabel(str(self._module_number))
-        label_module_number.setStyleSheet("border: none; font-weight: bold; font-size: large;")
+        label_module_number.setStyleSheet("QLabel {border: none; font-size: 15px; font-weight: bold;}")
         label_module_number.setToolTip(qApp.translate("t", "Номер модуля"))
         h_box_layout = qt.QHBoxLayout()
         h_box_layout.setContentsMargins(0, 0, 0, 0)
@@ -273,7 +254,7 @@ class ModuleWidget(qt.QWidget):
             channel.select_channel(state)
 
     @pyqtSlot(bool)
-    def send_are_all_channels_selected(self, state: bool):
+    def send_that_all_channels_selected(self, state: bool):
         """
         Slot checks if all channels of module are selected and sends
         appropriate signal.
@@ -290,7 +271,7 @@ class ModuleWidget(qt.QWidget):
         :param channel_number: channel number.
         """
 
-        self._channels[channel_number].radio_button_turn_on_off.setChecked(True)
+        self._channels[channel_number].button_turn_on_off.setChecked(True)
         self.turn_on_off_channel(True, channel_number)
 
     @pyqtSlot(bool, int)
@@ -331,7 +312,8 @@ class MultiplexerPinoutWidget(qt.QWidget):
     """
 
     MIN_WIDTH: int = 600
-    SCROLL_AREA_MIN_HEIGHT: int = 190
+    SCROLL_AREA_MIN_HEIGHT: int = 200
+    TIMEOUT: int = 10
     adding_channels_finished: pyqtSignal = pyqtSignal()
     adding_channels_started: pyqtSignal = pyqtSignal(int)
     channel_added: pyqtSignal = pyqtSignal(MultiplexerOutput)
@@ -351,11 +333,11 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self.scroll_area: qt.QScrollArea = None
         self._device_errors_handler: DeviceErrorsHandler = device_errors_handler if device_errors_handler else\
             parent.device_errors_handler
-        self._parent = parent
         self._modules: Dict[int, ModuleWidget] = {}
+        self._parent = parent
         self._selected_channels: List[MultiplexerOutput] = []
         self._timer: QTimer = QTimer()
-        self._timer.setInterval(10)
+        self._timer.setInterval(self.TIMEOUT)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self.send_selected_channel)
         self._turned_on_output: MultiplexerOutput = None
@@ -367,7 +349,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         """
 
         self.label_no_mux = qt.QLabel(qApp.translate("t", "Нет мультиплексора"))
-        self.label_no_mux.setStyleSheet("font-weight: bold; font-size: 25px;")
+        self.label_no_mux.setStyleSheet("QLabel {font-weight: bold; font-size: 25px;}")
 
     def _create_widgets_for_multiplexer(self):
         """
