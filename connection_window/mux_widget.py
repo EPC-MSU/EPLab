@@ -37,10 +37,10 @@ class MuxWidget(qt.QGroupBox):
         combo_box.setEditable(True)
         combo_box.setMinimumWidth(self.COMBO_BOX_MIN_WIDTH)
         if ut.get_platform() == "debian":
-            reg_exp = r"^(com:///dev/ttyACM\d+|virtual)$"
+            reg_exp = r"^(com:///dev/ttyACM\d+|virtual|none)$"
             placeholder = "com:///dev/ttyACMx"
         else:
-            reg_exp = r"^(com:\\\\\.\\COM\d+|virtual)$"
+            reg_exp = r"^(com:\\\\\.\\COM\d+|virtual|none)$"
             placeholder = "com:\\\\.\\COMx"
         combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(reg_exp), self))
         combo_box.lineEdit().setPlaceholderText(placeholder)
@@ -86,6 +86,8 @@ class MuxWidget(qt.QGroupBox):
         """
 
         if self.combo_box_com_ports.lineEdit().hasAcceptableInput():
+            if self.combo_box_com_ports.currentText() == "none":
+                return None
             return self.combo_box_com_ports.currentText()
         return None
 
@@ -114,6 +116,6 @@ class MuxWidget(qt.QGroupBox):
 
         self.combo_box_com_ports.clear()
         ports = ut.find_urpc_ports("epmux")
-        ports.append("virtual")
+        ports.extend(["none", "virtual"])
         self.combo_box_com_ports.addItems(ports)
         self.combo_box_com_ports.setCurrentText(ports[0])
