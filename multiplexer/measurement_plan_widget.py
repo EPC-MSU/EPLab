@@ -7,7 +7,7 @@ from enum import auto, Enum
 from typing import Dict, Generator, List, Tuple
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
-from PyQt5.QtGui import QCloseEvent, QIcon, QKeyEvent, QRegExpValidator
+from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QRegExpValidator
 from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, MIN_CHANNEL_NUMBER
 from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
 from epcore.product import EyePointProduct
@@ -70,7 +70,7 @@ class MeasurementPlanWidget(qt.QWidget):
 
     COLOR_ERROR_FRAME: str = "#FF0404"
     COLOR_ERROR: str = "#FFD8D8"
-    COLOR_NORMAL: str = "white"
+    COLOR_NORMAL: QColor = QColor.fromRgb(255, 255, 255)
     COLOR_NOT_TESTED: str = "#F9E154"
     HEADERS: List[str] = []
 
@@ -104,7 +104,7 @@ class MeasurementPlanWidget(qt.QWidget):
         """
 
         self.table_widget_info.insertRow(pin_index)
-        self.table_widget_info.setCellWidget(pin_index, 0, qt.QLabel(str(pin_index)))
+        self.table_widget_info.setItem(pin_index, 0, qt.QTableWidgetItem(str(pin_index)))
         line_edit_module_number = ModifiedLineEdit()
         line_edit_module_number.textEdited.connect(lambda: self.check_channel_and_module_numbers(pin_index))
         line_edit_module_number.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))
@@ -126,10 +126,10 @@ class MeasurementPlanWidget(qt.QWidget):
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
             for index, value in enumerate(self._get_values_for_parameters(settings)):
-                self.table_widget_info.setCellWidget(pin_index, 3 + index, qt.QLabel(value))
+                self.table_widget_info.setItem(pin_index, 3 + index, qt.QTableWidgetItem(value))
         else:
             for index in range(3):
-                self.table_widget_info.setCellWidget(pin_index, 3 + index, qt.QLabel())
+                self.table_widget_info.setItem(pin_index, 3 + index, qt.QTableWidgetItem())
         line_edit_comment = ModifiedLineEdit()
         line_edit_comment.editingFinished.connect(lambda: self.save_comment(pin_index))
         line_edit_comment.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))
@@ -284,11 +284,18 @@ class MeasurementPlanWidget(qt.QWidget):
         if ChannelAndModuleErrors.INVALID_CHANNEL in errors:
             color = self.COLOR_ERROR
         for column in range(self.table_widget_info.columnCount()):
-            widget = self.table_widget_info.cellWidget(row, column)
-            widget.setStyleSheet("")  # set default style and then new style
-            if color:
-                style = widget.styleSheet()
-                widget.setStyleSheet(style + f"background-color: {color};")
+            if column in (1, 2, 6):
+                widget = self.table_widget_info.cellWidget(row, column)
+                widget.setStyleSheet("")  # set default style and then new style
+                if color:
+                    style = widget.styleSheet()
+                    widget.setStyleSheet(style + f"background-color: {color};")
+            else:
+                item = self.table_widget_info.item(row, column)
+                if color:
+                    item.setBackground(QColor.fromRgb(int(color[1:], base=16)))
+                else:
+                    item.setBackground(self.COLOR_NORMAL)
         self._set_error_tooltip_to_mux_output(row, errors)
 
     def _paint_warnings(self, row: int, errors: List[ChannelAndModuleErrors]):
@@ -303,11 +310,18 @@ class MeasurementPlanWidget(qt.QWidget):
         if errors:
             color = self.COLOR_NOT_TESTED
         for column in range(self.table_widget_info.columnCount()):
-            widget = self.table_widget_info.cellWidget(row, column)
-            widget.setStyleSheet("")
-            if color:
-                style = widget.styleSheet()
-                widget.setStyleSheet(style + f"background-color: {color};")
+            if column in (1, 2, 6):
+                widget = self.table_widget_info.cellWidget(row, column)
+                widget.setStyleSheet("")
+                if color:
+                    style = widget.styleSheet()
+                    widget.setStyleSheet(style + f"background-color: {color};")
+            else:
+                item = self.table_widget_info.item(row, column)
+                if color:
+                    item.setBackground(QColor.fromRgb(int(color[1:], base=16)))
+                else:
+                    item.setBackground(self.COLOR_NORMAL)
         self._set_error_tooltip_to_mux_output(row, errors)
 
     def _set_error_tooltip_to_mux_output(self, row: int, errors: List[ChannelAndModuleErrors]):
@@ -347,12 +361,12 @@ class MeasurementPlanWidget(qt.QWidget):
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
             for index, value in enumerate(self._get_values_for_parameters(settings)):
-                label = self.table_widget_info.cellWidget(pin_index, 3 + index)
-                label.setText(value)
+                item = self.table_widget_info.item(pin_index, 3 + index)
+                item.setText(value)
         else:
             for index in range(3):
-                label = self.table_widget_info.cellWidget(pin_index, 3 + index)
-                label.setText("")
+                item = self.table_widget_info.item(pin_index, 3 + index)
+                item.setText("")
         self._line_edits_comments[pin_index].setText(pin.comment)
 
     @pyqtSlot()
