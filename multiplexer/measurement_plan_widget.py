@@ -4,8 +4,7 @@ File with class for widget to show short information from measurement plan.
 
 import os
 from enum import auto, Enum
-from functools import partial
-from typing import Generator, List, Tuple
+from typing import Dict, Generator, List, Tuple
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QCloseEvent, QIcon, QKeyEvent, QRegExpValidator
@@ -16,6 +15,8 @@ from common import WorkMode
 from language import Language
 
 DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
+MAX_MODULE_NUMBER = 8
+MIN_MODULE_NUMBER = 1
 
 
 class ChannelAndModuleErrors(Enum):
@@ -25,8 +26,7 @@ class ChannelAndModuleErrors(Enum):
 
     INVALID_CHANNEL = auto()
     INVALID_MODULE = auto()
-    UNSUITABLE_CHANNEL = auto()
-    UNSUITABLE_MODULE = auto()
+    UNSUITABLE_OUTPUT = auto()
 
 
 class LeftRight(Enum):
@@ -64,12 +64,14 @@ class ModifiedLineEdit(qt.QLineEdit):
 
 class MeasurementPlanWidget(qt.QWidget):
     """
-    Class to show short information from measurement plan.
+    Class for widget to show short information from measurement plan
+    in table.
     """
 
-    COLOR_ERROR: str = "pink"
+    COLOR_ERROR_FRAME: str = "#FF0404"
+    COLOR_ERROR: str = "#FFD8D8"
     COLOR_NORMAL: str = "white"
-    COLOR_WARNING: str = "#E7F5FE"
+    COLOR_NOT_TESTED: str = "#F9E154"
     HEADERS: List[str] = []
 
     def __init__(self, parent):
@@ -84,12 +86,13 @@ class MeasurementPlanWidget(qt.QWidget):
                                    qApp.translate("t", "Чувствительность"), qApp.translate("t", "Комментарий")]
         self.progress_bar: qt.QProgressBar = None
         self.table_widget_info: qt.QTableWidget = None
-        self._parent = parent
         self._dont_go_to_selected_pin: bool = False
         self._lang: Language = qApp.instance().property("language")
         self._line_edits_channel_numbers: List[qt.QLineEdit] = []
         self._line_edits_comments: List[qt.QLineEdit] = []
         self._line_edits_module_numbers: List[qt.QLineEdit] = []
+        self._parent = parent
+        self._saved_mux_outputs: Dict[int, MultiplexerOutput] = {}
         self._standby_mode: bool = False
         self._init_ui()
 
@@ -100,33 +103,30 @@ class MeasurementPlanWidget(qt.QWidget):
         :param pin: pin to be added.
         """
 
-        row_number = self.table_widget_info.rowCount()
-        self.table_widget_info.insertRow(row_number)
+        self.table_widget_info.insertRow(pin_index)
         self.table_widget_info.setCellWidget(pin_index, 0, qt.QLabel(str(pin_index)))
         line_edit_module_number = ModifiedLineEdit()
-        line_edit_module_number.textChanged.connect(partial(self.check_channel_and_module_numbers, pin_index))
-        line_edit_module_number.editingFinished.connect(lambda: self.save_mux_output(pin_index))
+        line_edit_module_number.textEdited.connect(lambda: self.check_channel_and_module_numbers(pin_index))
         line_edit_module_number.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))
         line_edit_module_number.right_pressed.connect(lambda: self.move_left_or_right(LeftRight.RIGHT))
         line_edit_module_number.setValidator(QRegExpValidator(QRegExp(r"\d+")))
         self.table_widget_info.setCellWidget(pin_index, 1, line_edit_module_number)
         self._line_edits_module_numbers.append(line_edit_module_number)
         line_edit_channel_number = ModifiedLineEdit()
-        line_edit_channel_number.textChanged.connect(partial(self.check_channel_and_module_numbers, pin_index))
-        line_edit_channel_number.editingFinished.connect(lambda: self.save_mux_output(pin_index))
+        line_edit_channel_number.textEdited.connect(lambda: self.check_channel_and_module_numbers(pin_index))
         line_edit_channel_number.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))
         line_edit_channel_number.right_pressed.connect(lambda: self.move_left_or_right(LeftRight.RIGHT))
         line_edit_channel_number.setValidator(QRegExpValidator(QRegExp(r"\d+")))
         self.table_widget_info.setCellWidget(pin_index, 2, line_edit_channel_number)
         self._line_edits_channel_numbers.append(line_edit_channel_number)
+        self._saved_mux_outputs[pin_index] = pin.multiplexer_output
         if pin.multiplexer_output:
             line_edit_module_number.setText(str(pin.multiplexer_output.module_number))
             line_edit_channel_number.setText(str(pin.multiplexer_output.channel_number))
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
             for index, value in enumerate(self._get_values_for_parameters(settings)):
-                label = qt.QLabel(value)
-                self.table_widget_info.setCellWidget(pin_index, 3 + index, label)
+                self.table_widget_info.setCellWidget(pin_index, 3 + index, qt.QLabel(value))
         else:
             for index in range(3):
                 self.table_widget_info.setCellWidget(pin_index, 3 + index, qt.QLabel())
@@ -148,34 +148,34 @@ class MeasurementPlanWidget(qt.QWidget):
         channel and module numbers are correct.
         """
 
-        correct = True
+        valid = True
         errors = []
         if not channel_number and not module_number:
-            return correct, errors
-        if not self._parent.measurement_plan.multiplexer:
-            errors.append(ChannelAndModuleErrors.UNSUITABLE_CHANNEL)
-            errors.append(ChannelAndModuleErrors.UNSUITABLE_MODULE)
+            errors.append(ChannelAndModuleErrors.UNSUITABLE_OUTPUT)
+            return valid, errors
         # Check channel number
         try:
             channel_number = int(channel_number)
             if not MIN_CHANNEL_NUMBER <= channel_number <= MAX_CHANNEL_NUMBER:
-                correct = False
+                valid = False
                 errors.append(ChannelAndModuleErrors.INVALID_CHANNEL)
         except ValueError:
-            correct = False
+            valid = False
             errors.append(ChannelAndModuleErrors.INVALID_CHANNEL)
         # Check module number
         try:
             module_number = int(module_number)
-            if self._parent.measurement_plan.multiplexer and\
-                    len(self._parent.measurement_plan.multiplexer.get_chain_info()) < module_number:
-                errors.append(ChannelAndModuleErrors.UNSUITABLE_MODULE)
-            elif module_number < 1:
-                correct = False
+            if not MIN_MODULE_NUMBER <= module_number <= MAX_MODULE_NUMBER:
+                valid = False
                 errors.append(ChannelAndModuleErrors.INVALID_MODULE)
+            elif self._parent.measurement_plan.multiplexer and\
+                    not (MIN_MODULE_NUMBER <= module_number <=
+                         len(self._parent.measurement_plan.multiplexer.get_chain_info())):
+                errors.append(ChannelAndModuleErrors.UNSUITABLE_OUTPUT)
         except ValueError:
+            valid = False
             errors.append(ChannelAndModuleErrors.INVALID_MODULE)
-        return correct, errors
+        return valid, errors
 
     def _clear_table(self):
         """
@@ -186,6 +186,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self._line_edits_channel_numbers = []
         self._line_edits_comments = []
         self._line_edits_module_numbers = []
+        self._saved_mux_outputs = {}
         for row in range(self.table_widget_info.rowCount(), -1, -1):
             self.table_widget_info.removeRow(row)
         self.table_widget_info.clearContents()
@@ -209,24 +210,8 @@ class MeasurementPlanWidget(qt.QWidget):
         self.table_widget_info.itemSelectionChanged.connect(self.set_pin_as_current)
         for pin_index, pin in self._parent.measurement_plan.all_pins_iterator():
             self._add_pin_to_table(pin_index, pin)
-            self.check_channel_and_module_numbers(pin_index, "")
+            self.check_channel_and_module_numbers(pin_index)
         self.select_row_for_current_pin()
-
-    def _fix_bad_multiplexer_output(self, pin_index: int):
-        """
-        Method fixes bad multiplexer output for pin with given index.
-        :param pin_index: pin index.
-        """
-
-        if not self._check_mux_output(self._line_edits_channel_numbers[pin_index].text(),
-                                      self._line_edits_module_numbers[pin_index].text())[0]:
-            pin = self._parent.measurement_plan.get_pin_with_index(pin_index)
-            if pin.multiplexer_output:
-                self._line_edits_channel_numbers[pin_index].setText(str(pin.multiplexer_output.channel_number))
-                self._line_edits_module_numbers[pin_index].setText(str(pin.multiplexer_output.module_number))
-            else:
-                self._line_edits_channel_numbers[pin_index].clear()
-                self._line_edits_module_numbers[pin_index].clear()
 
     def _get_values_for_parameters(self, settings: MeasurementSettings) -> Generator:
         """
@@ -285,50 +270,67 @@ class MeasurementPlanWidget(qt.QWidget):
         v_box_layout.addLayout(h_box_layout_2)
         self.setLayout(v_box_layout)
 
-    def _paint_channel_number(self, line_edit_channel_number: qt.QLineEdit, errors: List[ChannelAndModuleErrors]):
+    def _paint_errors(self, row: int, errors: List[ChannelAndModuleErrors]):
         """
-        Method paints line edit widget for given channel number in color
-        depending on errors.
-        :param line_edit_channel_number: line edit widget for given channel number;
-        :param errors: list with errors.
-        """
-
-        if ChannelAndModuleErrors.INVALID_CHANNEL in errors:
-            color = self.COLOR_ERROR
-            tooltip = qApp.translate("t", "Неверный номер канала модуля (допустимые значения от 1 до 64 включительно)")
-        elif ChannelAndModuleErrors.UNSUITABLE_CHANNEL in errors:
-            color = self.COLOR_WARNING
-            tooltip = qApp.translate("t", "Нет мультиплексора")
-        else:
-            color = self.COLOR_NORMAL
-            tooltip = ""
-        line_edit_channel_number.setStyleSheet(f"background-color: {color};")
-        line_edit_channel_number.setToolTip(tooltip)
-
-    def _paint_module_number(self, line_edit_module_number: qt.QLineEdit, errors: List[ChannelAndModuleErrors]):
-        """
-        Method paints line edit widget for given module number in color
-        depending on errors.
-        :param line_edit_module_number: line edit widget for given module number;
-        :param errors: list with errors.
+        Method colors row with given index if there is invalid multiplexer
+        output.
+        :param row: row index to color;
+        :param errors: list with errors for multiplexer output.
         """
 
+        color = None
         if ChannelAndModuleErrors.INVALID_MODULE in errors:
             color = self.COLOR_ERROR
-            tooltip = qApp.translate("t", "Неверный номер модуля")
-        elif ChannelAndModuleErrors.UNSUITABLE_MODULE in errors and not self._parent.measurement_plan.multiplexer:
-            color = self.COLOR_WARNING
-            tooltip = qApp.translate("t", "Нет мультиплексора")
-        elif ChannelAndModuleErrors.UNSUITABLE_MODULE in errors:
-            color = self.COLOR_WARNING
-            tooltip = qApp.translate("t", "Неверный номер модуля для текущей конфигурации мультиплексора (допустимые "
-                                          "значения от 1 до {} включительно)")
-            tooltip = tooltip.format(len(self._parent.measurement_plan.multiplexer.get_chain_info()))
-        else:
-            color = self.COLOR_NORMAL
-            tooltip = ""
-        line_edit_module_number.setStyleSheet(f"background-color: {color};")
-        line_edit_module_number.setToolTip(tooltip)
+        if ChannelAndModuleErrors.INVALID_CHANNEL in errors:
+            color = self.COLOR_ERROR
+        for column in range(self.table_widget_info.columnCount()):
+            widget = self.table_widget_info.cellWidget(row, column)
+            widget.setStyleSheet("")  # set default style and then new style
+            if color:
+                style = widget.styleSheet()
+                widget.setStyleSheet(style + f"background-color: {color};")
+        self._set_error_tooltip_to_mux_output(row, errors)
+
+    def _paint_warnings(self, row: int, errors: List[ChannelAndModuleErrors]):
+        """
+        Method colors row with given index if there is invalid or unsuitable
+        multiplexer output.
+        :param row: row index to paint;
+        :param errors: list with errors for multiplexer output.
+        """
+
+        color = None
+        if errors:
+            color = self.COLOR_NOT_TESTED
+        for column in range(self.table_widget_info.columnCount()):
+            widget = self.table_widget_info.cellWidget(row, column)
+            widget.setStyleSheet("")
+            if color:
+                style = widget.styleSheet()
+                widget.setStyleSheet(style + f"background-color: {color};")
+        self._set_error_tooltip_to_mux_output(row, errors)
+
+    def _set_error_tooltip_to_mux_output(self, row: int, errors: List[ChannelAndModuleErrors]):
+        """
+        Method sets tooltip about error to multiplexer output fields on
+        row with given index.
+        :param row: row index;
+        :param errors: list with errors for multiplexer output.
+        """
+
+        tooltips = ["", ""]
+        if ChannelAndModuleErrors.INVALID_MODULE in errors:
+            tooltips[0] = qApp.translate("t", "Поле Модуль MUX имеет некорректное значение (должно быть 1...8), "
+                                              "точка не сохранена")
+        if ChannelAndModuleErrors.INVALID_CHANNEL in errors:
+            tooltips[1] = qApp.translate("t", "Поле Канал MUX имеет некорректное значение (должно быть 1...64), "
+                                              "точка не сохранена")
+        for index, tooltip in enumerate(tooltips):
+            widget = self.table_widget_info.cellWidget(row, index + 1)
+            widget.setToolTip(tooltip)
+            if tooltip:
+                style_sheet = widget.styleSheet()
+                widget.setStyleSheet(style_sheet + f"border: 1px solid {self.COLOR_ERROR_FRAME}")
 
     def _update_pin_in_table(self, pin_index: int, pin: Pin):
         """
@@ -364,7 +366,7 @@ class MeasurementPlanWidget(qt.QWidget):
     @pyqtSlot(MultiplexerOutput)
     def add_pin_with_mux_output_to_plan(self, channel: MultiplexerOutput):
         """
-        Slot adds pin to measurement plan.
+        Slot adds pin with multiplexer output to measurement plan.
         :param channel: channel from multiplexer to be added.
         """
 
@@ -380,20 +382,29 @@ class MeasurementPlanWidget(qt.QWidget):
         value = self.progress_bar.value()
         self.progress_bar.setValue(value + 1)
 
-    @pyqtSlot(int, str)
-    def check_channel_and_module_numbers(self, pin_index: int, _: str):
+    @pyqtSlot(int)
+    def check_channel_and_module_numbers(self, pin_index: int):
         """
         Slot checks correctness of module number entered by user.
-        :param pin_index: pin index for which to check;
-        :param _: unused.
+        :param pin_index: pin index for which to check.
         """
 
-        line_edits = [self._line_edits_channel_numbers[pin_index], self._line_edits_module_numbers[pin_index]]
-        channel_number = line_edits[0].text()
-        module_number = line_edits[1].text()
-        errors = self._check_mux_output(channel_number, module_number)[1]
-        self._paint_channel_number(line_edits[0], errors)
-        self._paint_module_number(line_edits[1], errors)
+        channel_number = self._line_edits_channel_numbers[pin_index].text()
+        module_number = self._line_edits_module_numbers[pin_index].text()
+        valid, errors = self._check_mux_output(channel_number, module_number)
+        self._paint_errors(pin_index, errors)
+        pin = self._parent.measurement_plan.get_pin_with_index(pin_index)
+        if valid:
+            if not pin:
+                return
+            if channel_number and module_number:
+                pin.multiplexer_output = MultiplexerOutput(channel_number=int(channel_number),
+                                                           module_number=int(module_number))
+            else:
+                pin.multiplexer_output = None
+            self._saved_mux_outputs[pin_index] = pin.multiplexer_output
+        elif pin:
+            pin.multiplexer_output = None
 
     def closeEvent(self, event: QCloseEvent):
         """
@@ -415,8 +426,9 @@ class MeasurementPlanWidget(qt.QWidget):
 
     def keyPressEvent(self, key_press_event: QKeyEvent):
         """
-        Method handles
-        :param key_press_event:
+        Method performs additional processing of pressing left
+        key on keyboard.
+        :param key_press_event: key press event.
         """
 
         super().keyPressEvent(key_press_event)
@@ -458,11 +470,10 @@ class MeasurementPlanWidget(qt.QWidget):
         :param pin_index: pin index.
         """
 
-        line_edit_comment = self._line_edits_comments[pin_index]
         pin = self._parent.measurement_plan.get_pin_with_index(pin_index)
         if not pin:
             return
-        pin.comment = line_edit_comment.text()
+        pin.comment = self._line_edits_comments[pin_index].text()
         self._parent.update_current_pin()
 
     @pyqtSlot(int)
@@ -474,7 +485,8 @@ class MeasurementPlanWidget(qt.QWidget):
 
         channel_number = self._line_edits_channel_numbers[pin_index].text()
         module_number = self._line_edits_module_numbers[pin_index].text()
-        if self._check_mux_output(channel_number, module_number)[0]:
+        valid, errors = self._check_mux_output(channel_number, module_number)
+        if valid:
             pin = self._parent.measurement_plan.get_pin_with_index(pin_index)
             if not pin:
                 return
@@ -483,6 +495,7 @@ class MeasurementPlanWidget(qt.QWidget):
                                                            module_number=int(module_number))
             else:
                 pin.multiplexer_output = None
+            self._saved_mux_outputs[pin_index] = pin.multiplexer_output
 
     def select_row_for_current_pin(self):
         """
@@ -514,7 +527,6 @@ class MeasurementPlanWidget(qt.QWidget):
 
         if not self._dont_go_to_selected_pin or self._standby_mode:
             row_index = self.table_widget_info.currentRow()
-            self._fix_bad_multiplexer_output(row_index)
             self._parent.go_to_selected_pin(row_index)
         elif self._dont_go_to_selected_pin:
             self._dont_go_to_selected_pin = False
@@ -560,3 +572,23 @@ class MeasurementPlanWidget(qt.QWidget):
         self._parent.measurement_plan.remove_all_callback_funcs_for_pin_changes()
         self._parent.measurement_plan.add_callback_func_for_pin_changes(self.set_new_pin_parameters)
         self._fill_table()
+
+    def validate_mux_outputs_for_pins(self):
+        """
+        Method validates multiplexer outputs for pins in measurement plan.
+        """
+
+        for pin_index in range(self.table_widget_info.rowCount()):
+            saved_mux_output = self._saved_mux_outputs[pin_index]
+            if self._saved_mux_outputs[pin_index]:
+                self._line_edits_channel_numbers[pin_index].setText(str(saved_mux_output.channel_number))
+                self._line_edits_module_numbers[pin_index].setText(str(saved_mux_output.module_number))
+            else:
+                self._line_edits_channel_numbers[pin_index].clear()
+                self._line_edits_module_numbers[pin_index].clear()
+            pin = self._parent.measurement_plan.get_pin_with_index(pin_index)
+            pin.multiplexer_output = saved_mux_output
+            channel_number = self._line_edits_channel_numbers[pin_index].text()
+            module_number = self._line_edits_module_numbers[pin_index].text()
+            errors = self._check_mux_output(channel_number, module_number)[1]
+            self._paint_warnings(pin_index, errors)
