@@ -278,7 +278,7 @@ class MeasurementPlanWidget(qt.QWidget):
         :param errors: list with errors for multiplexer output.
         """
 
-        color = self.COLOR_NORMAL
+        color = None
         if ChannelAndModuleErrors.INVALID_MODULE in errors:
             color = self.COLOR_ERROR
         if ChannelAndModuleErrors.INVALID_CHANNEL in errors:
@@ -286,7 +286,9 @@ class MeasurementPlanWidget(qt.QWidget):
         for column in range(self.table_widget_info.columnCount()):
             widget = self.table_widget_info.cellWidget(row, column)
             widget.setStyleSheet("")  # set default style and then new style
-            widget.setStyleSheet(f"background-color: {color};")
+            if color:
+                style = widget.styleSheet()
+                widget.setStyleSheet(style + f"background-color: {color};")
         self._set_error_tooltip_to_mux_output(row, errors)
 
     def _paint_warnings(self, row: int, errors: List[ChannelAndModuleErrors]):
@@ -297,13 +299,15 @@ class MeasurementPlanWidget(qt.QWidget):
         :param errors: list with errors for multiplexer output.
         """
 
-        color = self.COLOR_NORMAL
+        color = None
         if errors:
             color = self.COLOR_NOT_TESTED
         for column in range(self.table_widget_info.columnCount()):
             widget = self.table_widget_info.cellWidget(row, column)
             widget.setStyleSheet("")
-            widget.setStyleSheet(f"background-color: {color};")
+            if color:
+                style = widget.styleSheet()
+                widget.setStyleSheet(style + f"background-color: {color};")
         self._set_error_tooltip_to_mux_output(row, errors)
 
     def _set_error_tooltip_to_mux_output(self, row: int, errors: List[ChannelAndModuleErrors]):

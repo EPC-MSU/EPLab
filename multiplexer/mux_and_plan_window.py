@@ -22,6 +22,7 @@ class MuxAndPlanWindow(qt.QWidget):
     Class for dialog window to show information about multiplexer and measurement plan.
     """
 
+    COLOR_NOT_TESTED: str = "#F9E154"
     DEFAULT_HEIGHT: int = 500
     DEFAULT_MUX_HEIGHT: int = 300
     DEFAULT_WIDTH: int = 700
@@ -85,8 +86,7 @@ class MuxAndPlanWindow(qt.QWidget):
             self.multiplexer_pinout_widget.set_visible(True)
         self.multiplexer_pinout_widget.stop_sending_channels()
 
-    @staticmethod
-    def _continue_plan_measurement() -> bool:
+    def _continue_plan_measurement(self) -> bool:
         """
         Method asks user whether it is necessary to continue measurements according
         to measurement plan.
@@ -97,8 +97,12 @@ class MuxAndPlanWindow(qt.QWidget):
         msg_box.setIcon(qt.QMessageBox.Information)
         msg_box.setWindowTitle(qApp.translate("t", "Внимание"))
         msg_box.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "ico.png")))
-        msg_box.setText(qApp.translate("t", "Не во всех точках из плана тестирования будут проведены измерения."
-                                            " Продолжить?"))
+        color = '<span style="background-color: {};">{}</span>'.format(self.COLOR_NOT_TESTED,
+                                                                       qApp.translate("t", "жёлтым"))
+        text = qApp.translate("t", "Не все точки имеют выходы мультиплексора и/или не все выходы могут быть "
+                                   "установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите "
+                                   "продолжить?")
+        msg_box.setText(text.format(color))
         msg_box.addButton(qApp.translate("t", "Да"), qt.QMessageBox.YesRole)
         msg_box.addButton(qApp.translate("t", "Нет"), qt.QMessageBox.NoRole)
         return not msg_box.exec_()
