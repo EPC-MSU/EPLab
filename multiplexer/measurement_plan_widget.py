@@ -168,8 +168,9 @@ class MeasurementPlanWidget(qt.QWidget):
             if not MIN_MODULE_NUMBER <= module_number <= MAX_MODULE_NUMBER:
                 valid = False
                 errors.append(ChannelAndModuleErrors.INVALID_MODULE)
-            elif not (MIN_MODULE_NUMBER <= module_number <=
-                      len(self._parent.measurement_plan.multiplexer.get_chain_info())):
+            elif self._parent.measurement_plan.multiplexer and\
+                    not (MIN_MODULE_NUMBER <= module_number <=
+                         len(self._parent.measurement_plan.multiplexer.get_chain_info())):
                 errors.append(ChannelAndModuleErrors.UNSUITABLE_OUTPUT)
         except ValueError:
             valid = False
