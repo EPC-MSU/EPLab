@@ -52,6 +52,9 @@ class TestMeasurementPlanWidget(unittest.TestCase):
                    ["1", "2", "45", "100 Hz", "5.0 V", "Middle", ""]]
         for row in range(2):
             for column in range(5):
-                widget = measurement_plan_widget.table_widget_info.cellWidget(row, column)
-                self.assertEqual(widget.text(), content[row][column])
+                if column in (1, 2, 6):
+                    widget_or_item = measurement_plan_widget.table_widget_info.cellWidget(row, column)
+                else:
+                    widget_or_item = measurement_plan_widget.table_widget_info.item(row, column)
+                self.assertEqual(widget_or_item.text(), content[row][column])
         app.exit(0)
