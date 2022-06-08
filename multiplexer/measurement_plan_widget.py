@@ -104,7 +104,9 @@ class MeasurementPlanWidget(qt.QWidget):
         """
 
         self.table_widget_info.insertRow(pin_index)
-        self.table_widget_info.setItem(pin_index, 0, qt.QTableWidgetItem(str(pin_index)))
+        item = qt.QTableWidgetItem(str(pin_index))
+        item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+        self.table_widget_info.setItem(pin_index, 0, item)
         line_edit_module_number = ModifiedLineEdit()
         line_edit_module_number.textEdited.connect(lambda: self.check_channel_and_module_numbers(pin_index))
         line_edit_module_number.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))
@@ -126,10 +128,14 @@ class MeasurementPlanWidget(qt.QWidget):
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
             for index, value in enumerate(self._get_values_for_parameters(settings)):
-                self.table_widget_info.setItem(pin_index, 3 + index, qt.QTableWidgetItem(value))
+                item = qt.QTableWidgetItem(value)
+                item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+                self.table_widget_info.setItem(pin_index, 3 + index, item)
         else:
             for index in range(3):
-                self.table_widget_info.setItem(pin_index, 3 + index, qt.QTableWidgetItem())
+                item = qt.QTableWidgetItem()
+                item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+                self.table_widget_info.setItem(pin_index, 3 + index, item)
         line_edit_comment = ModifiedLineEdit()
         line_edit_comment.editingFinished.connect(lambda: self.save_comment(pin_index))
         line_edit_comment.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))
