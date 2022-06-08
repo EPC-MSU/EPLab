@@ -1249,6 +1249,8 @@ class EPLabWindow(QMainWindow):
         if self._msystem:
             for measurer in self._msystem.measurers:
                 measurer.close_device()
+            for multiplexer in self._msystem.multiplexers:
+                multiplexer.close_device()
         self._msystem = None
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
         self.enable_widgets(False)
