@@ -152,21 +152,19 @@ class MuxAndPlanWindow(qt.QWidget):
         desktop = qApp.instance().desktop()
         height = desktop.availableGeometry().height()
         width = desktop.availableGeometry().width()
-        main_window_pos = QPoint()
-        main_window_pos.x = desktop.availableGeometry().x()
-        main_window_pos.y = desktop.availableGeometry().y()
+        main_window_pos = QPoint(desktop.availableGeometry().x(), desktop.availableGeometry().y())
         height -= 50
         if 1280 < width:
             main_window_size = QSize(width // 2, height)
-            window_pos = QPoint(main_window_pos.x + main_window_size.width(), main_window_pos.y)
+            window_pos = QPoint(main_window_pos.x() + main_window_size.width(), main_window_pos.y())
             window_size = QSize(width // 2, height)
         elif width < 1280:
             main_window_size = QSize(self._parent.minimumWidth(), height)
             window_size = QSize(self.minimumWidth(), height)
-            window_pos = QPoint(main_window_pos.x + width - window_size.width(), main_window_pos.y)
+            window_pos = QPoint(main_window_pos.x() + width - window_size.width(), main_window_pos.y())
         else:
             main_window_size = QSize(self._parent.minimumWidth(), height)
-            window_pos = QPoint(main_window_pos.x + main_window_size.width(), main_window_pos.y)
+            window_pos = QPoint(main_window_pos.x() + main_window_size.width(), main_window_pos.y())
             window_size = QSize(width - main_window_size.width(), height)
         current_main_window_pos = self._parent.pos()
         current_main_window_size = self._parent.size()
