@@ -1091,7 +1091,7 @@ class EPLabWindow(QMainWindow):
         :param mode: work mode to set.
         """
 
-        # self.open_mux_window_action.setEnabled(self._measurement_plan.multiplexer is not None)
+        self.open_mux_window_action.setEnabled(self._measurement_plan.multiplexer is not None)
         self.comparing_mode_action.setChecked(mode is WorkMode.COMPARE)
         self.writing_mode_action.setChecked(mode is WorkMode.WRITE)
         self.testing_mode_action.setChecked(mode is WorkMode.TEST)
