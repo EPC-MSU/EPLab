@@ -41,6 +41,15 @@ class AboutWindow(QDialog):
         link = '<a href="{}">{}</a>'.format(page_url, qApp.translate("t", "на нашем сайте."))
         return text.format(link), page_url
 
+    @staticmethod
+    def _get_logo_name() -> str:
+        """
+        Method returns file name with logo.
+        :return: file name with logo.
+        """
+
+        return "logo.png" if qApp.instance().property("language") is Language.RU else "logo_en.png"
+
     def _init_ui(self):
         """
         Method initializes widgets on dialog window.
@@ -52,8 +61,9 @@ class AboutWindow(QDialog):
         self.setFixedWidth(WINDOW_WIDTH)
         color = self.palette().color(QPalette.Background)
         text, page_url = self._create_info_text_and_link()
+        logo_name = self._get_logo_name()
         self.label_logo = QLabel()
-        self.label_logo.setText(f'<a href="{page_url}"><img src="{os.path.join(ut.DIR_MEDIA, "logo.png")}" '
+        self.label_logo.setText(f'<a href="{page_url}"><img src="{os.path.join(ut.DIR_MEDIA, logo_name)}" '
                                 f'width="{WINDOW_WIDTH}"></a>')
         self.label_logo.setOpenExternalLinks(True)
         self.text_edit_info: QTextBrowser = QTextBrowser()
