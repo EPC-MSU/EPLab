@@ -833,7 +833,7 @@ class EPLabWindow(QMainWindow):
                 return
             if not ut.check_compatibility(self._product, board):
                 text = qApp.translate("t", "План тестирования TEST_PLAN нельзя загрузить, поскольку он не "
-                                           "соответствует режиму работы EPLab")
+                                           "соответствует режиму работы EPLab.")
                 ut.show_exception(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
                 return
             self._measurement_plan = MeasurementPlan(
@@ -1148,8 +1148,8 @@ class EPLabWindow(QMainWindow):
             self._report_generation_thread.stop_thread()
             self._report_generation_thread.wait()
 
-    def connect_devices(self, port_1: str, port_2: str, product_name: Optional[cw.ProductNames] = None,
-                        mux_port: str = None):
+    def connect_devices(self, port_1: Optional[str], port_2: Optional[str],
+                        product_name: Optional[cw.ProductNames] = None, mux_port: str = None):
         """
         Method connects measurers with given ports.
         :param port_1: port for first measurer;

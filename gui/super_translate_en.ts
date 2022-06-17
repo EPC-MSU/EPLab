@@ -376,8 +376,8 @@
     </message>
     <message>
         <location filename="../mainwindow.py" line="817"/>
-        <source>План тестирования TEST_PLAN нельзя загрузить, поскольку он не соответствует режиму работы EPLab</source>
-        <translation>Test plan TEST_PLAN cannot be loaded because it does not correspond to the EPLab operating mode</translation>
+        <source>План тестирования TEST_PLAN нельзя загрузить, поскольку он не соответствует режиму работы EPLab.</source>
+        <translation>Test plan TEST_PLAN cannot be loaded because it does not correspond to the EPLab operating mode.</translation>
     </message>
     <message>
         <location filename="../mainwindow.py" line="837"/>
