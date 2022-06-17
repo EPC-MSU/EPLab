@@ -13,6 +13,8 @@ from platform import system
 from typing import Dict, Iterable, List, Optional
 import serial.tools.list_ports
 from PyQt5.QtCore import QCoreApplication as qApp
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QMessageBox
 from epcore.elements import Board, MeasurementSettings
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
@@ -97,7 +99,6 @@ def create_measurers(port_1: str, port_2: str) -> Optional[MeasurementSystem]:
         except BadFirmwareVersion as exc:
             logger.error("%s firmware version %s is not compatible with this version of EPLab", exc.args[0],
                          exc.args[2])
-            from mainwindow import show_exception
             text = qApp.translate("t", "Версия прошивки {} {} несовместима с данной версией EPLab")
             show_exception(qApp.translate("t", "Ошибка"), text.format(exc.args[0], exc.args[2]), "")
         except Exception as exc:
@@ -251,6 +252,26 @@ def save_settings_auto(product: EyePointProduct, settings: MeasurementSettings, 
     filename = os.path.join(dir_name, _FILENAME_FOR_AUTO_SETTINGS)
     with open(filename, "w") as configfile:
         config.write(configfile)
+
+
+def show_exception(msg_title: str, msg_text: str, exc: str = ""):
+    """
+    Function shows message box with error.
+    :param msg_title: title of message box;
+    :param msg_text: message text;
+    :param exc: text of exception.
+    """
+
+    max_message_length = 500
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Warning)
+    msg.setWindowTitle(msg_title)
+    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media", "ico.png")
+    msg.setWindowIcon(QIcon(icon_path))
+    msg.setText(msg_text)
+    if exc:
+        msg.setInformativeText(str(exc)[-max_message_length:])
+    msg.exec_()
 
 
 def sort_devices_by_usb_numbers(measurers: Iterable, reverse: bool = False) -> List:

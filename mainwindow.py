@@ -42,33 +42,23 @@ from version import Version
 logger = logging.getLogger("eplab")
 
 
-def show_exception(msg_title: str, msg_text: str, exc: str = ""):
-    """
-    Function shows message box with error.
-    :param msg_title: title of message box;
-    :param msg_text: message text;
-    :param exc: text of exception.
-    """
-
-    max_message_length = 500
-    msg = QMessageBox()
-    msg.setIcon(QMessageBox.Warning)
-    msg.setWindowTitle(msg_title)
-    dir_name = os.path.dirname(os.path.abspath(__file__))
-    icon_path = os.path.join(dir_name, "media", "ico.png")
-    msg.setWindowIcon(QIcon(icon_path))
-    msg.setText(msg_text)
-    if exc:
-        msg.setInformativeText(str(exc)[-max_message_length:])
-    msg.exec_()
-
-
 class EPLabWindow(QMainWindow):
     """
     Class for main window of application.
     """
 
-    default_path: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
+    COLOR_FOR_REFERENCE: QColor = QColor(0, 128, 255, 200)
+    COLOR_FOR_TEST: QColor = QColor(255, 0, 0, 200)
+    COLOR_FOR_TEST_FROM_PLAN: QColor = QColor(255, 129, 129, 200)
+    CRITICAL_WIDTH_FOR_LINUX_EN: int = 1380
+    CRITICAL_WIDTH_FOR_LINUX_RU: int = 1650
+    CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1150
+    CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1350
+    DEFAULT_PATH: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
+    DEFAULT_POS_X: int = 50
+    DEFAULT_POS_Y: int = 50
+    MIN_WIDTH_IN_LINUX: int = 700
+    MIN_WIDTH_IN_WINDOWS: int = 650
 
     def __init__(self, product: EyePointProduct, port_1: Optional[str] = None, port_2: Optional[str] = None,
                  english: Optional[bool] = None):
@@ -168,7 +158,7 @@ class EPLabWindow(QMainWindow):
                                            "Для PROCESS_NAME все точки должны содержать сохраненные измерения")
             text = text.replace("POINTS_PARAM", empty_pins)
             text = text.replace("PROCESS_NAME", process_name)
-            show_exception(qApp.translate("t", "Ошибка"), text, "")
+            ut.show_exception(qApp.translate("t", "Ошибка"), text, "")
             return True
         return False
 
@@ -379,10 +369,10 @@ class EPLabWindow(QMainWindow):
         self.setWindowIcon(QIcon(self._icon_path))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
         if system().lower() == "windows":
-            self.setMinimumWidth(650)
+            self.setMinimumWidth(self.MIN_WIDTH_IN_WINDOWS)
         else:
-            self.setMinimumWidth(700)
-        self.move(50, 50)
+            self.setMinimumWidth(self.MIN_WIDTH_IN_LINUX)
+        self.move(self.DEFAULT_POS_X, self.DEFAULT_POS_Y)
 
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
         self._product: EyePointProduct = product
@@ -413,14 +403,14 @@ class EPLabWindow(QMainWindow):
                                              solid_axis_enabled=False, axis_sign_enabled=False,
                                              screenshot_file_name_base="eplab")
         self._iv_window.plot.set_constant_screenshot_directory(True)
-        dir_path = os.path.join(self.default_path, "Screenshot")
+        dir_path = os.path.join(self.DEFAULT_PATH, "Screenshot")
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
         self._iv_window.plot.set_path_to_screenshot_directory(dir_path)
         self.reference_curve_plot = self._iv_window.plot.add_curve()
+        self.reference_curve_plot.set_curve_params(self.COLOR_FOR_REFERENCE)
         self.test_curve_plot = self._iv_window.plot.add_curve()
-        self.reference_curve_plot.set_curve_params(QColor(0, 128, 255, 200))
-        self.test_curve_plot.set_curve_params(QColor(255, 0, 0, 200))
+        self.test_curve_plot.set_curve_params(self.COLOR_FOR_TEST)
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
 
         vbox.setSpacing(0)
@@ -770,13 +760,13 @@ class EPLabWindow(QMainWindow):
                 pass
             else:
                 return
-        if not os.path.isdir(self.default_path):
-            os.mkdir(self.default_path)
-        if not os.path.isdir(os.path.join(self.default_path, "Reference")):
-            os.mkdir(os.path.join(self.default_path, "Reference"))
+        if not os.path.isdir(self.DEFAULT_PATH):
+            os.mkdir(self.DEFAULT_PATH)
+        if not os.path.isdir(os.path.join(self.DEFAULT_PATH, "Reference")):
+            os.mkdir(os.path.join(self.DEFAULT_PATH, "Reference"))
         filename = QFileDialog.getSaveFileName(
             self, qApp.translate("t", "Создать новую плату"), filter="UFIV Archived File (*.uzf)",
-            directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
+            directory=os.path.join(self.DEFAULT_PATH, "Reference", "board.uzf"))[0]
         if filename:
             self._current_file_path = filename
             self._reset_board()
@@ -850,15 +840,15 @@ class EPLabWindow(QMainWindow):
         try:
             num_point = int(self.num_point_line_edit.text())
         except ValueError as exc:
-            show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                           qApp.translate("t", "Неверный формат номера точки. Номер точки может принимать только "
-                                               "целочисленное значение!"), str(exc))
+            ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                              qApp.translate("t", "Неверный формат номера точки. Номер точки может принимать только "
+                                                  "целочисленное значение!"), str(exc))
             return
         try:
             self._measurement_plan.go_pin(num_point)
         except ValueError as exc:
-            show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                           qApp.translate("t", "Точка с таким номером не найдена на данной плате."), str(exc))
+            ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                              qApp.translate("t", "Точка с таким номером не найдена на данной плате."), str(exc))
             return
         self._update_current_pin()
         self._open_board_window_if_needed()
@@ -896,12 +886,13 @@ class EPLabWindow(QMainWindow):
             try:
                 board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
             except Exception as exc:
-                show_exception(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит"), str(exc))
+                ut.show_exception(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит"),
+                                  str(exc))
                 return
             if not ut.check_compatibility(self._product, board):
                 text = qApp.translate("t", "План тестирования TEST_PLAN нельзя загрузить, поскольку он не "
                                            "соответствует режиму работы EPLab")
-                show_exception(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
+                ut.show_exception(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
                 return
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
@@ -968,13 +959,13 @@ class EPLabWindow(QMainWindow):
 
         if self._check_measurement_plan():
             return None
-        if not os.path.isdir(self.default_path):
-            os.mkdir(self.default_path)
-        if not os.path.isdir(os.path.join(self.default_path, "Reference")):
-            os.mkdir(os.path.join(self.default_path, "Reference"))
+        if not os.path.isdir(self.DEFAULT_PATH):
+            os.mkdir(self.DEFAULT_PATH)
+        if not os.path.isdir(os.path.join(self.DEFAULT_PATH, "Reference")):
+            os.mkdir(os.path.join(self.DEFAULT_PATH, "Reference"))
         filename = QFileDialog.getSaveFileName(
             self, qApp.translate("t", "Сохранить плату"), filter="UFIV Archived File (*.uzf)",
-            directory=os.path.join(self.default_path, "Reference", "board.uzf"))[0]
+            directory=os.path.join(self.DEFAULT_PATH, "Reference", "board.uzf"))[0]
         if filename:
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             self._current_file_path = epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
@@ -1002,7 +993,7 @@ class EPLabWindow(QMainWindow):
         # Freeze image at first
         image = self.grab(self.rect())
         filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
-        dir_path = os.path.join(self.default_path, "Screenshot")
+        dir_path = os.path.join(self.DEFAULT_PATH, "Screenshot")
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
         if system().lower() == "windows":
@@ -1078,8 +1069,8 @@ class EPLabWindow(QMainWindow):
                     language = Language.get_language_name(qApp.instance().property("language"))
                 ut.save_settings_auto(self._product, settings, language)
             except ValueError as exc:
-                show_exception(qApp.translate("t", "Ошибка"),
-                               qApp.translate("t", "Ошибка при установке настроек устройства"), str(exc))
+                ut.show_exception(qApp.translate("t", "Ошибка"),
+                                  qApp.translate("t", "Ошибка при установке настроек устройства"), str(exc))
                 self._update_scroll_areas_for_parameters(old_settings)
                 self._set_msystem_settings(old_settings)
                 old_options = self._product.settings_to_options(old_settings)
@@ -1311,9 +1302,9 @@ class EPLabWindow(QMainWindow):
         # Determine the critical width of the window for given language and OS
         lang = qApp.instance().property("language")
         if system().lower() == "windows":
-            size = 1150 if lang is Language.EN else 1350
+            size = self.CRITICAL_WIDTH_FOR_WINDOWS_EN if lang is Language.EN else self.CRITICAL_WIDTH_FOR_WINDOWS_RU
         else:
-            size = 1380 if lang is Language.EN else 1650
+            size = self.CRITICAL_WIDTH_FOR_LINUX_EN if lang is Language.EN else self.CRITICAL_WIDTH_FOR_LINUX_RU
         # Change style of toolbars
         tool_bars = self.toolBar_write, self.toolBar_cursor, self.toolBar_mode
         for tool_bar in tool_bars:
