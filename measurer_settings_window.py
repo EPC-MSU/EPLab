@@ -31,6 +31,10 @@ class MeasurerSettingsWindow(qt.QDialog):
     Class for dialog window with settings of measurer.
     """
 
+    MAX_HEIGHT: int = 500
+    MAX_WIDTH: int = 400
+    MIN_WIDTH: int = 300
+
     def __init__(self, parent=None, settings: Dict = None, measurer: IVMeasurerBase = None, device_name: str = None):
         """
         :param parent: parent window;
@@ -165,6 +169,22 @@ class MeasurerSettingsWindow(qt.QDialog):
             group.setToolTip(data.get(f"tooltip_{self.lang}"))
         return group
 
+    def _create_text_browser(self, data: Dict) -> Optional[qt.QWidget]:
+        """
+        Method creates text browser widget with some info about measurer.
+        :param data: information about created label.
+        :return: created text browser widget.
+        """
+
+        info = data.get(f"label_{self.lang}", "")
+        if not info:
+            return
+        text_browser = qt.QTextBrowser()
+        text_browser.setReadOnly(True)
+        text_browser.setText(info)
+        text_browser.adjustSize()
+        return text_browser
+
     @staticmethod
     def _create_title(device_name: Optional[str] = None) -> str:
         """
@@ -222,8 +242,8 @@ class MeasurerSettingsWindow(qt.QDialog):
         """
 
         self.setWindowTitle(self._create_title(device_name))
-        self.setMinimumWidth(300)
-        self.setMaximumSize(400, 500)
+        self.setMinimumWidth(self.MIN_WIDTH)
+        self.setMaximumSize(self.MAX_WIDTH, self.MAX_HEIGHT)
         v_box = qt.QVBoxLayout()
         if isinstance(settings, dict) and settings.get("elements"):
             for element in settings.get("elements", []):
@@ -238,6 +258,8 @@ class MeasurerSettingsWindow(qt.QDialog):
                     widget = self._create_combobox(element, current_value)
                 elif element["type"] == "line_edit":
                     widget = self._create_line_edit(element, current_value)
+                elif element["type"] == "text_browser":
+                    widget = self._create_text_browser(element)
                 if widget is not None:
                     v_box.addWidget(widget)
             self.buttonBox = qt.QDialogButtonBox(qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel)
