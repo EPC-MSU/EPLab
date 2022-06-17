@@ -8,7 +8,6 @@ import os
 import re
 import select
 import socket
-import struct
 from datetime import datetime, timedelta
 from enum import Enum
 from functools import partial
@@ -26,6 +25,7 @@ from epcore.ivmeasurer.measurerivm import IVMeasurerIVM10
 from epcore.ivmeasurer.virtual import IVMeasurerVirtual
 import safe_opener
 import urpcbase as lib
+import utils as ut
 
 logger = logging.getLogger("eplab")
 IP_ASA_REG_EXP = r"^xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
@@ -90,7 +90,7 @@ class ProductNames(Enum):
         """
 
         products = [cls.EYEPOINT_A2, cls.EYEPOINT_U21, cls.EYEPOINT_U22, cls.EYEPOINT_S2]
-        if _get_platform() != "win64":
+        if ut.get_platform() != "win64":
             products.append(cls.EYEPOINT_H10)
         return products
 
@@ -122,7 +122,7 @@ class MeasurerType(Enum):
         :return: True if port can be of IVM10 measurer.
         """
 
-        platform_name = _get_platform()
+        platform_name = ut.get_platform()
         if "win" in platform_name:
             pattern = re.compile(r"^com:\\\\\.\\COM\d+$")
         elif platform_name == "debian":
@@ -132,21 +132,6 @@ class MeasurerType(Enum):
         if port is None or (not pattern.match(port) and port != "virtual"):
             return False
         return True
-
-
-def _create_uri_name(com_port: str) -> str:
-    """
-    Function returns uri for port.
-    :param com_port: COM-port.
-    :return: uri.
-    """
-
-    os_name = _get_platform()
-    if "win" in os_name:
-        return f"com:\\\\.\\{com_port}"
-    if os_name == "debian":
-        return f"com://{com_port}"
-    raise RuntimeError("Unexpected OS")
 
 
 def _filter_ports_by_vid_and_pid(com_ports: List[serial.tools.list_ports_common.ListPortInfo], vid: str, pid: str
@@ -174,22 +159,6 @@ def _filter_ports_by_vid_and_pid(com_ports: List[serial.tools.list_ports_common.
     return filtered_ports
 
 
-def _get_platform() -> Optional[str]:
-    """
-    Function returns name of OS.
-    :return: name of OS.
-    """
-
-    os_kind = system().lower()
-    if os_kind == "windows":
-        if 8 * struct.calcsize("P") == 32:
-            return "win32"
-        return "win64"
-    if os_kind == "linux":
-        return "debian"
-    raise RuntimeError("Unexpected OS")
-
-
 def find_urpc_ports(device_type: str) -> List[str]:
     """
     Function returns available COM-ports to connect.
@@ -197,7 +166,7 @@ def find_urpc_ports(device_type: str) -> List[str]:
     :return: list of available COM-ports.
     """
 
-    os_name = _get_platform()
+    os_name = ut.get_platform()
     dir_name = os.path.dirname(os.path.abspath(__file__))
     config_file = os.path.join(dir_name, "resources", os_name, f"{device_type}_config.ini")
     config = configparser.ConfigParser()
@@ -216,7 +185,7 @@ def find_urpc_ports(device_type: str) -> List[str]:
     serial_ports = _filter_ports_by_vid_and_pid(serial_ports, vid, pid)
     ximc_ports = []
     for com_port in serial_ports:
-        device_name = _create_uri_name(com_port.device)
+        device_name = ut.create_uri_name(com_port.device)
         device = lib.UrpcbaseDeviceHandle(device_name.encode(), True)
         try:
             safe_opener.open_device_safely(device, config_file)
@@ -573,7 +542,7 @@ class ConnectionWindow(qt.QDialog):
             ports.append(port)
         ports = self._get_different_xi_net_ports(ports)
         while len(ports) < 2:
-            ports.append("")
+            ports.append(None)
         selected_product_name, _ = self._get_checked_product_name()
         for index, port in enumerate(ports):
             if (port == "virtual" and
@@ -636,10 +605,10 @@ class ConnectionWindow(qt.QDialog):
         msg.setWindowIcon(QIcon(icon_path))
         product_name, _ = self._get_checked_product_name()
         measurer_type = ProductNames.get_measurer_type_by_product_name(product_name)
-        if measurer_type == MeasurerType.IVM10 and "win" in _get_platform():
+        if measurer_type == MeasurerType.IVM10 and "win" in ut.get_platform():
             info = qApp.translate("t", "Введите значение последовательного порта в формате com:\\\\.\\COMx или "
                                        "адрес XiNet сервера в формате xi-net://x.x.x.x/x.")
-        elif measurer_type == MeasurerType.IVM10 and _get_platform() == "debian":
+        elif measurer_type == MeasurerType.IVM10 and ut.get_platform() == "debian":
             info = qApp.translate("t", "Введите значение последовательного порта в формате com:///dev/ttyACMx или "
                                        "адрес XiNet сервера в формате xi-net://x.x.x.x/x.")
         elif measurer_type == MeasurerType.ASA:

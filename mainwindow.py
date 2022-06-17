@@ -891,7 +891,7 @@ class EPLabWindow(QMainWindow):
                 return
             if not ut.check_compatibility(self._product, board):
                 text = qApp.translate("t", "План тестирования TEST_PLAN нельзя загрузить, поскольку он не "
-                                           "соответствует режиму работы EPLab")
+                                           "соответствует режиму работы EPLab.")
                 ut.show_exception(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
                 return
             self._measurement_plan = MeasurementPlan(board, measurer=self._msystem.measurers[0])
@@ -1209,7 +1209,8 @@ class EPLabWindow(QMainWindow):
             self._report_generation_thread.stop_thread()
             self._report_generation_thread.wait()
 
-    def connect_devices(self, port_1: str, port_2: str, product_name: Optional[cw.ProductNames] = None):
+    def connect_devices(self, port_1: Optional[str], port_2: Optional[str],
+                        product_name: Optional[cw.ProductNames] = None):
         """
         Method connects measurers with given ports.
         :param port_1: port for first measurer;
@@ -1222,7 +1223,24 @@ class EPLabWindow(QMainWindow):
         if self._msystem:
             for measurer in self._msystem.measurers:
                 measurer.close_device()
-        self._msystem = ut.create_measurers(port_1, port_2)
+        good_com_ports, bad_com_ports = ut.check_com_ports([port_1, port_2])
+        if bad_com_ports:
+            if len(bad_com_ports) == 1:
+                text = qApp.translate("t", "Проверьте, что устройство {} подключено к компьютеру и не удерживается "
+                                           "другой программой.")
+            else:
+                text = qApp.translate("t", "Проверьте, что устройства {} подключены к компьютеру и не удерживаются "
+                                           "другой программой.")
+            ut.show_exception(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
+        self._msystem, bad_com_ports = ut.create_measurement_system(*good_com_ports)
+        if bad_com_ports:
+            if len(bad_com_ports) == 1:
+                text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство "
+                                           "EyePoint, а не какое-то другое устройство.")
+            else:
+                text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства "
+                                           "EyePoint, а не какие-то другие устройства.")
+            ut.show_exception(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
         if not self._msystem:
             self.disconnect_devices()
             return

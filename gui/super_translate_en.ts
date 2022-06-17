@@ -131,7 +131,7 @@
         <source>Сравнение</source>
         <translation>Comparison</translation>
     </message>
-	<message>
+    <message>
         <location filename="mainwindow.ui" line="377"/>
         <source>Выбор языка</source>
         <translation>Language selection</translation>
@@ -286,12 +286,12 @@
         <source>Подключение</source>
         <translation>Connection</translation>
     </message>
-	<message>
+    <message>
         <location filename="mainwindow.ui" line="716"/>
         <source>Язык</source>
         <translation>Language</translation>
     </message>
-	<message>
+    <message>
         <location filename="mainwindow.ui" line="729"/>
         <source>Сгенерировать отчет</source>
         <translation>Generate report</translation>
@@ -299,17 +299,17 @@
 </context>
 <context>
     <name>t</name>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="155"/>
         <source>сохранения плана тестирования</source>
         <translation>save the test plan</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="157"/>
         <source>создания отчета</source>
         <translation>create report</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="159"/>
         <source>Точки POINTS_PARAM не содержат сохраненных измерений. Для PROCESS_NAME все точки должны содержать сохраненные измерения</source>
         <translation>Points POINTS_PARAM do not contain saved measurements. To PROCESS_NAME all points must contain saved measurements</translation>
@@ -319,17 +319,17 @@
         <source>Точка POINTS_PARAM не содержит сохраненных измерений. Для PROCESS_NAME все точки должны содержать сохраненные измерения</source>
         <translation>Point POINTS_PARAM does not contain saved measurements. To PROCESS_NAME all points must contain saved measurements</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="224"/>
         <source>Эмулятор</source>
         <translation>Emulator</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="245"/>
         <source>Неизвестный измеритель</source>
         <translation>Unknown measurer</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="160"/>
         <source>Ошибка</source>
         <translation>Error</translation>
@@ -364,12 +364,12 @@
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="758"/>
         <source>Создать новую плату</source>
         <translation>Create new board</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="819"/>
         <source>Ошибка открытия точки</source>
         <translation>Open pin error</translation>
@@ -379,27 +379,27 @@
         <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение!</source>
         <translation>Incorrect format of pin number. Pin number must be integer!</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="828"/>
         <source>Точка с таким номером не найдена на данной плате.</source>
         <translation>Pin with this number was not found on this board.</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="861"/>
         <source>Открыть плату</source>
         <translation>Open board</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="868"/>
         <source>Формат файла не подходит</source>
         <translation>Invalid input file</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="898"/>
-        <source>План тестирования TEST_PLAN нельзя загрузить, поскольку он не соответствует режиму работы EPLab</source>
-        <translation>Test plan TEST_PLAN cannot be loaded because it does not correspond to the EPLab operating mode</translation>
+        <source>План тестирования TEST_PLAN нельзя загрузить, поскольку он не соответствует режиму работы EPLab.</source>
+        <translation>Test plan TEST_PLAN cannot be loaded because it does not correspond to the EPLab operating mode.</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="884"/>
         <source>Открыть изображение платы</source>
         <translation>Open board window</translation>
@@ -414,12 +414,12 @@
         <source>Для данной платы изображение не задано!</source>
         <translation>Not found image for current board!</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="942"/>
         <source>Сохранить плату</source>
         <translation>Save board</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="976"/>
         <source>Сохранить ВАХ</source>
         <translation>Save IVC</translation>
@@ -429,32 +429,57 @@
         <source>Ошибка при установке настроек устройства</source>
         <translation>Error occurred while configuring device settings</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="1081"/>
         <source>Удалить метку</source>
         <translation>Delete marker</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="1085"/>
         <source>Удалить все метки</source>
         <translation>Delete all markers</translation>
     </message>
-	<message>
+    <message>
         <location filename="../mainwindow.py" line="1186"/>
         <source>План тестирования не был сохранен. Сохранить последние изменения?</source>
         <translation>The measurement plan was not saved. Save the latest changes?</translation>
     </message>
-	<message>
+    <message>
+        <location filename="../mainwindow.py" line="1172"/>
+        <source>Проверьте, что устройство {} подключено к компьютеру и не удерживается другой программой.</source>
+        <translation>Check that device {} is connected to the computer and is not being held by another program.</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1175"/>
+        <source>Проверьте, что устройства {} подключены к компьютеру и не удерживаются другой программой.</source>
+        <translation>Check that devices {} are connected to the computer and are not being held by another program.</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1177"/>
+        <source>Ошибка подключения</source>
+        <translation>Connection error</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1181"/>
+        <source>Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство EyePoint, а не какое-то другое устройство.</source>
+        <translation>Failed to connect to {0}. Make sure {0} is an EyePoint device and not some other device.</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="1184"/>
+        <source>Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства EyePoint, а не какие-то другие устройства.</source>
+        <translation>Failed to connect to {0}. Make sure {0} is EyePoint devices and not some other devices.</translation>
+    </message>
+    <message>
         <location filename="../ivcviewer.py" line="485"/>
         <source>Сохранить изображение</source>
         <translation>Save image</translation>
     </message>
-	<message>
+    <message>
         <location filename="../ivcviewer.py" line="570"/>
         <source>Сохранить график как изображение</source>
         <translation>Save plot as image</translation>
     </message>
-	<message>
+    <message>
         <location filename="../ivcviewer.py" line="576"/>
         <source>Добавить метку</source>
         <translation>Add marker</translation>
@@ -474,27 +499,27 @@
         <source>Нет настроек</source>
         <translation>No settings</translation>
     </message>
-	<message>
+    <message>
         <location filename="../connection_window.py" line="34"/>
         <source>или</source>
         <translation>or</translation>
     </message>
-	<message>
+    <message>
         <location filename="../connection_window.py" line="291"/>
         <source>Свой вариант</source>
         <translation>Your variant</translation>
     </message>
-	<message>
+    <message>
         <location filename="../connection_window.py" line="320"/>
         <source>Настройка подключения</source>
         <translation>Connection setup</translation>
     </message>
-	<message>
+    <message>
         <location filename="../connection_window.py" line="321"/>
         <source>Тип измерителя</source>
         <translation>Measurer type</translation>
     </message>
-	<message>
+    <message>
         <location filename="../connection_window.py" line="346"/>
         <source>Канал #1</source>
         <translation>Channel #1</translation>
@@ -524,37 +549,37 @@
         <source>Введите значение последовательного порта в формате com:\\.\COMx или адрес XiNet сервера в формате xi-net://x.x.x.x/x.</source>
         <translation>Enter serial port value in format com:\\.\COMx or XiNet server address in format xi-net://x.x.x.x/x.</translation>
     </message>
-	<message>
+    <message>
         <location filename="../connection_window.py" line="649"/>
         <source>Введите значение последовательного порта в формате com:///dev/ttyACMx или адрес XiNet сервера в формате xi-net://x.x.x.x/x.</source>
         <translation>Enter serial port value in format com:///dev/ttyACMx or XiNet server address in format xi-net://x.x.x.x/x.</translation>
     </message>
-	<message>
+    <message>
         <location filename="../connection_window.py" line="652"/>
         <source>Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.</source>
         <translation>Enter H10 server address in format xmlrpc://x.x.x.x.</translation>
     </message>
-	<message>
+    <message>
         <location filename="../language.py" line="89"/>
         <source>Выбор языка</source>
         <translation>Language selection</translation>
     </message>
-	<message>
+    <message>
         <location filename="../language.py" line="91"/>
         <source>Выберите язык:</source>
         <translation>Choose language:</translation>
     </message>
-	<message>
+    <message>
         <location filename="../settings/settingswindow.py" line="99"/>
         <source>Открыть файл</source>
         <translation>Open file</translation>
     </message>
-	<message>
+    <message>
         <location filename="../settings/settingswindow.py" line="113"/>
         <source>Сохранить файл</source>
         <translation>Save file</translation>
     </message>
-	<message>
+    <message>
         <location filename="../settings/settingswindow.py" line="152"/>
         <source>  Напряжение: </source>
         <translation>  Voltage: </translation>
@@ -564,7 +589,7 @@
         <source> В / дел.</source>
         <translation> V / div. </translation>
     </message>
-	<message>
+    <message>
         <location filename="../settings/settingswindow.py" line="157"/>
         <source>Ампл. проб. сигнала: </source>
         <translation>Probe signal amplitude: </translation>
@@ -574,7 +599,7 @@
         <source> B</source>
         <translation> V</translation>
     </message>
-	<message>
+    <message>
         <location filename="../settings/settingswindow.py" line="160"/>
         <source>Частота: </source>
         <translation>Frequency: </translation>

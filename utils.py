@@ -7,16 +7,17 @@ import json
 import logging
 import os
 import re
+import struct
 import sys
 from operator import itemgetter
 from platform import system
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Tuple
 import serial.tools.list_ports
 from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMessageBox
 from epcore.elements import Board, MeasurementSettings
-from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
+from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EyePointProduct
@@ -24,6 +25,22 @@ from language import Language
 
 logger = logging.getLogger("eplab")
 _FILENAME_FOR_AUTO_SETTINGS = "eplab_settings_for_auto_save_and_read.ini"
+EXCLUSIVE_COM_PORT = {
+    "debian": "com:///dev/ttyACMx",
+    "win32": "com:\\\\.\\COMx",
+    "win64": "com:\\\\.\\COMx"}
+COM_PATTERN = {
+    "debian": re.compile(r"^com:///dev/ttyACM\d+$"),
+    "win32": re.compile(r"^com:\\\\\.\\COM\d+$"),
+    "win64": re.compile(r"^com:\\\\\.\\COM\d+$")}
+IVM10_PATTERN = {
+    "debian": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+|virtual)$"),
+    "win32": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+|virtual)$"),
+    "win64": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+|virtual)$")}
+IVMASA_PATTERN = {
+    "debian": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$"),
+    "win32": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$"),
+    "win64": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$")}
 
 
 def _get_options_from_config(config: configparser.ConfigParser) -> Optional[Dict]:
@@ -41,6 +58,67 @@ def _get_options_from_config(config: configparser.ConfigParser) -> Optional[Dict
     return {EyePointProduct.Parameter.frequency: frequency,
             EyePointProduct.Parameter.sensitive: resistance,
             EyePointProduct.Parameter.voltage: voltage}
+
+
+def check_com_port(com_port: str) -> bool:
+    """
+    Function checks that given COM-port can be used for IV-measurer.
+    :param com_port: COM-port to check.
+    :return: True if COM-port can be used.
+    """
+
+    available_ports_in_required_format = [create_uri_name(port.device) for port in serial.tools.list_ports.comports()]
+    if com_port not in available_ports_in_required_format:
+        raise ValueError(f"COM-port {com_port} was not found in system")
+    return True
+
+
+def check_com_ports(com_ports: List[str]) -> Tuple[List[str], List[str]]:
+    """
+    Function checks that given COM-ports can be used for IV-measurer.
+    :param com_ports: list of COM-ports.
+    :return: list of good COM-ports that can be used for IV-measurers and
+    list of bad COM-ports.
+    """
+
+    bad_com_ports = []
+    good_com_ports = []
+    for com_port in com_ports:
+        if not check_port_name(com_port):
+            bad_com_ports.append(com_port)
+            good_com_ports.append(None)
+        elif com_port is not None and COM_PATTERN[get_platform()].match(com_port) and com_port != "virtual":
+            try:
+                check_com_port(com_port)
+                good_com_ports.append(com_port)
+            except ValueError:
+                bad_com_ports.append(com_port)
+                good_com_ports.append(None)
+        else:
+            good_com_ports.append(com_port)
+    while True:
+        try:
+            bad_com_ports.remove(EXCLUSIVE_COM_PORT[get_platform()])
+            logger.info("Wildcard name com:\\\\.\\COMx passed that is not a real device. If you need to open a real "
+                        "device, then instead of com:\\\\.\\COMx you need to enter the real port name")
+        except ValueError:
+            break
+    return good_com_ports, bad_com_ports
+
+
+def check_port_name(port: str) -> bool:
+    """
+    Function checks that port name is correct.
+    :param port: port name.
+    :return: True if port name is correct.
+    """
+
+    platform_name = get_platform()
+    if port is None:
+        return True
+    if IVM10_PATTERN[platform_name].match(port) or IVMASA_PATTERN[platform_name].match(port):
+        return True
+    return False
 
 
 def check_compatibility(product: EyePointProduct, board: Board) -> bool:
@@ -61,16 +139,17 @@ def check_compatibility(product: EyePointProduct, board: Board) -> bool:
     return True
 
 
-def create_measurers(port_1: str, port_2: str) -> Optional[MeasurementSystem]:
+def create_measurers(url_1: str, url_2: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str]]:
     """
-    Function creates measurers and measurement system.
-    :param port_1: port for first measurer;
-    :param port_2: port for second measurer.
-    :return: measurement system.
+    Function creates measurers.
+    :param url_1: port for first measurer;
+    :param url_2: port for second measurer.
+    :return: created measurers and list with bad ports.
     """
 
+    bad_ports = []
     measurers = []
-    measurers_args = port_1, port_2
+    measurers_args = url_1, url_2
     virtual_already_has_been = False
     for measurer_arg in measurers_args:
         measurer_type = ""
@@ -86,7 +165,7 @@ def create_measurers(port_1: str, port_2: str) -> Optional[MeasurementSystem]:
                 measurer_type = "IVMeasurerVirtualASA"
                 measurer = IVMeasurerVirtualASA(defer_open=True)
                 measurers.append(measurer)
-            elif measurer_arg is not None and "com:" in measurer_arg or "xi-net:" in measurer_arg:
+            elif measurer_arg is not None and ("com:" in measurer_arg or "xi-net:" in measurer_arg):
                 measurer_type = "IVMeasurerIVM10"
                 dir_name = os.path.dirname(os.path.abspath(__file__))
                 config_file = os.path.join(dir_name, "cur.ini")
@@ -102,12 +181,13 @@ def create_measurers(port_1: str, port_2: str) -> Optional[MeasurementSystem]:
             text = qApp.translate("t", "Версия прошивки {} {} несовместима с данной версией EPLab")
             show_exception(qApp.translate("t", "Ошибка"), text.format(exc.args[0], exc.args[2]), "")
         except Exception as exc:
+            bad_ports.append(measurer_arg)
             logger.error("Error occurred while creating measurer of type '%s': %s", measurer_type, exc)
     if len(measurers) == 0:
         # Logically it will be correctly to abort here. But for better user
         # experience we will add single virtual IVM
         # measurers.append(IVMeasurerVirtual())
-        return None
+        return None, bad_ports
     elif len(measurers) == 2:
         # Reorder measurers according to their addresses in USB hubs tree
         measurers = sort_devices_by_usb_numbers(measurers)
@@ -115,7 +195,37 @@ def create_measurers(port_1: str, port_2: str) -> Optional[MeasurementSystem]:
     measurers[0].name = "test"
     if len(measurers) == 2:
         measurers[1].name = "ref"
-    return MeasurementSystem(measurers)
+    return measurers, bad_ports
+
+
+def create_measurement_system(measurer_url_1: str, measurer_url_2: str) -> Tuple[Optional[MeasurementSystem],
+                                                                                 List[str]]:
+    """
+    Function creates measurement system.
+    :param measurer_url_1: URL for first measurer;
+    :param measurer_url_2: URL for second measurer.
+    :return: measurement system and list with bad ports.
+    """
+
+    measurers, bad_ports = create_measurers(measurer_url_1, measurer_url_2)
+    if measurers:
+        return MeasurementSystem(measurers=measurers), bad_ports
+    return None, bad_ports
+
+
+def create_uri_name(com_port: str) -> str:
+    """
+    Function returns URI for port.
+    :param com_port: COM-port.
+    :return: URI.
+    """
+
+    os_name = get_platform()
+    if "win" in os_name:
+        return f"com:\\\\.\\{com_port}"
+    if os_name == "debian":
+        return f"com://{com_port}"
+    raise RuntimeError("Unexpected OS")
 
 
 def find_address_in_usb_hubs_tree(url: str) -> Optional[str]:
@@ -150,6 +260,22 @@ def get_dir_name() -> str:
     else:
         path = os.path.dirname(os.path.abspath(__file__))
     return path
+
+
+def get_platform() -> Optional[str]:
+    """
+    Function returns name of OS.
+    :return: name of OS.
+    """
+
+    os_kind = system().lower()
+    if os_kind == "windows":
+        if 8 * struct.calcsize("P") == 32:
+            return "win32"
+        return "win64"
+    if os_kind == "linux":
+        return "debian"
+    raise RuntimeError("Unexpected OS")
 
 
 def get_port(url) -> Optional[str]:
