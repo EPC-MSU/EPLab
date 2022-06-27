@@ -294,7 +294,7 @@
     <message>
         <location filename="mainwindow.ui" line="755"/>
         <source>Открыть окно просмотра мультиплексора</source>
-        <translation>Open multiplexor window</translation>
+        <translation>Open multiplexer window</translation>
     </message>
 </context>
 <context>
