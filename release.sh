@@ -8,27 +8,27 @@ python3 -m venv venv
 ./venv/bin/python3 -m pip install -r requirements.txt
 ./venv/bin/python3 -m pip install pyinstaller
 ./venv/bin/pyinstaller main.py --clean --onefile --noconsole \
+--add-data "./cur.ini:." \
+--add-data "./gui/*:gui" \
+--add-data "./media/*:media" \
+--add-data "./resources/eplab_asa_options.json:resources" \
+--add-data "./resources/debian/*:resources/debian" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/analogmultiplexer/epmux/epmux-debian/libepmux.so:." \
---add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ASA_device_settings.json:epcore/ivmeasurer" \
---add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libasa.so:." \
---add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ivm02/ivm-debian/libivm.so:epcore/ivmeasurer/ivm02" \
---add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ivm10/ivm-debian/libivm.so:epcore/ivmeasurer/ivm10" \
---add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/EyePoint_settings.json:epcore/ivmeasurer" \
---add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/EyePoint_virtual_device_settings.json:epcore/ivmeasurer" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/p10_elements.schema.json:epcore/doc" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/p10_elements_2.schema.json:epcore/doc" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/ufiv.schema.json:epcore/doc" \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ASA_device_settings.json:epcore/ivmeasurer" \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libasa.so:." \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/EyePoint_settings.json:epcore/ivmeasurer" \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/EyePoint_virtual_device_settings.json:epcore/ivmeasurer" \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ivm02/ivm-debian/libivm.so:epcore/ivmeasurer/ivm02/ivm-debian" \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ivm10/ivm-debian/libivm.so:epcore/ivmeasurer/ivm10/ivm-debian" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/measurementmanager/ivcmp-debian/libivcmp.so:." \
 --add-data "./venv/lib/python3.6/site-packages/epcore/product/doc/eplab_schema.json:epcore/product/doc" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/product/eplab_default_options.json:epcore/product" \
 --add-data "./venv/lib/python3.6/site-packages/epsound/void.wav:epsound" \
 --add-data "./venv/lib/python3.6/site-packages/ivviewer/media/*:ivviewer/media" \
 --add-data "./venv/lib/python3.6/site-packages/report_templates/*:report_templates" \
---add-data "./cur.ini:." \
---add-data "./gui/*:gui" \
---add-data "./media/*:media" \
---add-data "./resources/eplab_asa_options.json:resources" \
---add-data "./resources/debian/*:resources/debian" \
 --icon media/ico.ico
 
 mkdir ./dist/lib
