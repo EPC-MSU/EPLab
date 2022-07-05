@@ -318,7 +318,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         try:
             command_to_run()
         except Exception:
-            logger.error("Failed to execute command %s for IV-measurer %s", command_name, self._measurer.name)
+            logger.error("Failed to execute command %s for measurer %s", command_name, self._measurer.name)
             text = qApp.translate("t", "Не удалось выполнить команду '{}'")
             ut.show_exception(qApp.translate("t", "Ошибка"), text.format(user_readable_command_name))
 
@@ -342,6 +342,6 @@ class MeasurerSettingsWindow(qt.QDialog):
                     self._measurer.set_value_to_parameter(parameter_name, value)
             self._measurer.set_settings()
         except Exception:
-            logger.error("Failed to set settings in IV-measurer %s", self._measurer.name)
+            logger.error("Failed to set settings in measurer %s", self._measurer.name)
             ut.show_exception(qApp.translate("t", "Ошибка"),
                               qApp.translate("t", "Не удалось задать настройки для измерителя"))

@@ -595,6 +595,16 @@
         <translation>No settings</translation>
     </message>
     <message>
+        <location filename="../measurer_settings_window.py" line="322"/>
+        <source>Не удалось выполнить команду '{}'</source>
+        <translation>Failed to execute command '{}'</translation>
+    </message>
+    <message>
+        <location filename="../measurer_settings_window.py" line="347"/>
+        <source>Не удалось задать настройки для измерителя</source>
+        <translation>Failed to set settings in measurer</translation>
+    </message>
+    <message>
         <location filename="../multiplexer/measurement_plan_widget.py" line="84"/>
         <source>Модуль MUX</source>
         <translation>MUX module</translation>
