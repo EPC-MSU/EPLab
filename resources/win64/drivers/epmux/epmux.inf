@@ -4,7 +4,7 @@ Class=Ports
 ClassGuid={4d36e978-e325-11ce-bfc1-08002be10318}
 Provider=%MFGNAME%
 LayoutFile=layout.inf
-DriverVer=12/24/2021,1.0.0.0
+DriverVer=06/24/2022,1.0.2.0
 CatalogFile.NTx86=epmux.cat
 CatalogFile.NTamd64=epmux.cat
 
@@ -16,9 +16,11 @@ CopyINF=epmux.inf
 
 [CommunicationDevice.NT]
 %DESCR%=DriverInstall,USB\VID_1CBC&PID_0008
+%DESCR_MI%=DriverInstall,USB\VID_1CBC&PID_0008&MI_00
 
 [CommunicationDevice.NTamd64]
 %DESCR%=DriverInstall,USB\VID_1CBC&PID_0008
+%DESCR_MI%=DriverInstall,USB\VID_1CBC&PID_0008&MI_00
 
 [DriverInstall]
 Include=mdmcpq.inf
@@ -34,4 +36,5 @@ AddReg=LowerFilterAddReg
 
 [Strings]
 MFGNAME="EPC MSU"
-DESCR="EyePoint Analog Multiplexor"
+DESCR="EyePoint Analog Multiplexer"
+DESCR_MI="EyePoint Analog Multiplexer"
