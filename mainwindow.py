@@ -59,6 +59,7 @@ class EPLabWindow(QMainWindow):
     DEFAULT_POS_Y: int = 50
     MIN_WIDTH_IN_LINUX: int = 700
     MIN_WIDTH_IN_WINDOWS: int = 650
+    measurers_disconnected: pyqtSignal = pyqtSignal()
     work_mode_changed: pyqtSignal = pyqtSignal(WorkMode)
 
     def __init__(self, product: EyePointProduct, port_1: Optional[str] = None, port_2: Optional[str] = None,
@@ -511,6 +512,7 @@ class EPLabWindow(QMainWindow):
         Method try to reconnect measurer devices to app.
         """
 
+        self.measurers_disconnected.emit()
         self._mux_and_plan_window.set_disconnection_mode()
         # Draw empty curves
         self.enable_widgets(False)
@@ -1072,6 +1074,7 @@ class EPLabWindow(QMainWindow):
             if measurer == selected_measurer:
                 all_settings = measurer.get_all_settings()
                 dialog = MeasurerSettingsWindow(self, all_settings, measurer, device_name)
+                self.measurers_disconnected.connect(dialog.close)
                 if dialog.exec_():
                     dialog.set_parameters()
                 return

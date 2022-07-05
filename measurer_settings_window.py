@@ -2,13 +2,17 @@
 File with class for dialog window with settings of measurer.
 """
 
+import logging
 from inspect import getmembers, ismethod
 from typing import Any, Callable, Dict, Optional, Union
 import PyQt5.QtWidgets as qt
-from PyQt5.QtCore import QCoreApplication as qApp, QRegExp, Qt
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QRegExpValidator
 from epcore.ivmeasurer.base import IVMeasurerBase
+import utils as ut
 from language import Language
+
+logger = logging.getLogger("eplab")
 
 
 def get_converter(data: Dict) -> Callable:
@@ -46,6 +50,8 @@ class MeasurerSettingsWindow(qt.QDialog):
         super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self._measurer: IVMeasurerBase = measurer
         self._widgets: Dict = dict()
+        self.button_cancel: qt.QPushButton = None
+        self.button_ok: qt.QPushButton = None
         lang = qApp.instance().property("language")
         self.lang: str = "ru" if lang == Language.RU else "en"
         self._init_ui(settings, device_name)
@@ -65,7 +71,7 @@ class MeasurerSettingsWindow(qt.QDialog):
             button.setToolTip(data.get(f"tooltip_{self.lang}"))
         for member_name, member in getmembers(self._measurer):
             if member_name == data.get("func", None) and ismethod(member):
-                button.clicked.connect(member)
+                button.clicked.connect(lambda: self.run_command(member, member_name, data.get(f"label_{self.lang}")))
                 return button
         return None
 
@@ -262,11 +268,16 @@ class MeasurerSettingsWindow(qt.QDialog):
                     widget = self._create_text_browser(element)
                 if widget is not None:
                     v_box.addWidget(widget)
-            self.buttonBox = qt.QDialogButtonBox(qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel)
-            self.buttonBox.accepted.connect(self.accept)
-            self.buttonBox.rejected.connect(self.reject)
+            self.button_ok = qt.QPushButton("OK")
+            self.button_ok.clicked.connect(self.accept)
+            self.button_cancel = qt.QPushButton(qApp.translate("t", "Отмена"))
+            self.button_cancel.clicked.connect(self.reject)
+            h_layout = qt.QHBoxLayout()
+            h_layout.addStretch(1)
+            h_layout.addWidget(self.button_ok)
+            h_layout.addWidget(self.button_cancel)
             v_box.addStretch(1)
-            v_box.addWidget(self.buttonBox)
+            v_box.addLayout(h_layout)
         else:
             v_box.addWidget(qt.QLabel(qApp.translate("t", "Нет настроек")), alignment=Qt.AlignHCenter)
         self.setLayout(v_box)
@@ -295,21 +306,42 @@ class MeasurerSettingsWindow(qt.QDialog):
             value = max_value
         return value
 
+    @pyqtSlot()
+    def run_command(self, command_to_run: Callable, command_name: str, user_readable_command_name: str):
+        """
+        Slot runs special commands for IV-measurers connected to buttons.
+        :param command_to_run: command to run;
+        :param command_name: name of command to run;
+        :param user_readable_command_name: user readable name of command to run.
+        """
+
+        try:
+            command_to_run()
+        except Exception:
+            logger.error("Failed to execute command %s for IV-measurer %s", command_name, self._measurer.name)
+            text = qApp.translate("t", "Не удалось выполнить команду '{}'")
+            ut.show_exception(qApp.translate("t", "Ошибка"), text.format(user_readable_command_name))
+
     def set_parameters(self):
         """
         Method sets values from dialog window to parameters of measurer.
         """
 
-        for parameter_name, data in self._widgets.items():
-            value = None
-            converter = get_converter(data)
-            if data["type"] == "combo":
-                value = self._get_value_from_combo(data)
-            elif data["type"] == "line_edit":
-                value = self._get_value_from_line_edit(data)
-            elif data["type"] == "radio_button":
-                value = self._get_value_from_radio(data)
-            if value:
-                value = converter(value)
-                self._measurer.set_value_to_parameter(parameter_name, value)
-        self._measurer.set_settings()
+        try:
+            for parameter_name, data in self._widgets.items():
+                value = None
+                converter = get_converter(data)
+                if data["type"] == "combo":
+                    value = self._get_value_from_combo(data)
+                elif data["type"] == "line_edit":
+                    value = self._get_value_from_line_edit(data)
+                elif data["type"] == "radio_button":
+                    value = self._get_value_from_radio(data)
+                if value:
+                    value = converter(value)
+                    self._measurer.set_value_to_parameter(parameter_name, value)
+            self._measurer.set_settings()
+        except Exception:
+            logger.error("Failed to set settings in IV-measurer %s", self._measurer.name)
+            ut.show_exception(qApp.translate("t", "Ошибка"),
+                              qApp.translate("t", "Не удалось задать настройки для измерителя"))
