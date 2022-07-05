@@ -976,9 +976,12 @@ class EPLabWindow(QMainWindow):
         if language_selection_wnd.exec():
             language = language_selection_wnd.get_language_value()
             if language != qApp.instance().property("language"):
-                if self._msystem is not None:
-                    settings = self._msystem.get_settings()
-                else:
+                try:
+                    if self._msystem is not None:
+                        settings = self._msystem.get_settings()
+                    else:
+                        settings = None
+                except Exception:
                     settings = None
                 self._language_to_set = Language.get_language_name(language)
                 ut.save_settings_auto(self._product, settings, self._language_to_set)

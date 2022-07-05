@@ -250,6 +250,8 @@ class MuxAndPlanWindow(qt.QWidget):
         Method switches window to mode when devices are connected to application.
         """
 
+        if not self._parent.measurement_plan.multiplexer:
+            return
         self.setEnabled(True)
         self._check_multiplexer_connection()
 
@@ -258,6 +260,8 @@ class MuxAndPlanWindow(qt.QWidget):
         Method switches window to mode when devices are disconnected from application.
         """
 
+        if not self._parent.measurement_plan.multiplexer:
+            return
         if self.isEnabled():
             self._stop_plan_measurement()
         self._check_multiplexer_connection()
