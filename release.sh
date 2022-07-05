@@ -11,8 +11,8 @@ python3 -m venv venv
 --add-data "./cur.ini:." \
 --add-data "./gui/*:gui" \
 --add-data "./media/*:media" \
---add-data "./resources/eplab_asa_options.json:resources" \
 --add-data "./resources/debian/*:resources/debian" \
+--add-data "./resources/eplab_asa_options.json:resources" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/analogmultiplexer/epmux/epmux-debian/libepmux.so:." \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/p10_elements.schema.json:epcore/doc" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/p10_elements_2.schema.json:epcore/doc" \
