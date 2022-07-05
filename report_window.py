@@ -4,6 +4,7 @@ File with class for dialog window to create report for board.
 
 import queue
 import time
+from typing import List, Tuple
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from PyQt5.QtGui import QCloseEvent
@@ -16,24 +17,27 @@ from common import WorkMode
 from language import Language
 
 
-def get_scales_for_iv_curves(board: Board, product: EyePointProduct) -> list:
+def get_scales_and_noise_amplitudes_for_iv_curves(board: Board, product: EyePointProduct) -> Tuple[List, List]:
     """
-    Function returns scales for IV-curves in pins of board.
+    Function returns scales and noise amplitudes for IV-curves in pins of board.
     :param board: board;
     :param product: product.
-    :return: list with scales.
+    :return: list with scales and list with noise amplitudes.
     """
 
     scales = []
+    noise_amplitudes = []
     for element in board.elements:
         for pin in element.pins:
             if pin.measurements:
                 voltage, current = product.adjust_plot_scale(pin.measurements[0].settings)
                 current /= 1000
                 scales.append((voltage, current))
+                noise_amplitudes.append(product.adjust_noise_amplitude(pin.measurements[0].settings))
             else:
                 scales.append(None)
-    return scales
+                noise_amplitudes.append(None)
+    return scales, noise_amplitudes
 
 
 class ReportGenerationThread(QThread):
@@ -122,13 +126,14 @@ class ReportGenerationWindow(qt.QDialog):
         """
 
         test_board, ref_board = create_test_and_ref_boards(self._board)
-        scales = get_scales_for_iv_curves(self._board, self._parent.product)
+        scales, noise_amplitudes = get_scales_and_noise_amplitudes_for_iv_curves(self._board, self._parent.product)
         report_to_open = ReportTypes.FULL_REPORT if self._parent.work_mode == WorkMode.WRITE else\
             ReportTypes.SHORT_REPORT
         config = {ConfigAttributes.BOARD_REF: ref_board,
                   ConfigAttributes.BOARD_TEST: test_board,
                   ConfigAttributes.DIRECTORY: self._folder_for_report,
                   ConfigAttributes.ENGLISH: qApp.instance().property("language") == Language.EN,
+                  ConfigAttributes.NOISE_AMPLITUDES: noise_amplitudes,
                   ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
                   ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
                   ConfigAttributes.PIN_SIZE: 200,
