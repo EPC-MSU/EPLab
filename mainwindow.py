@@ -243,7 +243,7 @@ class EPLabWindow(QMainWindow):
                 device_name = qApp.translate("t", "Неизвестный измеритель")
                 icon = QIcon(os.path.join(ut.DIR_MEDIA, f"unknown_measurer_{measurer.name}.png"))
             action = QAction(icon, device_name, self)
-            action.triggered.connect(partial(self._on_show_device_settings, measurer, device_name))
+            action.triggered.connect(partial(self.show_device_settings, measurer, device_name))
             self.measurers_menu.addAction(action)
 
     def _create_radio_buttons_for_parameter(self, param_name: EyePointProduct.Parameter,
@@ -1061,24 +1061,6 @@ class EPLabWindow(QMainWindow):
         position = widget.geometry()
         menu.popup(widget.mapToGlobal(QPoint(position.x(), position.y())))
 
-    @pyqtSlot(IVMeasurerBase, str, bool)
-    def _on_show_device_settings(self, selected_measurer: IVMeasurerBase, device_name: str, _: bool):
-        """
-        Slot shows window to select device settings.
-        :param selected_measurer: measurer for which device settings should be displayed;
-        :param device_name: name of measurer;
-        :param _: not used.
-        """
-
-        for measurer in self._msystem.measurers:
-            if measurer == selected_measurer:
-                all_settings = measurer.get_all_settings()
-                dialog = MeasurerSettingsWindow(self, all_settings, measurer, device_name)
-                self.measurers_disconnected.connect(dialog.close)
-                if dialog.exec_():
-                    dialog.set_parameters()
-                return
-
     @pyqtSlot()
     def _on_show_settings_window(self):
         """
@@ -1391,6 +1373,24 @@ class EPLabWindow(QMainWindow):
                 self._measurement_plan.save_last_measurement_as_test()
         self._on_save_comment()
         self.update_current_pin()
+
+    @pyqtSlot(IVMeasurerBase, str, bool)
+    def show_device_settings(self, selected_measurer: IVMeasurerBase, device_name: str, _: bool):
+        """
+        Slot shows window to select device settings.
+        :param selected_measurer: measurer for which device settings should be displayed;
+        :param device_name: name of measurer;
+        :param _: not used.
+        """
+
+        for measurer in self._msystem.measurers:
+            if measurer == selected_measurer:
+                all_settings = measurer.get_all_settings()
+                dialog = MeasurerSettingsWindow(self, all_settings, measurer, device_name)
+                self.measurers_disconnected.connect(dialog.close)
+                if dialog.exec_():
+                    dialog.set_parameters()
+                return
 
     def update_current_pin(self):
         """

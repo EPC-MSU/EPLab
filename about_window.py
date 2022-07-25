@@ -8,7 +8,9 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp
 from PyQt5.QtGui import QIcon, QPalette
 from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QLayout, QPushButton, QTextBrowser, QVBoxLayout
 import utils as ut
+from connection_window.utils import get_platform
 from language import Language
+from version import Version
 
 TEXT_HEIGHT: int = 100
 WINDOW_WIDTH: int = 400
@@ -30,6 +32,10 @@ class AboutWindow(QDialog):
         :return: text with main information and hyperlink.
         """
 
+        platform_name = {"debian": "Debian 64-bit",
+                         "win32": "Windows 32-bit",
+                         "win64": "Windows 64-bit"}
+        app_name = f"<b>EPLab v{Version.full} ({platform_name[get_platform()]})</b><br><br>"
         text = qApp.translate("t", "Программное обеспечение для работы с устройствами линейки EyePoint,"
                                    " предназначенными для поиска неисправностей на печатных платах в ручном режиме "
                                    "(при помощи ручных щупов). Более подробную информацию вы можете найти {}")
@@ -39,6 +45,7 @@ class AboutWindow(QDialog):
         else:
             page_url += "en/"
         link = '<a href="{}">{}</a>'.format(page_url, qApp.translate("t", "на нашем сайте."))
+        text = app_name + text.format(link)
         return text.format(link), page_url
 
     @staticmethod
@@ -55,8 +62,9 @@ class AboutWindow(QDialog):
         Method initializes widgets on dialog window.
         """
 
-        self.setWindowTitle(qApp.translate("t", "О программе"))
-        self.setToolTip(qApp.translate("t", "О программе"))
+        window_title = qApp.translate("t", "О программе")
+        self.setWindowTitle(window_title)
+        self.setToolTip(window_title)
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "ico.png")))
         self.setFixedWidth(WINDOW_WIDTH)
         color = self.palette().color(QPalette.Background)
