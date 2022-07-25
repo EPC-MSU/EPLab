@@ -2,6 +2,7 @@
 File with classes to select measurers.
 """
 
+import ipaddress
 import os
 from functools import partial
 from typing import Dict, List
@@ -169,7 +170,9 @@ class MeasurerURLsWidget(qt.QWidget):
         :param url: selected address for first measurer.
         """
 
-        urls_for_first = [f"xmlrpc://{host}" for host in ut.reveal_asa()]
+        ip_addresses = [ipaddress.ip_address(ip_address) for ip_address in ut.reveal_asa()]
+        ip_addresses.sort()
+        urls_for_first = [f"xmlrpc://{host}" for host in ip_addresses]
         urls_for_first.append("virtual")
         self.combo_boxes_measurers[0].clear()
         self.combo_boxes_measurers[0].addItems(urls_for_first)
