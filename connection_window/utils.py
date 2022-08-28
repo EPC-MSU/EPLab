@@ -93,10 +93,7 @@ class ProductNames(Enum):
         :return: names of products.
         """
 
-        products = [cls.EYEPOINT_A2, cls.EYEPOINT_U21, cls.EYEPOINT_U22, cls.EYEPOINT_S2]
-        if get_platform() != "win64":
-            products.append(cls.EYEPOINT_H10)
-        return products
+        return [cls.EYEPOINT_A2, cls.EYEPOINT_U21, cls.EYEPOINT_U22, cls.EYEPOINT_S2, cls.EYEPOINT_H10]
 
     @classmethod
     def get_single_channel_products(cls) -> Tuple:
