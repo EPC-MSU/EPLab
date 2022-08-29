@@ -19,6 +19,11 @@ python3 -m venv venv
 --add-data "./venv/lib/python3.6/site-packages/epcore/doc/ufiv.schema.json:epcore/doc" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ASA_device_settings.json:epcore/ivmeasurer" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libasa.so:." \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc.so.3.51:." \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_client.so.3.51:." \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_util.so.4.51:." \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmlparse.so.3.51:." \
+--add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmltok.so.3.51:." \
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/EyePoint_settings.json:epcore/ivmeasurer" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/EyePoint_virtual_device_settings.json:epcore/ivmeasurer" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ivm02/ivm-debian/libivm.so:epcore/ivmeasurer/ivm02/ivm-debian" \
@@ -31,15 +36,7 @@ python3 -m venv venv
 --add-data "./venv/lib/python3.6/site-packages/report_templates/*:report_templates" \
 --icon media/ico.ico
 
-mkdir ./dist/lib
-cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libasa.so ./dist/lib/libasa.so
-cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc.so.3.51 ./dist/lib/libxmlrpc.so.3.51
-cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_client.so.3.51 ./dist/lib/libxmlrpc_client.so.3.51
-cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_util.so.4.51 ./dist/lib/libxmlrpc_util.so.4.51
-cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmlparse.so.3.51 ./dist/lib/libxmlrpc_xmlparse.so.3.51
-cp ./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmltok.so.3.51 ./dist/lib/libxmlrpc_xmltok.so.3.51
 cp ./resources/readme.md ./dist/readme.md
-cp ./resources/debian/install_libs.sh ./dist/install_libs.sh
 mv dist release
 mv ./release/main ./release/eplab
 rm -rf build
