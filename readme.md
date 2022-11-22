@@ -40,9 +40,7 @@
 
 ## Примечание к установке в Windows и Linux
 
-Для установки всех необходимых зависимостей нужен доступ на https://hg.ximc.ru к репозиториям [epcore](https://hg.ximc.ru/eyepoint/epcore/) и [ivviewer](https://hg.ximc.ru/eyepoint/ivviewer/) и доступ на https://github.com к репозиторию [ep_report_generator](https://github.com/EPC-MSU/ep_report_generator/).
-
-Если при установке зависимостей через `hg` возникает ошибка авторизации, то нужно прописать в `hg` логин и пароль от репозиториев на https://hg.ximc.ru. Это можно сделать через `TortoiseHg`, открыв любой репозиторий, перейдя во вкладку синхронизации (две стрелочки по кругу на верхней панели) и нажав на иконку с изображением замка (в середине страницы, слева от строки с адресом сервера). После этого нужно переоткрыть консоль.
+Для установки всех необходимых зависимостей нужен доступ на https://gitlab.ximc.ru к репозиториям [epcore](https://gitlab.ximc.ru/eyepoint/epcore) и [ivviewer](https://gitlab.ximc.ru/eyepoint/ivviewer) и доступ на https://github.com к репозиторию [ep_report_generator](https://github.com/EPC-MSU/ep_report_generator/).
 
 Чтобы установить зависимости через `git`:
 
