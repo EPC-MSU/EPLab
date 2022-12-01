@@ -1,4 +1,4 @@
-git+https://gitlab.ximc.ru/eyepoint/epcore.git@hg/Version0.1.18#egg=epcore
+git+https://gitlab.ximc.ru/eyepoint/epcore.git@v0.1.19#egg=epcore
 git+https://gitlab.ximc.ru/eyepoint/ivviewer.git@hg/Version0.1.11#egg=ivviewer
 git+https://github.com/EPC-MSU/board-view@Version0.1.1#egg=boardview
 git+https://github.com/EPC-MSU/ep_report_generator@v0.1.5#egg=ep_report_generator

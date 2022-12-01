@@ -825,9 +825,14 @@
         <translation>Save file</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="104"/>
-        <source>Версия прошивки {} {} несовместима с данной версией EPLab</source>
-        <translation>{} firmware version {} is not compatible with this version of EPLab</translation>
+        <location filename="../utils.py" line="248"/>
+        <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
+        <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>
+    </message>
+    <message>
+        <location filename="../utils.py" line="330"/>
+        <source>Все равно открыть</source>
+        <translation>Force open</translation>
     </message>
 </context>
 </TS>

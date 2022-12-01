@@ -12,9 +12,9 @@ from operator import itemgetter
 from platform import system
 from typing import Dict, Iterable, List, Optional, Tuple
 import serial.tools.list_ports
-from PyQt5.QtCore import QCoreApplication as qApp
+from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QCheckBox, QMessageBox
 from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerBase, AnalogMultiplexerVirtual
 from epcore.elements import Board, MeasurementSettings
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
@@ -22,6 +22,7 @@ from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EyePointProduct
 from language import Language
+
 
 logger = logging.getLogger("eplab")
 _FILENAME_FOR_AUTO_SETTINGS = "eplab_settings_for_auto_save_and_read.ini"
@@ -71,42 +72,12 @@ def create_measurers(url_1: str, url_2: str) -> Tuple[Optional[List[IVMeasurerBa
     :return: created measurers and list with bad ports.
     """
 
-    bad_ports = []
-    measurers = []
     measurers_args = url_1, url_2
-    virtual_already_has_been = False
-    for measurer_arg in measurers_args:
-        measurer_type = ""
-        try:
-            if measurer_arg == "virtual":
-                measurer_type = "IVMeasurerVirtual"
-                measurer = IVMeasurerVirtual()
-                if virtual_already_has_been:
-                    measurer.nominal = 1000
-                measurers.append(measurer)
-                virtual_already_has_been = True
-            elif measurer_arg == "virtualasa":
-                measurer_type = "IVMeasurerVirtualASA"
-                measurer = IVMeasurerVirtualASA(defer_open=True)
-                measurers.append(measurer)
-            elif measurer_arg is not None and ("com:" in measurer_arg or "xi-net:" in measurer_arg):
-                measurer_type = "IVMeasurerIVM10"
-                dir_name = os.path.dirname(os.path.abspath(__file__))
-                config_file = os.path.join(dir_name, "cur.ini")
-                measurer = IVMeasurerIVM10(measurer_arg, config=config_file, defer_open=True)
-                measurers.append(measurer)
-            elif measurer_arg is not None and "xmlrpc:" in measurer_arg:
-                measurer_type = "IVMeasurerASA"
-                measurer = IVMeasurerASA(measurer_arg, defer_open=True)
-                measurers.append(measurer)
-        except BadFirmwareVersion as exc:
-            logger.error("%s firmware version %s is not compatible with this version of EPLab", exc.args[0],
-                         exc.args[2])
-            text = qApp.translate("t", "Версия прошивки {} {} несовместима с данной версией EPLab")
-            show_exception(qApp.translate("t", "Ошибка"), text.format(exc.args[0], exc.args[2]), "")
-        except Exception as exc:
-            bad_ports.append(measurer_arg)
-            logger.error("Error occurred while creating measurer of type '%s': %s", measurer_type, exc)
+    measurers, bad_ports, bad_ports_by_firmware, bad_firmware_text_error = initialize_measurers(measurers_args)
+    if bad_ports_by_firmware and request_opening_by_force(bad_firmware_text_error):
+        new_meaurers, new_bad_ports, _, _ = initialize_measurers(bad_ports_by_firmware, True)
+        measurers.extend(new_meaurers)
+        bad_ports.extend(new_bad_ports)
     if len(measurers) == 0:
         # Logically it will be correctly to abort here. But for better user
         # experience we will add single virtual IVM
@@ -140,6 +111,26 @@ def create_measurement_system(measurer_url_1: str, measurer_url_2: str, mux_url:
             return MeasurementSystem(measurers=measurers, multiplexers=[multiplexer]), bad_ports
         return MeasurementSystem(measurers=measurers), bad_ports
     return None, bad_ports
+
+
+def create_message_box(msg_title: str, msg_text: str, exc: str = "") -> QMessageBox:
+    """
+    Function creates message box.
+    :param msg_title: title of message box;
+    :param msg_text: message text;
+    :param exc: text of exception.
+    :return: message box.
+    """
+
+    max_message_length = 500
+    message_box = QMessageBox()
+    message_box.setIcon(QMessageBox.Warning)
+    message_box.setWindowTitle(msg_title)
+    message_box.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "ico.png")))
+    message_box.setText(msg_text)
+    if exc:
+        message_box.setInformativeText(str(exc)[-max_message_length:])
+    return message_box
 
 
 def create_multiplexer(mux_url: Optional[str] = None) -> Tuple[Optional[AnalogMultiplexerBase], List[str]]:
@@ -211,6 +202,59 @@ def get_port(url) -> Optional[str]:
     return port[0]
 
 
+def initialize_measurers(measurer_ports: Iterable[str], force_open: bool = False
+                         ) -> Tuple[List[IVMeasurerBase], List[str], List[str], str]:
+    """
+    Function initializes measurers.
+    :param measurer_ports: ports of measurers.
+    :param force_open: if True then port should be opened by force.
+    :return: created measurers, bad ports of measurers, ports of measurers with
+    incompatible firmwares and text of errors.
+    """
+
+    bad_ports = []
+    bad_ports_by_firmware = []
+    bad_firmware_text_error = ""
+    measurers = []
+    virtual_already_has_been = False
+    for measurer_arg in measurer_ports:
+        measurer_type = ""
+        try:
+            if measurer_arg == "virtual":
+                measurer_type = "IVMeasurerVirtual"
+                measurer = IVMeasurerVirtual()
+                if virtual_already_has_been:
+                    measurer.nominal = 1000
+                measurers.append(measurer)
+                virtual_already_has_been = True
+            elif measurer_arg == "virtualasa":
+                measurer_type = "IVMeasurerVirtualASA"
+                measurer = IVMeasurerVirtualASA(defer_open=True)
+                measurers.append(measurer)
+            elif measurer_arg is not None and ("com:" in measurer_arg or "xi-net:" in measurer_arg):
+                measurer_type = "IVMeasurerIVM10"
+                dir_name = os.path.dirname(os.path.abspath(__file__))
+                config_file = os.path.join(dir_name, "cur.ini")
+                measurer = IVMeasurerIVM10(measurer_arg, config=config_file, defer_open=True, force_open=force_open)
+                measurers.append(measurer)
+            elif measurer_arg is not None and "xmlrpc:" in measurer_arg:
+                measurer_type = "IVMeasurerASA"
+                measurer = IVMeasurerASA(measurer_arg, defer_open=True)
+                measurers.append(measurer)
+        except BadFirmwareVersion as exc:
+            logger.error("%s firmware version %s is not compatible with this version of EPLab", exc.args[0],
+                         exc.args[2])
+            bad_ports_by_firmware.append(measurer_arg)
+            text = qApp.translate("t", "{}: версия прошивки {} {} несовместима с данной версией EPLab.")
+            if bad_firmware_text_error:
+                bad_firmware_text_error += "\n"
+            bad_firmware_text_error += text.format(measurer_arg, exc.args[0], exc.args[2])
+        except Exception as exc:
+            bad_ports.append(measurer_arg)
+            logger.error("Error occurred while creating measurer of type '%s': %s", measurer_type, exc)
+    return measurers, bad_ports, bad_ports_by_firmware, bad_firmware_text_error
+
+
 def read_language_auto() -> Optional[Language]:
     """
     Function searches language that were specified for interface during previous work.
@@ -274,7 +318,22 @@ def read_settings_auto(product: EyePointProduct) -> Optional[MeasurementSettings
     return settings
 
 
-def save_settings_auto(product: EyePointProduct, settings: MeasurementSettings, language: str):
+def request_opening_by_force(text: str) -> bool:
+    """
+    Function reports that the user has selected measurers with firmware incompatible with program.
+    Function also asks if measurers need to be opened by force.
+    :param text: error text.
+    :return: True if measurers need to be opened by force.
+    """
+
+    message_box = create_message_box(qApp.translate("t", "Ошибка"), text)
+    check_box_force_open = QCheckBox(qApp.translate("t", "Все равно открыть"))
+    message_box.layout().addWidget(check_box_force_open)
+    message_box.exec_()
+    return check_box_force_open.checkState() == Qt.Checked
+
+
+def save_settings_auto(product: EyePointProduct, settings: MeasurementSettings, language: str) -> None:
     """
     Function saves current settings for device in file.
     :param product:
@@ -297,7 +356,7 @@ def save_settings_auto(product: EyePointProduct, settings: MeasurementSettings, 
         config.write(configfile)
 
 
-def show_exception(msg_title: str, msg_text: str, exc: str = ""):
+def show_exception(msg_title: str, msg_text: str, exc: str = "") -> None:
     """
     Function shows message box with error.
     :param msg_title: title of message box;
@@ -305,16 +364,8 @@ def show_exception(msg_title: str, msg_text: str, exc: str = ""):
     :param exc: text of exception.
     """
 
-    max_message_length = 500
-    msg = QMessageBox()
-    msg.setIcon(QMessageBox.Warning)
-    msg.setWindowTitle(msg_title)
-    icon_path = os.path.join(DIR_MEDIA, "ico.png")
-    msg.setWindowIcon(QIcon(icon_path))
-    msg.setText(msg_text)
-    if exc:
-        msg.setInformativeText(str(exc)[-max_message_length:])
-    msg.exec_()
+    message_box = create_message_box(msg_title, msg_text, exc)
+    message_box.exec_()
 
 
 def sort_devices_by_usb_numbers(measurers: Iterable, reverse: bool = False) -> List:
