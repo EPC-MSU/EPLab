@@ -380,13 +380,11 @@ class EPLabWindow(QMainWindow):
         self.setCentralWidget(self.main_widget)
 
         self._iv_window: IVViewer = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
-                                             solid_axis_enabled=False, axis_sign_enabled=False,
-                                             screenshot_file_name_base="eplab")
-        self._iv_window.plot.set_constant_screenshot_directory(True)
+                                             solid_axis_enabled=False, axis_label_enabled=False)
         dir_path = os.path.join(self.DEFAULT_PATH, "Screenshot")
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
-        self._iv_window.plot.set_path_to_screenshot_directory(dir_path)
+        self._iv_window.plot.set_path_to_directory(dir_path)
         self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
         self.reference_curve_plot.set_curve_params(self.COLOR_FOR_REFERENCE)
         self.test_curve_plot: PlotCurve = self._iv_window.plot.add_curve()

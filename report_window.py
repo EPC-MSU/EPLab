@@ -10,8 +10,7 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from PyQt5.QtGui import QCloseEvent
 from epcore.elements import Board
 from epcore.product import EyePointProduct
-from report_generator import (ConfigAttributes, create_test_and_ref_boards, ObjectsForReport, ReportGenerator,
-                              ReportTypes, ScalingTypes)
+from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator, ReportTypes, ScalingTypes
 import utils as ut
 from common import WorkMode
 from language import Language
@@ -125,12 +124,10 @@ class ReportGenerationWindow(qt.QDialog):
         Method creates report.
         """
 
-        test_board, ref_board = create_test_and_ref_boards(self._board)
         scales, noise_amplitudes = get_scales_and_noise_amplitudes_for_iv_curves(self._board, self._parent.product)
         report_to_open = ReportTypes.FULL_REPORT if self._parent.work_mode == WorkMode.WRITE else\
             ReportTypes.SHORT_REPORT
-        config = {ConfigAttributes.BOARD_REF: ref_board,
-                  ConfigAttributes.BOARD_TEST: test_board,
+        config = {ConfigAttributes.BOARD: self._board,
                   ConfigAttributes.DIRECTORY: self._folder_for_report,
                   ConfigAttributes.ENGLISH: qApp.instance().property("language") == Language.EN,
                   ConfigAttributes.NOISE_AMPLITUDES: noise_amplitudes,
