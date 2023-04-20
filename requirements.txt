@@ -1,5 +1,5 @@
 git+https://gitlab.ximc.ru/eyepoint/epcore.git@dev-0.1#egg=epcore
--e git+https://gitlab.ximc.ru/eyepoint/ivviewer.git@dev-0.1#egg=ivviewer
+git+https://gitlab.ximc.ru/eyepoint/ivviewer.git@dev-0.1#egg=ivviewer
 git+https://github.com/EPC-MSU/board-view@Version0.1.1#egg=boardview
 git+https://github.com/EPC-MSU/ep_report_generator@master#egg=ep_report_generator
 epsound==0.0.13
