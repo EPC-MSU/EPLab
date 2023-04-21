@@ -353,7 +353,7 @@ class EPLabWindow(QMainWindow):
             qApp.instance().setProperty("language", Language.RU)
 
         dir_name = os.path.dirname(os.path.abspath(__file__))
-        loadUi(os.path.join(dir_name, "gui", "mainwindow.ui"), self)
+        loadUi(os.path.join(dir_name, "media", "mainwindow.ui"), self)
         self.setWindowIcon(self._icon)
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
         if system().lower() == "windows":
