@@ -26,7 +26,6 @@ except ImportError:
     class Sequence(metaclass=_GenericTypeMeta):
         pass
 
-logger = logging.getLogger("eplab")
 URPC_BUILDER_VERSION_MAJOR = 0
 URPC_BUILDER_VERSION_MINOR = 6
 URPC_BUILDER_VERSION_BUGFIX = 5
@@ -108,13 +107,13 @@ class _device_t(c_int):
 @CFUNCTYPE(None, c_int, c_wchar_p, c_void_p)
 def logging_callback(loglevel, message, user_data):
     if loglevel == 0x01:
-        logger.error(message)
+        logging.error(message)
     elif loglevel == 0x02:
-        logger.warning(message)
+        logging.warning(message)
     elif loglevel == 0x03:
-        logger.info(message)
+        logging.info(message)
     elif loglevel == 0x04:
-        logger.debug(message)
+        logging.debug(message)
 
 
 _lib = _load_lib()

@@ -21,12 +21,11 @@ from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IV
 from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EyePointProduct
-from language import Language
+from eplab.language import Language
 
 
-logger = logging.getLogger("eplab")
 _FILENAME_FOR_AUTO_SETTINGS = "eplab_settings_for_auto_save_and_read.ini"
-DIR_MEDIA: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
+DIR_MEDIA: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 
 
 def _get_options_from_config(config: configparser.ConfigParser) -> Optional[Dict]:
@@ -182,7 +181,7 @@ def get_dir_name() -> str:
     if getattr(sys, "frozen", False):
         path = os.path.dirname(os.path.abspath(sys.executable))
     else:
-        path = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     return path
 
 
@@ -233,7 +232,7 @@ def initialize_measurers(measurer_ports: Iterable[str], force_open: bool = False
                 measurers.append(measurer)
             elif measurer_arg is not None and ("com:" in measurer_arg or "xi-net:" in measurer_arg):
                 measurer_type = "IVMeasurerIVM10"
-                dir_name = os.path.dirname(os.path.abspath(__file__))
+                dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 config_file = os.path.join(dir_name, "cur.ini")
                 measurer = IVMeasurerIVM10(measurer_arg, config=config_file, defer_open=True, force_open=force_open)
                 measurers.append(measurer)
@@ -242,8 +241,8 @@ def initialize_measurers(measurer_ports: Iterable[str], force_open: bool = False
                 measurer = IVMeasurerASA(measurer_arg, defer_open=True)
                 measurers.append(measurer)
         except BadFirmwareVersion as exc:
-            logger.error("%s firmware version %s is not compatible with this version of EPLab", exc.args[0],
-                         exc.args[2])
+            logging.error("%s firmware version %s is not compatible with this version of EPLab", exc.args[0],
+                          exc.args[2])
             bad_ports_by_firmware.append(measurer_arg)
             text = qApp.translate("t", "{}: версия прошивки {} {} несовместима с данной версией EPLab.")
             if bad_firmware_text_error:
@@ -251,7 +250,7 @@ def initialize_measurers(measurer_ports: Iterable[str], force_open: bool = False
             bad_firmware_text_error += text.format(measurer_arg, exc.args[0], exc.args[2])
         except Exception as exc:
             bad_ports.append(measurer_arg)
-            logger.error("Error occurred while creating measurer of type '%s': %s", measurer_type, exc)
+            logging.error("Error occurred while creating measurer of type '%s': %s", measurer_type, exc)
     return measurers, bad_ports, bad_ports_by_firmware, bad_firmware_text_error
 
 
@@ -261,8 +260,7 @@ def read_language_auto() -> Optional[Language]:
     :return: language for interface.
     """
 
-    dir_name = get_dir_name()
-    filename = os.path.join(dir_name, _FILENAME_FOR_AUTO_SETTINGS)
+    filename = os.path.join(get_dir_name(), _FILENAME_FOR_AUTO_SETTINGS)
     if not os.path.exists(filename):
         return Language.EN
     config = configparser.ConfigParser()
@@ -298,8 +296,7 @@ def read_settings_auto(product: EyePointProduct) -> Optional[MeasurementSettings
     :return: previous settings for measurement system.
     """
 
-    dir_name = get_dir_name()
-    filename = os.path.join(dir_name, _FILENAME_FOR_AUTO_SETTINGS)
+    filename = os.path.join(get_dir_name(), _FILENAME_FOR_AUTO_SETTINGS)
     if not os.path.exists(filename):
         return None
     config = configparser.ConfigParser()
@@ -350,10 +347,14 @@ def save_settings_auto(product: EyePointProduct, settings: MeasurementSettings, 
     options_config["language"] = language
     config = configparser.ConfigParser()
     config["DEFAULT"] = options_config
-    dir_name = get_dir_name()
-    filename = os.path.join(dir_name, _FILENAME_FOR_AUTO_SETTINGS)
+    filename = os.path.join(get_dir_name(), _FILENAME_FOR_AUTO_SETTINGS)
     with open(filename, "w") as configfile:
         config.write(configfile)
+
+
+def set_logger() -> None:
+    logging.basicConfig(format="[%(asctime)s %(module)s.%(funcName)s %(levelname)s] %(message)s",
+                        datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO)
 
 
 def show_exception(msg_title: str, msg_text: str, exc: str = "") -> None:

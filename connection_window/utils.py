@@ -18,7 +18,7 @@ import serial.tools.list_ports
 import serial.tools.list_ports_common
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 
-logger = logging.getLogger("eplab")
+
 DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 EXCLUSIVE_COM_PORT = {
     "debian": "com:///dev/ttyACMx",
@@ -155,8 +155,8 @@ def check_com_ports(com_ports: List[str]) -> Tuple[List[str], List[str]]:
     while True:
         try:
             bad_com_ports.remove(EXCLUSIVE_COM_PORT[get_platform()])
-            logger.info("Wildcard name com:\\\\.\\COMx passed that is not a real device. If you need to open a real "
-                        "device, then instead of com:\\\\.\\COMx you need to enter the real port name")
+            logging.info("Wildcard name com:\\\\.\\COMx passed that is not a real device. If you need to open a real "
+                         "device, then instead of com:\\\\.\\COMx you need to enter the real port name")
         except ValueError:
             break
     return good_com_ports, bad_com_ports
@@ -228,13 +228,13 @@ def find_urpc_ports(device_type: str) -> List[str]:
     try:
         config.read(config_file)
     except Exception as exc:
-        logger.error("Cannot open '%s': %s", config_file, exc)
+        logging.error("Cannot open '%s': %s", config_file, exc)
         raise
     try:
         vid = int(config["Global"]["vid"], base=16)
         pid = int(config["Global"]["pid"], base=16)
     except Exception as exc:
-        logger.error("Cannot read 'VID' and 'PID' fields from '%s': %s", config_file, exc)
+        logging.error("Cannot read 'VID' and 'PID' fields from '%s': %s", config_file, exc)
         raise
     serial_ports = serial.tools.list_ports.comports()
     serial_ports = filter_ports_by_vid_and_pid(serial_ports, vid, pid)
@@ -308,5 +308,5 @@ def reveal_asa(timeout: float = None) -> List[str]:
                             if data.startswith("DISCOVER_CUBIELORD_RESPONSE ".encode()):
                                 ip_addresses.append(str(addr[0]))
             except Exception as exc:
-                logger.error("Failed to bind to interface %s and address %s: %s", iface_name, address.address, exc)
+                logging.error("Failed to bind to interface %s and address %s: %s", iface_name, address.address, exc)
     return ip_addresses

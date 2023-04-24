@@ -11,8 +11,9 @@ from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QRegExpValidator
 from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, MIN_CHANNEL_NUMBER
 from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
 from epcore.product import EyePointProduct
-from common import WorkMode
-from language import Language
+from eplab.common import WorkMode
+from eplab.language import Language
+
 
 DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 MAX_MODULE_NUMBER = 8
@@ -49,7 +50,7 @@ class ModifiedLineEdit(qt.QLineEdit):
     def __init__(self):
         super().__init__()
 
-    def keyPressEvent(self, key_press_event: QKeyEvent):
+    def keyPressEvent(self, key_press_event: QKeyEvent) -> None:
         """
         Method handles key press event.
         :param key_press_event: key press event.
@@ -74,7 +75,7 @@ class MeasurementPlanWidget(qt.QWidget):
     COLOR_NOT_TESTED: str = "#F9E154"
     HEADERS: List[str] = []
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         """
         :param parent: parent main window.
         """
@@ -96,7 +97,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self._standby_mode: bool = False
         self._init_ui()
 
-    def _add_pin_to_table(self, pin_index: int, pin: Pin):
+    def _add_pin_to_table(self, pin_index: int, pin: Pin) -> None:
         """
         Method adds pin to table with information about measurement plan.
         :param pin_index: index of pin to be added;
@@ -183,7 +184,7 @@ class MeasurementPlanWidget(qt.QWidget):
             errors.append(ChannelAndModuleErrors.INVALID_MODULE)
         return valid, errors
 
-    def _clear_table(self):
+    def _clear_table(self) -> None:
         """
         Method clears all information from table for measurement plan and
         removes all rows in table.
@@ -197,7 +198,7 @@ class MeasurementPlanWidget(qt.QWidget):
             self.table_widget_info.removeRow(row)
         self.table_widget_info.clearContents()
 
-    def _enable_widgets(self, state: bool):
+    def _enable_widgets(self, state: bool) -> None:
         """
         Method enables or disables widgets.
         :param state: if True then widgets will be enabled.
@@ -206,7 +207,7 @@ class MeasurementPlanWidget(qt.QWidget):
         for widget in (self.button_new_pin, self.table_widget_info):
             widget.setEnabled(state)
 
-    def _fill_table(self):
+    def _fill_table(self) -> None:
         """
         Method fills table for measurement plan.
         """
@@ -236,7 +237,7 @@ class MeasurementPlanWidget(qt.QWidget):
                 if available_option.name == options[parameter]:
                     yield available_option.label_ru if self._lang is Language.RU else available_option.label_en
 
-    def _init_table(self):
+    def _init_table(self) -> None:
         """
         Method initializes table for measurement plan.
         """
@@ -251,7 +252,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self.table_widget_info.cellClicked.connect(self.set_pin_as_current)
         self.table_widget_info.itemSelectionChanged.connect(self.set_pin_as_current)
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
         """
         Method initializes widgets on main widget.
         """
@@ -276,7 +277,7 @@ class MeasurementPlanWidget(qt.QWidget):
         v_box_layout.addLayout(h_box_layout_2)
         self.setLayout(v_box_layout)
 
-    def _paint_errors(self, row: int, errors: List[ChannelAndModuleErrors]):
+    def _paint_errors(self, row: int, errors: List[ChannelAndModuleErrors]) -> None:
         """
         Method colors row with given index if there is invalid multiplexer
         output.
@@ -304,10 +305,9 @@ class MeasurementPlanWidget(qt.QWidget):
                     item.setBackground(self.COLOR_NORMAL)
         self._set_error_tooltip_to_mux_output(row, errors)
 
-    def _paint_warnings(self, row: int, errors: List[ChannelAndModuleErrors]):
+    def _paint_warnings(self, row: int, errors: List[ChannelAndModuleErrors]) -> None:
         """
-        Method colors row with given index if there is invalid or unsuitable
-        multiplexer output.
+        Method colors row with given index if there is invalid or unsuitable multiplexer output.
         :param row: row index to paint;
         :param errors: list with errors for multiplexer output.
         """
@@ -332,8 +332,7 @@ class MeasurementPlanWidget(qt.QWidget):
 
     def _set_error_tooltip_to_mux_output(self, row: int, errors: List[ChannelAndModuleErrors]):
         """
-        Method sets tooltip about error to multiplexer output fields on
-        row with given index.
+        Method sets tooltip about error to multiplexer output fields on row with given index.
         :param row: row index;
         :param errors: list with errors for multiplexer output.
         """
@@ -352,7 +351,7 @@ class MeasurementPlanWidget(qt.QWidget):
                 style_sheet = widget.styleSheet()
                 widget.setStyleSheet(style_sheet + f"border: 1px solid {self.COLOR_ERROR_FRAME}")
 
-    def _update_pin_in_table(self, pin_index: int, pin: Pin):
+    def _update_pin_in_table(self, pin_index: int, pin: Pin) -> None:
         """
         Method updates pin information in table.
         :param pin_index: index of pin to be updated;
@@ -376,7 +375,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self._line_edits_comments[pin_index].setText(pin.comment)
 
     @pyqtSlot()
-    def add_pin_to_plan(self):
+    def add_pin_to_plan(self) -> None:
         """
         Slot adds pin to measurement plan.
         """
@@ -384,7 +383,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self._parent.create_new_pin()
 
     @pyqtSlot(MultiplexerOutput)
-    def add_pin_with_mux_output_to_plan(self, channel: MultiplexerOutput):
+    def add_pin_with_mux_output_to_plan(self, channel: MultiplexerOutput) -> None:
         """
         Slot adds pin with multiplexer output to measurement plan.
         :param channel: channel from multiplexer to be added.
@@ -394,7 +393,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self.change_progress()
 
     @pyqtSlot()
-    def change_progress(self):
+    def change_progress(self) -> None:
         """
         Slots changes value for progress bar.
         """
@@ -403,7 +402,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self.progress_bar.setValue(value + 1)
 
     @pyqtSlot(int)
-    def check_channel_and_module_numbers(self, pin_index: int):
+    def check_channel_and_module_numbers(self, pin_index: int) -> None:
         """
         Slot checks correctness of module number entered by user.
         :param pin_index: pin index for which to check.
@@ -426,7 +425,7 @@ class MeasurementPlanWidget(qt.QWidget):
         elif pin:
             pin.multiplexer_output = None
 
-    def closeEvent(self, event: QCloseEvent):
+    def closeEvent(self, event: QCloseEvent) -> None:
         """
         Method handles close event.
         :param event: close event.
@@ -444,10 +443,9 @@ class MeasurementPlanWidget(qt.QWidget):
 
         return self.table_widget_info.rowCount()
 
-    def keyPressEvent(self, key_press_event: QKeyEvent):
+    def keyPressEvent(self, key_press_event: QKeyEvent) -> None:
         """
-        Method performs additional processing of pressing left
-        key on keyboard.
+        Method performs additional processing of pressing left key on keyboard.
         :param key_press_event: key press event.
         """
 
@@ -456,7 +454,7 @@ class MeasurementPlanWidget(qt.QWidget):
             self.move_left_or_right(LeftRight.LEFT)
 
     @pyqtSlot(LeftRight)
-    def move_left_or_right(self, direction: LeftRight):
+    def move_left_or_right(self, direction: LeftRight) -> None:
         """
         Slot moves focus in table between columns.
         :param direction: left or right direction in which to move focus.
@@ -484,7 +482,7 @@ class MeasurementPlanWidget(qt.QWidget):
             self.table_widget_info.setCurrentCell(row, column)
 
     @pyqtSlot(int)
-    def save_comment(self, pin_index: int):
+    def save_comment(self, pin_index: int) -> None:
         """
         Slot saves comment to pin.
         :param pin_index: pin index.
@@ -497,7 +495,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self._parent.update_current_pin()
 
     @pyqtSlot(int)
-    def save_mux_output(self, pin_index: int):
+    def save_mux_output(self, pin_index: int) -> None:
         """
         Slot saves multiplexer output to pin.
         :param pin_index: pin index.
@@ -517,7 +515,7 @@ class MeasurementPlanWidget(qt.QWidget):
                 pin.multiplexer_output = None
             self._saved_mux_outputs[pin_index] = pin.multiplexer_output
 
-    def select_row_for_current_pin(self):
+    def select_row_for_current_pin(self) -> None:
         """
         Method selects row in table for current pin index.
         """
@@ -527,7 +525,7 @@ class MeasurementPlanWidget(qt.QWidget):
             self._dont_go_to_selected_pin = True
             self.table_widget_info.selectRow(pin_index)
 
-    def set_new_pin_parameters(self, pin_index: int):
+    def set_new_pin_parameters(self, pin_index: int) -> None:
         """
         Method updates pin parameters in measurement plan table.
         :param pin_index: index of pin whose parameters need to be updated.
@@ -540,7 +538,7 @@ class MeasurementPlanWidget(qt.QWidget):
             self._update_pin_in_table(pin_index, pin)
 
     @pyqtSlot()
-    def set_pin_as_current(self):
+    def set_pin_as_current(self) -> None:
         """
         Slot sets pin activated on measurement plan table as current.
         """
@@ -551,10 +549,9 @@ class MeasurementPlanWidget(qt.QWidget):
         elif self._dont_go_to_selected_pin:
             self._dont_go_to_selected_pin = False
 
-    def set_work_mode(self, work_mode: WorkMode):
+    def set_work_mode(self, work_mode: WorkMode) -> None:
         """
-        Method enables or disables widgets on measurement plan widget according
-        to given work mode.
+        Method enables or disables widgets on measurement plan widget according to given work mode.
         :param work_mode: work mode.
         """
 
@@ -562,7 +559,7 @@ class MeasurementPlanWidget(qt.QWidget):
             self.setEnabled(work_mode != WorkMode.COMPARE)
             self.button_new_pin.setEnabled(work_mode == WorkMode.WRITE)
 
-    def turn_off_standby_mode(self):
+    def turn_off_standby_mode(self) -> None:
         """
         Method turns off standby mode.
         """
@@ -571,7 +568,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self._enable_widgets(True)
         self.progress_bar.setVisible(False)
 
-    def turn_on_standby_mode(self, total_number: int):
+    def turn_on_standby_mode(self, total_number: int) -> None:
         """
         Method turns on standby mode.
         :param total_number: number of steps in standby mode.
@@ -584,7 +581,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self.progress_bar.setMaximum(total_number)
         self.progress_bar.setValue(0)
 
-    def update_info(self):
+    def update_info(self) -> None:
         """
         Method updates information about measurement plan.
         """
@@ -593,7 +590,7 @@ class MeasurementPlanWidget(qt.QWidget):
         self._parent.measurement_plan.add_callback_func_for_pin_changes(self.set_new_pin_parameters)
         self._fill_table()
 
-    def validate_mux_outputs_for_pins(self):
+    def validate_mux_outputs_for_pins(self) -> None:
         """
         Method validates multiplexer outputs for pins in measurement plan.
         """

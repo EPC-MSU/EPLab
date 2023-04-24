@@ -16,7 +16,7 @@ class MeasurementPlanRunner(QObject):
     measurements_started: pyqtSignal = pyqtSignal(int)
     measurement_done: pyqtSignal = pyqtSignal()
 
-    def __init__(self, parent, measurement_plan_widget: MeasurementPlanWidget):
+    def __init__(self, parent, measurement_plan_widget: MeasurementPlanWidget) -> None:
         """
         :param parent: main window of application;
         :param measurement_plan_widget: measurement plan widget.
@@ -32,7 +32,7 @@ class MeasurementPlanRunner(QObject):
         self._need_to_save_measurement: bool = False
         self._parent = parent
 
-    def _start_measurements(self):
+    def _start_measurements(self) -> None:
         """
         Method starts measurements according plan.
         """
@@ -43,7 +43,7 @@ class MeasurementPlanRunner(QObject):
         self.measurements_started.emit(self._amount_of_pins)
         self.go_to_pin()
 
-    def _stop_measurements(self):
+    def _stop_measurements(self) -> None:
         """
         Method stops measurements according plan.
         """
@@ -53,7 +53,7 @@ class MeasurementPlanRunner(QObject):
         self._is_running = False
         self.measurements_finished.emit()
 
-    def check_pin(self):
+    def check_pin(self) -> None:
         """
         Method checks if all necessary parameters for current pin are set
         from the measurement plan.
@@ -72,7 +72,7 @@ class MeasurementPlanRunner(QObject):
         self._bad_pin_indexes = self._parent.measurement_plan.get_pins_without_multiplexer_outputs()
         return bool(self._bad_pin_indexes)
 
-    def go_to_pin(self):
+    def go_to_pin(self) -> None:
         """
         Method moves to next pin in measurement plan.
         """
@@ -92,7 +92,7 @@ class MeasurementPlanRunner(QObject):
 
         return self._is_running
 
-    def save_pin(self):
+    def save_pin(self) -> None:
         """
         Method saves measurement in current pin if required.
         """
@@ -106,7 +106,7 @@ class MeasurementPlanRunner(QObject):
             self._current_pin_index += 1
             self.go_to_pin()
 
-    def start_or_stop_measurements(self, start: bool):
+    def start_or_stop_measurements(self, start: bool) -> None:
         """
         Method starts or stops measurements according measurement plan.
         :param start: if True then measurements will be started.

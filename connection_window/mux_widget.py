@@ -20,7 +20,7 @@ class MuxWidget(qt.QGroupBox):
     COMBO_BOX_MIN_WIDTH: int = 200
     IMAGE_SIZE: int = 200
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.button_show_help: qt.QPushButton = None
         self.button_update: qt.QPushButton = None
@@ -47,7 +47,7 @@ class MuxWidget(qt.QGroupBox):
         combo_box.setToolTip(placeholder)
         return combo_box
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
         """
         Method initializes widgets on main widget for multiplexer.
         """
@@ -92,7 +92,7 @@ class MuxWidget(qt.QGroupBox):
         return None
 
     @pyqtSlot()
-    def show_help(self):
+    def show_help(self) -> None:
         """
         Slot shows help information how to enter COM-port.
         """
@@ -109,7 +109,7 @@ class MuxWidget(qt.QGroupBox):
         msg_box.exec_()
 
     @pyqtSlot()
-    def update_com_ports(self):
+    def update_com_ports(self) -> None:
         """
         Method updates list of COM-ports.
         """

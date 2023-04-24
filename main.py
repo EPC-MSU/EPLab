@@ -1,14 +1,13 @@
-import logger
 import sys
 import traceback
 from argparse import ArgumentParser, Namespace
 from PyQt5.QtWidgets import qApp, QApplication, QDesktopWidget, QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget
 from epcore.product import EyePointProduct
-import utils as ut
-from mainwindow import EPLabWindow
+import eplab.utils as ut
+from eplab.main_window import EPLabWindow
 
 
-def exception_hook(exc_type: Exception, exc_value: Exception, exc_traceback: "traceback"):
+def exception_hook(exc_type: Exception, exc_value: Exception, exc_traceback: "traceback") -> None:
     """
     Function handles unexpected errors.
     :param exc_type: exception class;
@@ -22,10 +21,7 @@ def exception_hook(exc_type: Exception, exc_value: Exception, exc_traceback: "tr
     # sys.exit(1)
 
 
-sys.excepthook = exception_hook
-
-
-def launch_eplab(app: QApplication, args: Namespace):
+def launch_eplab(app: QApplication, args: Namespace) -> None:
     """
     Function to launch application.
     :param app:
@@ -45,7 +41,7 @@ class ErrorWindow(QMainWindow):
 
     MAX_MESSAGE_LENGTH = 500
 
-    def __init__(self, exc_type: Exception, exc_value: Exception, exc_traceback: "traceback"):
+    def __init__(self, exc_type: Exception, exc_value: Exception, exc_traceback: "traceback") -> None:
         """
         :param exc_type: type of exception;
         :param exc_value: exception instance;
@@ -58,7 +54,7 @@ class ErrorWindow(QMainWindow):
         traceback_text = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         self._init_ui(str(exc_value), traceback_text)
 
-    def _init_ui(self, error: str, trace_back: str):
+    def _init_ui(self, error: str, trace_back: str) -> None:
         """
         Method initializes widgets on window.
         :param error: text of exception instance;
@@ -84,7 +80,7 @@ class ErrorWindow(QMainWindow):
         self.setWindowTitle("Error")
 
 
-def show_error_window(app: QApplication, exc_type: Exception, exc_value: Exception, exc_traceback: "traceback"):
+def show_error_window(app: QApplication, exc_type: Exception, exc_value: Exception, exc_traceback: "traceback") -> None:
     """
     Function shows window with error.
     :param app: application;
@@ -100,7 +96,7 @@ def show_error_window(app: QApplication, exc_type: Exception, exc_value: Excepti
 
 
 if __name__ == "__main__":
-    logger.logger
+    ut.set_logger()
     parser = ArgumentParser(description="EyePoint Lab")
     parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual' for virtual mode)")
     parser.add_argument("test", help="Path to TEST measurer (type 'virtual' for virtual mode)", nargs="?", default=None)
@@ -108,6 +104,7 @@ if __name__ == "__main__":
     parser.add_argument("--config", help="Path to specific EPLab config file", default=None)
     args = parser.parse_args()
 
+    sys.excepthook = exception_hook
     app = QApplication(sys.argv)
     try:
         launch_eplab(app, args)

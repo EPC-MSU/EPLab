@@ -9,10 +9,11 @@ import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
-from common import WorkMode
+from eplab.common import WorkMode
 from multiplexer.measurement_plan_runner import MeasurementPlanRunner
 from multiplexer.measurement_plan_widget import MeasurementPlanWidget
 from multiplexer.multiplexer_pinout_widget import MultiplexerPinoutWidget
+
 
 DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 
@@ -27,7 +28,7 @@ class MuxAndPlanWindow(qt.QWidget):
     DEFAULT_MUX_HEIGHT: int = 300
     DEFAULT_WIDTH: int = 700
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         """
         :param parent: parent main window.
         """
@@ -51,10 +52,9 @@ class MuxAndPlanWindow(qt.QWidget):
         self.measurement_plan_runner.measurements_finished.connect(self.create_report)
         self.measurement_plan_runner.measurements_started.connect(self.turn_on_standby_mode)
 
-    def _change_widgets_to_start_plan_measurement(self, status: bool):
+    def _change_widgets_to_start_plan_measurement(self, status: bool) -> None:
         """
-        Method changes widgets to start or stop plan measurements according
-        status of one of them.
+        Method changes widgets to start or stop plan measurements according status of one of them.
         :param status: status of one of widgets to start plan measurements.
         """
 
@@ -73,7 +73,7 @@ class MuxAndPlanWindow(qt.QWidget):
             if widget.isChecked() != status:
                 widget.setChecked(status)
 
-    def _check_multiplexer_connection(self):
+    def _check_multiplexer_connection(self) -> None:
         """
         Method checks connection of multiplexer.
         """
@@ -88,8 +88,7 @@ class MuxAndPlanWindow(qt.QWidget):
 
     def _continue_plan_measurement(self) -> bool:
         """
-        Method asks user whether it is necessary to continue measurements according
-        to measurement plan.
+        Method asks user whether it is necessary to continue measurements according to measurement plan.
         :return: True if measurements should be continued.
         """
 
@@ -107,7 +106,7 @@ class MuxAndPlanWindow(qt.QWidget):
         msg_box.addButton(qApp.translate("t", "Нет"), qt.QMessageBox.NoRole)
         return not msg_box.exec_()
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
         """
         Method initializes widgets on dialog window.
         """
@@ -145,8 +144,7 @@ class MuxAndPlanWindow(qt.QWidget):
     def _is_arranged(self) -> Tuple:
         """
         Method checks if windows are arranged.
-        :return: True if windows are arranged, position and size for main window,
-        position and size for dialog window.
+        :return: True if windows are arranged, position and size for main window, position and size for dialog window.
         """
 
         desktop = qApp.instance().desktop()
@@ -185,7 +183,7 @@ class MuxAndPlanWindow(qt.QWidget):
             window_size = self._previous_window_size
         return arranged, main_window_pos, main_window_size, window_pos, window_size
 
-    def _resize_window(self):
+    def _resize_window(self) -> None:
         """
         Method resizes window depending on presence of multiplexer.
         """
@@ -196,7 +194,7 @@ class MuxAndPlanWindow(qt.QWidget):
         self.resize(self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT)
         self.splitter.setSizes([self.DEFAULT_MUX_HEIGHT, self.DEFAULT_HEIGHT - self.DEFAULT_MUX_HEIGHT])
 
-    def _stop_plan_measurement(self):
+    def _stop_plan_measurement(self) -> None:
         """
         Method stops measurements by multiplexer according to measurement plan.
         """
@@ -207,7 +205,7 @@ class MuxAndPlanWindow(qt.QWidget):
         self.setEnabled(False)
 
     @pyqtSlot()
-    def arrange_windows(self):
+    def arrange_windows(self) -> None:
         """
         Slot arranges windows.
         """
@@ -219,7 +217,7 @@ class MuxAndPlanWindow(qt.QWidget):
         self.resize(window_size)
 
     @pyqtSlot(WorkMode)
-    def change_work_mode(self, new_work_mode: WorkMode):
+    def change_work_mode(self, new_work_mode: WorkMode) -> None:
         """
         Slot changes widgets according to new work mode.
         :param new_work_mode: new work mode.
@@ -229,7 +227,7 @@ class MuxAndPlanWindow(qt.QWidget):
         self.multiplexer_pinout_widget.set_work_mode(new_work_mode)
 
     @pyqtSlot()
-    def create_report(self):
+    def create_report(self) -> None:
         """
         Slot generates report after testing according to plan.
         """
@@ -238,14 +236,14 @@ class MuxAndPlanWindow(qt.QWidget):
             self._parent.create_report(True)
         self._manual_stop = False
 
-    def select_current_pin(self):
+    def select_current_pin(self) -> None:
         """
         Method selects row in table for measurement plan for current pin index.
         """
 
         self.measurement_plan_widget.select_row_for_current_pin()
 
-    def set_connection_mode(self):
+    def set_connection_mode(self) -> None:
         """
         Method switches window to mode when devices are connected to application.
         """
@@ -255,7 +253,7 @@ class MuxAndPlanWindow(qt.QWidget):
         self.setEnabled(True)
         self._check_multiplexer_connection()
 
-    def set_disconnection_mode(self):
+    def set_disconnection_mode(self) -> None:
         """
         Method switches window to mode when devices are disconnected from application.
         """
@@ -267,10 +265,9 @@ class MuxAndPlanWindow(qt.QWidget):
         self._check_multiplexer_connection()
 
     @pyqtSlot(bool)
-    def start_or_stop_plan_measurement(self, status: bool):
+    def start_or_stop_plan_measurement(self, status: bool) -> None:
         """
-        Slot starts or stops measurements by multiplexer according to existing
-        measurement plan.
+        Slot starts or stops measurements by multiplexer according to existing measurement plan.
         :param status: if True then measurements should be started.
         """
 
@@ -283,7 +280,7 @@ class MuxAndPlanWindow(qt.QWidget):
         self.measurement_plan_runner.start_or_stop_measurements(status)
 
     @pyqtSlot()
-    def turn_off_standby_mode(self):
+    def turn_off_standby_mode(self) -> None:
         """
         Slot turns off standby mode.
         """
@@ -296,7 +293,7 @@ class MuxAndPlanWindow(qt.QWidget):
         self._parent.connection_action.setEnabled(True)
 
     @pyqtSlot(int)
-    def turn_on_standby_mode(self, total_number: int):
+    def turn_on_standby_mode(self, total_number: int) -> None:
         """
         Slot turns on standby mode.
         :param total_number: number of steps in standby mode.
@@ -311,7 +308,7 @@ class MuxAndPlanWindow(qt.QWidget):
             self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement.setEnabled(True)
             self._parent.start_or_stop_entire_plan_measurement_action.setEnabled(True)
 
-    def update_info(self):
+    def update_info(self) -> None:
         """
         Method updates information about measurement plan and multiplexer.
         """

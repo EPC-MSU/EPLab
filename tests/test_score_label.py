@@ -10,6 +10,6 @@ class TestScore(unittest.TestCase):
         app = QApplication(sys.argv)
         label = QLabel()
         score_wrapper = ScoreWrapper(label)
-        score_wrapper.set_score(0.54)
+        score_wrapper._set_score(0.54)
         self.assertTrue("54" in label.text())
         app.exit(0)

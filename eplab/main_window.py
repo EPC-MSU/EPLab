@@ -3,7 +3,6 @@ File with class for main window of application.
 """
 
 import copy
-import logging
 import os
 import re
 from datetime import datetime
@@ -11,7 +10,7 @@ from functools import partial
 from platform import system
 from typing import Dict, List, Optional, Tuple
 import numpy as np
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QPoint, Qt as QtC, QTimer, QTranslator
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QPoint, Qt, QTimer, QTranslator
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow, QMenu, QMessageBox,
                              QRadioButton, QScrollArea, QVBoxLayout, QWidget)
@@ -25,21 +24,19 @@ from epcore.product import EyePointProduct
 from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
 import connection_window as cw
-import utils as ut
-from about_window import show_product_info
-from boardwindow import BoardWidget
-from common import DeviceErrorsHandler, WorkMode
-from language import Language, LanguageSelectionWindow
-from measurer_settings_window import MeasurerSettingsWindow
+import eplab.utils as ut
+from eplab.about_window import show_product_info
+from eplab.board_window import BoardWidget
+from eplab.common import DeviceErrorsHandler, WorkMode
+from eplab.language import Language, LanguageSelectionWindow
+from eplab.measurer_settings_window import MeasurerSettingsWindow
+from eplab.player import SoundPlayer
+from eplab.report_window import ReportGenerationThread, ReportGenerationWindow
+from eplab.score import ScoreWrapper
+from eplab.version import Version
 from multiplexer import MuxAndPlanWindow
-from player import SoundPlayer
-from report_window import ReportGenerationThread, ReportGenerationWindow
-from score import ScoreWrapper
 from settings.settings import Settings
 from settings.settingswindow import LowSettingsPanel, SettingsWindow
-from version import Version
-
-logger = logging.getLogger("eplab")
 
 
 class EPLabWindow(QMainWindow):
@@ -63,7 +60,7 @@ class EPLabWindow(QMainWindow):
     work_mode_changed: pyqtSignal = pyqtSignal(WorkMode)
 
     def __init__(self, product: EyePointProduct, port_1: Optional[str] = None, port_2: Optional[str] = None,
-                 english: Optional[bool] = None):
+                 english: Optional[bool] = None) -> None:
         """
         :param product: product;
         :param port_1: port for first measurer;
@@ -99,7 +96,7 @@ class EPLabWindow(QMainWindow):
     def work_mode(self) -> WorkMode:
         return self._work_mode
 
-    def _adjust_plot_params(self, settings: MeasurementSettings):
+    def _adjust_plot_params(self, settings: MeasurementSettings) -> None:
         """
         Method adjusts plot parameters.
         :param settings: measurement settings for which plot parameters to adjust.
@@ -124,7 +121,7 @@ class EPLabWindow(QMainWindow):
         self._comparator.set_min_ivc(var_v, var_c)
         return self._comparator.compare_ivc(curve_1, curve_2)
 
-    def _change_work_mode(self, mode: WorkMode):
+    def _change_work_mode(self, mode: WorkMode) -> None:
         """
         Method sets window settings for given work mode.
         :param mode: work mode.
@@ -173,7 +170,7 @@ class EPLabWindow(QMainWindow):
         return False
 
     @staticmethod
-    def _clear_layout(layout: QLayout):
+    def _clear_layout(layout: QLayout) -> None:
         """
         Method removes all widgets from layout.
         :param layout: layout to clear.
@@ -183,7 +180,7 @@ class EPLabWindow(QMainWindow):
             item = layout.itemAt(i_item)
             layout.removeItem(item)
 
-    def _clear_widgets(self):
+    def _clear_widgets(self) -> None:
         """
         Method clears widgets on main window.
         """
@@ -215,7 +212,7 @@ class EPLabWindow(QMainWindow):
         self._mux_and_plan_window.close()
         self._report_generation_window.close()
 
-    def _create_measurer_setting_actions(self):
+    def _create_measurer_setting_actions(self) -> None:
         """
         Method creates menu items to select settings for available measurers.
         """
@@ -268,7 +265,7 @@ class EPLabWindow(QMainWindow):
         widget.setLayout(layout)
         return widget
 
-    def _create_scroll_areas_for_parameters(self, settings: MeasurementSettings):
+    def _create_scroll_areas_for_parameters(self, settings: MeasurementSettings) -> None:
         """
         Method creates scroll areas for different parameters of measuring system.
         Scroll areas has radio buttons to choose options of parameters.
@@ -283,18 +280,17 @@ class EPLabWindow(QMainWindow):
         for i_parameter, parameter in enumerate(parameters):
             widget_with_options = self._create_radio_buttons_for_parameter(parameter, available[parameter])
             scroll_area = QScrollArea()
-            scroll_area.setVerticalScrollBarPolicy(QtC.ScrollBarAlwaysOn)
-            scroll_area.setHorizontalScrollBarPolicy(QtC.ScrollBarAlwaysOff)
+            scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+            scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
             scroll_area.setWidgetResizable(True)
             scroll_area.setWidget(widget_with_options)
             self._parameters_scroll_areas[parameter] = scroll_area
             self._clear_layout(layouts[i_parameter])
             layouts[i_parameter].addWidget(scroll_area)
 
-    def _disable_optimal_parameter_searcher(self):
+    def _disable_optimal_parameter_searcher(self) -> None:
         """
-        Method disables searcher of optimal parameters. Now searcher can work
-        only for IVMeasurerIVM10.
+        Method disables searcher of optimal parameters. Now searcher can work only for IVMeasurerIVM10.
         """
 
         for measurer in self._msystem.measurers:
@@ -323,7 +319,7 @@ class EPLabWindow(QMainWindow):
                     return name
         return {param: _get_checked_button(self._option_buttons[param]) for param in self._option_buttons}
 
-    def _init_threshold(self):
+    def _init_threshold(self) -> None:
         """
         Method initializes initial value of score threshold.
         """
@@ -331,7 +327,7 @@ class EPLabWindow(QMainWindow):
         threshold = self._score_wrapper.threshold
         self._update_threshold(threshold)
 
-    def _init_ui(self, product: EyePointProduct, english: Optional[bool] = None):
+    def _init_ui(self, product: EyePointProduct, english: Optional[bool] = None) -> None:
         """
         Method initializes widgets on main window and objects.
         :param product: product;
@@ -352,8 +348,7 @@ class EPLabWindow(QMainWindow):
         else:
             qApp.instance().setProperty("language", Language.RU)
 
-        dir_name = os.path.dirname(os.path.abspath(__file__))
-        loadUi(os.path.join(dir_name, "media", "mainwindow.ui"), self)
+        loadUi(os.path.join(ut.DIR_MEDIA, "mainwindow.ui"), self)
         self.setWindowIcon(self._icon)
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
         if system().lower() == "windows":
@@ -381,6 +376,11 @@ class EPLabWindow(QMainWindow):
 
         self._iv_window: IVViewer = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
                                              solid_axis_enabled=False, axis_label_enabled=False)
+        self._iv_window.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),
+                                             export_ivc=qApp.translate("t", "Экспортировать кривые в файл"),
+                                             remove_all_cursors=qApp.translate("t", "Удалить все метки"),
+                                             remove_cursor=qApp.translate("t", "Удалить метку"),
+                                             save_screenshot=qApp.translate("t", "Сохранить изображение"))
         dir_path = os.path.join(self.DEFAULT_PATH, "Screenshot")
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
@@ -422,7 +422,7 @@ class EPLabWindow(QMainWindow):
         self.about_action.triggered.connect(show_product_info)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
-        self.sound_enabled_action.toggled.connect(self._on_enable_sound)
+        self.sound_enabled_action.toggled.connect(lambda state: self._player.set_mute(not state))
         self.freeze_curve_a_action.toggled.connect(partial(self._on_freeze_curve, 0))
         self.freeze_curve_b_action.toggled.connect(partial(self._on_freeze_curve, 1))
         self.hide_curve_a_action.toggled.connect(self._on_hide_curve)
@@ -466,11 +466,11 @@ class EPLabWindow(QMainWindow):
                                                                                         self._report_generation_thread)
         self._settings_path: str = ut.get_dir_name()
 
-    def _open_board_window_if_needed(self):
+    def _open_board_window_if_needed(self) -> None:
         if self._measurement_plan.image:
             self._board_window.show()
 
-    def _read_curves_periodic_task(self):
+    def _read_curves_periodic_task(self) -> None:
         if self._msystem.measurements_are_ready():
             if self._skip_curve:
                 self._skip_curve = False
@@ -500,12 +500,12 @@ class EPLabWindow(QMainWindow):
 
         for measurer in self.get_measurers():
             if isinstance(measurer, (IVMeasurerASA, IVMeasurerVirtualASA)):
-                dir_name = os.path.dirname(os.path.abspath(__file__))
+                dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 file_name = os.path.join(dir_name, "resources", "eplab_asa_options.json")
                 return ut.read_json(file_name)
         return None
 
-    def _reconnect_periodic_task(self):
+    def _reconnect_periodic_task(self) -> None:
         """
         Method try to reconnect measurer devices to app.
         """
@@ -536,7 +536,7 @@ class EPLabWindow(QMainWindow):
                 self._set_msystem_settings(settings)
                 self._msystem.trigger_measurements()
 
-    def _reset_board(self):
+    def _reset_board(self) -> None:
         """
         Method sets measurement plan to default empty board with 1 pin.
         """
@@ -546,10 +546,10 @@ class EPLabWindow(QMainWindow):
             multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
         self._last_saved_measurement_plan_data: Dict = self._measurement_plan.to_json()
 
-    def _remove_ref_curve(self):
+    def _remove_ref_curve(self) -> None:
         self._ref_curve = None
 
-    def _set_msystem_settings(self, settings: MeasurementSettings):
+    def _set_msystem_settings(self, settings: MeasurementSettings) -> None:
         """
         Method sets new measurement settings.
         :param settings: measurement settings to set.
@@ -561,7 +561,7 @@ class EPLabWindow(QMainWindow):
         # When new curve will be received plot parameters will be adjusted
         self._settings_update_next_cycle = settings
 
-    def _set_options_to_ui(self, options: Dict[EyePointProduct.Parameter, str]):
+    def _set_options_to_ui(self, options: Dict[EyePointProduct.Parameter, str]) -> None:
         """
         Method sets options of parameters to UI.
         :param options: options that should be checked.
@@ -570,7 +570,7 @@ class EPLabWindow(QMainWindow):
         for parameter, value in options.items():
             self._option_buttons[parameter][value].setChecked(True)
 
-    def _set_plot_parameters_to_low_panel_settings(self, settings: MeasurementSettings):
+    def _set_plot_parameters_to_low_panel_settings(self, settings: MeasurementSettings) -> None:
         """
         Method sets plot parameters to low panel on main window.
         :param settings: measurement settings.
@@ -587,7 +587,7 @@ class EPLabWindow(QMainWindow):
                       "probe_signal_frequency": np.round(settings.probe_signal_frequency, 1)}
         self.low_panel_settings.set_all_parameters(**param_dict)
 
-    def _set_widgets_to_init_state(self):
+    def _set_widgets_to_init_state(self) -> None:
         """
         Method initializes widgets on main window and sets them to initial state.
         """
@@ -636,7 +636,7 @@ class EPLabWindow(QMainWindow):
             self._msystem.trigger_measurements()
         self._current_file_path = None
 
-    def _update_curves(self, curves: Dict[str, Optional[IVCurve]] = None, settings: MeasurementSettings = None):
+    def _update_curves(self, curves: Dict[str, Optional[IVCurve]] = None, settings: MeasurementSettings = None) -> None:
         """
         Method updates curves and calculates (if required) score.
         :param curves: dictionary with new curves;
@@ -676,7 +676,7 @@ class EPLabWindow(QMainWindow):
         if settings is not None:
             self._set_plot_parameters_to_low_panel_settings(settings)
 
-    def _update_scroll_areas_for_parameters(self, settings: MeasurementSettings):
+    def _update_scroll_areas_for_parameters(self, settings: MeasurementSettings) -> None:
         """
         Method updates scroll areas for different parameters of measuring system.
         :param settings: measurement settings.
@@ -689,7 +689,7 @@ class EPLabWindow(QMainWindow):
             del old_widget
             scroll_area.setWidget(widget_with_options)
 
-    def _update_threshold(self, threshold: float):
+    def _update_threshold(self, threshold: float) -> None:
         """
         Method updates score threshold value in _score_wrapper and _player.
         :param threshold: new score threshold value.
@@ -699,13 +699,13 @@ class EPLabWindow(QMainWindow):
         self._player.set_threshold(threshold)
 
     @pyqtSlot(bool)
-    def _on_add_cursor(self, state: bool):
+    def _on_add_cursor(self, state: bool) -> None:
         if state:
             self.remove_cursor_action.setChecked(False)
         self._iv_window.plot.set_state_adding_cursor(state)
 
     @pyqtSlot()
-    def _on_connect_or_disconnect(self):
+    def _on_connect_or_disconnect(self) -> None:
         """
         Slot shows dialog window to select devices for connection.
         """
@@ -714,10 +714,9 @@ class EPLabWindow(QMainWindow):
         connection_wnd.exec()
 
     @pyqtSlot()
-    def _on_create_new_board(self):
+    def _on_create_new_board(self) -> None:
         """
-        Slot saves board information to file. Depending on conditions
-        board is saved to a new or existing file.
+        Slot saves board information to file. Depending on conditions board is saved to a new or existing file.
         """
 
         if self._current_file_path is not None:
@@ -751,25 +750,8 @@ class EPLabWindow(QMainWindow):
             self.update_current_pin()
             self._mux_and_plan_window.update_info()
 
-    @pyqtSlot()
-    def _on_delete_all_cursors(self):
-        """
-        Slot deletes all cursors from plot.
-        """
-
-        self._iv_window.plot.remove_all_cursors()
-
-    @pyqtSlot(bool)
-    def _on_enable_sound(self, state: bool):
-        """
-        Slot enables or disables sound.
-        :param state: if True then sound will be enabled.
-        """
-
-        self._player.set_mute(not state)
-
     @pyqtSlot(int, bool)
-    def _on_freeze_curve(self, measurer_id: int, state: bool):
+    def _on_freeze_curve(self, measurer_id: int, state: bool) -> None:
         """
         Slot freezes or unfreezes curve for measurer with given index.
         :param measurer_id: index of measurer;
@@ -784,7 +766,7 @@ class EPLabWindow(QMainWindow):
                 self._skip_curve = True
 
     @pyqtSlot()
-    def _on_go_to_left_or_right_pin(self):
+    def _on_go_to_left_or_right_pin(self) -> None:
         """
         Slot moves to next or previous pin in measurement plan.
         """
@@ -805,7 +787,7 @@ class EPLabWindow(QMainWindow):
         self._open_board_window_if_needed()
 
     @pyqtSlot(bool)
-    def _on_hide_curve(self, state: bool):
+    def _on_hide_curve(self, state: bool) -> None:
         """
         Slot sets parameter to hide or show curve.
         :param state: if True then curve will be hidden.
@@ -817,7 +799,7 @@ class EPLabWindow(QMainWindow):
             self._hide_curve_ref = state
 
     @pyqtSlot()
-    def _on_load_board(self):
+    def _on_load_board(self) -> None:
         """
         Slot loads board from file.
         """
@@ -847,7 +829,7 @@ class EPLabWindow(QMainWindow):
             self._mux_and_plan_window.update_info()
 
     @pyqtSlot()
-    def _on_load_board_image(self):
+    def _on_load_board_image(self) -> None:
         """
         Slot loads image for board from file.
         """
@@ -861,7 +843,7 @@ class EPLabWindow(QMainWindow):
             self._open_board_window_if_needed()
 
     @pyqtSlot()
-    def _on_open_board_image(self):
+    def _on_open_board_image(self) -> None:
         if not self._measurement_plan.image:
             ut.show_exception(qApp.translate("t", "Открытие изображения платы"),
                               qApp.translate("t", "Для данной платы изображение не задано!"))
@@ -869,7 +851,7 @@ class EPLabWindow(QMainWindow):
             self._open_board_window_if_needed()
 
     @pyqtSlot()
-    def _on_open_mux_window(self):
+    def _on_open_mux_window(self) -> None:
         """
         Slot shows window with measurement plan and multiplexer pinout.
         """
@@ -878,7 +860,7 @@ class EPLabWindow(QMainWindow):
             self._mux_and_plan_window.show()
 
     @pyqtSlot()
-    def _on_periodic_task(self):
+    def _on_periodic_task(self) -> None:
         if self._device_errors_handler.all_ok:
             with self._device_errors_handler:
                 self._read_curves_periodic_task()
@@ -926,12 +908,12 @@ class EPLabWindow(QMainWindow):
         return False
 
     @pyqtSlot()
-    def _on_save_comment(self):
+    def _on_save_comment(self) -> None:
         pin_index = self._measurement_plan.get_current_index()
         self._measurement_plan.save_comment_to_pin_with_index(pin_index, self.line_comment_pin.text())
 
     @pyqtSlot()
-    def _on_save_image(self):
+    def _on_save_image(self) -> None:
         """
         Slot saves screenshot of main window.
         """
@@ -954,7 +936,7 @@ class EPLabWindow(QMainWindow):
             image.save(filename)
 
     @pyqtSlot()
-    def _on_search_optimal(self):
+    def _on_search_optimal(self) -> None:
         """
         Slot runs algorithm to search optimal measurement settings.
         """
@@ -967,7 +949,7 @@ class EPLabWindow(QMainWindow):
             self._set_options_to_ui(options)
 
     @pyqtSlot()
-    def _on_select_language(self):
+    def _on_select_language(self) -> None:
         """
         Slot shows dialog window to select language.
         """
@@ -994,7 +976,7 @@ class EPLabWindow(QMainWindow):
                 ut.show_exception(qApp.translate("t", "Внимание"), text)
 
     @pyqtSlot(bool)
-    def _on_select_option(self, checked: bool):
+    def _on_select_option(self, checked: bool) -> None:
         """
         Slot handles selection of new option for parameter of measuring system.
         :param checked: if True radio button corresponding to option was selected.
@@ -1024,7 +1006,7 @@ class EPLabWindow(QMainWindow):
                 self._set_options_to_ui(old_options)
 
     @pyqtSlot()
-    def _on_set_cursor_deletion_mode(self):
+    def _on_set_cursor_deletion_mode(self) -> None:
         """
         Slot sets cursor deletion mode when one cursor at a time can be deleted.
         """
@@ -1035,7 +1017,7 @@ class EPLabWindow(QMainWindow):
         self._iv_window.plot.set_state_removing_cursor(True)
 
     @pyqtSlot()
-    def _on_show_context_menu_for_cursor_deletion(self):
+    def _on_show_context_menu_for_cursor_deletion(self) -> None:
         """
         Slot shows context menu for choosing to delete cursors one at a time or
         all at once.
@@ -1054,13 +1036,13 @@ class EPLabWindow(QMainWindow):
         menu.addAction(action_remove_cursor)
         icon = QIcon(os.path.join(ut.DIR_MEDIA, "delete_all.png"))
         action_remove_all_cursors = QAction(icon, qApp.translate("t", "Удалить все метки"), menu)
-        action_remove_all_cursors.triggered.connect(self._on_delete_all_cursors)
+        action_remove_all_cursors.triggered.connect(self._iv_window.plot.remove_all_cursors)
         menu.addAction(action_remove_all_cursors)
         position = widget.geometry()
         menu.popup(widget.mapToGlobal(QPoint(position.x(), position.y())))
 
     @pyqtSlot()
-    def _on_show_settings_window(self):
+    def _on_show_settings_window(self) -> None:
         """
         Slot is called when you click on 'Settings' button, it shows settings window.
         """
@@ -1071,7 +1053,7 @@ class EPLabWindow(QMainWindow):
         self._settings_path = settings_window.settings_directory
 
     @pyqtSlot(WorkMode)
-    def _on_switch_work_mode(self, mode: WorkMode):
+    def _on_switch_work_mode(self, mode: WorkMode) -> None:
         """
         Slot switches work mode.
         :param mode: work mode to set.
@@ -1095,7 +1077,7 @@ class EPLabWindow(QMainWindow):
         if mode in (WorkMode.TEST, WorkMode.WRITE) and self._measurement_plan.multiplexer:
             self._on_open_mux_window()
 
-    def apply_settings(self, threshold: float):
+    def apply_settings(self, threshold: float) -> None:
         """
         Method applies settings from settings window.
         :param threshold: threshold value.
@@ -1116,7 +1098,7 @@ class EPLabWindow(QMainWindow):
         self.sound_enabled_action.setChecked(self.__settings.sound_enabled)
         self._update_threshold(self.__settings.score_threshold)
 
-    def closeEvent(self, event: QCloseEvent):
+    def closeEvent(self, event: QCloseEvent) -> None:
         self._board_window.close()
         if self._measurement_plan and self._measurement_plan.to_json() != self._last_saved_measurement_plan_data:
             msg_box = QMessageBox()
@@ -1135,7 +1117,7 @@ class EPLabWindow(QMainWindow):
             self._report_generation_thread.wait()
 
     def connect_devices(self, port_1: Optional[str], port_2: Optional[str],
-                        product_name: Optional[cw.ProductNames] = None, mux_port: str = None):
+                        product_name: Optional[cw.ProductNames] = None, mux_port: str = None) -> None:
         """
         Method connects measurers with given ports.
         :param port_1: port for first measurer;
@@ -1186,7 +1168,7 @@ class EPLabWindow(QMainWindow):
         self._set_widgets_to_init_state()
 
     @pyqtSlot()
-    def create_new_pin(self, multiplexer_output=None):
+    def create_new_pin(self, multiplexer_output=None) -> None:
         """
         Slot creates new pin.
         :param multiplexer_output: multiplexer output for new pin.
@@ -1211,7 +1193,7 @@ class EPLabWindow(QMainWindow):
         self.update_current_pin()
 
     @pyqtSlot()
-    def create_report(self, auto_start: bool = False):
+    def create_report(self, auto_start: bool = False) -> None:
         """
         Slot shows dialog window to create report for board.
         :param auto_start: if True then generation of report will start automatically.
@@ -1224,7 +1206,7 @@ class EPLabWindow(QMainWindow):
         else:
             self._report_generation_window.activateWindow()
 
-    def disconnect_devices(self):
+    def disconnect_devices(self) -> None:
         """
         Method disconnects measurers.
         """
@@ -1243,7 +1225,7 @@ class EPLabWindow(QMainWindow):
         self._clear_widgets()
         self._product_name = None
 
-    def enable_widgets(self, enabled: bool):
+    def enable_widgets(self, enabled: bool) -> None:
         """
         Method sets widgets to given state (enabled or disabled).
         :param enabled: if True widgets will be set to enabled state.
@@ -1265,7 +1247,7 @@ class EPLabWindow(QMainWindow):
             self.freeze_curve_b_action.setEnabled(False)
             self.hide_curve_b_action.setEnabled(False)
 
-    def get_measurers(self) -> list:
+    def get_measurers(self) -> List[IVMeasurerBase]:
         """
         Method returns list of measurers.
         :return: list of measurers.
@@ -1295,7 +1277,7 @@ class EPLabWindow(QMainWindow):
         return settings
 
     @pyqtSlot()
-    def go_to_selected_pin(self, pin_index: int = None):
+    def go_to_selected_pin(self, pin_index: int = None) -> None:
         """
         Slot sets given pin as current.
         :param pin_index: index of pin to be set as current.
@@ -1336,7 +1318,7 @@ class EPLabWindow(QMainWindow):
         self.__settings.import_(path=file_path)
         return self.__settings.score_threshold
 
-    def resizeEvent(self, event: QResizeEvent):
+    def resizeEvent(self, event: QResizeEvent) -> None:
         """
         Method handles resizing of main window.
         :param event: resizing event.
@@ -1352,14 +1334,14 @@ class EPLabWindow(QMainWindow):
         tool_bars = self.toolBar_write, self.toolBar_cursor, self.toolBar_mode
         for tool_bar in tool_bars:
             if self.width() < size:
-                style = QtC.ToolButtonIconOnly
+                style = Qt.ToolButtonIconOnly
             else:
-                style = QtC.ToolButtonTextBesideIcon
+                style = Qt.ToolButtonTextBesideIcon
             tool_bar.setToolButtonStyle(style)
         super().resizeEvent(event)
 
     @pyqtSlot()
-    def save_pin(self):
+    def save_pin(self) -> None:
         """
         Slot saves IV-curve to current pin.
         """
@@ -1373,7 +1355,7 @@ class EPLabWindow(QMainWindow):
         self.update_current_pin()
 
     @pyqtSlot(IVMeasurerBase, str, bool)
-    def show_device_settings(self, selected_measurer: IVMeasurerBase, device_name: str, _: bool):
+    def show_device_settings(self, selected_measurer: IVMeasurerBase, device_name: str, _: bool) -> None:
         """
         Slot shows window to select device settings.
         :param selected_measurer: measurer for which device settings should be displayed;
@@ -1390,7 +1372,7 @@ class EPLabWindow(QMainWindow):
                     dialog.set_parameters()
                 return
 
-    def update_current_pin(self):
+    def update_current_pin(self) -> None:
         """
         Call this method when current pin index changed.
         """

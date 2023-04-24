@@ -2,7 +2,6 @@
 File with class for dialog window to select devices for connection.
 """
 
-import logging
 from typing import List, Optional
 import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
@@ -11,15 +10,13 @@ import connection_window.utils as ut
 from connection_window.measurer_widget import MeasurerTypeWidget, MeasurerURLsWidget
 from connection_window.mux_widget import MuxWidget
 
-logger = logging.getLogger("eplab")
-
 
 class ConnectionWindow(qt.QDialog):
     """
     Class for dialog window to select devices for connection.
     """
 
-    def __init__(self, parent=None, initial_product_name: Optional[ut.ProductNames] = None):
+    def __init__(self, parent=None, initial_product_name: Optional[ut.ProductNames] = None) -> None:
         """
         :param parent: parent window;
         :param initial_product_name: name of product with which application was working.
@@ -54,7 +51,7 @@ class ConnectionWindow(qt.QDialog):
                 ports[i_measurer] = ut.MeasurerType.IVM10_VIRTUAL.value
         return ports
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
         """
         Method initializes widgets in dialog window.
         """
@@ -96,7 +93,7 @@ class ConnectionWindow(qt.QDialog):
         self.adjustSize()
 
     @pyqtSlot()
-    def connect(self):
+    def connect(self) -> None:
         """
         Slot connects new measurers.
         """
@@ -117,7 +114,7 @@ class ConnectionWindow(qt.QDialog):
         self.close()
 
     @pyqtSlot()
-    def disconnect(self):
+    def disconnect(self) -> None:
         """
         Slot disconnects all measurers.
         """

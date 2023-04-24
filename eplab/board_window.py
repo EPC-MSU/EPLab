@@ -11,8 +11,8 @@ from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView
 from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
-import utils as ut
-from common import WorkMode
+import eplab.utils as ut
+from eplab.common import WorkMode
 
 
 def pil_to_pixmap(im: Image) -> QPixmap:
@@ -42,7 +42,7 @@ class BoardWidget(QWidget):
     _board: Optional[MeasurementPlan] = None
     _scene: BoardView
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         """
         :param parent: parent main window.
         """
@@ -55,7 +55,7 @@ class BoardWidget(QWidget):
         self._scene.point_selected.connect(self.select_pin_with_index)
         self._init_ui()
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
         """
         Method initializes widgets.
         """
@@ -68,7 +68,7 @@ class BoardWidget(QWidget):
         layout.addWidget(self._scene)
         self.setLayout(layout)
 
-    def add_pin(self, x: float, y: float, index: int):
+    def add_pin(self, x: float, y: float, index: int) -> None:
         """
         Method adds new pin to board image.
         :param x: x coordinate of point;
@@ -79,7 +79,7 @@ class BoardWidget(QWidget):
         self._scene.add_point(QPointF(x, y), index)
 
     @pyqtSlot(int, QPointF)
-    def change_pin_coordinates(self, index: int, pin: QPointF):
+    def change_pin_coordinates(self, index: int, pin: QPointF) -> None:
         """
         Slot changes coordinates of given pin.
         :param index: pin index;
@@ -91,7 +91,7 @@ class BoardWidget(QWidget):
         self._parent.measurement_plan.get_current_pin().y = pin.y()
 
     @pyqtSlot(QPointF)
-    def create_new_pin(self, point: QPointF):
+    def create_new_pin(self, point: QPointF) -> None:
         """
         Slot creates new pin on board.
         :param point: object with coordinates of new pin.
@@ -104,7 +104,7 @@ class BoardWidget(QWidget):
             self._parent.update_current_pin()
 
     @pyqtSlot(int)
-    def select_pin_with_index(self, index: int):
+    def select_pin_with_index(self, index: int) -> None:
         """
         Slot handles signal when pin
         :param index: pin index.
@@ -113,7 +113,7 @@ class BoardWidget(QWidget):
         self._parent.measurement_plan.go_pin(index)
         self._parent.update_current_pin()
 
-    def set_board(self, board: MeasurementPlan):
+    def set_board(self, board: MeasurementPlan) -> None:
         """
         Method sets new board.
         :param board: new board.

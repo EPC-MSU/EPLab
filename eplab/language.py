@@ -73,7 +73,7 @@ class LanguageSelectionWindow(qt.QDialog):
     Class for window to select language.
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         """
         :param parent: parent window.
         """
@@ -81,7 +81,7 @@ class LanguageSelectionWindow(qt.QDialog):
         super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self._init_ui()
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
         """
         Method initializes widgets in dialog window.
         """
@@ -96,11 +96,10 @@ class LanguageSelectionWindow(qt.QDialog):
         language = Language.get_language_name(qApp.instance().property("language"))
         self.combo_box_languages.setCurrentText(language)
         v_box.addWidget(self.combo_box_languages)
-        btns = qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel
-        self.buttonBox = qt.QDialogButtonBox(btns)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        v_box.addWidget(self.buttonBox)
+        self.button_box = qt.QDialogButtonBox(qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        v_box.addWidget(self.button_box)
         v_box.setSizeConstraint(qt.QLayout.SetFixedSize)
         self.adjustSize()
         self.setLayout(v_box)

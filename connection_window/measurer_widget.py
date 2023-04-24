@@ -23,7 +23,7 @@ class MeasurerTypeWidget(qt.QWidget):
     WIDGET_WIDTH: int = 300
     measurer_type_changed: pyqtSignal = pyqtSignal(ut.MeasurerType, bool)
 
-    def __init__(self, initial_product_name: ut.ProductNames = None):
+    def __init__(self, initial_product_name: ut.ProductNames = None) -> None:
         """
         :param initial_product_name: initial product name.
         """
@@ -35,7 +35,7 @@ class MeasurerTypeWidget(qt.QWidget):
         self._initial_product_name: ut.ProductNames = initial_product_name
         self._init_ui()
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
         """
         Method initializes widgets on main widget.
         """
@@ -77,7 +77,7 @@ class MeasurerTypeWidget(qt.QWidget):
                 return product_name
 
     @pyqtSlot(ut.MeasurerType, bool)
-    def select_measurer_type(self, measurer_type: ut.MeasurerType, radio_button_status: bool):
+    def select_measurer_type(self, measurer_type: ut.MeasurerType, radio_button_status: bool) -> None:
         """
         Slot handles signal that new measurer type was selected.
         :param measurer_type: selected measurer type;
@@ -89,7 +89,7 @@ class MeasurerTypeWidget(qt.QWidget):
         show_two_channels = self.get_product_name() not in ut.ProductNames.get_single_channel_products()
         self.measurer_type_changed.emit(measurer_type, show_two_channels)
 
-    def send_initial_values(self):
+    def send_initial_values(self) -> None:
         """
         Method emits signal.
         """
@@ -115,7 +115,7 @@ class MeasurerURLsWidget(qt.QWidget):
         IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+|virtual)$"
         PLACEHOLDER_IVM = "com:\\\\.\\COMx {} xi-net://x.x.x.x/x"
 
-    def __init__(self, initial_ports: List[str]):
+    def __init__(self, initial_ports: List[str]) -> None:
         """
         :param initial_ports: initial ports of measurers.
         """
@@ -164,7 +164,7 @@ class MeasurerURLsWidget(qt.QWidget):
             ports_for_first_and_second[index] = sorted(ports_for_first_and_second[index])
         return ports_for_first_and_second
 
-    def _init_asa(self, url: str = None):
+    def _init_asa(self, url: str = None) -> None:
         """
         Method initializes available ports for first measurer of type ASA.
         :param url: selected address for first measurer.
@@ -181,7 +181,7 @@ class MeasurerURLsWidget(qt.QWidget):
         else:
             self.combo_boxes_measurers[0].setCurrentText("virtual")
 
-    def _init_ivm10(self, port_1: str = None, port_2: str = None):
+    def _init_ivm10(self, port_1: str = None, port_2: str = None) -> None:
         """
         Method initializes available ports for first and second measurers of type IVM10.
         :param port_1: selected port for first measurer;
@@ -204,7 +204,7 @@ class MeasurerURLsWidget(qt.QWidget):
         if port_1 is None and port_2 is None:
             self._set_real_ivm10_ports()
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
         """
         Method initializes widgets on main widget.
         """
@@ -238,7 +238,7 @@ class MeasurerURLsWidget(qt.QWidget):
             self.buttons_show_help.append(button)
         self.setLayout(grid_layout)
 
-    def _set_real_ivm10_ports(self):
+    def _set_real_ivm10_ports(self) -> None:
         """
         Method sets real IVM10 device to current ports.
         """
@@ -262,7 +262,7 @@ class MeasurerURLsWidget(qt.QWidget):
             self._init_ivm10(*ports)
 
     @pyqtSlot()
-    def change_ports(self):
+    def change_ports(self) -> None:
         """
         Slot handles signal that port for measurer was changed.
         """
@@ -287,7 +287,7 @@ class MeasurerURLsWidget(qt.QWidget):
         return ports
 
     @pyqtSlot(ut.MeasurerType, bool)
-    def set_measurer_type(self, measurer_type: ut.MeasurerType, show_two_channels: bool):
+    def set_measurer_type(self, measurer_type: ut.MeasurerType, show_two_channels: bool) -> None:
         """
         Slot sets new measurer type.
         :param measurer_type: new measurer type;
@@ -312,7 +312,7 @@ class MeasurerURLsWidget(qt.QWidget):
         self.labels_measurers[1].setVisible(show_two_channels)
 
     @pyqtSlot()
-    def show_help(self):
+    def show_help(self) -> None:
         """
         Slot shows help information how to enter COM-port or server address.
         """

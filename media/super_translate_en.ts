@@ -325,6 +325,31 @@
         <translation>Unknown measurer</translation>
     </message>
     <message>
+        <location filename="../mainwindow.py" line="380"/>
+        <source>Добавить метку</source>
+        <translation>Add marker</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="381"/>
+        <source>Экспортировать кривые в файл</source>
+        <translation>Export curves to file</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="382"/>
+        <source>Удалить все метки</source>
+        <translation>Delete all markers</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="383"/>
+        <source>Удалить метку</source>
+        <translation>Delete marker</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="384"/>
+        <source>Сохранить изображение</source>
+        <translation>Save image</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.py" line="515"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
@@ -408,16 +433,6 @@
         <location filename="../mainwindow.py" line="999"/>
         <source>Ошибка при установке настроек устройства</source>
         <translation>Error occurred while configuring device settings</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="1031"/>
-        <source>Удалить метку</source>
-        <translation>Delete marker</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="1035"/>
-        <source>Удалить все метки</source>
-        <translation>Delete all markers</translation>
     </message>
     <message>
         <location filename="../mainwindow.py" line="1122"/>
@@ -558,21 +573,6 @@
         <location filename="../connection_window/mux_widget.py" line="97"/>
         <source>Введите значение последовательного порта в формате com:///dev/ttyACMx.</source>
         <translation>Enter serial port value in format com:///dev/ttyACMx.</translation>
-    </message>
-    <message>
-        <location filename="../ivcviewer.py" line="554"/>
-        <source>Сохранить изображение</source>
-        <translation>Save image</translation>
-    </message>
-    <message>
-        <location filename="../ivcviewer.py" line="666"/>
-        <source>Сохранить график как изображение</source>
-        <translation>Save plot as image</translation>
-    </message>
-    <message>
-        <location filename="../ivcviewer.py" line="672"/>
-        <source>Добавить метку</source>
-        <translation>Add marker</translation>
     </message>
     <message>
         <location filename="../language.py" line="89"/>
