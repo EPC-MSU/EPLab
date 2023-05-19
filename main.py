@@ -1,4 +1,6 @@
+import importlib.util
 import logger
+import os
 import sys
 import traceback
 from argparse import ArgumentParser, Namespace
@@ -6,6 +8,11 @@ from PyQt5.QtWidgets import qApp, QApplication, QDesktopWidget, QLabel, QMainWin
 from epcore.product import EyePointProduct
 import utils as ut
 from mainwindow import EPLabWindow
+
+
+if "_PYIBoot_SPLASH" in os.environ and importlib.util.find_spec("pyi_splash"):
+    import pyi_splash
+    pyi_splash.close()
 
 
 def exception_hook(exc_type: Exception, exc_value: Exception, exc_traceback: "traceback"):

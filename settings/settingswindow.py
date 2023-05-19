@@ -95,7 +95,7 @@ class SettingsWindow(QDialog):
 
         super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        uic.loadUi(os.path.join(dir_name, "media", "settings.ui"), self)
+        uic.loadUi(os.path.join(dir_name, "gui", "settings.ui"), self)
         self.parent = parent
         self.settings_directory: str = settings_directory if settings_directory else ut.get_dir_name()
         self.layout().setSizeConstraint(QLayout.SetFixedSize)

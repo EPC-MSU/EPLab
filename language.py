@@ -65,7 +65,7 @@ _LANGUAGES = {Language.RU: "Русский",
               Language.EN: "English"}
 _DIR_NAME = os.path.dirname(os.path.abspath(__file__))
 _FILES = {Language.RU: "",
-          Language.EN: os.path.join(_DIR_NAME, "media", "super_translate_en.qm")}
+          Language.EN: os.path.join(_DIR_NAME, "gui", "super_translate_en.qm")}
 
 
 class LanguageSelectionWindow(qt.QDialog):
