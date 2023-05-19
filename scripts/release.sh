@@ -35,7 +35,8 @@ python3 -m venv venv
 --add-data "./venv/lib/python3.6/site-packages/epsound/void.wav:epsound" \
 --add-data "./venv/lib/python3.6/site-packages/ivviewer/media/*:ivviewer/media" \
 --add-data "./venv/lib/python3.6/site-packages/report_templates/*:report_templates" \
---icon media/ico.ico
+--icon media/ico.ico \
+--splash media/logo.png
 
 cp ./resources/readme.md ./dist/readme.md
 mv dist release
