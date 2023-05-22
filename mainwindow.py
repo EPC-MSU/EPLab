@@ -1370,7 +1370,7 @@ class EPLabWindow(QMainWindow):
         super().resizeEvent(event)
 
     @pyqtSlot()
-    def save_pin(self):
+    def save_pin(self) -> None:
         """
         Slot saves IV-curve to current pin.
         """
@@ -1401,7 +1401,7 @@ class EPLabWindow(QMainWindow):
                     dialog.set_parameters()
                 return
 
-    def update_current_pin(self):
+    def update_current_pin(self) -> None:
         """
         Call this method when current pin index changed.
         """
