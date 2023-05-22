@@ -105,10 +105,21 @@ class EPLabWindow(QMainWindow):
         :param settings: measurement settings for which plot parameters to adjust.
         """
 
-        borders = self._product.adjust_plot_borders(settings)
-        scale = self._product.adjust_plot_scale(settings)
+        scale = self._calculate_scales(settings)
         self._iv_window.plot.set_scale(*scale)
-        self._iv_window.plot.set_min_borders(*borders)
+        self._iv_window.plot.set_min_borders(*scale)
+
+    @staticmethod
+    def _calculate_scales(settings: MeasurementSettings) -> Tuple[float, float]:
+        """
+        :param settings: measurement settings.
+        :return: scale on horizontal and vertical axes.
+        """
+
+        scale_coefficient = 1.2
+        x_scale = scale_coefficient * settings.max_voltage
+        y_scale = 1000 * x_scale / settings.internal_resistance
+        return x_scale, y_scale
 
     def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> float:
         """
