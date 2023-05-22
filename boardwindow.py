@@ -84,12 +84,10 @@ class BoardWidget(QWidget):
         if self._control_pressed and key in (Qt.Key_Down, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up):
             return super().eventFilter(obj, event)
         if key == Qt.Key_Left:
-            self.measurement_plan.go_prev_pin()
-            self.select_pin_with_index(self.measurement_plan.get_current_index())
+            self._parent.go_to_left_or_right_pin(True)
             return True
         if key == Qt.Key_Right:
-            self.measurement_plan.go_next_pin()
-            self.select_pin_with_index(self.measurement_plan.get_current_index())
+            self._parent.go_to_left_or_right_pin(False)
             return True
         if key in (Qt.Key_Enter, Qt.Key_Return):
             self._parent.save_pin()

@@ -11,8 +11,9 @@ from functools import partial
 from platform import system
 from typing import Dict, List, Optional, Tuple
 import numpy as np
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QPoint, Qt as QtC, QTimer, QTranslator
-from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QResizeEvent
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt as QtC, QTimer,
+                          QTranslator)
+from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow, QMenu, QMessageBox,
                              QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
@@ -73,6 +74,7 @@ class EPLabWindow(QMainWindow):
 
         super().__init__()
         self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "ico.png"))
+        self.installEventFilter(self)
         self._init_ui(product, english)
         if port_1 is None and port_2 is None:
             self.disconnect_devices()
@@ -334,6 +336,24 @@ class EPLabWindow(QMainWindow):
                     return name
         return {param: _get_checked_button(self._option_buttons[param]) for param in self._option_buttons}
 
+    def _handle_key_press_event(self, obj: QObject, event: QEvent) -> bool:
+        """
+        Method handles key press events on main window.
+        :param obj: main window;
+        :param event: key press event.
+        :return: handling result.
+        """
+
+        key = QKeyEvent(event).key()
+        if key in (QtC.Key_Left, QtC.Key_Right) and self.next_point_action.isEnabled() and \
+                self.previous_point_action.isEnabled():
+            self.go_to_left_or_right_pin(key == QtC.Key_Left)
+            return True
+        if key in (QtC.Key_Enter, QtC.Key_Return) and self.save_point_action.isEnabled():
+            self.save_pin()
+            return True
+        return super().eventFilter(obj, event)
+
     def _init_threshold(self):
         """
         Method initializes initial value of score threshold.
@@ -419,13 +439,13 @@ class EPLabWindow(QMainWindow):
         self.open_file_action.triggered.connect(self._on_load_board)
         self.save_file_action.triggered.connect(self._on_save_board)
         self.save_as_file_action.triggered.connect(self._on_save_board_as)
-        self.previous_point_action.triggered.connect(self._on_go_to_left_or_right_pin)
+        self.previous_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(True))
         self.num_point_line_edit = QLineEdit(self)
         self.num_point_line_edit.setFixedWidth(40)
         self.num_point_line_edit.setEnabled(False)
         self.toolBar_test.insertWidget(self.next_point_action, self.num_point_line_edit)
         self.num_point_line_edit.returnPressed.connect(self.go_to_selected_pin)
-        self.next_point_action.triggered.connect(self._on_go_to_left_or_right_pin)
+        self.next_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(False))
         self.new_point_action.triggered.connect(self.create_new_pin)
         self.save_point_action.triggered.connect(self.save_pin)
         self.add_board_image_action.triggered.connect(self._on_load_board_image)
@@ -793,27 +813,6 @@ class EPLabWindow(QMainWindow):
             else:
                 self._msystem.measurers[measurer_id].unfreeze()
                 self._skip_curve = True
-
-    @pyqtSlot()
-    def _on_go_to_left_or_right_pin(self):
-        """
-        Slot moves to next or previous pin in measurement plan.
-        """
-
-        try:
-            if self.sender() is self.previous_point_action:
-                self._measurement_plan.go_prev_pin()
-            else:
-                self._measurement_plan.go_next_pin()
-        except BadMultiplexerOutputError:
-            if not self._mux_and_plan_window.measurement_plan_runner.is_running:
-                ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
-                                  qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
-                                                      "точки не был установлен."))
-        except Exception:
-            self._device_errors_handler.all_ok = False
-        self.update_current_pin()
-        self._open_board_window_if_needed()
 
     @pyqtSlot(bool)
     def _on_hide_curve(self, state: bool):
@@ -1276,6 +1275,12 @@ class EPLabWindow(QMainWindow):
             self.freeze_curve_b_action.setEnabled(False)
             self.hide_curve_b_action.setEnabled(False)
 
+    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+        if obj == self and isinstance(event, QKeyEvent) and QKeyEvent(event).type() == QEvent.KeyPress and \
+                self.measurement_plan:
+            return self._handle_key_press_event(obj, event)
+        return super().eventFilter(obj, event)
+
     def get_measurers(self) -> list:
         """
         Method returns list of measurers.
@@ -1304,6 +1309,29 @@ class EPLabWindow(QMainWindow):
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
         return settings
+
+    @pyqtSlot(bool)
+    def go_to_left_or_right_pin(self, to_prev: bool) -> None:
+        """
+        Slot moves to next or previous pin in measurement plan.
+        :param to_prev: if True, then there will be a transition to the previous point in measurement plan, otherwise -
+        to next point.
+        """
+
+        try:
+            if to_prev:
+                self._measurement_plan.go_prev_pin()
+            else:
+                self._measurement_plan.go_next_pin()
+        except BadMultiplexerOutputError:
+            if not self._mux_and_plan_window.measurement_plan_runner.is_running:
+                ut.show_exception(qApp.translate("t", "Ошибка открытия точки"),
+                                  qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
+                                                      "точки не был установлен."))
+        except Exception:
+            self._device_errors_handler.all_ok = False
+        self.update_current_pin()
+        self._open_board_window_if_needed()
 
     @pyqtSlot()
     def go_to_selected_pin(self, pin_index: int = None):
