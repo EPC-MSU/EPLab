@@ -5,8 +5,8 @@ File with class to show image of board.
 import os
 from typing import Optional
 from PIL import Image
-from PyQt5.QtCore import pyqtSlot, QPointF
-from PyQt5.QtGui import QIcon, QImage, QPixmap
+from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPointF, Qt
+from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap
 from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView
 from epcore.elements import Pin
@@ -48,12 +48,66 @@ class BoardWidget(QWidget):
         """
 
         super().__init__()
+        self._control_pressed: bool = False
         self._parent = parent
         self._scene: BoardView = BoardView()
         self._scene.on_right_click.connect(self.create_new_pin)
         self._scene.point_moved.connect(self.change_pin_coordinates)
         self._scene.point_selected.connect(self.select_pin_with_index)
+        self._scene.installEventFilter(self)
         self._init_ui()
+
+    @property
+    def measurement_plan(self) -> MeasurementPlan:
+        """
+        :return: measurement plan.
+        """
+
+        return self._parent.measurement_plan
+
+    @property
+    def workspace(self) -> BoardView:
+        return self._scene
+
+    def _handle_key_press_event(self, obj: QObject, event: QEvent) -> bool:
+        """
+        Method handles key press events for board view.
+        :param obj: board view object;
+        :param event: key press event.
+        :return: handling result.
+        """
+
+        key = QKeyEvent(event).key()
+        if key == Qt.Key_Control:
+            self._control_pressed = True
+            return True
+        if self._control_pressed and key in (Qt.Key_Down, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up):
+            return super().eventFilter(obj, event)
+        if key == Qt.Key_Left:
+            self.measurement_plan.go_prev_pin()
+            self.select_pin_with_index(self.measurement_plan.get_current_index())
+            return True
+        if key == Qt.Key_Right:
+            self.measurement_plan.go_next_pin()
+            self.select_pin_with_index(self.measurement_plan.get_current_index())
+            return True
+        if key in (Qt.Key_Enter, Qt.Key_Return):
+            self._parent.save_pin()
+            return True
+        return super().eventFilter(obj, event)
+
+    def _handle_key_release_event(self, obj: QObject, event: QEvent) -> bool:
+        """
+        Method handles key release event for board view.
+        :param obj: board view object;
+        :param event: key release event.
+        :return: handling result.
+        """
+
+        key = QKeyEvent(event).key()
+        if key == Qt.Key_Control:
+            self._control_pressed = False
+        return super().eventFilter(obj, event)
 
     def _init_ui(self) -> None:
         """
@@ -62,15 +116,11 @@ class BoardWidget(QWidget):
 
         self.setWindowTitle("EPLab - Board")
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "ico.png")))
-        self.resize(self.WIDTH, self.HEIGHT)
+        self.resize(BoardWidget.WIDTH, BoardWidget.HEIGHT)
         self.setStyleSheet("background-color:black;")
         layout = QVBoxLayout(self)
         layout.addWidget(self._scene)
         self.setLayout(layout)
-
-    @property
-    def workspace(self) -> BoardView:
-        return self._scene
 
     def add_pin(self, x: float, y: float, index: int) -> None:
         """
@@ -90,8 +140,8 @@ class BoardWidget(QWidget):
         :param pin: new coordinates of pin.
         """
 
-        self._parent.measurement_plan.go_pin(index)
-        current_pin = self._parent.measurement_plan.get_current_pin()
+        self.measurement_plan.go_pin(index)
+        current_pin = self.measurement_plan.get_current_pin()
         current_pin.x = pin.x()
         current_pin.y = pin.y()
 
@@ -104,10 +154,19 @@ class BoardWidget(QWidget):
 
         if self._parent.work_mode is WorkMode.WRITE:
             pin = Pin(x=point.x(), y=point.y(), measurements=[])
-            self._parent.measurement_plan.append_pin(pin)
-            self.add_pin(pin.x, pin.y, self._parent.measurement_plan.get_current_index())
+            self.measurement_plan.append_pin(pin)
+            self.add_pin(pin.x, pin.y, self.measurement_plan.get_current_index())
             self._parent.update_current_pin()
             self._parent.save_pin()
+
+    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+        if obj == self._scene and isinstance(event, QKeyEvent):
+            key_event = QKeyEvent(event)
+            if key_event.type() == QEvent.KeyPress:
+                return self._handle_key_press_event(obj, event)
+            if key_event.type() == QEvent.KeyRelease:
+                return self._handle_key_release_event(obj, event)
+        return super().eventFilter(obj, event)
 
     @pyqtSlot(int)
     def select_pin_with_index(self, index: int) -> None:
@@ -116,7 +175,7 @@ class BoardWidget(QWidget):
         :param index: pin index.
         """
 
-        self._parent.measurement_plan.go_pin(index)
+        self.measurement_plan.go_pin(index)
         self._parent.update_current_pin()
 
     def set_board(self, board: MeasurementPlan) -> None:
