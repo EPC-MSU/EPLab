@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt as QtC, QTimer,
                           QTranslator)
-from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QResizeEvent
+from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow, QMenu, QMessageBox,
                              QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
@@ -74,8 +74,8 @@ class EPLabWindow(QMainWindow):
 
         super().__init__()
         self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "ico.png"))
-        self.installEventFilter(self)
         self._init_ui(product, english)
+        self.installEventFilter(self)
         if port_1 is None and port_2 is None:
             self.disconnect_devices()
         else:
@@ -443,6 +443,7 @@ class EPLabWindow(QMainWindow):
         self.num_point_line_edit = QLineEdit(self)
         self.num_point_line_edit.setFixedWidth(40)
         self.num_point_line_edit.setEnabled(False)
+        self.num_point_line_edit.installEventFilter(self)
         self.toolBar_test.insertWidget(self.next_point_action, self.num_point_line_edit)
         self.num_point_line_edit.returnPressed.connect(self.go_to_selected_pin)
         self.next_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(False))
@@ -452,6 +453,7 @@ class EPLabWindow(QMainWindow):
         self.create_report_action.triggered.connect(self.create_report)
         self.about_action.triggered.connect(show_product_info)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
+        self.line_comment_pin.installEventFilter(self)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)
         self.sound_enabled_action.toggled.connect(self._on_enable_sound)
         self.freeze_curve_a_action.toggled.connect(partial(self._on_freeze_curve, 0))
@@ -1276,6 +1278,25 @@ class EPLabWindow(QMainWindow):
             self.hide_curve_b_action.setEnabled(False)
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+        """
+        Method handles events with main window and some its children (line edit widgets). Method does the following.
+        When focus is on main window, navigates between measurement plan points using Left and Right keys, and takes
+        measurement using Enter key. When focus is on line edit children, performs standard actions for those widgets.
+        When clicking on main window, moves focus to main window.
+        :param obj: object for which event occurred;
+        :param event: event.
+        :return: True if event should be filtered out, otherwise - False.
+        """
+
+        if obj in (self.num_point_line_edit, self.line_comment_pin):
+            if isinstance(event, QKeyEvent):
+                key_event = QKeyEvent(event)
+                if key_event.type() == QEvent.KeyPress and key_event.key() in (QtC.Key_Enter, QtC.Key_Return):
+                    obj.keyPressEvent(key_event)
+                    return True
+            return super().eventFilter(obj, event)
+        if isinstance(event, QMouseEvent):
+            self.setFocus()
         if obj == self and isinstance(event, QKeyEvent) and QKeyEvent(event).type() == QEvent.KeyPress and \
                 self.measurement_plan:
             return self._handle_key_press_event(obj, event)
