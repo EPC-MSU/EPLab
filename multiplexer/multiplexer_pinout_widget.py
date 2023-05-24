@@ -11,6 +11,7 @@ from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
 from common import DeviceErrorsHandler, WorkMode
 
+
 DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 
 
@@ -25,7 +26,7 @@ class ChannelWidget(qt.QWidget):
     selected: pyqtSignal = pyqtSignal(bool)
     turned_on: pyqtSignal = pyqtSignal(bool, int)
 
-    def __init__(self, channel_number: int, up: bool = True):
+    def __init__(self, channel_number: int, up: bool = True) -> None:
         """
         :param channel_number: channel number on module;
         :param up: if True then channel number should be displayed on top of widget.
@@ -37,7 +38,7 @@ class ChannelWidget(qt.QWidget):
         self._channel_number: int = channel_number
         self._init_ui(up)
 
-    def _init_ui(self, up: bool):
+    def _init_ui(self, up: bool) -> None:
         """
         Method initializes widgets on channel widget.
         :param up: if True then channel number should be displayed on top of widget.
@@ -80,7 +81,7 @@ class ChannelWidget(qt.QWidget):
 
         return self.check_box_select_channel.isChecked()
 
-    def enable_select_widget(self, state):
+    def enable_select_widget(self, state) -> None:
         """
         Method enables or disables check box widget to select channel.
         :param state: if True then check box will be enabled.
@@ -88,7 +89,7 @@ class ChannelWidget(qt.QWidget):
 
         self.check_box_select_channel.setEnabled(state)
 
-    def select_channel(self, state):
+    def select_channel(self, state: bool) -> None:
         """
         Method selects or unselects channel.
         :param state: if True then channel should be selected.
@@ -97,7 +98,7 @@ class ChannelWidget(qt.QWidget):
         self.check_box_select_channel.setChecked(state)
 
     @pyqtSlot(int)
-    def send_to_select(self, state: int):
+    def send_to_select(self, state: int) -> None:
         """
         Slot sends signal that channel was selected or unselected.
         :param state: state of check box widget.
@@ -106,7 +107,7 @@ class ChannelWidget(qt.QWidget):
         self.selected.emit(state == Qt.Checked)
 
     @pyqtSlot(bool)
-    def send_to_turn_on_off(self, state: bool):
+    def send_to_turn_on_off(self, state: bool) -> None:
         """
         Slot sends signal that channel was turned on or turned off.
         :param state: if True then channel was turned on.
@@ -114,7 +115,7 @@ class ChannelWidget(qt.QWidget):
 
         self.turned_on.emit(state, self._channel_number)
 
-    def turn_off(self):
+    def turn_off(self) -> None:
         """
         Method turns off channel.
         """
@@ -134,7 +135,7 @@ class ModuleWidget(qt.QWidget):
     module_turned_off: pyqtSignal = pyqtSignal(MultiplexerOutput)
     module_turned_on: pyqtSignal = pyqtSignal(MultiplexerOutput)
 
-    def __init__(self, module_type: ModuleTypes, module_number: int):
+    def __init__(self, module_type: ModuleTypes, module_number: int) -> None:
         """
         :param module_type: module type;
         :param module_number: module number.
@@ -149,7 +150,7 @@ class ModuleWidget(qt.QWidget):
         self._turned_on_channel: ChannelWidget = None
         self._init_ui()
 
-    def _change_module_color(self):
+    def _change_module_color(self) -> None:
         """
         Method changes color of module.
         """
@@ -157,7 +158,7 @@ class ModuleWidget(qt.QWidget):
         color = self.COLOR_TURNED_ON if self._turned_on_channel else self.COLOR_TURNED_OFF
         self.frame_module.setStyleSheet(f"QWidget {{border: 2px solid {color}; border-radius: 3px;}}")
 
-    def _create_context_menu(self):
+    def _create_context_menu(self) -> None:
         """
         Method creates context menu for module.
         """
@@ -169,7 +170,7 @@ class ModuleWidget(qt.QWidget):
         self.addAction(self.action_select_all_channels)
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
 
-    def _create_pinout(self):
+    def _create_pinout(self) -> None:
         """
         Method creates widgets for channels in module.
         """
@@ -188,7 +189,7 @@ class ModuleWidget(qt.QWidget):
             grid_layout.addWidget(channel, row, column)
         self.frame_module.setLayout(grid_layout)
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
         """
         Method initializes widgets on module widget.
         """
@@ -220,7 +221,7 @@ class ModuleWidget(qt.QWidget):
                 break
         return all_channels_selected
 
-    def enable_select_channels(self, state: bool):
+    def enable_select_channels(self, state: bool) -> None:
         """
         Method enables or disables widgets on channel widgets to select channel.
         :param state: if True then select widgets will be enabled.
@@ -244,7 +245,7 @@ class ModuleWidget(qt.QWidget):
                                                            module_number=self._module_number))
         return selected_channels
 
-    def select_all_channels(self, state: bool):
+    def select_all_channels(self, state: bool) -> None:
         """
         Method selects or unselects all channels of module.
         :param state: if True then all channels should be selected.
@@ -254,10 +255,9 @@ class ModuleWidget(qt.QWidget):
             channel.select_channel(state)
 
     @pyqtSlot(bool)
-    def send_that_all_channels_selected(self, state: bool):
+    def send_that_all_channels_selected(self, state: bool) -> None:
         """
-        Slot checks if all channels of module are selected and sends
-        appropriate signal.
+        Slot checks if all channels of module are selected and sends appropriate signal.
         :param state: new state of one of module's channel.
         """
 
@@ -265,7 +265,7 @@ class ModuleWidget(qt.QWidget):
         self.action_select_all_channels.setChecked(all_channels_selected)
         self.all_channels_selected.emit(all_channels_selected)
 
-    def set_connected_channel(self, channel_number: int):
+    def set_connected_channel(self, channel_number: int) -> None:
         """
         Method sets given channel of module as turned on.
         :param channel_number: channel number.
@@ -275,7 +275,7 @@ class ModuleWidget(qt.QWidget):
         self.turn_on_off_channel(True, channel_number)
 
     @pyqtSlot(bool, int)
-    def turn_on_off_channel(self, state: bool, channel_number: int):
+    def turn_on_off_channel(self, state: bool, channel_number: int) -> None:
         """
         Slot turns on or turns off channel.
         :param state: if True then channel should be turned on;
@@ -295,7 +295,7 @@ class ModuleWidget(qt.QWidget):
                 self._turned_on_channel = None
         self._change_module_color()
 
-    def turn_off(self):
+    def turn_off(self) -> None:
         """
         Method turns off channels of module.
         """
@@ -318,7 +318,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
     adding_channels_started: pyqtSignal = pyqtSignal(int)
     channel_added: pyqtSignal = pyqtSignal(MultiplexerOutput)
 
-    def __init__(self, parent, device_errors_handler: Optional[DeviceErrorsHandler] = None):
+    def __init__(self, parent, device_errors_handler: Optional[DeviceErrorsHandler] = None) -> None:
         """
         :param parent: parent main window;
         :param device_errors_handler: device errors handler.
@@ -343,7 +343,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self._turned_on_output: MultiplexerOutput = None
         self._init_ui()
 
-    def _create_empty_widget(self):
+    def _create_empty_widget(self) -> None:
         """
         Method creates empty widget.
         """
@@ -351,7 +351,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self.label_no_mux = qt.QLabel(qApp.translate("t", "Нет мультиплексора"))
         self.label_no_mux.setStyleSheet("QLabel {font-weight: bold; font-size: 25px;}")
 
-    def _create_widgets_for_multiplexer(self):
+    def _create_widgets_for_multiplexer(self) -> None:
         """
         Method creates widgets to work with multiplexer.
         """
@@ -378,7 +378,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self.button_start_or_stop_entire_plan_measurement.setToolTip(name_and_tooltip)
         self.button_start_or_stop_entire_plan_measurement.setCheckable(True)
 
-    def _enable_widgets(self, state: bool):
+    def _enable_widgets(self, state: bool) -> None:
         """
         Method enables or disables some widgets on multiplexer pinout widget.
         :param state: if True then widgets will be enabled.
@@ -391,7 +391,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         for module in self._modules.values():
             module.enable_select_channels(state)
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
         """
         Method initializes widgets on main widget.
         """
@@ -412,7 +412,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         layout.addWidget(self.label_no_mux, alignment=Qt.AlignHCenter)
         self.setLayout(layout)
 
-    def _remove_all_modules(self):
+    def _remove_all_modules(self) -> None:
         """
         Method removes all modules from widget.
         """
@@ -422,7 +422,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
             module.deleteLater()
         self._modules = {}
 
-    def _update_modules(self):
+    def _update_modules(self) -> None:
         """
         Method updates modules for widget.
         """
@@ -448,9 +448,9 @@ class MultiplexerPinoutWidget(qt.QWidget):
             self._enable_widgets(len(chain) != 0)
 
     @pyqtSlot(bool)
-    def check_selected_channels(self, state: bool):
+    def check_selected_channels(self, state: bool) -> None:
         """
-        Method checks if all channels of multiplexer are selected.
+        Slot checks if all channels of multiplexer are selected.
         :param state: new state of one of multiplexer's module.
         """
 
@@ -464,7 +464,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         self.check_box_select_all.setChecked(all_channels_selected)
 
     @pyqtSlot()
-    def collect_selected_channels(self):
+    def collect_selected_channels(self) -> None:
         """
         Slot collects selected multiplexer channels.
         """
@@ -477,7 +477,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
             self.adding_channels_started.emit(len(self._selected_channels))
             self._timer.start()
 
-    def enable_widgets(self, state: bool):
+    def enable_widgets(self, state: bool) -> None:
         """
         Method enables or disables all widgets on multiplexer pinout widget.
         :param state: if True then widgets will be enabled.
@@ -488,7 +488,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
             module.setEnabled(state)
 
     @pyqtSlot(bool)
-    def select_all_channels(self, state: bool):
+    def select_all_channels(self, state: bool) -> None:
         """
         Slot selects or unselects all channels of modules.
         :param state: state of check box.
@@ -497,7 +497,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         for module in self._modules.values():
             module.select_all_channels(state)
 
-    def send_selected_channel(self):
+    def send_selected_channel(self) -> None:
         """
         Method sends selected channel.
         """
@@ -509,7 +509,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         else:
             self.adding_channels_finished.emit()
 
-    def set_connected_channel(self, channel: MultiplexerOutput):
+    def set_connected_channel(self, channel: MultiplexerOutput) -> None:
         """
         Method sets given channel of multiplexer as turned on.
         :param channel: connected channel.
@@ -518,7 +518,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         if channel.module_number in self._modules:
             self._modules[channel.module_number].set_connected_channel(channel.channel_number)
 
-    def set_visible(self, status: Optional[bool] = None):
+    def set_visible(self, status: Optional[bool] = None) -> None:
         """
         Method sets widgets to visible state.
         :param status: if True then widgets to work with multiplexer will be shown.
@@ -534,10 +534,9 @@ class MultiplexerPinoutWidget(qt.QWidget):
             widget.setVisible(visible)
         self.label_no_mux.setVisible(not visible)
 
-    def set_work_mode(self, work_mode: WorkMode):
+    def set_work_mode(self, work_mode: WorkMode) -> None:
         """
-        Method enables or disables widgets on multiplexer pinout widget according
-        to given work mode.
+        Method enables or disables widgets on multiplexer pinout widget according to given work mode.
         :param work_mode: work mode.
         """
 
@@ -549,7 +548,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
             else:
                 self._enable_widgets(False)
 
-    def stop_sending_channels(self):
+    def stop_sending_channels(self) -> None:
         """
         Method stops sending selected channels.
         """
@@ -558,7 +557,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
             self._timer.stop()
 
     @pyqtSlot(MultiplexerOutput)
-    def turn_off_output(self, output: MultiplexerOutput):
+    def turn_off_output(self, output: MultiplexerOutput) -> None:
         """
         Slot turns off output of multiplexer.
         :param output: output to turn off.
@@ -570,7 +569,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
                 self._turned_on_output = None
 
     @pyqtSlot(MultiplexerOutput)
-    def turn_on_output(self, output: MultiplexerOutput):
+    def turn_on_output(self, output: MultiplexerOutput) -> None:
         """
         Slot turns on output of multiplexer.
         :param output: output to turn on.
@@ -585,7 +584,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
             self._modules[self._turned_on_output.module_number].turn_off()
         self._turned_on_output = output
 
-    def update_info(self):
+    def update_info(self) -> None:
         """
         Method updates information about multiplexer.
         """
