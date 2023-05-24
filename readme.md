@@ -42,7 +42,7 @@
 
 1. Следуя [инструкциям](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token), получите **access_token**.
 
-2. В файле **requirements.txt** замените строчку с ep_report_generator на следующую (здесь *username* - имя пользователя в https://github.com):
+2. В файле **requirements.txt** замените строчку с ep_report_generator на следующую (здесь **username** - имя пользователя в https://github.com):
 
    ```bash
    git+https://username:access_token@github.com/EPC-MSU/ep_report_generator@vX.X.X#egg=ep_report_generator
@@ -59,7 +59,7 @@
 ```batch
 venv\Scripts\python main.py <ivm_url> [--ref <ivm_url>]
 ```
-ПО может работать как с одним, так и с двумя устройствами (второе устройство задавать не обязательно). *ivm_url*  - это адрес COM-порта. Также *ivm_url* может быть *virtual* (будет использоваться виртуальный измеритель). Пример запуска:
+ПО может работать как с одним, так и с двумя устройствами (второе устройство задавать необязательно). *ivm_url*  - это адрес COM-порта. Также *ivm_url* может быть *virtual* (будет использоваться виртуальный измеритель). Пример запуска:
 
 ```batch
 venv\Scripts\python main.py com:\\.\COM13 --ref virtual
