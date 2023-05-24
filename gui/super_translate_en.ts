@@ -325,6 +325,21 @@
         <translation>Unknown measurer</translation>
     </message>
     <message>
+        <location filename="../mainwindow.py" line="375"/>
+        <source>Добавить метку</source>
+        <translation>Add marker</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="376"/>
+        <source>Экспортировать кривые в файл</source>
+        <translation>Export curves to file</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.py" line="379"/>
+        <source>Сохранить изображение</source>
+        <translation>Save image</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.py" line="515"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
@@ -558,21 +573,6 @@
         <location filename="../connection_window/mux_widget.py" line="97"/>
         <source>Введите значение последовательного порта в формате com:///dev/ttyACMx.</source>
         <translation>Enter serial port value in format com:///dev/ttyACMx.</translation>
-    </message>
-    <message>
-        <location filename="../ivcviewer.py" line="554"/>
-        <source>Сохранить изображение</source>
-        <translation>Save image</translation>
-    </message>
-    <message>
-        <location filename="../ivcviewer.py" line="666"/>
-        <source>Сохранить график как изображение</source>
-        <translation>Save plot as image</translation>
-    </message>
-    <message>
-        <location filename="../ivcviewer.py" line="672"/>
-        <source>Добавить метку</source>
-        <translation>Add marker</translation>
     </message>
     <message>
         <location filename="../language.py" line="89"/>

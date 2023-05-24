@@ -372,6 +372,11 @@ class EPLabWindow(QMainWindow):
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
         self._iv_window.plot.set_path_to_directory(dir_path)
+        self._iv_window.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),
+                                             export_ivc=qApp.translate("t", "Экспортировать кривые в файл"),
+                                             remove_all_cursors=qApp.translate("t", "Удалить все метки"),
+                                             remove_cursor=qApp.translate("t", "Удалить метку"),
+                                             save_screenshot=qApp.translate("t", "Сохранить изображение"))
         self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
         self.reference_curve_plot.set_curve_params(self.COLOR_FOR_REFERENCE)
         self.test_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
