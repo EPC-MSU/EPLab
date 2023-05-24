@@ -185,7 +185,7 @@ class EPLabWindow(QMainWindow):
             item = layout.itemAt(i_item)
             layout.removeItem(item)
 
-    def _clear_widgets(self):
+    def _clear_widgets(self) -> None:
         """
         Method clears widgets on main window.
         """
@@ -200,6 +200,7 @@ class EPLabWindow(QMainWindow):
             self._clear_layout(layout)
             layout.addWidget(QScrollArea())
         self.measurers_menu.clear()
+        self._iv_window.plot.remove_all_cursors()
         self._work_mode = None
         self._settings_update_next_cycle = None
         self._skip_curve = False
