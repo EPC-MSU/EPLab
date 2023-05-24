@@ -73,7 +73,7 @@ class EPLabWindow(QMainWindow):
         """
 
         super().__init__()
-        self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "ico.png"))
+        self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "icon.png"))
         self._init_ui(product, english)
         self.installEventFilter(self)
         if port_1 is None and port_2 is None:

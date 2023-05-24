@@ -113,7 +113,7 @@ class BoardWidget(QWidget):
         """
 
         self.setWindowTitle("EPLab - Board")
-        self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "ico.png")))
+        self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.resize(BoardWidget.WIDTH, BoardWidget.HEIGHT)
         self.setStyleSheet("background-color:black;")
         layout = QVBoxLayout(self)

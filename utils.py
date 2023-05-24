@@ -126,7 +126,7 @@ def create_message_box(msg_title: str, msg_text: str, exc: str = "") -> QMessage
     message_box = QMessageBox()
     message_box.setIcon(QMessageBox.Warning)
     message_box.setWindowTitle(msg_title)
-    message_box.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "ico.png")))
+    message_box.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "icon.png")))
     message_box.setText(msg_text)
     if exc:
         message_box.setInformativeText(str(exc)[-max_message_length:])

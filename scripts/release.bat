@@ -42,7 +42,7 @@ venv\Scripts\pyinstaller main.py --clean --onefile --noconsole ^
 --add-data "venv\Lib\site-packages\ivviewer\media\*;ivviewer\media" ^
 --add-data "venv\Lib\site-packages\report_templates\*;report_templates" ^
 --hidden-import=PyQt5.sip ^
---icon media\ico.ico ^
+--icon media\icon.ico ^
 --splash media\logo.png
 
 xcopy resources\win%target_platform%\drivers\* dist\drivers\* /S /E

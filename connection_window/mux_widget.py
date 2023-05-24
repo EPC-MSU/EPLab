@@ -100,7 +100,7 @@ class MuxWidget(qt.QGroupBox):
         msg_box = qt.QMessageBox()
         msg_box.setIcon(qt.QMessageBox.Information)
         msg_box.setWindowTitle(qApp.translate("t", "Помощь"))
-        msg_box.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "ico.png")))
+        msg_box.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         if "win" in ut.get_platform():
             info = qApp.translate("t", "Введите значение последовательного порта в формате com:\\\\.\\COMx.")
         else:

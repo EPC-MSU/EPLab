@@ -320,7 +320,7 @@ class MeasurerURLsWidget(qt.QWidget):
         msg_box = qt.QMessageBox()
         msg_box.setIcon(qt.QMessageBox.Information)
         msg_box.setWindowTitle(qApp.translate("t", "Помощь"))
-        msg_box.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "ico.png")))
+        msg_box.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         if self._measurer_type == ut.MeasurerType.IVM10:
             if "win" in ut.get_platform():
                 info = qApp.translate("t", "Введите значение последовательного порта в формате com:\\\\.\\COMx или "

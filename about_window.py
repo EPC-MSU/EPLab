@@ -65,7 +65,7 @@ class AboutWindow(QDialog):
         window_title = qApp.translate("t", "О программе")
         self.setWindowTitle(window_title)
         self.setToolTip(window_title)
-        self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "ico.png")))
+        self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.setFixedWidth(WINDOW_WIDTH)
         color = self.palette().color(QPalette.Background)
         text, page_url = self._create_info_text_and_link()

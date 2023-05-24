@@ -95,7 +95,7 @@ class MuxAndPlanWindow(qt.QWidget):
         msg_box = qt.QMessageBox()
         msg_box.setIcon(qt.QMessageBox.Information)
         msg_box.setWindowTitle(qApp.translate("t", "Внимание"))
-        msg_box.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "ico.png")))
+        msg_box.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "icon.png")))
         color = '<span style="background-color: {};">{}</span>'.format(self.COLOR_NOT_TESTED,
                                                                        qApp.translate("t", "жёлтым"))
         text = qApp.translate("t", "Не все точки имеют выходы мультиплексора и/или не все выходы могут быть "
