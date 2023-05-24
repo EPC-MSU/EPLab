@@ -9,18 +9,17 @@ import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from PyQt5.QtGui import QCloseEvent
 from epcore.elements import Board
-from epcore.product import EyePointProduct
 from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator, ReportTypes, ScalingTypes
 import utils as ut
 from common import WorkMode
 from language import Language
 
 
-def get_scales_and_noise_amplitudes_for_iv_curves(board: Board, product: EyePointProduct) -> Tuple[List, List]:
+def get_scales_and_noise_amplitudes_for_iv_curves(board: Board, main_window) -> Tuple[List, List]:
     """
     Function returns scales and noise amplitudes for IV-curves in pins of board.
     :param board: board;
-    :param product: product.
+    :param main_window: main window of application.
     :return: list with scales and list with noise amplitudes.
     """
 
@@ -29,10 +28,10 @@ def get_scales_and_noise_amplitudes_for_iv_curves(board: Board, product: EyePoin
     for element in board.elements:
         for pin in element.pins:
             if pin.measurements:
-                voltage, current = product.adjust_plot_scale(pin.measurements[0].settings)
+                voltage, current = main_window.calculate_scales(pin.measurements[0].settings)
                 current /= 1000
                 scales.append((voltage, current))
-                noise_amplitudes.append(product.adjust_noise_amplitude(pin.measurements[0].settings))
+                noise_amplitudes.append(main_window.product.adjust_noise_amplitude(pin.measurements[0].settings))
             else:
                 scales.append(None)
                 noise_amplitudes.append(None)
@@ -44,13 +43,17 @@ class ReportGenerationThread(QThread):
     Class for thread to generate reports.
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
+        """
+        :param parent: parent.
+        """
+
         super().__init__(parent=parent)
         self._stop_thread: bool = False
         self._task: queue.Queue = queue.Queue()
         self.report_generator: ReportGenerator = ReportGenerator()
 
-    def add_task(self, config: dict):
+    def add_task(self, config: dict) -> None:
         """
         Method adds task.
         :param config: config dictionary to create report.
@@ -59,7 +62,7 @@ class ReportGenerationThread(QThread):
         self.report_generator.stop = False
         self._task.put(lambda: self.report_generator.run(config))
 
-    def run(self):
+    def run(self) -> None:
         while not self._stop_thread:
             if not self._task.empty():
                 task = self._task.get()
@@ -67,14 +70,14 @@ class ReportGenerationThread(QThread):
             else:
                 time.sleep(0.1)
 
-    def stop_generation(self):
+    def stop_generation(self) -> None:
         """
         Method stops report generation.
         """
 
         self.report_generator.stop_process()
 
-    def stop_thread(self):
+    def stop_thread(self) -> None:
         """
         Method stops thread.
         """
@@ -87,7 +90,7 @@ class ReportGenerationWindow(qt.QDialog):
     Class for dialog window to create report for board.
     """
 
-    def __init__(self, parent, thread: ReportGenerationThread):
+    def __init__(self, parent, thread: ReportGenerationThread) -> None:
         """
         :param parent: parent window;
         :param thread: thread for report generation.
@@ -119,12 +122,12 @@ class ReportGenerationWindow(qt.QDialog):
         self._thread.report_generator.generation_stopped.connect(lambda: self.handle_generation_break_or_stop(""))
         self._thread.report_generator.exception_raised.connect(self.handle_generation_break_or_stop)
 
-    def _create_report(self):
+    def _create_report(self) -> None:
         """
         Method creates report.
         """
 
-        scales, noise_amplitudes = get_scales_and_noise_amplitudes_for_iv_curves(self._board, self._parent.product)
+        scales, noise_amplitudes = get_scales_and_noise_amplitudes_for_iv_curves(self._board, self._parent)
         report_to_open = ReportTypes.FULL_REPORT if self._parent.work_mode == WorkMode.WRITE else\
             ReportTypes.SHORT_REPORT
         config = {ConfigAttributes.BOARD: self._board,
@@ -133,7 +136,7 @@ class ReportGenerationWindow(qt.QDialog):
                   ConfigAttributes.NOISE_AMPLITUDES: noise_amplitudes,
                   ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
                   ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
-                  ConfigAttributes.PIN_SIZE: 200,
+                  ConfigAttributes.PIN_SIZE: 150,
                   ConfigAttributes.REPORTS_TO_OPEN: [report_to_open],
                   ConfigAttributes.SCALING_TYPE: ScalingTypes.USER_DEFINED,
                   ConfigAttributes.THRESHOLD_SCORE: self._threshold_score,
@@ -145,7 +148,7 @@ class ReportGenerationWindow(qt.QDialog):
         self.group_box_info.setVisible(True)
         self._thread.add_task(config)
 
-    def _finish_generation(self, report_dir_path: str = "", report_was_generated: bool = True):
+    def _finish_generation(self, report_dir_path: str = "", report_was_generated: bool = True) -> None:
         """
         Method finishes generation of report.
         :param report_dir_path: path to directory with report;
@@ -163,7 +166,7 @@ class ReportGenerationWindow(qt.QDialog):
             message = qApp.translate("t", "Отчет не был сгенерирован")
         qt.QMessageBox.information(self._parent, qApp.translate("t", "Информация"), message)
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
         """
         Method initializes widgets on dialog window.
         """
@@ -202,7 +205,7 @@ class ReportGenerationWindow(qt.QDialog):
         self.setLayout(v_box_layout)
         self.adjustSize()
 
-    def _set_state_to_buttons(self, state: bool):
+    def _set_state_to_buttons(self, state: bool) -> None:
         """
         Method sets properties for buttons.
         :param state: if True then buttons need to be passed properties when generating
@@ -217,7 +220,7 @@ class ReportGenerationWindow(qt.QDialog):
             self.button_create_report.setChecked(False)
 
     @pyqtSlot()
-    def change_progress(self):
+    def change_progress(self) -> None:
         """
         Slot changes progress of report generation.
         """
@@ -225,7 +228,7 @@ class ReportGenerationWindow(qt.QDialog):
         self._number_of_steps_done += 1
         self.progress_bar.setValue(int(self._number_of_steps_done / self._total_number * 100))
 
-    def closeEvent(self, event: QCloseEvent):
+    def closeEvent(self, event: QCloseEvent) -> None:
         """
         Method handles close event.
         :param event: close event.
@@ -235,7 +238,7 @@ class ReportGenerationWindow(qt.QDialog):
         super().closeEvent(event)
 
     @pyqtSlot(str)
-    def finish_generation(self, report_dir_path: str):
+    def finish_generation(self, report_dir_path: str) -> None:
         """
         Slot finishes generation of report.
         :param report_dir_path: path to directory with report.
@@ -246,7 +249,7 @@ class ReportGenerationWindow(qt.QDialog):
         self._set_state_to_buttons(False)
 
     @pyqtSlot(str)
-    def handle_generation_break_or_stop(self, _: str):
+    def handle_generation_break_or_stop(self, _: str) -> None:
         """
         Slot handles break of report generation.
         :param _: message of exception.
@@ -256,7 +259,7 @@ class ReportGenerationWindow(qt.QDialog):
         self.button_create_report.setEnabled(True)
 
     @pyqtSlot()
-    def select_folder(self):
+    def select_folder(self) -> None:
         """
         Slot selects folder where report will be saved.
         """
@@ -267,7 +270,7 @@ class ReportGenerationWindow(qt.QDialog):
             self._folder_for_report = folder
 
     @pyqtSlot(int)
-    def set_total_number_of_steps(self, number: int):
+    def set_total_number_of_steps(self, number: int) -> None:
         """
         Slot sets total number of steps of calculation.
         :param number: total number of steps.
@@ -275,7 +278,7 @@ class ReportGenerationWindow(qt.QDialog):
 
         self._total_number = number
 
-    def start_generation(self):
+    def start_generation(self) -> None:
         """
         Method starts report generation.
         """
@@ -284,7 +287,7 @@ class ReportGenerationWindow(qt.QDialog):
         self.button_create_report.setChecked(True)
 
     @pyqtSlot(bool)
-    def start_or_stop(self, status: bool):
+    def start_or_stop(self, status: bool) -> None:
         """
         Slot starts or stops report generation.
         :param status: if True then report generation should be started.
@@ -301,7 +304,7 @@ class ReportGenerationWindow(qt.QDialog):
             self.button_create_report.setEnabled(False)
         self._set_state_to_buttons(status)
 
-    def update_info(self):
+    def update_info(self) -> None:
         """
         Method updates info for report generator.
         """

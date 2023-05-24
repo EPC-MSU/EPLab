@@ -14,3 +14,4 @@ src/*
 doc/*.png
 EPLab-Files/
 eplab_settings_for_auto_save_and_read.ini
+report *

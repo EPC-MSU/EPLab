@@ -107,21 +107,9 @@ class EPLabWindow(QMainWindow):
         :param settings: measurement settings for which plot parameters to adjust.
         """
 
-        scale = self._calculate_scales(settings)
+        scale = self.calculate_scales(settings)
         self._iv_window.plot.set_scale(*scale)
         self._iv_window.plot.set_min_borders(*scale)
-
-    @staticmethod
-    def _calculate_scales(settings: MeasurementSettings) -> Tuple[float, float]:
-        """
-        :param settings: measurement settings.
-        :return: scale on horizontal and vertical axes.
-        """
-
-        scale_coefficient = 1.2
-        x_scale = scale_coefficient * settings.max_voltage
-        y_scale = 1000 * x_scale / settings.internal_resistance
-        return x_scale, y_scale
 
     def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> float:
         """
@@ -1128,6 +1116,18 @@ class EPLabWindow(QMainWindow):
         self.sound_enabled_action.setChecked(self.__settings.sound_enabled)
         self._update_threshold(self.__settings.score_threshold)
 
+    @staticmethod
+    def calculate_scales(settings: MeasurementSettings) -> Tuple[float, float]:
+        """
+        :param settings: measurement settings.
+        :return: scale on horizontal and vertical axes.
+        """
+
+        scale_coefficient = 1.2
+        x_scale = scale_coefficient * settings.max_voltage
+        y_scale = 1000 * x_scale / settings.internal_resistance
+        return x_scale, y_scale
+
     def closeEvent(self, event: QCloseEvent):
         self._board_window.close()
         if self._measurement_plan and self._measurement_plan.to_json() != self._last_saved_measurement_plan_data:
@@ -1186,6 +1186,7 @@ class EPLabWindow(QMainWindow):
         if not self._msystem:
             self.disconnect_devices()
             return
+        self._clear_widgets()
         self._iv_window.plot.clear_center_text()
         options_data = self._read_options_from_json()
         self._product.change_options(options_data)
@@ -1236,7 +1237,7 @@ class EPLabWindow(QMainWindow):
         else:
             self._report_generation_window.activateWindow()
 
-    def disconnect_devices(self):
+    def disconnect_devices(self) -> None:
         """
         Method disconnects measurers.
         """
