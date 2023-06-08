@@ -36,7 +36,7 @@ python3 -m venv venv
 --add-data "./venv/lib/python3.6/site-packages/ivviewer/media/*:ivviewer/media" \
 --add-data "./venv/lib/python3.6/site-packages/report_templates/*:report_templates" \
 --icon media/icon.ico \
---splash media/logo.png
+--splash media/banner.png
 
 cp ./resources/readme.md ./dist/readme.md
 mv dist release
