@@ -572,6 +572,9 @@
    <property name="text">
     <string>Следующая точка</string>
    </property>
+   <property name="shortcut">
+    <string>Right</string>
+   </property>
   </action>
   <action name="previous_point_action">
    <property name="enabled">
@@ -583,6 +586,9 @@
    </property>
    <property name="text">
     <string>Предыдущая точка</string>
+   </property>
+   <property name="shortcut">
+    <string>Left</string>
    </property>
   </action>
   <action name="new_point_action">
@@ -613,6 +619,9 @@
    </property>
    <property name="iconText">
     <string> Сохранить точку</string>
+   </property>
+   <property name="shortcut">
+    <string>Return</string>
    </property>
   </action>
   <action name="add_board_image_action">
