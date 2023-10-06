@@ -296,6 +296,11 @@
         <source>Открыть окно просмотра мультиплексора</source>
         <translation>Open multiplexer window</translation>
     </message>
+    <message>
+        <location filename="mainwindow.ui" line="770"/>
+        <source>Горячие клавиши</source>
+        <translation>Keymap reference</translation>
+    </message>
 </context>
 <context>
     <name>t</name>

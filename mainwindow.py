@@ -13,7 +13,7 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt as QtC, QTimer,
                           QTranslator)
-from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QMouseEvent, QResizeEvent
+from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow, QMenu, QMessageBox,
                              QScrollArea, QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
@@ -31,6 +31,7 @@ from about_window import show_product_info
 from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
 from language import Language, LanguageSelectionWindow
+from keymapdialog import show_keymap_info
 from measurer_settings_window import MeasurerSettingsWindow
 from multiplexer import MuxAndPlanWindow
 from parameter_widget import ParameterWidget
@@ -398,8 +399,10 @@ class EPLabWindow(QMainWindow):
         self.open_mux_window_action.triggered.connect(self._on_open_mux_window)
         self.search_optimal_action.triggered.connect(self._on_search_optimal)
         self.new_file_action.triggered.connect(self._on_create_new_board)
+        self.new_file_action.setShortcut(QKeySequence("Ctrl+N"))
         self.open_file_action.triggered.connect(self._on_load_board)
         self.save_file_action.triggered.connect(self._on_save_board)
+        self.save_file_action.setShortcut(QKeySequence("Ctrl+S"))
         self.save_as_file_action.triggered.connect(self._on_save_board_as)
         self.previous_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(True))
         self.num_point_line_edit = QLineEdit(self)
@@ -414,6 +417,7 @@ class EPLabWindow(QMainWindow):
         self.add_board_image_action.triggered.connect(self._on_load_board_image)
         self.create_report_action.triggered.connect(self.create_report)
         self.about_action.triggered.connect(show_product_info)
+        self.action_keymap.triggered.connect(show_keymap_info)
         self.save_comment_push_button.clicked.connect(self._on_save_comment)
         self.line_comment_pin.installEventFilter(self)
         self.line_comment_pin.returnPressed.connect(self._on_save_comment)

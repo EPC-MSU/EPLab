@@ -4,13 +4,14 @@ File with class for dialog window to show main information about application.
 
 import os
 from typing import Tuple
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon, QPalette
 from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QLayout, QPushButton, QTextBrowser, QVBoxLayout
 import utils as ut
 from connection_window.utils import get_platform
 from language import Language
 from version import Version
+
 
 TEXT_HEIGHT: int = 100
 WINDOW_WIDTH: int = 400
@@ -62,10 +63,10 @@ class AboutWindow(QDialog):
         Method initializes widgets on dialog window.
         """
 
-        window_title = qApp.translate("t", "О программе")
-        self.setWindowTitle(window_title)
-        self.setToolTip(window_title)
+        self.setWindowTitle(qApp.translate("t", "О программе"))
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+
         self.setFixedWidth(WINDOW_WIDTH)
         color = self.palette().color(QPalette.Background)
         text, page_url = self._create_info_text_and_link()
@@ -76,7 +77,7 @@ class AboutWindow(QDialog):
         self.label_logo.setOpenExternalLinks(True)
         self.text_edit_info: QTextBrowser = QTextBrowser()
         self.text_edit_info.setFrameStyle(QFrame.NoFrame)
-        self.text_edit_info.setStyleSheet(f"background: {color.name()}")
+        self.text_edit_info.setStyleSheet(f"background: {color.name()};")
         self.text_edit_info.setOpenExternalLinks(True)
         self.text_edit_info.setHtml(text)
         self.text_edit_info.setFixedSize(WINDOW_WIDTH, TEXT_HEIGHT)
@@ -86,7 +87,6 @@ class AboutWindow(QDialog):
         self.button_copy.clicked.connect(self.copy_info)
         self.button_ok: QPushButton = QPushButton("OK")
         self.button_ok.setDefault(True)
-        self.button_ok.setToolTip("OK")
         self.button_ok.clicked.connect(self.close)
         h_layout = QHBoxLayout()
         h_layout.addStretch(1)
