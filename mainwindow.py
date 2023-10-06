@@ -15,7 +15,7 @@ from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLayout, QLineEdit, QMainWindow, QMenu, QMessageBox,
-                             QScrollArea, QVBoxLayout, QWidget)
+                             QScrollArea, QShortcut, QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
@@ -312,6 +312,18 @@ class EPLabWindow(QMainWindow):
             return True
         return super().eventFilter(obj, event)
 
+    @pyqtSlot()
+    def _handle_pedal_signal(self) -> None:
+        """
+        Slot processes pedal presses.
+        """
+
+        if self.work_mode == WorkMode.COMPARE:
+            self.freeze_curve_a_action.trigger()
+            self.freeze_curve_b_action.trigger()
+        else:
+            self.next_point_action.trigger()
+
     def _init_threshold(self):
         """
         Method initializes initial value of score threshold.
@@ -431,6 +443,9 @@ class EPLabWindow(QMainWindow):
         self.remove_cursor_action.triggered.connect(self._on_show_context_menu_for_cursor_deletion)
         self.save_screen_action.triggered.connect(self._on_save_image)
         self.select_language_action.triggered.connect(self._on_select_language)
+
+        self.shortcut_pedal_crutch: QShortcut = QShortcut(QKeySequence("Ctrl+Alt+Shift+P"), self)
+        self.shortcut_pedal_crutch.activated.connect(self._handle_pedal_signal)
 
         self.comparing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.COMPARE))
         self.writing_mode_action.triggered.connect(lambda: self._on_switch_work_mode(WorkMode.WRITE))
@@ -1270,6 +1285,7 @@ class EPLabWindow(QMainWindow):
             return super().eventFilter(obj, event)
         if isinstance(event, QMouseEvent):
             self.setFocus()
+
         if obj == self and isinstance(event, QKeyEvent) and QKeyEvent(event).type() == QEvent.KeyPress and \
                 self.measurement_plan:
             return self._handle_key_press_event(obj, event)

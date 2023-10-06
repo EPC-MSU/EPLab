@@ -770,6 +770,14 @@
     <string>Горячие клавиши</string>
    </property>
   </action>
+  <action name="action_pedal_crutch">
+   <property name="text">
+    <string>Костыль для педали</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
