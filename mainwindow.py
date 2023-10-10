@@ -315,7 +315,8 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _handle_pedal_signal(self) -> None:
         """
-        Slot processes pedal presses.
+        Slot processes pedal presses. The pedal freezes/unfreezes the measures in comparison mode and causes a
+        transition to the next point in the testing plan in other modes.
         """
 
         if self.work_mode == WorkMode.COMPARE:
