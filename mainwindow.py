@@ -293,6 +293,28 @@ class EPLabWindow(QMainWindow):
 
         return {param: scroll_area.get_checked_option() for param, scroll_area in self._parameters_scroll_areas.items()}
 
+    def _handle_freezing_curves_with_pedal(self) -> None:
+        """
+        Method freezes the measurers curves using a pedal. If at least one curve is not frozen, then all curves are
+        frozen by pedal. If all curves are frozen, unfreeze all curves.
+        """
+
+        actions_for_measurers = {0: self.freeze_curve_a_action,
+                                 1: self.freeze_curve_b_action}
+        unfreezed = []
+        measurers = self.get_measurers()
+        for index, measurer in enumerate(measurers):
+            if not measurer.is_freezed():
+                unfreezed.append(index)
+        if len(unfreezed) not in (0, len(measurers)):
+            for index in unfreezed:
+                action = actions_for_measurers.get(index, None)
+                if action:
+                    action.trigger()
+        else:
+            self.freeze_curve_a_action.trigger()
+            self.freeze_curve_b_action.trigger()
+
     def _handle_key_press_event(self, obj: QObject, event: QEvent) -> bool:
         """
         Method handles key press events on the main window. The left and right keys are responsible for moving to the
@@ -320,8 +342,7 @@ class EPLabWindow(QMainWindow):
         """
 
         if self.work_mode == WorkMode.COMPARE:
-            self.freeze_curve_a_action.trigger()
-            self.freeze_curve_b_action.trigger()
+            self._handle_freezing_curves_with_pedal()
         else:
             self.next_point_action.trigger()
 
