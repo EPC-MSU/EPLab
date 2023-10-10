@@ -756,13 +756,13 @@ class EPLabWindow(QMainWindow):
         self._score_wrapper.set_threshold(threshold)
         self._player.set_threshold(threshold)
 
+    @pyqtSlot(Settings)
     def apply_settings(self, new_settings: Settings) -> None:
         """
-        Method applies settings from settings window.
+        Slot applies settings from settings window.
         :param new_settings: new settings.
         """
 
-        print("______", new_settings.score_threshold, new_settings.frequency)
         self._settings = new_settings
         self._switch_work_mode(self._settings.work_mode)
         settings = self._settings.measurement_settings()
