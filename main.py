@@ -25,7 +25,7 @@ def exception_hook(exc_type: Exception, exc_value: Exception, exc_traceback: "tr
 
     traceback.print_exception(exc_type, exc_value, exc_traceback)
     traceback_text = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-    ut.show_exception("Error", str(exc_value), traceback_text)
+    ut.show_message("Error", str(exc_value), traceback_text)
     # sys.exit(1)
 
 

@@ -12,6 +12,7 @@ from epcore.ivmeasurer.base import IVMeasurerBase
 import utils as ut
 from language import Language
 
+
 logger = logging.getLogger("eplab")
 
 
@@ -320,7 +321,7 @@ class MeasurerSettingsWindow(qt.QDialog):
         except Exception:
             logger.error("Failed to execute command %s for measurer %s", command_name, self._measurer.name)
             text = qApp.translate("t", "Не удалось выполнить команду '{}'")
-            ut.show_exception(qApp.translate("t", "Ошибка"), text.format(user_readable_command_name))
+            ut.show_message(qApp.translate("t", "Ошибка"), text.format(user_readable_command_name))
 
     def set_parameters(self):
         """
@@ -343,5 +344,5 @@ class MeasurerSettingsWindow(qt.QDialog):
             self._measurer.set_settings()
         except Exception:
             logger.error("Failed to set settings in measurer %s", self._measurer.name)
-            ut.show_exception(qApp.translate("t", "Ошибка"),
-                              qApp.translate("t", "Не удалось задать настройки для измерителя"))
+            ut.show_message(qApp.translate("t", "Ошибка"),
+                            qApp.translate("t", "Не удалось задать настройки для измерителя"))

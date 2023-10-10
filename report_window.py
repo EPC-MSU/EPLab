@@ -28,7 +28,7 @@ def get_scales_and_noise_amplitudes_for_iv_curves(board: Board, main_window) -> 
     for element in board.elements:
         for pin in element.pins:
             if pin.measurements:
-                voltage, current = main_window.calculate_scales(pin.measurements[0].settings)
+                voltage, current = ut.calculate_scales(pin.measurements[0].settings)
                 current /= 1000
                 scales.append((voltage, current))
                 noise_amplitudes.append(main_window.product.adjust_noise_amplitude(pin.measurements[0].settings))

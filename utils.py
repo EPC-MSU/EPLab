@@ -14,7 +14,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 import serial.tools.list_ports
 from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QCheckBox, QMessageBox
+from PyQt5.QtWidgets import QCheckBox, QLayout, QMessageBox
 from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerBase, AnalogMultiplexerVirtual
 from epcore.elements import Board, MeasurementSettings
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
@@ -46,6 +46,18 @@ def _get_options_from_config(config: configparser.ConfigParser) -> Optional[Dict
             EyePointProduct.Parameter.voltage: voltage}
 
 
+def calculate_scales(settings: MeasurementSettings) -> Tuple[float, float]:
+    """
+    :param settings: measurement settings.
+    :return: scale along horizontal and vertical axes.
+    """
+
+    scale_coefficient = 1.2
+    x_scale = scale_coefficient * settings.max_voltage
+    y_scale = 1000 * x_scale / settings.internal_resistance
+    return x_scale, y_scale
+
+
 def check_compatibility(product: EyePointProduct, board: Board) -> bool:
     """
     Function checks operating mode and loaded test plan for compatibility.
@@ -62,6 +74,16 @@ def check_compatibility(product: EyePointProduct, board: Board) -> bool:
                 if len(options) < 3:
                     return False
     return True
+
+
+def clear_layout(layout: QLayout) -> None:
+    """
+    :param layout: layout from which to completely remove all widgets.
+    """
+
+    for i_item in range(layout.count()):
+        item = layout.itemAt(i_item)
+        layout.removeItem(item)
 
 
 def create_measurers(url_1: str, url_2: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str]]:
@@ -356,16 +378,38 @@ def save_settings_auto(product: EyePointProduct, settings: MeasurementSettings, 
         config.write(configfile)
 
 
-def show_exception(msg_title: str, msg_text: str, exc: str = "") -> None:
+def show_message(header: str, message: str, additional_info: str = None, icon: QMessageBox.Icon = QMessageBox.Warning,
+                 no_button: bool = False, cancel_button: bool = False, yes_button: bool = False) -> int:
     """
-    Function shows message box with error.
-    :param msg_title: title of message box;
-    :param msg_text: message text;
-    :param exc: text of exception.
+    Function shows message box.
+    :param header: header;
+    :param message: message;
+    :param additional_info: additional information for the message;
+    :param icon: message box icon;
+    :param no_button: if True, then No button will be shown;
+    :param cancel_button: if True, then Cancel button will be shown;
+    :param yes_button: if True, then Yes button will be shown.
+    :return: code of the button that the user clicked in the message box.
     """
 
-    message_box = create_message_box(msg_title, msg_text, exc)
-    message_box.exec_()
+    message_box = QMessageBox()
+    message_box.setWindowTitle(header)
+    message_box.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "icon.png")))
+    message_box.setIcon(icon)
+    message_box.setTextFormat(Qt.RichText)
+    message_box.setTextInteractionFlags(Qt.TextBrowserInteraction)
+    message_box.setText(message)
+    if additional_info:
+        message_box.setInformativeText(additional_info)
+    if yes_button:
+        message_box.addButton(qApp.translate("utils", "Yes"), QMessageBox.AcceptRole)
+    else:
+        message_box.addButton("OK", QMessageBox.AcceptRole)
+    if no_button:
+        message_box.addButton(qApp.translate("utils", "No"), QMessageBox.NoRole)
+    if cancel_button:
+        message_box.addButton(qApp.translate("utils", "Cancel"), QMessageBox.RejectRole)
+    return message_box.exec()
 
 
 def sort_devices_by_usb_numbers(measurers: Iterable, reverse: bool = False) -> List:
