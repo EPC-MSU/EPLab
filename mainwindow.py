@@ -38,8 +38,7 @@ from parameter_widget import ParameterWidget
 from player import SoundPlayer
 from report_window import ReportGenerationThread, ReportGenerationWindow
 from score import ScoreWrapper
-from settings.settings import Settings
-from settings.settingswindow import LowSettingsPanel, SettingsWindow
+from settings import LowSettingsPanel, Settings, SettingsWindow
 from version import Version
 
 
@@ -197,7 +196,7 @@ class EPLabWindow(QMainWindow):
         # TODO: separate config file
         # Voltage in Volts, current in mA
         self._comparator.set_min_ivc(0.6, 0.002)
-        self.__settings = None
+        self._settings = None
         for widget in (self.freq_layout, self.current_layout, self.voltage_layout):
             layout = widget.layout()
             ut.clear_layout(layout)
@@ -402,7 +401,7 @@ class EPLabWindow(QMainWindow):
         self._comparator: IVCComparator = IVCComparator()
 
         self._score_wrapper: ScoreWrapper = ScoreWrapper(self.score_label)
-        self.__settings: Settings = None
+        self._settings: Settings = None
         self._player: SoundPlayer = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
 
@@ -635,7 +634,7 @@ class EPLabWindow(QMainWindow):
         # TODO: separate config file
         # Voltage in Volts, current in mA
         self._comparator.set_min_ivc(0.6, 0.002)
-        self.__settings: Settings = None
+        self._settings = None
         self._reset_board()
         self._board_window.set_board(self._measurement_plan)
         # Create menu items to select settings for available measurers
@@ -757,27 +756,23 @@ class EPLabWindow(QMainWindow):
         self._score_wrapper.set_threshold(threshold)
         self._player.set_threshold(threshold)
 
-    def apply_settings(self, threshold: float) -> None:
+    def apply_settings(self, new_settings: Settings) -> None:
         """
         Method applies settings from settings window.
-        :param threshold: new threshold value.
+        :param new_settings: new settings.
         """
 
-        if self.__settings is None or (self.__settings and self.__settings.score_threshold != threshold):
-            # Settings were not loaded from file
-            self._update_threshold(threshold)
-            return
-
-        # Settings were loaded from file
-        self._switch_work_mode(self.__settings.work_mode)
-        settings = self.__settings.measurement_settings()
+        print("______", new_settings.score_threshold, new_settings.frequency)
+        self._settings = new_settings
+        self._switch_work_mode(self._settings.work_mode)
+        settings = self._settings.measurement_settings()
         options = self._product.settings_to_options(settings)
         self._set_options_to_ui(options)
         self._set_msystem_settings(settings)
-        self.hide_curve_a_action.setChecked(self.__settings.hide_curve_a)
-        self.hide_curve_b_action.setChecked(self.__settings.hide_curve_b)
-        self.sound_enabled_action.setChecked(self.__settings.sound_enabled)
-        self._update_threshold(self.__settings.score_threshold)
+        self.hide_curve_a_action.setChecked(self._settings.hide_curve_a)
+        self.hide_curve_b_action.setChecked(self._settings.hide_curve_b)
+        self.sound_enabled_action.setChecked(self._settings.sound_enabled)
+        self._update_threshold(self._settings.score_threshold)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self._board_window.close()
@@ -1020,9 +1015,8 @@ class EPLabWindow(QMainWindow):
 
         return self._msystem.measurers if self._msystem else []
 
-    def get_settings(self, threshold: float) -> Settings:
+    def get_settings(self) -> Settings:
         """
-        :param threshold: threshold value.
         :return: current applied settings in different objects.
         """
 
@@ -1034,7 +1028,7 @@ class EPLabWindow(QMainWindow):
             settings.work_mode = WorkMode.WRITE
         else:
             settings.work_mode = WorkMode.COMPARE
-        settings.score_threshold = threshold
+        settings.score_threshold = self.threshold
         settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
@@ -1167,17 +1161,6 @@ class EPLabWindow(QMainWindow):
 
         if not self._mux_and_plan_window.isVisible():
             self._mux_and_plan_window.show()
-
-    def open_settings_from_file(self, file_path: str) -> float:
-        """
-        Method reads settings from file with given path and returns score threshold.
-        :param file_path: path to file with settings.
-        :return: score threshold.
-        """
-
-        self.__settings = Settings()
-        self.__settings.import_(path=file_path)
-        return self.__settings.score_threshold
 
     @pyqtSlot()
     def remove_all_cursors(self) -> None:
@@ -1424,11 +1407,12 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def show_settings_window(self) -> None:
         """
-        Slot is called when you click on 'Settings' button, it shows settings window.
+        Slot shows settings window.
         """
 
-        self.__settings = None
-        settings_window = SettingsWindow(self, self._score_wrapper.threshold, self._settings_path)
+        self._settings = None
+        settings_window = SettingsWindow(self, self.get_settings(), self._settings_path)
+        settings_window.apply_settings_signal.connect(self.apply_settings)
         settings_window.exec()
         self._settings_path = settings_window.settings_directory
 
