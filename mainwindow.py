@@ -10,7 +10,6 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Dict, Optional, Tuple
-import numpy as np
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt as QtC, QTimer,
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
@@ -406,7 +405,7 @@ class EPLabWindow(QMainWindow):
         self._player.set_mute(not self.sound_enabled_action.isChecked())
 
         self._board_window: BoardWidget = BoardWidget(self)
-        self.low_panel_settings: LowSettingsPanel = LowSettingsPanel(self)
+        self.low_settings_panel: LowSettingsPanel = LowSettingsPanel(self)
         self.main_widget: QWidget = QWidget(self)
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -433,7 +432,7 @@ class EPLabWindow(QMainWindow):
         v_box_layout = QVBoxLayout()
         v_box_layout.setSpacing(0)
         v_box_layout.addWidget(self._iv_window)
-        v_box_layout.addLayout(self.grid_param)
+        v_box_layout.addLayout(self.low_settings_panel)
         h_box_layout = QHBoxLayout(self.main_widget)
         h_box_layout.addLayout(v_box_layout)
 
@@ -613,21 +612,21 @@ class EPLabWindow(QMainWindow):
         for parameter, value in options.items():
             self._parameters_scroll_areas[parameter].set_checked_option(value)
 
-    def _set_plot_parameters_to_low_panel_settings(self, settings: MeasurementSettings) -> None:
+    def _set_plot_parameters_to_low_settings_panel(self, settings: MeasurementSettings) -> None:
         """
         :param settings: new measurement settings that need to be shown on the bottom panel on the main window.
         """
 
         scroll_area = self._parameters_scroll_areas[EyePointProduct.Parameter.sensitive]
-        sensitive = scroll_area.get_checked_option_label()
-        voltage, current = self._iv_window.plot.get_minor_axis_step()
-        param_dict = {"voltage": voltage,
-                      "current": current,
+        sensitivity = scroll_area.get_checked_option_label()
+        voltage_per_division, current_per_division = self._iv_window.plot.get_minor_axis_step()
+        param_dict = {"current_per_division": current_per_division,
+                      "max_voltage": settings.max_voltage,
+                      "probe_signal_frequency": settings.probe_signal_frequency,
                       "score": self._score_wrapper.get_score(),
-                      "sensity": sensitive,
-                      "max_voltage": np.round(settings.max_voltage, 1),
-                      "probe_signal_frequency": np.round(settings.probe_signal_frequency, 1)}
-        self.low_panel_settings.set_all_parameters(**param_dict)
+                      "sensitivity": sensitivity,
+                      "voltage_per_division": voltage_per_division}
+        self.low_settings_panel.set_all_parameters(**param_dict)
 
     def _set_widgets_to_init_state(self) -> None:
         # Little bit hardcode here. See #39320
@@ -735,7 +734,7 @@ class EPLabWindow(QMainWindow):
         else:
             self._score_wrapper.set_dummy_score()
         if settings is not None:
-            self._set_plot_parameters_to_low_panel_settings(settings)
+            self._set_plot_parameters_to_low_settings_panel(settings)
 
     def _update_scroll_areas_for_parameters(self, settings: MeasurementSettings) -> None:
         """

@@ -806,7 +806,7 @@
     </message>
     <message>
         <location filename="../settings/settingswindow.py" line="77"/>
-        <source> B</source>
+        <source> В</source>
         <translation> V</translation>
     </message>
     <message>
