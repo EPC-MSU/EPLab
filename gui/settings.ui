@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>SettingsDialog</class>
+ <widget class="QDialog" name="SettingsDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>329</width>
+    <width>326</width>
     <height>105</height>
    </rect>
   </property>
@@ -61,24 +61,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="line_edit_score_threshold">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>70</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>70</width>
-         <height>16777215</height>
-        </size>
+      <widget class="QSpinBox" name="spin_box_score_threshold">
+       <property name="maximum">
+        <number>100</number>
        </property>
       </widget>
      </item>

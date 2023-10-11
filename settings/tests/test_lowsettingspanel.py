@@ -16,14 +16,14 @@ class TestLowSettingsPanel(unittest.TestCase):
                 "score": "67%",
                 "sensitivity": "Middle",
                 "voltage_per_division": 1.23}
-        result = {"Ток": "  Ток: 2.32 мА / дел.",
-                  "Ампл. проб. сигнала": "Ампл. проб. сигнала: 34.2 В",
-                  "Частота": "Частота: 78342.4 Гц",
-                  "Различие": "Различие: 67%",
-                  "Чувствительность": "Чувствительность: Middle",
-                  "Напряжение": "  Напряжение: 1.23 В / дел."}
+        correct_result = {"Ток": "  Ток: 2.32 мА / дел.",
+                          "Ампл. проб. сигнала": "Ампл. проб. сигнала: 34.2 В",
+                          "Частота": "Частота: 78342.4 Гц",
+                          "Различие": "Различие: 67%",
+                          "Чувствительность": "Чувствительность: Middle",
+                          "Напряжение": "  Напряжение: 1.23 В / дел."}
         panel = LowSettingsPanel()
         panel.set_all_parameters(**data)
-        for label_name, value in result.items():
+        for label_name, value in correct_result.items():
             label = panel._param_dict[label_name]
             self.assertEqual(label.text(), value)

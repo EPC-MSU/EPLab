@@ -1,7 +1,6 @@
 import os
 from PyQt5 import uic
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
-from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout
 from settings.settings import Settings
 from settings.utils import InvalidParameterValueError, MissingParameterError
@@ -44,9 +43,7 @@ class SettingsWindow(QDialog):
         self.layout().setSizeConstraint(QLayout.SetFixedSize)
         self.button_score_threshold_minus.clicked.connect(self.decrease_threshold)
         self.button_score_threshold_plus.clicked.connect(self.increase_threshold)
-        validator = QRegExpValidator(QRegExp(r"^(\d|\d\d|100)%?"), self)
-        self.line_edit_score_threshold.setValidator(validator)
-        self.line_edit_score_threshold.textEdited.connect(self.update_threshold)
+        self.spin_box_score_threshold.valueChanged.connect(self.update_threshold)
         self.button_cancel.clicked.connect(self.discard_changes)
         self.button_load_settings.clicked.connect(self.open_settings)
         self.button_ok.clicked.connect(self.apply_changes)
@@ -57,12 +54,8 @@ class SettingsWindow(QDialog):
         :return: score threshold value.
         """
 
-        value = self.line_edit_score_threshold.text()
-        if not value:
-            value = 0
-        elif value[-1] == "%":
-            value = value[:-1]
-        return float(int(value) / 100.0)
+        value = self.spin_box_score_threshold.value()
+        return float(value / 100.0)
 
     def _send_settings(self, settings: Settings = None) -> None:
         """
@@ -77,8 +70,8 @@ class SettingsWindow(QDialog):
         :param threshold: new score threshold value.
         """
 
-        threshold = min(max(threshold, 0), 1)
-        self.line_edit_score_threshold.setText(f"{round(threshold * 100.0)}%")
+        threshold = min(max(round(100 * threshold), 0), 100)
+        self.spin_box_score_threshold.setValue(threshold)
         self._settings.score_threshold = self._get_threshold_value()
 
     @pyqtSlot()
@@ -136,9 +129,9 @@ class SettingsWindow(QDialog):
                 ut.show_message(qApp.translate("settings", "Ошибка"), f"{exc}\n{error_message}")
                 return
 
+            self._settings_directory = os.path.dirname(settings_path)
             self._settings = settings
             self._update_threshold_in_settings_wnd(self._settings.score_threshold)
-            self._settings_directory = os.path.dirname(settings_path)
             self._send_settings()
 
     @pyqtSlot()
@@ -157,11 +150,11 @@ class SettingsWindow(QDialog):
             self._settings.score_threshold = self._get_threshold_value()
             self._settings.export(path=settings_path)
 
-    @pyqtSlot(str)
-    def update_threshold(self, new_value: str) -> None:
+    @pyqtSlot(int)
+    def update_threshold(self, new_value: int) -> None:
         """
         :param new_value: new threshold value.
         """
 
-        self._update_threshold_in_settings_wnd(self._get_threshold_value())
+        self._update_threshold_in_settings_wnd(new_value / 100)
         self._send_settings()

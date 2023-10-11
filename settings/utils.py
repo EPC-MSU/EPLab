@@ -53,8 +53,7 @@ def get_parameter(settings: QSettings, parameter: str, convert: Callable[[str], 
 
     if required:
         logger.error("The parameter '%s' is missing from the configuration file", parameter)
-        raise MissingParameterError(qApp.translate("settings", "Значение параметра '{}' не задано в конфигурационном "
-                                                               "файле.").format(parameter))
+        raise MissingParameterError(qApp.translate("settings", "Значение параметра '{}' не задано в конфигурационном файле.").format(parameter))
     return default
 
 

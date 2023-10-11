@@ -28,8 +28,8 @@ class LowSettingsPanel(QGridLayout):
         :param current_per_division: current value per division.
         """
 
-        self._param_dict["Ток"].setText(qApp.translate("t", "  Ток: ") + str(current_per_division) +
-                                        qApp.translate("t", " мА / дел."))
+        self._param_dict["Ток"].setText(qApp.translate("settings", "  Ток: ") + str(current_per_division) +
+                                        qApp.translate("settings", " мА / дел."))
 
     def _set_max_voltage(self, max_voltage: float) -> None:
         """

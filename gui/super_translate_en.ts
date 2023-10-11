@@ -2,34 +2,29 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>Dialog</name>
+    <name>SettingsDialog</name>
     <message>
         <location filename="settings.ui" line="20"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="33"/>
+        <location filename="settings.ui" line="31"/>
         <source>Порог ошибки</source>
         <translation>Score threshold</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="133"/>
+        <location filename="settings.ui" line="114"/>
         <source>Загрузить настройки</source>
         <translation>Load settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="152"/>
+        <location filename="settings.ui" line="133"/>
         <source>Сохранить настройки</source>
         <translation>Save settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="175"/>
-        <source>Применить</source>
-        <translation>Apply</translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="194"/>
+        <location filename="settings.ui" line="188"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>
@@ -770,66 +765,6 @@
         <translation>Select directory</translation>
     </message>
     <message>
-        <location filename="../settings/settingswindow.py" line="62"/>
-        <source>  Ток: </source>
-        <translation>  Current: </translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="63"/>
-        <source> мА / дел.</source>
-        <translation> mA / div.</translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="66"/>
-        <source>Частота: </source>
-        <translation>Frequency: </translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="67"/>
-        <source> Гц</source>
-        <translation> Hz</translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="70"/>
-        <source>Различие: </source>
-        <translation>Difference: </translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="73"/>
-        <source>Чувствительность: </source>
-        <translation>Sensitivity: </translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="77"/>
-        <source>Ампл. проб. сигнала: </source>
-        <translation>Probe signal amplitude: </translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="77"/>
-        <source> В</source>
-        <translation> V</translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="80"/>
-        <source>  Напряжение: </source>
-        <translation>  Voltage: </translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="81"/>
-        <source> В / дел.</source>
-        <translation> V / div. </translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="171"/>
-        <source>Открыть файл</source>
-        <translation>Open file</translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="186"/>
-        <source>Сохранить файл</source>
-        <translation>Save file</translation>
-    </message>
-    <message>
         <location filename="../utils.py" line="248"/>
         <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
         <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>
@@ -838,6 +773,89 @@
         <location filename="../utils.py" line="330"/>
         <source>Все равно открыть</source>
         <translation>Force open</translation>
+    </message>
+</context>
+<context>
+    <name>settings</name>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="31"/>
+        <source>  Ток: </source>
+        <translation>  Current: </translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingpanel.py" line="32"/>
+        <source> мА / дел.</source>
+        <translation> mA / div.</translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="39"/>
+        <source>Ампл. проб. сигнала: </source>
+        <translation>Probe signal amplitude: </translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="40"/>
+        <source> В</source>
+        <translation> V</translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="47"/>
+        <source>Частота: </source>
+        <translation>Frequency: </translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="48"/>
+        <source> Гц</source>
+        <translation> Hz</translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="55"/>
+        <source>Различие: </source>
+        <translation>Difference: </translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="62"/>
+        <source>Чувствительность: </source>
+        <translation>Sensitivity: </translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="68"/>
+        <source>  Напряжение: </source>
+        <translation>  Voltage: </translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="69"/>
+        <source> В / дел.</source>
+        <translation> V / div. </translation>
+    </message>
+    <message>
+        <location filename="../settings/settingswindow.py" line="119"/>
+        <source>Открыть файл</source>
+        <translation>Open file</translation>
+    </message>
+    <message>
+        <location filename="../settings/settingswindow.py" line="127"/>
+        <source>Проверьте конфигурационный файл &apos;{}&apos;.</source>
+        <translation>Check the configuration file &apos;{}&apos;.</translation>
+    </message>
+    <message>
+        <location filename="../settings/settingswindow.py" line="129"/>
+        <source>Ошибка</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <location filename="../settings/settingswindow.py" line="143"/>
+        <source>Сохранить файл</source>
+        <translation>Save file</translation>
+    </message>
+    <message>
+        <location filename="../settings/utils.py" line="47"/>
+        <source>Параметр &apos;{}&apos; имеет недопустимое значение &apos;{}&apos;.</source>
+        <translation>The parameter &apos;{}&apos; has an invalid value &apos;{}&apos;.</translation>
+    </message>
+    <message>
+        <location filename="../settings/utils.py" line="56"/>
+        <source>Значение параметра &apos;{}&apos; не задано в конфигурационном файле.</source>
+        <translation>The parameter &apos;{}&apos; value is not specified in the configuration file.</translation>
     </message>
 </context>
 </TS>
