@@ -36,37 +36,37 @@ class LowSettingsPanel(QGridLayout):
         :param max_voltage: voltage amplitude.
         """
 
-        self._param_dict["Ампл. проб. сигнала"].setText(qApp.translate("t", "Ампл. проб. сигнала: ") +
-                                                        str(round(max_voltage, 1)) + qApp.translate("t", " В"))
+        self._param_dict["Ампл. проб. сигнала"].setText(qApp.translate("settings", "Ампл. проб. сигнала: ") +
+                                                        str(round(max_voltage, 1)) + qApp.translate("settings", " В"))
 
     def _set_probe_signal_frequency(self, probe_frequency: float) -> None:
         """
         :param probe_frequency: probe signal frequency value.
         """
 
-        self._param_dict["Частота"].setText(qApp.translate("t", "Частота: ") + str(round(probe_frequency, 1)) +
-                                            qApp.translate("t", " Гц"))
+        self._param_dict["Частота"].setText(qApp.translate("settings", "Частота: ") + str(round(probe_frequency, 1)) +
+                                            qApp.translate("settings", " Гц"))
 
     def _set_score(self, score: str) -> None:
         """
         :param score: score value.
         """
 
-        self._param_dict["Различие"].setText(qApp.translate("t", "Различие: ") + score)
+        self._param_dict["Различие"].setText(qApp.translate("settings", "Различие: ") + score)
 
     def _set_sensitivity(self, sensitivity: str) -> None:
         """
         :param sensitivity: current sensitivity value.
         """
 
-        self._param_dict["Чувствительность"].setText(qApp.translate("t", "Чувствительность: ") + sensitivity)
+        self._param_dict["Чувствительность"].setText(qApp.translate("settings", "Чувствительность: ") + sensitivity)
 
     def _set_voltage_per_division(self, voltage_per_division: float) -> None:
         """
         :param voltage_per_division: voltage value per division.
         """
-        self._param_dict["Напряжение"].setText(qApp.translate("t", "  Напряжение: ") +
-                                               str(voltage_per_division) + qApp.translate("t", " В / дел."))
+        self._param_dict["Напряжение"].setText(qApp.translate("settings", "  Напряжение: ") +
+                                               str(voltage_per_division) + qApp.translate("settings", " В / дел."))
 
     def set_all_parameters(self, **kwargs) -> None:
         """

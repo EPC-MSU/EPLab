@@ -116,8 +116,8 @@ class SettingsWindow(QDialog):
         Slot loads settings from the configuration file.
         """
 
-        settings_path = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть файл"), self._settings_directory,
-                                                    "Ini file (*.ini);;All Files (*)")[0]
+        settings_path = QFileDialog.getOpenFileName(self, qApp.translate("settings", "Открыть файл"),
+                                                    self._settings_directory, "Ini file (*.ini);;All Files (*)")[0]
         if settings_path:
             try:
                 settings = Settings()
@@ -140,7 +140,7 @@ class SettingsWindow(QDialog):
         Slot saves settings to a configuration file.
         """
 
-        settings_path = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить файл"),
+        settings_path = QFileDialog.getSaveFileName(self, qApp.translate("settings", "Сохранить файл"),
                                                     directory=os.path.join(self._settings_directory, "settings.ini"),
                                                     filter="Ini file (*.ini);;All Files (*)")[0]
         if settings_path:

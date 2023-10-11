@@ -783,7 +783,7 @@
         <translation>  Current: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingpanel.py" line="32"/>
+        <location filename="../settings/lowsettingspanel.py" line="32"/>
         <source> мА / дел.</source>
         <translation> mA / div.</translation>
     </message>
