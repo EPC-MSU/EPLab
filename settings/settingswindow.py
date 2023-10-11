@@ -4,6 +4,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QRegExp
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout
 from settings.settings import Settings
+from settings.utils import InvalidParameterValueError, MissingParameterError
 import utils as ut
 
 
@@ -125,9 +126,15 @@ class SettingsWindow(QDialog):
         settings_path = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть файл"), self._settings_directory,
                                                     "Ini file (*.ini);;All Files (*)")[0]
         if settings_path:
-            settings = Settings()
-            settings.set_default_values(**self._settings.get_values())
-            settings.read(path=settings_path)
+            try:
+                settings = Settings()
+                settings.set_default_values(**self._settings.get_values())
+                settings.read(path=settings_path)
+            except (InvalidParameterValueError, MissingParameterError) as exc:
+                error_message = qApp.translate("settings", "Проверьте конфигурационный файл '{}'.").format(
+                    settings_path)
+                ut.show_message(qApp.translate("settings", "Ошибка"), f"{exc}\n{error_message}")
+                return
 
             self._settings = settings
             self._update_threshold_in_settings_wnd(self._settings.score_threshold)

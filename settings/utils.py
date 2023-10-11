@@ -1,10 +1,17 @@
 import logging
 from typing import Any, Callable
 from PyQt5.QtCore import QCoreApplication as qApp, QSettings
-import traceback
 
 
 logger = logging.getLogger("eplab")
+
+
+class InvalidParameterValueError(ValueError):
+    pass
+
+
+class MissingParameterError(RuntimeError):
+    pass
 
 
 def float_to_str(value: float) -> str:
@@ -29,7 +36,6 @@ def get_parameter(settings: QSettings, parameter: str, convert: Callable[[str], 
     :return: parameter value.
     """
 
-    file_name = settings.fileName()
     value = settings.value(parameter)
     if value is not None:
         if convert is not None:
@@ -38,19 +44,17 @@ def get_parameter(settings: QSettings, parameter: str, convert: Callable[[str], 
             except ValueError as exc:
                 logger.error("An error occurred while converting the value '%s' for the parameter '%s'", value,
                              parameter)
-                logger.error("%s", traceback.format_exc())
-                error_message = qApp.translate("settings", "Не удалось конвертировать значение '{}' параметра '{}'. "
-                                                           "Проверьте конфигурационный файл '{}'."
-                                               ).format(value, parameter, file_name)
-                raise ValueError(error_message) from exc
+                error_message = qApp.translate("settings", "Параметр '{}' имеет недопустимое значение '{}'.").format(
+                    parameter, value)
+                raise InvalidParameterValueError(error_message) from exc
             else:
                 value = converted_value
         return value
 
     if required:
-        logger.error("The parameter '%s' is missing from the configuration file '%s'", parameter, file_name)
-        raise RuntimeError(qApp.translate("settings", "Значение параметра '{}' не задано в конфигурационном файле '{}'."
-                                          ).format(parameter, file_name))
+        logger.error("The parameter '%s' is missing from the configuration file", parameter)
+        raise MissingParameterError(qApp.translate("settings", "Значение параметра '{}' не задано в конфигурационном "
+                                                               "файле.").format(parameter))
     return default
 
 
