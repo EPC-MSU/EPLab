@@ -1,5 +1,7 @@
 import os
+from typing import Any, Dict
 from PyQt5.QtCore import pyqtSignal, QObject, QSettings
+from settings import utils as ut
 
 
 class SettingsHandler(QObject):
@@ -52,19 +54,57 @@ class SettingsHandler(QObject):
     def settings_path(self) -> None:
         self.__settings = None
 
+    def _get_default_value(self, attribute_name: str) -> Any:
+        """
+        :param attribute_name: name of the attribute whose default value to get.
+        :return: default value for a given attribute.
+        """
+
+        default = getattr(self, f"{attribute_name}_default", None)
+        if default is None:
+            default = getattr(self.__class__, attribute_name, None)
+        return default
+
     def _read(self, settings: QSettings) -> None:
         """
-        Perform parameters reading. Should be implemented in sub-classes.
+        Performs parameters reading. Should be implemented in sub-classes.
         """
 
         raise NotImplementedError("Read not implemented")
 
+    def _read_parameters_from_settings(self, settings: QSettings, parameters: Dict[str, Dict[str, Any]]) -> None:
+        """
+        :param settings: QSettings object from which parameter values ​​need to be read;
+        :param parameters: dictionary with parameters whose values ​​need to be read.
+        """
+
+        for parameter_name, parameter_data in parameters.items():
+            convert_function = parameter_data.get("convert", str)
+            required = parameter_data.get("required", False)
+            default = self._get_default_value(parameter_name)
+            value = ut.get_parameter(settings, parameter_name, convert=convert_function, required=required,
+                                     default=default)
+            setattr(self, parameter_name, value)
+
     def _write(self, settings: QSettings) -> None:
         """
-        Perform parameters writing. Should be implemented in sub-classes.
+        Performs parameters writing. Should be implemented in sub-classes.
         """
 
         raise NotImplementedError("Write not implemented")
+
+    def _write_parameters_to_settings(self, settings: QSettings, parameters: Dict[str, Dict[str, Any]]) -> None:
+        """
+        :param settings: QSettings object into which parameter values ​​should be written;
+        :param parameters: dictionary with parameters whose values need to be written.
+        """
+
+        for parameter_name, parameter_data in parameters.items():
+            value = getattr(self, parameter_name, None)
+            convert_function = parameter_data.get("convert", None)
+            if convert_function is not None:
+                value = convert_function(value)
+            ut.set_parameter(settings, parameter_name, value)
 
     def export(self, *args, settings: QSettings = None, path: str = None) -> None:
         """
@@ -83,6 +123,20 @@ class SettingsHandler(QObject):
 
         self._write(settings)
         settings.sync()
+
+    def get_default_values(self) -> Dict[str, Any]:
+        """
+        :return: dictionary with default values o​​f attributes.
+        """
+
+        raise NotImplementedError()
+
+    def get_values(self) -> Dict[str, Any]:
+        """
+        :return: dictionary with values of attributes.
+        """
+
+        raise NotImplementedError()
 
     def import_(self, *args, settings=None, path=None) -> None:
         """
@@ -137,6 +191,15 @@ class SettingsHandler(QObject):
             raise RuntimeError("Failed to read settings from '{}': access error".format(self.__settings.fileName()))
         if status == QSettings.FormatError:
             raise RuntimeError("Failed to read settings from '{}': format error".format(self.__settings.fileName()))
+
+    def set_default_values(self, **kwargs) -> None:
+        """
+        :param kwargs: dictionary with default values ​​of attributes.
+        """
+
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, f"{key}_default", value)
 
     def sync(self) -> None:
         if self.__settings is not None:

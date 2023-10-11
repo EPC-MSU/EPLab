@@ -1,9 +1,9 @@
-from typing import Tuple
-from PyQt5.QtCore import pyqtSignal
+from typing import Any, Dict, List, Tuple
+from PyQt5.QtCore import pyqtSignal, QSettings
 from epcore.elements.measurement import MeasurementSettings
 from common import WorkMode
+from settings import utils as ut
 from settings.settingshandler import SettingsHandler
-from settings.utils import get_parameter, set_parameter, to_bool, float_to_str
 
 
 MODES = {"Compare": WorkMode.COMPARE,
@@ -28,71 +28,100 @@ class SettingsEditor:
 
 class Settings(SettingsHandler):
 
+    ATTRIBUTE_NAMES: List[str] = ["frequency", "hide_curve_a", "hide_curve_b", "internal_resistance", "max_voltage",
+                                  "score_threshold", "sound_enabled", "work_mode"]
     changed: pyqtSignal = pyqtSignal()
     frequency: Tuple[int, int] = None
     hide_curve_a: bool = False
     hide_curve_b: bool = False
     internal_resistance: float = None
     max_voltage: float = None
-    score_threshold: float = 0.5
+    score_threshold: float = 0.15
     sound_enabled: bool = False
     work_mode: WorkMode = WorkMode.COMPARE
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
-        self.__active_editors = set()
+        self._active_editors = set()
 
-    def _read(self, settings) -> None:
+    def _read(self, settings: QSettings) -> None:
+        """
+        :param settings: QSettings object from which parameter values ​​need to be read.
+        """
+
+        params = {"frequency": {"convert": lambda value: tuple(map(int, value))},
+                  "hide_curve_a": {"convert": ut.to_bool},
+                  "hide_curve_b": {"convert": ut.to_bool},
+                  "internal_resistance": {"convert": float},
+                  "max_voltage": {"convert": float},
+                  "score_threshold": {"convert": float},
+                  "sound_enabled": {"convert": ut.to_bool},
+                  "work_mode": {"convert": lambda value: MODES[value]}}
         with SettingsEditor(self):
             settings.beginGroup("General")
-            self.max_voltage = get_parameter(settings, "max_voltage", convert=float, required=False,
-                                             default=self.max_voltage)
-            self.internal_resistance = get_parameter(settings, "internal_resistance", convert=float, required=False,
-                                                     default=Settings.internal_resistance)
-            self.frequency = get_parameter(settings, "frequency", convert=lambda value: tuple(map(int, value)),
-                                           required=False, default=Settings.frequency)
-            self.score_threshold = get_parameter(settings, "score_threshold", convert=float, required=False,
-                                                 default=Settings.score_threshold)
-            self.sound_enabled = get_parameter(settings, "sound_enabled", convert=to_bool, required=False,
-                                               default=Settings.sound_enabled)
-            self.hide_curve_a = get_parameter(settings, "hide_curve_a", convert=to_bool, required=False,
-                                              default=Settings.hide_curve_a)
-            self.hide_curve_b = get_parameter(settings, "hide_curve_b", convert=to_bool, required=False,
-                                              default=Settings.hide_curve_b)
-            _mode_key = get_parameter(settings, "work_mode", convert=str, required=False, default="Compare")
-            self.work_mode = MODES[_mode_key]
+            self._read_parameters_from_settings(settings, params)
             settings.endGroup()
 
-    def _write(self, settings) -> None:
+    def _write(self, settings: QSettings) -> None:
+        """
+        :param settings: QSettings object into which parameter values ​​should be written.
+        """
+
+        def get_work_mode(work_mode: WorkMode) -> str:
+            for key in MODES:
+                if MODES[key] == work_mode:
+                    return key
+            return "Compare"
+
+        params = {"frequency": {"convert": lambda value: list(map(int, value))},
+                  "hide_curve_a": {},
+                  "hide_curve_b": {},
+                  "internal_resistance": {"convert": ut.float_to_str},
+                  "max_voltage": {"convert": ut.float_to_str},
+                  "score_threshold": {"convert": ut.float_to_str},
+                  "sound_enabled": {},
+                  "work_mode": {"convert": get_work_mode}}
         settings.beginGroup("General")
-        set_parameter(settings, "frequency", [int(f) for f in self.frequency])
-        set_parameter(settings, "max_voltage", float_to_str(self.max_voltage))
-        set_parameter(settings, "internal_resistance", float_to_str(self.internal_resistance))
-        set_parameter(settings, "score_threshold", float_to_str(self.score_threshold))
-        set_parameter(settings, "sound_enabled", self.sound_enabled)
-        set_parameter(settings, "hide_curve_a", self.hide_curve_a)
-        set_parameter(settings, "hide_curve_b", self.hide_curve_b)
-        for k in MODES.keys():
-            if MODES[k] == self.work_mode:
-                _mode_key = k
-        set_parameter(settings, "work_mode", _mode_key)
+        self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 
     def add_editor(self, editor) -> None:
-        self.__active_editors.add(editor)
+        self._active_editors.add(editor)
 
-    def measurement_settings(self) -> MeasurementSettings:
+    def get_default_values(self) -> Dict[str, Any]:
+        """
+        :return: dictionary with default values ​​of attributes.
+        """
+
+        return {param: self._get_default_value(param) for param in Settings.ATTRIBUTE_NAMES}
+
+    def get_values(self) -> Dict[str, Any]:
+        """
+        :return: dictionary with default values of attributes.
+        """
+
+        return {param: getattr(self, param, None) for param in Settings.ATTRIBUTE_NAMES}
+
+    def get_measurement_settings(self) -> MeasurementSettings:
+        """
+        :return: measurement settings.
+        """
+
         return MeasurementSettings(probe_signal_frequency=self.frequency[0],
                                    sampling_rate=self.frequency[1],
                                    internal_resistance=self.internal_resistance,
                                    max_voltage=self.max_voltage)
 
     def remove_editor(self, editor) -> None:
-        self.__active_editors.discard(editor)
-        if len(self.__active_editors) == 0:
+        self._active_editors.discard(editor)
+        if len(self._active_editors) == 0:
             self.changed.emit()
 
     def set_measurement_settings(self, settings: MeasurementSettings) -> None:
+        """
+        :param settings: new measurement settings.
+        """
+
         self.frequency = settings.probe_signal_frequency, settings.sampling_rate
         self.internal_resistance = settings.internal_resistance
         self.max_voltage = settings.max_voltage

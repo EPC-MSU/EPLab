@@ -45,6 +45,7 @@ class SettingsWindow(QDialog):
         self.button_score_threshold_plus.clicked.connect(self.increase_threshold)
         validator = QRegExpValidator(QRegExp(r"^(\d|\d\d|100)%?"), self)
         self.line_edit_score_threshold.setValidator(validator)
+        self.line_edit_score_threshold.textEdited.connect(self.update_threshold)
         self.button_cancel.clicked.connect(self.discard_changes)
         self.button_load_settings.clicked.connect(self.open_settings)
         self.button_ok.clicked.connect(self.apply_changes)
@@ -95,6 +96,7 @@ class SettingsWindow(QDialog):
         """
 
         self._update_threshold_in_settings_wnd(self._get_threshold_value() - SettingsWindow.THRESHOLD_STEP)
+        self._send_settings()
 
     @pyqtSlot()
     def discard_changes(self) -> None:
@@ -112,6 +114,7 @@ class SettingsWindow(QDialog):
         """
 
         self._update_threshold_in_settings_wnd(self._get_threshold_value() + SettingsWindow.THRESHOLD_STEP)
+        self._send_settings()
 
     @pyqtSlot()
     def open_settings(self) -> None:
@@ -122,10 +125,13 @@ class SettingsWindow(QDialog):
         settings_path = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть файл"), self._settings_directory,
                                                     "Ini file (*.ini);;All Files (*)")[0]
         if settings_path:
-            self._settings_directory = os.path.dirname(settings_path)
-            self._settings = Settings()
-            self._settings.read(path=settings_path)
+            settings = Settings()
+            settings.set_default_values(**self._settings.get_values())
+            settings.read(path=settings_path)
+
+            self._settings = settings
             self._update_threshold_in_settings_wnd(self._settings.score_threshold)
+            self._settings_directory = os.path.dirname(settings_path)
             self._send_settings()
 
     @pyqtSlot()
@@ -143,3 +149,12 @@ class SettingsWindow(QDialog):
                 settings_path += ".ini"
             self._settings.score_threshold = self._get_threshold_value()
             self._settings.export(path=settings_path)
+
+    @pyqtSlot(str)
+    def update_threshold(self, new_value: str) -> None:
+        """
+        :param new_value: new threshold value.
+        """
+
+        self._update_threshold_in_settings_wnd(self._get_threshold_value())
+        self._send_settings()

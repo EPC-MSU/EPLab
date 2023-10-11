@@ -75,6 +75,7 @@ class EPLabWindow(QMainWindow):
 
         super().__init__()
         self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "icon.png"))
+        self._settings_path: str = ut.get_dir_name()
         self._init_ui(product, english)
         self.installEventFilter(self)
         if port_1 is None and port_2 is None:
@@ -195,7 +196,6 @@ class EPLabWindow(QMainWindow):
         # TODO: separate config file
         # Voltage in Volts, current in mA
         self._comparator.set_min_ivc(0.6, 0.002)
-        self._settings = None
         for widget in (self.freq_layout, self.current_layout, self.voltage_layout):
             layout = widget.layout()
             ut.clear_layout(layout)
@@ -400,7 +400,6 @@ class EPLabWindow(QMainWindow):
         self._comparator: IVCComparator = IVCComparator()
 
         self._score_wrapper: ScoreWrapper = ScoreWrapper(self.score_label)
-        self._settings: Settings = None
         self._player: SoundPlayer = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
 
@@ -508,7 +507,6 @@ class EPLabWindow(QMainWindow):
         self._report_generation_thread.start()
         self._report_generation_window: ReportGenerationWindow = ReportGenerationWindow(self,
                                                                                         self._report_generation_thread)
-        self._settings_path: str = ut.get_dir_name()
 
     def _open_board_window_if_needed(self) -> None:
         if self._measurement_plan.image:
@@ -633,7 +631,6 @@ class EPLabWindow(QMainWindow):
         # TODO: separate config file
         # Voltage in Volts, current in mA
         self._comparator.set_min_ivc(0.6, 0.002)
-        self._settings = None
         self._reset_board()
         self._board_window.set_board(self._measurement_plan)
         # Create menu items to select settings for available measurers
@@ -762,16 +759,15 @@ class EPLabWindow(QMainWindow):
         :param new_settings: new settings.
         """
 
-        self._settings = new_settings
-        self._switch_work_mode(self._settings.work_mode)
-        settings = self._settings.measurement_settings()
-        options = self._product.settings_to_options(settings)
+        self._switch_work_mode(new_settings.work_mode)
+        measurement_settings = new_settings.get_measurement_settings()
+        options = self._product.settings_to_options(measurement_settings)
         self._set_options_to_ui(options)
-        self._set_msystem_settings(settings)
-        self.hide_curve_a_action.setChecked(self._settings.hide_curve_a)
-        self.hide_curve_b_action.setChecked(self._settings.hide_curve_b)
-        self.sound_enabled_action.setChecked(self._settings.sound_enabled)
-        self._update_threshold(self._settings.score_threshold)
+        self._set_msystem_settings(measurement_settings)
+        self.hide_curve_a_action.setChecked(new_settings.hide_curve_a)
+        self.hide_curve_b_action.setChecked(new_settings.hide_curve_b)
+        self.sound_enabled_action.setChecked(new_settings.sound_enabled)
+        self._update_threshold(new_settings.score_threshold)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self._board_window.close()
@@ -1409,7 +1405,6 @@ class EPLabWindow(QMainWindow):
         Slot shows settings window.
         """
 
-        self._settings = None
         settings_window = SettingsWindow(self, self.get_settings(), self._settings_path)
         settings_window.apply_settings_signal.connect(self.apply_settings)
         settings_window.exec()
