@@ -1,12 +1,12 @@
 """
-File with class for dialog window for language selection.
+File with the language selection dialog box class.
 """
 
 import os
 from enum import Enum, auto
 from typing import Optional, Tuple
-import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import QCoreApplication as qApp, Qt
+from PyQt5.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QLabel, QLayout, QVBoxLayout
 
 
 class Language(Enum):
@@ -20,7 +20,6 @@ class Language(Enum):
     @classmethod
     def get_language_name(cls, value: "Language") -> str:
         """
-        Method returns name of language for given value.
         :param value: value of language.
         :return: name of language.
         """
@@ -30,7 +29,6 @@ class Language(Enum):
     @classmethod
     def get_language_value(cls, language: str) -> Optional["Language"]:
         """
-        Method returns value of language with given name.
         :param language: name of language.
         :return: value of language.
         """
@@ -43,7 +41,6 @@ class Language(Enum):
     @classmethod
     def get_languages(cls) -> Tuple:
         """
-        Method returns names and values of languages.
         :return: names and values of languages.
         """
 
@@ -53,9 +50,8 @@ class Language(Enum):
     @classmethod
     def get_translator_file(cls, value: "Language") -> str:
         """
-        Method returns path to file with translation for given language.
         :param value: value of language.
-        :return: path to file with translation.
+        :return: path to file with translation for given language.
         """
 
         return _FILES.get(value)
@@ -63,17 +59,17 @@ class Language(Enum):
 
 _LANGUAGES = {Language.RU: "Русский",
               Language.EN: "English"}
-_DIR_NAME = os.path.dirname(os.path.abspath(__file__))
+_DIR_NAME = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _FILES = {Language.RU: "",
           Language.EN: os.path.join(_DIR_NAME, "gui", "super_translate_en.qm")}
 
 
-class LanguageSelectionWindow(qt.QDialog):
+class LanguageSelectionWindow(QDialog):
     """
     Class for window to select language.
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         """
         :param parent: parent window.
         """
@@ -81,33 +77,28 @@ class LanguageSelectionWindow(qt.QDialog):
         super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self._init_ui()
 
-    def _init_ui(self):
-        """
-        Method initializes widgets in dialog window.
-        """
-
-        self.setWindowTitle(qApp.translate("t", "Выбор языка"))
-        v_box = qt.QVBoxLayout()
-        label = qt.QLabel(qApp.translate("t", "Выберите язык:"))
-        v_box.addWidget(label)
-        self.combo_box_languages = qt.QComboBox()
+    def _init_ui(self) -> None:
+        self.setWindowTitle(qApp.translate("dialogs", "Выбор языка"))
+        self.label: QLabel = QLabel(qApp.translate("dialogs", "Выберите язык:"))
+        self.combo_box_languages: QComboBox = QComboBox()
         for value, language in Language.get_languages():
             self.combo_box_languages.addItem(language, value)
         language = Language.get_language_name(qApp.instance().property("language"))
         self.combo_box_languages.setCurrentText(language)
-        v_box.addWidget(self.combo_box_languages)
-        btns = qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel
-        self.buttonBox = qt.QDialogButtonBox(btns)
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
+
+        v_box = QVBoxLayout()
+        v_box.addWidget(self.label)
+        v_box.addWidget(self.combo_box_languages)
         v_box.addWidget(self.buttonBox)
-        v_box.setSizeConstraint(qt.QLayout.SetFixedSize)
+        v_box.setSizeConstraint(QLayout.SetFixedSize)
         self.adjustSize()
         self.setLayout(v_box)
 
     def get_language_value(self) -> Language:
         """
-        Method returns selected language.
         :return: value of language.
         """
 
@@ -115,8 +106,7 @@ class LanguageSelectionWindow(qt.QDialog):
 
     def get_translator_file(self) -> str:
         """
-        Method returns file with translation for selected language.
-        :return: path to file with required translation.
+        :return: path to file with translation for selected language.
         """
 
         return _FILES.get(self.combo_box_languages.currentData())

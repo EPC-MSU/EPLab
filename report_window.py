@@ -5,14 +5,15 @@ File with class for dialog window to create report for board.
 import queue
 import time
 from typing import List, Tuple
-import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from PyQt5.QtGui import QCloseEvent
+from PyQt5.QtWidgets import (QDialog, QFileDialog, QGroupBox, QHBoxLayout, QLayout, QProgressBar, QPushButton,
+                             QTextEdit, QVBoxLayout)
 from epcore.elements import Board
 from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator, ReportTypes, ScalingTypes
 import utils as ut
 from common import WorkMode
-from language import Language
+from dialogs import Language
 
 
 def get_scales_and_noise_amplitudes_for_iv_curves(board: Board, main_window) -> Tuple[List, List]:
@@ -55,7 +56,6 @@ class ReportGenerationThread(QThread):
 
     def add_task(self, config: dict) -> None:
         """
-        Method adds task.
         :param config: config dictionary to create report.
         """
 
@@ -85,7 +85,7 @@ class ReportGenerationThread(QThread):
         self._stop_thread = True
 
 
-class ReportGenerationWindow(qt.QDialog):
+class ReportGenerationWindow(QDialog):
     """
     Class for dialog window to create report for board.
     """
@@ -159,49 +159,44 @@ class ReportGenerationWindow(qt.QDialog):
         self.group_box_info.setVisible(False)
         self.group_box_info.setChecked(False)
         self.text_edit_info.setVisible(False)
-        if report_was_generated:
-            message = qApp.translate("t", "Отчет сгенерирован и сохранен в директорию 'FOLDER'")
-            message = message.replace("FOLDER", report_dir_path)
-        else:
-            message = qApp.translate("t", "Отчет не был сгенерирован")
-        qt.QMessageBox.information(self._parent, qApp.translate("t", "Информация"), message)
+        if not report_was_generated:
+            ut.show_message(qApp.translate("t", "Информация"), qApp.translate("dialogs", "Отчет не был сгенерирован."))
 
     def _init_ui(self) -> None:
-        """
-        Method initializes widgets on dialog window.
-        """
-
         self.setWindowTitle(qApp.translate("t", "Генератор отчетов"))
-        v_box_layout = qt.QVBoxLayout()
-        self.button_select_folder = qt.QPushButton(qApp.translate("t", "Выбрать папку для отчета"))
+
+        self.button_select_folder: QPushButton = QPushButton(qApp.translate("t", "Выбрать папку для отчета"))
         self.button_select_folder.clicked.connect(self.select_folder)
         self.button_select_folder.setFixedWidth(300)
-        v_box_layout.addWidget(self.button_select_folder)
-        self.button_create_report = qt.QPushButton(qApp.translate("t", "Сгенерировать отчет"))
+        self.button_create_report: QPushButton = QPushButton(qApp.translate("t", "Сгенерировать отчет"))
         self.button_create_report.setCheckable(True)
         self.button_create_report.toggled.connect(self.start_or_stop)
         self.button_create_report.setFixedWidth(300)
-        v_box_layout.addWidget(self.button_create_report)
-        self.progress_bar = qt.QProgressBar()
+        self.progress_bar: QProgressBar = QProgressBar()
         self.progress_bar.setVisible(False)
         self.progress_bar.setMinimum(0)
         self.progress_bar.setMaximum(100)
-        v_box_layout.addWidget(self.progress_bar)
-        self.text_edit_info = qt.QTextEdit()
+
+        self.text_edit_info: QTextEdit = QTextEdit()
         self.text_edit_info.setVisible(False)
         self.text_edit_info.setMaximumHeight(100)
         self.text_edit_info.setReadOnly(True)
-        self.group_box_info = qt.QGroupBox(qApp.translate("t", "Шаги генерации отчета"))
+        self.group_box_info: QGroupBox = QGroupBox(qApp.translate("t", "Шаги генерации отчета"))
         self.group_box_info.setFixedWidth(300)
         self.group_box_info.setCheckable(True)
         self.group_box_info.setChecked(False)
         self.group_box_info.setVisible(False)
         self.group_box_info.toggled.connect(self.text_edit_info.setVisible)
-        h_box_layout = qt.QHBoxLayout()
+        h_box_layout = QHBoxLayout()
         h_box_layout.addWidget(self.text_edit_info)
         self.group_box_info.setLayout(h_box_layout)
+
+        v_box_layout = QVBoxLayout()
+        v_box_layout.addWidget(self.button_select_folder)
+        v_box_layout.addWidget(self.button_create_report)
+        v_box_layout.addWidget(self.progress_bar)
         v_box_layout.addWidget(self.group_box_info)
-        v_box_layout.setSizeConstraint(qt.QLayout.SetFixedSize)
+        v_box_layout.setSizeConstraint(QLayout.SetFixedSize)
         self.setLayout(v_box_layout)
         self.adjustSize()
 
@@ -264,8 +259,7 @@ class ReportGenerationWindow(qt.QDialog):
         Slot selects folder where report will be saved.
         """
 
-        folder = qt.QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"),
-                                                     self._folder_for_report)
+        folder = QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"), self._folder_for_report)
         if folder:
             self._folder_for_report = folder
 

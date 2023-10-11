@@ -10,7 +10,7 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QRegExpValidator
 from epcore.ivmeasurer.base import IVMeasurerBase
 import utils as ut
-from language import Language
+from dialogs import Language
 
 
 logger = logging.getLogger("eplab")

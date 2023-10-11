@@ -26,11 +26,9 @@ from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
 import connection_window as cw
 import utils as ut
-from about_window import show_product_info
+from dialogs import Language, LanguageSelectionWindow, show_keymap_info, show_product_info
 from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
-from language import Language, LanguageSelectionWindow
-from keymapdialog import show_keymap_info
 from measurer_settings_window import MeasurerSettingsWindow
 from multiplexer import MuxAndPlanWindow
 from parameter_widget import ParameterWidget
@@ -379,9 +377,7 @@ class EPLabWindow(QMainWindow):
             translation_file = Language.get_translator_file(language)
             self._translator.load(translation_file)
             qApp.instance().installTranslator(self._translator)
-            qApp.instance().setProperty("language", language)
-        else:
-            qApp.instance().setProperty("language", Language.RU)
+        qApp.instance().setProperty("language", language)
 
         dir_name = os.path.dirname(os.path.abspath(__file__))
         loadUi(os.path.join(dir_name, "gui", "mainwindow.ui"), self)
