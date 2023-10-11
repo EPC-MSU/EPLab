@@ -26,14 +26,14 @@ from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
 import connection_window as cw
 import utils as ut
-from dialogs import Language, LanguageSelectionWindow, show_keymap_info, show_product_info
+from dialogs import (Language, LanguageSelectionWindow, show_keymap_info, show_product_info, ReportGenerationThread,
+                     ReportGenerationWindow)
 from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
 from measurer_settings_window import MeasurerSettingsWindow
 from multiplexer import MuxAndPlanWindow
 from parameter_widget import ParameterWidget
 from player import SoundPlayer
-from report_window import ReportGenerationThread, ReportGenerationWindow
 from score import ScoreWrapper
 from settings import LowSettingsPanel, Settings, SettingsWindow
 from version import Version
@@ -74,6 +74,9 @@ class EPLabWindow(QMainWindow):
         super().__init__()
         self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "icon.png"))
         self._settings_path: str = ut.get_dir_name()
+        self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
+        self._report_generation_thread.start()
+
         self._init_ui(product, english)
         self.installEventFilter(self)
         if port_1 is None and port_2 is None:
@@ -212,7 +215,6 @@ class EPLabWindow(QMainWindow):
         self._score_wrapper.set_dummy_score()
         self.line_comment_pin.clear()
         self._mux_and_plan_window.close()
-        self._report_generation_window.close()
 
     def _create_measurer_setting_actions(self) -> None:
         """
@@ -498,11 +500,6 @@ class EPLabWindow(QMainWindow):
         self._timer.setInterval(10)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._handle_periodic_task)
-        self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(parent=self)
-        self._report_generation_thread.setTerminationEnabled(True)
-        self._report_generation_thread.start()
-        self._report_generation_window: ReportGenerationWindow = ReportGenerationWindow(self,
-                                                                                        self._report_generation_thread)
 
     def _open_board_window_if_needed(self) -> None:
         if self._measurement_plan.image:
@@ -901,18 +898,13 @@ class EPLabWindow(QMainWindow):
         self.update_current_pin()
 
     @pyqtSlot()
-    def create_report(self, auto_start: bool = False) -> None:
+    def create_report(self) -> None:
         """
         Slot shows a dialog window to create report for the board.
-        :param auto_start: if True then generation of report will start automatically.
         """
 
-        if auto_start:
-            self._report_generation_window.start_generation()
-        if not self._report_generation_window.isVisible():
-            self._report_generation_window.show()
-        else:
-            self._report_generation_window.activateWindow()
+        window = ReportGenerationWindow(self, self._report_generation_thread, self.measurement_plan, self.threshold)
+        window.show_window()
 
     def disconnect_devices(self) -> None:
         self._timer.stop()
