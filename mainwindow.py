@@ -26,8 +26,8 @@ from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
 import connection_window as cw
 import utils as ut
-from dialogs import (Language, LanguageSelectionWindow, show_keymap_info, show_product_info, ReportGenerationThread,
-                     ReportGenerationWindow)
+from dialogs import (Language, LanguageSelectionWindow, ReportGenerationThread, show_keymap_info, show_product_info,
+                     show_report_generation_window)
 from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
 from measurer_settings_window import MeasurerSettingsWindow
@@ -72,8 +72,8 @@ class EPLabWindow(QMainWindow):
         """
 
         super().__init__()
+        self._dir_chosen_by_user: str = ut.get_dir_name()
         self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "icon.png"))
-        self._settings_path: str = ut.get_dir_name()
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
         self._report_generation_thread.start()
 
@@ -83,6 +83,23 @@ class EPLabWindow(QMainWindow):
             self.disconnect_devices()
         else:
             self.connect_devices(port_1, port_2)
+
+    @property
+    def dir_chosen_by_user(self) -> str:
+        """
+        :return: the last directory that the user selected when working with the application.
+        """
+
+        return self._dir_chosen_by_user
+
+    @dir_chosen_by_user.setter
+    def dir_chosen_by_user(self, path: str) -> None:
+        """
+        :param path: path chosen by the user when working with the application.
+        """
+
+        if os.path.exists(path):
+            self._dir_chosen_by_user = os.path.dirname(path) if not os.path.isdir(path) else path
 
     @property
     def device_errors_handler(self) -> DeviceErrorsHandler:
@@ -903,8 +920,12 @@ class EPLabWindow(QMainWindow):
         Slot shows a dialog window to create report for the board.
         """
 
-        window = ReportGenerationWindow(self, self._report_generation_thread, self.measurement_plan, self.threshold)
-        window.show_window()
+        selected_dir = QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"),
+                                                        self.dir_chosen_by_user)
+        if selected_dir:
+            self.dir_chosen_by_user = selected_dir
+            show_report_generation_window(self, self._report_generation_thread, self.measurement_plan, selected_dir,
+                                          self.threshold, self.work_mode)
 
     def disconnect_devices(self) -> None:
         self._timer.stop()
@@ -1393,10 +1414,10 @@ class EPLabWindow(QMainWindow):
         Slot shows settings window.
         """
 
-        settings_window = SettingsWindow(self, self.get_settings(), self._settings_path)
+        settings_window = SettingsWindow(self, self.get_settings(), self.dir_chosen_by_user)
         settings_window.apply_settings_signal.connect(self.apply_settings)
         settings_window.exec()
-        self._settings_path = settings_window.settings_directory
+        self.dir_chosen_by_user = settings_window.settings_directory
 
     def update_current_pin(self) -> None:
         """
