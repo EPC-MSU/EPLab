@@ -3,7 +3,7 @@ File with the language selection dialog box class.
 """
 
 import os
-from enum import Enum, auto
+from enum import auto, Enum
 from typing import Optional, Tuple
 from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QLabel, QLayout, QVBoxLayout
@@ -110,3 +110,13 @@ class LanguageSelectionWindow(QDialog):
         """
 
         return _FILES.get(self.combo_box_languages.currentData())
+
+
+def show_language_selection_window() -> Optional[Language]:
+    """
+    :return: user's chosen language.
+    """
+
+    language_selection_wnd = LanguageSelectionWindow()
+    if language_selection_wnd.exec():
+        return language_selection_wnd.get_language_value()

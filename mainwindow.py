@@ -26,8 +26,8 @@ from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
 import connection_window as cw
 import utils as ut
-from dialogs import (Language, LanguageSelectionWindow, ReportGenerationThread, show_keymap_info, show_product_info,
-                     show_report_generation_window)
+from dialogs import (Language, ReportGenerationThread, show_keymap_info, show_language_selection_window,
+                     show_product_info, show_report_generation_window)
 from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
 from measurer_settings_window import MeasurerSettingsWindow
@@ -74,6 +74,7 @@ class EPLabWindow(QMainWindow):
         super().__init__()
         self._dir_chosen_by_user: str = ut.get_dir_name()
         self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "icon.png"))
+        self._language_to_set: str = None
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
         self._report_generation_thread.start()
 
@@ -387,7 +388,6 @@ class EPLabWindow(QMainWindow):
         """
 
         self._translator: QTranslator = QTranslator()
-        self._language_to_set: str = None
         if english:
             language = Language.EN
         else:
@@ -1295,26 +1295,24 @@ class EPLabWindow(QMainWindow):
         Slot shows a dialog window to select language.
         """
 
-        language_selection_wnd = LanguageSelectionWindow(self)
-        if language_selection_wnd.exec():
-            language = language_selection_wnd.get_language_value()
-            if language != qApp.instance().property("language"):
-                try:
-                    if self._msystem is not None:
-                        settings = self._msystem.get_settings()
-                    else:
-                        settings = None
-                except Exception:
-                    settings = None
-                self._language_to_set = Language.get_language_name(language)
-                ut.save_settings_auto(self._product, settings, self._language_to_set)
-                text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
-                text_en = "The language settings are saved. Restart the program for the changes to take effect."
-                if qApp.instance().property("language") is Language.RU:
-                    text = text_ru + "\n" + text_en
+        language = show_language_selection_window()
+        if language != qApp.instance().property("language"):
+            try:
+                if self._msystem is not None:
+                    settings = self._msystem.get_settings()
                 else:
-                    text = text_en + "\n" + text_ru
-                ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information)
+                    settings = None
+            except Exception:
+                settings = None
+            self._language_to_set = Language.get_language_name(language)
+            ut.save_settings_auto(self._product, settings, self._language_to_set)
+            text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
+            text_en = "The language settings are saved. Restart the program for the changes to take effect."
+            if qApp.instance().property("language") is Language.RU:
+                text = text_ru + "\n" + text_en
+            else:
+                text = text_en + "\n" + text_ru
+            ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information)
 
     @pyqtSlot()
     def select_option(self) -> None:

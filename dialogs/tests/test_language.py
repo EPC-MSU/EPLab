@@ -3,7 +3,7 @@ import sys
 import unittest
 from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtWidgets import QApplication
-from dialogs import Language, LanguageSelectionWindow
+from dialogs.language import Language, LanguageSelectionWindow
 
 
 class TestLanguage(unittest.TestCase):
