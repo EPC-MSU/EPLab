@@ -5,17 +5,18 @@ File with class for widget to show short information from measurement plan.
 import os
 from enum import auto, Enum
 from typing import Dict, Generator, List, Tuple
-import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QRegExpValidator
+from PyQt5.QtWidgets import (QAbstractItemView, QHBoxLayout, QLineEdit, QProgressBar, QPushButton, QTableWidget,
+                             QTableWidgetItem, QVBoxLayout, QWidget)
 from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, MIN_CHANNEL_NUMBER
 from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
 from epcore.product import EyePointProduct
+import utils as ut
 from common import WorkMode
 from dialogs.language import Language
 
 
-DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 MAX_MODULE_NUMBER = 8
 MIN_MODULE_NUMBER = 1
 
@@ -39,7 +40,7 @@ class LeftRight(Enum):
     RIGHT = auto()
 
 
-class ModifiedLineEdit(qt.QLineEdit):
+class ModifiedLineEdit(QLineEdit):
     """
     Class for line edit widget with additional handling of left and right keystrokes.
     """
@@ -60,7 +61,7 @@ class ModifiedLineEdit(qt.QLineEdit):
             self.right_pressed.emit()
 
 
-class MeasurementPlanWidget(qt.QWidget):
+class MeasurementPlanWidget(QWidget):
     """
     Class for widget to show short information from measurement plan in table.
     """
@@ -77,17 +78,17 @@ class MeasurementPlanWidget(qt.QWidget):
         """
 
         super().__init__()
-        self.button_new_pin: qt.QPushButton = None
+        self.button_new_pin: QPushButton = None
         self.HEADERS: List[str] = ["№", qApp.translate("t", "Модуль MUX"), qApp.translate("t", "Канал MUX"),
                                    qApp.translate("t", "Частота"), qApp.translate("t", "Напряжение"),
                                    qApp.translate("t", "Чувствительность"), qApp.translate("t", "Комментарий")]
-        self.progress_bar: qt.QProgressBar = None
-        self.table_widget_info: qt.QTableWidget = None
+        self.progress_bar: QProgressBar = None
+        self.table_widget_info: QTableWidget = None
         self._dont_go_to_selected_pin: bool = False
         self._lang: Language = qApp.instance().property("language")
-        self._line_edits_channel_numbers: List[qt.QLineEdit] = []
-        self._line_edits_comments: List[qt.QLineEdit] = []
-        self._line_edits_module_numbers: List[qt.QLineEdit] = []
+        self._line_edits_channel_numbers: List[QLineEdit] = []
+        self._line_edits_comments: List[QLineEdit] = []
+        self._line_edits_module_numbers: List[QLineEdit] = []
         self._parent = parent
         self._saved_mux_outputs: Dict[int, MultiplexerOutput] = {}
         self._standby_mode: bool = False
@@ -101,7 +102,7 @@ class MeasurementPlanWidget(qt.QWidget):
         """
 
         self.table_widget_info.insertRow(pin_index)
-        item = qt.QTableWidgetItem(str(pin_index))
+        item = QTableWidgetItem(str(pin_index))
         item.setFlags(item.flags() ^ Qt.ItemIsEditable)
         self.table_widget_info.setItem(pin_index, 0, item)
         line_edit_module_number = ModifiedLineEdit()
@@ -125,12 +126,12 @@ class MeasurementPlanWidget(qt.QWidget):
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
             for index, value in enumerate(self._get_values_for_parameters(settings)):
-                item = qt.QTableWidgetItem(value)
+                item = QTableWidgetItem(value)
                 item.setFlags(item.flags() ^ Qt.ItemIsEditable)
                 self.table_widget_info.setItem(pin_index, 3 + index, item)
         else:
             for index in range(3):
-                item = qt.QTableWidgetItem()
+                item = QTableWidgetItem()
                 item.setFlags(item.flags() ^ Qt.ItemIsEditable)
                 self.table_widget_info.setItem(pin_index, 3 + index, item)
         line_edit_comment = ModifiedLineEdit()
@@ -235,12 +236,12 @@ class MeasurementPlanWidget(qt.QWidget):
         Method initializes table for measurement plan.
         """
 
-        self.table_widget_info = qt.QTableWidget()
+        self.table_widget_info = QTableWidget()
         self.table_widget_info.setColumnCount(len(self.HEADERS))
         self.table_widget_info.setHorizontalHeaderLabels(self.HEADERS)
         self.table_widget_info.verticalHeader().setVisible(False)
-        self.table_widget_info.setSelectionBehavior(qt.QAbstractItemView.SelectRows)
-        self.table_widget_info.setSelectionMode(qt.QAbstractItemView.SingleSelection)
+        self.table_widget_info.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table_widget_info.setSelectionMode(QAbstractItemView.SingleSelection)
         self.table_widget_info.horizontalHeader().setStretchLastSection(True)
         self.table_widget_info.cellClicked.connect(self.set_pin_as_current)
         self.table_widget_info.itemSelectionChanged.connect(self.set_pin_as_current)
@@ -252,19 +253,19 @@ class MeasurementPlanWidget(qt.QWidget):
 
         self._init_table()
         name_and_tooltip = qApp.translate("t", "Новая точка")
-        self.button_new_pin = qt.QPushButton(name_and_tooltip)
+        self.button_new_pin = QPushButton(name_and_tooltip)
         self.button_new_pin.setToolTip(name_and_tooltip)
-        self.button_new_pin.setIcon(QIcon(os.path.join(DIR_MEDIA, "newpoint.png")))
+        self.button_new_pin.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "newpoint.png")))
         self.button_new_pin.clicked.connect(self.add_pin_to_plan)
-        self.progress_bar = qt.QProgressBar()
+        self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
-        h_box_layout_1 = qt.QHBoxLayout()
+        h_box_layout_1 = QHBoxLayout()
         h_box_layout_1.addStretch(1)
         h_box_layout_1.addWidget(self.button_new_pin)
-        h_box_layout_2 = qt.QHBoxLayout()
+        h_box_layout_2 = QHBoxLayout()
         h_box_layout_2.addWidget(self.progress_bar, 2)
         h_box_layout_2.addStretch(1)
-        v_box_layout = qt.QVBoxLayout()
+        v_box_layout = QVBoxLayout()
         v_box_layout.addLayout(h_box_layout_1)
         v_box_layout.addWidget(self.table_widget_info)
         v_box_layout.addLayout(h_box_layout_2)
@@ -279,9 +280,9 @@ class MeasurementPlanWidget(qt.QWidget):
 
         color = None
         if ChannelAndModuleErrors.INVALID_MODULE in errors:
-            color = self.COLOR_ERROR
+            color = MeasurementPlanWidget.COLOR_ERROR
         if ChannelAndModuleErrors.INVALID_CHANNEL in errors:
-            color = self.COLOR_ERROR
+            color = MeasurementPlanWidget.COLOR_ERROR
         for column in range(self.table_widget_info.columnCount()):
             if column in (1, 2, 6):
                 widget = self.table_widget_info.cellWidget(row, column)
@@ -294,7 +295,7 @@ class MeasurementPlanWidget(qt.QWidget):
                 if color:
                     item.setBackground(QColor.fromRgb(int(color[1:], base=16)))
                 else:
-                    item.setBackground(self.COLOR_NORMAL)
+                    item.setBackground(MeasurementPlanWidget.COLOR_NORMAL)
         self._set_error_tooltip_to_mux_output(row, errors)
 
     def _paint_warnings(self, row: int, errors: List[ChannelAndModuleErrors]) -> None:
@@ -306,7 +307,7 @@ class MeasurementPlanWidget(qt.QWidget):
 
         color = None
         if errors:
-            color = self.COLOR_NOT_TESTED
+            color = MeasurementPlanWidget.COLOR_NOT_TESTED
         for column in range(self.table_widget_info.columnCount()):
             if column in (1, 2, 6):
                 widget = self.table_widget_info.cellWidget(row, column)
@@ -319,7 +320,7 @@ class MeasurementPlanWidget(qt.QWidget):
                 if color:
                     item.setBackground(QColor.fromRgb(int(color[1:], base=16)))
                 else:
-                    item.setBackground(self.COLOR_NORMAL)
+                    item.setBackground(MeasurementPlanWidget.COLOR_NORMAL)
         self._set_error_tooltip_to_mux_output(row, errors)
 
     def _set_error_tooltip_to_mux_output(self, row: int, errors: List[ChannelAndModuleErrors]) -> None:
@@ -341,7 +342,7 @@ class MeasurementPlanWidget(qt.QWidget):
             widget.setToolTip(tooltip)
             if tooltip:
                 style_sheet = widget.styleSheet()
-                widget.setStyleSheet(style_sheet + f"border: 1px solid {self.COLOR_ERROR_FRAME}")
+                widget.setStyleSheet(style_sheet + f"border: 1px solid {MeasurementPlanWidget.COLOR_ERROR_FRAME}")
 
     def _update_pin_in_table(self, pin_index: int, pin: Pin) -> None:
         """

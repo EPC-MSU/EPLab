@@ -4,18 +4,17 @@ File with class for widget to show multiplexer pinout.
 
 import os
 from typing import Dict, List, Optional
-import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QTimer
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (QAction, QCheckBox, QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea,
+                             QVBoxLayout, QWidget)
 from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
+import utils as ut
 from common import DeviceErrorsHandler, WorkMode
 
 
-DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
-
-
-class ChannelWidget(qt.QWidget):
+class ChannelWidget(QWidget):
     """
     Class to show single channel of module.
     """
@@ -33,8 +32,8 @@ class ChannelWidget(qt.QWidget):
         """
 
         super().__init__()
-        self.button_turn_on_off: qt.QPushButton = None
-        self.check_box_select_channel: qt.QCheckBox = None
+        self.button_turn_on_off: QPushButton = None
+        self.check_box_select_channel: QCheckBox = None
         self._channel_number: int = channel_number
         self._init_ui(up)
 
@@ -44,23 +43,23 @@ class ChannelWidget(qt.QWidget):
         :param up: if True then channel number should be displayed on top of widget.
         """
 
-        self.button_turn_on_off = qt.QPushButton(str(self._channel_number))
+        self.button_turn_on_off = QPushButton(str(self._channel_number))
         self.button_turn_on_off.setCheckable(True)
         tooltip = qApp.translate("t", "Включить/выключить канал {}")
         self.button_turn_on_off.setToolTip(tooltip.format(self._channel_number))
         self.button_turn_on_off.clicked.connect(self.send_to_turn_on_off)
         self.button_turn_on_off.setStyleSheet(
-            f"QPushButton {{background-color: {self.COLOR_TURNED_OFF}; border: none; font: 10px; font-weight: bold;"
-            f" spacing: 0px;}}"
-            f"QPushButton:checked {{background-color: {self.COLOR_TURNED_ON}; border: none;}}")
-        self.button_turn_on_off.setFixedSize(self.SIZE, self.SIZE)
-        self.check_box_select_channel = qt.QCheckBox()
+            f"QPushButton {{background-color: {ChannelWidget.COLOR_TURNED_OFF}; border: none; font: 10px; "
+            f"font-weight: bold; spacing: 0px;}}"
+            f"QPushButton:checked {{background-color: {ChannelWidget.COLOR_TURNED_ON}; border: none;}}")
+        self.button_turn_on_off.setFixedSize(ChannelWidget.SIZE, ChannelWidget.SIZE)
+        self.check_box_select_channel = QCheckBox()
         tooltip = qApp.translate("t", "Выбрать канал {}")
         self.check_box_select_channel.setToolTip(tooltip.format(self._channel_number))
         self.check_box_select_channel.stateChanged.connect(self.send_to_select)
         self.check_box_select_channel.setStyleSheet("QCheckBox {border: none; spacing: 0px;}")
-        self.check_box_select_channel.setFixedSize(self.SIZE, self.SIZE)
-        v_box_layout = qt.QVBoxLayout()
+        self.check_box_select_channel.setFixedSize(ChannelWidget.SIZE, ChannelWidget.SIZE)
+        v_box_layout = QVBoxLayout()
         if up:
             v_box_layout.addWidget(self.button_turn_on_off, alignment=Qt.AlignHCenter)
             v_box_layout.addWidget(self.check_box_select_channel, alignment=Qt.AlignHCenter)
@@ -123,7 +122,7 @@ class ChannelWidget(qt.QWidget):
         self.button_turn_on_off.setChecked(False)
 
 
-class ModuleWidget(qt.QWidget):
+class ModuleWidget(QWidget):
     """
     Class to show single module of multiplexer.
     """
@@ -142,8 +141,8 @@ class ModuleWidget(qt.QWidget):
         """
 
         super().__init__()
-        self.action_select_all_channels: qt.QAction = None
-        self.frame_module: qt.QWidget = None
+        self.action_select_all_channels: QAction = None
+        self.frame_module: QWidget = None
         self._channels: Dict[int, ChannelWidget] = {}
         self._module_number: int = module_number
         self._module_type: ModuleTypes = module_type
@@ -155,7 +154,7 @@ class ModuleWidget(qt.QWidget):
         Method changes color of module.
         """
 
-        color = self.COLOR_TURNED_ON if self._turned_on_channel else self.COLOR_TURNED_OFF
+        color = ModuleWidget.COLOR_TURNED_ON if self._turned_on_channel else ModuleWidget.COLOR_TURNED_OFF
         self.frame_module.setStyleSheet(f"QWidget {{border: 2px solid {color}; border-radius: 3px;}}")
 
     def _create_context_menu(self) -> None:
@@ -163,8 +162,8 @@ class ModuleWidget(qt.QWidget):
         Method creates context menu for module.
         """
 
-        self.action_select_all_channels = qt.QAction(QIcon(os.path.join(DIR_MEDIA, "select.png")),
-                                                     qApp.translate("t", "Выбрать все каналы"))
+        self.action_select_all_channels = QAction(QIcon(os.path.join(ut.DIR_MEDIA, "select.png")),
+                                                  qApp.translate("t", "Выбрать все каналы"))
         self.action_select_all_channels.setCheckable(True)
         self.action_select_all_channels.triggered.connect(self.select_all_channels)
         self.addAction(self.action_select_all_channels)
@@ -175,11 +174,12 @@ class ModuleWidget(qt.QWidget):
         Method creates widgets for channels in module.
         """
 
-        self.frame_module = qt.QWidget()
-        self.frame_module.setStyleSheet(f"QWidget {{border: 2px solid {self.COLOR_TURNED_OFF}; border-radius: 3px;}}")
-        grid_layout = qt.QGridLayout()
+        self.frame_module = QWidget()
+        self.frame_module.setStyleSheet(f"QWidget {{border: 2px solid {ModuleWidget.COLOR_TURNED_OFF}; "
+                                        f"border-radius: 3px;}}")
+        grid_layout = QGridLayout()
         grid_layout.setContentsMargins(2, 2, 2, 2)
-        for index in range(self.MAX_CHANNEL_NUMBER):
+        for index in range(ModuleWidget.MAX_CHANNEL_NUMBER):
             column = index // 2
             row = index % 2
             channel = ChannelWidget(index + 1, row == 0)
@@ -196,10 +196,10 @@ class ModuleWidget(qt.QWidget):
 
         self._create_context_menu()
         self._create_pinout()
-        label_module_number = qt.QLabel(str(self._module_number))
+        label_module_number = QLabel(str(self._module_number))
         label_module_number.setStyleSheet("QLabel {border: none; font-size: 15px; font-weight: bold;}")
         label_module_number.setToolTip(qApp.translate("t", "Номер модуля"))
-        h_box_layout = qt.QHBoxLayout()
+        h_box_layout = QHBoxLayout()
         h_box_layout.setContentsMargins(0, 0, 0, 0)
         h_box_layout.addWidget(label_module_number, alignment=Qt.AlignVCenter)
         h_box_layout.addWidget(self.frame_module)
@@ -306,7 +306,7 @@ class ModuleWidget(qt.QWidget):
         self._change_module_color()
 
 
-class MultiplexerPinoutWidget(qt.QWidget):
+class MultiplexerPinoutWidget(QWidget):
     """
     Class to show multiplexer pinout.
     """
@@ -325,19 +325,19 @@ class MultiplexerPinoutWidget(qt.QWidget):
         """
 
         super().__init__()
-        self.check_box_select_all: qt.QCheckBox = None
-        self.button_add_points_to_plan: qt.QPushButton = None
-        self.button_start_or_stop_entire_plan_measurement: qt.QPushButton = None
-        self.label_no_mux: qt.QLabel = None
-        self.layout_for_modules: qt.QVBoxLayout = None
-        self.scroll_area: qt.QScrollArea = None
+        self.check_box_select_all: QCheckBox = None
+        self.button_add_points_to_plan: QPushButton = None
+        self.button_start_or_stop_entire_plan_measurement: QPushButton = None
+        self.label_no_mux: QLabel = None
+        self.layout_for_modules: QVBoxLayout = None
+        self.scroll_area: QScrollArea = None
         self._device_errors_handler: DeviceErrorsHandler = device_errors_handler if device_errors_handler else\
             parent.device_errors_handler
         self._modules: Dict[int, ModuleWidget] = {}
         self._parent = parent
         self._selected_channels: List[MultiplexerOutput] = []
         self._timer: QTimer = QTimer()
-        self._timer.setInterval(self.TIMEOUT)
+        self._timer.setInterval(MultiplexerPinoutWidget.TIMEOUT)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self.send_selected_channel)
         self._turned_on_output: MultiplexerOutput = None
@@ -348,7 +348,7 @@ class MultiplexerPinoutWidget(qt.QWidget):
         Method creates empty widget.
         """
 
-        self.label_no_mux = qt.QLabel(qApp.translate("t", "Нет мультиплексора"))
+        self.label_no_mux = QLabel(qApp.translate("t", "Нет мультиплексора"))
         self.label_no_mux.setStyleSheet("QLabel {font-weight: bold; font-size: 25px;}")
 
     def _create_widgets_for_multiplexer(self) -> None:
@@ -356,25 +356,26 @@ class MultiplexerPinoutWidget(qt.QWidget):
         Method creates widgets to work with multiplexer.
         """
 
-        self.layout_for_modules = qt.QVBoxLayout()
+        self.layout_for_modules = QVBoxLayout()
         self.layout_for_modules.addStretch(1)
-        self.scroll_area = qt.QScrollArea()
+        self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setMinimumHeight(self.SCROLL_AREA_MIN_HEIGHT)
-        widget = qt.QWidget()
+        self.scroll_area.setMinimumHeight(MultiplexerPinoutWidget.SCROLL_AREA_MIN_HEIGHT)
+        widget = QWidget()
         widget.setLayout(self.layout_for_modules)
         self.scroll_area.setWidget(widget)
-        self.check_box_select_all = qt.QCheckBox(qApp.translate("t", "Выбрать все каналы"))
+        self.check_box_select_all = QCheckBox(qApp.translate("t", "Выбрать все каналы"))
         self.check_box_select_all.clicked.connect(self.select_all_channels)
         self.check_box_select_all.setChecked(True)
         name_and_tooltip = qApp.translate("t", "Добавить выбранные каналы в план")
-        self.button_add_points_to_plan = qt.QPushButton(name_and_tooltip)
+        self.button_add_points_to_plan = QPushButton(name_and_tooltip)
         self.button_add_points_to_plan.setToolTip(name_and_tooltip)
-        self.button_add_points_to_plan.setIcon(QIcon(os.path.join(DIR_MEDIA, "add_channels.png")))
+        self.button_add_points_to_plan.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "add_channels.png")))
         self.button_add_points_to_plan.clicked.connect(self.collect_selected_channels)
         name_and_tooltip = qApp.translate("t", "Запустить измерение всего плана")
-        self.button_start_or_stop_entire_plan_measurement = qt.QPushButton(name_and_tooltip)
-        self.button_start_or_stop_entire_plan_measurement.setIcon(QIcon(os.path.join(DIR_MEDIA, "start_auto_test.png")))
+        self.button_start_or_stop_entire_plan_measurement = QPushButton(name_and_tooltip)
+        self.button_start_or_stop_entire_plan_measurement.setIcon(QIcon(os.path.join(ut.DIR_MEDIA,
+                                                                                     "start_auto_test.png")))
         self.button_start_or_stop_entire_plan_measurement.setToolTip(name_and_tooltip)
         self.button_start_or_stop_entire_plan_measurement.setCheckable(True)
 
@@ -398,15 +399,15 @@ class MultiplexerPinoutWidget(qt.QWidget):
 
         self._create_widgets_for_multiplexer()
         self._create_empty_widget()
-        self.setMinimumWidth(self.MIN_WIDTH)
-        h_box_layout = qt.QHBoxLayout()
+        self.setMinimumWidth(MultiplexerPinoutWidget.MIN_WIDTH)
+        h_box_layout = QHBoxLayout()
         h_box_layout.addWidget(self.check_box_select_all)
         h_box_layout.addStretch(1)
-        v_box_layout = qt.QVBoxLayout()
+        v_box_layout = QVBoxLayout()
         v_box_layout.addWidget(self.button_add_points_to_plan)
         v_box_layout.addWidget(self.button_start_or_stop_entire_plan_measurement)
         h_box_layout.addLayout(v_box_layout)
-        layout = qt.QVBoxLayout()
+        layout = QVBoxLayout()
         layout.addWidget(self.scroll_area)
         layout.addLayout(h_box_layout)
         layout.addWidget(self.label_no_mux, alignment=Qt.AlignHCenter)

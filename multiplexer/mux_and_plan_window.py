@@ -1,24 +1,21 @@
 """
-File with class to show window with information about multiplexer and
-measurement plan.
+File with class to show window with information about multiplexer and measurement plan.
 """
 
 import os
 from typing import Tuple
-import PyQt5.QtWidgets as qt
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QHBoxLayout, QMessageBox, QPushButton, QSplitter, QVBoxLayout, QWidget
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
+import utils as ut
 from common import WorkMode
 from multiplexer.measurement_plan_runner import MeasurementPlanRunner
 from multiplexer.measurement_plan_widget import MeasurementPlanWidget
 from multiplexer.multiplexer_pinout_widget import MultiplexerPinoutWidget
 
 
-DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
-
-
-class MuxAndPlanWindow(qt.QWidget):
+class MuxAndPlanWindow(QWidget):
     """
     Class for dialog window to show information about multiplexer and measurement plan.
     """
@@ -34,10 +31,10 @@ class MuxAndPlanWindow(qt.QWidget):
         """
 
         super().__init__(None, Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
-        self.button_arrange_windows: qt.QPushButton = None
+        self.button_arrange_windows: QPushButton = None
         self.measurement_plan_widget: MeasurementPlanWidget = None
         self.multiplexer_pinout_widget: MultiplexerPinoutWidget = None
-        self.splitter: qt.QSplitter = None
+        self.splitter: QSplitter = None
         self._manual_stop: bool = True
         self._parent = parent
         self._previous_main_window_pos: QPoint = None
@@ -62,10 +59,10 @@ class MuxAndPlanWindow(qt.QWidget):
                    self._parent.start_or_stop_entire_plan_measurement_action)
         if status:
             text = qApp.translate("t", "Остановить измерение всего плана")
-            icon = QIcon(os.path.join(DIR_MEDIA, "stop_auto_test.png"))
+            icon = QIcon(os.path.join(ut.DIR_MEDIA, "stop_auto_test.png"))
         else:
             text = qApp.translate("t", "Запустить измерение всего плана")
-            icon = QIcon(os.path.join(DIR_MEDIA, "start_auto_test.png"))
+            icon = QIcon(os.path.join(ut.DIR_MEDIA, "start_auto_test.png"))
         for widget in widgets:
             widget.setIcon(icon)
             widget.setText(text)
@@ -86,25 +83,20 @@ class MuxAndPlanWindow(qt.QWidget):
             self.multiplexer_pinout_widget.set_visible(True)
         self.multiplexer_pinout_widget.stop_sending_channels()
 
-    def _continue_plan_measurement(self) -> bool:
+    @staticmethod
+    def _continue_plan_measurement() -> bool:
         """
         Method asks user whether it is necessary to continue measurements according to measurement plan.
         :return: True if measurements should be continued.
         """
 
-        msg_box = qt.QMessageBox()
-        msg_box.setIcon(qt.QMessageBox.Information)
-        msg_box.setWindowTitle(qApp.translate("t", "Внимание"))
-        msg_box.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "icon.png")))
-        color = '<span style="background-color: {};">{}</span>'.format(self.COLOR_NOT_TESTED,
+        color = '<span style="background-color: {};">{}</span>'.format(MuxAndPlanWindow.COLOR_NOT_TESTED,
                                                                        qApp.translate("t", "жёлтым"))
         text = qApp.translate("t", "Не все точки имеют выходы мультиплексора и/или не все выходы могут быть "
                                    "установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите "
                                    "продолжить?")
-        msg_box.setText(text.format(color))
-        msg_box.addButton(qApp.translate("t", "Да"), qt.QMessageBox.YesRole)
-        msg_box.addButton(qApp.translate("t", "Нет"), qt.QMessageBox.NoRole)
-        return not msg_box.exec_()
+        return not ut.show_message(qApp.translate("t", "Внимание"), text.format(color), icon=QMessageBox.Information,
+                                   yes_button=True, no_button=True)
 
     def _init_ui(self) -> None:
         """
@@ -112,12 +104,12 @@ class MuxAndPlanWindow(qt.QWidget):
         """
 
         self.setWindowTitle(qApp.translate("t", "Мультиплексор и план измерения"))
-        self.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "ico.png")))
-        self.button_arrange_windows = qt.QPushButton()
-        self.button_arrange_windows.setIcon(QIcon(os.path.join(DIR_MEDIA, "arrange_windows.png")))
+        self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
+        self.button_arrange_windows = QPushButton()
+        self.button_arrange_windows.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "arrange_windows.png")))
         self.button_arrange_windows.setToolTip(qApp.translate("t", "Упорядочить окна"))
         self.button_arrange_windows.clicked.connect(self.arrange_windows)
-        h_box_layout = qt.QHBoxLayout()
+        h_box_layout = QHBoxLayout()
         h_box_layout.addStretch(1)
         h_box_layout.addWidget(self.button_arrange_windows)
         self.measurement_plan_widget = MeasurementPlanWidget(self._parent)
@@ -128,12 +120,12 @@ class MuxAndPlanWindow(qt.QWidget):
             self.measurement_plan_widget.add_pin_with_mux_output_to_plan)
         self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement.clicked.connect(
             self.start_or_stop_plan_measurement)
-        self.splitter = qt.QSplitter(Qt.Vertical)
+        self.splitter = QSplitter(Qt.Vertical)
         self.splitter.setContentsMargins(0, 0, 0, 0)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(self.multiplexer_pinout_widget)
         self.splitter.addWidget(self.measurement_plan_widget)
-        layout = qt.QVBoxLayout()
+        layout = QVBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(h_box_layout)
@@ -152,7 +144,7 @@ class MuxAndPlanWindow(qt.QWidget):
         width = desktop.availableGeometry().width()
         main_window_pos = QPoint(desktop.availableGeometry().x(), desktop.availableGeometry().y())
         height -= 50
-        if 1280 < width:
+        if width > 1280:
             main_window_size = QSize(width // 2, height)
             window_pos = QPoint(main_window_pos.x() + main_window_size.width(), main_window_pos.y())
             window_size = QSize(width // 2, height)
@@ -191,8 +183,9 @@ class MuxAndPlanWindow(qt.QWidget):
         if not self._parent.measurement_plan or not self._parent.measurement_plan.multiplexer or\
                 self._is_arranged()[0] or self.isVisible():
             return
-        self.resize(self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT)
-        self.splitter.setSizes([self.DEFAULT_MUX_HEIGHT, self.DEFAULT_HEIGHT - self.DEFAULT_MUX_HEIGHT])
+        self.resize(MuxAndPlanWindow.DEFAULT_WIDTH, MuxAndPlanWindow.DEFAULT_HEIGHT)
+        self.splitter.setSizes([MuxAndPlanWindow.DEFAULT_MUX_HEIGHT,
+                                MuxAndPlanWindow.DEFAULT_HEIGHT - MuxAndPlanWindow.DEFAULT_MUX_HEIGHT])
 
     def _stop_plan_measurement(self) -> None:
         """
@@ -233,7 +226,7 @@ class MuxAndPlanWindow(qt.QWidget):
         """
 
         if self._parent.work_mode is WorkMode.TEST and not self._manual_stop:
-            self._parent.create_report(True)
+            self._parent.create_report()
         self._manual_stop = False
 
     def select_current_pin(self) -> None:
