@@ -14,8 +14,8 @@ class Language(Enum):
     Class for supported languages.
     """
 
-    RU = auto()
     EN = auto()
+    RU = auto()
 
     @classmethod
     def get_language_name(cls, value: "Language") -> str:

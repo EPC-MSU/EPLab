@@ -1,6 +1,6 @@
+from dialogs.language import Language, LanguageSelectionWindow
 from dialogs.aboutwindow import show_product_info
 from dialogs.keymapdialog import show_keymap_info
-from dialogs.language import Language, LanguageSelectionWindow
 from dialogs.reportgenerationwindow import ReportGenerationThread, show_report_generation_window
 
 
