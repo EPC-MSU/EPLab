@@ -1296,7 +1296,7 @@ class EPLabWindow(QMainWindow):
         """
 
         language = show_language_selection_window()
-        if language != qApp.instance().property("language"):
+        if language is not None and language != qApp.instance().property("language"):
             try:
                 if self._msystem is not None:
                     settings = self._msystem.get_settings()
@@ -1309,9 +1309,9 @@ class EPLabWindow(QMainWindow):
             text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
             text_en = "The language settings are saved. Restart the program for the changes to take effect."
             if qApp.instance().property("language") is Language.RU:
-                text = text_ru + "\n" + text_en
+                text = text_ru + "<br>" + text_en
             else:
-                text = text_en + "\n" + text_ru
+                text = text_en + "<br>" + text_ru
             ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information)
 
     @pyqtSlot()

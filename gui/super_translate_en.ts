@@ -480,24 +480,9 @@
         <translation>Pin with this number was not found on this board.</translation>
     </message>
     <message>
-        <location filename="../about_window.py" line="33"/>
-        <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Более подробную информацию вы можете найти {}</source>
-        <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). You can find more information about EyePoint product {}</translation>
-    </message>
-    <message>
-        <location filename="../about_window.py" line="41"/>
-        <source>на нашем сайте.</source>
-        <translation>on our website.</translation>
-    </message>
-    <message>
-        <location filename="../about_window.py" line="50"/>
-        <source>О программе</source>
-        <translation>About product</translation>
-    </message>
-    <message>
-        <location filename="../about_window.py" line="67"/>
-        <source>Копировать</source>
-        <translation>Copy</translation>
+        <location filename="../mainwindow.py" line="923"/>
+        <source>Выбрать папку</source>
+        <translation>Select directory</translation>
     </message>
     <message>
         <location filename="../connection_window/connection_window.py" line="67"/>
@@ -573,16 +558,6 @@
         <location filename="../connection_window/mux_widget.py" line="97"/>
         <source>Введите значение последовательного порта в формате com:///dev/ttyACMx.</source>
         <translation>Enter serial port value in format com:///dev/ttyACMx.</translation>
-    </message>
-    <message>
-        <location filename="../language.py" line="89"/>
-        <source>Выбор языка</source>
-        <translation>Language selection</translation>
-    </message>
-    <message>
-        <location filename="../language.py" line="91"/>
-        <source>Выберите язык:</source>
-        <translation>Choose language:</translation>
     </message>
     <message>
         <location filename="../measurer_settings_window.py" line="175"/>
@@ -720,51 +695,6 @@
         <translation>Arrange windows</translation>
     </message>
     <message>
-        <location filename="../report_window.py" line="156"/>
-        <source>Отчет сгенерирован и сохранен в директорию &apos;FOLDER&apos;</source>
-        <translation>Report was generated and saved to directory &apos;FOLDER&apos;</translation>
-    </message>
-    <message>
-        <location filename="../report_window.py" line="159"/>
-        <source>Отчет не был сгенерирован</source>
-        <translation>Report was not generated</translation>
-    </message>
-    <message>
-        <location filename="../report_window.py" line="160"/>
-        <source>Информация</source>
-        <translation>Information</translation>
-    </message>
-    <message>
-        <location filename="../report_window.py" line="167"/>
-        <source>Генератор отчетов</source>
-        <translation>Report generator</translation>
-    </message>
-    <message>
-        <location filename="../report_window.py" line="169"/>
-        <source>Выбрать папку для отчета</source>
-        <translation>Select directory for the report</translation>
-    </message>
-    <message>
-        <location filename="../report_window.py" line="173"/>
-        <source>Сгенерировать отчет</source>
-        <translation>Generate report</translation>
-    </message>
-    <message>
-        <location filename="../report_window.py" line="187"/>
-        <source>Шаги генерации отчета</source>
-        <translation>Steps to generate report</translation>
-    </message>
-    <message>
-        <location filename="../report_window.py" line="210"/>
-        <source>Завершить генерацию отчетов</source>
-        <translation>Finish report generation</translation>
-    </message>
-    <message>
-        <location filename="../report_window.py" line="260"/>
-        <source>Выбрать папку</source>
-        <translation>Select directory</translation>
-    </message>
-    <message>
         <location filename="../utils.py" line="248"/>
         <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
         <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>
@@ -773,6 +703,49 @@
         <location filename="../utils.py" line="330"/>
         <source>Все равно открыть</source>
         <translation>Force open</translation>
+    </message>
+</context>
+<context>
+    <name>dialogs</name>
+    <message>
+        <location filename="../dialogs/aboutwindow.py" line="40"/>
+        <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Более подробную информацию вы можете найти {}</source>
+        <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). You can find more information about EyePoint product {}</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/aboutwindow.py" line="49"/>
+        <source>на нашем сайте.</source>
+        <translation>on our website.</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/aboutwindow.py" line="67"/>
+        <source>О программе</source>
+        <translation>About product</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/aboutwindow.py" line="87"/>
+        <source>Копировать</source>
+        <translation>Copy</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/language.py" line="81"/>
+        <source>Выбор языка</source>
+        <translation>Language selection</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/language.py" line="82"/>
+        <source>Выберите язык:</source>
+        <translation>Choose language:</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/reportgenerationwindow.py" line="163"/>
+        <source>Генератор отчетов</source>
+        <translation>Report generator</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/reportgenerationwindow.py" line="172"/>
+        <source>Шаги генерации отчета</source>
+        <translation>Steps to generate report</translation>
     </message>
 </context>
 <context>

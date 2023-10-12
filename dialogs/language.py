@@ -6,7 +6,9 @@ import os
 from enum import auto, Enum
 from typing import Optional, Tuple
 from PyQt5.QtCore import QCoreApplication as qApp, Qt
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QLabel, QLayout, QVBoxLayout
+import utils as ut
 
 
 class Language(Enum):
@@ -79,6 +81,7 @@ class LanguageSelectionWindow(QDialog):
 
     def _init_ui(self) -> None:
         self.setWindowTitle(qApp.translate("dialogs", "Выбор языка"))
+        self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.label: QLabel = QLabel(qApp.translate("dialogs", "Выберите язык:"))
         self.combo_box_languages: QComboBox = QComboBox()
         for value, language in Language.get_languages():
