@@ -21,7 +21,7 @@ from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IV
 from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EyePointProduct
-from dialogs import Language
+from dialogs.language import Language
 
 
 logger = logging.getLogger("eplab")

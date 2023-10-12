@@ -26,8 +26,9 @@ from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
 import connection_window as cw
 import utils as ut
-from dialogs import (Language, ReportGenerationThread, show_keymap_info, show_language_selection_window,
-                     show_product_info, show_report_generation_window)
+from dialogs import (ReportGenerationThread, show_keymap_info, show_language_selection_window, show_product_info,
+                     show_report_generation_window)
+from dialogs.language import Language
 from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
 from measurer_settings_window import MeasurerSettingsWindow

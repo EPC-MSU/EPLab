@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent,
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QRadioButton, QScrollArea, QVBoxLayout, QWidget
 from epcore.product import EyePointProduct
-from dialogs import Language
+from dialogs.language import Language
 
 
 class ParameterWidget(QScrollArea):
