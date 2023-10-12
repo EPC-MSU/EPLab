@@ -15,9 +15,10 @@ from common import WorkMode
 from dialogs.language import Language
 
 
-def get_scales_and_noise_amplitudes_for_iv_curves(board: Board, main_window) -> Tuple[List, List]:
+def get_scales_and_noise_amplitudes_for_iv_curves(board: Board, main_window
+                                                  ) -> Tuple[List[Tuple[float, float]], List[Tuple[float, float]]]:
     """
-    Function returns scales and noise amplitudes for IV-curves in pins of board.
+    Function returns scales and noise amplitudes for IV-curves in the pins of the board.
     :param board: board;
     :param main_window: main window.
     :return: list with scales and list with noise amplitudes.
@@ -59,11 +60,11 @@ class ReportGenerationThread(QThread):
     def _create_config(self, board: Board, dir_for_report: str, threshold: float, work_mode: WorkMode
                        ) -> Dict[ConfigAttributes, Any]:
         """
-        :param board:
-        :param dir_for_report:
-        :param threshold:
-        :param work_mode:
-        :return:
+        :param board: board for which to generate a report;
+        :param dir_for_report: directory where to save the report;
+        :param threshold: score threshold;
+        :param work_mode: application work mode.
+        :return: configuration dictionary that specifies the operation of the report generator.
         """
 
         scales, noise_amplitudes = get_scales_and_noise_amplitudes_for_iv_curves(board, self._parent)
@@ -82,10 +83,10 @@ class ReportGenerationThread(QThread):
 
     def _run_report_generation(self, board: Board, dir_for_report: str, threshold: float, work_mode: WorkMode) -> None:
         """
-        :param board:
-        :param dir_for_report:
-        :param threshold:
-        :param work_mode:
+        :param board: board for which to generate a report;
+        :param dir_for_report: directory where to save the report;
+        :param threshold: score threshold;
+        :param work_mode: application work mode.
         """
 
         config = self._create_config(board, dir_for_report, threshold, work_mode)
@@ -208,6 +209,15 @@ class ReportGenerationWindow(QDialog):
 
 def show_report_generation_window(parent, thread: ReportGenerationThread, board: Board, dir_for_report: str,
                                   threshold: float, work_mode: WorkMode) -> None:
+    """
+    :param parent: main window;
+    :param thread: thread in which the report will be generated;
+    :param board: board for which to generate a report;
+    :param dir_for_report: directory where to save the report;
+    :param threshold: score threshold;
+    :param work_mode: application work mode.
+    """
+
     window = ReportGenerationWindow(parent, thread)
     thread.add_task(board, dir_for_report, threshold, work_mode)
     window.exec()
