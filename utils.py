@@ -2,7 +2,6 @@
 File with useful functions.
 """
 
-import configparser
 import json
 import logging
 import os
@@ -21,29 +20,10 @@ from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IV
 from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
 from epcore.product import EyePointProduct
-from dialogs.language import Language
 
 
 logger = logging.getLogger("eplab")
-_FILENAME_FOR_AUTO_SETTINGS = "eplab_settings_for_auto_save_and_read.ini"
 DIR_MEDIA: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
-
-
-def _get_options_from_config(config: configparser.ConfigParser) -> Optional[Dict]:
-    """
-    Function returns options from config object with saved settings.
-    :return: dictionary with probe signal frequency, internal resistance and
-    max voltage.
-    """
-
-    frequency = config.get("frequency", None)
-    resistance = config.get("sensitive", None)
-    voltage = config.get("voltage", None)
-    if None in (frequency, resistance, voltage):
-        return None
-    return {EyePointProduct.Parameter.frequency: frequency,
-            EyePointProduct.Parameter.sensitive: resistance,
-            EyePointProduct.Parameter.voltage: voltage}
 
 
 def calculate_scales(settings: MeasurementSettings) -> Tuple[float, float]:
@@ -277,28 +257,6 @@ def initialize_measurers(measurer_ports: Iterable[str], force_open: bool = False
     return measurers, bad_ports, bad_ports_by_firmware, bad_firmware_text_error
 
 
-def read_language_auto() -> Optional[Language]:
-    """
-    Function searches language that were specified for interface during previous work.
-    :return: language for interface.
-    """
-
-    dir_name = get_dir_name()
-    filename = os.path.join(dir_name, _FILENAME_FOR_AUTO_SETTINGS)
-    if not os.path.exists(filename):
-        return Language.EN
-    config = configparser.ConfigParser()
-    try:
-        config.read(filename)
-    except (configparser.ParsingError, configparser.DuplicateSectionError, configparser.DuplicateOptionError):
-        return Language.EN
-    language_name = config["DEFAULT"].get("language")
-    language = Language.get_language_value(language_name)
-    if language is None:
-        return Language.EN
-    return language
-
-
 def read_json(path: Optional[str] = None) -> Optional[Dict]:
     """
     Function reads file with content in json format.
@@ -308,36 +266,9 @@ def read_json(path: Optional[str] = None) -> Optional[Dict]:
 
     if not path:
         return None
+
     with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
-
-
-def read_settings_auto(product: EyePointProduct) -> Optional[MeasurementSettings]:
-    """
-    Function searches measurement settings that were specified for device
-    during previous work.
-    :param product:
-    :return: previous settings for measurement system.
-    """
-
-    dir_name = get_dir_name()
-    filename = os.path.join(dir_name, _FILENAME_FOR_AUTO_SETTINGS)
-    if not os.path.exists(filename):
-        return None
-    config = configparser.ConfigParser()
-    try:
-        config.read(filename)
-    except (configparser.ParsingError, configparser.DuplicateSectionError, configparser.DuplicateOptionError):
-        return None
-    options = _get_options_from_config(config["DEFAULT"])
-    if options is None:
-        return None
-    settings = MeasurementSettings(0, 0, 0, 0)
-    settings = product.options_to_settings(options, settings)
-    if -1 in (settings.probe_signal_frequency, settings.sampling_rate, settings.max_voltage,
-              settings.internal_resistance):
-        return None
-    return settings
 
 
 def request_opening_by_force(text: str) -> bool:
@@ -353,29 +284,6 @@ def request_opening_by_force(text: str) -> bool:
     message_box.layout().addWidget(check_box_force_open)
     message_box.exec_()
     return check_box_force_open.checkState() == Qt.Checked
-
-
-def save_settings_auto(product: EyePointProduct, settings: MeasurementSettings, language: str) -> None:
-    """
-    Function saves current settings for device in file.
-    :param product:
-    :param settings: settings to be saved;
-    :param language: language for interface.
-    """
-
-    options_config = {}
-    if settings is not None:
-        options = product.settings_to_options(settings)
-        options_config = {"frequency": options[EyePointProduct.Parameter.frequency],
-                          "sensitive": options[EyePointProduct.Parameter.sensitive],
-                          "voltage": options[EyePointProduct.Parameter.voltage]}
-    options_config["language"] = language
-    config = configparser.ConfigParser()
-    config["DEFAULT"] = options_config
-    dir_name = get_dir_name()
-    filename = os.path.join(dir_name, _FILENAME_FOR_AUTO_SETTINGS)
-    with open(filename, "w") as configfile:
-        config.write(configfile)
 
 
 def show_message(header: str, message: str, additional_info: str = None, icon: QMessageBox.Icon = QMessageBox.Warning,

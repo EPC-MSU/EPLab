@@ -124,20 +124,6 @@ class SettingsHandler(QObject):
         self._write(settings)
         settings.sync()
 
-    def get_default_values(self) -> Dict[str, Any]:
-        """
-        :return: dictionary with default values o​​f attributes.
-        """
-
-        raise NotImplementedError()
-
-    def get_values(self) -> Dict[str, Any]:
-        """
-        :return: dictionary with values of attributes.
-        """
-
-        raise NotImplementedError()
-
     def import_(self, *args, settings=None, path=None) -> None:
         """
         Reads settings from QSettings object or file and not binds to it.

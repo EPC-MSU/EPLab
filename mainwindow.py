@@ -36,7 +36,7 @@ from multiplexer import MuxAndPlanWindow
 from parameter_widget import ParameterWidget
 from player import SoundPlayer
 from score import ScoreWrapper
-from settings import LowSettingsPanel, Settings, SettingsWindow
+from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
 from version import Version
 
 
@@ -58,6 +58,7 @@ class EPLabWindow(QMainWindow):
     DEFAULT_PATH: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
     DEFAULT_POS_X: int = 50
     DEFAULT_POS_Y: int = 50
+    FILENAME_FOR_AUTO_SETTINGS: str = os.path.join(ut.get_dir_name(), "eplab_settings_for_auto_save_and_read.ini")
     MIN_WIDTH_IN_LINUX: int = 700
     MIN_WIDTH_IN_WINDOWS: int = 650
     measurers_disconnected: pyqtSignal = pyqtSignal()
@@ -73,10 +74,10 @@ class EPLabWindow(QMainWindow):
         """
 
         super().__init__()
+        self._auto_settings: AutoSettings = AutoSettings(path=EPLabWindow.FILENAME_FOR_AUTO_SETTINGS)
         self._current_file_path: str = None
         self._dir_chosen_by_user: str = ut.get_dir_name()
         self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "icon.png"))
-        self._language_to_set: str = None
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
         self._report_generation_thread.start()
 
@@ -393,7 +394,7 @@ class EPLabWindow(QMainWindow):
         if english:
             language = Language.EN
         else:
-            language = ut.read_language_auto()
+            language = self._auto_settings.get_language()
         if language is not Language.RU:
             translation_file = Language.get_translator_file(language)
             self._translator.load(translation_file)
@@ -661,7 +662,7 @@ class EPLabWindow(QMainWindow):
         self._test_curve_from_plan = None
         # Set ui settings state to current device
         with self._device_errors_handler:
-            settings = ut.read_settings_auto(self._product)
+            settings = self._auto_settings.get_measurement_settings(self._product)
             if settings is not None:
                 self._msystem.set_settings(settings)
             settings = self._msystem.get_settings()
@@ -1302,15 +1303,7 @@ class EPLabWindow(QMainWindow):
 
         language = show_language_selection_window()
         if language is not None and language != qApp.instance().property("language"):
-            try:
-                if self._msystem is not None:
-                    settings = self._msystem.get_settings()
-                else:
-                    settings = None
-            except Exception:
-                settings = None
-            self._language_to_set = Language.get_language_name(language)
-            ut.save_settings_auto(self._product, settings, self._language_to_set)
+            self._auto_settings.save_language(Language.get_language_name(language))
             text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
             text_en = "The language settings are saved. Restart the program for the changes to take effect."
             if qApp.instance().property("language") is Language.RU:
@@ -1334,11 +1327,7 @@ class EPLabWindow(QMainWindow):
         self._set_options_to_ui(options)
         try:
             self._set_msystem_settings(settings)
-            if self._language_to_set is not None:
-                language = self._language_to_set
-            else:
-                language = Language.get_language_name(qApp.instance().property("language"))
-            ut.save_settings_auto(self._product, settings, language)
+            self._auto_settings.save_measurement_settings(self._product.settings_to_options(settings))
         except ValueError as exc:
             ut.show_message(qApp.translate("t", "Ошибка"),
                             qApp.translate("t", "Ошибка при установке настроек устройства"), str(exc))
