@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>951</width>
-    <height>686</height>
+    <width>1003</width>
+    <height>647</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -164,7 +164,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>951</width>
+     <width>1003</width>
      <height>21</height>
     </rect>
    </property>
@@ -238,7 +238,7 @@
    <addaction name="measurers_menu"/>
    <addaction name="help_menu_action"/>
   </widget>
-  <widget class="QToolBar" name="toolBar_file">
+  <widget class="QToolBar" name="toolbar_file">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
      <horstretch>0</horstretch>
@@ -264,7 +264,7 @@
    <addaction name="open_file_action"/>
    <addaction name="save_file_action"/>
   </widget>
-  <widget class="QToolBar" name="toolBar_test">
+  <widget class="QToolBar" name="toolbar_test">
    <property name="minimumSize">
     <size>
      <width>0</width>
@@ -292,7 +292,7 @@
    <addaction name="previous_point_action"/>
    <addaction name="next_point_action"/>
   </widget>
-  <widget class="QToolBar" name="toolBar_write">
+  <widget class="QToolBar" name="toolbar_write">
    <property name="windowTitle">
     <string>Запись плана тестирования</string>
    </property>
@@ -311,18 +311,9 @@
    <addaction name="new_point_action"/>
    <addaction name="save_point_action"/>
   </widget>
-  <widget class="QToolBar" name="toolBar_cursor">
-   <property name="minimumSize">
-    <size>
-     <width>0</width>
-     <height>0</height>
-    </size>
-   </property>
+  <widget class="QToolBar" name="toolbar_auto_search">
    <property name="windowTitle">
-    <string>Курсор</string>
-   </property>
-   <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextBesideIcon</enum>
+    <string>toolBar</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -330,10 +321,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="add_cursor_action"/>
-   <addaction name="remove_cursor_action"/>
+   <addaction name="search_optimal_action"/>
   </widget>
-  <widget class="QToolBar" name="toolBar_compare">
+  <widget class="QToolBar" name="toolbar_compare">
    <property name="windowTitle">
     <string>Сравнение</string>
    </property>
@@ -349,8 +339,10 @@
    <addaction name="save_screen_action"/>
    <addaction name="freeze_curve_a_action"/>
    <addaction name="freeze_curve_b_action"/>
+   <addaction name="add_cursor_action"/>
+   <addaction name="remove_cursor_action"/>
   </widget>
-  <widget class="QToolBar" name="toolBar_mode">
+  <widget class="QToolBar" name="toolbar_mode">
    <property name="windowTitle">
     <string>Режим</string>
    </property>
@@ -376,7 +368,7 @@
    <addaction name="writing_mode_action"/>
    <addaction name="testing_mode_action"/>
   </widget>
-  <widget class="QToolBar" name="toolBar_language">
+  <widget class="QToolBar" name="toolbar_language">
    <property name="windowTitle">
     <string>Выбор языка</string>
    </property>
@@ -399,6 +391,9 @@
    <property name="text">
     <string>Создать план тестирования</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
   <action name="open_file_action">
    <property name="icon">
@@ -416,6 +411,9 @@
    </property>
    <property name="text">
     <string>Сохранить план тестирования</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="save_as_file_action">
@@ -645,6 +643,9 @@
    <property name="text">
     <string>Автоподбор параметров</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+A</string>
+   </property>
   </action>
   <action name="add_cursor_action">
    <property name="checkable">
@@ -768,14 +769,6 @@
   <action name="action_keymap">
    <property name="text">
     <string>Горячие клавиши</string>
-   </property>
-  </action>
-  <action name="action_pedal_crutch">
-   <property name="text">
-    <string>Костыль для педали</string>
-   </property>
-   <property name="visible">
-    <bool>true</bool>
    </property>
   </action>
  </widget>

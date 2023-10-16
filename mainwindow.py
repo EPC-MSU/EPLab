@@ -53,8 +53,8 @@ class EPLabWindow(QMainWindow):
     COLOR_FOR_TEST_FROM_PLAN: QColor = QColor(255, 129, 129, 200)
     CRITICAL_WIDTH_FOR_LINUX_EN: int = 1380
     CRITICAL_WIDTH_FOR_LINUX_RU: int = 1650
-    CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1150
-    CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1350
+    CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1020
+    CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1200
     DEFAULT_PATH: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
     DEFAULT_POS_X: int = 50
     DEFAULT_POS_Y: int = 50
@@ -456,19 +456,16 @@ class EPLabWindow(QMainWindow):
         self.open_window_board_action.triggered.connect(self.open_board_image)
         self.open_mux_window_action.triggered.connect(self.open_mux_window)
         self.search_optimal_action.triggered.connect(self.search_optimal)
-        self.search_optimal_action.setShortcut(QKeySequence("Alt+A"))
         self.new_file_action.triggered.connect(self.create_new_board)
-        self.new_file_action.setShortcut(QKeySequence("Ctrl+N"))
         self.open_file_action.triggered.connect(self.load_board)
         self.save_file_action.triggered.connect(self.save_board)
-        self.save_file_action.setShortcut(QKeySequence("Ctrl+S"))
         self.save_as_file_action.triggered.connect(self.save_board_as)
         self.previous_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(True))
         self.num_point_line_edit = QLineEdit(self)
         self.num_point_line_edit.setFixedWidth(40)
         self.num_point_line_edit.setEnabled(False)
         self.num_point_line_edit.installEventFilter(self)
-        self.toolBar_test.insertWidget(self.next_point_action, self.num_point_line_edit)
+        self.toolbar_test.insertWidget(self.next_point_action, self.num_point_line_edit)
         self.num_point_line_edit.returnPressed.connect(self.go_to_selected_pin)
         self.next_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(False))
         self.new_point_action.triggered.connect(self.create_new_pin)
@@ -1194,7 +1191,7 @@ class EPLabWindow(QMainWindow):
             size = EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_EN if lang is Language.EN else \
                 EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_RU
         # Change style of toolbars
-        tool_bars = self.toolBar_write, self.toolBar_cursor, self.toolBar_mode
+        tool_bars = self.toolbar_write, self.toolbar_mode
         for tool_bar in tool_bars:
             if self.width() < size:
                 style = QtC.ToolButtonIconOnly
@@ -1370,7 +1367,7 @@ class EPLabWindow(QMainWindow):
             self._iv_window.plot.set_state_removing_cursor(False)
             return
 
-        widget = self.toolBar_cursor.widgetForAction(self.remove_cursor_action)
+        widget = self.toolbar_compare.widgetForAction(self.remove_cursor_action)
         menu = QMenu(widget)
         icon = QIcon(os.path.join(ut.DIR_MEDIA, "delete_cursor.png"))
         action_remove_cursor = QAction(icon, qApp.translate("t", "Удалить метку"), menu)
@@ -1381,7 +1378,7 @@ class EPLabWindow(QMainWindow):
         action_remove_all_cursors.triggered.connect(self.remove_all_cursors)
         menu.addAction(action_remove_all_cursors)
         position = widget.geometry()
-        menu.popup(widget.mapToGlobal(QPoint(position.x(), position.y())))
+        menu.popup(self.toolbar_compare.mapToGlobal(QPoint(position.x(), position.y())))
 
     @pyqtSlot(IVMeasurerBase, str, bool)
     def show_device_settings(self, selected_measurer: IVMeasurerBase, device_name: str, _: bool) -> None:
