@@ -456,6 +456,7 @@ class EPLabWindow(QMainWindow):
         self.open_window_board_action.triggered.connect(self.open_board_image)
         self.open_mux_window_action.triggered.connect(self.open_mux_window)
         self.search_optimal_action.triggered.connect(self.search_optimal)
+        self.search_optimal_action.setShortcut(QKeySequence("Alt+A"))
         self.new_file_action.triggered.connect(self.create_new_board)
         self.new_file_action.setShortcut(QKeySequence("Ctrl+N"))
         self.open_file_action.triggered.connect(self.load_board)
