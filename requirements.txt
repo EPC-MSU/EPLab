@@ -1,7 +1,7 @@
 git+https://deploy_ro:VPNjSZm9Kqmyzs5Z4w6V@gitlab.ximc.ru/eyepoint/epcore.git@v0.1.20#egg=epcore
 git+https://deploy_ro:VPNjSZm9Kqmyzs5Z4w6V@gitlab.ximc.ru/eyepoint/ivviewer.git@v0.1.13#egg=ivviewer
 git+https://github.com/EPC-MSU/board-view@Version0.1.1#egg=boardview
-git+https://github.com/EPC-MSU/ep_report_generator@v0.1.10#egg=ep_report_generator
+git+https://github.com/EPC-MSU/ep_report_generator@master#egg=ep_report_generator
 epsound==0.0.13
 psutil==5.8.0
 PyQt5<=5.15.0
