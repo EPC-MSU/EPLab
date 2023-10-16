@@ -267,7 +267,7 @@ def initialize_measurers(measurer_ports: Iterable[str], force_open: bool = False
             logger.error("%s firmware version %s is not compatible with this version of EPLab", exc.args[0],
                          exc.args[2])
             bad_ports_by_firmware.append(measurer_arg)
-            text = qApp.translate("t", "{}: версия прошивки {} {} несовместима с данной версией EPLab.")
+            text = qApp.translate("utils", "{}: версия прошивки {} {} несовместима с данной версией EPLab.")
             if bad_firmware_text_error:
                 bad_firmware_text_error += "\n"
             bad_firmware_text_error += text.format(measurer_arg, exc.args[0], exc.args[2])
@@ -348,8 +348,8 @@ def request_opening_by_force(text: str) -> bool:
     :return: True if measurers need to be opened by force.
     """
 
-    message_box = create_message_box(qApp.translate("t", "Ошибка"), text)
-    check_box_force_open = QCheckBox(qApp.translate("t", "Все равно открыть"))
+    message_box = create_message_box(qApp.translate("utils", "Ошибка"), text)
+    check_box_force_open = QCheckBox(qApp.translate("utils", "Все равно открыть"))
     message_box.layout().addWidget(check_box_force_open)
     message_box.exec_()
     return check_box_force_open.checkState() == Qt.Checked
@@ -402,13 +402,13 @@ def show_message(header: str, message: str, additional_info: str = None, icon: Q
     if additional_info:
         message_box.setInformativeText(additional_info)
     if yes_button:
-        message_box.addButton(qApp.translate("utils", "Yes"), QMessageBox.AcceptRole)
+        message_box.addButton(qApp.translate("utils", "Да"), QMessageBox.AcceptRole)
     else:
         message_box.addButton("OK", QMessageBox.AcceptRole)
     if no_button:
-        message_box.addButton(qApp.translate("utils", "No"), QMessageBox.NoRole)
+        message_box.addButton(qApp.translate("utils", "Нет"), QMessageBox.NoRole)
     if cancel_button:
-        message_box.addButton(qApp.translate("utils", "Cancel"), QMessageBox.RejectRole)
+        message_box.addButton(qApp.translate("utils", "Отмена"), QMessageBox.RejectRole)
     return message_box.exec()
 
 

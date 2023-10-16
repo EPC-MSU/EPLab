@@ -694,16 +694,6 @@
         <source>Упорядочить окна</source>
         <translation>Arrange windows</translation>
     </message>
-    <message>
-        <location filename="../utils.py" line="248"/>
-        <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
-        <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>
-    </message>
-    <message>
-        <location filename="../utils.py" line="330"/>
-        <source>Все равно открыть</source>
-        <translation>Force open</translation>
-    </message>
 </context>
 <context>
     <name>dialogs</name>
@@ -829,6 +819,39 @@
         <location filename="../settings/utils.py" line="56"/>
         <source>Значение параметра &apos;{}&apos; не задано в конфигурационном файле.</source>
         <translation>The parameter &apos;{}&apos; value is not specified in the configuration file.</translation>
+    </message>
+</context>
+<context>
+    <name>utils</name>
+    <message>
+        <location filename="../utils.py" line="270"/>
+        <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
+        <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>
+    </message>
+    <message>
+        <location filename="../utils.py" line="351"/>
+        <source>Ошибка</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <location filename="../utils.py" line="352"/>
+        <source>Все равно открыть</source>
+        <translation>Force open</translation>
+    </message>
+    <message>
+        <location filename="../utils.py" line="405"/>
+        <source>Да</source>
+        <translation>Yes</translation>
+    </message>
+    <message>
+        <location filename="../utils.py" line="409"/>
+        <source>Нет</source>
+        <translation>No</translation>
+    </message>
+    <message>
+        <location filename="../utils.py" line="411"/>
+        <source>Отмена</source>
+        <translation>Cancel</translation>
     </message>
 </context>
 </TS>

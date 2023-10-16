@@ -226,7 +226,7 @@ class MuxAndPlanWindow(QWidget):
         """
 
         if self._parent.work_mode is WorkMode.TEST and not self._manual_stop:
-            self._parent.create_report()
+            self._parent.create_report(True)
         self._manual_stop = False
 
     def select_current_pin(self) -> None:

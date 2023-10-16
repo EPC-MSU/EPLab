@@ -73,6 +73,7 @@ class EPLabWindow(QMainWindow):
         """
 
         super().__init__()
+        self._current_file_path: str = None
         self._dir_chosen_by_user: str = ut.get_dir_name()
         self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "icon.png"))
         self._language_to_set: str = None
@@ -404,10 +405,10 @@ class EPLabWindow(QMainWindow):
         self.setWindowIcon(self._icon)
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
         if system().lower() == "windows":
-            self.setMinimumWidth(self.MIN_WIDTH_IN_WINDOWS)
+            self.setMinimumWidth(EPLabWindow.MIN_WIDTH_IN_WINDOWS)
         else:
-            self.setMinimumWidth(self.MIN_WIDTH_IN_LINUX)
-        self.move(self.DEFAULT_POS_X, self.DEFAULT_POS_Y)
+            self.setMinimumWidth(EPLabWindow.MIN_WIDTH_IN_LINUX)
+        self.move(EPLabWindow.DEFAULT_POS_X, EPLabWindow.DEFAULT_POS_Y)
 
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
         self._product: EyePointProduct = product
@@ -427,9 +428,8 @@ class EPLabWindow(QMainWindow):
 
         self._iv_window: IVViewer = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
                                              solid_axis_enabled=False, axis_label_enabled=False)
-        dir_path = os.path.join(self.DEFAULT_PATH, "Screenshot")
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
+        dir_path = os.path.join(EPLabWindow.DEFAULT_PATH, "Screenshot")
+        os.makedirs(dir_path, exist_ok=True)
         self._iv_window.plot.set_path_to_directory(dir_path)
         self._iv_window.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),
                                              export_ivc=qApp.translate("t", "Экспортировать кривые в файл"),
@@ -437,11 +437,11 @@ class EPLabWindow(QMainWindow):
                                              remove_cursor=qApp.translate("t", "Удалить метку"),
                                              save_screenshot=qApp.translate("t", "Сохранить изображение"))
         self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
-        self.reference_curve_plot.set_curve_params(self.COLOR_FOR_REFERENCE)
+        self.reference_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_REFERENCE)
         self.test_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
-        self.test_curve_plot.set_curve_params(self.COLOR_FOR_TEST)
+        self.test_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_TEST)
         self.test_curve_plot_from_plan: PlotCurve = self._iv_window.plot.add_curve()
-        self.test_curve_plot_from_plan.set_curve_params(self.COLOR_FOR_TEST_FROM_PLAN)
+        self.test_curve_plot_from_plan.set_curve_params(EPLabWindow.COLOR_FOR_TEST_FROM_PLAN)
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
 
         v_box_layout = QVBoxLayout()
@@ -507,7 +507,6 @@ class EPLabWindow(QMainWindow):
         self._ref_curve: IVCurve = None
         self._test_curve: IVCurve = None
         self._test_curve_from_plan: IVCurve = None
-        self._current_file_path: str = None
         self._product_name: cw.ProductNames = None
         self._mux_and_plan_window: MuxAndPlanWindow = MuxAndPlanWindow(self)
         self.work_mode_changed.connect(self._mux_and_plan_window.change_work_mode)
@@ -678,7 +677,6 @@ class EPLabWindow(QMainWindow):
         self._init_threshold()
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
-        self._current_file_path = None
 
     @pyqtSlot(WorkMode)
     def _switch_work_mode(self, mode: WorkMode) -> None:
@@ -878,7 +876,7 @@ class EPLabWindow(QMainWindow):
                 # You don't need to do anything
                 return
 
-        dir_reference = os.path.join(self.DEFAULT_PATH, "Reference")
+        dir_reference = os.path.join(EPLabWindow.DEFAULT_PATH, "Reference")
         os.makedirs(dir_reference, exist_ok=True)
         filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Создать новую плату"),
                                                filter="UFIV Archived File (*.uzf)",
@@ -916,16 +914,18 @@ class EPLabWindow(QMainWindow):
         self.update_current_pin()
 
     @pyqtSlot()
-    def create_report(self) -> None:
+    def create_report(self, default_path: bool = False) -> None:
         """
         Slot shows a dialog window to create report for the board.
+        :param default_path: if True, then the report should be created in the default directory.
         """
 
-        selected_dir = QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"),
-                                                        self.dir_chosen_by_user)
-        if selected_dir:
-            self.dir_chosen_by_user = selected_dir
-            show_report_generation_window(self, self._report_generation_thread, self.measurement_plan, selected_dir,
+        dir_path = os.path.join(EPLabWindow.DEFAULT_PATH, "Reports")
+        os.makedirs(dir_path, exist_ok=True)
+        if not default_path:
+            dir_path = QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"), dir_path)
+        if dir_path:
+            show_report_generation_window(self, self._report_generation_thread, self.measurement_plan, dir_path,
                                           self.threshold, self.work_mode)
 
     def disconnect_devices(self) -> None:
@@ -1121,11 +1121,13 @@ class EPLabWindow(QMainWindow):
                 ut.show_message(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит"),
                                 str(exc))
                 return
+
             if not ut.check_compatibility(self._product, board):
                 text = qApp.translate("t", "План тестирования TEST_PLAN нельзя загрузить, поскольку он не "
                                            "соответствует режиму работы EPLab.")
                 ut.show_message(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
                 return
+
             self._measurement_plan = MeasurementPlan(
                 board, measurer=self._msystem.measurers[0],
                 multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
@@ -1184,9 +1186,11 @@ class EPLabWindow(QMainWindow):
         # Determine the critical width of the window for given language and OS
         lang = qApp.instance().property("language")
         if system().lower() == "windows":
-            size = self.CRITICAL_WIDTH_FOR_WINDOWS_EN if lang is Language.EN else self.CRITICAL_WIDTH_FOR_WINDOWS_RU
+            size = EPLabWindow.CRITICAL_WIDTH_FOR_WINDOWS_EN if lang is Language.EN else \
+                EPLabWindow.CRITICAL_WIDTH_FOR_WINDOWS_RU
         else:
-            size = self.CRITICAL_WIDTH_FOR_LINUX_EN if lang is Language.EN else self.CRITICAL_WIDTH_FOR_LINUX_RU
+            size = EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_EN if lang is Language.EN else \
+                EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_RU
         # Change style of toolbars
         tool_bars = self.toolBar_write, self.toolBar_cursor, self.toolBar_mode
         for tool_bar in tool_bars:
@@ -1224,11 +1228,11 @@ class EPLabWindow(QMainWindow):
         if self._check_measurement_plan_for_empty_pins():
             return None
 
-        dir_reference = os.path.join(self.DEFAULT_PATH, "Reference")
+        dir_reference = os.path.join(EPLabWindow.DEFAULT_PATH, "Reference")
         os.makedirs(dir_reference, exist_ok=True)
-        filename = QFileDialog.getSaveFileName(
-            self, qApp.translate("t", "Сохранить плату"), filter="UFIV Archived File (*.uzf)",
-            directory=os.path.join(dir_reference, "board.uzf"))[0]
+        filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить плату"),
+                                               filter="UFIV Archived File (*.uzf)",
+                                               directory=os.path.join(dir_reference, "board.uzf"))[0]
         if filename:
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             self._current_file_path = epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
@@ -1248,7 +1252,7 @@ class EPLabWindow(QMainWindow):
 
         image = self.grab(self.rect())
         filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
-        dir_path = os.path.join(self.DEFAULT_PATH, "Screenshot")
+        dir_path = os.path.join(EPLabWindow.DEFAULT_PATH, "Screenshot")
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
         if system().lower() == "windows":
