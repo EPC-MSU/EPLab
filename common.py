@@ -6,9 +6,9 @@ from epcore.ivmeasurer.ivm10.ivm import UrpcDeviceUndefinedError
 
 class WorkMode(Enum):
     COMPARE = auto()
-    WRITE = auto()
-    TEST = auto()
     READ_PLAN = auto()
+    TEST = auto()
+    WRITE = auto()
 
 
 class DeviceErrorsHandler:
