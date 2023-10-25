@@ -75,13 +75,22 @@ class EPLabWindow(QMainWindow):
 
         super().__init__()
         self._auto_settings: AutoSettings = AutoSettings(path=EPLabWindow.FILENAME_FOR_AUTO_SETTINGS)
+        self._comparator: IVCComparator = IVCComparator()
         self._current_file_path: str = None
+        self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
         self._dir_chosen_by_user: str = ut.get_dir_name()
-        self._icon: QIcon = QIcon(os.path.join(ut.DIR_MEDIA, "icon.png"))
+        self._hide_curve_ref: bool = False
+        self._hide_curve_test: bool = False
+        self._measurement_plan: MeasurementPlan = None
+        self._msystem: MeasurementSystem = None
+        self._product: EyePointProduct = product
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
         self._report_generation_thread.start()
+        self._skip_curve: bool = False  # set to True to skip next measured curves
+        self._work_mode: WorkMode = None
 
-        self._init_ui(product, english)
+        self._load_translation(english)
+        self._init_ui()
         self.installEventFilter(self)
         if port_1 is None and port_2 is None:
             self.disconnect_devices()
@@ -385,26 +394,10 @@ class EPLabWindow(QMainWindow):
         threshold = self._score_wrapper.threshold
         self._update_threshold(threshold)
 
-    def _init_ui(self, product: EyePointProduct, english: Optional[bool] = None) -> None:
-        """
-        :param product: product;
-        :param english: if True then the interface language will be English.
-        """
-
-        self._translator: QTranslator = QTranslator()
-        if english:
-            language = Language.EN
-        else:
-            language = self._auto_settings.get_language()
-        if language is not Language.RU:
-            translation_file = Language.get_translator_file(language)
-            self._translator.load(translation_file)
-            qApp.instance().installTranslator(self._translator)
-        qApp.instance().setProperty("language", language)
-
+    def _init_ui(self) -> None:
         dir_name = os.path.dirname(os.path.abspath(__file__))
         loadUi(os.path.join(dir_name, "gui", "mainwindow.ui"), self)
-        self.setWindowIcon(self._icon)
+        self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
         if system().lower() == "windows":
             self.setMinimumWidth(EPLabWindow.MIN_WIDTH_IN_WINDOWS)
@@ -412,18 +405,12 @@ class EPLabWindow(QMainWindow):
             self.setMinimumWidth(EPLabWindow.MIN_WIDTH_IN_LINUX)
         self.move(EPLabWindow.DEFAULT_POS_X, EPLabWindow.DEFAULT_POS_Y)
 
-        self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
-        self._product: EyePointProduct = product
-        self._msystem: MeasurementSystem = None
-        self._measurement_plan: MeasurementPlan = None
-        self._comparator: IVCComparator = IVCComparator()
-
-        self._score_wrapper: ScoreWrapper = ScoreWrapper(self.score_label)
+        self._board_window: BoardWidget = BoardWidget(self)
         self._player: SoundPlayer = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
+        self._score_wrapper: ScoreWrapper = ScoreWrapper(self.score_label)
 
-        self._board_window: BoardWidget = BoardWidget(self)
-        self.low_settings_panel: LowSettingsPanel = LowSettingsPanel(self)
+        self.low_settings_panel: LowSettingsPanel = LowSettingsPanel()
         self.main_widget: QWidget = QWidget(self)
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -497,13 +484,8 @@ class EPLabWindow(QMainWindow):
         self.testing_mode_action.triggered.connect(lambda: self._switch_work_mode(WorkMode.TEST))
         self.settings_mode_action.triggered.connect(self.show_settings_window)
 
-        self._work_mode: WorkMode = None
         # Update plot settings at next measurement cycle (place settings here or None)
         self._settings_update_next_cycle: MeasurementSettings = None
-        # Set to True to skip next measured curves
-        self._skip_curve: bool = False
-        self._hide_curve_ref: bool = False
-        self._hide_curve_test: bool = False
         self._ref_curve: IVCurve = None
         self._test_curve: IVCurve = None
         self._test_curve_from_plan: IVCurve = None
@@ -517,6 +499,22 @@ class EPLabWindow(QMainWindow):
         self._timer.setInterval(10)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._handle_periodic_task)
+
+    def _load_translation(self, english: Optional[bool] = None) -> None:
+        """
+        :param english: if True then the interface language will be English.
+        """
+
+        if english:
+            language = Language.EN
+        else:
+            language = self._auto_settings.get_language()
+        if language is not Language.RU:
+            translation_file = Language.get_translator_file(language)
+            self._translator: QTranslator = QTranslator()
+            self._translator.load(translation_file)
+            qApp.instance().installTranslator(self._translator)
+        qApp.instance().setProperty("language", language)
 
     def _open_board_window_if_needed(self) -> None:
         if self._measurement_plan.image:
