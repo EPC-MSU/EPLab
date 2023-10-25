@@ -15,21 +15,20 @@ import utils as ut
 from common import WorkMode
 
 
-def pil_to_pixmap(im: Image) -> QPixmap:
+def pil_to_pixmap(image: Image) -> QPixmap:
     # See https://stackoverflow.com/questions/34697559/pil-image-to-qpixmap-conversion-issue
-    if im.mode == "RGB":
-        r, g, b = im.split()
-        im = Image.merge("RGB", (b, g, r))
-    elif im.mode == "RGBA":
-        r, g, b, a = im.split()
-        im = Image.merge("RGBA", (b, g, r, a))
-    elif im.mode == "L":
-        im = im.convert("RGBA")
-    im2 = im.convert("RGBA")
-    data = im2.tobytes("raw", "RGBA")
-    qim = QImage(data, im.size[0], im.size[1], QImage.Format_ARGB32)
-    pixmap = QPixmap.fromImage(qim)
-    return pixmap
+    if image.mode == "RGB":
+        red, green, blue = image.split()
+        image = Image.merge("RGB", (blue, green, red))
+    elif image.mode == "RGBA":
+        red, green, blue, alpha = image.split()
+        image = Image.merge("RGBA", (blue, green, red, alpha))
+    elif image.mode == "L":
+        image = image.convert("RGBA")
+    image_2 = image.convert("RGBA")
+    data = image_2.tobytes("raw", "RGBA")
+    q_image = QImage(data, image.size[0], image.size[1], QImage.Format_ARGB32)
+    return QPixmap.fromImage(q_image)
 
 
 class BoardWidget(QWidget):
@@ -39,8 +38,6 @@ class BoardWidget(QWidget):
 
     HEIGHT: int = 600
     WIDTH: int = 600
-    _board: Optional[MeasurementPlan] = None
-    _scene: BoardView
 
     def __init__(self, parent=None) -> None:
         """
@@ -48,13 +45,9 @@ class BoardWidget(QWidget):
         """
 
         super().__init__()
+        self._board: Optional[MeasurementPlan] = None
         self._control_pressed: bool = False
         self._parent = parent
-        self._scene: BoardView = BoardView()
-        self._scene.on_right_click.connect(self.create_new_pin)
-        self._scene.point_moved.connect(self.change_pin_coordinates)
-        self._scene.point_selected.connect(self.select_pin_with_index)
-        self._scene.installEventFilter(self)
         self._init_ui()
 
     @property
@@ -116,6 +109,13 @@ class BoardWidget(QWidget):
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.resize(BoardWidget.WIDTH, BoardWidget.HEIGHT)
         self.setStyleSheet("background-color:black;")
+
+        self._scene: BoardView = BoardView()
+        self._scene.on_right_click.connect(self.create_new_pin)
+        self._scene.point_moved.connect(self.change_pin_coordinates)
+        self._scene.point_selected.connect(self.select_pin_with_index)
+        self._scene.installEventFilter(self)
+
         layout = QVBoxLayout(self)
         layout.addWidget(self._scene)
         self.setLayout(layout)
@@ -129,6 +129,13 @@ class BoardWidget(QWidget):
         """
 
         self._scene.add_point(QPointF(x, y), index)
+
+    def allow_drag(self, allow: bool) -> None:
+        """
+        :param allow: True, if to enable drag mode.
+        """
+
+        self._scene.allow_drag(allow)
 
     @pyqtSlot(int, QPointF)
     def change_pin_coordinates(self, index: int, pin: QPointF) -> None:
@@ -166,6 +173,15 @@ class BoardWidget(QWidget):
                 return self._handle_key_release_event(obj, event)
         return super().eventFilter(obj, event)
 
+    def get_default_pin_xy(self) -> QPointF:
+        """
+        :return: point with coordinates in the center of the board.
+        """
+
+        width = self._scene.width()
+        height = self._scene.height()
+        return self._scene.mapToScene(int(width / 2), int(height / 2))
+
     @pyqtSlot(int)
     def select_pin_with_index(self, index: int) -> None:
         """
@@ -176,15 +192,15 @@ class BoardWidget(QWidget):
         self.measurement_plan.go_pin(index)
         self._parent.update_current_pin()
 
-    def set_board(self, board: MeasurementPlan) -> None:
+    def update_board(self) -> None:
         """
-        Method sets new board.
-        :param board: new board.
+        Method updates board image.
         """
 
         self._scene.clear_scene()
-        if board.image:
-            self._scene.set_background(pil_to_pixmap(board.image))
+        if self.measurement_plan.image:
+            self._scene.set_background(pil_to_pixmap(self.measurement_plan.image))
             self._scene.scale_to_window_size(self.width(), self.height())
-        for index, pin in board.all_pins_iterator():
+
+        for index, pin in self.measurement_plan.all_pins_iterator():
             self._scene.add_point(QPointF(pin.x, pin.y), number=index)

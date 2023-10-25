@@ -3,16 +3,18 @@ import os
 from epsound import WavPlayer
 from common import WorkMode
 
+
 logger = logging.getLogger("eplab")
 
 
 class SoundPlayer:
-    def __init__(self):
-        self._player = WavPlayer(wait=False)
-        self._sound_available = True
-        self._score = 0
+
+    def __init__(self) -> None:
+        self._player: WavPlayer = WavPlayer(wait=False)
+        self._score: float = 0
+        self._sound_available: bool = True
+        self._threshold: float = 0
         self._work_mode: WorkMode = WorkMode.COMPARE
-        self._threshold = 0
 
         if not self._player.check_sound_available():
             logger.error("Sound is not available on your system; mute")
@@ -26,23 +28,33 @@ class SoundPlayer:
         file_name = os.path.join(dir_name, "media", "test.wav")
         self._player.add_sound(file_name, "test")
 
-    def set_mute(self, mute: bool = True):
-        if self._sound_available:  # We can't disable MUTE if sound driver is not available
-            self._player.set_mute(mute)
+    def _play(self, name: str) -> None:
+        """
+        :param name: name of the sound file to be played.
+        """
 
-    def _score_to_sound_n(self, score: float) -> int:
-        # TODO: When will stabilise ivcmp library,
-        # add exceptions here
-        sound_n = min(int(score * 10.0) + 1, 10)
-        return max(1, sound_n)
-
-    def _play(self, name: str):
         try:
             self._player.play(name)
         except RuntimeError:
-            pass  # Another sound in progress - it's ok to get error here...
+            # Another sound in progress - it's ok to get error here...
+            pass
 
-    def score_updated(self, score: float):
+    @staticmethod
+    def _score_to_sound_n(score: float) -> int:
+        """
+        :param score: score.
+        :return: number of the sound file that corresponds to the given score.
+        """
+
+        # TODO: When will stabilise ivcmp library, add exceptions here
+        sound_n = min(int(score * 10.0) + 1, 10)
+        return max(1, sound_n)
+
+    def score_updated(self, score: float) -> None:
+        """
+        :param score: score.
+        """
+
         # Logic described here #39296
         # FIXME: in case of *very fast* score update in asynchronous mode here may be big stack of wav files
         if self._work_mode is WorkMode.COMPARE:
@@ -52,13 +64,29 @@ class SoundPlayer:
                     self._play(f"{sound_num}")
                 except ValueError:  # NaN score or smth else strange
                     return
-        else:
+        elif self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
             if self._score > self._threshold > score:
                 self._play("test")
         self._score = score
 
-    def set_threshold(self, threshold: float):
+    def set_mute(self, mute: bool = True) -> None:
+        """
+        :param mute: if True, then the sound will be muted.
+        """
+
+        if self._sound_available:
+            self._player.set_mute(mute)
+
+    def set_threshold(self, threshold: float) -> None:
+        """
+        :param threshold: new threshold value for score.
+        """
+
         self._threshold = threshold
 
-    def set_work_mode(self, mode: WorkMode):
+    def set_work_mode(self, mode: WorkMode) -> None:
+        """
+        :param mode: new work mode.
+        """
+
         self._work_mode = mode

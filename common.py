@@ -8,6 +8,7 @@ class WorkMode(Enum):
     COMPARE = auto()
     WRITE = auto()
     TEST = auto()
+    READ_PLAN = auto()
 
 
 class DeviceErrorsHandler:

@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 from functools import partial
 from platform import system
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt as QtC, QTimer,
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
@@ -81,12 +81,18 @@ class EPLabWindow(QMainWindow):
         self._dir_chosen_by_user: str = ut.get_dir_name()
         self._hide_curve_ref: bool = False
         self._hide_curve_test: bool = False
+        self._last_saved_measurement_plan_data: Dict[str, Any] = None
         self._measurement_plan: MeasurementPlan = None
         self._msystem: MeasurementSystem = None
         self._product: EyePointProduct = product
+        self._product_name: cw.ProductNames = None
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
         self._report_generation_thread.start()
         self._skip_curve: bool = False  # set to True to skip next measured curves
+        self._timer: QTimer = QTimer()
+        self._timer.setInterval(10)
+        self._timer.setSingleShot(True)
+        self._timer.timeout.connect(self._handle_periodic_task)
         self._work_mode: WorkMode = None
 
         self._load_translation(english)
@@ -175,26 +181,38 @@ class EPLabWindow(QMainWindow):
     def _change_work_mode(self, mode: WorkMode) -> None:
         """
         Method sets window settings for given work mode.
-        :param mode: work mode.
+        :param mode: new work mode.
         """
 
+        enable = bool(self._measurement_plan and self._measurement_plan.multiplexer is not None)
+        self.open_mux_window_action.setEnabled(enable)
+        self.comparing_mode_action.setChecked(mode is WorkMode.COMPARE)
+        self.writing_mode_action.setChecked(mode is WorkMode.WRITE)
+        self.testing_mode_action.setChecked(mode is WorkMode.TEST)
+        self.next_point_action.setEnabled(mode is not WorkMode.COMPARE)
+        self.previous_point_action.setEnabled(mode is not WorkMode.COMPARE)
+        self.num_point_line_edit.setEnabled(mode is not WorkMode.COMPARE)
+        self.new_point_action.setEnabled(mode is WorkMode.WRITE)
+        self.save_point_action.setEnabled(mode is not WorkMode.COMPARE)
+        self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
+        self.create_report_action.setEnabled(mode is not WorkMode.COMPARE)
+        enable = bool(mode is not WorkMode.COMPARE and self._measurement_plan and
+                      self._measurement_plan.multiplexer is not None)
+        self.start_or_stop_entire_plan_measurement_action.setEnabled(enable)
+
         self._player.set_work_mode(mode)
-        if self._work_mode is mode:
-            return
         # Comment is only for test and write mode
-        self.line_comment_pin.setEnabled(mode is not WorkMode.COMPARE)
-        self.search_optimal_action.setEnabled(mode is not WorkMode.TEST)
+        self.line_comment_pin.setEnabled(mode in (WorkMode.TEST, WorkMode.WRITE))
+        self.search_optimal_action.setEnabled(mode in (WorkMode.COMPARE, WorkMode.WRITE))
         if mode is WorkMode.COMPARE and len(self._msystem.measurers) < 2:
             # Remove reference curve in case we have only one IVMeasurer in compare mode
             self._remove_ref_curve()
         # Drag allowed only in write mode
-        self._board_window.workspace.allow_drag(mode is WorkMode.WRITE)
+        self._board_window.allow_drag(mode is WorkMode.WRITE)
         # Disable settings in test mode
-        settings_enable = mode is not WorkMode.TEST
         for scroll_area in self._parameters_scroll_areas.values():
-            scroll_area.enable_buttons(settings_enable)
+            scroll_area.enable_buttons(mode in (WorkMode.COMPARE, WorkMode.WRITE))
         self._work_mode = mode
-        self.update_current_pin()
 
     def _check_measurement_plan_for_empty_pins(self) -> bool:
         """
@@ -409,6 +427,7 @@ class EPLabWindow(QMainWindow):
         self._player: SoundPlayer = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
         self._score_wrapper: ScoreWrapper = ScoreWrapper(self.score_label)
+        self._parameters_scroll_areas = {}
 
         self.low_settings_panel: LowSettingsPanel = LowSettingsPanel()
         self.main_widget: QWidget = QWidget(self)
@@ -489,16 +508,10 @@ class EPLabWindow(QMainWindow):
         self._ref_curve: IVCurve = None
         self._test_curve: IVCurve = None
         self._test_curve_from_plan: IVCurve = None
-        self._product_name: cw.ProductNames = None
         self._mux_and_plan_window: MuxAndPlanWindow = MuxAndPlanWindow(self)
         self.work_mode_changed.connect(self._mux_and_plan_window.change_work_mode)
         self.start_or_stop_entire_plan_measurement_action.triggered.connect(
             self._mux_and_plan_window.start_or_stop_plan_measurement)
-
-        self._timer: QTimer = QTimer()
-        self._timer.setInterval(10)
-        self._timer.setSingleShot(True)
-        self._timer.timeout.connect(self._handle_periodic_task)
 
     def _load_translation(self, english: Optional[bool] = None) -> None:
         """
@@ -519,6 +532,28 @@ class EPLabWindow(QMainWindow):
     def _open_board_window_if_needed(self) -> None:
         if self._measurement_plan.image:
             self._board_window.show()
+
+    def _read_measurement_plan(self) -> Optional[Board]:
+        """
+        :return: measurement plan read from file.
+        """
+
+        filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
+                                               filter="Board Files (*.json *.uzf)")[0]
+        board = None
+        if filename:
+            try:
+                board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
+            except Exception as exc:
+                ut.show_message(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит"),
+                                str(exc))
+            else:
+                if self._msystem and not ut.check_compatibility(self._product, board):
+                    text = qApp.translate("t", "План тестирования TEST_PLAN нельзя загрузить, поскольку он не "
+                                               "соответствует режиму работы EPLab.")
+                    ut.show_message(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
+                    board = None
+        return board
 
     def _read_curves_periodic_task(self) -> None:
         if self._msystem.measurements_are_ready():
@@ -640,7 +675,7 @@ class EPLabWindow(QMainWindow):
         # Voltage in Volts, current in mA
         self._comparator.set_min_ivc(0.6, 0.002)
         self._reset_board()
-        self._board_window.set_board(self._measurement_plan)
+        self._board_window.update_board()
         # Create menu items to select settings for available measurers
         self._create_measurer_setting_actions()
         # If necessary, deactivate the menu item for auto-selection
@@ -668,10 +703,7 @@ class EPLabWindow(QMainWindow):
             options = self._product.settings_to_options(settings)
             self._set_options_to_ui(options)
         self._mux_and_plan_window.update_info()
-        self._work_mode = None
-        self._change_work_mode(WorkMode.COMPARE)  # default mode - compare two curves
-        self._switch_work_mode(self._work_mode)
-        self.update_current_pin()
+        self._switch_work_mode(WorkMode.COMPARE)
         self._init_threshold()
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
@@ -682,20 +714,8 @@ class EPLabWindow(QMainWindow):
         :param mode: work mode to set.
         """
 
-        self.open_mux_window_action.setEnabled(self._measurement_plan.multiplexer is not None)
-        self.comparing_mode_action.setChecked(mode is WorkMode.COMPARE)
-        self.writing_mode_action.setChecked(mode is WorkMode.WRITE)
-        self.testing_mode_action.setChecked(mode is WorkMode.TEST)
-        self.next_point_action.setEnabled(mode is not WorkMode.COMPARE)
-        self.previous_point_action.setEnabled(mode is not WorkMode.COMPARE)
-        self.num_point_line_edit.setEnabled(mode is not WorkMode.COMPARE)
-        self.new_point_action.setEnabled(mode is WorkMode.WRITE)
-        self.save_point_action.setEnabled(mode is not WorkMode.COMPARE)
-        self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
-        self.create_report_action.setEnabled(mode is not WorkMode.COMPARE)
-        self.start_or_stop_entire_plan_measurement_action.setEnabled(mode is not WorkMode.COMPARE and
-                                                                     self._measurement_plan.multiplexer is not None)
         self._change_work_mode(mode)
+        self.update_current_pin()
         self.work_mode_changed.emit(mode)
         if mode in (WorkMode.TEST, WorkMode.WRITE) and self._measurement_plan.multiplexer:
             self.open_mux_window()
@@ -737,7 +757,7 @@ class EPLabWindow(QMainWindow):
             self._player.score_updated(score)
         else:
             self._score_wrapper.set_dummy_score()
-        if settings is not None:
+        if settings is not None and self._work_mode is not WorkMode.READ_PLAN:
             self._set_plot_parameters_to_low_settings_panel(settings)
 
     def _update_scroll_areas_for_parameters(self, settings: MeasurementSettings) -> None:
@@ -883,7 +903,7 @@ class EPLabWindow(QMainWindow):
             self._current_file_path = filename
             self._reset_board()
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
-            self._board_window.set_board(self._measurement_plan)
+            self._board_window.update_board()
             self.update_current_pin()
             self._mux_and_plan_window.update_info()
 
@@ -895,9 +915,7 @@ class EPLabWindow(QMainWindow):
 
         if self._measurement_plan.image:
             # Place at the center of current viewpoint by default
-            width = self._board_window.workspace.width()
-            height = self._board_window.workspace.height()
-            point = self._board_window.workspace.mapToScene(int(width / 2), int(height / 2))
+            point = self._board_window.get_default_pin_xy()
             pin = Pin(point.x(), point.y(), measurements=[], multiplexer_output=multiplexer_output)
         else:
             pin = Pin(0, 0, measurements=[], multiplexer_output=multiplexer_output)
@@ -954,7 +972,7 @@ class EPLabWindow(QMainWindow):
         :param enabled: if True widgets will be set to enabled state.
         """
 
-        widgets = (self.new_file_action, self.open_file_action, self.save_file_action, self.save_as_file_action,
+        widgets = (self.new_file_action, self.save_file_action, self.save_as_file_action,
                    self.save_screen_action, self.open_window_board_action, self.open_mux_window_action,
                    self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
                    self.hide_curve_b_action, self.search_optimal_action, self.comparing_mode_action,
@@ -1110,28 +1128,17 @@ class EPLabWindow(QMainWindow):
         Slot loads board from a file.
         """
 
-        filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
-                                               filter="Board Files (*.json *.uzf)")[0]
-        if filename:
-            try:
-                board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
-            except Exception as exc:
-                ut.show_message(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит"),
-                                str(exc))
-                return
-
-            if not ut.check_compatibility(self._product, board):
-                text = qApp.translate("t", "План тестирования TEST_PLAN нельзя загрузить, поскольку он не "
-                                           "соответствует режиму работы EPLab.")
-                ut.show_message(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
-                return
-
-            self._measurement_plan = MeasurementPlan(
-                board, measurer=self._msystem.measurers[0],
-                multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
+        board = self._read_measurement_plan()
+        if board:
+            if not self._msystem:
+                self._change_work_mode(WorkMode.READ_PLAN)
+                self._iv_window.plot.clear_center_text()
+            measurer = self._msystem.measurers[0] if self._msystem else None
+            multiplexer = self._msystem.multiplexers[0] if self._msystem and self._msystem.multiplexers else None
+            self._measurement_plan = MeasurementPlan(board, measurer, multiplexer)
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
-            self._board_window.set_board(self._measurement_plan)
+            self._board_window.update_board()
             self.update_current_pin()
             self._open_board_window_if_needed()
             self._mux_and_plan_window.update_info()
@@ -1146,7 +1153,7 @@ class EPLabWindow(QMainWindow):
                                                filter="Image Files (*.png *.jpg *.bmp)")[0]
         if filename:
             epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
-            self._board_window.set_board(self._measurement_plan)
+            self._board_window.update_board()
             self.update_current_pin()
             self._open_board_window_if_needed()
 
@@ -1430,5 +1437,13 @@ class EPLabWindow(QMainWindow):
                     self._update_curves(curves, self._msystem.measurers[0].get_settings())
                 else:
                     self._update_curves({"ref": None, "test_for_plan": None}, self._msystem.measurers[0].get_settings())
+        elif self._work_mode is WorkMode.READ_PLAN:
+            current_pin = self._measurement_plan.get_current_pin()
+            self.line_comment_pin.setText(current_pin.comment or "")
+            ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
+            curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
+                      "test_for_plan": None if not test_for_plan else test_for_plan.ivc}
+            self._update_curves(curves, settings)
+
         if self._mux_and_plan_window:
             self._mux_and_plan_window.select_current_pin()
