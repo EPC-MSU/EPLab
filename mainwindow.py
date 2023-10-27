@@ -104,6 +104,9 @@ class EPLabWindow(QMainWindow):
         else:
             self.connect_devices(port_1, port_2)
 
+        if path:
+            self.load_board(path)
+
     @property
     def dir_chosen_by_user(self) -> str:
         """
@@ -522,13 +525,15 @@ class EPLabWindow(QMainWindow):
         if self._measurement_plan.image:
             self._board_window.show()
 
-    def _read_measurement_plan(self) -> Optional[Board]:
+    def _read_measurement_plan(self, filename: Optional[str] = None) -> Optional[Board]:
         """
+        :param filename: path to the file with the measurement plan that needs to be opened.
         :return: measurement plan read from file.
         """
 
-        filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
-                                               filter="Board Files (*.json *.uzf)")[0]
+        if not (isinstance(filename, str) and os.path.exists(filename)):
+            filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
+                                                   filter="Board Files (*.json *.uzf)")[0]
         board = None
         if filename:
             try:
@@ -1175,12 +1180,13 @@ class EPLabWindow(QMainWindow):
             self._hide_curve_ref = state
 
     @pyqtSlot()
-    def load_board(self) -> None:
+    def load_board(self, filename: Optional[str] = None) -> None:
         """
         Slot loads board from a file.
+        :param filename: path to the file with the measurement plan that needs to be opened.
         """
 
-        board = self._read_measurement_plan()
+        board = self._read_measurement_plan(filename)
         if board:
             if not self._msystem:
                 self._change_work_mode(WorkMode.READ_PLAN)
