@@ -56,6 +56,14 @@ def check_compatibility(product: EyePointProduct, board: Board) -> bool:
     return True
 
 
+def check_is_running_from_exe() -> bool:
+    """
+    :return: True if the application is launched from an executable file, otherwise from a source.
+    """
+
+    return getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
+
+
 def clear_layout(layout: QLayout) -> None:
     """
     :param layout: layout from which to completely remove all widgets.

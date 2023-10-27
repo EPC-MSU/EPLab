@@ -65,12 +65,13 @@ class EPLabWindow(QMainWindow):
     work_mode_changed: pyqtSignal = pyqtSignal(WorkMode)
 
     def __init__(self, product: EyePointProduct, port_1: Optional[str] = None, port_2: Optional[str] = None,
-                 english: Optional[bool] = None) -> None:
+                 english: Optional[bool] = None, path: str = None) -> None:
         """
         :param product: product;
         :param port_1: port for the first measurer;
         :param port_2: port for the second measurer;
-        :param english: if True then interface language will be English.
+        :param english: if True then interface language will be English;
+        :param path: path to the test plan to be opened.
         """
 
         super().__init__()

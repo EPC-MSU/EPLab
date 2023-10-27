@@ -6,4 +6,5 @@ cd ..
 set QT_QPA_PLATFORM_PLUGIN_PATH=venv\Lib\site-packages\PyQt5\Qt\plugins\platforms
 set IVM_TEST=com:\\.\COMx
 set IVM_REF=com:\\.\COMx
-venv\Scripts\python main.py %IVM_TEST% --ref %IVM_REF%
+venv\Scripts\python main.py --test %IVM_TEST% --ref %IVM_REF%
+pause
