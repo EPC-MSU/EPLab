@@ -382,18 +382,6 @@ class EPLabWindow(QMainWindow):
         return super().eventFilter(obj, event)
 
     @pyqtSlot()
-    def _handle_pedal_signal(self) -> None:
-        """
-        Slot processes pedal presses. The pedal freezes/unfreezes the measures in comparison mode and causes a
-        transition to the next pin in the measurement plan in other modes.
-        """
-
-        if self.work_mode == WorkMode.COMPARE:
-            self._handle_freezing_curves_with_pedal()
-        elif self.work_mode in (WorkMode.READ_PLAN, WorkMode.TEST, WorkMode.WRITE):
-            self.next_point_action.trigger()
-
-    @pyqtSlot()
     def _handle_periodic_task(self) -> None:
         if self._device_errors_handler.all_ok:
             with self._device_errors_handler:
@@ -496,7 +484,7 @@ class EPLabWindow(QMainWindow):
         self.select_language_action.triggered.connect(self.select_language)
 
         self.shortcut_pedal_crutch: QShortcut = QShortcut(QKeySequence("Ctrl+Alt+Shift+P"), self)
-        self.shortcut_pedal_crutch.activated.connect(self._handle_pedal_signal)
+        self.shortcut_pedal_crutch.activated.connect(self.handle_pedal_signal)
 
         self.comparing_mode_action.triggered.connect(lambda: self._switch_work_mode(WorkMode.COMPARE))
         self.writing_mode_action.triggered.connect(lambda: self._switch_work_mode(WorkMode.WRITE))
@@ -1161,6 +1149,18 @@ class EPLabWindow(QMainWindow):
 
         self.update_current_pin()
         self._open_board_window_if_needed()
+
+    @pyqtSlot()
+    def handle_pedal_signal(self) -> None:
+        """
+        Slot processes pedal presses. The pedal freezes/unfreezes the measures in comparison mode and causes a
+        transition to the next pin in the measurement plan in other modes.
+        """
+
+        if self.work_mode == WorkMode.COMPARE:
+            self._handle_freezing_curves_with_pedal()
+        elif self.work_mode in (WorkMode.READ_PLAN, WorkMode.TEST, WorkMode.WRITE):
+            self.next_point_action.trigger()
 
     @pyqtSlot(bool)
     def hide_curve(self, state: bool) -> None:

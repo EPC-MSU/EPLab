@@ -6,8 +6,8 @@ import os
 from typing import Optional
 from PIL import Image
 from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPointF, Qt
-from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap
-from PyQt5.QtWidgets import QVBoxLayout, QWidget
+from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QKeySequence, QPixmap
+from PyQt5.QtWidgets import QShortcut, QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView
 from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
@@ -48,6 +48,9 @@ class BoardWidget(QWidget):
         self._board: Optional[MeasurementPlan] = None
         self._control_pressed: bool = False
         self._parent = parent
+        self._shortcut_pedal_crutch: QShortcut = QShortcut(QKeySequence("Ctrl+Alt+Shift+P"), self)
+        if hasattr(self._parent, "handle_pedal_signal"):
+            self._shortcut_pedal_crutch.activated.connect(self._parent.handle_pedal_signal)
         self._init_ui()
 
     @property
@@ -73,19 +76,23 @@ class BoardWidget(QWidget):
         key = QKeyEvent(event).key()
         if key == Qt.Key_Control:
             self._control_pressed = True
-            return True
+
         if self._control_pressed and key in (Qt.Key_Down, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up):
             return super().eventFilter(obj, event)
+
         if key == Qt.Key_Left:
             self._parent.go_to_left_or_right_pin(True)
             return True
+
         if key == Qt.Key_Right:
             self._parent.go_to_left_or_right_pin(False)
             return True
+
         if key in (Qt.Key_Enter, Qt.Key_Return):
             self._parent.save_pin()
             return True
-        return super().eventFilter(obj, event)
+
+        return self._parent.eventFilter(self._parent, event)
 
     def _handle_key_release_event(self, obj: QObject, event: QEvent) -> bool:
         """
