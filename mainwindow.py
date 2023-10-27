@@ -33,7 +33,7 @@ from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
 from measurer_settings_window import MeasurerSettingsWindow
 from multiplexer import MuxAndPlanWindow
-from parameter_widget import ParameterWidget
+from window.parameterwidget import ParameterWidget
 from player import SoundPlayer
 from score import ScoreWrapper
 from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
@@ -1133,8 +1133,11 @@ class EPLabWindow(QMainWindow):
             if not self._msystem:
                 self._change_work_mode(WorkMode.READ_PLAN)
                 self._iv_window.plot.clear_center_text()
-            measurer = self._msystem.measurers[0] if self._msystem else None
-            multiplexer = self._msystem.multiplexers[0] if self._msystem and self._msystem.multiplexers else None
+                measurer = None
+                multiplexer = None
+            else:
+                measurer = self._msystem.measurers[0]
+                multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
             self._measurement_plan = MeasurementPlan(board, measurer, multiplexer)
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
@@ -1441,9 +1444,16 @@ class EPLabWindow(QMainWindow):
             current_pin = self._measurement_plan.get_current_pin()
             self.line_comment_pin.setText(current_pin.comment or "")
             ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
-            curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
-                      "test_for_plan": None if not test_for_plan else test_for_plan.ivc}
-            self._update_curves(curves, settings)
+            print(settings)
+            with self._device_errors_handler:
+                if settings:
+                    curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
+                              "test_for_plan": None if not test_for_plan else test_for_plan.ivc}
+                    if self._msystem:
+                        self._set_msystem_settings(settings)
+                    self._update_curves(curves, settings)
+                else:
+                    print("_______ERROR")
 
         if self._mux_and_plan_window:
             self._mux_and_plan_window.select_current_pin()
