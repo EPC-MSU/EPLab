@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 from functools import partial
 from platform import system
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt as QtC, QTimer,
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
@@ -21,7 +21,7 @@ from epcore.analogmultiplexer import BadMultiplexerOutputError
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, Pin
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.measurementmanager import IVCComparator, MeasurementPlan, MeasurementSystem, Searcher
-from epcore.product import EyePointProduct
+from epcore.product import EyePointProduct, MeasurementParameterOption
 from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
 import connection_window as cw
@@ -193,9 +193,9 @@ class EPLabWindow(QMainWindow):
         self.previous_point_action.setEnabled(mode is not WorkMode.COMPARE)
         self.num_point_line_edit.setEnabled(mode is not WorkMode.COMPARE)
         self.new_point_action.setEnabled(mode is WorkMode.WRITE)
-        self.save_point_action.setEnabled(mode is not WorkMode.COMPARE)
+        self.save_point_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
         self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
-        self.create_report_action.setEnabled(mode is not WorkMode.COMPARE)
+        self.create_report_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
         enable = bool(mode is not WorkMode.COMPARE and self._measurement_plan and
                       self._measurement_plan.multiplexer is not None)
         self.start_or_stop_entire_plan_measurement_action.setEnabled(enable)
@@ -296,14 +296,14 @@ class EPLabWindow(QMainWindow):
             action.triggered.connect(partial(self.show_device_settings, measurer, device_name))
             self.measurers_menu.addAction(action)
 
-    def _create_scroll_areas_for_parameters(self, settings: MeasurementSettings) -> None:
+    def _create_scroll_areas_for_parameters(self, available: Dict[EyePointProduct.Parameter,
+                                                                  List[MeasurementParameterOption]]) -> None:
         """
         Method creates scroll areas for different parameters of the measuring system. Scroll areas have radio buttons
         to choose options of parameters.
-        :param settings: measurement settings.
+        :param available: dictionary with available options for parameters.
         """
 
-        available = self._product.get_available_options(settings)
         self._parameters_scroll_areas = {}
         layouts = self.freq_layout.layout(), self.voltage_layout.layout(), self.current_layout.layout()
         parameters = (EyePointProduct.Parameter.frequency, EyePointProduct.Parameter.voltage,
@@ -390,7 +390,7 @@ class EPLabWindow(QMainWindow):
 
         if self.work_mode == WorkMode.COMPARE:
             self._handle_freezing_curves_with_pedal()
-        elif self.work_mode in (WorkMode.TEST, WorkMode.WRITE):
+        elif self.work_mode in (WorkMode.READ_PLAN, WorkMode.TEST, WorkMode.WRITE):
             self.next_point_action.trigger()
 
     @pyqtSlot()
@@ -699,7 +699,7 @@ class EPLabWindow(QMainWindow):
                 self._msystem.set_settings(settings)
             settings = self._msystem.get_settings()
             self._adjust_plot_params(settings)
-            self._create_scroll_areas_for_parameters(settings)
+            self._create_scroll_areas_for_parameters(self._product.get_available_options(settings))
             options = self._product.settings_to_options(settings)
             self._set_options_to_ui(options)
         self._mux_and_plan_window.update_info()
@@ -719,6 +719,57 @@ class EPLabWindow(QMainWindow):
         self.work_mode_changed.emit(mode)
         if mode in (WorkMode.TEST, WorkMode.WRITE) and self._measurement_plan.multiplexer:
             self.open_mux_window()
+
+    def _update_current_pin_in_read_plan_mode(self) -> None:
+        current_pin = self._measurement_plan.get_current_pin()
+        self.line_comment_pin.setText(current_pin.comment or "")
+        ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
+        with self._device_errors_handler:
+            if settings:
+                available = {
+                    EyePointProduct.Parameter.frequency: [
+                        MeasurementParameterOption(name=f"{settings.probe_signal_frequency}",
+                                                   value=settings.probe_signal_frequency,
+                                                   label_ru=f"{settings.probe_signal_frequency} Гц",
+                                                   label_en=f"{settings.probe_signal_frequency} Hz")],
+                    EyePointProduct.Parameter.sensitive: [
+                        MeasurementParameterOption(name=f"{settings.internal_resistance}",
+                                                   value=settings.internal_resistance,
+                                                   label_ru=f"{settings.internal_resistance} Ом",
+                                                   label_en=f"{settings.internal_resistance} Ohm")],
+                    EyePointProduct.Parameter.voltage: [
+                        MeasurementParameterOption(name=f"{settings.max_voltage}",
+                                                   value=settings.max_voltage,
+                                                   label_ru=f"{settings.max_voltage} В",
+                                                   label_en=f"{settings.max_voltage} V")]
+                }
+                self._update_scroll_areas_for_parameters(available)
+                options = {
+                    EyePointProduct.Parameter.frequency: f"{settings.probe_signal_frequency}",
+                    EyePointProduct.Parameter.sensitive: f"{settings.internal_resistance}",
+                    EyePointProduct.Parameter.voltage: f"{settings.max_voltage}"
+                }
+                self._set_options_to_ui(options)
+                self._adjust_plot_params(settings)
+
+                curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
+                          "test": None if not test_for_plan else test_for_plan.ivc}
+                self._update_curves(curves, settings)
+
+    def _update_current_pin_in_test_and_write_mode(self) -> None:
+        current_pin = self._measurement_plan.get_current_pin()
+        self.line_comment_pin.setText(current_pin.comment or "")
+        ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
+        with self._device_errors_handler:
+            if settings:
+                curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
+                          "test_for_plan": None if not test_for_plan else test_for_plan.ivc}
+                self._set_msystem_settings(settings)
+                options = self._product.settings_to_options(settings)
+                self._set_options_to_ui(options)
+                self._update_curves(curves, self._msystem.measurers[0].get_settings())
+            else:
+                self._update_curves({"ref": None, "test_for_plan": None}, self._msystem.measurers[0].get_settings())
 
     def _update_curves(self, curves: Dict[str, Optional[IVCurve]] = None, settings: MeasurementSettings = None) -> None:
         """
@@ -757,16 +808,16 @@ class EPLabWindow(QMainWindow):
             self._player.score_updated(score)
         else:
             self._score_wrapper.set_dummy_score()
-        if settings is not None and self._work_mode is not WorkMode.READ_PLAN:
+        if settings is not None:
             self._set_plot_parameters_to_low_settings_panel(settings)
 
-    def _update_scroll_areas_for_parameters(self, settings: MeasurementSettings) -> None:
+    def _update_scroll_areas_for_parameters(self, available: Dict[EyePointProduct.Parameter,
+                                                                  List[MeasurementParameterOption]]) -> None:
         """
         Method updates the scroll areas for different parameters of the measuring system.
-        :param settings: measurement settings.
+        :param available: dictionary with available options for parameters.
         """
 
-        available = self._product.get_available_options(settings)
         for parameter, scroll_area in self._parameters_scroll_areas.items():
             scroll_area.update_options(available[parameter])
 
@@ -1135,6 +1186,9 @@ class EPLabWindow(QMainWindow):
                 self._iv_window.plot.clear_center_text()
                 measurer = None
                 multiplexer = None
+                self._create_scroll_areas_for_parameters({EyePointProduct.Parameter.frequency: [],
+                                                          EyePointProduct.Parameter.sensitive: [],
+                                                          EyePointProduct.Parameter.voltage: []})
             else:
                 measurer = self._msystem.measurers[0]
                 multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
@@ -1329,7 +1383,7 @@ class EPLabWindow(QMainWindow):
         old_settings = copy.deepcopy(settings)
         options = self._get_options_from_ui()
         settings = self._product.options_to_settings(options, settings)
-        self._update_scroll_areas_for_parameters(settings)
+        self._update_scroll_areas_for_parameters(self._product.get_available_options(settings))
         options = self._product.settings_to_options(settings)
         self._set_options_to_ui(options)
         try:
@@ -1338,7 +1392,7 @@ class EPLabWindow(QMainWindow):
         except ValueError as exc:
             ut.show_message(qApp.translate("t", "Ошибка"),
                             qApp.translate("t", "Ошибка при установке настроек устройства"), str(exc))
-            self._update_scroll_areas_for_parameters(old_settings)
+            self._update_scroll_areas_for_parameters(self._product.get_available_options(old_settings))
             self._set_msystem_settings(old_settings)
             old_options = self._product.settings_to_options(old_settings)
             self._set_options_to_ui(old_options)
@@ -1427,33 +1481,9 @@ class EPLabWindow(QMainWindow):
         self.num_point_line_edit.setText(str(index))
         self._board_window.workspace.select_point(index)
         if self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
-            current_pin = self._measurement_plan.get_current_pin()
-            self.line_comment_pin.setText(current_pin.comment or "")
-            ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
-            with self._device_errors_handler:
-                if settings:
-                    curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
-                              "test_for_plan": None if not test_for_plan else test_for_plan.ivc}
-                    self._set_msystem_settings(settings)
-                    options = self._product.settings_to_options(settings)
-                    self._set_options_to_ui(options)
-                    self._update_curves(curves, self._msystem.measurers[0].get_settings())
-                else:
-                    self._update_curves({"ref": None, "test_for_plan": None}, self._msystem.measurers[0].get_settings())
-        elif self._work_mode is WorkMode.READ_PLAN:
-            current_pin = self._measurement_plan.get_current_pin()
-            self.line_comment_pin.setText(current_pin.comment or "")
-            ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
-            print(settings)
-            with self._device_errors_handler:
-                if settings:
-                    curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
-                              "test_for_plan": None if not test_for_plan else test_for_plan.ivc}
-                    if self._msystem:
-                        self._set_msystem_settings(settings)
-                    self._update_curves(curves, settings)
-                else:
-                    print("_______ERROR")
+            self._update_current_pin_in_test_and_write_mode()
+        elif self._work_mode == WorkMode.READ_PLAN:
+            self._update_current_pin_in_read_plan_mode()
 
         if self._mux_and_plan_window:
             self._mux_and_plan_window.select_current_pin()
