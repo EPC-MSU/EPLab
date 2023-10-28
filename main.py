@@ -8,7 +8,6 @@ from epcore.product import EyePointProduct
 import utils as ut
 from logger import set_logger
 from mainwindow import EPLabWindow
-from uzfconnector import connect_uzf_to_eplab
 
 
 if "_PYIBoot_SPLASH" in os.environ and importlib.util.find_spec("pyi_splash"):
@@ -118,7 +117,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     app_ = QApplication(sys.argv)
-    connect_uzf_to_eplab()
     try:
         launch_eplab(app_, args)
     except Exception:
