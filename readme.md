@@ -36,7 +36,7 @@
 
 ## Примечание к установке в Windows и Linux
 
-Для установки всех необходимых зависимостей нужен доступ на https://gitlab.ximc.ru к репозиториям [epcore](https://gitlab.ximc.ru/eyepoint/epcore) и [ivviewer](https://gitlab.ximc.ru/eyepoint/ivviewer) и доступ на https://github.com к репозиторию [ep_report_generator](https://github.com/EPC-MSU/ep_report_generator/).
+Для установки всех необходимых зависимостей нужен доступ на https://github.com к репозиториям [ep_report_generator](https://github.com/EPC-MSU/ep_report_generator/), [epcore](https://gitlab.ximc.ru/eyepoint/epcore) и [ivviewer](https://gitlab.ximc.ru/eyepoint/ivviewer).
 
 Чтобы установить зависимости через **git**:
 
@@ -57,12 +57,12 @@
 Чтобы запустить приложение для работы с устройствами IVM10, нужно выполнить команду:
 
 ```batch
-venv\Scripts\python main.py <ivm_url> [--ref <ivm_url>]
+venv\Scripts\python main.py --test <ivm_url> [--ref <ivm_url>]
 ```
 ПО может работать как с одним, так и с двумя устройствами (второе устройство задавать необязательно). *ivm_url*  - это адрес COM-порта. Также *ivm_url* может быть *virtual* (будет использоваться виртуальный измеритель). Пример запуска:
 
 ```batch
-venv\Scripts\python main.py com:\\.\COM13 --ref virtual
+venv\Scripts\python main.py --test com:\\.\COM13 --ref virtual
 ```
 
 #### Запуск в Windows для работы с АСА
@@ -70,7 +70,7 @@ venv\Scripts\python main.py com:\\.\COM13 --ref virtual
 Чтобы запустить приложение для работы с сетевым устройством АСА, нужно выполнить команду:
 
 ```batch
-venv\Scripts\python main.py xmlrpc://172.16.3.213 --ref virtualasa --config eplab_asa_options.json
+venv\Scripts\python main.py --test xmlrpc://172.16.3.213 --ref virtualasa --config eplab_asa_options.json
 ```
 
 Здесь предполагается, что:
@@ -105,12 +105,12 @@ set QT_QPA_PLATFORM_PLUGIN_PATH=venv\Lib\site-packages\PyQt5\Qt\plugins\platform
 Чтобы запустить приложение для работы с устройствами IVM10, нужно выполнить команду:
 
 ```bash
-venv/bin/python3 main.py <ivm_url> [--ref <ivm_url>]
+venv/bin/python3 main.py --test <ivm_url> [--ref <ivm_url>]
 ```
 ПО может работать как с одним, так и с двумя устройствами (второе устройство задавать не обязательно). *ivm_url*  - это адрес COM-порта. Также *ivm_url* может быть *virtual* (будет использоваться виртуальный измеритель). Пример запуска:
 
 ```bash
-venv/bin/python3 main.py com:///dev/ttyACM0 --ref virtual
+venv/bin/python3 main.py --test com:///dev/ttyACM0 --ref virtual
 ```
 
 #### Запуск в Linux для работы с АСА
@@ -118,7 +118,7 @@ venv/bin/python3 main.py com:///dev/ttyACM0 --ref virtual
 Чтобы запустить приложение для работы с сетевым устройством АСА, нужно выполнить команду:
 
 ```bash
-venv/bin/python3 main.py xmlrpc://172.16.3.213 --ref virtualasa --config eplab_asa_options.json
+venv/bin/python3 main.py --test xmlrpc://172.16.3.213 --ref virtualasa --config eplab_asa_options.json
 ```
 
 Здесь предполагается, что:
@@ -189,10 +189,6 @@ bash run.sh
   ```
 
 ## Дополнительно
-
-- Файл платы для тестов можно загрузить из папки **tests\test_data\eyepoint_calibration_board**.
-
-- Чтобы сконвертировать файлы плат, сделанные с помощью **EyePoint Px**, можно воспользоваться конвертером, который находится в модуле **epcore.utils**.
 
 - Для работы с сетевым устройством АСА нужно запустить сервер версии 4.3.2.
 
