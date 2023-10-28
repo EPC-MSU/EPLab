@@ -18,6 +18,7 @@ import serial.tools.list_ports
 import serial.tools.list_ports_common
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 
+
 logger = logging.getLogger("eplab")
 DIR_MEDIA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 EXCLUSIVE_COM_PORT = {
@@ -239,6 +240,23 @@ def find_urpc_ports(device_type: str) -> List[str]:
     serial_ports = serial.tools.list_ports.comports()
     serial_ports = filter_ports_by_vid_and_pid(serial_ports, vid, pid)
     return sorted([create_uri_name(serial_port.device) for serial_port in serial_ports])
+
+
+def get_current_measurers_ports(main_window) -> List[str]:
+    """
+    :param main_window: main window of application.
+    :return: list of measurer ports that the application currently works with.
+    """
+
+    ports = [None, None]
+    for i_measurer, measurer in enumerate(main_window.get_measurers()):
+        if measurer.url:
+            ports[i_measurer] = measurer.url
+        elif isinstance(measurer, IVMeasurerVirtualASA):
+            ports[i_measurer] = MeasurerType.ASA_VIRTUAL.value
+        elif isinstance(measurer, IVMeasurerVirtual):
+            ports[i_measurer] = MeasurerType.IVM10_VIRTUAL.value
+    return ports
 
 
 def get_different_ports(ports: List[str]) -> List[str]:

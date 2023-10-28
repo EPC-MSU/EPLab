@@ -61,6 +61,7 @@ class EPLabWindow(QMainWindow):
     FILENAME_FOR_AUTO_SETTINGS: str = os.path.join(ut.get_dir_name(), "eplab_settings_for_auto_save_and_read.ini")
     MIN_WIDTH_IN_LINUX: int = 700
     MIN_WIDTH_IN_WINDOWS: int = 650
+    measurers_connected: pyqtSignal = pyqtSignal(bool)
     measurers_disconnected: pyqtSignal = pyqtSignal()
     work_mode_changed: pyqtSignal = pyqtSignal(WorkMode)
 
@@ -100,9 +101,9 @@ class EPLabWindow(QMainWindow):
         self._init_ui()
         self.installEventFilter(self)
         if port_1 is None and port_2 is None:
-            self.disconnect_devices()
+            self.disconnect_measurers()
         else:
-            self.connect_devices(port_1, port_2)
+            self.connect_measurers(port_1, port_2)
 
         if path:
             self.load_board(path)
@@ -857,8 +858,8 @@ class EPLabWindow(QMainWindow):
             self._report_generation_thread.stop_thread()
             self._report_generation_thread.wait()
 
-    def connect_devices(self, port_1: Optional[str], port_2: Optional[str],
-                        product_name: Optional[cw.ProductNames] = None, mux_port: str = None) -> None:
+    def connect_measurers(self, port_1: Optional[str], port_2: Optional[str],
+                          product_name: Optional[cw.ProductNames] = None, mux_port: str = None) -> None:
         """
         Method connects measurers with given ports.
         :param port_1: port for first measurer;
@@ -894,9 +895,11 @@ class EPLabWindow(QMainWindow):
                 text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства "
                                            "EyePoint, а не какие-то другие устройства.")
             ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
+
         if not self._msystem:
-            self.disconnect_devices()
+            self.disconnect_measurers()
             return
+
         self._clear_widgets()
         self._iv_window.plot.clear_center_text()
         options_data = self._read_options_from_json()
@@ -908,15 +911,19 @@ class EPLabWindow(QMainWindow):
         self._timer.start()
         self.enable_widgets(True)
         self._set_widgets_to_init_state()
+        self.measurers_connected.emit(True)
 
     @pyqtSlot()
     def connect_or_disconnect(self) -> None:
         """
-        Slot shows dialog window to select devices for connection.
+        Slot shows dialog window to select measurers for connection.
         """
 
-        connection_wnd = cw.ConnectionWindow(self, self._product_name)
-        connection_wnd.exec()
+        window = cw.ConnectionWindow(self, cw.utils.get_current_measurers_ports(self), self._product_name)
+        window.connect_measurers_signal.connect(lambda data: self.connect_measurers(**data))
+        window.disconnect_measurers_signal.connect(self.disconnect_measurers)
+        self.measurers_connected.connect(window.handle_connection)
+        window.exec()
 
     @pyqtSlot()
     def create_new_board(self) -> None:
@@ -989,7 +996,7 @@ class EPLabWindow(QMainWindow):
             show_report_generation_window(self, self._report_generation_thread, self.measurement_plan, dir_path,
                                           self.threshold, self.work_mode)
 
-    def disconnect_devices(self) -> None:
+    def disconnect_measurers(self) -> None:
         self._timer.stop()
         if self.start_or_stop_entire_plan_measurement_action.isChecked():
             self.start_or_stop_entire_plan_measurement_action.setChecked(False)
@@ -1004,6 +1011,7 @@ class EPLabWindow(QMainWindow):
         self.enable_widgets(False)
         self._clear_widgets()
         self._product_name = None
+        self.measurers_connected.emit(False)
 
     @pyqtSlot(bool)
     def enable_sound(self, state: bool) -> None:
@@ -1237,7 +1245,10 @@ class EPLabWindow(QMainWindow):
         """
 
         if not self._mux_and_plan_window.isVisible():
+            print("+++++++++++++ SHOW")
             self._mux_and_plan_window.show()
+        else:
+            print("______________ NOTHING")
 
     @pyqtSlot()
     def remove_all_cursors(self) -> None:
