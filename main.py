@@ -114,10 +114,10 @@ if __name__ == "__main__":
     parser.add_argument("--en", help="Use English version", action="store_true", default=False)
     parser.add_argument("--ref", help="Path to REF [additional] measurer (type 'virtual' for virtual mode)")
     parser.add_argument("--test", help="Path to TEST measurer (type 'virtual' for virtual mode)", default=None)
-    args = parser.parse_args()
+    parsed_args = parser.parse_args()
 
     app_ = QApplication(sys.argv)
     try:
-        launch_eplab(app_, args)
+        launch_eplab(app_, parsed_args)
     except Exception:
         show_error_window(app_, *sys.exc_info())
