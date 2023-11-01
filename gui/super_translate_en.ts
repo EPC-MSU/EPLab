@@ -718,14 +718,19 @@
         <translation>Copy</translation>
     </message>
     <message>
-        <location filename="../dialogs/language.py" line="81"/>
+        <location filename="../dialogs/language.py" line="83"/>
         <source>Выбор языка</source>
         <translation>Language selection</translation>
     </message>
     <message>
-        <location filename="../dialogs/language.py" line="82"/>
+        <location filename="../dialogs/language.py" line="85"/>
         <source>Выберите язык:</source>
         <translation>Choose language:</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/language.py" line="92"/>
+        <source>Отмена</source>
+        <translation>Cancel</translation>
     </message>
     <message>
         <location filename="../dialogs/reportgenerationwindow.py" line="163"/>
