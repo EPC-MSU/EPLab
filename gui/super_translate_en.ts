@@ -224,7 +224,7 @@
     <message>
         <location filename="mainwindow.ui" line="636"/>
         <source>Автоподбор параметров</source>
-        <translation>Optimal  search of parameters</translation>
+        <translation>Optimal search of parameters</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="648"/>

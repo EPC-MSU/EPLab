@@ -1281,10 +1281,9 @@ class EPLabWindow(QMainWindow):
         """
 
         if not self._mux_and_plan_window.isVisible():
-            print("+++++++++++++ SHOW")
             self._mux_and_plan_window.show()
         else:
-            print("______________ NOTHING")
+            self._mux_and_plan_window.activateWindow()
 
     @pyqtSlot()
     def remove_all_cursors(self) -> None:
