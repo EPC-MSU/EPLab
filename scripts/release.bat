@@ -1,6 +1,6 @@
 cd ..
 set PYTHON=python
-python -c "import struct; print(8 * struct.calcsize(\"P\"))" > result.txt
+%PYTHON% -c "import struct; print(8 * struct.calcsize(\"P\"))" > result.txt
 set /p target_platform=<result.txt
 echo %target_platform%
 del result.txt
