@@ -1176,6 +1176,7 @@ class EPLabWindow(QMainWindow):
 
         if pin_index is not None:
             self.num_point_line_edit.setText(str(pin_index))
+
         try:
             pin_index = int(self.num_point_line_edit.text())
         except ValueError:
@@ -1192,9 +1193,9 @@ class EPLabWindow(QMainWindow):
                 ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
                                 qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
                                                     "точки не был установлен."))
-        except ValueError as exc:
+        except ValueError:
             ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
-                            qApp.translate("t", "Точка с таким номером не найдена на данной плате."), str(exc))
+                            qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
             return
 
         self.update_current_pin()
