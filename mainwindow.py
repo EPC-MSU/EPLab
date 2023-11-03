@@ -52,8 +52,8 @@ class EPLabWindow(QMainWindow):
     COLOR_FOR_REFERENCE: QColor = QColor(0, 128, 255, 200)
     COLOR_FOR_TEST: QColor = QColor(255, 0, 0, 200)
     COLOR_FOR_TEST_FROM_PLAN: QColor = QColor(255, 129, 129, 200)
-    CRITICAL_WIDTH_FOR_LINUX_EN: int = 1380
-    CRITICAL_WIDTH_FOR_LINUX_RU: int = 1650
+    CRITICAL_WIDTH_FOR_LINUX_EN: int = 1220
+    CRITICAL_WIDTH_FOR_LINUX_RU: int = 1450
     CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1020
     CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1200
     DEFAULT_PATH: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
