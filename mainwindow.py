@@ -54,8 +54,8 @@ class EPLabWindow(QMainWindow):
     COLOR_FOR_TEST_FROM_PLAN: QColor = QColor(255, 129, 129, 200)
     CRITICAL_WIDTH_FOR_LINUX_EN: int = 1220
     CRITICAL_WIDTH_FOR_LINUX_RU: int = 1450
-    CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1020
-    CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1200
+    CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1180
+    CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1350
     DEFAULT_PATH: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
     DEFAULT_POS_X: int = 50
     DEFAULT_POS_Y: int = 50
@@ -1308,7 +1308,7 @@ class EPLabWindow(QMainWindow):
             size = EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_EN if lang is Language.EN else \
                 EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_RU
         # Change style of toolbars
-        tool_bars = self.toolbar_write, self.toolbar_mode
+        tool_bars = self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search
         for tool_bar in tool_bars:
             if self.width() < size:
                 style = QtC.ToolButtonIconOnly
