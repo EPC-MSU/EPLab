@@ -1,3 +1,4 @@
+import copy
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
@@ -24,7 +25,7 @@ class SettingsWindow(QDialog):
 
         super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self._init_settings: Settings = init_settings
-        self._settings: Settings = init_settings
+        self._settings: Settings = copy.copy(init_settings)
         self._settings_directory: str = settings_directory or ut.get_dir_name()
         self._init_ui()
         self._update_threshold_in_settings_wnd(self._init_settings.score_threshold)

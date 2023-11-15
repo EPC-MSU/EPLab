@@ -44,6 +44,17 @@ class Settings(SettingsHandler):
         super().__init__(parent=parent)
         self._active_editors = set()
 
+    def __copy__(self) -> "Settings":
+        new_obj = type(self)()
+        for attr_name in Settings.ATTRIBUTE_NAMES:
+            value = getattr(self, attr_name, None)
+            setattr(new_obj, attr_name, value)
+        return new_obj
+
+    def __repr__(self) -> str:
+        attr_values = [f"{attr_name}={getattr(self, attr_name, None)}" for attr_name in Settings.ATTRIBUTE_NAMES]
+        return f"Settings({', '.join(attr_values)})"
+
     def _read(self, settings: QSettings) -> None:
         """
         :param settings: QSettings object from which parameter values ​​need to be read.
@@ -95,13 +106,6 @@ class Settings(SettingsHandler):
 
         return {param: self._get_default_value(param) for param in Settings.ATTRIBUTE_NAMES}
 
-    def get_values(self) -> Dict[str, Any]:
-        """
-        :return: dictionary with default values of attributes.
-        """
-
-        return {param: getattr(self, param, None) for param in Settings.ATTRIBUTE_NAMES}
-
     def get_measurement_settings(self) -> MeasurementSettings:
         """
         :return: measurement settings.
@@ -111,6 +115,13 @@ class Settings(SettingsHandler):
                                    sampling_rate=self.frequency[1],
                                    internal_resistance=self.internal_resistance,
                                    max_voltage=self.max_voltage)
+
+    def get_values(self) -> Dict[str, Any]:
+        """
+        :return: dictionary with default values of attributes.
+        """
+
+        return {param: getattr(self, param, None) for param in Settings.ATTRIBUTE_NAMES}
 
     def remove_editor(self, editor) -> None:
         self._active_editors.discard(editor)
