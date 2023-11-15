@@ -1,5 +1,7 @@
+import copy
 import os
 import unittest
+from typing import Any, Dict
 from common import WorkMode
 from settings import Settings
 
@@ -8,17 +10,24 @@ class TestSettings(unittest.TestCase):
 
     def setUp(self) -> None:
         self.dir_test: str = os.path.join(os.curdir, "settings", "tests", "test_data")
-        self.correct_result = {"frequency": (100, 10000),
-                               "hide_curve_a": True,
-                               "hide_curve_b": False,
-                               "internal_resistance": 47500,
-                               "max_voltage": 3.3,
-                               "score_threshold": 0.69,
-                               "sound_enabled": True,
-                               "work_mode": WorkMode.TEST}
+        self.correct_result: Dict[str, Any] = {"frequency": (100, 10000),
+                                               "hide_curve_a": True,
+                                               "hide_curve_b": False,
+                                               "internal_resistance": 47500,
+                                               "max_voltage": 3.3,
+                                               "score_threshold": 0.69,
+                                               "sound_enabled": True,
+                                               "work_mode": WorkMode.TEST}
         self.settings: Settings = Settings()
-        for key, value in self.correct_result.items():
-            setattr(self.settings, key, value)
+        _ = [setattr(self.settings, key, value) for key, value in self.correct_result.items()]
+
+    def test_copy(self) -> None:
+        other_settings = copy.copy(self.settings)
+        other_settings.score_threshold = 0.96
+        self.assertNotEqual(other_settings.score_threshold, self.settings.score_threshold)
+        for attr_name in Settings.ATTRIBUTE_NAMES:
+            if attr_name != "score_threshold":
+                self.assertEqual(getattr(other_settings, attr_name), getattr(self.settings, attr_name))
 
     def test_read(self) -> None:
         settings = Settings()
