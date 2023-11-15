@@ -35,6 +35,7 @@ from measurer_settings_window import MeasurerSettingsWindow
 from multiplexer import MuxAndPlanWindow
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.parameterwidget import ParameterWidget
+from window.scaler import Scaler
 from window.scorewrapper import ScoreWrapper
 from player import SoundPlayer
 from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
@@ -101,6 +102,9 @@ class EPLabWindow(QMainWindow):
         self._load_translation(english)
         self._init_ui()
 
+        self._scaler: Scaler = Scaler(self)
+        self._scaler.update_scale()
+
         if port_1 is None and port_2 is None:
             self.disconnect_measurers()
         else:
@@ -145,6 +149,12 @@ class EPLabWindow(QMainWindow):
         """
 
         return self._product
+
+    @property
+    def scale(self) -> float:
+        app = qApp.instance()
+        screen = app.screens()[0]
+        return screen.logicalDotsPerInch() / 96.0
 
     @property
     def threshold(self) -> float:

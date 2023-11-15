@@ -3,11 +3,16 @@ import os
 import sys
 import traceback
 from argparse import ArgumentParser, Namespace
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import qApp, QApplication, QDesktopWidget, QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget
 from epcore.product import EyePointProduct
 import utils as ut
 from logger import set_logger
 from mainwindow import EPLabWindow
+
+
+QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)  # enable high dpi scaling
+QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)  # use highdpi icons
 
 
 if "_PYIBoot_SPLASH" in os.environ and importlib.util.find_spec("pyi_splash"):
