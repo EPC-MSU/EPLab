@@ -11,6 +11,7 @@ import utils as ut
 from connection_window.utils import get_platform
 from dialogs.language import Language
 from version import Version
+from window.scaler import update_scale
 
 
 TEXT_HEIGHT: int = 100
@@ -118,4 +119,5 @@ def show_product_info() -> None:
     """
 
     window = AboutWindow()
+    update_scale(window)
     window.exec_()
