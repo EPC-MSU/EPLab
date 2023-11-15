@@ -35,8 +35,8 @@ from measurer_settings_window import MeasurerSettingsWindow
 from multiplexer import MuxAndPlanWindow
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.parameterwidget import ParameterWidget
+from window.scorewrapper import ScoreWrapper
 from player import SoundPlayer
-from score import ScoreWrapper
 from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
 from version import Version
 
@@ -668,7 +668,7 @@ class EPLabWindow(QMainWindow):
         param_dict = {"current_per_division": current_per_division,
                       "max_voltage": settings.max_voltage,
                       "probe_signal_frequency": settings.probe_signal_frequency,
-                      "score": self._score_wrapper.get_score(),
+                      "score": self._score_wrapper.get_friendly_score(),
                       "sensitivity": sensitivity,
                       "voltage_per_division": voltage_per_division}
         self.low_settings_panel.set_all_parameters(**param_dict)

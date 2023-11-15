@@ -19,16 +19,29 @@ class ScoreWrapper:
 
     @property
     def threshold(self) -> float:
+        """
+        :return: threshold score.
+        """
+
         return self._threshold
 
     def _get_threshold_int(self) -> None:
         self._threshold_int: int = convert_to_int(self._threshold)
 
     def _set_score_text(self, text: str, color: str) -> None:
+        """
+        :param text: user friendly score value to display in the label widget;
+        :param color: display color.
+        """
+
         self._label.setText(f'<html><head/><body><p><span style="font-size:48pt;color:{color};">{text}</span>'
                             f"</p></body></html>")
 
-    def get_score(self) -> str:
+    def get_friendly_score(self) -> str:
+        """
+        :return: user friendly score value.
+        """
+
         return self._friendly_score
 
     def set_dummy_score(self) -> None:
@@ -36,19 +49,28 @@ class ScoreWrapper:
         self._set_score_text(self._friendly_score, self._COLOR_GOOD)
 
     def set_score(self, score: float) -> None:
+        """
+        :param score: new score value.
+        """
+
         score = convert_to_int(score)
-        color = self._COLOR_GOOD if score < self._threshold_int else self._COLOR_BAD
-        try:
-            self._friendly_score = str(score) + "%"
-        except ValueError:
-            # TODO: this should not happen
-            self._friendly_score = "NaN"
+        color = self._COLOR_GOOD if score <= self._threshold_int else self._COLOR_BAD
+        self._friendly_score = str(score) + "%"
         self._set_score_text(self._friendly_score, color)
 
     def set_threshold(self, new_threshold: float) -> None:
+        """
+        :param new_threshold: new threshold score value.
+        """
+
         self._threshold = max(min(new_threshold, 1.0), 0.0)
         self._get_threshold_int()
 
 
 def convert_to_int(value: float) -> int:
+    """
+    :param value: the value to be converted to an integer percentage.
+    :return: integer percentage.
+    """
+
     return round(100 * value)
