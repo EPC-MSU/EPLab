@@ -278,6 +278,7 @@ class EPLabWindow(QMainWindow):
         self._score_wrapper.set_dummy_score()
         self.line_comment_pin.clear()
         self._mux_and_plan_window.close()
+        self.low_settings_panel.clear_panel()
 
     def _create_measurer_setting_actions(self) -> None:
         """
