@@ -14,6 +14,9 @@ class KeymapDialog(QDialog):
     Dialog box class that displays the keyboard shortcuts used in the application.
     """
 
+    HEIGHT: int = 380
+    WIDTH: int = 280
+
     def __init__(self) -> None:
         super().__init__()
         self._init_ui()
@@ -68,7 +71,10 @@ class KeymapDialog(QDialog):
         v_layout = QVBoxLayout()
         v_layout.addWidget(self.text_browser)
         v_layout.addLayout(h_layout)
+
         self.setLayout(v_layout)
+        self.setFixedHeight(KeymapDialog.HEIGHT)
+        self.setFixedWidth(KeymapDialog.WIDTH)
 
 
 def show_keymap_info() -> None:
