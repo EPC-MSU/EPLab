@@ -34,6 +34,7 @@ from common import DeviceErrorsHandler, WorkMode
 from measurer_settings_window import MeasurerSettingsWindow
 from multiplexer import MuxAndPlanWindow
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
+from window.dirwatcher import DirWatcher
 from window.parameterwidget import ParameterWidget
 from window.scaler import update_scale
 from window.scorewrapper import ScoreWrapper
@@ -83,6 +84,7 @@ class EPLabWindow(QMainWindow):
         self._current_file_path: str = None
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
         self._dir_chosen_by_user: str = ut.get_dir_name()
+        self._dir_watcher: DirWatcher = DirWatcher(ut.get_dir_name())
         self._hide_curve_ref: bool = False
         self._hide_curve_test: bool = False
         self._last_saved_measurement_plan_data: Dict[str, Any] = None
@@ -436,8 +438,7 @@ class EPLabWindow(QMainWindow):
 
         self._iv_window: IVViewer = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
                                              solid_axis_enabled=False, axis_label_enabled=False)
-        dir_path = os.path.join(EPLabWindow.DEFAULT_PATH, "Screenshot")
-        os.makedirs(dir_path, exist_ok=True)
+        dir_path = self._dir_watcher.screenshot
         self._iv_window.plot.set_path_to_directory(dir_path)
         self._iv_window.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),
                                              export_ivc=qApp.translate("t", "Экспортировать кривые в файл"),
@@ -541,6 +542,7 @@ class EPLabWindow(QMainWindow):
 
         if not (isinstance(filename, str) and os.path.exists(filename)):
             filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
+                                                   directory=self._dir_watcher.reference,
                                                    filter="Board Files (*.json *.uzf)")[0]
         board = None
         if filename:
@@ -964,11 +966,10 @@ class EPLabWindow(QMainWindow):
                 # You don't need to do anything
                 return
 
-        dir_reference = os.path.join(EPLabWindow.DEFAULT_PATH, "Reference")
-        os.makedirs(dir_reference, exist_ok=True)
+        default_path = os.path.join(self._dir_watcher.reference, "board.uzf")
         filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Создать новую плату"),
                                                filter="UFIV Archived File (*.uzf)",
-                                               directory=os.path.join(dir_reference, "board.uzf"))[0]
+                                               directory=default_path)[0]
         if filename:
             self._current_file_path = filename
             self._reset_board()
@@ -1006,8 +1007,7 @@ class EPLabWindow(QMainWindow):
         :param default_path: if True, then the report should be created in the default directory.
         """
 
-        dir_path = os.path.join(EPLabWindow.DEFAULT_PATH, "Reports")
-        os.makedirs(dir_path, exist_ok=True)
+        dir_path = self._dir_watcher.reports
         if not default_path:
             dir_path = QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"), dir_path)
         if dir_path:
@@ -1353,11 +1353,9 @@ class EPLabWindow(QMainWindow):
         if self._check_measurement_plan_for_empty_pins():
             return None
 
-        dir_reference = os.path.join(EPLabWindow.DEFAULT_PATH, "Reference")
-        os.makedirs(dir_reference, exist_ok=True)
+        default_path = os.path.join(self._dir_watcher.reference, "board.uzf")
         filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить плату"),
-                                               filter="UFIV Archived File (*.uzf)",
-                                               directory=os.path.join(dir_reference, "board.uzf"))[0]
+                                               filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
         if filename:
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             self._current_file_path = epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
@@ -1377,9 +1375,7 @@ class EPLabWindow(QMainWindow):
 
         image = self.grab(self.rect())
         filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
-        dir_path = os.path.join(EPLabWindow.DEFAULT_PATH, "Screenshot")
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
+        dir_path = self._dir_watcher.screenshot
         if system().lower() == "windows":
             filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
                                                    directory=os.path.join(dir_path, filename))[0]
