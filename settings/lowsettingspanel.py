@@ -68,6 +68,9 @@ class LowSettingsPanel(QGridLayout):
         self._param_dict["Напряжение"].setText(qApp.translate("settings", "  Напряжение: ") +
                                                str(voltage_per_division) + qApp.translate("settings", " В / дел."))
 
+    def clear_panel(self) -> None:
+        _ = [label.clear() for label in self._param_dict.values()]
+
     def set_all_parameters(self, **kwargs) -> None:
         """
         Method sets all parameters on the low panel.
