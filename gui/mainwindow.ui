@@ -767,6 +767,10 @@
    </property>
   </action>
   <action name="action_keymap">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/keyboard.png</normaloff>../media/keyboard.png</iconset>
+   </property>
    <property name="text">
     <string>Горячие клавиши</string>
    </property>
