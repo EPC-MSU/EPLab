@@ -59,6 +59,9 @@ class LowSettingsPanel(QGridLayout):
         :param sensitivity: current sensitivity value.
         """
 
+        widget = self._param_dict["Чувствительность"]
+        font = widget.font()
+        print(font.pointSize())
         self._param_dict["Чувствительность"].setText(qApp.translate("settings", "Чувствительность: ") + sensitivity)
 
     def _set_voltage_per_division(self, voltage_per_division: float) -> None:
@@ -70,6 +73,10 @@ class LowSettingsPanel(QGridLayout):
 
     def clear_panel(self) -> None:
         _ = [label.clear() for label in self._param_dict.values()]
+
+    def get_labels(self) -> List[QLabel]:
+        for label in self._param_dict.values():
+            yield label
 
     def set_all_parameters(self, **kwargs) -> None:
         """
