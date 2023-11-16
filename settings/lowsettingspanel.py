@@ -59,9 +59,6 @@ class LowSettingsPanel(QGridLayout):
         :param sensitivity: current sensitivity value.
         """
 
-        widget = self._param_dict["Чувствительность"]
-        font = widget.font()
-        print(font.pointSize())
         self._param_dict["Чувствительность"].setText(qApp.translate("settings", "Чувствительность: ") + sensitivity)
 
     def _set_voltage_per_division(self, voltage_per_division: float) -> None:
