@@ -403,6 +403,9 @@
    <property name="text">
     <string>Открыть план тестирования</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="save_file_action">
    <property name="icon">
