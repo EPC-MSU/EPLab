@@ -14,7 +14,7 @@ class KeymapDialog(QDialog):
     Dialog box class that displays the keyboard shortcuts used in the application.
     """
 
-    HEIGHT: int = 380
+    HEIGHT: int = 370
     WIDTH: int = 280
 
     def __init__(self) -> None:
