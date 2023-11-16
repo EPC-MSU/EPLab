@@ -403,6 +403,9 @@
    <property name="text">
     <string>Открыть план тестирования</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="save_file_action">
    <property name="icon">
@@ -764,6 +767,10 @@
    </property>
   </action>
   <action name="action_keymap">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/keyboard.png</normaloff>../media/keyboard.png</iconset>
+   </property>
    <property name="text">
     <string>Горячие клавиши</string>
    </property>

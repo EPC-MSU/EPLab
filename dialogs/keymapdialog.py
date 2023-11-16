@@ -42,6 +42,7 @@ class KeymapDialog(QDialog):
                  "border-top: 1px solid #716561;}"
                  "</style>")
         key_map = [("Ctrl+N", qApp.translate("MainWindow", "Создать план тестирования")),
+                   ("Ctrl+O", qApp.translate("MainWindow", "Открыть план тестирования")),
                    ("Ctrl+S", qApp.translate("MainWindow", "Сохранить план тестирования")),
                    ("Alt+A", qApp.translate("MainWindow", "Автоподбор параметров")),
                    ("Enter", qApp.translate("MainWindow", "Сохранить точку")),
