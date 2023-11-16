@@ -15,6 +15,9 @@
 
 1. Установите [MSVC 2013 redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=40784) и [MSVC 2015 redistributable](https://www.microsoft.com/ru-ru/download/details.aspx?id=48145).
 
+   - Если у вас EPLab разрядности 32-bit, то вам нужно установить MSVC 2013 x86 и MSVC 2015 x86.
+   - Если у вас EPLab разрядности 64-bit, то вам нужно установить MSVC 2013 x64 и MSVC 2015 x64.
+
 2. Установите драйвер **ivm.inf** из папки **drivers\ivm**.
 
 3. Если вы планируете использовать мультиплексор, установите драйвер **epmux.inf** из папки **drivers\epmux**.
