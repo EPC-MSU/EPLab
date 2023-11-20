@@ -12,6 +12,7 @@ from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
 import utils as ut
 from common import DeviceErrorsHandler, WorkMode
+from window.scaler import update_scale_of_class
 
 
 class ChannelWidget(QWidget):
@@ -306,6 +307,7 @@ class ModuleWidget(QWidget):
         self._change_module_color()
 
 
+@update_scale_of_class
 class MultiplexerPinoutWidget(QWidget):
     """
     Class to show multiplexer pinout.

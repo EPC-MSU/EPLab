@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import (QComboBox, QDialogButtonBox, QGroupBox, QLabel, QLineEdit, QProgressBar, QPushButton,
-                             QTextBrowser, QToolBar, QWidget)
+from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox, QGroupBox, QLabel, QLineEdit, QProgressBar,
+                             QPushButton, QTextBrowser, QToolBar, QWidget)
 from dialogs.measurersettingswindow import MeasurerSettingsWindow
 from settings import LowSettingsPanel
 from window.parameterwidget import ParameterWidget
@@ -40,9 +40,25 @@ def update_scale(widget: QWidget) -> None:
             scale_font_on_widget(child_widget, font_size)
 
     for child_widget in vars(widget).values():
-        if isinstance(child_widget, (QComboBox, QDialogButtonBox, QGroupBox, QLabel, QLineEdit, QProgressBar,
+        if isinstance(child_widget, (QCheckBox, QComboBox, QDialogButtonBox, QGroupBox, QLabel, QLineEdit, QProgressBar,
                                      QPushButton, QTextBrowser, QToolBar)):
             scale_font_on_widget(child_widget, font_size)
             child_widget.adjustSize()
         elif isinstance(child_widget, LowSettingsPanel):
             scale_low_settings_panel(child_widget, font_size)
+
+
+def update_scale_of_class(widget_cls):
+    """
+    A decorator that will scale a widget created from a given class.
+    :param widget_cls: widget class.
+    :return: decorated class.
+    """
+
+    class ScaledWidgetClass(widget_cls):
+
+        def __init__(self, *args, **kwargs) -> None:
+            super().__init__(*args, **kwargs)
+            update_scale(self)
+
+    return ScaledWidgetClass

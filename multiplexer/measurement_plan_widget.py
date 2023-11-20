@@ -15,6 +15,7 @@ from epcore.product import EyePointProduct
 import utils as ut
 from common import WorkMode
 from window.language import Language
+from window.scaler import update_scale_of_class
 
 
 MAX_MODULE_NUMBER = 8
@@ -61,6 +62,7 @@ class ModifiedLineEdit(QLineEdit):
             self.right_pressed.emit()
 
 
+@update_scale_of_class
 class MeasurementPlanWidget(QWidget):
     """
     Class for widget to show short information from measurement plan in table.
