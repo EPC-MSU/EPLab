@@ -91,7 +91,7 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan: MeasurementPlan = None
         self._msystem: MeasurementSystem = None
         self._product: EyePointProduct = product
-        self._product_name: cw.ProductNames = None
+        self._product_name: cw.ProductName = None
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
         self._report_generation_thread.start()
         self._skip_curve: bool = False  # set to True to skip next measured curves
@@ -879,7 +879,7 @@ class EPLabWindow(QMainWindow):
             self._report_generation_thread.wait()
 
     def connect_measurers(self, port_1: Optional[str], port_2: Optional[str],
-                          product_name: Optional[cw.ProductNames] = None, mux_port: str = None) -> None:
+                          product_name: Optional[cw.ProductName] = None, mux_port: str = None) -> None:
         """
         Method connects measurers with given ports.
         :param port_1: port for first measurer;
@@ -925,7 +925,7 @@ class EPLabWindow(QMainWindow):
         options_data = self._read_options_from_json()
         self._product.change_options(options_data)
         if product_name is None:
-            self._product_name = cw.ProductNames.get_default_product_name_for_measurers(self._msystem.measurers)
+            self._product_name = cw.ProductName.get_default_product_name_for_measurers(self._msystem.measurers)
         else:
             self._product_name = product_name
         self._timer.start()
@@ -939,11 +939,7 @@ class EPLabWindow(QMainWindow):
         Slot shows dialog window to select measurers for connection.
         """
 
-        window = cw.ConnectionWindow(self, cw.utils.get_current_measurers_ports(self), self._product_name)
-        window.connect_measurers_signal.connect(lambda data: self.connect_measurers(**data))
-        window.disconnect_measurers_signal.connect(self.disconnect_measurers)
-        self.measurers_connected.connect(window.handle_connection)
-        window.exec()
+        cw.show_connection_window(self, self._product_name)
 
     @pyqtSlot()
     def create_new_board(self) -> None:

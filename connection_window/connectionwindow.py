@@ -7,8 +7,11 @@ from typing import List
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QPushButton, QVBoxLayout
 import connection_window.utils as ut
-from connection_window.measurer_widget import MeasurerTypeWidget, MeasurerURLsWidget
-from connection_window.mux_widget import MuxWidget
+from connection_window.measurertypewidget import MeasurerTypeWidget
+from connection_window.measurerurlswidget import MeasurerURLsWidget
+from connection_window.muxwidget import MuxWidget
+from connection_window.productname import MeasurerType, ProductName
+from window.scaler import update_scale
 
 
 logger = logging.getLogger("eplab")
@@ -22,16 +25,16 @@ class ConnectionWindow(QDialog):
     connect_measurers_signal: pyqtSignal = pyqtSignal(dict)
     disconnect_measurers_signal: pyqtSignal = pyqtSignal()
 
-    def __init__(self, main_window, initial_ports: List[str], initial_product_name: ut.ProductNames) -> None:
+    def __init__(self, main_window, initial_ports: List[str], initial_product_name: ProductName) -> None:
         """
         :param main_window: main window of application;
-        :param initial_ports:
+        :param initial_ports: ports of devices connected to the application when the dialog box opens;
         :param initial_product_name: name of product with which application was working.
         """
 
         super().__init__(main_window, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self._initial_ports: List[str] = initial_ports
-        self._initial_product_name: ut.ProductNames = initial_product_name
+        self._initial_product_name: ProductName = initial_product_name
         self._urls: list = None
         self._init_ui()
         self.handle_connection(bool(initial_product_name))
@@ -41,7 +44,7 @@ class ConnectionWindow(QDialog):
         Method initializes widgets in the dialog window.
         """
 
-        self.setWindowTitle(qApp.translate("t", "Настройка подключения"))
+        self.setWindowTitle(qApp.translate("connection_window", "Настройка подключения"))
 
         self.widget_measurer_type: MeasurerTypeWidget = MeasurerTypeWidget(self._initial_product_name)
         self.widget_measurer_urls: MeasurerURLsWidget = MeasurerURLsWidget(self._initial_ports)
@@ -51,20 +54,20 @@ class ConnectionWindow(QDialog):
         v_box_layout = QVBoxLayout()
         v_box_layout.addWidget(self.widget_measurer_type)
         v_box_layout.addWidget(self.widget_measurer_urls)
-        group_box_measurers = QGroupBox(qApp.translate("t", "Измерители"))
-        group_box_measurers.setLayout(v_box_layout)
+        self.group_box_measurers: QGroupBox = QGroupBox(qApp.translate("connection_window", "Измерители"))
+        self.group_box_measurers.setLayout(v_box_layout)
         self.widget_mux: MuxWidget = MuxWidget()
 
         h_box_layout = QHBoxLayout()
-        h_box_layout.addWidget(group_box_measurers)
+        h_box_layout.addWidget(self.group_box_measurers)
         h_box_layout.addWidget(self.widget_mux)
 
-        self.button_connect: QPushButton = QPushButton(qApp.translate("t", "Подключить"))
+        self.button_connect: QPushButton = QPushButton(qApp.translate("connection_window", "Подключить"))
         self.button_connect.setDefault(True)
         self.button_connect.clicked.connect(self.connect_measurers)
-        self.button_disconnect: QPushButton = QPushButton(qApp.translate("t", "Отключить"))
+        self.button_disconnect: QPushButton = QPushButton(qApp.translate("connection_window", "Отключить"))
         self.button_disconnect.clicked.connect(self.disconnect_measurers)
-        self.button_cancel: QPushButton = QPushButton(qApp.translate("t", "Отмена"))
+        self.button_cancel: QPushButton = QPushButton(qApp.translate("connection_window", "Отмена"))
         self.button_cancel.clicked.connect(self.close)
 
         layout = QHBoxLayout()
@@ -95,7 +98,7 @@ class ConnectionWindow(QDialog):
         selected_product_name = self.widget_measurer_type.get_product_name()
         for index, port in enumerate(measurer_ports):
             if (port == "virtual" and
-                    ut.ProductNames.get_measurer_type_by_product_name(selected_product_name) == ut.MeasurerType.ASA):
+                    ProductName.get_measurer_type_by_product_name(selected_product_name) == MeasurerType.ASA):
                 measurer_ports[index] = "virtualasa"
         data = {"port_1": measurer_ports[0],
                 "port_2": measurer_ports[1],
@@ -113,8 +116,22 @@ class ConnectionWindow(QDialog):
 
     def handle_connection(self, connected: bool) -> None:
         """
-        :param connected:
+        :param connected: if True, then devices are connected, otherwise devices are disconnected.
         """
 
         self.button_connect.setEnabled(not connected)
         self.button_disconnect.setEnabled(connected)
+
+
+def show_connection_window(main_window, product_name: ProductName) -> None:
+    """
+    :param main_window: main window of application;
+    :param product_name: name of product with which application was working.
+    """
+
+    window = ConnectionWindow(main_window, ut.get_current_measurers_ports(main_window), product_name)
+    update_scale(window)
+    window.connect_measurers_signal.connect(lambda data: main_window.connect_measurers(**data))
+    window.disconnect_measurers_signal.connect(main_window.disconnect_measurers)
+    main_window.measurers_connected.connect(window.handle_connection)
+    window.exec()
