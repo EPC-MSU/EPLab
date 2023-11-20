@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1003</width>
-    <height>647</height>
+    <width>632</width>
+    <height>415</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
+   <widget class="QWidget" name="score_dock_widget">
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
       <widget class="QLabel" name="score_label">
@@ -64,7 +64,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="verticalSpacer_7">
+      <spacer name="vertical_spacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -80,6 +80,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="freq_dock">
+   <property name="maximumSize">
+    <size>
+     <width>524287</width>
+     <height>524287</height>
+    </size>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -89,16 +95,22 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="freq_layout">
-    <layout class="QVBoxLayout" name="verticalLayout_7"/>
+   <widget class="QWidget" name="freq_dock_widget">
+    <layout class="QVBoxLayout" name="vertical_layout"/>
    </widget>
   </widget>
   <widget class="QDockWidget" name="current_dock">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>524287</width>
+     <height>524287</height>
+    </size>
    </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
@@ -109,11 +121,17 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="current_layout">
-    <layout class="QVBoxLayout" name="verticalLayout_8"/>
+   <widget class="QWidget" name="current_dock_widget">
+    <layout class="QVBoxLayout" name="vertical_layout_2"/>
    </widget>
   </widget>
   <widget class="QDockWidget" name="voltage_dock">
+   <property name="maximumSize">
+    <size>
+     <width>524287</width>
+     <height>524287</height>
+    </size>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -123,11 +141,17 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="voltage_layout">
-    <layout class="QVBoxLayout" name="verticalLayout_9"/>
+   <widget class="QWidget" name="voltage_dock_widget">
+    <layout class="QVBoxLayout" name="vertical_layout_3"/>
    </widget>
   </widget>
   <widget class="QDockWidget" name="comment_dock">
+   <property name="maximumSize">
+    <size>
+     <width>524287</width>
+     <height>524287</height>
+    </size>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -137,8 +161,8 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_6">
-    <layout class="QVBoxLayout" name="verticalLayout_10">
+   <widget class="QWidget" name="comment_dock_widget">
+    <layout class="QVBoxLayout" name="vertical_layout_4">
      <item>
       <widget class="QLineEdit" name="line_comment_pin">
        <property name="placeholderText">
@@ -156,6 +180,19 @@
        </property>
       </widget>
      </item>
+     <item>
+      <spacer name="vertical_spacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </widget>
   </widget>
@@ -164,7 +201,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1003</width>
+     <width>632</width>
      <height>21</height>
     </rect>
    </property>

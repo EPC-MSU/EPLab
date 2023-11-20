@@ -255,7 +255,7 @@ class EPLabWindow(QMainWindow):
         # TODO: separate config file
         # Voltage in Volts, current in mA
         self._comparator.set_min_ivc(0.6, 0.002)
-        for widget in (self.freq_layout, self.current_layout, self.voltage_layout):
+        for widget in (self.freq_dock_widget, self.current_dock_widget, self.voltage_dock_widget):
             layout = widget.layout()
             ut.clear_layout(layout)
             layout.addWidget(QScrollArea())
@@ -315,15 +315,16 @@ class EPLabWindow(QMainWindow):
         """
 
         self._parameters_scroll_areas = {}
-        layouts = self.freq_layout.layout(), self.voltage_layout.layout(), self.current_layout.layout()
+        layouts = [widget.layout() for widget in (self.freq_dock_widget, self.voltage_dock_widget,
+                                                  self.current_dock_widget)]
         parameters = (EyePointProduct.Parameter.frequency, EyePointProduct.Parameter.voltage,
                       EyePointProduct.Parameter.sensitive)
-        for i_parameter, parameter in enumerate(parameters):
-            scroll_area = ParameterWidget(parameter, available[parameter])
-            scroll_area.option_changed.connect(self.select_option)
-            self._parameters_scroll_areas[parameter] = scroll_area
-            ut.clear_layout(layouts[i_parameter])
-            layouts[i_parameter].addWidget(scroll_area)
+        for layout, parameter in zip(layouts, parameters):
+            widget = ParameterWidget(parameter, available[parameter])
+            widget.option_changed.connect(self.select_option)
+            self._parameters_scroll_areas[parameter] = widget
+            ut.clear_layout(layout)
+            layout.addWidget(widget)
 
     def _disable_optimal_parameter_searcher(self) -> None:
         """
