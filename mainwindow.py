@@ -26,11 +26,10 @@ from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
 import connection_window as cw
 import utils as ut
-from dialogs import (ReportGenerationThread, show_keymap_info, show_language_selection_window, show_product_info,
-                     show_report_generation_window)
+from dialogs import (ReportGenerationThread, show_keymap_info, show_language_selection_window,
+                     show_measurer_settings_window, show_product_info, show_report_generation_window)
 from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
-from measurer_settings_window import MeasurerSettingsWindow
 from multiplexer import MuxAndPlanWindow
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.dirwatcher import DirWatcher
@@ -1509,11 +1508,7 @@ class EPLabWindow(QMainWindow):
 
         for measurer in self._msystem.measurers:
             if measurer == selected_measurer:
-                all_settings = measurer.get_all_settings()
-                dialog = MeasurerSettingsWindow(self, all_settings, measurer, device_name)
-                self.measurers_disconnected.connect(dialog.close)
-                if dialog.exec_():
-                    dialog.set_parameters()
+                show_measurer_settings_window(self, measurer, device_name)
                 return
 
     @pyqtSlot()

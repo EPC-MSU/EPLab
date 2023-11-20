@@ -485,26 +485,6 @@
         <translation>Select directory</translation>
     </message>
     <message>
-        <location filename="../measurer_settings_window.py" line="175"/>
-        <source>Настройки. </source>
-        <translation>Settings. </translation>
-    </message>
-    <message>
-        <location filename="../measurer_settings_window.py" line="249"/>
-        <source>Нет настроек</source>
-        <translation>No settings</translation>
-    </message>
-    <message>
-        <location filename="../measurer_settings_window.py" line="322"/>
-        <source>Не удалось выполнить команду '{}'</source>
-        <translation>Failed to execute command '{}'</translation>
-    </message>
-    <message>
-        <location filename="../measurer_settings_window.py" line="347"/>
-        <source>Не удалось задать настройки для измерителя</source>
-        <translation>Failed to set settings in measurer</translation>
-    </message>
-    <message>
         <location filename="../multiplexer/measurement_plan_widget.py" line="84"/>
         <source>Модуль MUX</source>
         <translation>MUX module</translation>
@@ -726,19 +706,49 @@
         <translation>Copy</translation>
     </message>
     <message>
-        <location filename="../dialogs/language.py" line="83"/>
+        <location filename="../dialogs/languageselectionwindow.py" line="28"/>
         <source>Выбор языка</source>
         <translation>Language selection</translation>
     </message>
     <message>
-        <location filename="../dialogs/language.py" line="85"/>
+        <location filename="../dialogs/languageselectionwindow.py" line="30"/>
         <source>Выберите язык:</source>
         <translation>Choose language:</translation>
     </message>
     <message>
-        <location filename="../dialogs/language.py" line="92"/>
+        <location filename="../dialogs/languageselectionwindow.py" line="37"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/measurersettingswindow.py" line="209"/>
+        <source>Настройки. </source>
+        <translation>Settings. </translation>
+    </message>
+    <message>
+        <location filename="../dialogs/measurersettingswindow.py" line="211"/>
+        <source>Неизвестный измеритель</source>
+        <translation>Unknown measurer</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/measurersettingswindow.py" line="249"/>
+        <source>Нет настроек</source>
+        <translation>No settings</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/measurersettingswindow.py" line="332"/>
+        <source>Не удалось выполнить команду &apos;{}&apos;.</source>
+        <translation>Failed to execute command &apos;{}&apos;.</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/measurersettingswindow.py" line="334"/>
+        <source>Ошибка</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/measurersettingswindow.py" line="358"/>
+        <source>Не удалось задать настройки для измерителя.</source>
+        <translation>Failed to set settings in measurer.</translation>
     </message>
     <message>
         <location filename="../dialogs/reportgenerationwindow.py" line="163"/>
