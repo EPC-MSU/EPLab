@@ -35,7 +35,7 @@ from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.dirwatcher import DirWatcher
 from window.language import Language, Translator
 from window.parameterwidget import ParameterWidget
-from window.scaler import update_scale
+from window.scaler import update_scale_of_class
 from window.scorewrapper import ScoreWrapper
 from player import SoundPlayer
 from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
@@ -45,6 +45,7 @@ from version import Version
 logger = logging.getLogger("eplab")
 
 
+@update_scale_of_class
 class EPLabWindow(QMainWindow):
     """
     Class for the main window of application.
@@ -102,7 +103,6 @@ class EPLabWindow(QMainWindow):
 
         self._load_translation(english)
         self._init_ui()
-        update_scale(self)
 
         if port_1 is None and port_2 is None:
             self.disconnect_measurers()

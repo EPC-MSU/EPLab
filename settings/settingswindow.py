@@ -6,8 +6,10 @@ from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout
 from settings.settings import Settings
 from settings.utils import InvalidParameterValueError, MissingParameterError
 import utils as ut
+from window.scaler import update_scale_of_class
 
 
+@update_scale_of_class
 class SettingsWindow(QDialog):
     """
     Class for dialog window with measurement settings.

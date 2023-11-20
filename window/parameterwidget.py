@@ -4,23 +4,7 @@ from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QRadioButton, QScrollArea, QVBoxLayout, QWidget
 from epcore.product import EyePointProduct, MeasurementParameterOption
 from window.language import Language
-
-
-def update_scale_decorator(func):
-    """
-    A decorator that will scale the ParameterWidget after creating option widgets.
-    :param func: decorated method.
-    """
-
-    def wrapper(*args, **kwargs):
-
-        from window.scaler import update_scale
-
-        result = func(*args, **kwargs)
-        update_scale(args[0])
-        return result
-
-    return wrapper
+from window.scaler import update_scale_decorator
 
 
 class ParameterWidget(QScrollArea):

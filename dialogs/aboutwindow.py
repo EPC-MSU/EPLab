@@ -11,12 +11,14 @@ import utils as ut
 from connection_window.utils import get_platform
 from version import Version
 from window.language import Language
+from window.scaler import update_scale_of_class
 
 
 TEXT_HEIGHT: int = 100
 WINDOW_WIDTH: int = 400
 
 
+@update_scale_of_class
 class AboutWindow(QDialog):
     """
     Class for dialog window to show main information about the application.
@@ -117,8 +119,5 @@ def show_product_info() -> None:
     Function shows window with information about application.
     """
 
-    from window.scaler import update_scale
-
     window = AboutWindow()
-    update_scale(window)
     window.exec_()

@@ -9,8 +9,10 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QLabel, QLayout, QVBoxLayout
 import utils as ut
 from window.language import Language, Translator
+from window.scaler import update_scale_of_class
 
 
+@update_scale_of_class
 class LanguageSelectionWindow(QDialog):
     """
     Class for window to select language.
@@ -66,9 +68,6 @@ def show_language_selection_window() -> Optional[Language]:
     :return: user's chosen language.
     """
 
-    from window.scaler import update_scale
-
     window = LanguageSelectionWindow()
-    update_scale(window)
     if window.exec():
         return window.get_language_value()

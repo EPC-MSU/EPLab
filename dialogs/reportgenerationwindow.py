@@ -13,6 +13,7 @@ from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator
 import utils as ut
 from common import WorkMode
 from window.language import Language
+from window.scaler import update_scale_of_class
 
 
 def get_scales_and_noise_amplitudes_for_iv_curves(board: Board, main_window
@@ -124,6 +125,7 @@ class ReportGenerationThread(QThread):
         self._stop_thread = True
 
 
+@update_scale_of_class
 class ReportGenerationWindow(QDialog):
     """
     Class for dialog window to create report for board.
@@ -218,9 +220,6 @@ def show_report_generation_window(parent, thread: ReportGenerationThread, board:
     :param work_mode: application work mode.
     """
 
-    from window.scaler import update_scale
-
     window = ReportGenerationWindow(parent, thread)
-    update_scale(window)
     thread.add_task(board, dir_for_report, threshold, work_mode)
     window.exec()

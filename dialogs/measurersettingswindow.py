@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (QComboBox, QDialog, QGroupBox, QHBoxLayout, QLabel,
 from epcore.ivmeasurer.base import IVMeasurerBase
 import utils as ut
 from window.language import Language
+from window.scaler import update_scale_of_class
 
 
 logger = logging.getLogger("eplab")
@@ -32,6 +33,7 @@ def get_converter(data: Dict[str, Any]) -> Callable[[Any], Any]:
     return str
 
 
+@update_scale_of_class
 class MeasurerSettingsWindow(QDialog):
     """
     Class for dialog window with settings of measurer.
@@ -383,15 +385,12 @@ class MeasurerSettingsWindow(QDialog):
 def show_measurer_settings_window(main_window, measurer: IVMeasurerBase, device_name: str) -> None:
     """
     :param main_window: main window of application;
-    :param measurer:
-    :param device_name:
+    :param measurer: specific measurer for which settings will be intended;
+    :param device_name: name of measurer.
     """
-
-    from window.scaler import update_scale
 
     all_settings = measurer.get_all_settings()
     window = MeasurerSettingsWindow(main_window, all_settings, measurer, device_name)
-    update_scale(window)
     main_window.measurers_disconnected.connect(window.close)
     if window.exec_():
         window.set_parameters()

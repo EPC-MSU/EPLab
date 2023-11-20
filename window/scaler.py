@@ -1,8 +1,5 @@
 from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox, QGroupBox, QLabel, QLineEdit, QProgressBar,
-                             QPushButton, QTextBrowser, QToolBar, QWidget)
-from dialogs.measurersettingswindow import MeasurerSettingsWindow
-from settings import LowSettingsPanel
-from window.parameterwidget import ParameterWidget
+                             QPushButton, QSpinBox, QTextBrowser, QToolBar, QWidget)
 
 
 def scale_font_on_widget(widget: QWidget, font_size: int) -> None:
@@ -16,7 +13,7 @@ def scale_font_on_widget(widget: QWidget, font_size: int) -> None:
     widget.setFont(font)
 
 
-def scale_low_settings_panel(widget: LowSettingsPanel, font_size: int) -> None:
+def scale_low_settings_panel(widget, font_size: int) -> None:
     """
     :param widget:
     :param font_size: required font size.
@@ -31,6 +28,10 @@ def update_scale(widget: QWidget) -> None:
     :param widget: widget that needs to be scaled.
     """
 
+    from dialogs.measurersettingswindow import MeasurerSettingsWindow
+    from settings import LowSettingsPanel
+    from window.parameterwidget import ParameterWidget
+
     font_size = 8
     if isinstance(widget, MeasurerSettingsWindow):
         for child_widget in widget.all_widgets:
@@ -41,11 +42,26 @@ def update_scale(widget: QWidget) -> None:
 
     for child_widget in vars(widget).values():
         if isinstance(child_widget, (QCheckBox, QComboBox, QDialogButtonBox, QGroupBox, QLabel, QLineEdit, QProgressBar,
-                                     QPushButton, QTextBrowser, QToolBar)):
+                                     QPushButton, QSpinBox, QTextBrowser, QToolBar)):
             scale_font_on_widget(child_widget, font_size)
             child_widget.adjustSize()
         elif isinstance(child_widget, LowSettingsPanel):
             scale_low_settings_panel(child_widget, font_size)
+
+
+def update_scale_decorator(func):
+    """
+    A decorator that will scale the ParameterWidget after creating option widgets.
+    :param func: decorated method.
+    """
+
+    def wrapper(*args, **kwargs):
+
+        result = func(*args, **kwargs)
+        update_scale(args[0])
+        return result
+
+    return wrapper
 
 
 def update_scale_of_class(widget_cls):

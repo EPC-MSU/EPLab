@@ -11,12 +11,13 @@ from connection_window.measurertypewidget import MeasurerTypeWidget
 from connection_window.measurerurlswidget import MeasurerURLsWidget
 from connection_window.muxwidget import MuxWidget
 from connection_window.productname import MeasurerType, ProductName
-from window.scaler import update_scale
+from window.scaler import update_scale_of_class
 
 
 logger = logging.getLogger("eplab")
 
 
+@update_scale_of_class
 class ConnectionWindow(QDialog):
     """
     Dialog box class for selecting devices to connect.
@@ -130,7 +131,6 @@ def show_connection_window(main_window, product_name: ProductName) -> None:
     """
 
     window = ConnectionWindow(main_window, ut.get_current_measurers_ports(main_window), product_name)
-    update_scale(window)
     window.connect_measurers_signal.connect(lambda data: main_window.connect_measurers(**data))
     window.disconnect_measurers_signal.connect(main_window.disconnect_measurers)
     main_window.measurers_connected.connect(window.handle_connection)
