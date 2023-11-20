@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import (QComboBox, QDialogButtonBox, QGroupBox, QLabel, QLineEdit, QPushButton, QTextBrowser,
-                             QToolBar, QWidget)
+from PyQt5.QtWidgets import (QComboBox, QDialogButtonBox, QGroupBox, QLabel, QLineEdit, QProgressBar, QPushButton,
+                             QTextBrowser, QToolBar, QWidget)
 from settings import LowSettingsPanel
 from dialogs.measurersettingswindow import MeasurerSettingsWindow
 
@@ -36,8 +36,8 @@ def update_scale(widget: QWidget) -> None:
             scale_font_on_widget(child_widget, font_size)
 
     for child_widget in vars(widget).values():
-        if isinstance(child_widget, (QComboBox, QDialogButtonBox, QGroupBox, QLabel, QLineEdit, QPushButton,
-                                     QTextBrowser, QToolBar)):
+        if isinstance(child_widget, (QComboBox, QDialogButtonBox, QGroupBox, QLabel, QLineEdit, QProgressBar,
+                                     QPushButton, QTextBrowser, QToolBar)):
             scale_font_on_widget(child_widget, font_size)
             child_widget.adjustSize()
         elif isinstance(child_widget, LowSettingsPanel):
