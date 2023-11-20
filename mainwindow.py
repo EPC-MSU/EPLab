@@ -28,13 +28,13 @@ import connection_window as cw
 import utils as ut
 from dialogs import (ReportGenerationThread, show_keymap_info, show_language_selection_window, show_product_info,
                      show_report_generation_window)
-from dialogs.language import Language
 from boardwindow import BoardWidget
 from common import DeviceErrorsHandler, WorkMode
 from measurer_settings_window import MeasurerSettingsWindow
 from multiplexer import MuxAndPlanWindow
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.dirwatcher import DirWatcher
+from window.language import Language, Translator
 from window.parameterwidget import ParameterWidget
 from window.scaler import update_scale
 from window.scorewrapper import ScoreWrapper
@@ -524,7 +524,7 @@ class EPLabWindow(QMainWindow):
         else:
             language = self._auto_settings.get_language()
         if language is not Language.RU:
-            translation_file = Language.get_translator_file(language)
+            translation_file = Translator.get_translator_file(language)
             self._translator: QTranslator = QTranslator()
             self._translator.load(translation_file)
             qApp.instance().installTranslator(self._translator)
@@ -1423,7 +1423,7 @@ class EPLabWindow(QMainWindow):
 
         language = show_language_selection_window()
         if language is not None and language != qApp.instance().property("language"):
-            self._auto_settings.save_language(Language.get_language_name(language))
+            self._auto_settings.save_language(Translator.get_language_name(language))
             text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
             text_en = "The language settings are saved. Restart the program for the changes to take effect."
             if qApp.instance().property("language") is Language.RU:

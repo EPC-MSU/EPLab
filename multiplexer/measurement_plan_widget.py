@@ -14,7 +14,7 @@ from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
 from epcore.product import EyePointProduct
 import utils as ut
 from common import WorkMode
-from dialogs.language import Language
+from window.language import Language
 
 
 MAX_MODULE_NUMBER = 8

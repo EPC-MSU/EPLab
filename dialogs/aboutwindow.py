@@ -9,8 +9,8 @@ from PyQt5.QtGui import QIcon, QPalette
 from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QLayout, QPushButton, QTextBrowser, QVBoxLayout
 import utils as ut
 from connection_window.utils import get_platform
-from dialogs.language import Language
 from version import Version
+from window.language import Language
 from window.scaler import update_scale
 
 

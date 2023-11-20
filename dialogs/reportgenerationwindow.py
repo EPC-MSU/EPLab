@@ -12,7 +12,7 @@ from epcore.elements import Board
 from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator, ReportTypes, ScalingTypes
 import utils as ut
 from common import WorkMode
-from dialogs.language import Language
+from window.language import Language
 
 
 def get_scales_and_noise_amplitudes_for_iv_curves(board: Board, main_window

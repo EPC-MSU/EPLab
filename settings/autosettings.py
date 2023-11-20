@@ -2,8 +2,8 @@ from typing import Optional
 from PyQt5.QtCore import QSettings
 from epcore.elements import MeasurementSettings
 from epcore.product import EyePointProduct
-from dialogs.language import Language
 from settings.settingshandler import SettingsHandler
+from window.language import Language, Translator
 
 
 class AutoSettings(SettingsHandler):
@@ -40,7 +40,7 @@ class AutoSettings(SettingsHandler):
         settings.endGroup()
 
     def get_language(self) -> Language:
-        language = Language.get_language_value(self.language)
+        language = Translator.get_language_value(self.language)
         if language is None:
             return Language.EN
         return language
