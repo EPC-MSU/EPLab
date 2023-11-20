@@ -150,12 +150,6 @@ class EPLabWindow(QMainWindow):
         return self._product
 
     @property
-    def scale(self) -> float:
-        app = qApp.instance()
-        screen = app.screens()[0]
-        return screen.logicalDotsPerInch() / 96.0
-
-    @property
     def threshold(self) -> float:
         """
         :return: threshold value for comparing IV curves.

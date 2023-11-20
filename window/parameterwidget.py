@@ -6,6 +6,19 @@ from epcore.product import EyePointProduct, MeasurementParameterOption
 from window.language import Language
 
 
+def update_scale_decorator(func):
+
+    def wrapper(*args, **kwargs):
+
+        from window.scaler import update_scale
+
+        result = func(*args, **kwargs)
+        update_scale(args[0])
+        return result
+
+    return wrapper
+
+
 class ParameterWidget(QScrollArea):
 
     option_changed: pyqtSignal = pyqtSignal()
@@ -25,6 +38,7 @@ class ParameterWidget(QScrollArea):
         self.setWidgetResizable(True)
         self.setWidget(self._create_radio_buttons_for_parameter(available_options))
 
+    @update_scale_decorator
     def _create_radio_buttons_for_parameter(self, available_options: List[MeasurementParameterOption]) -> QWidget:
         """
         Method creates radio buttons for the options of a given parameter and places them in the widget.
@@ -45,6 +59,11 @@ class ParameterWidget(QScrollArea):
         widget = QWidget()
         widget.setLayout(layout)
         return widget
+
+    @property
+    def widgets(self) -> QRadioButton:
+        for button in self._option_buttons.values():
+            yield button
 
     def enable_buttons(self, enable: bool) -> None:
         """
