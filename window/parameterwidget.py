@@ -7,6 +7,10 @@ from window.language import Language
 
 
 def update_scale_decorator(func):
+    """
+    A decorator that will scale the ParameterWidget after creating option widgets.
+    :param func: decorated method.
+    """
 
     def wrapper(*args, **kwargs):
 
