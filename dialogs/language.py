@@ -121,6 +121,9 @@ def show_language_selection_window() -> Optional[Language]:
     :return: user's chosen language.
     """
 
-    language_selection_wnd = LanguageSelectionWindow()
-    if language_selection_wnd.exec():
-        return language_selection_wnd.get_language_value()
+    from window.scaler import update_scale
+
+    window = LanguageSelectionWindow()
+    update_scale(window)
+    if window.exec():
+        return window.get_language_value()
