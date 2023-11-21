@@ -19,7 +19,7 @@ class MeasurerTypeWidget(QWidget):
 
     IMAGE_HEIGHT: int = 100
     IMAGE_WIDTH: int = 100
-    WIDGET_HEIGHT: int = 300
+    WIDGET_HEIGHT: int = 200
     WIDGET_WIDTH: int = 300
     measurer_type_changed: pyqtSignal = pyqtSignal(MeasurerType, bool)
 
@@ -64,7 +64,7 @@ class MeasurerTypeWidget(QWidget):
             self.radio_buttons_products[product_name] = radio_button
         self.radio_buttons_products[self._initial_product_name].setChecked(True)
         self.setToolTip(qApp.translate("connection_window", "Тип измерителя"))
-        self.setFixedSize(MeasurerTypeWidget.WIDGET_WIDTH, MeasurerTypeWidget.WIDGET_HEIGHT)
+        self.setFixedHeight(MeasurerTypeWidget.WIDGET_HEIGHT)
         self.setLayout(layout)
 
     def get_product_name(self) -> ProductName:
