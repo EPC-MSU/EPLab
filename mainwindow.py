@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional, Tuple
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt as QtC, QTimer,
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
-from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLineEdit, QMainWindow, QMenu, QMessageBox, QScrollArea,
-                             QShortcut, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLineEdit, QMainWindow, QMenu, QMessageBox, QShortcut,
+                             QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
@@ -258,7 +258,6 @@ class EPLabWindow(QMainWindow):
         for widget in (self.freq_dock_widget, self.current_dock_widget, self.voltage_dock_widget):
             layout = widget.layout()
             ut.clear_layout(layout)
-            layout.addWidget(QScrollArea())
         self.measurers_menu.clear()
         self._iv_window.plot.remove_all_cursors()
         self._work_mode = None
@@ -432,8 +431,7 @@ class EPLabWindow(QMainWindow):
 
         self._iv_window: IVViewer = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
                                              solid_axis_enabled=False, axis_label_enabled=False)
-        dir_path = self._dir_watcher.screenshot
-        self._iv_window.plot.set_path_to_directory(dir_path)
+        self._iv_window.plot.set_path_to_directory(self._dir_watcher.screenshot)
         self._iv_window.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),
                                              export_ivc=qApp.translate("t", "Экспортировать кривые в файл"),
                                              remove_all_cursors=qApp.translate("t", "Удалить все метки"),

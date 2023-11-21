@@ -71,7 +71,9 @@ def clear_layout(layout: QLayout) -> None:
 
     for i_item in range(layout.count()):
         item = layout.itemAt(i_item)
-        layout.removeItem(item)
+        widget = item.widget()
+        layout.removeWidget(widget)
+        widget.deleteLater()
 
 
 def create_measurers(url_1: str, url_2: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str]]:
