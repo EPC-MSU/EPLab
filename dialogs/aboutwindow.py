@@ -14,15 +14,14 @@ from window.language import Language
 from window.scaler import update_scale_of_class
 
 
-TEXT_HEIGHT: int = 100
-WINDOW_WIDTH: int = 400
-
-
 @update_scale_of_class
 class AboutWindow(QDialog):
     """
     Class for dialog window to show main information about the application.
     """
+
+    TEXT_HEIGHT: int = 100
+    WINDOW_WIDTH: int = 400
 
     def __init__(self) -> None:
         super().__init__()
@@ -70,20 +69,20 @@ class AboutWindow(QDialog):
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
 
-        self.setFixedWidth(WINDOW_WIDTH)
+        self.setFixedWidth(AboutWindow.WINDOW_WIDTH)
         color = self.palette().color(QPalette.Background)
         text, page_url = self._create_info_text_and_link()
         logo_name = self._get_logo_name()
         self.label_logo = QLabel()
         self.label_logo.setText(f'<a href="{page_url}"><img src="{os.path.join(ut.DIR_MEDIA, logo_name)}" '
-                                f'width="{WINDOW_WIDTH}"></a>')
+                                f'width="{AboutWindow.WINDOW_WIDTH}"></a>')
         self.label_logo.setOpenExternalLinks(True)
         self.text_edit_info: QTextBrowser = QTextBrowser()
         self.text_edit_info.setFrameStyle(QFrame.NoFrame)
         self.text_edit_info.setStyleSheet(f"background: {color.name()};")
         self.text_edit_info.setOpenExternalLinks(True)
         self.text_edit_info.setHtml(text)
-        self.text_edit_info.setFixedSize(WINDOW_WIDTH, TEXT_HEIGHT)
+        self.text_edit_info.setFixedSize(AboutWindow.WINDOW_WIDTH, AboutWindow.TEXT_HEIGHT)
         self.button_copy: QPushButton = QPushButton()
         self.button_copy.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "copy.png")))
         self.button_copy.setToolTip(qApp.translate("dialogs", "Копировать"))
