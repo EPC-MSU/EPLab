@@ -10,9 +10,10 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt as QtC, QTimer,
-                          QTranslator)
-from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, QRegExp, Qt as QtC,
+                          QTimer, QTranslator)
+from PyQt5.QtGui import (QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent,
+                         QRegExpValidator)
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLineEdit, QMainWindow, QMenu, QMessageBox, QShortcut,
                              QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
@@ -58,6 +59,8 @@ class EPLabWindow(QMainWindow):
     CRITICAL_WIDTH_FOR_LINUX_RU: int = 1620
     CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1180
     CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1350
+    DEFAULT_COMPARATOR_MIN_CURRENT: float = 0.002
+    DEFAULT_COMPARATOR_MIN_VOLTAGE: float = 0.6
     DEFAULT_PATH: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
     DEFAULT_POS_X: int = 50
     DEFAULT_POS_Y: int = 50
@@ -113,6 +116,10 @@ class EPLabWindow(QMainWindow):
             self.load_board(path)
 
     @property
+    def device_errors_handler(self) -> DeviceErrorsHandler:
+        return self._device_errors_handler
+
+    @property
     def dir_chosen_by_user(self) -> str:
         """
         :return: the last directory that the user selected when working with the application.
@@ -128,10 +135,6 @@ class EPLabWindow(QMainWindow):
 
         if os.path.exists(path):
             self._dir_chosen_by_user = os.path.dirname(path) if not os.path.isdir(path) else path
-
-    @property
-    def device_errors_handler(self) -> DeviceErrorsHandler:
-        return self._device_errors_handler
 
     @property
     def measurement_plan(self) -> MeasurementPlan:
@@ -182,9 +185,8 @@ class EPLabWindow(QMainWindow):
         :return: score for given IV-curves and measurement settings.
         """
 
-        var_v, var_c = self._get_noise_amplitude(settings)
         # It is very important to set relevant noise levels
-        self._comparator.set_min_ivc(var_v, var_c)
+        self._comparator.set_min_ivc(*self._get_noise_amplitude(settings))
         return self._comparator.compare_ivc(curve_1, curve_2)
 
     def _change_work_mode(self, mode: WorkMode) -> None:
@@ -219,60 +221,66 @@ class EPLabWindow(QMainWindow):
         # Drag allowed only in write mode
         self._board_window.allow_drag(mode is WorkMode.WRITE)
         # Disable settings in test mode
-        for scroll_area in self._parameters_scroll_areas.values():
+        for scroll_area in self._parameters_widgets.values():
             scroll_area.enable_buttons(mode in (WorkMode.COMPARE, WorkMode.WRITE))
         self._work_mode = mode
+
+    def _check_board_for_compatibility(self, board: Board, error_message: str) -> Optional[Board]:
+        """
+        :param board: board to check for compatibility with measurement system;
+        :param error_message: message to display if the board is not compatible.
+        :return: verified board or None if the board did not pass the test.
+        """
+
+        if self._msystem and not ut.check_compatibility(self._product, board):
+            ut.show_message(qApp.translate("t", "Ошибка"), error_message)
+            board = None
+        return board
 
     def _check_measurement_plan_for_empty_pins(self) -> bool:
         """
         :return: True if there are pins without measurements in measurement plan.
         """
 
-        empty_pins = ""
-        for pin_index, pin in self._measurement_plan.all_pins_iterator():
-            if not pin.measurements:
-                if empty_pins:
-                    empty_pins += ", "
-                empty_pins += str(pin_index)
-        if empty_pins:
-            if "," in empty_pins:
-                text = qApp.translate("t", "Точки POINTS_PARAM не содержат сохраненных измерений. Для сохранения "
-                                           "плана тестирования все точки должны содержать сохраненные измерения")
+        pin_indices = [str(index) for index, pin in self._measurement_plan.all_pins_iterator() if not pin.measurements]
+        if pin_indices:
+            if len(pin_indices) > 1:
+                text = qApp.translate("t", "Точки [{}] не содержат сохраненных измерений. Для сохранения плана "
+                                           "тестирования все точки должны содержать измерения.")
             else:
-                text = qApp.translate("t", "Точка POINTS_PARAM не содержит сохраненных измерений. Для сохранения "
-                                           "плана тестирования все точки должны содержать сохраненные измерения")
-            text = text.replace("POINTS_PARAM", empty_pins)
+                text = qApp.translate("t", "Точка [{}] не содержит сохраненных измерений. Для сохранения плана "
+                                           "тестирования все точки должны содержать измерения.")
+            text = text.format(", ".join(pin_indices))
             ut.show_message(qApp.translate("t", "Ошибка"), text)
-            return True
-        return False
+        return bool(pin_indices)
 
     def _clear_widgets(self) -> None:
         """
         Method clears widgets on the main window.
         """
 
-        # Little bit hardcode here. See #39320
-        # TODO: separate config file
-        # Voltage in Volts, current in mA
-        self._comparator.set_min_ivc(0.6, 0.002)
+        self._comparator.set_min_ivc(*self._get_noise_amplitude())
+
         for widget in (self.freq_dock_widget, self.current_dock_widget, self.voltage_dock_widget):
             layout = widget.layout()
             ut.clear_layout(layout)
+        self.line_comment_pin.clear()
+        self.low_settings_panel.clear_panel()
         self.measurers_menu.clear()
+        self.num_point_line_edit.clear()
         self._iv_window.plot.remove_all_cursors()
-        self._work_mode = None
+        self._mux_and_plan_window.close()
+        self._score_wrapper.set_dummy_score()
+
+        self._current_file_path = None
         self._settings_update_next_cycle = None
         self._skip_curve = False
+        self._work_mode = None
         self._hide_curve_test = False
         self._hide_curve_ref = False
         self._ref_curve = None
         self._test_curve = None
         self._test_curve_from_plan = None
-        self._current_file_path = None
-        self._score_wrapper.set_dummy_score()
-        self.line_comment_pin.clear()
-        self._mux_and_plan_window.close()
-        self.low_settings_panel.clear_panel()
 
     def _create_measurer_setting_actions(self) -> None:
         """
@@ -313,7 +321,7 @@ class EPLabWindow(QMainWindow):
         :param available: dictionary with available options for parameters.
         """
 
-        self._parameters_scroll_areas = {}
+        self._parameters_widgets = {}
         layouts = [widget.layout() for widget in (self.freq_dock_widget, self.voltage_dock_widget,
                                                   self.current_dock_widget)]
         parameters = (EyePointProduct.Parameter.frequency, EyePointProduct.Parameter.voltage,
@@ -321,7 +329,7 @@ class EPLabWindow(QMainWindow):
         for layout, parameter in zip(layouts, parameters):
             widget = ParameterWidget(parameter, available[parameter])
             widget.option_changed.connect(self.select_option)
-            self._parameters_scroll_areas[parameter] = widget
+            self._parameters_widgets[parameter] = widget
             ut.clear_layout(layout)
             layout.addWidget(widget)
 
@@ -335,12 +343,14 @@ class EPLabWindow(QMainWindow):
                 self.search_optimal_action.setEnabled(False)
                 return
 
-    def _get_noise_amplitude(self, settings: MeasurementSettings) -> Tuple[float, float]:
+    def _get_noise_amplitude(self, settings: Optional[MeasurementSettings] = None) -> Tuple[float, float]:
         """
         :param settings: measurement settings.
         :return: noise amplitudes of voltage and current for given measurement settings.
         """
 
+        if settings is None or self._product is None:
+            return EPLabWindow.DEFAULT_COMPARATOR_MIN_VOLTAGE, EPLabWindow.DEFAULT_COMPARATOR_MIN_CURRENT
         return self._product.adjust_noise_amplitude(settings)
 
     def _get_options_from_ui(self) -> Dict[EyePointProduct.Parameter, str]:
@@ -348,7 +358,7 @@ class EPLabWindow(QMainWindow):
         :return: dictionary with selected options for parameters of measuring system from UI.
         """
 
-        return {param: scroll_area.get_checked_option() for param, scroll_area in self._parameters_scroll_areas.items()}
+        return {param: widget.get_checked_option() for param, widget in self._parameters_widgets.items()}
 
     def _handle_freezing_curves_with_pedal(self) -> None:
         """
@@ -404,8 +414,7 @@ class EPLabWindow(QMainWindow):
         Method initializes the initial value of the score threshold.
         """
 
-        threshold = self._score_wrapper.threshold
-        self._update_threshold(threshold)
+        self._update_threshold(self._score_wrapper.threshold)
 
     def _init_ui(self) -> None:
         dir_name = os.path.dirname(os.path.abspath(__file__))
@@ -419,10 +428,10 @@ class EPLabWindow(QMainWindow):
         self.move(EPLabWindow.DEFAULT_POS_X, EPLabWindow.DEFAULT_POS_Y)
 
         self._board_window: BoardWidget = BoardWidget(self)
+        self._parameters_widgets: Dict[EyePointProduct.Parameter, ParameterWidget] = {}
         self._player: SoundPlayer = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
         self._score_wrapper: ScoreWrapper = ScoreWrapper(self.score_label)
-        self._parameters_scroll_areas = {}
 
         self.low_settings_panel: LowSettingsPanel = LowSettingsPanel()
         self.main_widget: QWidget = QWidget(self)
@@ -431,6 +440,7 @@ class EPLabWindow(QMainWindow):
 
         self._iv_window: IVViewer = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
                                              solid_axis_enabled=False, axis_label_enabled=False)
+        self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
         self._iv_window.plot.set_path_to_directory(self._dir_watcher.screenshot)
         self._iv_window.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),
                                              export_ivc=qApp.translate("t", "Экспортировать кривые в файл"),
@@ -443,7 +453,6 @@ class EPLabWindow(QMainWindow):
         self.test_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_TEST)
         self.test_curve_plot_from_plan: PlotCurve = self._iv_window.plot.add_curve()
         self.test_curve_plot_from_plan.set_curve_params(EPLabWindow.COLOR_FOR_TEST_FROM_PLAN)
-        self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
 
         v_box_layout = QVBoxLayout()
         v_box_layout.setSpacing(0)
@@ -461,7 +470,8 @@ class EPLabWindow(QMainWindow):
         self.save_file_action.triggered.connect(self.save_board)
         self.save_as_file_action.triggered.connect(self.save_board_as)
         self.previous_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(True))
-        self.num_point_line_edit = QLineEdit(self)
+        self.num_point_line_edit: QLineEdit = QLineEdit(self)
+        self.num_point_line_edit.setValidator(QRegExpValidator(QRegExp(r"\d+")))
         self.num_point_line_edit.setFixedWidth(40)
         self.num_point_line_edit.setEnabled(False)
         self.num_point_line_edit.installEventFilter(self)
@@ -540,15 +550,10 @@ class EPLabWindow(QMainWindow):
         if filename:
             try:
                 board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
+                board.filename = filename
             except Exception as exc:
-                ut.show_message(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит"),
+                ut.show_message(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит."),
                                 str(exc))
-            else:
-                if self._msystem and not ut.check_compatibility(self._product, board):
-                    text = qApp.translate("t", "План тестирования TEST_PLAN нельзя загрузить, поскольку он не "
-                                               "соответствует режиму работы EPLab.")
-                    ut.show_message(qApp.translate("t", "Ошибка"), text.replace("TEST_PLAN", f"'{filename}'"))
-                    board = None
         return board
 
     def _read_curves_periodic_task(self) -> None:
@@ -573,7 +578,7 @@ class EPLabWindow(QMainWindow):
                     self._iv_window.plot.redraw_cursors()
             self._msystem.trigger_measurements()
 
-    def _read_options_from_json(self) -> Optional[Dict]:
+    def _read_options_from_json(self) -> Optional[Dict[str, Any]]:
         """
         :return: dictionary with options for parameters of the measurement system. If the measurers are standard type
         IVMeasurerIVM10, then the option parameters are not returned.
@@ -593,6 +598,7 @@ class EPLabWindow(QMainWindow):
 
         self.measurers_disconnected.emit()
         self._mux_and_plan_window.set_disconnection_mode()
+
         # Draw empty curves
         self.enable_widgets(False)
         self._test_curve = None
@@ -604,10 +610,11 @@ class EPLabWindow(QMainWindow):
         self.test_curve_plot_from_plan.set_curve(None)
         # Draw text
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
+
         if self._msystem.reconnect():
+            # Reconnection success!
             self.enable_widgets(True)
             self._mux_and_plan_window.set_connection_mode()
-            # Reconnection success!
             self._device_errors_handler.reset_error()
             self._iv_window.plot.clear_center_text()
             with self._device_errors_handler:
@@ -621,6 +628,10 @@ class EPLabWindow(QMainWindow):
         self._ref_curve = None
 
     def _replace_save_point_action(self) -> None:
+        """
+        Method replaces the menu item that is responsible for saving the measurement at a point.
+        """
+
         action_icon = self.save_point_action.icon()
         action_name = self.save_point_action.text()
         self.test_plan_menu_action.removeAction(self.save_point_action)
@@ -639,7 +650,20 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan = MeasurementPlan(
             Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]), measurer=self._msystem.measurers[0],
             multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
-        self._last_saved_measurement_plan_data: Dict = self._measurement_plan.to_json()
+        self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
+
+    def _save_last_curves(self, curves: Dict[str, Optional[IVCurve]] = None) -> None:
+        """
+        :param curves: dictionary with new curves.
+        """
+
+        curves_dict = {"ref": "_ref_curve",
+                       "test": "_test_curve",
+                       "test_for_plan": "_test_curve_from_plan"}
+        if isinstance(curves, dict):
+            for curve_name, attr_name in curves_dict.items():
+                if curve_name in curves:
+                    setattr(self, attr_name, curves[curve_name])
 
     def _set_msystem_settings(self, settings: MeasurementSettings) -> None:
         """
@@ -658,15 +682,15 @@ class EPLabWindow(QMainWindow):
         """
 
         for parameter, value in options.items():
-            self._parameters_scroll_areas[parameter].set_checked_option(value)
+            self._parameters_widgets[parameter].set_checked_option(value)
 
     def _set_plot_parameters_to_low_settings_panel(self, settings: MeasurementSettings) -> None:
         """
         :param settings: new measurement settings that need to be shown on the bottom panel on the main window.
         """
 
-        scroll_area = self._parameters_scroll_areas[EyePointProduct.Parameter.sensitive]
-        sensitivity = scroll_area.get_checked_option_label()
+        sensitivity_widget = self._parameters_widgets[EyePointProduct.Parameter.sensitive]
+        sensitivity = sensitivity_widget.get_checked_option_label()
         voltage_per_division, current_per_division = self._iv_window.plot.get_minor_axis_step()
         param_dict = {"current_per_division": current_per_division,
                       "max_voltage": settings.max_voltage,
@@ -677,21 +701,16 @@ class EPLabWindow(QMainWindow):
         self.low_settings_panel.set_all_parameters(**param_dict)
 
     def _set_widgets_to_init_state(self) -> None:
-        # Little bit hardcode here. See #39320
-        # TODO: separate config file
-        # Voltage in Volts, current in mA
-        self._comparator.set_min_ivc(0.6, 0.002)
-        self._reset_board()
         self._board_window.update_board()
-        # Create menu items to select settings for available measurers
         self._create_measurer_setting_actions()
-        # If necessary, deactivate the menu item for auto-selection
         self._disable_optimal_parameter_searcher()
+
         with self._device_errors_handler:
             for measurer in self._msystem.measurers:
                 measurer.open_device()
             for multiplexer in self._msystem.multiplexers:
                 multiplexer.open_device()
+
         self._settings_update_next_cycle = None
         self._skip_curve = False
         self._hide_curve_test = False
@@ -699,6 +718,7 @@ class EPLabWindow(QMainWindow):
         self._ref_curve = None
         self._test_curve = None
         self._test_curve_from_plan = None
+
         # Set ui settings state to current device
         with self._device_errors_handler:
             settings = self._auto_settings.get_measurement_settings(self._product)
@@ -785,28 +805,17 @@ class EPLabWindow(QMainWindow):
         :param settings: measurement settings.
         """
 
-        # TODO: let the function work with larger lists
-        # Store last curves
-        if curves is not None:
-            if "ref" in curves.keys():
-                self._ref_curve = curves["ref"]
-            if "test" in curves.keys():
-                self._test_curve = curves["test"]
-            if "test_for_plan" in curves.keys():
-                self._test_curve_from_plan = curves["test_for_plan"]
+        self._save_last_curves(curves)
+
         # Update plots
-        if not self._hide_curve_ref:
-            self.reference_curve_plot.set_curve(self._ref_curve)
-        else:
-            self.reference_curve_plot.set_curve(None)
-        if not self._hide_curve_test:
-            self.test_curve_plot.set_curve(self._test_curve)
-        else:
-            self.test_curve_plot.set_curve(None)
-        if self._work_mode != WorkMode.COMPARE:
-            self.test_curve_plot_from_plan.set_curve(self._test_curve_from_plan)
-        else:
-            self.test_curve_plot_from_plan.set_curve(None)
+        for hide, plot, curve in zip((self._hide_curve_ref, self._hide_curve_test, self._work_mode == WorkMode.COMPARE),
+                                     (self.reference_curve_plot, self.test_curve_plot, self.test_curve_plot_from_plan),
+                                     (self._ref_curve, self._test_curve, self._test_curve_from_plan)):
+            if not hide:
+                plot.set_curve(curve)
+            else:
+                plot.set_curve(None)
+
         # Update score
         if self._ref_curve and self._test_curve and self._work_mode != WorkMode.WRITE:
             assert settings is not None
@@ -825,7 +834,7 @@ class EPLabWindow(QMainWindow):
         :param available: dictionary with available options for parameters.
         """
 
-        for parameter, scroll_area in self._parameters_scroll_areas.items():
+        for parameter, scroll_area in self._parameters_widgets.items():
             scroll_area.update_options(available[parameter])
 
     def _update_threshold(self, threshold: float) -> None:
@@ -855,6 +864,10 @@ class EPLabWindow(QMainWindow):
         self._update_threshold(new_settings.score_threshold)
 
     def closeEvent(self, event: QCloseEvent) -> None:
+        """
+        :param event: close event.
+        """
+
         self._board_window.close()
         if self._measurement_plan and self._measurement_plan.to_json() != self._last_saved_measurement_plan_data:
             result = ut.show_message(qApp.translate("t", "Внимание"),
@@ -889,6 +902,7 @@ class EPLabWindow(QMainWindow):
                 measurer.close_device()
             for multiplexer in self._msystem.multiplexers:
                 multiplexer.close_device()
+
         good_com_ports, bad_com_ports = cw.utils.check_com_ports([port_1, port_2, mux_port])
         if bad_com_ports:
             if len(bad_com_ports) == 1:
@@ -898,6 +912,7 @@ class EPLabWindow(QMainWindow):
                 text = qApp.translate("t", "Проверьте, что устройства {} подключены к компьютеру и не удерживаются "
                                            "другой программой.")
             ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
+
         self._msystem, bad_com_ports = ut.create_measurement_system(*good_com_ports)
         if bad_com_ports:
             if len(bad_com_ports) == 1:
@@ -920,10 +935,20 @@ class EPLabWindow(QMainWindow):
             self._product_name = cw.ProductName.get_default_product_name_for_measurers(self._msystem.measurers)
         else:
             self._product_name = product_name
-        self._timer.start()
         self.enable_widgets(True)
+
+        if self._measurement_plan:
+            error_message = qApp.translate("t", "План тестирования {}не соответствует режиму работы EPLab и будет "
+                                                "закрыт.")
+            board_filename = getattr(self._measurement_plan, "filename", None)
+            error_message = error_message.format(f"'{board_filename}' " if board_filename else "")
+            self._measurement_plan = self._check_board_for_compatibility(self._measurement_plan, error_message)
+
+        if not self._measurement_plan:
+            self._reset_board()
         self._set_widgets_to_init_state()
         self.measurers_connected.emit(True)
+        self._timer.start()
 
     @pyqtSlot()
     def connect_or_disconnect(self) -> None:
@@ -956,10 +981,10 @@ class EPLabWindow(QMainWindow):
 
         default_path = os.path.join(self._dir_watcher.reference, "board.uzf")
         filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Создать новую плату"),
-                                               filter="UFIV Archived File (*.uzf)",
-                                               directory=default_path)[0]
+                                               filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
         if filename:
             self._current_file_path = filename
+            self._measurement_plan.filename = filename
             self._reset_board()
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._board_window.update_board()
@@ -982,10 +1007,8 @@ class EPLabWindow(QMainWindow):
         self._board_window.add_pin(pin.x, pin.y, self._measurement_plan.get_current_index())
         self.line_comment_pin.setText(pin.comment or "")
 
-        # It is important to initialize pin with real measurement. Otherwise user can create
-        # several empty points and they will not be unique. This will cause some errors during
-        # ufiv validation.
-        # self._on_save_pin()
+        # It is important to initialize pin with real measurement. Otherwise user can create several empty points and
+        # they will not be unique. This will cause some errors during ufiv validation.
         self.update_current_pin()
 
     @pyqtSlot()
@@ -1011,11 +1034,13 @@ class EPLabWindow(QMainWindow):
                 measurer.close_device()
             for multiplexer in self._msystem.multiplexers:
                 multiplexer.close_device()
+        self._last_saved_measurement_plan_data = None
         self._measurement_plan = None
         self._msystem = None
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
         self.enable_widgets(False)
         self._clear_widgets()
+        self._board_window.close()
         self._product_name = None
         self.measurers_connected.emit(False)
 
@@ -1115,7 +1140,7 @@ class EPLabWindow(QMainWindow):
                 self._msystem.measurers[measurer_id].unfreeze()
                 self._skip_curve = True
 
-    def get_measurers(self) -> list:
+    def get_measurers(self) -> List[IVMeasurerBase]:
         """
         :return: list of measurers.
         """
@@ -1179,7 +1204,7 @@ class EPLabWindow(QMainWindow):
         except ValueError:
             ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
                             qApp.translate("t", "Неверный формат номера точки. Номер точки может принимать только "
-                                                "целочисленное значение!"))
+                                                "целочисленное значение."))
             return
 
         try:
@@ -1230,18 +1255,26 @@ class EPLabWindow(QMainWindow):
 
         board = self._read_measurement_plan(filename)
         if board:
+            error_message = qApp.translate("t", "План тестирования {}нельзя загрузить, поскольку он не соответствует "
+                                                "режиму работы EPLab.")
+            board_filename = getattr(board, "filename", None)
+            error_message = error_message.format(f"'{board_filename}' " if board_filename else "")
+            board = self._check_board_for_compatibility(board, error_message)
+
+        if board:
             if not self._msystem:
+                self._create_scroll_areas_for_parameters({EyePointProduct.Parameter.frequency: [],
+                                                          EyePointProduct.Parameter.sensitive: [],
+                                                          EyePointProduct.Parameter.voltage: []})
                 self._change_work_mode(WorkMode.READ_PLAN)
                 self._iv_window.plot.clear_center_text()
                 measurer = None
                 multiplexer = None
-                self._create_scroll_areas_for_parameters({EyePointProduct.Parameter.frequency: [],
-                                                          EyePointProduct.Parameter.sensitive: [],
-                                                          EyePointProduct.Parameter.voltage: []})
             else:
                 measurer = self._msystem.measurers[0]
                 multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
             self._measurement_plan = MeasurementPlan(board, measurer, multiplexer)
+            self._measurement_plan.filename = getattr(board, "filename", None)
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
             self._board_window.update_board()
@@ -1265,9 +1298,13 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def open_board_image(self) -> None:
+        """
+        Slot opens window with image of the board.
+        """
+
         if not self._measurement_plan.image:
             ut.show_message(qApp.translate("t", "Открытие изображения платы"),
-                            qApp.translate("t", "Для данной платы изображение не задано!"))
+                            qApp.translate("t", "Для данной платы изображение не задано."))
         else:
             self._open_board_window_if_needed()
 
@@ -1361,19 +1398,18 @@ class EPLabWindow(QMainWindow):
         Slot saves screenshot of the main window.
         """
 
-        image = self.grab(self.rect())
         filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
-        dir_path = self._dir_watcher.screenshot
+        default_name = os.path.join(self._dir_watcher.screenshot, filename)
         if system().lower() == "windows":
             filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
-                                                   directory=os.path.join(dir_path, filename))[0]
+                                                   directory=default_name)[0]
         else:
             filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
-                                                   directory=os.path.join(dir_path, filename),
-                                                   options=QFileDialog.DontUseNativeDialog)[0]
+                                                   directory=default_name, options=QFileDialog.DontUseNativeDialog)[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
+            image = self.grab(self.rect())
             image.save(filename)
 
     @pyqtSlot()
@@ -1438,7 +1474,7 @@ class EPLabWindow(QMainWindow):
             self._auto_settings.save_measurement_settings(self._product.settings_to_options(settings))
         except ValueError as exc:
             ut.show_message(qApp.translate("t", "Ошибка"),
-                            qApp.translate("t", "Ошибка при установке настроек устройства"), str(exc))
+                            qApp.translate("t", "Ошибка при установке настроек устройства."), str(exc))
             self._update_scroll_areas_for_parameters(self._product.get_available_options(old_settings))
             self._set_msystem_settings(old_settings)
             old_options = self._product.settings_to_options(old_settings)

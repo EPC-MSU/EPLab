@@ -9,7 +9,7 @@ import re
 import sys
 from operator import itemgetter
 from platform import system
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 import serial.tools.list_ports
 from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon
@@ -50,8 +50,11 @@ def check_compatibility(product: EyePointProduct, board: Board) -> bool:
         for pin in element.pins:
             for measurement in pin.measurements:
                 measurement_settings = measurement.settings
-                options = product.settings_to_options(measurement_settings)
-                if len(options) < 3:
+                try:
+                    options = product.settings_to_options(measurement_settings)
+                    if len(options) < 3:
+                        return False
+                except Exception:
                     return False
     return True
 
@@ -267,7 +270,7 @@ def initialize_measurers(measurer_ports: Iterable[str], force_open: bool = False
     return measurers, bad_ports, bad_ports_by_firmware, bad_firmware_text_error
 
 
-def read_json(path: Optional[str] = None) -> Optional[Dict]:
+def read_json(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """
     Function reads file with content in json format.
     :param path: path to file.
