@@ -748,6 +748,10 @@ class EPLabWindow(QMainWindow):
             self.open_mux_window()
 
     def _update_current_pin_in_read_plan_mode(self) -> None:
+
+        def round_value(value: float) -> float:
+            return round(value, 2)
+
         current_pin = self._measurement_plan.get_current_pin()
         self.line_comment_pin.setText(current_pin.comment or "")
         ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
@@ -757,18 +761,18 @@ class EPLabWindow(QMainWindow):
                     EyePointProduct.Parameter.frequency: [
                         MeasurementParameterOption(name=f"{settings.probe_signal_frequency}",
                                                    value=settings.probe_signal_frequency,
-                                                   label_ru=f"{settings.probe_signal_frequency} Гц",
-                                                   label_en=f"{settings.probe_signal_frequency} Hz")],
+                                                   label_ru=f"{round_value(settings.probe_signal_frequency)} Гц",
+                                                   label_en=f"{round_value(settings.probe_signal_frequency)} Hz")],
                     EyePointProduct.Parameter.sensitive: [
                         MeasurementParameterOption(name=f"{settings.internal_resistance}",
                                                    value=settings.internal_resistance,
-                                                   label_ru=f"{settings.internal_resistance} Ом",
-                                                   label_en=f"{settings.internal_resistance} Ohm")],
+                                                   label_ru=f"{round_value(settings.internal_resistance)} Ом",
+                                                   label_en=f"{round_value(settings.internal_resistance)} Ohm")],
                     EyePointProduct.Parameter.voltage: [
                         MeasurementParameterOption(name=f"{settings.max_voltage}",
                                                    value=settings.max_voltage,
-                                                   label_ru=f"{settings.max_voltage} В",
-                                                   label_en=f"{settings.max_voltage} V")]
+                                                   label_ru=f"{round_value(settings.max_voltage)} В",
+                                                   label_en=f"{round_value(settings.max_voltage)} V")]
                 }
                 self._update_scroll_areas_for_parameters(available)
                 options = {
