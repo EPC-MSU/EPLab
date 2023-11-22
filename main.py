@@ -7,8 +7,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import qApp, QApplication, QDesktopWidget, QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget
 from epcore.product import EyePointProduct
 import utils as ut
-from logger import set_logger
 from mainwindow import EPLabWindow
+from window.logger import set_logger
 
 
 QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)  # enable high dpi scaling
