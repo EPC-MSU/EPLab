@@ -750,6 +750,12 @@ class EPLabWindow(QMainWindow):
     def _update_current_pin_in_read_plan_mode(self) -> None:
 
         def round_value(value: float) -> float:
+            """
+            Function rounds a real number to two decimal places.
+            :param value: value to round.
+            :return: rounded value.
+            """
+
             return round(value, 2)
 
         current_pin = self._measurement_plan.get_current_pin()
@@ -1287,7 +1293,8 @@ class EPLabWindow(QMainWindow):
             self._board_window.update_board()
             self.update_current_pin()
             self._open_board_window_if_needed()
-            self._mux_and_plan_window.update_info()
+            if self._msystem:
+                self._mux_and_plan_window.update_info()
 
     @pyqtSlot()
     def load_board_image(self) -> None:

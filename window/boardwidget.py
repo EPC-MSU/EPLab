@@ -208,6 +208,8 @@ class BoardWidget(QWidget):
         if self.measurement_plan.image:
             self._scene.set_background(pil_to_pixmap(self.measurement_plan.image))
             self._scene.scale_to_window_size(self.width(), self.height())
+        else:
+            self.close()
 
         for index, pin in self.measurement_plan.all_pins_iterator():
             self._scene.add_point(QPointF(pin.x, pin.y), number=index)
