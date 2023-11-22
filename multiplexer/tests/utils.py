@@ -9,7 +9,7 @@ from epcore.filemanager import load_board_from_ufiv
 from epcore.ivmeasurer import IVMeasurerVirtual
 from epcore.measurementmanager import MeasurementPlan
 from epcore.product import EyePointProduct
-from common import DeviceErrorsHandler, WorkMode
+from window.common import DeviceErrorsHandler, WorkMode
 
 
 def create_dummy_main_window():

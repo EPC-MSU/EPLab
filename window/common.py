@@ -5,6 +5,10 @@ from epcore.ivmeasurer.ivm10.ivm import UrpcDeviceUndefinedError
 
 
 class WorkMode(Enum):
+    """
+    A class listing all application operating modes.
+    """
+
     COMPARE = auto()
     READ_PLAN = auto()
     TEST = auto()

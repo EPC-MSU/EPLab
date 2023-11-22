@@ -1,7 +1,7 @@
 import logging
 import os
 from epsound import WavPlayer
-from common import WorkMode
+from window.common import WorkMode
 
 
 logger = logging.getLogger("eplab")

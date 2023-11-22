@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Tuple
 from PyQt5.QtCore import pyqtSignal, QSettings
 from epcore.elements.measurement import MeasurementSettings
-from common import WorkMode
 from settings import utils as ut
 from settings.settingshandler import SettingsHandler
+from window.common import WorkMode
 
 
 MODES = {"Compare": WorkMode.COMPARE,

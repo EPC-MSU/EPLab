@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QProgressB
 from epcore.elements import Board
 from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator, ReportTypes, ScalingTypes
 import utils as ut
-from common import WorkMode
+from window.common import WorkMode
 from window.language import Language
 from window.scaler import update_scale_of_class
 

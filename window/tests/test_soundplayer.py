@@ -1,6 +1,6 @@
 import time
 import unittest
-from common import WorkMode
+from window.common import WorkMode
 from window.soundplayer import SoundPlayer
 
 

@@ -2,8 +2,8 @@ import copy
 import os
 import unittest
 from typing import Any, Dict
-from common import WorkMode
 from settings import Settings
+from window.common import WorkMode
 
 
 class TestSettings(unittest.TestCase):

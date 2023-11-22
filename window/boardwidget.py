@@ -12,7 +12,7 @@ from boardview.BoardViewWidget import BoardView
 from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
 import utils as ut
-from common import WorkMode
+from window.common import WorkMode
 
 
 def pil_to_pixmap(image: Image) -> QPixmap:

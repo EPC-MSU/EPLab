@@ -13,7 +13,7 @@ from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, MIN_CHANNEL_NUMBER
 from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
 from epcore.product import EyePointProduct
 import utils as ut
-from common import WorkMode
+from window.common import WorkMode
 from window.language import Language
 from window.scaler import update_scale_of_class
 
