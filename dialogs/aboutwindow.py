@@ -7,9 +7,9 @@ from typing import Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon, QPalette
 from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QLayout, QPushButton, QTextBrowser, QVBoxLayout
-import utils as ut
 from connection_window.utils import get_platform
 from version import Version
+from window import utils as ut
 from window.language import Language
 from window.scaler import update_scale_of_class
 

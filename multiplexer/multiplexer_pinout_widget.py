@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (QAction, QCheckBox, QGridLayout, QHBoxLayout, QLabe
                              QVBoxLayout, QWidget)
 from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
-import utils as ut
+from window import utils as ut
 from window.common import DeviceErrorsHandler, WorkMode
 from window.scaler import update_scale_of_class
 

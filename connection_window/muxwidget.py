@@ -8,7 +8,7 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QIcon, QPixmap, QRegExpValidator
 from PyQt5.QtWidgets import QComboBox, QGroupBox, QHBoxLayout, QLabel, QMessageBox, QPushButton, QVBoxLayout
 import connection_window.utils as ut
-from utils import DIR_MEDIA, show_message
+from window.utils import DIR_MEDIA, show_message
 
 
 class MuxWidget(QGroupBox):

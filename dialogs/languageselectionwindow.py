@@ -7,7 +7,7 @@ from typing import Optional
 from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QLabel, QLayout, QVBoxLayout
-import utils as ut
+from window import utils as ut
 from window.language import Language, Translator
 from window.scaler import update_scale_of_class
 

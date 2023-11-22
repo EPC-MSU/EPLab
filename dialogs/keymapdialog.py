@@ -6,7 +6,7 @@ import os
 from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon, QPalette
 from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QPushButton, QTextBrowser, QVBoxLayout
-import utils as ut
+from window import utils as ut
 from window.scaler import update_scale_of_class
 
 

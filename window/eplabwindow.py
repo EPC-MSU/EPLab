@@ -26,10 +26,10 @@ from epcore.product import EyePointProduct, MeasurementParameterOption
 from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
 import connection_window as cw
-import utils as ut
 from dialogs import (ReportGenerationThread, show_keymap_info, show_language_selection_window,
                      show_measurer_settings_window, show_product_info, show_report_generation_window)
 from multiplexer import MuxAndPlanWindow
+from window import utils as ut
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.boardwidget import BoardWidget
 from window.common import DeviceErrorsHandler, WorkMode
@@ -418,8 +418,7 @@ class EPLabWindow(QMainWindow):
         self._update_threshold(self._score_wrapper.threshold)
 
     def _init_ui(self) -> None:
-        dir_name = os.path.dirname(os.path.abspath(__file__))
-        loadUi(os.path.join(dir_name, "gui", "mainwindow.ui"), self)
+        loadUi(os.path.join(os.path.dirname(ut.DIR_MEDIA), "gui", "mainwindow.ui"), self)
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
         if system().lower() == "windows":
@@ -587,7 +586,7 @@ class EPLabWindow(QMainWindow):
 
         for measurer in self.get_measurers():
             if isinstance(measurer, (IVMeasurerASA, IVMeasurerVirtualASA)):
-                dir_name = os.path.dirname(os.path.abspath(__file__))
+                dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 file_name = os.path.join(dir_name, "resources", "eplab_asa_options.json")
                 return ut.read_json(file_name)
         return None

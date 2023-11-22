@@ -23,7 +23,7 @@ from epcore.product import EyePointProduct
 
 
 logger = logging.getLogger("eplab")
-DIR_MEDIA: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
+DIR_MEDIA: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
 
 
 def calculate_scales(settings: MeasurementSettings) -> Tuple[float, float]:
@@ -197,7 +197,7 @@ def get_dir_name() -> str:
     if getattr(sys, "frozen", False):
         path = os.path.dirname(os.path.abspath(sys.executable))
     else:
-        path = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     return path
 
 
@@ -248,7 +248,7 @@ def initialize_measurers(measurer_ports: Iterable[str], force_open: bool = False
                 measurers.append(measurer)
             elif measurer_arg is not None and ("com:" in measurer_arg or "xi-net:" in measurer_arg):
                 measurer_type = "IVMeasurerIVM10"
-                dir_name = os.path.dirname(os.path.abspath(__file__))
+                dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 config_file = os.path.join(dir_name, "cur.ini")
                 measurer = IVMeasurerIVM10(measurer_arg, config=config_file, defer_open=True, force_open=force_open)
                 measurers.append(measurer)

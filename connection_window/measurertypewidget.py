@@ -9,7 +9,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGridLayout, QLabel, QRadioButton, QScrollArea, QVBoxLayout, QWidget
 from connection_window.productname import MeasurerType, ProductName
-from utils import DIR_MEDIA
+from window.utils import DIR_MEDIA
 
 
 class MeasurerTypeWidget(QWidget):

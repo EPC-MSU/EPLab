@@ -6,8 +6,8 @@ from argparse import ArgumentParser, Namespace
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import qApp, QApplication, QDesktopWidget, QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget
 from epcore.product import EyePointProduct
-import utils as ut
-from mainwindow import EPLabWindow
+from window import utils as ut
+from window.eplabwindow import EPLabWindow
 from window.logger import set_logger
 
 

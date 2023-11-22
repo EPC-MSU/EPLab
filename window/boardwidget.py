@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QShortcut, QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView
 from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
-import utils as ut
+from window import utils as ut
 from window.common import WorkMode
 
 

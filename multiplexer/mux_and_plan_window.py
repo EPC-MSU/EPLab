@@ -8,10 +8,10 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QHBoxLayout, QMessageBox, QPushButton, QSplitter, QVBoxLayout, QWidget
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
-import utils as ut
 from multiplexer.measurement_plan_runner import MeasurementPlanRunner
 from multiplexer.measurement_plan_widget import MeasurementPlanWidget
 from multiplexer.multiplexer_pinout_widget import MultiplexerPinoutWidget
+from window import utils as ut
 from window.common import WorkMode
 from window.scaler import update_scale_of_class
 

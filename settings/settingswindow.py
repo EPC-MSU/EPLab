@@ -5,7 +5,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout
 from settings.settings import Settings
 from settings.utils import InvalidParameterValueError, MissingParameterError
-import utils as ut
+from window import utils as ut
 from window.scaler import update_scale_of_class
 
 

@@ -10,7 +10,7 @@ from PyQt5.QtGui import QIcon, QRegExpValidator
 from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QMessageBox, QPushButton, QWidget
 import connection_window.utils as ut
 from connection_window.productname import MeasurerType
-from utils import DIR_MEDIA, show_message
+from window.utils import DIR_MEDIA, show_message
 
 
 class MeasurerURLsWidget(QWidget):

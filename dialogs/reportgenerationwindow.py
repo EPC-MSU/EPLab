@@ -10,7 +10,7 @@ from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QProgressBar, QTextEdit, QVBoxLayout
 from epcore.elements import Board
 from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator, ReportTypes, ScalingTypes
-import utils as ut
+from window import utils as ut
 from window.common import WorkMode
 from window.language import Language
 from window.scaler import update_scale_of_class
