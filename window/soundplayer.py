@@ -20,13 +20,13 @@ class SoundPlayer:
             logger.error("Sound is not available on your system; mute")
             self._player.set_mute()
             self._sound_available = False
+        self._load_sounds()
 
-        dir_name = os.path.dirname(os.path.abspath(__file__))
+    def _load_sounds(self) -> None:
+        dir_media = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
         for i in range(1, 11):
-            file_name = os.path.join(dir_name, "media", f"{i}.wav")
-            self._player.add_sound(file_name, f"{i}")
-        file_name = os.path.join(dir_name, "media", "test.wav")
-        self._player.add_sound(file_name, "test")
+            self._player.add_sound(os.path.join(dir_media, f"{i}.wav"), f"{i}")
+        self._player.add_sound(os.path.join(dir_media, "test.wav"), "test")
 
     def _play(self, name: str) -> None:
         """

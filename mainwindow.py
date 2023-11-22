@@ -38,7 +38,7 @@ from window.language import Language, Translator
 from window.parameterwidget import ParameterWidget
 from window.scaler import update_scale_of_class
 from window.scorewrapper import ScoreWrapper
-from player import SoundPlayer
+from window.soundplayer import SoundPlayer
 from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
 from version import Version
 
