@@ -195,6 +195,8 @@ class EPLabWindow(QMainWindow):
         :param mode: new work mode.
         """
 
+        if mode == WorkMode.READ_PLAN:
+            self.open_window_board_action.setEnabled(True)
         enable = bool(self._measurement_plan and self._measurement_plan.multiplexer is not None)
         self.open_mux_window_action.setEnabled(enable)
         self.comparing_mode_action.setChecked(mode is WorkMode.COMPARE)
