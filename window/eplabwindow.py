@@ -536,7 +536,10 @@ class EPLabWindow(QMainWindow):
 
     def _open_board_window_if_needed(self) -> None:
         if self._measurement_plan.image:
-            self._board_window.show()
+            if not self._board_window.isVisible():
+                self._board_window.show()
+            else:
+                self._board_window.activateWindow()
 
     def _read_measurement_plan(self, filename: Optional[str] = None) -> Optional[Board]:
         """
