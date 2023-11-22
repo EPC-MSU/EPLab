@@ -9,9 +9,9 @@ import re
 from datetime import datetime
 from functools import partial
 from platform import system
-from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, QRegExp, Qt as QtC,
-                          QTimer, QTranslator)
+from typing import Any, Dict, List, Optional, Tuple, Union
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, QRegExp, Qt, QTimer,
+                          QTranslator)
 from PyQt5.QtGui import (QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent,
                          QRegExpValidator)
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLineEdit, QMainWindow, QMenu, QMessageBox, QShortcut,
@@ -225,7 +225,8 @@ class EPLabWindow(QMainWindow):
             scroll_area.enable_buttons(mode in (WorkMode.COMPARE, WorkMode.WRITE))
         self._work_mode = mode
 
-    def _check_board_for_compatibility(self, board: Board, error_message: str) -> Optional[Board]:
+    def _check_board_for_compatibility(self, board: Union[Board, MeasurementPlan], error_message: str
+                                       ) -> Optional[Union[Board, MeasurementPlan]]:
         """
         :param board: board to check for compatibility with measurement system;
         :param error_message: message to display if the board is not compatible.
@@ -391,8 +392,8 @@ class EPLabWindow(QMainWindow):
 
         key = event.key()
         key_type = event.type()
-        if self.save_point_action.isEnabled() and ((key == QtC.Key_Enter and key_type == QEvent.ShortcutOverride) or
-                                                   (key == QtC.Key_Return and key_type == QEvent.KeyPress)):
+        if self.save_point_action.isEnabled() and ((key == Qt.Key_Enter and key_type == QEvent.ShortcutOverride) or
+                                                   (key == Qt.Key_Return and key_type == QEvent.KeyPress)):
             self.save_pin()
             return True
 
@@ -944,7 +945,10 @@ class EPLabWindow(QMainWindow):
             error_message = error_message.format(f"'{board_filename}' " if board_filename else "")
             self._measurement_plan = self._check_board_for_compatibility(self._measurement_plan, error_message)
 
-        if not self._measurement_plan:
+        if self._measurement_plan:
+            self._measurement_plan.measurer = self._msystem.measurers[0]
+            self._measurement_plan.multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
+        else:
             self._reset_board()
         self._set_widgets_to_init_state()
         self.measurers_connected.emit(True)
@@ -1109,10 +1113,10 @@ class EPLabWindow(QMainWindow):
             if isinstance(event, QKeyEvent):
                 key_event = QKeyEvent(event)
                 key = key_event.key()
-                if key in (QtC.Key_Enter, QtC.Key_Return):
+                if key in (Qt.Key_Enter, Qt.Key_Return):
                     event_type = key_event.type()
-                    if (key == QtC.Key_Enter and event_type == QKeyEvent.ShortcutOverride) or \
-                            (key == QtC.Key_Return and event_type == QKeyEvent.KeyPress):
+                    if (key == Qt.Key_Enter and event_type == QKeyEvent.ShortcutOverride) or \
+                            (key == Qt.Key_Return and event_type == QKeyEvent.KeyPress):
                         obj.keyPressEvent(event)
                     return True
                 return False
@@ -1345,9 +1349,9 @@ class EPLabWindow(QMainWindow):
         tool_bars = self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search
         for tool_bar in tool_bars:
             if self.width() < size:
-                style = QtC.ToolButtonIconOnly
+                style = Qt.ToolButtonIconOnly
             else:
-                style = QtC.ToolButtonTextBesideIcon
+                style = Qt.ToolButtonTextBesideIcon
             tool_bar.setToolButtonStyle(style)
         super().resizeEvent(event)
 
