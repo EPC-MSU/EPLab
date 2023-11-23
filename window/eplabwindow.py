@@ -14,8 +14,8 @@ from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent
                           QTranslator)
 from PyQt5.QtGui import (QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent,
                          QRegExpValidator)
-from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLineEdit, QMainWindow, QMenu, QMessageBox, QShortcut,
-                             QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLineEdit, QMainWindow, QMenu, QMessageBox, QVBoxLayout,
+                             QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
@@ -33,9 +33,11 @@ from window import utils as ut
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.boardwidget import BoardWidget
 from window.common import DeviceErrorsHandler, WorkMode
+from window.curvestates import CurveStates
 from window.dirwatcher import DirWatcher
 from window.language import Language, Translator
 from window.parameterwidget import ParameterWidget
+from window.pedalhandler import PedalHandler
 from window.scaler import update_scale_of_class
 from window.scorewrapper import ScoreWrapper
 from window.soundplayer import SoundPlayer
@@ -93,6 +95,8 @@ class EPLabWindow(QMainWindow):
         self._last_saved_measurement_plan_data: Dict[str, Any] = None
         self._measurement_plan: MeasurementPlan = None
         self._msystem: MeasurementSystem = None
+        self._pedal_handler: PedalHandler = PedalHandler()
+        self._pedal_handler.pedal_signal.connect(self.handle_pedal_signal)
         self._product: EyePointProduct = product
         self._product_name: cw.ProductName = None
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
@@ -363,27 +367,21 @@ class EPLabWindow(QMainWindow):
 
         return {param: widget.get_checked_option() for param, widget in self._parameters_widgets.items()}
 
-    def _handle_freezing_curves_with_pedal(self) -> None:
+    def _handle_freezing_curves_with_pedal(self, pressed: bool) -> None:
         """
         Method freezes the measurers curves using a pedal. If at least one curve is not frozen, then all curves are
         frozen by pedal. If all curves are frozen, unfreeze all curves.
+        :param pressed: if True, then the pedal is pressed, otherwise it is released.
         """
 
-        actions_for_measurers = {0: self.freeze_curve_a_action,
-                                 1: self.freeze_curve_b_action}
-        unfreezed = []
-        measurers = self.get_measurers()
-        for index, measurer in enumerate(measurers):
-            if not measurer.is_freezed():
-                unfreezed.append(index)
-        if len(unfreezed) not in (0, len(measurers)):
-            for index in unfreezed:
-                action = actions_for_measurers.get(index, None)
-                if action:
+        if pressed:
+            self._curves_states.store_states()
+            for action in (self.freeze_curve_a_action, self.freeze_curve_b_action):
+                if action.isEnabled() and not action.isChecked():
                     action.trigger()
+                action.setEnabled(False)
         else:
-            self.freeze_curve_a_action.trigger()
-            self.freeze_curve_b_action.trigger()
+            self._curves_states.restore_states()
 
     def _handle_key_press_event(self, event: QKeyEvent) -> bool:
         """
@@ -492,6 +490,7 @@ class EPLabWindow(QMainWindow):
         self.sound_enabled_action.toggled.connect(self.enable_sound)
         self.freeze_curve_a_action.toggled.connect(partial(self.freeze_curve, 0))
         self.freeze_curve_b_action.toggled.connect(partial(self.freeze_curve, 1))
+        self._curves_states: CurveStates = CurveStates(self.freeze_curve_a_action, self.freeze_curve_b_action)
         self.hide_curve_a_action.toggled.connect(self.hide_curve)
         self.hide_curve_b_action.toggled.connect(self.hide_curve)
         self.add_cursor_action.toggled.connect(self.set_add_cursor_state)
@@ -499,9 +498,6 @@ class EPLabWindow(QMainWindow):
         self.remove_cursor_action.triggered.connect(self.show_context_menu_for_cursor_deletion)
         self.save_screen_action.triggered.connect(self.save_image)
         self.select_language_action.triggered.connect(self.select_language)
-
-        self.shortcut_pedal_crutch: QShortcut = QShortcut(QKeySequence("Ctrl+Alt+Shift+P"), self)
-        self.shortcut_pedal_crutch.activated.connect(self.handle_pedal_signal)
 
         self.comparing_mode_action.triggered.connect(lambda: self._switch_work_mode(WorkMode.COMPARE))
         self.writing_mode_action.triggered.connect(lambda: self._switch_work_mode(WorkMode.WRITE))
@@ -723,6 +719,10 @@ class EPLabWindow(QMainWindow):
         self._ref_curve = None
         self._test_curve = None
         self._test_curve_from_plan = None
+
+        for action in (self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
+                       self.hide_curve_b_action):
+            action.setChecked(False)
 
         # Set ui settings state to current device
         with self._device_errors_handler:
@@ -1241,16 +1241,17 @@ class EPLabWindow(QMainWindow):
         self.update_current_pin()
         self._open_board_window_if_needed()
 
-    @pyqtSlot()
-    def handle_pedal_signal(self) -> None:
+    @pyqtSlot(bool)
+    def handle_pedal_signal(self, pressed: bool) -> None:
         """
         Slot processes pedal presses. The pedal freezes/unfreezes the measures in comparison mode and causes a
         transition to the next pin in the measurement plan in other modes.
+        :param pressed: if True, then the pedal is pressed, otherwise it is released.
         """
 
         if self.work_mode == WorkMode.COMPARE:
-            self._handle_freezing_curves_with_pedal()
-        elif self.work_mode in (WorkMode.TEST, WorkMode.WRITE):
+            self._handle_freezing_curves_with_pedal(pressed)
+        elif pressed and self.work_mode in (WorkMode.TEST, WorkMode.WRITE):
             self.save_pin()
 
     @pyqtSlot(bool)
@@ -1263,6 +1264,20 @@ class EPLabWindow(QMainWindow):
             self._hide_curve_test = state
         elif self.sender() is self.hide_curve_b_action:
             self._hide_curve_ref = state
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        """
+        :param event: key press event.
+        """
+
+        self._pedal_handler.handle_key_event(event)
+
+    def keyReleaseEvent(self, event: QKeyEvent) -> None:
+        """
+        :param event: key release event.
+        """
+
+        self._pedal_handler.handle_key_event(event)
 
     @pyqtSlot()
     def load_board(self, filename: Optional[str] = None) -> None:

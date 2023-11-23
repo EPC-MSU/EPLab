@@ -6,13 +6,14 @@ import os
 from typing import Optional
 from PIL import Image
 from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPointF, Qt
-from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QKeySequence, QPixmap
-from PyQt5.QtWidgets import QShortcut, QVBoxLayout, QWidget
+from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap
+from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView
 from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
 from window import utils as ut
 from window.common import WorkMode
+from window.pedalhandler import PedalHandler
 
 
 def pil_to_pixmap(image: Image) -> QPixmap:
@@ -48,9 +49,9 @@ class BoardWidget(QWidget):
         self._board: Optional[MeasurementPlan] = None
         self._control_pressed: bool = False
         self._parent = parent
-        self._shortcut_pedal_crutch: QShortcut = QShortcut(QKeySequence("Ctrl+Alt+Shift+P"), self)
-        if hasattr(self._parent, "handle_pedal_signal"):
-            self._shortcut_pedal_crutch.activated.connect(self._parent.handle_pedal_signal)
+        self._pedal_handler: PedalHandler = PedalHandler()
+        if hasattr(parent, "handle_pedal_signal"):
+            self._pedal_handler.pedal_signal.connect(parent.handle_pedal_signal)
         self._init_ui()
 
     @property
@@ -188,6 +189,20 @@ class BoardWidget(QWidget):
         width = self._scene.width()
         height = self._scene.height()
         return self._scene.mapToScene(int(width / 2), int(height / 2))
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        """
+        :param event: key press event.
+        """
+
+        self._pedal_handler.handle_key_event(event)
+
+    def keyReleaseEvent(self, event: QKeyEvent) -> None:
+        """
+        :param event: key release event.
+        """
+
+        self._pedal_handler.handle_key_event(event)
 
     @pyqtSlot(int)
     def select_pin_with_index(self, index: int) -> None:
