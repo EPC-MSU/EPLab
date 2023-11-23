@@ -1250,7 +1250,7 @@ class EPLabWindow(QMainWindow):
 
         if self.work_mode == WorkMode.COMPARE:
             self._handle_freezing_curves_with_pedal()
-        elif self.work_mode in (WorkMode.READ_PLAN, WorkMode.TEST, WorkMode.WRITE):
+        elif self.work_mode in (WorkMode.TEST, WorkMode.WRITE):
             self.save_pin()
 
     @pyqtSlot(bool)
