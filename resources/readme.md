@@ -12,6 +12,11 @@
 - Генерация HTML отчетов с результатами тестирования.
 - Возможность связать расширение **uzf** с EPLab (подробнее об этом можно прочитать в разделе **"Дополнительно"**).
 
+## Поддерживаемые ОС: 
+
+- Windows 7 и новее.
+- Linux (протестировано на Ubuntu 18.04, 20.04;  Astra Linux - 4.15.3).
+
 ## Запуск в Windows
 
 1. Установите [MSVC 2013 redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=40784) и [MSVC 2015 redistributable](https://www.microsoft.com/ru-ru/download/details.aspx?id=48145).
