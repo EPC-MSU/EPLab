@@ -55,7 +55,7 @@ class PedalHandler(QObject):
     def __init__(self) -> None:
         super().__init__()
         self._buttons: Dict[int, PedalHandler.Button] = {key: PedalHandler.Button(key) for key in PedalHandler.KEYS}
-        self._status: PedalHandler.Status = PedalHandler.Status
+        self._status: PedalHandler.Status = PedalHandler.Status.RELEASED
 
     def _check_buttons(self) -> None:
         all_pressed = all(button.status for button in self._buttons.values())
