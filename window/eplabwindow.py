@@ -1251,7 +1251,7 @@ class EPLabWindow(QMainWindow):
         if self.work_mode == WorkMode.COMPARE:
             self._handle_freezing_curves_with_pedal()
         elif self.work_mode in (WorkMode.READ_PLAN, WorkMode.TEST, WorkMode.WRITE):
-            self.next_point_action.trigger()
+            self.save_pin()
 
     @pyqtSlot(bool)
     def hide_curve(self, state: bool) -> None:
