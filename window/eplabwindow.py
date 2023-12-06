@@ -87,7 +87,6 @@ class EPLabWindow(QMainWindow):
         super().__init__()
         self._auto_settings: AutoSettings = AutoSettings(path=EPLabWindow.FILENAME_FOR_AUTO_SETTINGS)
         self._comparator: IVCComparator = IVCComparator()
-        self._current_file_path: str = None
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
         self._dir_chosen_by_user: str = ut.get_dir_name()
         self._dir_watcher: DirWatcher = DirWatcher(ut.get_dir_name())
@@ -282,7 +281,6 @@ class EPLabWindow(QMainWindow):
         self._mux_and_plan_window.close()
         self._score_wrapper.set_dummy_score()
 
-        self._current_file_path = None
         self._settings_update_next_cycle = None
         self._skip_curve = False
         self._work_mode = None
@@ -997,7 +995,7 @@ class EPLabWindow(QMainWindow):
         open, then before creating a new file, you will be asked to save the changes to the open file.
         """
 
-        if self._current_file_path is not None:
+        if self._measurement_plan_path.path is not None:
             result = ut.show_message(qApp.translate("t", "Внимание"),
                                      qApp.translate("t", "Сохранить изменения в файл?"),
                                      icon=QMessageBox.Information, yes_button=True, no_button=True, cancel_button=True)
@@ -1015,8 +1013,6 @@ class EPLabWindow(QMainWindow):
         filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Создать новую плату"),
                                                filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
         if filename:
-            self._current_file_path = filename
-            self._measurement_plan.filename = filename
             self._reset_board()
             self._measurement_plan_path.path = filename
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
@@ -1322,7 +1318,6 @@ class EPLabWindow(QMainWindow):
                 measurer = self._msystem.measurers[0]
                 multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
             self._measurement_plan = MeasurementPlan(board, measurer, multiplexer)
-            self._measurement_plan.filename = filename
             self._measurement_plan_path.path = filename
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
@@ -1411,11 +1406,12 @@ class EPLabWindow(QMainWindow):
         if self._check_measurement_plan_for_empty_pins():
             return None
 
-        if not self._current_file_path:
+        if not self._measurement_plan_path.path:
             return self.save_board_as()
 
         self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
-        self._current_file_path = epfilemanager.save_board_to_ufiv(self._current_file_path, self._measurement_plan)
+        self._measurement_plan_path.path = epfilemanager.save_board_to_ufiv(self._measurement_plan_path.path,
+                                                                            self._measurement_plan)
         return True
 
     @pyqtSlot()
@@ -1433,8 +1429,7 @@ class EPLabWindow(QMainWindow):
                                                filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
         if filename:
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
-            self._current_file_path = epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
-            self._measurement_plan_path.path = filename
+            self._measurement_plan_path.path = epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             return True
         return False
 
