@@ -371,8 +371,8 @@
     </message>
     <message>
         <location filename="../mainwindow.py" line="872"/>
-        <source>План тестирования не был сохранен. Сохранить последние изменения?</source>
-        <translation>The measurement plan was not saved. Save the latest changes?</translation>
+        <source>План тестирования не был сохранен.</source>
+        <translation>The measurement plan was not saved.</translation>
     </message>
     <message>
         <location filename="../mainwindow.py" line="907"/>

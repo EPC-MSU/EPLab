@@ -654,19 +654,22 @@ class EPLabWindow(QMainWindow):
             multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
         self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
 
-    def _save_changes_in_measurement_plan(self) -> bool:
+    def _save_changes_in_measurement_plan(self, additional_info: str = None) -> bool:
         """
+        :param additional_info: additional text to the question.
         :return:
         """
 
         result = 0
-        if self._last_saved_measurement_plan_data != self._measurement_plan.to_json():
-            result = ut.show_message(qApp.translate("t", "Внимание"),
-                                     qApp.translate("t", "Сохранить изменения в файл?"),
-                                     icon=QMessageBox.Information, yes_button=True, no_button=True, cancel_button=True)
+        if self._measurement_plan and self._last_saved_measurement_plan_data != self._measurement_plan.to_json():
+            main_text = qApp.translate("t", "Сохранить изменения в файл?")
+            text = f"{additional_info} {main_text}" if additional_info else main_text
+            result = ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information,
+                                     yes_button=True, no_button=True, cancel_button=True)
             if result == 0:
                 # You need to save the changes to an existing file
-                self.save_board()
+                if self.save_board() is None:
+                    result = 2
         return result in (0, 1)
 
     def _save_last_curves(self, curves: Dict[str, Optional[IVCurve]] = None) -> None:
@@ -910,16 +913,10 @@ class EPLabWindow(QMainWindow):
         :param event: close event.
         """
 
-        self._board_window.close()
-        if self._measurement_plan and self._measurement_plan.to_json() != self._last_saved_measurement_plan_data:
-            result = ut.show_message(qApp.translate("t", "Внимание"),
-                                     qApp.translate("t", "План тестирования не был сохранен. Сохранить последние "
-                                                         "изменения?"), icon=QMessageBox.Information, yes_button=True,
-                                     no_button=True)
-            if result == 0:
-                if self.save_board() is None:
-                    event.ignore()
+        if not self._save_changes_in_measurement_plan(qApp.translate("t", "План тестирования не был сохранен.")):
+            event.ignore()
 
+        self._board_window.close()
         self._mux_and_plan_window.close()
         if self._report_generation_thread:
             self._report_generation_thread.stop_thread()
