@@ -251,7 +251,8 @@ class EPLabWindow(QMainWindow):
         :return: True if there are pins without measurements in measurement plan.
         """
 
-        pin_indices = [str(index) for index, pin in self._measurement_plan.all_pins_iterator() if not pin.measurements]
+        pin_indices = [str(index + 1) for index, pin in self._measurement_plan.all_pins_iterator()
+                       if not pin.measurements]
         if pin_indices:
             if len(pin_indices) > 1:
                 text = qApp.translate("t", "Точки [{}] не содержат сохраненных измерений. Для сохранения плана "
