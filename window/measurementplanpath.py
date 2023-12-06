@@ -4,6 +4,9 @@ from PyQt5.QtCore import pyqtSignal, QObject
 
 
 class MeasurementPlanPath(QObject):
+    """
+    Class for storing the path to the current measurement plan.
+    """
 
     name_changed: pyqtSignal = pyqtSignal(str)
 
