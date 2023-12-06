@@ -36,6 +36,7 @@ from window.common import DeviceErrorsHandler, WorkMode
 from window.curvestates import CurveStates
 from window.dirwatcher import DirWatcher
 from window.language import Language, Translator
+from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
 from window.pedalhandler import PedalHandler
 from window.scaler import update_scale_of_class
@@ -94,6 +95,8 @@ class EPLabWindow(QMainWindow):
         self._hide_curve_test: bool = False
         self._last_saved_measurement_plan_data: Dict[str, Any] = None
         self._measurement_plan: MeasurementPlan = None
+        self._measurement_plan_path: MeasurementPlanPath = MeasurementPlanPath()
+        self._measurement_plan_path.name_changed.connect(self.change_window_title)
         self._msystem: MeasurementSystem = None
         self._pedal_handler: PedalHandler = PedalHandler()
         self._pedal_handler.pedal_signal.connect(self.handle_pedal_signal)
@@ -242,6 +245,7 @@ class EPLabWindow(QMainWindow):
         if self._msystem and not ut.check_compatibility(self._product, board):
             ut.show_message(qApp.translate("t", "Ошибка"), error_message)
             board = None
+            self._measurement_plan_path.path = None
         return board
 
     def _check_measurement_plan_for_empty_pins(self) -> bool:
@@ -551,6 +555,7 @@ class EPLabWindow(QMainWindow):
         if filename:
             try:
                 board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
+                self._measurement_plan_path.path = filename
                 board.filename = filename
             except Exception as exc:
                 ut.show_message(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит."),
@@ -878,6 +883,17 @@ class EPLabWindow(QMainWindow):
         self.sound_enabled_action.setChecked(new_settings.sound_enabled)
         self._update_threshold(new_settings.score_threshold)
 
+    @pyqtSlot(str)
+    def change_window_title(self, measurement_plan_name: str) -> None:
+        """
+        :param measurement_plan_name: new name for measurement plan.
+        """
+
+        if measurement_plan_name:
+            self.setWindowTitle(f"{measurement_plan_name} - EPLab {Version.full}")
+        else:
+            self.setWindowTitle(f"EPLab {Version.full}")
+
     def closeEvent(self, event: QCloseEvent) -> None:
         """
         :param event: close event.
@@ -1003,6 +1019,7 @@ class EPLabWindow(QMainWindow):
         if filename:
             self._current_file_path = filename
             self._measurement_plan.filename = filename
+            self._measurement_plan_path.path = filename
             self._reset_board()
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._board_window.update_board()
@@ -1054,6 +1071,7 @@ class EPLabWindow(QMainWindow):
                 multiplexer.close_device()
         self._last_saved_measurement_plan_data = None
         self._measurement_plan = None
+        self._measurement_plan_path.path = None
         self._msystem = None
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
         self.enable_widgets(False)
@@ -1290,7 +1308,7 @@ class EPLabWindow(QMainWindow):
         if board:
             error_message = qApp.translate("t", "План тестирования {}нельзя загрузить, поскольку он не соответствует "
                                                 "режиму работы EPLab.")
-            board_filename = getattr(board, "filename", None)
+            board_filename = self._measurement_plan_path.path
             error_message = error_message.format(f"'{board_filename}' " if board_filename else "")
             board = self._check_board_for_compatibility(board, error_message)
 
@@ -1418,6 +1436,7 @@ class EPLabWindow(QMainWindow):
         if filename:
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             self._current_file_path = epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
+            self._measurement_plan_path.path = filename
             return True
         return False
 
