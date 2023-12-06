@@ -912,6 +912,7 @@ class EPLabWindow(QMainWindow):
 
         if not self._save_changes_in_measurement_plan(qApp.translate("t", "План тестирования не был сохранен.")):
             event.ignore()
+            return
 
         self._board_window.close()
         self._mux_and_plan_window.close()
@@ -1254,28 +1255,7 @@ class EPLabWindow(QMainWindow):
         :param pin_index: index of a pin to be set as current (starts at 0).
         """
 
-        if pin_index is not None:
-            self.pin_index_widget.setText(str(pin_index))
-
-        pin_index = self.pin_index_widget.get_index()
-        if pin_index is None:
-            return
-
-        try:
-            with self._device_errors_handler:
-                self._measurement_plan.go_pin(pin_index)
-        except BadMultiplexerOutputError:
-            if not self._mux_and_plan_window.measurement_plan_runner.is_running:
-                ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
-                                qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
-                                                    "точки не был установлен."))
-        except ValueError:
-            ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
-                            qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
-            return
-
-        self.update_current_pin()
-        self._open_board_window_if_needed()
+        self.go_to_pin_selected_in_widget(pin_index + 1)
 
     @pyqtSlot(bool)
     def handle_pedal_signal(self, pressed: bool) -> None:

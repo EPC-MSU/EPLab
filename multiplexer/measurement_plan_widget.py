@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (QAbstractItemView, QHBoxLayout, QLineEdit, QProgres
 from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, MIN_CHANNEL_NUMBER
 from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
 from epcore.product import EyePointProduct
+from multiplexer.pinindextableitem import PinIndexTableItem
 from window import utils as ut
 from window.common import WorkMode
 from window.language import Language
@@ -104,7 +105,7 @@ class MeasurementPlanWidget(QWidget):
         """
 
         self.table_widget_info.insertRow(pin_index)
-        item = QTableWidgetItem(str(pin_index))
+        item = PinIndexTableItem(pin_index)
         item.setFlags(item.flags() ^ Qt.ItemIsEditable)
         self.table_widget_info.setItem(pin_index, 0, item)
         line_edit_module_number = ModifiedLineEdit()
