@@ -95,7 +95,7 @@ class EPLabWindow(QMainWindow):
         self._hide_curve_test: bool = False
         self._last_saved_measurement_plan_data: Dict[str, Any] = None
         self._measurement_plan: MeasurementPlan = None
-        self._measurement_plan_path: MeasurementPlanPath = MeasurementPlanPath()
+        self._measurement_plan_path: MeasurementPlanPath = MeasurementPlanPath(self)
         self._measurement_plan_path.name_changed.connect(self.change_window_title)
         self._msystem: MeasurementSystem = None
         self._pedal_handler: PedalHandler = PedalHandler()
@@ -245,7 +245,6 @@ class EPLabWindow(QMainWindow):
         if self._msystem and not ut.check_compatibility(self._product, board):
             ut.show_message(qApp.translate("t", "Ошибка"), error_message)
             board = None
-            self._measurement_plan_path.path = None
         return board
 
     def _check_measurement_plan_for_empty_pins(self) -> bool:
@@ -541,10 +540,10 @@ class EPLabWindow(QMainWindow):
             else:
                 self._board_window.activateWindow()
 
-    def _read_measurement_plan(self, filename: Optional[str] = None) -> Optional[Board]:
+    def _read_measurement_plan(self, filename: Optional[str] = None) -> Tuple[Optional[Board], Optional[str]]:
         """
         :param filename: path to the file with the measurement plan that needs to be opened.
-        :return: measurement plan read from file.
+        :return: measurement plan read from file and file name.
         """
 
         if not (isinstance(filename, str) and os.path.exists(filename)):
@@ -555,12 +554,10 @@ class EPLabWindow(QMainWindow):
         if filename:
             try:
                 board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
-                self._measurement_plan_path.path = filename
-                board.filename = filename
             except Exception as exc:
                 ut.show_message(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит."),
                                 str(exc))
-        return board
+        return board, filename
 
     def _read_curves_periodic_task(self) -> None:
         if self._msystem.measurements_are_ready():
@@ -971,7 +968,7 @@ class EPLabWindow(QMainWindow):
         if self._measurement_plan:
             error_message = qApp.translate("t", "План тестирования {}не соответствует режиму работы EPLab и будет "
                                                 "закрыт.")
-            board_filename = getattr(self._measurement_plan, "filename", None)
+            board_filename = self._measurement_plan_path.path
             error_message = error_message.format(f"'{board_filename}' " if board_filename else "")
             self._measurement_plan = self._check_board_for_compatibility(self._measurement_plan, error_message)
 
@@ -980,6 +977,7 @@ class EPLabWindow(QMainWindow):
             self._measurement_plan.multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
         else:
             self._reset_board()
+            self._measurement_plan_path.path = None
         self._set_widgets_to_init_state()
         self.measurers_connected.emit(True)
         self._timer.start()
@@ -1019,8 +1017,8 @@ class EPLabWindow(QMainWindow):
         if filename:
             self._current_file_path = filename
             self._measurement_plan.filename = filename
-            self._measurement_plan_path.path = filename
             self._reset_board()
+            self._measurement_plan_path.path = filename
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._board_window.update_board()
             self.update_current_pin()
@@ -1304,12 +1302,11 @@ class EPLabWindow(QMainWindow):
         :param filename: path to the file with the measurement plan that needs to be opened.
         """
 
-        board = self._read_measurement_plan(filename)
+        board, filename = self._read_measurement_plan(filename)
         if board:
             error_message = qApp.translate("t", "План тестирования {}нельзя загрузить, поскольку он не соответствует "
                                                 "режиму работы EPLab.")
-            board_filename = self._measurement_plan_path.path
-            error_message = error_message.format(f"'{board_filename}' " if board_filename else "")
+            error_message = error_message.format(f"'{filename}' " if filename else "")
             board = self._check_board_for_compatibility(board, error_message)
 
         if board:
@@ -1325,7 +1322,8 @@ class EPLabWindow(QMainWindow):
                 measurer = self._msystem.measurers[0]
                 multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
             self._measurement_plan = MeasurementPlan(board, measurer, multiplexer)
-            self._measurement_plan.filename = getattr(board, "filename", None)
+            self._measurement_plan.filename = filename
+            self._measurement_plan_path.path = filename
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
             self._board_window.update_board()

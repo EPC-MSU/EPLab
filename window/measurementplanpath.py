@@ -7,12 +7,14 @@ class MeasurementPlanPath(QObject):
 
     name_changed: pyqtSignal = pyqtSignal(str)
 
-    def __init__(self, path: Optional[str] = None) -> None:
+    def __init__(self, main_window, path: Optional[str] = None) -> None:
         """
+        :param main_window: main window of application.
         :param path: path to measurement plan.
         """
 
         super().__init__()
+        self._main_window = main_window
         self._path: str = None
         self.path = path
 
@@ -34,7 +36,9 @@ class MeasurementPlanPath(QObject):
         self._send_new_name()
 
     def _send_new_name(self) -> None:
-        if self._path is None:
+        if self._main_window.measurement_plan is None:
+            measurement_plan_name = ""
+        elif self._path is None:
             measurement_plan_name = "Untitled"
         else:
             measurement_plan_name = os.path.split(self._path)[1]
