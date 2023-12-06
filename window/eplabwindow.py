@@ -222,6 +222,7 @@ class EPLabWindow(QMainWindow):
         self._player.set_work_mode(mode)
         # Comment is only for test and write mode
         self.line_comment_pin.setEnabled(mode in (WorkMode.TEST, WorkMode.WRITE))
+        self.save_comment_push_button.setEnabled(mode in (WorkMode.TEST, WorkMode.WRITE))
         self.search_optimal_action.setEnabled(mode in (WorkMode.COMPARE, WorkMode.WRITE))
         if mode is WorkMode.COMPARE and len(self._msystem.measurers) < 2:
             # Remove reference curve in case we have only one IVMeasurer in compare mode
@@ -545,7 +546,7 @@ class EPLabWindow(QMainWindow):
         """
 
         if not (isinstance(filename, str) and os.path.exists(filename)):
-            filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть плату"),
+            filename = QFileDialog.getOpenFileName(self, qApp.translate("MainWindow", "Открыть план тестирования"),
                                                    directory=self._dir_watcher.reference,
                                                    filter="Board Files (*.json *.uzf)")[0]
         board = None
@@ -652,6 +653,21 @@ class EPLabWindow(QMainWindow):
             Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]), measurer=self._msystem.measurers[0],
             multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
         self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
+
+    def _save_changes_in_measurement_plan(self) -> bool:
+        """
+        :return:
+        """
+
+        result = 0
+        if self._last_saved_measurement_plan_data != self._measurement_plan.to_json():
+            result = ut.show_message(qApp.translate("t", "Внимание"),
+                                     qApp.translate("t", "Сохранить изменения в файл?"),
+                                     icon=QMessageBox.Information, yes_button=True, no_button=True, cancel_button=True)
+            if result == 0:
+                # You need to save the changes to an existing file
+                self.save_board()
+        return result in (0, 1)
 
     def _save_last_curves(self, curves: Dict[str, Optional[IVCurve]] = None) -> None:
         """
@@ -995,22 +1011,11 @@ class EPLabWindow(QMainWindow):
         open, then before creating a new file, you will be asked to save the changes to the open file.
         """
 
-        if self._measurement_plan_path.path is not None:
-            result = ut.show_message(qApp.translate("t", "Внимание"),
-                                     qApp.translate("t", "Сохранить изменения в файл?"),
-                                     icon=QMessageBox.Information, yes_button=True, no_button=True, cancel_button=True)
-            if result == 0:
-                # You need to save the changes to an existing file
-                self.save_board()
-            elif result == 1:
-                # Need to create a new file
-                pass
-            else:
-                # You don't need to do anything
-                return
+        if not self._save_changes_in_measurement_plan():
+            return
 
         default_path = os.path.join(self._dir_watcher.reference, "board.uzf")
-        filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Создать новую плату"),
+        filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Создать план тестирования"),
                                                filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
         if filename:
             self._reset_board()
@@ -1298,6 +1303,9 @@ class EPLabWindow(QMainWindow):
         :param filename: path to the file with the measurement plan that needs to be opened.
         """
 
+        if not self._save_changes_in_measurement_plan():
+            return
+
         board, filename = self._read_measurement_plan(filename)
         if board:
             error_message = qApp.translate("t", "План тестирования {}нельзя загрузить, поскольку он не соответствует "
@@ -1425,7 +1433,7 @@ class EPLabWindow(QMainWindow):
             return None
 
         default_path = os.path.join(self._dir_watcher.reference, "board.uzf")
-        filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить плату"),
+        filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить план тестирования"),
                                                filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
         if filename:
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
@@ -1447,11 +1455,12 @@ class EPLabWindow(QMainWindow):
         filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
         default_name = os.path.join(self._dir_watcher.screenshot, filename)
         if system().lower() == "windows":
-            filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
-                                                   directory=default_name)[0]
+            filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
+                                                   filter="Image (*.png)", directory=default_name)[0]
         else:
-            filename = QFileDialog.getSaveFileName(self, qApp.translate("t", "Сохранить ВАХ"), filter="Image (*.png)",
-                                                   directory=default_name, options=QFileDialog.DontUseNativeDialog)[0]
+            filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
+                                                   filter="Image (*.png)", directory=default_name,
+                                                   options=QFileDialog.DontUseNativeDialog)[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
