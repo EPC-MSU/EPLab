@@ -31,6 +31,7 @@ def update_scale(widget: QWidget) -> None:
     from dialogs.measurersettingswindow import MeasurerSettingsWindow
     from settings import LowSettingsPanel
     from window.parameterwidget import ParameterWidget
+    from window.pinindexwidget import PinIndexWidget
 
     font_size = 8
     if isinstance(widget, MeasurerSettingsWindow):
@@ -42,7 +43,7 @@ def update_scale(widget: QWidget) -> None:
 
     for child_widget in vars(widget).values():
         if isinstance(child_widget, (QCheckBox, QComboBox, QDialogButtonBox, QGroupBox, QLabel, QLineEdit, QProgressBar,
-                                     QPushButton, QSpinBox, QTextBrowser, QToolBar)):
+                                     QPushButton, QSpinBox, QTextBrowser, QToolBar, PinIndexWidget)):
             scale_font_on_widget(child_widget, font_size)
             child_widget.adjustSize()
         elif isinstance(child_widget, LowSettingsPanel):

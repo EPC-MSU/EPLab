@@ -10,12 +10,10 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple, Union
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, QRegExp, Qt, QTimer,
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt, QTimer,
                           QTranslator)
-from PyQt5.QtGui import (QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent,
-                         QRegExpValidator)
-from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QLineEdit, QMainWindow, QMenu, QMessageBox, QVBoxLayout,
-                             QWidget)
+from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
+from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMenu, QMessageBox, QVBoxLayout, QWidget
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
@@ -39,6 +37,7 @@ from window.language import Language, Translator
 from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
 from window.pedalhandler import PedalHandler
+from window.pinindexwidget import PinIndexWidget
 from window.scaler import update_scale_of_class
 from window.scorewrapper import ScoreWrapper
 from window.soundplayer import SoundPlayer
@@ -210,7 +209,7 @@ class EPLabWindow(QMainWindow):
         self.testing_mode_action.setChecked(mode is WorkMode.TEST)
         self.next_point_action.setEnabled(mode is not WorkMode.COMPARE)
         self.previous_point_action.setEnabled(mode is not WorkMode.COMPARE)
-        self.num_point_line_edit.setEnabled(mode is not WorkMode.COMPARE)
+        self.pin_index_widget.setEnabled(mode is not WorkMode.COMPARE)
         self.new_point_action.setEnabled(mode is WorkMode.WRITE)
         self.save_point_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
         self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
@@ -277,7 +276,7 @@ class EPLabWindow(QMainWindow):
         self.line_comment_pin.clear()
         self.low_settings_panel.clear_panel()
         self.measurers_menu.clear()
-        self.num_point_line_edit.clear()
+        self.pin_index_widget.clear()
         self._iv_window.plot.remove_all_cursors()
         self._mux_and_plan_window.close()
         self._score_wrapper.set_dummy_score()
@@ -472,13 +471,11 @@ class EPLabWindow(QMainWindow):
         self.save_file_action.triggered.connect(self.save_board)
         self.save_as_file_action.triggered.connect(self.save_board_as)
         self.previous_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(True))
-        self.num_point_line_edit: QLineEdit = QLineEdit(self)
-        self.num_point_line_edit.setValidator(QRegExpValidator(QRegExp(r"\d+")))
-        self.num_point_line_edit.setFixedWidth(40)
-        self.num_point_line_edit.setEnabled(False)
-        self.num_point_line_edit.installEventFilter(self)
-        self.toolbar_test.insertWidget(self.next_point_action, self.num_point_line_edit)
-        self.num_point_line_edit.returnPressed.connect(self.go_to_selected_pin)
+        self.pin_index_widget: PinIndexWidget = PinIndexWidget(self)
+        self.pin_index_widget.setEnabled(False)
+        self.pin_index_widget.installEventFilter(self)
+        self.toolbar_test.insertWidget(self.next_point_action, self.pin_index_widget)
+        self.pin_index_widget.returnPressed.connect(self.go_to_pin_selected_in_widget)
         self.next_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(False))
         self.new_point_action.triggered.connect(self.create_new_pin)
         self._replace_save_point_action()
@@ -1095,7 +1092,7 @@ class EPLabWindow(QMainWindow):
                    self.hide_curve_b_action, self.search_optimal_action, self.comparing_mode_action,
                    self.writing_mode_action, self.testing_mode_action, self.settings_mode_action,
                    self.next_point_action, self.previous_point_action, self.new_point_action, self.save_point_action,
-                   self.add_board_image_action, self.create_report_action, self.num_point_line_edit,
+                   self.add_board_image_action, self.create_report_action, self.pin_index_widget,
                    self.start_or_stop_entire_plan_measurement_action, self.add_cursor_action, self.remove_cursor_action,
                    self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock, self.comment_dock,
                    self.measurers_menu)
@@ -1114,7 +1111,7 @@ class EPLabWindow(QMainWindow):
         """
 
         if self.measurement_plan and isinstance(event, QKeyEvent) and \
-                not getattr(self.num_point_line_edit, "is_focused", False) and \
+                not getattr(self.pin_index_widget, "is_focused", False) and \
                 not getattr(self.line_comment_pin, "is_focused", False):
             key_event = QKeyEvent(event)
             if key_event.type() in (QEvent.KeyPress, QEvent.ShortcutOverride):
@@ -1137,7 +1134,7 @@ class EPLabWindow(QMainWindow):
         :return: True if event should be filtered out, otherwise - False.
         """
 
-        if obj in (self.num_point_line_edit, self.line_comment_pin):
+        if obj in (self.pin_index_widget, self.line_comment_pin):
             if isinstance(event, QKeyEvent):
                 key_event = QKeyEvent(event)
                 key = key_event.key()
@@ -1222,21 +1219,46 @@ class EPLabWindow(QMainWindow):
         self._open_board_window_if_needed()
 
     @pyqtSlot()
+    def go_to_pin_selected_in_widget(self, user_pin_index: int = None) -> None:
+        """
+        Slot sets given pin as current.
+        :param user_pin_index: user index of a pin to be set as current (start at 1).
+        """
+
+        if user_pin_index is not None:
+            self.pin_index_widget.setText(str(user_pin_index))
+
+        pin_index = self.pin_index_widget.get_index()
+        if pin_index is None:
+            return
+
+        try:
+            with self._device_errors_handler:
+                self._measurement_plan.go_pin(pin_index)
+        except BadMultiplexerOutputError:
+            if not self._mux_and_plan_window.measurement_plan_runner.is_running:
+                ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
+                                qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
+                                                    "точки не был установлен."))
+        except ValueError:
+            ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
+                            qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
+            return
+
+        self.update_current_pin()
+        self._open_board_window_if_needed()
+
     def go_to_selected_pin(self, pin_index: int = None) -> None:
         """
         Slot sets given pin as current.
-        :param pin_index: index of a pin to be set as current.
+        :param pin_index: index of a pin to be set as current (starts at 0).
         """
 
         if pin_index is not None:
-            self.num_point_line_edit.setText(str(pin_index))
+            self.pin_index_widget.setText(str(pin_index))
 
-        try:
-            pin_index = int(self.num_point_line_edit.text())
-        except ValueError:
-            ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
-                            qApp.translate("t", "Неверный формат номера точки. Номер точки может принимать только "
-                                                "целочисленное значение."))
+        pin_index = self.pin_index_widget.get_index()
+        if pin_index is None:
             return
 
         try:
@@ -1609,7 +1631,7 @@ class EPLabWindow(QMainWindow):
         """
 
         index = self._measurement_plan.get_current_index()
-        self.num_point_line_edit.setText(str(index))
+        self.pin_index_widget.set_index(index)
         self._board_window.workspace.select_point(index)
         if self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
             self._update_current_pin_in_test_and_write_mode()
