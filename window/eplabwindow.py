@@ -211,6 +211,7 @@ class EPLabWindow(QMainWindow):
         self.previous_point_action.setEnabled(mode is not WorkMode.COMPARE)
         self.pin_index_widget.setEnabled(mode is not WorkMode.COMPARE)
         self.new_point_action.setEnabled(mode is WorkMode.WRITE)
+        self.remove_point_action.setEnabled(mode is WorkMode.WRITE)
         self.save_point_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
         self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
         self.create_report_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
@@ -479,6 +480,7 @@ class EPLabWindow(QMainWindow):
         self.pin_index_widget.returnPressed.connect(self.go_to_pin_selected_in_widget)
         self.next_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(False))
         self.new_point_action.triggered.connect(self.create_new_pin)
+        self.remove_point_action.triggered.connect(self.remove_pin)
         self._replace_save_point_action()
         self.add_board_image_action.triggered.connect(self.load_board_image)
         self.create_report_action.triggered.connect(self.create_report)
@@ -1093,11 +1095,11 @@ class EPLabWindow(QMainWindow):
                    self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
                    self.hide_curve_b_action, self.search_optimal_action, self.comparing_mode_action,
                    self.writing_mode_action, self.testing_mode_action, self.settings_mode_action,
-                   self.next_point_action, self.previous_point_action, self.new_point_action, self.save_point_action,
-                   self.add_board_image_action, self.create_report_action, self.pin_index_widget,
-                   self.start_or_stop_entire_plan_measurement_action, self.add_cursor_action, self.remove_cursor_action,
-                   self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock, self.comment_dock,
-                   self.measurers_menu)
+                   self.next_point_action, self.previous_point_action, self.new_point_action, self.remove_point_action,
+                   self.save_point_action, self.add_board_image_action, self.create_report_action,
+                   self.pin_index_widget, self.start_or_stop_entire_plan_measurement_action, self.add_cursor_action,
+                   self.remove_cursor_action, self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock,
+                   self.comment_dock, self.measurers_menu)
         for widget in widgets:
             widget.setEnabled(enabled)
         if enabled and len(self._msystem.measurers) < 2:
@@ -1379,6 +1381,14 @@ class EPLabWindow(QMainWindow):
         """
 
         self._iv_window.plot.remove_all_cursors()
+
+    @pyqtSlot()
+    def remove_pin(self) -> None:
+        """
+        Slot removes current pin from measurement plan.
+        """
+
+        self.measurement_plan.get_current_index()
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         """
