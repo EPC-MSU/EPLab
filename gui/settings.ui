@@ -61,15 +61,18 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="spin_box_score_threshold">
+      <widget class="QDoubleSpinBox" name="spin_box_score_threshold">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="maximum">
-        <number>100</number>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="singleStep">
+        <double>1.000000000000000</double>
        </property>
       </widget>
      </item>

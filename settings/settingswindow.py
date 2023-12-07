@@ -57,8 +57,7 @@ class SettingsWindow(QDialog):
         :return: score threshold value.
         """
 
-        value = self.spin_box_score_threshold.value()
-        return float(value / 100.0)
+        return self.spin_box_score_threshold.value() / 100.0
 
     def _send_settings(self, settings: Settings = None) -> None:
         """
@@ -73,7 +72,7 @@ class SettingsWindow(QDialog):
         :param threshold: new score threshold value.
         """
 
-        threshold = min(max(round(100 * threshold), 0), 100)
+        threshold = min(max(round(100 * threshold, 1), 0), 100)
         self.spin_box_score_threshold.setValue(threshold)
         self._settings.score_threshold = self._get_threshold_value()
 
@@ -153,8 +152,8 @@ class SettingsWindow(QDialog):
             self._settings.score_threshold = self._get_threshold_value()
             self._settings.export(path=settings_path)
 
-    @pyqtSlot(int)
-    def update_threshold(self, new_value: int) -> None:
+    @pyqtSlot(float)
+    def update_threshold(self, new_value: float) -> None:
         """
         :param new_value: new threshold value.
         """
