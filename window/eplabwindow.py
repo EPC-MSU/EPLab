@@ -1266,7 +1266,7 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot(bool)
     def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:
-        self.testing_mode_action.setEnabled(there_are_measured_pins)
+        self.testing_mode_action.setEnabled(bool(self._msystem and there_are_measured_pins))
 
     @pyqtSlot(bool)
     def handle_pedal_signal(self, pressed: bool) -> None:
