@@ -34,6 +34,7 @@ from window.common import DeviceErrorsHandler, WorkMode
 from window.curvestates import CurveStates
 from window.dirwatcher import DirWatcher
 from window.language import Language, Translator
+from window.measurementplanchecker import MeasurementPlanChecker
 from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
 from window.pedalhandler import PedalHandler
@@ -93,6 +94,8 @@ class EPLabWindow(QMainWindow):
         self._hide_curve_test: bool = False
         self._last_saved_measurement_plan_data: Dict[str, Any] = None
         self._measurement_plan: MeasurementPlan = None
+        self._measurement_plan_checker: MeasurementPlanChecker = MeasurementPlanChecker(self)
+        self._measurement_plan_checker.measured_pin_in_plan_signal.connect(self.handle_measurement_plan_change)
         self._measurement_plan_path: MeasurementPlanPath = MeasurementPlanPath(self)
         self._measurement_plan_path.name_changed.connect(self.change_window_title)
         self._msystem: MeasurementSystem = None
@@ -650,6 +653,7 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan = MeasurementPlan(
             Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]), measurer=self._msystem.measurers[0],
             multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
+        self._measurement_plan_checker.set_new_plan()
         self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
 
     def _save_changes_in_measurement_plan(self, additional_info: str = None) -> bool:
@@ -981,6 +985,7 @@ class EPLabWindow(QMainWindow):
             board_filename = self._measurement_plan_path.path
             error_message = error_message.format(f"'{board_filename}' " if board_filename else "")
             self._measurement_plan = self._check_board_for_compatibility(self._measurement_plan, error_message)
+            self._measurement_plan_checker.set_new_plan()
 
         if self._measurement_plan:
             self._measurement_plan.measurer = self._msystem.measurers[0]
@@ -1066,6 +1071,7 @@ class EPLabWindow(QMainWindow):
                 multiplexer.close_device()
         self._last_saved_measurement_plan_data = None
         self._measurement_plan = None
+        self._measurement_plan_checker.set_new_plan()
         self._measurement_plan_path.path = None
         self._msystem = None
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
@@ -1259,6 +1265,10 @@ class EPLabWindow(QMainWindow):
         self.go_to_pin_selected_in_widget(pin_index + 1)
 
     @pyqtSlot(bool)
+    def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:
+        self.testing_mode_action.setEnabled(there_are_measured_pins)
+
+    @pyqtSlot(bool)
     def handle_pedal_signal(self, pressed: bool) -> None:
         """
         Slot processes pedal presses. The pedal freezes/unfreezes the measures in comparison mode and causes a
@@ -1326,6 +1336,7 @@ class EPLabWindow(QMainWindow):
                 measurer = self._msystem.measurers[0]
                 multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
             self._measurement_plan = MeasurementPlan(board, measurer, multiplexer)
+            self._measurement_plan_checker.set_new_plan()
             self._measurement_plan_path.path = filename
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here

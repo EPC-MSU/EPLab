@@ -582,7 +582,7 @@ class MeasurementPlanWidget(QWidget):
         Method updates information about measurement plan.
         """
 
-        self._parent.measurement_plan.remove_all_callback_funcs_for_pin_changes()
+        # self._parent.measurement_plan.remove_all_callback_funcs_for_pin_changes()
         self._parent.measurement_plan.add_callback_func_for_pin_changes(self.set_new_pin_parameters)
         self._fill_table()
 
