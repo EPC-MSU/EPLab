@@ -18,6 +18,10 @@ class MeasurementPlanChecker(QObject):
         self._measured_pins: Set[int] = set()
 
     @property
+    def is_measured_pin(self) -> bool:
+        return len(self._measured_pins) != 0
+
+    @property
     def measurement_plan(self) -> Optional[MeasurementPlan]:
         return self._main_window.measurement_plan
 

@@ -236,6 +236,10 @@ class EPLabWindow(QMainWindow):
             scroll_area.enable_buttons(mode in (WorkMode.COMPARE, WorkMode.WRITE))
         self._work_mode = mode
 
+    def _change_work_mode_for_new_measurement_plan(self) -> None:
+        if self._work_mode == WorkMode.TEST and not self._measurement_plan_checker.is_measured_pin:
+            self._change_work_mode(WorkMode.COMPARE)
+
     def _check_board_for_compatibility(self, board: Union[Board, MeasurementPlan], error_message: str
                                        ) -> Optional[Union[Board, MeasurementPlan]]:
         """
@@ -1031,6 +1035,7 @@ class EPLabWindow(QMainWindow):
             self._board_window.update_board()
             self.update_current_pin()
             self._mux_and_plan_window.update_info()
+            self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
     def create_new_pin(self, multiplexer_output=None) -> None:
@@ -1351,6 +1356,7 @@ class EPLabWindow(QMainWindow):
             self._open_board_window_if_needed()
             if self._msystem:
                 self._mux_and_plan_window.update_info()
+            self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
     def load_board_image(self) -> None:
