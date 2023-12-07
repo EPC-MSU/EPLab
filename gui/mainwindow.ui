@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>632</width>
+    <width>663</width>
     <height>415</height>
    </rect>
   </property>
@@ -201,7 +201,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>632</width>
+     <width>663</width>
      <height>21</height>
     </rect>
    </property>
@@ -264,6 +264,7 @@
     <addaction name="previous_point_action"/>
     <addaction name="separator"/>
     <addaction name="new_point_action"/>
+    <addaction name="remove_point_action"/>
     <addaction name="save_point_action"/>
     <addaction name="add_board_image_action"/>
     <addaction name="create_report_action"/>
@@ -352,6 +353,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="new_point_action"/>
+   <addaction name="remove_point_action"/>
    <addaction name="save_point_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_auto_search">
@@ -816,6 +818,18 @@
    </property>
    <property name="text">
     <string>Горячие клавиши</string>
+   </property>
+  </action>
+  <action name="remove_point_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/removepoint.png</normaloff>../media/removepoint.png</iconset>
+   </property>
+   <property name="text">
+    <string>Удалить точку</string>
    </property>
   </action>
  </widget>
