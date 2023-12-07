@@ -26,7 +26,7 @@ class ScoreWrapper:
         return self._threshold
 
     def _get_threshold_int(self) -> None:
-        self._threshold_int: int = convert_to_int(self._threshold)
+        self._threshold_with_tenths: float = convert_to_percent_with_tenths(self._threshold)
 
     def _set_score_text(self, text: str, color: str) -> None:
         """
@@ -53,8 +53,8 @@ class ScoreWrapper:
         :param score: new score value.
         """
 
-        score = convert_to_int(score)
-        color = self._COLOR_GOOD if score <= self._threshold_int else self._COLOR_BAD
+        score = convert_to_percent_with_tenths(score)
+        color = self._COLOR_GOOD if score <= self._threshold_with_tenths else self._COLOR_BAD
         self._friendly_score = str(score) + "%"
         self._set_score_text(self._friendly_score, color)
 
@@ -67,10 +67,10 @@ class ScoreWrapper:
         self._get_threshold_int()
 
 
-def convert_to_int(value: float) -> int:
+def convert_to_percent_with_tenths(value: float) -> float:
     """
-    :param value: the value to be converted to an integer percentage.
-    :return: integer percentage.
+    :param value: the value to be converted to an percentage with tenths.
+    :return: percent with tenths.
     """
 
-    return round(100 * value)
+    return round(100 * value, 1)

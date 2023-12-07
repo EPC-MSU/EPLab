@@ -42,7 +42,7 @@
       <widget class="QLabel" name="score_label">
        <property name="minimumSize">
         <size>
-         <width>182</width>
+         <width>190</width>
          <height>0</height>
         </size>
        </property>
