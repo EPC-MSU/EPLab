@@ -818,6 +818,12 @@ class EPLabWindow(QMainWindow):
                 curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
                           "test": None if not test_for_plan else test_for_plan.ivc}
                 self._update_curves(curves, settings)
+            else:
+                for plot in (self.reference_curve_plot, self.test_curve_plot, self.test_curve_plot_from_plan):
+                    plot.set_curve(None)
+                pin_index = self.pin_index_widget.text()
+                self._clear_widgets()
+                self.pin_index_widget.setText(pin_index)
 
     def _update_current_pin_in_test_and_write_mode(self) -> None:
         current_pin = self._measurement_plan.get_current_pin()
