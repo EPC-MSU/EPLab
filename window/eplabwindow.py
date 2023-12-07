@@ -1234,6 +1234,11 @@ class EPLabWindow(QMainWindow):
                                                     "точки не был установлен."))
         except Exception:
             self._device_errors_handler.all_ok = False
+
+        if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
+            self.go_to_left_or_right_pin(to_prev)
+            return
+
         self.update_current_pin()
         self._open_board_window_if_needed()
 
@@ -1262,6 +1267,10 @@ class EPLabWindow(QMainWindow):
         except ValueError:
             ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
                             qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
+            return
+
+        if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
+            self.go_to_left_or_right_pin(False)
             return
 
         self.update_current_pin()

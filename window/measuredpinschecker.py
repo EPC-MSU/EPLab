@@ -42,7 +42,7 @@ class MeasuredPinsChecker(QObject):
         """
 
         if 0 <= pin_index < len(self.measurement_plan._all_pins):
-            pin = self.measurement_plan._all_pins[pin_index]
+            pin = self.measurement_plan.get_pin_with_index(pin_index)
             if self._check_pin(pin):
                 self._measured_pins.add(pin_index)
             else:
@@ -76,6 +76,13 @@ class MeasuredPinsChecker(QObject):
             for index, pin in self.measurement_plan.all_pins_iterator():
                 if self._check_pin(pin):
                     self._measured_pins.add(index)
+
+    def check_empty_current_pin(self) -> bool:
+        pin = self.measurement_plan.get_current_pin()
+        for measurement in pin.measurements:
+            if measurement.is_reference:
+                return False
+        return True
 
     def set_new_plan(self) -> None:
         self._set_new_plan()
