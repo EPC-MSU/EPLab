@@ -12,7 +12,8 @@ from platform import system
 from typing import Any, Dict, List, Optional, Tuple, Union
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt, QTimer,
                           QTranslator)
-from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
+from PyQt5.QtGui import (QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QMoveEvent,
+                         QResizeEvent)
 from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMenu, QMessageBox, QVBoxLayout, QWidget
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
@@ -39,6 +40,7 @@ from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
 from window.pedalhandler import PedalHandler
 from window.pinindexwidget import PinIndexWidget
+from window.popupmessage import PopupMessage
 from window.scaler import update_scale_of_class
 from window.scorewrapper import ScoreWrapper
 from window.soundplayer import SoundPlayer
@@ -101,6 +103,7 @@ class EPLabWindow(QMainWindow):
         self._msystem: MeasurementSystem = None
         self._pedal_handler: PedalHandler = PedalHandler()
         self._pedal_handler.pedal_signal.connect(self.handle_pedal_signal)
+        self._popup_message: Optional[PopupMessage] = None
         self._product: EyePointProduct = product
         self._product_name: cw.ProductName = None
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
@@ -125,6 +128,10 @@ class EPLabWindow(QMainWindow):
 
     @property
     def device_errors_handler(self) -> DeviceErrorsHandler:
+        """
+        :return: device errors handler.
+        """
+
         return self._device_errors_handler
 
     @property
@@ -771,6 +778,21 @@ class EPLabWindow(QMainWindow):
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
 
+    def _skip_empty_pins(self, left: bool = False) -> None:
+        """
+        In TEST work mode you can only move along pins with measured reference IV curves. See ticket #89690.
+        :param left: if True, then in search of the next pin with the measured reference IV-curve you need to move
+        through the list to the left (towards decreasing indices), otherwise - to the right (towards increasing
+        indices).
+        """
+
+        pin_index, message_text = self._measured_pins_checker.get_next_measured_pin(left)
+        self.go_to_selected_pin(pin_index)
+        if message_text:
+            if self._popup_message:
+                self._popup_message.close()
+            self._popup_message = PopupMessage(self, message_text)
+
     @pyqtSlot(WorkMode)
     def _switch_work_mode(self, mode: WorkMode) -> None:
         """
@@ -779,9 +801,7 @@ class EPLabWindow(QMainWindow):
 
         self._change_work_mode(mode)
         if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
-            # In TEST work mode you can only move along pins with measured reference IV curves. See ticket #89690
-            pin_index = self._measured_pins_checker.get_next_measured_pin()
-            self.go_to_selected_pin(pin_index)
+            self._skip_empty_pins()
 
         self.update_current_pin()
         self.work_mode_changed.emit(mode)
@@ -1247,8 +1267,7 @@ class EPLabWindow(QMainWindow):
             self._device_errors_handler.all_ok = False
 
         if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
-            pin_index = self._measured_pins_checker.get_next_measured_pin(to_prev)
-            self.go_to_selected_pin(pin_index)
+            self._skip_empty_pins(to_prev)
             return
 
         self.update_current_pin()
@@ -1282,8 +1301,7 @@ class EPLabWindow(QMainWindow):
             return
 
         if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
-            pin_index = self._measured_pins_checker.get_next_measured_pin()
-            self.go_to_selected_pin(pin_index)
+            self._skip_empty_pins()
             return
 
         self.update_current_pin()
@@ -1299,6 +1317,13 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot(bool)
     def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:
+        """
+        Slot processes the signal after checking the measurement plan for pins with the measured reference IV-curves.
+        If there are no such pins in the measurement plan, then switching to TEST work mode is prohibited.
+        See ticket #89690.
+        :param there_are_measured_pins: True, if the measurement plan contains a pin with a measured reference IV-curve.
+        """
+
         self.testing_mode_action.setEnabled(bool(self._msystem and there_are_measured_pins))
 
     @pyqtSlot(bool)
@@ -1394,6 +1419,15 @@ class EPLabWindow(QMainWindow):
             self.update_current_pin()
             self._open_board_window_if_needed()
 
+    def moveEvent(self, event: QMoveEvent) -> None:
+        """
+        :param event: move event.
+        """
+
+        if self._popup_message and self._popup_message.isVisible():
+            self._popup_message.set_position()
+        super().moveEvent(event)
+
     @pyqtSlot()
     def open_board_image(self) -> None:
         """
@@ -1447,6 +1481,9 @@ class EPLabWindow(QMainWindow):
             else:
                 style = Qt.ToolButtonTextBesideIcon
             tool_bar.setToolButtonStyle(style)
+
+        if self._popup_message and self._popup_message.isVisible():
+            self._popup_message.set_position()
         super().resizeEvent(event)
 
     @pyqtSlot()
@@ -1488,6 +1525,10 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def save_comment(self) -> None:
+        """
+        Slot saves comment for pin.
+        """
+
         pin_index = self._measurement_plan.get_current_index()
         self._measurement_plan.save_comment_to_pin_with_index(pin_index, self.line_comment_pin.text())
 

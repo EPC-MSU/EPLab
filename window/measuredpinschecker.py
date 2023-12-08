@@ -1,7 +1,7 @@
-from typing import Optional, Set
+from typing import List, Optional, Set, Tuple
+from PyQt5.QtCore import pyqtSignal, QCoreApplication as qApp, QObject
 from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
-from PyQt5.QtCore import pyqtSignal, QObject
 
 
 class MeasuredPinsChecker(QObject):
@@ -61,6 +61,29 @@ class MeasuredPinsChecker(QObject):
         else:
             self._measured_pins.discard(pin_index)
 
+    @staticmethod
+    def _get_text(empty_pins: List[int]) -> str:
+        """
+        :param empty_pins: list of pins that do not have measured reference IV curves.
+        :return: message listing pins that do not have measured reference IV curves.
+        """
+
+        if len(empty_pins) == 1:
+            index = empty_pins[0] + 1
+            return qApp.translate("t", "В точке {} плана тестирования нет эталонной сигнатуры, эта точка пропущена."
+                                  ).format(index)
+
+        if len(empty_pins) > 1:
+            borders = get_borders(sorted(empty_pins))
+            borders_str = []
+            for left, right in borders:
+                if left != right:
+                    borders_str.append(f"{left + 1} - {right + 1}")
+                else:
+                    borders_str.append(f"{left + 1}")
+            return qApp.translate("t", "В точках {} плана тестирования нет эталонных сигнатур, эти точки пропущены."
+                                  ).format(", ".join(borders_str))
+
     def _handle_measurement_plan_change(self, pin_index: int) -> None:
         """
         :param pin_index: pin index that has changed.
@@ -94,7 +117,7 @@ class MeasuredPinsChecker(QObject):
                 return False
         return True
 
-    def get_next_measured_pin(self, left: bool = False) -> int:
+    def get_next_measured_pin(self, left: bool = False) -> Tuple[int, Optional[str]]:
         """
         :param left: if True, then in search of the next pin with the measured reference IV-curve you need to move
         through the list to the left (towards decreasing indices), otherwise - to the right (towards increasing
@@ -103,6 +126,11 @@ class MeasuredPinsChecker(QObject):
         """
 
         def get_next_pin_index(current_index: int) -> int:
+            """
+            :param current_index: current index.
+            :return: next index.
+            """
+
             if left:
                 index = current_index - 1
                 if index < 0:
@@ -116,11 +144,13 @@ class MeasuredPinsChecker(QObject):
         number_of_pins = len(self.measurement_plan._all_pins)
         start_index = self.measurement_plan.get_current_index()
         pin_index = start_index
+        empty_indeces = {pin_index}
         while True:
             pin_index = get_next_pin_index(pin_index)
             pin = self.measurement_plan.get_pin_with_index(pin_index)
             if (pin and self._check_pin(pin)) or pin_index == start_index:
-                return pin_index
+                return pin_index, self._get_text(list(empty_indeces))
+            empty_indeces.add(pin_index)
 
     def set_new_plan(self) -> None:
         """
@@ -131,3 +161,28 @@ class MeasuredPinsChecker(QObject):
         self._handle_measurement_plan_change(0)
         if self.measurement_plan:
             self.measurement_plan.add_callback_func_for_pin_changes(self._handle_measurement_plan_change)
+
+
+def get_borders(array: List[int]) -> List[Tuple[int, int]]:
+    """
+    For example, a function receives a list:
+    [1, 2, 3, 5, 6, 27, 39, 40, 41]
+    Then the function will return the boundaries:
+    [(1, 3), (5, 6), (27, 27), (39, 41)]
+    :param array: sorted list of numbers.
+    :return: borders.
+    """
+
+    def get_segment(array_: List[int], shift: int) -> Tuple[int, int]:
+        i = 0
+        while i + 1 < len(array_) and array_[i] + 1 == array_[i + 1]:
+            i += 1
+        return shift, i + shift
+
+    borders = []
+    i_left = 0
+    while i_left < len(array):
+        i_left, i_right = get_segment(array[i_left:], i_left)
+        borders.append((array[i_left], array[i_right]))
+        i_left = i_right + 1
+    return borders
