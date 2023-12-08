@@ -141,8 +141,11 @@ class MeasuredPinsChecker(QObject):
                     index = 0
             return index
 
-        number_of_pins = len(self.measurement_plan._all_pins)
         start_index = self.measurement_plan.get_current_index()
+        if not self.check_empty_current_pin():
+            return start_index, None
+
+        number_of_pins = len(self.measurement_plan._all_pins)
         pin_index = start_index
         empty_indeces = {pin_index}
         while True:
