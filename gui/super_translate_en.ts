@@ -305,16 +305,6 @@
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="278"/>
-        <source>Точки [{}] не содержат сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
-        <translation>Points [{}] do not contain saved measurements. To save the test plan all points must contain measurements.</translation>
-    </message>
-    <message>
-        <location filename="../window/eplabwindow.py" line="281"/>
-        <source>Точка [{}] не содержит сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
-        <translation>Point [{}] does not contain saved measurements. To save the test plan all points must contain measurements.</translation>
-    </message>
-    <message>
         <location filename="../window/eplabwindow.py" line="322"/>
         <source>Эмулятор</source>
         <translation>Emulator</translation>
@@ -450,14 +440,14 @@
         <translation>Error occurred while configuring device settings.</translation>
     </message>
     <message>
-        <location filanema="../window/measuredpinschecker.py" line="73"/>
-        <source>В точке {} плана тестирования нет эталонной сигнатуры, эта точка пропущена.</source>
-        <translation>There is no reference signature at pin {} of the test plan, this pin is skipped.</translation>
+        <location filename="../window/measuredpinschecker.py" line="115"/>
+        <source>Точки {} не содержат сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
+        <translation>Points {} do not contain saved measurements. To save the test plan all points must contain measurements.</translation>
     </message>
     <message>
-        <location filanema="../window/measuredpinschecker.py" line="84"/>
-        <source>В точках {} плана тестирования нет эталонных сигнатур, эти точки пропущены.</source>
-        <translation>There are no reference signatures at pins {} of the test plan, these pins are skipped.</translation>
+        <location filename="../window/measuredpinschecker.py" line="118"/>
+        <source>Точка {} не содержит сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
+        <translation>Point {} does not contain saved measurements. To save the test plan all points must contain measurements.</translation>
     </message>
     <message>
         <location filename="../window/pinindexwidget.py" line="37"/>

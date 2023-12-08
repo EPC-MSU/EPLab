@@ -2,6 +2,7 @@ from typing import List, Optional, Set, Tuple
 from PyQt5.QtCore import pyqtSignal, QCoreApplication as qApp, QObject
 from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
+from window import utils as ut
 
 
 class MeasuredPinsChecker(QObject):
@@ -17,6 +18,7 @@ class MeasuredPinsChecker(QObject):
         """
 
         super().__init__()
+        self._empty_pins: Set[int] = set()
         self._main_window = main_window
         self._measured_pins: Set[int] = set()
 
@@ -57,32 +59,11 @@ class MeasuredPinsChecker(QObject):
 
         pin = self.measurement_plan.get_pin_with_index(pin_index)
         if pin is not None and self._check_pin(pin):
+            self._empty_pins.discard(pin_index)
             self._measured_pins.add(pin_index)
         else:
+            self._empty_pins.add(pin_index)
             self._measured_pins.discard(pin_index)
-
-    @staticmethod
-    def _get_text(empty_pins: List[int]) -> str:
-        """
-        :param empty_pins: list of pins that do not have measured reference IV curves.
-        :return: message listing pins that do not have measured reference IV curves.
-        """
-
-        if len(empty_pins) == 1:
-            index = empty_pins[0] + 1
-            return qApp.translate("t", "В точке {} плана тестирования нет эталонной сигнатуры, эта точка пропущена."
-                                  ).format(index)
-
-        if len(empty_pins) > 1:
-            borders = get_borders(sorted(empty_pins))
-            borders_str = []
-            for left, right in borders:
-                if left != right:
-                    borders_str.append(f"{left + 1} - {right + 1}")
-                else:
-                    borders_str.append(f"{left + 1}")
-            return qApp.translate("t", "В точках {} плана тестирования нет эталонных сигнатур, эти точки пропущены."
-                                  ).format(", ".join(borders_str))
 
     def _handle_measurement_plan_change(self, pin_index: int) -> None:
         """
@@ -99,11 +80,14 @@ class MeasuredPinsChecker(QObject):
         Method checks a new measurement plan for the presence of pins with measured reference IV-curves.
         """
 
+        self._empty_pins.clear()
         self._measured_pins.clear()
         if self.measurement_plan:
             for index, pin in self.measurement_plan.all_pins_iterator():
                 if self._check_pin(pin):
                     self._measured_pins.add(index)
+                else:
+                    self._empty_pins.add(index)
 
     def check_empty_current_pin(self) -> bool:
         """
@@ -117,7 +101,29 @@ class MeasuredPinsChecker(QObject):
                 return False
         return True
 
-    def get_next_measured_pin(self, left: bool = False) -> Tuple[int, Optional[str]]:
+    def check_measurement_plan_for_empty_pins(self) -> bool:
+        """
+        :return: True if there are pins without measurements in measurement plan.
+        """
+
+        if len(self._empty_pins) > 0:
+            empty = True
+            empty_pins = list(self._empty_pins)
+            if len(empty_pins) > 1:
+                borders = get_borders(sorted(empty_pins))
+                borders_text = get_borders_as_text(borders)
+                text = qApp.translate("t", "Точки {} не содержат сохраненных измерений. Для сохранения плана "
+                                           "тестирования все точки должны содержать измерения.").format(borders_text)
+            else:
+                text = qApp.translate("t", "Точка {} не содержит сохраненных измерений. Для сохранения плана "
+                                           "тестирования все точки должны содержать измерения."
+                                      ).format(empty_pins[0] + 1)
+            ut.show_message(qApp.translate("t", "Ошибка"), text)
+        else:
+            empty = False
+        return empty
+
+    def get_next_measured_pin(self, left: bool = False) -> int:
         """
         :param left: if True, then in search of the next pin with the measured reference IV-curve you need to move
         through the list to the left (towards decreasing indices), otherwise - to the right (towards increasing
@@ -143,7 +149,7 @@ class MeasuredPinsChecker(QObject):
 
         start_index = self.measurement_plan.get_current_index()
         if not self.check_empty_current_pin():
-            return start_index, None
+            return start_index
 
         number_of_pins = len(self.measurement_plan._all_pins)
         pin_index = start_index
@@ -152,7 +158,7 @@ class MeasuredPinsChecker(QObject):
             pin_index = get_next_pin_index(pin_index)
             pin = self.measurement_plan.get_pin_with_index(pin_index)
             if (pin and self._check_pin(pin)) or pin_index == start_index:
-                return pin_index, self._get_text(list(empty_indeces))
+                return pin_index
             empty_indeces.add(pin_index)
 
     def set_new_plan(self) -> None:
@@ -189,3 +195,13 @@ def get_borders(array: List[int]) -> List[Tuple[int, int]]:
         borders.append((array[i_left], array[i_right]))
         i_left = i_right + 1
     return borders
+
+
+def get_borders_as_text(borders: List[Tuple[int, int]]) -> str:
+    borders_str = []
+    for left, right in borders:
+        if left != right:
+            borders_str.append(f"{left + 1} - {right + 1}")
+        else:
+            borders_str.append(f"{left + 1}")
+    return ", ".join(borders_str)

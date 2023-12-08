@@ -12,8 +12,7 @@ from platform import system
 from typing import Any, Dict, List, Optional, Tuple, Union
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt, QTimer,
                           QTranslator)
-from PyQt5.QtGui import (QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QMoveEvent,
-                         QResizeEvent)
+from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMenu, QMessageBox, QVBoxLayout, QWidget
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
@@ -40,7 +39,6 @@ from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
 from window.pedalhandler import PedalHandler
 from window.pinindexwidget import PinIndexWidget
-from window.popupmessage import PopupMessage
 from window.scaler import update_scale_of_class
 from window.scorewrapper import ScoreWrapper
 from window.soundplayer import SoundPlayer
@@ -103,7 +101,6 @@ class EPLabWindow(QMainWindow):
         self._msystem: MeasurementSystem = None
         self._pedal_handler: PedalHandler = PedalHandler()
         self._pedal_handler.pedal_signal.connect(self.handle_pedal_signal)
-        self._popup_message: Optional[PopupMessage] = None
         self._product: EyePointProduct = product
         self._product_name: cw.ProductName = None
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
@@ -265,24 +262,6 @@ class EPLabWindow(QMainWindow):
             ut.show_message(qApp.translate("t", "Ошибка"), error_message)
             board = None
         return board
-
-    def _check_measurement_plan_for_empty_pins(self) -> bool:
-        """
-        :return: True if there are pins without measurements in measurement plan.
-        """
-
-        pin_indices = [str(index + 1) for index, pin in self._measurement_plan.all_pins_iterator()
-                       if not pin.measurements]
-        if pin_indices:
-            if len(pin_indices) > 1:
-                text = qApp.translate("t", "Точки [{}] не содержат сохраненных измерений. Для сохранения плана "
-                                           "тестирования все точки должны содержать измерения.")
-            else:
-                text = qApp.translate("t", "Точка [{}] не содержит сохраненных измерений. Для сохранения плана "
-                                           "тестирования все точки должны содержать измерения.")
-            text = text.format(", ".join(pin_indices))
-            ut.show_message(qApp.translate("t", "Ошибка"), text)
-        return bool(pin_indices)
 
     def _clear_widgets(self) -> None:
         """
@@ -786,12 +765,8 @@ class EPLabWindow(QMainWindow):
         indices).
         """
 
-        pin_index, message_text = self._measured_pins_checker.get_next_measured_pin(left)
+        pin_index = self._measured_pins_checker.get_next_measured_pin(left)
         self.go_to_selected_pin(pin_index)
-        if message_text:
-            if self._popup_message:
-                self._popup_message.close()
-            self._popup_message = PopupMessage(self, message_text)
 
     @pyqtSlot(WorkMode)
     def _switch_work_mode(self, mode: WorkMode) -> None:
@@ -1419,15 +1394,6 @@ class EPLabWindow(QMainWindow):
             self.update_current_pin()
             self._open_board_window_if_needed()
 
-    def moveEvent(self, event: QMoveEvent) -> None:
-        """
-        :param event: move event.
-        """
-
-        if self._popup_message and self._popup_message.isVisible():
-            self._popup_message.set_position()
-        super().moveEvent(event)
-
     @pyqtSlot()
     def open_board_image(self) -> None:
         """
@@ -1482,8 +1448,6 @@ class EPLabWindow(QMainWindow):
                 style = Qt.ToolButtonTextBesideIcon
             tool_bar.setToolButtonStyle(style)
 
-        if self._popup_message and self._popup_message.isVisible():
-            self._popup_message.set_position()
         super().resizeEvent(event)
 
     @pyqtSlot()
@@ -1493,7 +1457,7 @@ class EPLabWindow(QMainWindow):
         :return: True if measurement plan was saved otherwise False.
         """
 
-        if self._check_measurement_plan_for_empty_pins():
+        if self._measured_pins_checker.check_measurement_plan_for_empty_pins():
             return None
 
         if not self._measurement_plan_path.path:
@@ -1511,7 +1475,7 @@ class EPLabWindow(QMainWindow):
         :return: True if measurement plan was saved otherwise False.
         """
 
-        if self._check_measurement_plan_for_empty_pins():
+        if self._measured_pins_checker.check_measurement_plan_for_empty_pins():
             return None
 
         default_path = os.path.join(self._dir_watcher.reference, "board.uzf")

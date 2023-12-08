@@ -59,11 +59,10 @@ class TestMeasuredPinsChecker(unittest.TestCase):
         while self._window.measurement_plan.get_current_index() != 0:
             self._window.measurement_plan.go_next_pin()
 
-        self.assertEqual(self._checker.get_next_measured_pin(), (0, None))
+        self.assertEqual(self._checker.get_next_measured_pin(), 0)
 
         self._window.measurement_plan.go_next_pin()
-        self.assertEqual(self._checker.get_next_measured_pin(),
-                         (2, "В точке 2 плана тестирования нет эталонной сигнатуры, эта точка пропущена."))
+        self.assertEqual(self._checker.get_next_measured_pin(), 2)
 
         self._window.measurement_plan.go_next_pin()
-        self.assertEqual(self._checker.get_next_measured_pin(), (2, None))
+        self.assertEqual(self._checker.get_next_measured_pin(), 2)
