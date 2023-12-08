@@ -300,180 +300,161 @@
 <context>
     <name>t</name>
     <message>
-        <location filename="../mainwindow.py" line="234"/>
+        <location filename="../window/eplabwindow.py" line="265"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="246"/>
-        <source>Точки [{}] не содержат сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
-        <translation>Points [{}] do not contain saved measurements. To save the test plan all points must contain measurements.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="249"/>
-        <source>Точка [{}] не содержит сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
-        <translation>Point [{}] does not contain saved measurements. To save the test plan all points must contain measurements.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="292"/>
+        <location filename="../window/eplabwindow.py" line="322"/>
         <source>Эмулятор</source>
         <translation>Emulator</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="309"/>
+        <location filename="../window/eplabwindow.py" line="339"/>
         <source>Неизвестный измеритель</source>
         <translation>Unknown measurer</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="444"/>
+        <location filename="../window/eplabwindow.py" line="467"/>
         <source>Добавить метку</source>
         <translation>Add marker</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="445"/>
-        <source>Экспортировать кривые в файл</source>
-        <translation>Export curves to file</translation>
+        <location filename="../window/eplabwindow.py" line="468"/>
+        <source>Экспортировать сигнатуры в файл</source>
+        <translation>Export signatures to file</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="446"/>
+        <location filename="../window/eplabwindow.py" line="469"/>
         <source>Удалить все метки</source>
         <translation>Delete all markers</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="447"/>
+        <location filename="../window/eplabwindow.py" line="470"/>
         <source>Удалить метку</source>
         <translation>Delete marker</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="448"/>
+        <location filename="../window/eplabwindow.py" line="471"/>
         <source>Сохранить изображение</source>
         <translation>Save image</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="544"/>
-        <source>Открыть плату</source>
-        <translation>Open board</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="553"/>
+        <location filename="../window/eplabwindow.py" line="575"/>
         <source>Формат файла не подходит.</source>
         <translation>The file format is not suitable.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="609"/>
+        <location filename="../window/eplabwindow.py" line="632"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="871"/>
-        <source>Внимание</source>
-        <translation>Warning</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="872"/>
-        <source>План тестирования не был сохранен.</source>
-        <translation>The measurement plan was not saved.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="907"/>
-        <source>Проверьте, что устройство {} подключено к компьютеру и не удерживается другой программой.</source>
-        <translation>Check that device {} is connected to the computer and is not being held by another program.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="910"/>
-        <source>Проверьте, что устройства {} подключены к компьютеру и не удерживаются другой программой.</source>
-        <translation>Check that devices {} are connected to the computer and are not being held by another program.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="912"/>
-        <source>Ошибка подключения</source>
-        <translation>Connection error</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="917"/>
-        <source>Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство EyePoint, а не какое-то другое устройство.</source>
-        <translation>Failed to connect to {0}. Make sure {0} is an EyePoint device and not some other device.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="920"/>
-        <source>Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства EyePoint, а не какие-то другие устройства.</source>
-        <translation>Failed to connect to {0}. Make sure {0} is EyePoint devices and not some other devices.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="939"/>
-        <source>План тестирования {}не соответствует режиму работы EPLab и будет закрыт.</source>
-        <translation>The test plan {} does not correspond to the EPLab work mode and will be closed.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="968"/>
+        <location filename="../window/eplabwindow.py" line="684"/>
         <source>Сохранить изменения в файл?</source>
         <translation>Do you want to save changes in file?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="981"/>
-        <source>Создать новую плату</source>
-        <translation>Create new board</translation>
+        <location filename="../window/eplabwindow.py" line="686"/>
+        <source>Внимание</source>
+        <translation>Warning</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1021"/>
+        <location filename="../window/eplabwindow.py" line="959"/>
+        <source>План тестирования не был сохранен.</source>
+        <translation>The measurement plan was not saved.</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="992"/>
+        <source>Проверьте, что устройство {} подключено к компьютеру и не удерживается другой программой.</source>
+        <translation>Check that device {} is connected to the computer and is not being held by another program.</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="995"/>
+        <source>Проверьте, что устройства {} подключены к компьютеру и не удерживаются другой программой.</source>
+        <translation>Check that devices {} are connected to the computer and are not being held by another program.</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="997"/>
+        <source>Ошибка подключения</source>
+        <translation>Connection error</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="1002"/>
+        <source>Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство EyePoint, а не какое-то другое устройство.</source>
+        <translation>Failed to connect to {0}. Make sure {0} is an EyePoint device and not some other device.</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="1005"/>
+        <source>Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства EyePoint, а не какие-то другие устройства.</source>
+        <translation>Failed to connect to {0}. Make sure {0} is EyePoint devices and not some other devices.</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="1024"/>
+        <source>План тестирования {}не соответствует режиму работы EPLab и будет закрыт.</source>
+        <translation>The test plan {} does not correspond to the EPLab work mode and will be closed.</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="1100"/>
         <source>Выбрать папку</source>
         <translation>Select directory</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1181"/>
+        <location filename="../window/eplabwindow.py" line="1263"/>
         <source>Ошибка открытия точки</source>
         <translation>Open pin error</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1182"/>
+        <location filename="../window/eplabwindow.py" line="1264"/>
         <source>Подключенный мультиплексор имеет другую конфигурацию, выход точки не был установлен.</source>
         <translation>The connected multiplexer has a different configuration, pin output is not set.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1203"/>
-        <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение.</source>
-        <translation>Incorrect format of pin number. Pin number must be integer.</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="1217"/>
+        <location filename="../window/eplabwindow.py" line="1300"/>
         <source>Точка с таким номером не найдена на данной плате.</source>
         <translation>Pin with this number was not found on this board.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1255"/>
+        <location filename="../window/eplabwindow.py" line="1379"/>
         <source>План тестирования {}нельзя загрузить, поскольку он не соответствует режиму работы EPLab.</source>
         <translation>Test plan {}cannot be loaded because it does not correspond to the EPLab operating mode.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1288"/>
+        <location filename="../window/eplabwindow.py" line="1414"/>
         <source>Открыть изображение платы</source>
         <translation>Open board window</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1303"/>
+        <location filename="../window/eplabwindow.py" line="1438"/>
         <source>Открытие изображения платы</source>
         <translation>Open board image</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1304"/>
+        <location filename="../window/eplabwindow.py" line="1439"/>
         <source>Для данной платы изображение не задано.</source>
         <translation>Not found image for current board.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.py" line="1379"/>
-        <source>Сохранить плату</source>
-        <translation>Save board</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="1401"/>
-        <source>Сохранить ВАХ</source>
-        <translation>Save IVC</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.py" line="1474"/>
+        <location filename="../window/eplabwindow.py" line="1618"/>
         <source>Ошибка при установке настроек устройства.</source>
         <translation>Error occurred while configuring device settings.</translation>
     </message>
+    <message>
+        <location filename="../window/measuredpinschecker.py" line="115"/>
+        <source>Точки {} не содержат сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
+        <translation>Points {} do not contain saved measurements. To save the test plan all points must contain measurements.</translation>
+    </message>
+    <message>
+        <location filename="../window/measuredpinschecker.py" line="118"/>
+        <source>Точка {} не содержит сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
+        <translation>Point {} does not contain saved measurements. To save the test plan all points must contain measurements.</translation>
+    </message>
+    <message>
+        <location filename="../window/pinindexwidget.py" line="37"/>
+        <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение.</source>
+        <translation>Incorrect format of pin number. Pin number must be integer.</translation>
+    </message>
+
     <message>
         <location filename="../multiplexer/measurement_plan_widget.py" line="84"/>
         <source>Модуль MUX</source>
@@ -837,32 +818,32 @@
 <context>
     <name>utils</name>
     <message>
-        <location filename="../utils.py" line="270"/>
+        <location filename="../window/utils.py" line="270"/>
         <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
         <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="351"/>
+        <location filename="../window/utils.py" line="351"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="352"/>
+        <location filename="../window/utils.py" line="352"/>
         <source>Все равно открыть</source>
         <translation>Force open</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="405"/>
+        <location filename="../window/utils.py" line="405"/>
         <source>Да</source>
         <translation>Yes</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="409"/>
+        <location filename="../window/utils.py" line="409"/>
         <source>Нет</source>
         <translation>No</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="411"/>
+        <location filename="../window/utils.py" line="411"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>

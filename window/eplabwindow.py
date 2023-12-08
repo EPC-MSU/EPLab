@@ -34,6 +34,7 @@ from window.common import DeviceErrorsHandler, WorkMode
 from window.curvestates import CurveStates
 from window.dirwatcher import DirWatcher
 from window.language import Language, Translator
+from window.measuredpinschecker import MeasuredPinsChecker
 from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
 from window.pedalhandler import PedalHandler
@@ -93,6 +94,8 @@ class EPLabWindow(QMainWindow):
         self._hide_curve_test: bool = False
         self._last_saved_measurement_plan_data: Dict[str, Any] = None
         self._measurement_plan: MeasurementPlan = None
+        self._measured_pins_checker: MeasuredPinsChecker = MeasuredPinsChecker(self)
+        self._measured_pins_checker.measured_pin_in_plan_signal.connect(self.handle_measurement_plan_change)
         self._measurement_plan_path: MeasurementPlanPath = MeasurementPlanPath(self)
         self._measurement_plan_path.name_changed.connect(self.change_window_title)
         self._msystem: MeasurementSystem = None
@@ -122,6 +125,10 @@ class EPLabWindow(QMainWindow):
 
     @property
     def device_errors_handler(self) -> DeviceErrorsHandler:
+        """
+        :return: device errors handler.
+        """
+
         return self._device_errors_handler
 
     @property
@@ -233,6 +240,16 @@ class EPLabWindow(QMainWindow):
             scroll_area.enable_buttons(mode in (WorkMode.COMPARE, WorkMode.WRITE))
         self._work_mode = mode
 
+    def _change_work_mode_for_new_measurement_plan(self) -> None:
+        """
+        Method changes the work mode of the main window when a new measurement plan is initialized. If the new plan
+        does not contain pins with measured reference IV-curves, and the current work mode is TEST, then you need to
+        change the work mode to COMPARE (see ticket #89690).
+        """
+
+        if self._work_mode == WorkMode.TEST and not self._measured_pins_checker.is_measured_pin:
+            self._change_work_mode(WorkMode.COMPARE)
+
     def _check_board_for_compatibility(self, board: Union[Board, MeasurementPlan], error_message: str
                                        ) -> Optional[Union[Board, MeasurementPlan]]:
         """
@@ -245,24 +262,6 @@ class EPLabWindow(QMainWindow):
             ut.show_message(qApp.translate("t", "Ошибка"), error_message)
             board = None
         return board
-
-    def _check_measurement_plan_for_empty_pins(self) -> bool:
-        """
-        :return: True if there are pins without measurements in measurement plan.
-        """
-
-        pin_indices = [str(index + 1) for index, pin in self._measurement_plan.all_pins_iterator()
-                       if not pin.measurements]
-        if pin_indices:
-            if len(pin_indices) > 1:
-                text = qApp.translate("t", "Точки [{}] не содержат сохраненных измерений. Для сохранения плана "
-                                           "тестирования все точки должны содержать измерения.")
-            else:
-                text = qApp.translate("t", "Точка [{}] не содержит сохраненных измерений. Для сохранения плана "
-                                           "тестирования все точки должны содержать измерения.")
-            text = text.format(", ".join(pin_indices))
-            ut.show_message(qApp.translate("t", "Ошибка"), text)
-        return bool(pin_indices)
 
     def _clear_widgets(self) -> None:
         """
@@ -445,7 +444,7 @@ class EPLabWindow(QMainWindow):
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
         self._iv_window.plot.set_path_to_directory(self._dir_watcher.screenshot)
         self._iv_window.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),
-                                             export_ivc=qApp.translate("t", "Экспортировать кривые в файл"),
+                                             export_ivc=qApp.translate("t", "Экспортировать сигнатуры в файл"),
                                              remove_all_cursors=qApp.translate("t", "Удалить все метки"),
                                              remove_cursor=qApp.translate("t", "Удалить метку"),
                                              save_screenshot=qApp.translate("t", "Сохранить изображение"))
@@ -650,6 +649,7 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan = MeasurementPlan(
             Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]), measurer=self._msystem.measurers[0],
             multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
+        self._measured_pins_checker.set_new_plan()
         self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
 
     def _save_changes_in_measurement_plan(self, additional_info: str = None) -> bool:
@@ -757,6 +757,17 @@ class EPLabWindow(QMainWindow):
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
 
+    def _skip_empty_pins(self, left: bool = False) -> None:
+        """
+        In TEST work mode you can only move along pins with measured reference IV curves. See ticket #89690.
+        :param left: if True, then in search of the next pin with the measured reference IV-curve you need to move
+        through the list to the left (towards decreasing indices), otherwise - to the right (towards increasing
+        indices).
+        """
+
+        pin_index = self._measured_pins_checker.get_next_measured_pin(left)
+        self.go_to_selected_pin(pin_index)
+
     @pyqtSlot(WorkMode)
     def _switch_work_mode(self, mode: WorkMode) -> None:
         """
@@ -764,6 +775,9 @@ class EPLabWindow(QMainWindow):
         """
 
         self._change_work_mode(mode)
+        if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
+            self._skip_empty_pins()
+
         self.update_current_pin()
         self.work_mode_changed.emit(mode)
         if mode in (WorkMode.TEST, WorkMode.WRITE) and self._measurement_plan.multiplexer:
@@ -814,6 +828,12 @@ class EPLabWindow(QMainWindow):
                 curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
                           "test": None if not test_for_plan else test_for_plan.ivc}
                 self._update_curves(curves, settings)
+            else:
+                for plot in (self.reference_curve_plot, self.test_curve_plot, self.test_curve_plot_from_plan):
+                    plot.set_curve(None)
+                pin_index = self.pin_index_widget.text()
+                self._clear_widgets()
+                self.pin_index_widget.setText(pin_index)
 
     def _update_current_pin_in_test_and_write_mode(self) -> None:
         current_pin = self._measurement_plan.get_current_pin()
@@ -981,6 +1001,7 @@ class EPLabWindow(QMainWindow):
             board_filename = self._measurement_plan_path.path
             error_message = error_message.format(f"'{board_filename}' " if board_filename else "")
             self._measurement_plan = self._check_board_for_compatibility(self._measurement_plan, error_message)
+            self._measured_pins_checker.set_new_plan()
 
         if self._measurement_plan:
             self._measurement_plan.measurer = self._msystem.measurers[0]
@@ -1020,6 +1041,7 @@ class EPLabWindow(QMainWindow):
             self._board_window.update_board()
             self.update_current_pin()
             self._mux_and_plan_window.update_info()
+            self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
     def create_new_pin(self, multiplexer_output=None) -> None:
@@ -1066,6 +1088,7 @@ class EPLabWindow(QMainWindow):
                 multiplexer.close_device()
         self._last_saved_measurement_plan_data = None
         self._measurement_plan = None
+        self._measured_pins_checker.set_new_plan()
         self._measurement_plan_path.path = None
         self._msystem = None
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
@@ -1217,6 +1240,11 @@ class EPLabWindow(QMainWindow):
                                                     "точки не был установлен."))
         except Exception:
             self._device_errors_handler.all_ok = False
+
+        if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
+            self._skip_empty_pins(to_prev)
+            return
+
         self.update_current_pin()
         self._open_board_window_if_needed()
 
@@ -1247,6 +1275,10 @@ class EPLabWindow(QMainWindow):
                             qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
             return
 
+        if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
+            self._skip_empty_pins()
+            return
+
         self.update_current_pin()
         self._open_board_window_if_needed()
 
@@ -1257,6 +1289,17 @@ class EPLabWindow(QMainWindow):
         """
 
         self.go_to_pin_selected_in_widget(pin_index + 1)
+
+    @pyqtSlot(bool)
+    def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:
+        """
+        Slot processes the signal after checking the measurement plan for pins with the measured reference IV-curves.
+        If there are no such pins in the measurement plan, then switching to TEST work mode is prohibited.
+        See ticket #89690.
+        :param there_are_measured_pins: True, if the measurement plan contains a pin with a measured reference IV-curve.
+        """
+
+        self.testing_mode_action.setEnabled(bool(self._msystem and there_are_measured_pins))
 
     @pyqtSlot(bool)
     def handle_pedal_signal(self, pressed: bool) -> None:
@@ -1326,6 +1369,7 @@ class EPLabWindow(QMainWindow):
                 measurer = self._msystem.measurers[0]
                 multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
             self._measurement_plan = MeasurementPlan(board, measurer, multiplexer)
+            self._measured_pins_checker.set_new_plan()
             self._measurement_plan_path.path = filename
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
@@ -1334,6 +1378,7 @@ class EPLabWindow(QMainWindow):
             self._open_board_window_if_needed()
             if self._msystem:
                 self._mux_and_plan_window.update_info()
+            self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
     def load_board_image(self) -> None:
@@ -1402,6 +1447,7 @@ class EPLabWindow(QMainWindow):
             else:
                 style = Qt.ToolButtonTextBesideIcon
             tool_bar.setToolButtonStyle(style)
+
         super().resizeEvent(event)
 
     @pyqtSlot()
@@ -1411,7 +1457,7 @@ class EPLabWindow(QMainWindow):
         :return: True if measurement plan was saved otherwise False.
         """
 
-        if self._check_measurement_plan_for_empty_pins():
+        if self._measured_pins_checker.check_measurement_plan_for_empty_pins():
             return None
 
         if not self._measurement_plan_path.path:
@@ -1429,7 +1475,7 @@ class EPLabWindow(QMainWindow):
         :return: True if measurement plan was saved otherwise False.
         """
 
-        if self._check_measurement_plan_for_empty_pins():
+        if self._measured_pins_checker.check_measurement_plan_for_empty_pins():
             return None
 
         default_path = os.path.join(self._dir_watcher.reference, "board.uzf")
@@ -1443,6 +1489,10 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def save_comment(self) -> None:
+        """
+        Slot saves comment for pin.
+        """
+
         pin_index = self._measurement_plan.get_current_index()
         self._measurement_plan.save_comment_to_pin_with_index(pin_index, self.line_comment_pin.text())
 
