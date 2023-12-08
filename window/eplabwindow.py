@@ -237,6 +237,12 @@ class EPLabWindow(QMainWindow):
         self._work_mode = mode
 
     def _change_work_mode_for_new_measurement_plan(self) -> None:
+        """
+        Method changes the work mode of the main window when a new measurement plan is initialized. If the new plan
+        does not contain pins with measured reference IV-curves, and the current work mode is TEST, then you need to
+        change the work mode to COMPARE (see ticket #89690).
+        """
+
         if self._work_mode == WorkMode.TEST and not self._measured_pins_checker.is_measured_pin:
             self._change_work_mode(WorkMode.COMPARE)
 
@@ -772,6 +778,11 @@ class EPLabWindow(QMainWindow):
         """
 
         self._change_work_mode(mode)
+        if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
+            # In TEST work mode you can only move along pins with measured reference IV curves. See ticket #89690
+            pin_index = self._measured_pins_checker.get_next_measured_pin()
+            self.go_to_selected_pin(pin_index)
+
         self.update_current_pin()
         self.work_mode_changed.emit(mode)
         if mode in (WorkMode.TEST, WorkMode.WRITE) and self._measurement_plan.multiplexer:
@@ -1236,7 +1247,8 @@ class EPLabWindow(QMainWindow):
             self._device_errors_handler.all_ok = False
 
         if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
-            self.go_to_left_or_right_pin(to_prev)
+            pin_index = self._measured_pins_checker.get_next_measured_pin(to_prev)
+            self.go_to_selected_pin(pin_index)
             return
 
         self.update_current_pin()
@@ -1270,7 +1282,8 @@ class EPLabWindow(QMainWindow):
             return
 
         if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
-            self.go_to_left_or_right_pin(False)
+            pin_index = self._measured_pins_checker.get_next_measured_pin()
+            self.go_to_selected_pin(pin_index)
             return
 
         self.update_current_pin()
