@@ -34,6 +34,7 @@ python3 -m venv venv
 --add-data "./venv/lib/python3.6/site-packages/epcore/product/eplab_default_options.json:epcore/product" \
 --add-data "./venv/lib/python3.6/site-packages/epsound/void.wav:epsound" \
 --add-data "./venv/lib/python3.6/site-packages/ivviewer/media/*:ivviewer/media" \
+--add-data "./venv/lib/python3.6/site-packages/report_generator/locales/en/LC_MESSAGES/*:report_generator/locales/en/LC_MESSAGES" \
 --add-data "./venv/lib/python3.6/site-packages/report_templates/*:report_templates" \
 --icon media/icon.ico \
 --splash media/banner.png

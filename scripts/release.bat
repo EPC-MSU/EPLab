@@ -40,6 +40,7 @@ venv\Scripts\pyinstaller main.py --clean --onefile --noconsole ^
 --add-data "venv\Lib\site-packages\epcore\product\eplab_default_options.json;epcore\product" ^
 --add-data "venv\Lib\site-packages\epsound\void.wav;epsound" ^
 --add-data "venv\Lib\site-packages\ivviewer\media\*;ivviewer\media" ^
+--add-data "venv\Lib\site-packages\report_generator\locales\en\LC_MESSAGES\*;report_generator\locales\en\LC_MESSAGES" ^
 --add-data "venv\Lib\site-packages\report_templates\*;report_templates" ^
 --hidden-import=PyQt5.sip ^
 --icon media\icon.ico ^
