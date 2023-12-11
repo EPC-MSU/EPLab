@@ -1,5 +1,16 @@
+import platform
 from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox, QDoubleSpinBox, QGroupBox, QLabel, QLineEdit,
                              QProgressBar, QPushButton, QSpinBox, QTextBrowser, QToolBar, QWidget)
+
+
+def get_font_size() -> int:
+    """
+    :return: font size for operating system.
+    """
+
+    if platform.system().lower() == "windows":
+        return 8
+    return 11
 
 
 def scale_font_on_widget(widget: QWidget, font_size: int) -> None:
@@ -33,7 +44,7 @@ def update_scale(widget: QWidget) -> None:
     from window.parameterwidget import ParameterWidget
     from window.pinindexwidget import PinIndexWidget
 
-    font_size = 8
+    font_size = get_font_size()
     if isinstance(widget, MeasurerSettingsWindow):
         for child_widget in widget.all_widgets:
             scale_font_on_widget(child_widget, font_size)
