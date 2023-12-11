@@ -29,15 +29,15 @@ class SettingsEditor:
 class Settings(SettingsHandler):
 
     ATTRIBUTE_NAMES: List[str] = ["frequency", "hide_curve_a", "hide_curve_b", "internal_resistance", "max_voltage",
-                                  "score_threshold", "sound_enabled", "work_mode"]
+                                  "sound_enabled", "tolerance", "work_mode"]
     changed: pyqtSignal = pyqtSignal()
     frequency: Tuple[int, int] = None
     hide_curve_a: bool = False
     hide_curve_b: bool = False
     internal_resistance: float = None
     max_voltage: float = None
-    score_threshold: float = 0.15
     sound_enabled: bool = False
+    tolerance: float = 0.15
     work_mode: WorkMode = WorkMode.COMPARE
 
     def __init__(self, parent=None) -> None:
@@ -65,8 +65,8 @@ class Settings(SettingsHandler):
                   "hide_curve_b": {"convert": ut.to_bool},
                   "internal_resistance": {"convert": float},
                   "max_voltage": {"convert": float},
-                  "score_threshold": {"convert": float},
                   "sound_enabled": {"convert": ut.to_bool},
+                  "tolerance": {"convert": float},
                   "work_mode": {"convert": lambda value: MODES[value]}}
         with SettingsEditor(self):
             settings.beginGroup("General")
@@ -89,8 +89,8 @@ class Settings(SettingsHandler):
                   "hide_curve_b": {},
                   "internal_resistance": {"convert": ut.float_to_str},
                   "max_voltage": {"convert": ut.float_to_str},
-                  "score_threshold": {"convert": ut.float_to_str},
                   "sound_enabled": {},
+                  "tolerance": {"convert": ut.float_to_str},
                   "work_mode": {"convert": get_work_mode}}
         settings.beginGroup("General")
         self._write_parameters_to_settings(settings, params)

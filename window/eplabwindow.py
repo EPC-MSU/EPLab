@@ -165,12 +165,12 @@ class EPLabWindow(QMainWindow):
         return self._product
 
     @property
-    def threshold(self) -> float:
+    def tolerance(self) -> float:
         """
-        :return: threshold value for comparing IV curves.
+        :return: tolerance value for comparing IV curves.
         """
 
-        return self._score_wrapper.threshold
+        return self._score_wrapper.tolerance
 
     @property
     def work_mode(self) -> Optional[WorkMode]:
@@ -411,12 +411,12 @@ class EPLabWindow(QMainWindow):
         # Add this task to event loop
         self._timer.start()
 
-    def _init_threshold(self) -> None:
+    def _init_tolerance(self) -> None:
         """
-        Method initializes the initial value of the score threshold.
+        Method initializes the initial value of the tolerance.
         """
 
-        self._update_threshold(self._score_wrapper.threshold)
+        self._update_tolerance(self._score_wrapper.tolerance)
 
     def _init_ui(self) -> None:
         loadUi(os.path.join(os.path.dirname(ut.DIR_MEDIA), "gui", "mainwindow.ui"), self)
@@ -753,7 +753,7 @@ class EPLabWindow(QMainWindow):
             self._set_options_to_ui(options)
         self._mux_and_plan_window.update_info()
         self._switch_work_mode(WorkMode.COMPARE)
-        self._init_threshold()
+        self._init_tolerance()
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
 
@@ -889,14 +889,14 @@ class EPLabWindow(QMainWindow):
         for parameter, scroll_area in self._parameters_widgets.items():
             scroll_area.update_options(available[parameter])
 
-    def _update_threshold(self, threshold: float) -> None:
+    def _update_tolerance(self, tolerance: float) -> None:
         """
-        Method updates score threshold value in _score_wrapper and _player.
-        :param threshold: new score threshold value.
+        Method updates tolerance value in _score_wrapper and _player.
+        :param tolerance: new tolerance value.
         """
 
-        self._score_wrapper.set_threshold(threshold)
-        self._player.set_threshold(threshold)
+        self._score_wrapper.set_tolerance(tolerance)
+        self._player.set_tolerance(tolerance)
 
     @pyqtSlot(Settings)
     def apply_settings(self, new_settings: Settings) -> None:
@@ -913,7 +913,7 @@ class EPLabWindow(QMainWindow):
         self.hide_curve_a_action.setChecked(new_settings.hide_curve_a)
         self.hide_curve_b_action.setChecked(new_settings.hide_curve_b)
         self.sound_enabled_action.setChecked(new_settings.sound_enabled)
-        self._update_threshold(new_settings.score_threshold)
+        self._update_tolerance(new_settings.tolerance)
 
     @pyqtSlot(str)
     def change_window_title(self, measurement_plan_name: str) -> None:
@@ -1075,7 +1075,7 @@ class EPLabWindow(QMainWindow):
             dir_path = QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"), dir_path)
         if dir_path:
             show_report_generation_window(self, self._report_generation_thread, self.measurement_plan, dir_path,
-                                          self.threshold, self.work_mode)
+                                          self.tolerance, self.work_mode)
 
     def disconnect_measurers(self) -> None:
         self._timer.stop()
@@ -1214,7 +1214,7 @@ class EPLabWindow(QMainWindow):
             settings.work_mode = WorkMode.WRITE
         else:
             settings.work_mode = WorkMode.COMPARE
-        settings.score_threshold = self.threshold
+        settings.tolerance = self.tolerance
         settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())

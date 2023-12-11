@@ -15,18 +15,18 @@ class TestSettings(unittest.TestCase):
                                                "hide_curve_b": False,
                                                "internal_resistance": 47500,
                                                "max_voltage": 3.3,
-                                               "score_threshold": 0.69,
                                                "sound_enabled": True,
+                                               "tolerance": 0.69,
                                                "work_mode": WorkMode.TEST}
         self.settings: Settings = Settings()
         _ = [setattr(self.settings, key, value) for key, value in self.correct_result.items()]
 
     def test_copy(self) -> None:
         other_settings = copy.copy(self.settings)
-        other_settings.score_threshold = 0.96
-        self.assertNotEqual(other_settings.score_threshold, self.settings.score_threshold)
+        other_settings.tolerance = 0.96
+        self.assertNotEqual(other_settings.tolerance, self.settings.tolerance)
         for attr_name in Settings.ATTRIBUTE_NAMES:
-            if attr_name != "score_threshold":
+            if attr_name != "tolerance":
                 self.assertEqual(getattr(other_settings, attr_name), getattr(self.settings, attr_name))
 
     def test_read(self) -> None:
@@ -43,7 +43,7 @@ class TestSettings(unittest.TestCase):
         init_settings.hide_curve_b = True
         init_settings.internal_resistance = 672.4
         init_settings.max_voltage = 32.43
-        init_settings.score_threshold = 0.23
+        init_settings.tolerance = 0.23
         init_settings.sound_enabled = False
         init_settings.work_mode = WorkMode.WRITE
 

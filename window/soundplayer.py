@@ -13,7 +13,7 @@ class SoundPlayer:
         self._player: WavPlayer = WavPlayer(wait=False)
         self._score: float = 0
         self._sound_available: bool = True
-        self._threshold: float = 0
+        self._tolerance: float = 0
         self._work_mode: WorkMode = WorkMode.COMPARE
 
         if not self._player.check_sound_available():
@@ -58,14 +58,14 @@ class SoundPlayer:
         # Logic described here #39296
         # FIXME: in case of *very fast* score update in asynchronous mode here may be big stack of wav files
         if self._work_mode is WorkMode.COMPARE:
-            if score > self._threshold:
+            if score > self._tolerance:
                 try:
                     sound_num = self._score_to_sound_n(self._score)
                     self._play(f"{sound_num}")
                 except ValueError:  # NaN score or smth else strange
                     return
         elif self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
-            if self._score > self._threshold > score:
+            if self._score > self._tolerance > score:
                 self._play("test")
         self._score = score
 
@@ -77,12 +77,12 @@ class SoundPlayer:
         if self._sound_available:
             self._player.set_mute(mute)
 
-    def set_threshold(self, threshold: float) -> None:
+    def set_tolerance(self, tolerance: float) -> None:
         """
-        :param threshold: new threshold value for score.
+        :param tolerance: new tolerance value.
         """
 
-        self._threshold = threshold
+        self._tolerance = tolerance
 
     def set_work_mode(self, mode: WorkMode) -> None:
         """

@@ -30,7 +30,7 @@ class SettingsWindow(QDialog):
         self._settings: Settings = copy.copy(init_settings)
         self._settings_directory: str = settings_directory or ut.get_dir_name()
         self._init_ui()
-        self._update_threshold_in_settings_wnd(self._init_settings.score_threshold)
+        self._update_tolerance_in_settings_wnd(self._init_settings.tolerance)
 
     @property
     def settings_directory(self) -> str:
@@ -44,20 +44,20 @@ class SettingsWindow(QDialog):
         dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         uic.loadUi(os.path.join(dir_name, "gui", "settings.ui"), self)
         self.layout().setSizeConstraint(QLayout.SetFixedSize)
-        self.button_score_threshold_minus.clicked.connect(self.decrease_threshold)
-        self.button_score_threshold_plus.clicked.connect(self.increase_threshold)
-        self.spin_box_score_threshold.valueChanged.connect(self.update_threshold)
+        self.button_tolerance_minus.clicked.connect(self.decrease_tolerance)
+        self.button_tolerance_plus.clicked.connect(self.increase_tolerance)
+        self.spin_box_tolerance.valueChanged.connect(self.update_tolerance)
         self.button_cancel.clicked.connect(self.discard_changes)
         self.button_load_settings.clicked.connect(self.open_settings)
         self.button_ok.clicked.connect(self.apply_changes)
         self.button_save_settings.clicked.connect(self.save_settings_to_file)
 
-    def _get_threshold_value(self) -> float:
+    def _get_tolerance_value(self) -> float:
         """
-        :return: score threshold value.
+        :return: tolerance value.
         """
 
-        return self.spin_box_score_threshold.value() / 100.0
+        return self.spin_box_tolerance.value() / 100.0
 
     def _send_settings(self, settings: Settings = None) -> None:
         """
@@ -66,15 +66,15 @@ class SettingsWindow(QDialog):
 
         self.apply_settings_signal.emit(settings or self._settings)
 
-    def _update_threshold_in_settings_wnd(self, threshold: float) -> None:
+    def _update_tolerance_in_settings_wnd(self, tolerance: float) -> None:
         """
-        Method updates score threshold value in settings window.
-        :param threshold: new score threshold value.
+        Method updates tolerance value in settings window.
+        :param tolerance: new tolerance value.
         """
 
-        threshold = min(max(round(100 * threshold, 1), 0), 100)
-        self.spin_box_score_threshold.setValue(threshold)
-        self._settings.score_threshold = self._get_threshold_value()
+        tolerance = min(max(round(100 * tolerance, 1), 0), 100)
+        self.spin_box_tolerance.setValue(tolerance)
+        self._settings.tolerance = self._get_tolerance_value()
 
     @pyqtSlot()
     def apply_changes(self) -> None:
@@ -86,12 +86,12 @@ class SettingsWindow(QDialog):
         self.close()
 
     @pyqtSlot()
-    def decrease_threshold(self) -> None:
+    def decrease_tolerance(self) -> None:
         """
-        Slot decreases the threshold value by a given step.
+        Slot decreases the tolerance value by a given step.
         """
 
-        self._update_threshold_in_settings_wnd(self._get_threshold_value() - SettingsWindow.THRESHOLD_STEP)
+        self._update_tolerance_in_settings_wnd(self._get_tolerance_value() - SettingsWindow.THRESHOLD_STEP)
         self._send_settings()
 
     @pyqtSlot()
@@ -104,12 +104,12 @@ class SettingsWindow(QDialog):
         self.close()
 
     @pyqtSlot()
-    def increase_threshold(self) -> None:
+    def increase_tolerance(self) -> None:
         """
-        Slot increases the threshold value by a given step.
+        Slot increases the tolerance value by a given step.
         """
 
-        self._update_threshold_in_settings_wnd(self._get_threshold_value() + SettingsWindow.THRESHOLD_STEP)
+        self._update_tolerance_in_settings_wnd(self._get_tolerance_value() + SettingsWindow.THRESHOLD_STEP)
         self._send_settings()
 
     @pyqtSlot()
@@ -133,7 +133,7 @@ class SettingsWindow(QDialog):
 
             self._settings_directory = os.path.dirname(settings_path)
             self._settings = settings
-            self._update_threshold_in_settings_wnd(self._settings.score_threshold)
+            self._update_tolerance_in_settings_wnd(self._settings.tolerance)
             self._send_settings()
 
     @pyqtSlot()
@@ -149,14 +149,14 @@ class SettingsWindow(QDialog):
             self._settings_directory = os.path.dirname(settings_path)
             if not settings_path.endswith(".ini"):
                 settings_path += ".ini"
-            self._settings.score_threshold = self._get_threshold_value()
+            self._settings.tolerance = self._get_tolerance_value()
             self._settings.export(path=settings_path)
 
     @pyqtSlot(float)
-    def update_threshold(self, new_value: float) -> None:
+    def update_tolerance(self, new_value: float) -> None:
         """
-        :param new_value: new threshold value.
+        :param new_value: new tolerance value.
         """
 
-        self._update_threshold_in_settings_wnd(new_value / 100)
+        self._update_tolerance_in_settings_wnd(new_value / 100)
         self._send_settings()

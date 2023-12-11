@@ -5,7 +5,7 @@ class ScoreWrapper:
 
     _COLOR_BAD: str = "#cc0000"
     _COLOR_GOOD: str = "#73d216"
-    DEFAULT_SCORE_THRESHOLD: float = 0.15
+    DEFAULT_SCORE_TOLERANCE: float = 0.15
 
     def __init__(self, label: QLabel) -> None:
         """
@@ -14,19 +14,19 @@ class ScoreWrapper:
 
         self._friendly_score: str = "-"
         self._label: QLabel = label
-        self._threshold: float = ScoreWrapper.DEFAULT_SCORE_THRESHOLD
-        self._get_threshold_int()
+        self._tolerance: float = ScoreWrapper.DEFAULT_SCORE_TOLERANCE
+        self._get_tolerance_with_tenths()
 
     @property
-    def threshold(self) -> float:
+    def tolerance(self) -> float:
         """
-        :return: threshold score.
+        :return: tolerance.
         """
 
-        return self._threshold
+        return self._tolerance
 
-    def _get_threshold_int(self) -> None:
-        self._threshold_with_tenths: float = convert_to_percent_with_tenths(self._threshold)
+    def _get_tolerance_with_tenths(self) -> None:
+        self._tolerance_with_tenths: float = convert_to_percent_with_tenths(self._tolerance)
 
     def _set_score_text(self, text: str, color: str) -> None:
         """
@@ -54,17 +54,17 @@ class ScoreWrapper:
         """
 
         score = convert_to_percent_with_tenths(score)
-        color = self._COLOR_GOOD if score <= self._threshold_with_tenths else self._COLOR_BAD
+        color = self._COLOR_GOOD if score <= self._tolerance_with_tenths else self._COLOR_BAD
         self._friendly_score = str(score) + "%"
         self._set_score_text(self._friendly_score, color)
 
-    def set_threshold(self, new_threshold: float) -> None:
+    def set_tolerance(self, new_tolerance: float) -> None:
         """
-        :param new_threshold: new threshold score value.
+        :param new_tolerance: new tolerance value.
         """
 
-        self._threshold = max(min(new_threshold, 1.0), 0.0)
-        self._get_threshold_int()
+        self._tolerance = max(min(new_tolerance, 1.0), 0.0)
+        self._get_tolerance_with_tenths()
 
 
 def convert_to_percent_with_tenths(value: float) -> float:
