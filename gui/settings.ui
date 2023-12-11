@@ -28,7 +28,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Порог ошибки</string>
+        <string>Допуск</string>
        </property>
       </widget>
      </item>

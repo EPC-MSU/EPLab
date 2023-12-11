@@ -10,8 +10,8 @@
     </message>
     <message>
         <location filename="settings.ui" line="31"/>
-        <source>Порог ошибки</source>
-        <translation>Score threshold</translation>
+        <source>Допуск</source>
+        <translation>Tolerance</translation>
     </message>
     <message>
         <location filename="settings.ui" line="114"/>
@@ -33,7 +33,7 @@
     <name>MainWindow</name>
     <message>
         <location filename="mainwindow.ui" line="34"/>
-        <source>Степень различия</source>
+        <source>Различие</source>
         <translation>Difference</translation>
     </message>
     <message>

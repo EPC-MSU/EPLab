@@ -31,7 +31,7 @@
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="windowTitle">
-    <string>Степень различия</string>
+    <string>Различие</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
