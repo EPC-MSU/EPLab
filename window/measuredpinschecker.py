@@ -123,44 +123,6 @@ class MeasuredPinsChecker(QObject):
             empty = False
         return empty
 
-    def get_next_measured_pin(self, left: bool = False) -> int:
-        """
-        :param left: if True, then in search of the next pin with the measured reference IV-curve you need to move
-        through the list to the left (towards decreasing indices), otherwise - to the right (towards increasing
-        indices).
-        :return: the index of the next pin in which the reference IV-curve is measured.
-        """
-
-        def get_next_pin_index(current_index: int) -> int:
-            """
-            :param current_index: current index.
-            :return: next index.
-            """
-
-            if left:
-                index = current_index - 1
-                if index < 0:
-                    index = number_of_pins - 1
-            else:
-                index = current_index + 1
-                if index >= number_of_pins:
-                    index = 0
-            return index
-
-        start_index = self.measurement_plan.get_current_index()
-        if not self.check_empty_current_pin():
-            return start_index
-
-        number_of_pins = len(self.measurement_plan._all_pins)
-        pin_index = start_index
-        empty_indeces = {pin_index}
-        while True:
-            pin_index = get_next_pin_index(pin_index)
-            pin = self.measurement_plan.get_pin_with_index(pin_index)
-            if (pin and self._check_pin(pin)) or pin_index == start_index:
-                return pin_index
-            empty_indeces.add(pin_index)
-
     def set_new_plan(self) -> None:
         """
         Method must be executed when a new measurement plan is initialized.

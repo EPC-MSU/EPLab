@@ -273,6 +273,10 @@ class EPLabWindow(QMainWindow):
         for widget in (self.freq_dock_widget, self.current_dock_widget, self.voltage_dock_widget):
             layout = widget.layout()
             ut.clear_layout(layout)
+
+        for action in (self.comparing_mode_action, self.writing_mode_action, self.testing_mode_action):
+            action.setChecked(False)
+
         self.line_comment_pin.clear()
         self.low_settings_panel.clear_panel()
         self.measurers_menu.clear()
@@ -757,16 +761,13 @@ class EPLabWindow(QMainWindow):
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
 
-    def _skip_empty_pins(self, left: bool = False) -> None:
+    def _skip_empty_pins(self) -> None:
         """
-        In TEST work mode you can only move along pins with measured reference IV curves. See ticket #89690.
-        :param left: if True, then in search of the next pin with the measured reference IV-curve you need to move
-        through the list to the left (towards decreasing indices), otherwise - to the right (towards increasing
-        indices).
+        In TEST work mode you can make measurements only at pins where there are reference IV-curves. See ticket #89690.
         """
 
-        pin_index = self._measured_pins_checker.get_next_measured_pin(left)
-        self.go_to_selected_pin(pin_index)
+        if self._work_mode == WorkMode.TEST:
+            self.save_point_action.setEnabled(not self._measured_pins_checker.check_empty_current_pin())
 
     @pyqtSlot(WorkMode)
     def _switch_work_mode(self, mode: WorkMode) -> None:
@@ -775,8 +776,7 @@ class EPLabWindow(QMainWindow):
         """
 
         self._change_work_mode(mode)
-        if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
-            self._skip_empty_pins()
+        self._skip_empty_pins()
 
         self.update_current_pin()
         self.work_mode_changed.emit(mode)
@@ -1241,10 +1241,7 @@ class EPLabWindow(QMainWindow):
         except Exception:
             self._device_errors_handler.all_ok = False
 
-        if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
-            self._skip_empty_pins(to_prev)
-            return
-
+        self._skip_empty_pins()
         self.update_current_pin()
         self._open_board_window_if_needed()
 
@@ -1275,10 +1272,7 @@ class EPLabWindow(QMainWindow):
                             qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
             return
 
-        if self._work_mode == WorkMode.TEST and self._measured_pins_checker.check_empty_current_pin():
-            self._skip_empty_pins()
-            return
-
+        self._skip_empty_pins()
         self.update_current_pin()
         self._open_board_window_if_needed()
 
@@ -1299,7 +1293,8 @@ class EPLabWindow(QMainWindow):
         :param there_are_measured_pins: True, if the measurement plan contains a pin with a measured reference IV-curve.
         """
 
-        self.testing_mode_action.setEnabled(bool(self._msystem and there_are_measured_pins))
+        if self.comparing_mode_action.isEnabled():
+            self.testing_mode_action.setEnabled(bool(self._msystem and there_are_measured_pins))
 
     @pyqtSlot(bool)
     def handle_pedal_signal(self, pressed: bool) -> None:

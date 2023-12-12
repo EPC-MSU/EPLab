@@ -89,7 +89,7 @@ class BoardWidget(QWidget):
             self._parent.go_to_left_or_right_pin(False)
             return True
 
-        if key in (Qt.Key_Enter, Qt.Key_Return):
+        if key in (Qt.Key_Enter, Qt.Key_Return) and self._parent.save_point_action.isEnabled():
             self._parent.save_pin()
             return True
 
