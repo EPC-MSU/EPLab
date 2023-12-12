@@ -219,7 +219,7 @@
     <message>
         <location filename="mainwindow.ui" line="627"/>
         <source>Добавить изображение</source>
-        <translation>Add board window</translation>
+        <translation>Add board image</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="636"/>
@@ -422,7 +422,7 @@
     <message>
         <location filename="../window/eplabwindow.py" line="1414"/>
         <source>Открыть изображение платы</source>
-        <translation>Open board window</translation>
+        <translation>Open board image</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1438"/>
