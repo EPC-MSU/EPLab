@@ -422,7 +422,7 @@
     <message>
         <location filename="../window/eplabwindow.py" line="1414"/>
         <source>Открыть изображение платы</source>
-        <translation>Open board image</translation>
+        <translation>Open board imageF</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1438"/>
