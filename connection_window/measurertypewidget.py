@@ -5,7 +5,7 @@ File with classes to select measurers.
 import os
 from functools import partial
 from typing import Dict
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QTimer
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGridLayout, QLabel, QRadioButton, QScrollArea, QVBoxLayout, QWidget
 from connection_window.productname import MeasurerType, ProductName
@@ -34,6 +34,10 @@ class MeasurerTypeWidget(QWidget):
             initial_product_name = ProductName.EYEPOINT_A2
         self._initial_product_name: ProductName = initial_product_name
         self._init_ui()
+        self._timer: QTimer = QTimer()
+        self._timer.timeout.connect(self._show_initial_product)
+        self._timer.setSingleShot(True)
+        self._timer.start(50)
 
     def _init_ui(self) -> None:
         """
@@ -41,11 +45,11 @@ class MeasurerTypeWidget(QWidget):
         """
 
         widget = QWidget()
-        scroll_area = QScrollArea(self)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setWidget(widget)
+        self.scroll_area: QScrollArea = QScrollArea(self)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidget(widget)
         layout = QVBoxLayout()
-        layout.addWidget(scroll_area)
+        layout.addWidget(self.scroll_area)
         grid_layout = QGridLayout()
         widget.setLayout(grid_layout)
         self.radio_buttons_products = {}
@@ -66,6 +70,15 @@ class MeasurerTypeWidget(QWidget):
         self.setToolTip(qApp.translate("connection_window", "Тип измерителя"))
         self.setFixedHeight(MeasurerTypeWidget.WIDGET_HEIGHT)
         self.setLayout(layout)
+
+    @pyqtSlot()
+    def _show_initial_product(self) -> None:
+        """
+        Slot scrolls the contents of the scroll area so that the initial product name is visible inside the viewport.
+        """
+
+        radio_button = self.radio_buttons_products[self._initial_product_name]
+        self.scroll_area.ensureWidgetVisible(radio_button)
 
     def get_product_name(self) -> ProductName:
         """
