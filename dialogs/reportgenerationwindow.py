@@ -5,7 +5,7 @@ File with class for dialog window to create report for board.
 import queue
 import time
 from typing import Any, Dict, List, Tuple
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QThread
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QProgressBar, QTextEdit, QVBoxLayout
 from epcore.elements import Board
@@ -44,6 +44,8 @@ class ReportGenerationThread(QThread):
     """
     Class for thread to generate reports.
     """
+
+    close_window_signal: pyqtSignal = pyqtSignal()
 
     def __init__(self, parent) -> None:
         """
@@ -105,8 +107,16 @@ class ReportGenerationThread(QThread):
                 task = self._task.get()
                 task()
                 self._task_is_running = False
+                self.send_close_signal()
             else:
                 time.sleep(0.1)
+
+    def send_close_signal(self) -> None:
+        """
+        Method
+        """
+
+        self.close_window_signal.emit()
 
     def stop_generation(self) -> None:
         """
@@ -154,9 +164,7 @@ class ReportGenerationWindow(QDialog):
                 except Exception:
                     pass
 
-        self._thread.report_generator.exception_raised.connect(lambda: self.close())
-        self._thread.report_generator.generation_finished.connect(lambda: self.close())
-        self._thread.report_generator.generation_stopped.connect(lambda: self.close())
+        self._thread.close_window_signal.connect(lambda: self.close())
         self._thread.report_generator.step_done.connect(self.change_progress)
         self._thread.report_generator.step_started.connect(self.text_edit_info.append)
         self._thread.report_generator.total_number_of_steps_calculated.connect(self.set_total_number_of_steps)
