@@ -19,6 +19,7 @@ class MeasurerTypeWidget(QWidget):
 
     IMAGE_HEIGHT: int = 100
     IMAGE_WIDTH: int = 100
+    TIME_TO_SHOW_INITIAL_PRODUCT_MS: int = 50
     WIDGET_HEIGHT: int = 200
     WIDGET_WIDTH: int = 300
     measurer_type_changed: pyqtSignal = pyqtSignal(MeasurerType, bool)
@@ -37,7 +38,7 @@ class MeasurerTypeWidget(QWidget):
         self._timer: QTimer = QTimer()
         self._timer.timeout.connect(self._show_initial_product)
         self._timer.setSingleShot(True)
-        self._timer.start(50)
+        self._timer.start(MeasurerTypeWidget.TIME_TO_SHOW_INITIAL_PRODUCT_MS)
 
     def _init_ui(self) -> None:
         """

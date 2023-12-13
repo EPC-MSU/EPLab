@@ -5,10 +5,10 @@ File with class for dialog window with settings of measurer.
 import logging
 from inspect import getmembers, ismethod
 from typing import Any, Callable, Dict, List, Optional, Union
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt, QTimer
 from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import (QComboBox, QDialog, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QRadioButton,
-                             QTextBrowser, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (QComboBox, QDialog, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton,
+                             QRadioButton, QTextBrowser, QVBoxLayout, QWidget)
 from epcore.ivmeasurer.base import IVMeasurerBase
 from window import utils as ut
 from window.language import Language
@@ -42,6 +42,7 @@ class MeasurerSettingsWindow(QDialog):
     MAX_HEIGHT: int = 500
     MAX_WIDTH: int = 400
     MIN_WIDTH: int = 300
+    TIME_TO_FIX_SIZE_MS: int = 50
 
     def __init__(self, parent=None, settings: Dict[str, Any] = None, measurer: IVMeasurerBase = None,
                  device_name: str = None) -> None:
@@ -60,6 +61,10 @@ class MeasurerSettingsWindow(QDialog):
         self.button_ok: QPushButton = None
         self.lang: str = "ru" if qApp.instance().property("language") == Language.RU else "en"
         self._init_ui(settings, device_name)
+        self._timer: QTimer = QTimer()
+        self._timer.timeout.connect(self._fix_size)
+        self._timer.setSingleShot(True)
+        self._timer.start(MeasurerSettingsWindow.TIME_TO_FIX_SIZE_MS)
 
     @property
     def all_widgets(self) -> List[QWidget]:
@@ -232,6 +237,14 @@ class MeasurerSettingsWindow(QDialog):
         if device_name is None:
             device_name = qApp.translate("dialogs", "Неизвестный измеритель")
         return title + device_name
+
+    @pyqtSlot()
+    def _fix_size(self) -> None:
+        layout = self.layout()
+        layout.setSizeConstraint(QLayout.SetFixedSize)
+        self.adjustSize()
+        if self.width() < MeasurerSettingsWindow.MIN_WIDTH:
+            self.setFixedWidth(MeasurerSettingsWindow.MIN_WIDTH)
 
     @staticmethod
     def _get_value_from_combo(data: Dict[str, Any]) -> Union[float, int, str]:
