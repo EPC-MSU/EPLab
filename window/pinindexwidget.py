@@ -33,7 +33,7 @@ class PinIndexWidget(QLineEdit):
         try:
             pin_index = int(self.text()) - 1
         except ValueError:
-            ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
+            ut.show_message(qApp.translate("t", "Ошибка"),
                             qApp.translate("t", "Неверный формат номера точки. Номер точки может принимать только "
                                                 "целочисленное значение."))
             pin_index = None

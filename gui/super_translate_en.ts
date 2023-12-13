@@ -400,11 +400,6 @@
         <translation>Select directory</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1263"/>
-        <source>Ошибка открытия точки</source>
-        <translation>Open pin error</translation>
-    </message>
-    <message>
         <location filename="../window/eplabwindow.py" line="1264"/>
         <source>Подключенный мультиплексор имеет другую конфигурацию, выход точки не был установлен.</source>
         <translation>The connected multiplexer has a different configuration, pin output is not set.</translation>
@@ -422,11 +417,6 @@
     <message>
         <location filename="../window/eplabwindow.py" line="1414"/>
         <source>Открыть изображение платы</source>
-        <translation>Open board image</translation>
-    </message>
-    <message>
-        <location filename="../window/eplabwindow.py" line="1438"/>
-        <source>Открытие изображения платы</source>
         <translation>Open board image</translation>
     </message>
     <message>

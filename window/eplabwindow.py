@@ -1235,7 +1235,7 @@ class EPLabWindow(QMainWindow):
                 self._measurement_plan.go_next_pin()
         except BadMultiplexerOutputError:
             if not self._mux_and_plan_window.measurement_plan_runner.is_running:
-                ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
+                ut.show_message(qApp.translate("t", "Ошибка"),
                                 qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
                                                     "точки не был установлен."))
         except Exception:
@@ -1264,11 +1264,11 @@ class EPLabWindow(QMainWindow):
                 self._measurement_plan.go_pin(pin_index)
         except BadMultiplexerOutputError:
             if not self._mux_and_plan_window.measurement_plan_runner.is_running:
-                ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
+                ut.show_message(qApp.translate("t", "Ошибка"),
                                 qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
                                                     "точки не был установлен."))
         except ValueError:
-            ut.show_message(qApp.translate("t", "Ошибка открытия точки"),
+            ut.show_message(qApp.translate("t", "Ошибка"),
                             qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
             return
 
@@ -1396,7 +1396,7 @@ class EPLabWindow(QMainWindow):
         """
 
         if not self._measurement_plan.image:
-            ut.show_message(qApp.translate("t", "Открытие изображения платы"),
+            ut.show_message(qApp.translate("t", "Ошибка"),
                             qApp.translate("t", "Для данной платы изображение не задано."))
         else:
             self._open_board_window_if_needed()
