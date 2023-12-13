@@ -37,7 +37,7 @@ class MuxAndPlanWindow(QWidget):
         self.measurement_plan_widget: MeasurementPlanWidget = None
         self.multiplexer_pinout_widget: MultiplexerPinoutWidget = None
         self.splitter: QSplitter = None
-        self._manual_stop: bool = True
+        self._manual_stop: bool = False
         self._parent = parent
         self._previous_main_window_pos: QPoint = None
         self._previous_main_window_size: QSize = None
@@ -271,6 +271,7 @@ class MuxAndPlanWindow(QWidget):
                 not self._continue_plan_measurement():
             self.sender().setChecked(False)
             return
+
         self._change_widgets_to_start_plan_measurement(status)
         self.measurement_plan_runner.start_or_stop_measurements(status)
 
