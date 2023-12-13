@@ -5,12 +5,13 @@ File with class to show image of board.
 import os
 from typing import Optional
 from PIL import Image
-from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPointF, Qt
+from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPointF, QRect, Qt
 from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap
 from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView
 from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
+from dialogs.save_geometry import update_widget_to_save_geometry
 from window import utils as ut
 from window.common import WorkMode
 from window.pedalhandler import PedalHandler
@@ -32,6 +33,7 @@ def pil_to_pixmap(image: Image) -> QPixmap:
     return QPixmap.fromImage(q_image)
 
 
+@update_widget_to_save_geometry
 class BoardWidget(QWidget):
     """
     Class to show board image.
@@ -52,6 +54,7 @@ class BoardWidget(QWidget):
         self._pedal_handler: PedalHandler = PedalHandler()
         if hasattr(parent, "handle_pedal_signal"):
             self._pedal_handler.pedal_signal.connect(parent.handle_pedal_signal)
+        self._previous_pos: Optional[QRect] = None
         self._init_ui()
 
     @property

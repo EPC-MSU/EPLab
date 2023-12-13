@@ -77,7 +77,7 @@ def update_scale_decorator(func):
     return wrapper
 
 
-def update_scale_of_class(widget_cls):
+def update_scale_of_class(widget_cls: type) -> type:
     """
     A decorator that will scale a widget created from a given class.
     :param widget_cls: widget class.

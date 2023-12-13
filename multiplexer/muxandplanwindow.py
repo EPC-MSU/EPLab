@@ -3,11 +3,12 @@ File with class to show window with information about multiplexer and measuremen
 """
 
 import os
-from typing import Optional, Tuple
+from typing import Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
-from PyQt5.QtGui import QCloseEvent, QIcon, QShowEvent
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QHBoxLayout, QMessageBox, QPushButton, QSplitter, QVBoxLayout, QWidget
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
+from dialogs.save_geometry import update_widget_to_save_geometry
 from multiplexer.measurementplanrunner import MeasurementPlanRunner
 from multiplexer.measurementplanwidget import MeasurementPlanWidget
 from multiplexer.multiplexerpinoutwidget import MultiplexerPinoutWidget
@@ -16,6 +17,7 @@ from window.common import WorkMode
 from window.scaler import update_scale_of_class
 
 
+@update_widget_to_save_geometry
 @update_scale_of_class
 class MuxAndPlanWindow(QWidget):
     """
@@ -32,7 +34,7 @@ class MuxAndPlanWindow(QWidget):
         :param parent: parent main window.
         """
 
-        super().__init__(None, Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        super().__init__()
         self.button_arrange_windows: QPushButton = None
         self.measurement_plan_widget: MeasurementPlanWidget = None
         self.multiplexer_pinout_widget: MultiplexerPinoutWidget = None
@@ -41,7 +43,6 @@ class MuxAndPlanWindow(QWidget):
         self._parent = parent
         self._previous_main_window_pos: QPoint = None
         self._previous_main_window_size: QSize = None
-        self._previous_pos: Optional[QPoint] = None
         self._previous_window_pos: QPoint = None
         self._previous_window_size: QSize = None
         self._init_ui()
@@ -178,18 +179,6 @@ class MuxAndPlanWindow(QWidget):
             window_size = self._previous_window_size
         return arranged, main_window_pos, main_window_size, window_pos, window_size
 
-    def _resize_window(self) -> None:
-        """
-        Method resizes window depending on presence of multiplexer.
-        """
-
-        if not self._parent.measurement_plan or not self._parent.measurement_plan.multiplexer or\
-                self._is_arranged()[0] or self.isVisible():
-            return
-        self.resize(MuxAndPlanWindow.DEFAULT_WIDTH, MuxAndPlanWindow.DEFAULT_HEIGHT)
-        self.splitter.setSizes([MuxAndPlanWindow.DEFAULT_MUX_HEIGHT,
-                                MuxAndPlanWindow.DEFAULT_HEIGHT - MuxAndPlanWindow.DEFAULT_MUX_HEIGHT])
-
     def _stop_plan_measurement(self) -> None:
         """
         Method stops measurements by multiplexer according to measurement plan.
@@ -221,16 +210,6 @@ class MuxAndPlanWindow(QWidget):
 
         self.measurement_plan_widget.set_work_mode(new_work_mode)
         self.multiplexer_pinout_widget.set_work_mode(new_work_mode)
-
-    def closeEvent(self, event: QCloseEvent) -> None:
-        """
-        :param event: close event.
-        """
-
-        if self.isVisible():
-            geometry = self.geometry()
-            self._previous_pos = QPoint(geometry.x(), geometry.y())
-        super().closeEvent(event)
 
     @pyqtSlot()
     def create_report(self) -> None:
@@ -269,15 +248,6 @@ class MuxAndPlanWindow(QWidget):
         if self.isEnabled():
             self._stop_plan_measurement()
         self._check_multiplexer_connection()
-
-    def showEvent(self, event: QShowEvent) -> None:
-        """
-        :param event: show event.
-        """
-
-        if self._previous_pos is not None:
-            self.move(self._previous_pos)
-        super().showEvent(event)
 
     @pyqtSlot(bool)
     def start_or_stop_plan_measurement(self, status: bool) -> None:
@@ -331,4 +301,3 @@ class MuxAndPlanWindow(QWidget):
 
         self.measurement_plan_widget.update_info()
         self.multiplexer_pinout_widget.update_info()
-        self._resize_window()
