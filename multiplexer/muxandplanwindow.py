@@ -3,9 +3,9 @@ File with class to show window with information about multiplexer and measuremen
 """
 
 import os
-from typing import Tuple
+from typing import Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QCloseEvent, QIcon, QShowEvent
 from PyQt5.QtWidgets import QHBoxLayout, QMessageBox, QPushButton, QSplitter, QVBoxLayout, QWidget
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
 from multiplexer.measurementplanrunner import MeasurementPlanRunner
@@ -41,6 +41,7 @@ class MuxAndPlanWindow(QWidget):
         self._parent = parent
         self._previous_main_window_pos: QPoint = None
         self._previous_main_window_size: QSize = None
+        self._previous_pos: Optional[QPoint] = None
         self._previous_window_pos: QPoint = None
         self._previous_window_size: QSize = None
         self._init_ui()
@@ -221,6 +222,16 @@ class MuxAndPlanWindow(QWidget):
         self.measurement_plan_widget.set_work_mode(new_work_mode)
         self.multiplexer_pinout_widget.set_work_mode(new_work_mode)
 
+    def closeEvent(self, event: QCloseEvent) -> None:
+        """
+        :param event: close event.
+        """
+
+        if self.isVisible():
+            geometry = self.geometry()
+            self._previous_pos = QPoint(geometry.x(), geometry.y())
+        super().closeEvent(event)
+
     @pyqtSlot()
     def create_report(self) -> None:
         """
@@ -258,6 +269,15 @@ class MuxAndPlanWindow(QWidget):
         if self.isEnabled():
             self._stop_plan_measurement()
         self._check_multiplexer_connection()
+
+    def showEvent(self, event: QShowEvent) -> None:
+        """
+        :param event: show event.
+        """
+
+        if self._previous_pos is not None:
+            self.move(self._previous_pos)
+        super().showEvent(event)
 
     @pyqtSlot(bool)
     def start_or_stop_plan_measurement(self, status: bool) -> None:
