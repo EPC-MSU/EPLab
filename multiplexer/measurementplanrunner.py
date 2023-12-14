@@ -97,7 +97,7 @@ class MeasurementPlanRunner(QObject):
         """
 
         if self._is_running and (self._need_to_save_measurement or self._current_pin_index in self._bad_pin_indexes):
-            if self._current_pin_index not in self._bad_pin_indexes and self._parent.save_point_action.isEnabled():
+            if self._current_pin_index not in self._bad_pin_indexes and self._parent.can_be_measured:
                 self._parent.save_pin()
             self.measurement_done.emit()
             self._measurement_saved = True

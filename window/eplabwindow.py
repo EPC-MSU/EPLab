@@ -149,6 +149,14 @@ class EPLabWindow(QMainWindow):
             self._dir_chosen_by_user = os.path.dirname(path) if not os.path.isdir(path) else path
 
     @property
+    def can_be_measured(self) -> bool:
+        if self._work_mode is WorkMode.WRITE:
+            return True
+        if self._work_mode is WorkMode.TEST and not self._measured_pins_checker.check_empty_current_pin():
+            return True
+        return False
+
+    @property
     def measurement_plan(self) -> MeasurementPlan:
         """
         :return: object with measurement plan.
