@@ -14,9 +14,11 @@ from multiplexer.measurementplanwidget import MeasurementPlanWidget
 from multiplexer.multiplexerpinoutwidget import MultiplexerPinoutWidget
 from window import utils as ut
 from window.common import WorkMode
+from window.pedalhandler import add_pedal_handler
 from window.scaler import update_scale_of_class
 
 
+@add_pedal_handler
 @update_widget_to_save_geometry
 @update_scale_of_class
 class MuxAndPlanWindow(QWidget):

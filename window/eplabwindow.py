@@ -37,7 +37,7 @@ from window.language import Language, Translator
 from window.measuredpinschecker import MeasuredPinsChecker
 from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
-from window.pedalhandler import PedalHandler
+from window.pedalhandler import add_pedal_handler
 from window.pinindexwidget import PinIndexWidget
 from window.scaler import update_scale_of_class
 from window.scorewrapper import ScoreWrapper
@@ -49,6 +49,7 @@ from version import Version
 logger = logging.getLogger("eplab")
 
 
+@add_pedal_handler
 @update_scale_of_class
 class EPLabWindow(QMainWindow):
     """
@@ -99,8 +100,6 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan_path: MeasurementPlanPath = MeasurementPlanPath(self)
         self._measurement_plan_path.name_changed.connect(self.change_window_title)
         self._msystem: MeasurementSystem = None
-        self._pedal_handler: PedalHandler = PedalHandler()
-        self._pedal_handler.pedal_signal.connect(self.handle_pedal_signal)
         self._product: EyePointProduct = product
         self._product_name: cw.ProductName = None
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
@@ -1332,20 +1331,6 @@ class EPLabWindow(QMainWindow):
             self._hide_curve_test = state
         elif self.sender() is self.hide_curve_b_action:
             self._hide_curve_ref = state
-
-    def keyPressEvent(self, event: QKeyEvent) -> None:
-        """
-        :param event: key press event.
-        """
-
-        self._pedal_handler.handle_key_event(event)
-
-    def keyReleaseEvent(self, event: QKeyEvent) -> None:
-        """
-        :param event: key release event.
-        """
-
-        self._pedal_handler.handle_key_event(event)
 
     @pyqtSlot()
     def load_board(self, filename: Optional[str] = None) -> None:

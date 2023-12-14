@@ -14,7 +14,7 @@ from epcore.measurementmanager import MeasurementPlan
 from dialogs.save_geometry import update_widget_to_save_geometry
 from window import utils as ut
 from window.common import WorkMode
-from window.pedalhandler import PedalHandler
+from window.pedalhandler import add_pedal_handler
 
 
 def pil_to_pixmap(image: Image) -> QPixmap:
@@ -33,6 +33,7 @@ def pil_to_pixmap(image: Image) -> QPixmap:
     return QPixmap.fromImage(q_image)
 
 
+@add_pedal_handler
 @update_widget_to_save_geometry
 class BoardWidget(QWidget):
     """
@@ -51,9 +52,6 @@ class BoardWidget(QWidget):
         self._board: Optional[MeasurementPlan] = None
         self._control_pressed: bool = False
         self._parent = parent
-        self._pedal_handler: PedalHandler = PedalHandler()
-        if hasattr(parent, "handle_pedal_signal"):
-            self._pedal_handler.pedal_signal.connect(parent.handle_pedal_signal)
         self._previous_pos: Optional[QRect] = None
         self._init_ui()
 
@@ -192,20 +190,6 @@ class BoardWidget(QWidget):
         width = self._scene.width()
         height = self._scene.height()
         return self._scene.mapToScene(int(width / 2), int(height / 2))
-
-    def keyPressEvent(self, event: QKeyEvent) -> None:
-        """
-        :param event: key press event.
-        """
-
-        self._pedal_handler.handle_key_event(event)
-
-    def keyReleaseEvent(self, event: QKeyEvent) -> None:
-        """
-        :param event: key release event.
-        """
-
-        self._pedal_handler.handle_key_event(event)
 
     @pyqtSlot(int)
     def select_pin_with_index(self, index: int) -> None:

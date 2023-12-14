@@ -79,3 +79,37 @@ class PedalHandler(QObject):
             button = self._buttons[key]
             button.status = event.type()
         self._check_buttons()
+
+
+def add_pedal_handler(widget_cls: type) -> type:
+    """
+    The decorator adds a pedal handler to the widget class.
+    :param widget_cls: widget class.
+    :return: decorated class with pedal handler.
+    """
+
+    class ClassWithPedalHandler(widget_cls):
+
+        def __init__(self, *args, **kwargs) -> None:
+            super().__init__(*args, **kwargs)
+            self._pedal_handler: PedalHandler = PedalHandler()
+            if hasattr(self, "handle_pedal_signal"):
+                self._pedal_handler.pedal_signal.connect(self.handle_pedal_signal)
+            elif hasattr(self, "_parent") and hasattr(self._parent, "handle_pedal_signal"):
+                self._pedal_handler.pedal_signal.connect(self._parent.handle_pedal_signal)
+
+        def keyPressEvent(self, event: QKeyEvent) -> None:
+            """
+            :param event: key press event.
+            """
+
+            self._pedal_handler.handle_key_event(event)
+
+        def keyReleaseEvent(self, event: QKeyEvent) -> None:
+            """
+            :param event: key release event.
+            """
+
+            self._pedal_handler.handle_key_event(event)
+
+    return ClassWithPedalHandler
