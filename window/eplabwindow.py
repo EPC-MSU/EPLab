@@ -150,6 +150,11 @@ class EPLabWindow(QMainWindow):
 
     @property
     def can_be_measured(self) -> bool:
+        """
+        :return: True if the measurement at the current pin can be carried out, otherwise False. Used for auto
+        measurement according to plan.
+        """
+
         if self._work_mode is WorkMode.WRITE:
             return True
         if self._work_mode is WorkMode.TEST and not self._measured_pins_checker.check_empty_current_pin():
