@@ -430,6 +430,16 @@
         <translation>Error occurred while configuring device settings.</translation>
     </message>
     <message>
+        <location filename="../window/eplabwindow.py" line="1342"/>
+        <source>Информация</source>
+        <translation>Information</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="1343"/>
+        <source>Изменен масштаб экрана. Закройте приложение и откройте снова.</source>
+        <translation>Screen scale has been changed. Close the application and open again.</translation>
+    </message>
+    <message>
         <location filename="../window/measuredpinschecker.py" line="115"/>
         <source>Точки {} не содержат сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
         <translation>Points {} do not contain saved measurements. To save the test plan all points must contain measurements.</translation>

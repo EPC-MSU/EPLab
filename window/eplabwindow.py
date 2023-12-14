@@ -113,6 +113,7 @@ class EPLabWindow(QMainWindow):
 
         self._load_translation(english)
         self._init_ui()
+        self._connect_scale_change_signal()
 
         if port_1 is None and port_2 is None:
             self.disconnect_measurers()
@@ -305,6 +306,16 @@ class EPLabWindow(QMainWindow):
         self._ref_curve = None
         self._test_curve = None
         self._test_curve_from_plan = None
+
+    def _connect_scale_change_signal(self) -> None:
+        """
+        Method connects the screen zoom signal.
+        """
+
+        screens = qApp.instance().screens()
+        if len(screens) > 0:
+            screen = screens[0]
+            screen.logicalDotsPerInchChanged.connect(self.handle_scale_change)
 
     def _create_measurer_setting_actions(self) -> None:
         """
@@ -1320,6 +1331,17 @@ class EPLabWindow(QMainWindow):
             self._handle_freezing_curves_with_pedal(pressed)
         elif pressed and self.work_mode in (WorkMode.TEST, WorkMode.WRITE) and self.save_point_action.isEnabled():
             self.save_pin()
+
+    @pyqtSlot(float)
+    def handle_scale_change(self, new_scale: float) -> None:
+        """
+        Slot processes the signal that the screen scale has been changed.
+        :param new_scale: new screen scale.
+        """
+
+        ut.show_message(qApp.translate("t", "Информация"),
+                        qApp.translate("t", "Изменен масштаб экрана. Закройте приложение и откройте снова."),
+                        icon=QMessageBox.Information)
 
     @pyqtSlot(bool)
     def hide_curve(self, state: bool) -> None:
