@@ -14,8 +14,8 @@
 
 ## Поддерживаемые ОС: 
 
-- Windows 7 и новее.
-- Linux (протестировано на Ubuntu 18.04, 20.04;  Astra Linux - 4.15.3).
+- Windows 7 SP1 и новее.
+- Linux (протестировано на Ubuntu 18.04, 20.04; Astra Linux - 4.15.3).
 
 ## Запуск в Windows
 
