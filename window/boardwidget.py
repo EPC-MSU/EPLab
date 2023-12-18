@@ -188,8 +188,13 @@ class BoardWidget(QWidget):
         return self._scene.mapToScene(int(width / 2), int(height / 2))
 
     def resizeEvent(self, event: QResizeEvent) -> None:
-        print(self.size())
+        """
+        :param event: resize event.
+        """
+
         self._scene.update()
+        self._scene.updateSceneRect(self._scene.sceneRect())
+        super().resizeEvent(event)
 
     def select_pin_on_scene(self, index: int) -> None:
         """
