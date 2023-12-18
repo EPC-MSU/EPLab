@@ -6,7 +6,7 @@ import os
 from typing import Optional, Union
 from PIL import Image
 from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPointF, QRect, Qt
-from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent
+from PyQt5.QtGui import QBrush, QColor, QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent
 from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView, GraphicsManualPinItem
 from epcore.elements import Pin
@@ -113,13 +113,14 @@ class BoardWidget(QWidget):
         self.setWindowTitle("EPLab - Board")
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.resize(BoardWidget.WIDTH, BoardWidget.HEIGHT)
-        self.setStyleSheet("background-color:black;")
+        self.setStyleSheet("background-color: blue;")
 
         self._scene: BoardView = BoardView()
         self._scene.on_right_click.connect(self.create_new_pin)
         self._scene.point_moved.connect(self.change_pin_coordinates)
         self._scene.point_selected.connect(self.select_pin_with_index)
         self._scene.installEventFilter(self)
+        self._scene.setBackgroundBrush(QBrush(QColor("red")))
 
         layout = QVBoxLayout(self)
         layout.addWidget(self._scene)
@@ -193,7 +194,7 @@ class BoardWidget(QWidget):
         """
 
         self._scene.update()
-        self._scene.updateSceneRect(self._scene.sceneRect())
+        self._scene.setSceneRect(self._scene.sceneRect())
         super().resizeEvent(event)
 
     def select_pin_on_scene(self, index: int) -> None:
@@ -241,8 +242,12 @@ class BoardWidget(QWidget):
 
         self._scene.clear_scene()
         if self.measurement_plan.image:
-            self._scene.set_background(pil_to_pixmap(self.measurement_plan.image))
+            self._image_ = pil_to_pixmap(self.measurement_plan.image)
+            print("****", self._image_.rect())
+            self._scene.set_background(self._image_)
             self._scene.scale_to_window_size(self.width(), self.height())
+            image_rect = self._image_.rect()
+            self._scene.setSceneRect(image_rect.x(), image_rect.y(), image_rect.width(), image_rect.height())
         else:
             self.close()
 
