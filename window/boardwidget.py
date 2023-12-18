@@ -3,12 +3,12 @@ File with class to show image of board.
 """
 
 import os
-from typing import Optional
+from typing import Optional, Union
 from PIL import Image
 from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPointF, QRect, Qt
-from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap
+from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent
 from PyQt5.QtWidgets import QVBoxLayout, QWidget
-from boardview.BoardViewWidget import BoardView
+from boardview.BoardViewWidget import BoardView, GraphicsManualPinItem
 from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
 from dialogs.save_geometry import update_widget_to_save_geometry
@@ -62,10 +62,6 @@ class BoardWidget(QWidget):
         """
 
         return self._parent.measurement_plan
-
-    @property
-    def workspace(self) -> BoardView:
-        return self._scene
 
     def _handle_key_press_event(self, obj: QObject, event: QEvent) -> bool:
         """
@@ -191,6 +187,18 @@ class BoardWidget(QWidget):
         height = self._scene.height()
         return self._scene.mapToScene(int(width / 2), int(height / 2))
 
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        print(self.size())
+        self._scene.update()
+
+    def select_pin_on_scene(self, index: int) -> None:
+        """
+        :param index: pin index.
+        """
+
+        self._scene.select_point(index)
+        self.show_component_centered(index)
+
     @pyqtSlot(int)
     def select_pin_with_index(self, index: int) -> None:
         """
@@ -200,6 +208,26 @@ class BoardWidget(QWidget):
 
         self.measurement_plan.go_pin(index)
         self._parent.update_current_pin()
+        self.show_component_centered(index)
+
+    def show_component_centered(self, index_or_component: Union[int, GraphicsManualPinItem]) -> None:
+        """
+        Method displays the selected component in the center of the screen.
+        :param index_or_component: index or selected component.
+        """
+
+        if isinstance(index_or_component, GraphicsManualPinItem):
+            component = index_or_component
+        else:
+            for component_ in self._scene._components:
+                if component_.number == index_or_component:
+                    component = component_
+                    break
+            else:
+                component = None
+
+        if component is not None:
+            self._scene.centerOn(component)
 
     def update_board(self) -> None:
         """

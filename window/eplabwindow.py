@@ -1678,7 +1678,7 @@ class EPLabWindow(QMainWindow):
 
         index = self._measurement_plan.get_current_index()
         self.pin_index_widget.set_index(index)
-        self._board_window.workspace.select_point(index)
+        self._board_window.select_pin_on_scene(index)
         if self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
             self._update_current_pin_in_test_and_write_mode()
         elif self._work_mode == WorkMode.READ_PLAN:
