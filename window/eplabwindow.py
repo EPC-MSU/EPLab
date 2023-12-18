@@ -1671,14 +1671,15 @@ class EPLabWindow(QMainWindow):
         settings_window.exec()
         self.dir_chosen_by_user = settings_window.settings_directory
 
-    def update_current_pin(self) -> None:
+    def update_current_pin(self, pin_centering: bool = True) -> None:
         """
         Call this method when current pin index changed.
+        :param pin_centering: if True, then the selected pin will be centered on the board window.
         """
 
         index = self._measurement_plan.get_current_index()
         self.pin_index_widget.set_index(index)
-        self._board_window.select_pin_on_scene(index)
+        self._board_window.select_pin_on_scene(index, pin_centering)
         if self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
             self._update_current_pin_in_test_and_write_mode()
         elif self._work_mode == WorkMode.READ_PLAN:

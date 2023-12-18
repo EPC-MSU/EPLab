@@ -3,10 +3,10 @@ File with class to show image of board.
 """
 
 import os
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 from PIL import Image
-from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPointF, QRect, Qt
-from PyQt5.QtGui import QBrush, QColor, QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent
+from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPoint, QPointF, QRect, QRectF, Qt, QTimer
+from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent, QWheelEvent
 from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView, GraphicsManualPinItem
 from epcore.elements import Pin
@@ -43,16 +43,21 @@ class BoardWidget(QWidget):
     HEIGHT: int = 600
     WIDTH: int = 600
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, main_window=None) -> None:
         """
-        :param parent: parent main window.
+        :param main_window: main window of application.
         """
 
         super().__init__()
         self._board: Optional[MeasurementPlan] = None
+        self._board_image: QPixmap = None
         self._control_pressed: bool = False
-        self._parent = parent
+        self._parent = main_window
         self._previous_pos: Optional[QRect] = None
+        self._timer: QTimer = QTimer()
+        self._timer.timeout.connect(self._set_scene_rect)
+        self._timer.setInterval(50)
+        self._timer.setSingleShot(True)
         self._init_ui()
 
     @property
@@ -113,18 +118,45 @@ class BoardWidget(QWidget):
         self.setWindowTitle("EPLab - Board")
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.resize(BoardWidget.WIDTH, BoardWidget.HEIGHT)
-        self.setStyleSheet("background-color: blue;")
+        self.setStyleSheet("background-color: black;")
 
         self._scene: BoardView = BoardView()
         self._scene.on_right_click.connect(self.create_new_pin)
         self._scene.point_moved.connect(self.change_pin_coordinates)
         self._scene.point_selected.connect(self.select_pin_with_index)
         self._scene.installEventFilter(self)
-        self._scene.setBackgroundBrush(QBrush(QColor("red")))
 
         layout = QVBoxLayout(self)
         layout.addWidget(self._scene)
         self.setLayout(layout)
+
+    def _set_scene_rect(self) -> None:
+        """
+        Method sets area of the scene visualized by view.
+        """
+
+        def get_viewport_size_in_scene_coordinates() -> Tuple[float, float]:
+            viewport_size = self._scene.viewport().size()
+            top_left = QPoint(0, 0)
+            top_left = self._scene.mapToScene(top_left)
+            bottom_right = QPoint(viewport_size.width(), viewport_size.height())
+            bottom_right = self._scene.mapToScene(bottom_right)
+            return bottom_right.x() - top_left.x(), bottom_right.y() - top_left.y()
+
+        def get_left_and_right(viewport_size: float, image_size: float) -> Tuple[float, float]:
+            d_size = (viewport_size - image_size) / 2
+            if viewport_size < image_size:
+                d_size = 0
+            left = 0 - 2 * d_size - image_size / 2
+            right = image_size + 2 * d_size + image_size / 2
+            return left, right
+
+        viewport_width, viewport_height = get_viewport_size_in_scene_coordinates()
+        image_rect = self._board_image.rect()
+        x_left, x_right = get_left_and_right(viewport_width, image_rect.width())
+        y_top, y_bottom = get_left_and_right(viewport_height, image_rect.height())
+        self._scene.setSceneRect(QRectF(x_left, y_top, x_right - x_left, y_bottom - y_top))
+        self._scene.update()
 
     def add_pin(self, x: float, y: float, index: int) -> None:
         """
@@ -177,6 +209,13 @@ class BoardWidget(QWidget):
                 return self._handle_key_press_event(obj, event)
             if key_event.type() == QEvent.KeyRelease:
                 return self._handle_key_release_event(obj, event)
+
+        if obj == self._scene and isinstance(event, QWheelEvent):
+            result = super().eventFilter(obj, event)
+            if self._board_image:
+                self._timer.start()
+            return result
+
         return super().eventFilter(obj, event)
 
     def get_default_pin_xy(self) -> QPointF:
@@ -193,17 +232,19 @@ class BoardWidget(QWidget):
         :param event: resize event.
         """
 
-        self._scene.update()
-        self._scene.setSceneRect(self._scene.sceneRect())
         super().resizeEvent(event)
+        if self._board_image:
+            self._timer.start()
 
-    def select_pin_on_scene(self, index: int) -> None:
+    def select_pin_on_scene(self, index: int, pin_centering: bool = True) -> None:
         """
-        :param index: pin index.
+        :param index: pin index;
+        :param pin_centering: if True, then the selected pin will be centered on the board window.
         """
 
         self._scene.select_point(index)
-        self.show_component_centered(index)
+        if pin_centering:
+            self.show_component_centered(index)
 
     @pyqtSlot(int)
     def select_pin_with_index(self, index: int) -> None:
@@ -213,8 +254,7 @@ class BoardWidget(QWidget):
         """
 
         self.measurement_plan.go_pin(index)
-        self._parent.update_current_pin()
-        self.show_component_centered(index)
+        self._parent.update_current_pin(False)
 
     def show_component_centered(self, index_or_component: Union[int, GraphicsManualPinItem]) -> None:
         """
@@ -242,13 +282,14 @@ class BoardWidget(QWidget):
 
         self._scene.clear_scene()
         if self.measurement_plan.image:
-            self._image_ = pil_to_pixmap(self.measurement_plan.image)
-            print("****", self._image_.rect())
-            self._scene.set_background(self._image_)
+            self._board_image = pil_to_pixmap(self.measurement_plan.image)
+            self._scene.set_background(self._board_image)
             self._scene.scale_to_window_size(self.width(), self.height())
-            image_rect = self._image_.rect()
+            image_rect = self._board_image.rect()
             self._scene.setSceneRect(image_rect.x(), image_rect.y(), image_rect.width(), image_rect.height())
         else:
+            del self._board_image
+            self._board_image = None
             self.close()
 
         for index, pin in self.measurement_plan.all_pins_iterator():
