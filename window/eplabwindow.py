@@ -485,7 +485,7 @@ class EPLabWindow(QMainWindow):
         v_box_layout = QVBoxLayout()
         v_box_layout.setSpacing(0)
         v_box_layout.addWidget(self._iv_window)
-        v_box_layout.addLayout(self.low_settings_panel)
+        v_box_layout.addWidget(self.low_settings_panel)
         h_box_layout = QHBoxLayout(self.main_widget)
         h_box_layout.addLayout(v_box_layout)
 
