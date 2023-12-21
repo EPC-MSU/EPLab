@@ -214,6 +214,16 @@ class EPLabWindow(QMainWindow):
         self._comparator.set_min_ivc(*self._get_noise_amplitude(settings))
         return self._comparator.compare_ivc(curve_1, curve_2)
 
+    def _change_save_point_name(self, mode: Optional[WorkMode] = None) -> None:
+        """
+        :param mode: new work mode.
+        """
+
+        save_point_names = {WorkMode.COMPARE: qApp.translate("t", "Сохранить"),
+                            WorkMode.TEST: qApp.translate("t", "Сохранить тест"),
+                            WorkMode.WRITE: qApp.translate("t", "Сохранить эталон")}
+        self.save_point_action.setText(save_point_names.get(mode, qApp.translate("t", "Сохранить")))
+
     def _change_work_mode(self, mode: WorkMode) -> None:
         """
         Method sets window settings for given work mode.
@@ -237,6 +247,7 @@ class EPLabWindow(QMainWindow):
         enable = bool(mode is not WorkMode.COMPARE and self._measurement_plan and
                       self._measurement_plan.multiplexer is not None)
         self.start_or_stop_entire_plan_measurement_action.setEnabled(enable)
+        self._change_save_point_name(mode)
 
         self._player.set_work_mode(mode)
         # Comment is only for test and write mode
@@ -306,6 +317,7 @@ class EPLabWindow(QMainWindow):
         self._current_curve = None
         self._reference_curve = None
         self._test_curve = None
+        self._change_save_point_name()
 
     def _connect_scale_change_signal(self) -> None:
         """
@@ -518,7 +530,7 @@ class EPLabWindow(QMainWindow):
         self.add_board_image_action.triggered.connect(self.load_board_image)
         self.create_report_action.triggered.connect(self.create_report)
         self.about_action.triggered.connect(show_product_info)
-        self.action_keymap.triggered.connect(show_keymap_info)
+        self.action_keymap.triggered.connect(lambda: show_keymap_info(self))
         self.save_comment_push_button.clicked.connect(self.save_comment)
         self.line_comment_pin.installEventFilter(self)
         self.line_comment_pin.returnPressed.connect(self.save_comment)

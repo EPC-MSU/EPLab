@@ -19,8 +19,13 @@ class KeymapDialog(QDialog):
     HEIGHT: int = 370
     WIDTH: int = 280
 
-    def __init__(self) -> None:
+    def __init__(self, main_window) -> None:
+        """
+        :param main_window: main window of application.
+        """
+
         super().__init__()
+        self._main_window = main_window
         self._init_ui()
 
     def _create_text_browser(self) -> QTextBrowser:
@@ -35,8 +40,7 @@ class KeymapDialog(QDialog):
         text_browser.setHtml(self._get_text())
         return text_browser
 
-    @staticmethod
-    def _get_text() -> str:
+    def _get_text(self) -> str:
         """
         :return: text describing the keyboard shortcuts used in the application.
         """
@@ -50,7 +54,7 @@ class KeymapDialog(QDialog):
                    ("Ctrl+O", qApp.translate("MainWindow", "Открыть план тестирования")),
                    ("Ctrl+S", qApp.translate("MainWindow", "Сохранить план тестирования")),
                    ("Alt+A", qApp.translate("MainWindow", "Автоподбор параметров")),
-                   ("Enter", qApp.translate("MainWindow", "Сохранить точку")),
+                   ("Enter", self._main_window.save_point_action.text()),
                    ("Left", qApp.translate("MainWindow", "Предыдущая точка")),
                    ("Right", qApp.translate("MainWindow", "Следующая точка"))]
         row_format = "<tr><td><b>{}</b></td><td>{}</td></tr>"
@@ -79,10 +83,11 @@ class KeymapDialog(QDialog):
         self.setFixedWidth(KeymapDialog.WIDTH)
 
 
-def show_keymap_info() -> None:
+def show_keymap_info(main_window) -> None:
     """
     Function shows window with information about keyboard shortcuts used in the application.
+    :param main_window: main window of application.
     """
 
-    window = KeymapDialog()
+    window = KeymapDialog(main_window)
     window.exec_()

@@ -300,6 +300,21 @@
 <context>
     <name>t</name>
     <message>
+        <location filename="../window/eplabwindow.py" line="222"/>
+        <source>Сохранить</source>
+        <translation>Save</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="223"/>
+        <source>Сохранить тест</source>
+        <translation>Save test</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="224"/>
+        <source>Сохранить эталон</source>
+        <translation>Save reference</translation>
+    </message>
+    <message>
         <location filename="../window/eplabwindow.py" line="265"/>
         <source>Ошибка</source>
         <translation>Error</translation>
