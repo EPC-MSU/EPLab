@@ -113,7 +113,14 @@ class CommentWidget(QWidget):
         :param mode: new work mode.
         """
 
-        self.setEnabled(mode in (WorkMode.TEST, WorkMode.WRITE))
+        if mode is WorkMode.READ_PLAN:
+            column = 1
+            for row in range(self.table_widget.rowCount()):
+                widget = self.table_widget.cellWidget(row, column)
+                widget.setReadOnly()
+            self.setEnabled(True)
+        else:
+            self.setEnabled(mode in (WorkMode.TEST, WorkMode.WRITE))
 
     def update_info(self) -> None:
         """
