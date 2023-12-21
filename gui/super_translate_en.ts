@@ -735,52 +735,67 @@
 <context>
     <name>settings</name>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="31"/>
-        <source>  Ток: </source>
-        <translation>  Current: </translation>
+        <location filename="../settings/lowsettingspanel.py" line="25"/>
+        <source>Эталон</source>
+        <translation>Reference</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="32"/>
+        <location filename="../settings/lowsettingspanel.py" line="25"/>
+        <source>Тест</source>
+        <translation>Test</translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="26"/>
+        <source>Текущая</source>
+        <translation>Current</translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="65"/>
+        <source>Ток: </source>
+        <translation>Current: </translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="66"/>
         <source> мА / дел.</source>
         <translation> mA / div.</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="39"/>
+        <location filename="../settings/lowsettingspanel.py" line="85"/>
         <source>Ампл. проб. сигнала: </source>
         <translation>Probe signal amplitude: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="40"/>
+        <location filename="../settings/lowsettingspanel.py" line="86"/>
         <source> В</source>
         <translation> V</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="47"/>
+        <location filename="../settings/lowsettingspanel.py" line="93"/>
         <source>Частота: </source>
         <translation>Frequency: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="48"/>
+        <location filename="../settings/lowsettingspanel.py" line="94"/>
         <source> Гц</source>
         <translation> Hz</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="55"/>
+        <location filename="../settings/lowsettingspanel.py" line="101"/>
         <source>Различие: </source>
         <translation>Difference: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="62"/>
+        <location filename="../settings/lowsettingspanel.py" line="108"/>
         <source>Чувствительность: </source>
         <translation>Sensitivity: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="68"/>
-        <source>  Напряжение: </source>
-        <translation>  Voltage: </translation>
+        <location filename="../settings/lowsettingspanel.py" line="114"/>
+        <source>Напряжение: </source>
+        <translation>Voltage: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="69"/>
+        <location filename="../settings/lowsettingspanel.py" line="115"/>
         <source> В / дел.</source>
         <translation> V / div. </translation>
     </message>

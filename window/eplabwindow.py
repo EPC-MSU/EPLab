@@ -56,9 +56,9 @@ class EPLabWindow(QMainWindow):
     Class for the main window of application.
     """
 
+    COLOR_FOR_CURRENT: QColor = QColor(255, 0, 0, 200)
     COLOR_FOR_REFERENCE: QColor = QColor(0, 128, 255, 200)
-    COLOR_FOR_TEST: QColor = QColor(255, 0, 0, 200)
-    COLOR_FOR_TEST_FROM_PLAN: QColor = QColor(255, 129, 129, 200)
+    COLOR_FOR_TEST: QColor = QColor(255, 129, 129, 200)
     CRITICAL_WIDTH_FOR_LINUX_EN: int = 1420
     CRITICAL_WIDTH_FOR_LINUX_RU: int = 1620
     CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1180
@@ -91,8 +91,8 @@ class EPLabWindow(QMainWindow):
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
         self._dir_chosen_by_user: str = ut.get_dir_name()
         self._dir_watcher: DirWatcher = DirWatcher(ut.get_dir_name())
-        self._hide_curve_ref: bool = False
-        self._hide_curve_test: bool = False
+        self._hide_reference_curve: bool = False
+        self._hide_current_curve: bool = False
         self._last_saved_measurement_plan_data: Dict[str, Any] = None
         self._measurement_plan: MeasurementPlan = None
         self._measured_pins_checker: MeasuredPinsChecker = MeasuredPinsChecker(self)
@@ -301,11 +301,11 @@ class EPLabWindow(QMainWindow):
         self._settings_update_next_cycle = None
         self._skip_curve = False
         self._work_mode = None
-        self._hide_curve_test = False
-        self._hide_curve_ref = False
-        self._ref_curve = None
+        self._hide_current_curve = False
+        self._hide_reference_curve = False
+        self._current_curve = None
+        self._reference_curve = None
         self._test_curve = None
-        self._test_curve_from_plan = None
 
     def _connect_scale_change_signal(self) -> None:
         """
@@ -475,12 +475,12 @@ class EPLabWindow(QMainWindow):
                                              remove_all_cursors=qApp.translate("t", "Удалить все метки"),
                                              remove_cursor=qApp.translate("t", "Удалить метку"),
                                              save_screenshot=qApp.translate("t", "Сохранить изображение"))
+        self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
+        self.current_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_CURRENT)
         self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
         self.reference_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_REFERENCE)
         self.test_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
         self.test_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_TEST)
-        self.test_curve_plot_from_plan: PlotCurve = self._iv_window.plot.add_curve()
-        self.test_curve_plot_from_plan.set_curve_params(EPLabWindow.COLOR_FOR_TEST_FROM_PLAN)
 
         v_box_layout = QVBoxLayout()
         v_box_layout.setSpacing(0)
@@ -532,9 +532,9 @@ class EPLabWindow(QMainWindow):
 
         # Update plot settings at next measurement cycle (place settings here or None)
         self._settings_update_next_cycle: MeasurementSettings = None
-        self._ref_curve: IVCurve = None
+        self._current_curve: IVCurve = None
+        self._reference_curve: IVCurve = None
         self._test_curve: IVCurve = None
-        self._test_curve_from_plan: IVCurve = None
         self._mux_and_plan_window: MuxAndPlanWindow = MuxAndPlanWindow(self)
         self.work_mode_changed.connect(self._mux_and_plan_window.change_work_mode)
         self.start_or_stop_entire_plan_measurement_action.triggered.connect(
@@ -589,10 +589,10 @@ class EPLabWindow(QMainWindow):
             else:
                 # Get curves from devices
                 curves = dict()
-                curves["test"] = self._msystem.measurers[0].get_last_cached_iv_curve()
+                curves["current"] = self._msystem.measurers[0].get_last_cached_iv_curve()
                 if self._work_mode is WorkMode.COMPARE and len(self._msystem.measurers) > 1:
                     # Display two current curves
-                    curves["ref"] = self._msystem.measurers[1].get_last_cached_iv_curve()
+                    curves["reference"] = self._msystem.measurers[1].get_last_cached_iv_curve()
                 self._update_curves(curves, self._msystem.get_settings())
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.check_pin()
@@ -627,13 +627,12 @@ class EPLabWindow(QMainWindow):
 
         # Draw empty curves
         self.enable_widgets(False)
-        self._test_curve = None
+        self._current_curve = None
         if self._work_mode is WorkMode.COMPARE:
-            self._ref_curve = None
+            self._reference_curve = None
         self._update_curves()
-        self.reference_curve_plot.set_curve(None)
-        self.test_curve_plot.set_curve(None)
-        self.test_curve_plot_from_plan.set_curve(None)
+        for plot in (self.current_curve_plot, self.reference_curve_plot, self.test_curve_plot):
+            plot.set_curve(None)
         # Draw text
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
 
@@ -651,7 +650,7 @@ class EPLabWindow(QMainWindow):
                 self._msystem.trigger_measurements()
 
     def _remove_ref_curve(self) -> None:
-        self._ref_curve = None
+        self._reference_curve = None
 
     def _replace_save_point_action(self) -> None:
         """
@@ -702,9 +701,9 @@ class EPLabWindow(QMainWindow):
         :param curves: dictionary with new curves.
         """
 
-        curves_dict = {"ref": "_ref_curve",
-                       "test": "_test_curve",
-                       "test_for_plan": "_test_curve_from_plan"}
+        curves_dict = {"current": "_current_curve",
+                       "reference": "_reference_curve",
+                       "test": "_test_curve"}
         if isinstance(curves, dict):
             for curve_name, attr_name in curves_dict.items():
                 if curve_name in curves:
@@ -737,13 +736,23 @@ class EPLabWindow(QMainWindow):
         sensitivity_widget = self._parameters_widgets[EyePointProduct.Parameter.sensitive]
         sensitivity = sensitivity_widget.get_checked_option_label()
         voltage_per_division, current_per_division = self._iv_window.plot.get_minor_axis_step()
-        param_dict = {"current_per_division": current_per_division,
+        param_dict = {"current_per_div": current_per_division,
                       "max_voltage": settings.max_voltage,
-                      "probe_signal_frequency": settings.probe_signal_frequency,
+                      "frequency": settings.probe_signal_frequency,
                       "score": self._score_wrapper.get_friendly_score(),
                       "sensitivity": sensitivity,
-                      "voltage_per_division": voltage_per_division}
-        self.low_settings_panel.set_all_parameters(**param_dict)
+                      "voltage_per_div": voltage_per_division}
+        legend_dict = self._get_curves_for_legend()
+        self.low_settings_panel.set_all_parameters(**param_dict, **legend_dict)
+
+    def _get_curves_for_legend(self) -> Dict[str, bool]:
+        """
+        :return:
+        """
+
+        return {"current": bool(self.current_curve_plot.curve),
+                "reference": bool(self.reference_curve_plot.curve),
+                "test": bool(self.test_curve_plot.curve)}
 
     def _set_widgets_to_init_state(self) -> None:
         self._board_window.update_board()
@@ -758,11 +767,11 @@ class EPLabWindow(QMainWindow):
 
         self._settings_update_next_cycle = None
         self._skip_curve = False
-        self._hide_curve_test = False
-        self._hide_curve_ref = False
-        self._ref_curve = None
+        self._hide_current_curve = False
+        self._hide_reference_curve = False
+        self._current_curve = None
+        self._reference_curve = None
         self._test_curve = None
-        self._test_curve_from_plan = None
 
         for action in (self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
                        self.hide_curve_b_action):
@@ -848,11 +857,11 @@ class EPLabWindow(QMainWindow):
                 self._set_options_to_ui(options)
                 self._adjust_plot_params(settings)
 
-                curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
+                curves = {"reference": None if not ref_for_plan else ref_for_plan.ivc,
                           "test": None if not test_for_plan else test_for_plan.ivc}
                 self._update_curves(curves, settings)
             else:
-                for plot in (self.reference_curve_plot, self.test_curve_plot, self.test_curve_plot_from_plan):
+                for plot in (self.reference_curve_plot, self.current_curve_plot, self.test_curve_plot):
                     plot.set_curve(None)
                 pin_index = self.pin_index_widget.text()
                 self._clear_widgets()
@@ -864,14 +873,15 @@ class EPLabWindow(QMainWindow):
         ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
         with self._device_errors_handler:
             if settings:
-                curves = {"ref": None if not ref_for_plan else ref_for_plan.ivc,
-                          "test_for_plan": None if not test_for_plan else test_for_plan.ivc}
+                curves = {"reference": None if not ref_for_plan else ref_for_plan.ivc,
+                          "test": None if not test_for_plan else test_for_plan.ivc}
                 self._set_msystem_settings(settings)
                 options = self._product.settings_to_options(settings)
                 self._set_options_to_ui(options)
-                self._update_curves(curves, self._msystem.measurers[0].get_settings())
             else:
-                self._update_curves({"ref": None, "test_for_plan": None}, self._msystem.measurers[0].get_settings())
+                curves = {"reference": None,
+                          "test": None}
+            self._update_curves(curves, self._msystem.measurers[0].get_settings())
 
     def _update_curves(self, curves: Dict[str, Optional[IVCurve]] = None, settings: MeasurementSettings = None) -> None:
         """
@@ -883,18 +893,19 @@ class EPLabWindow(QMainWindow):
         self._save_last_curves(curves)
 
         # Update plots
-        for hide, plot, curve in zip((self._hide_curve_ref, self._hide_curve_test, self._work_mode == WorkMode.COMPARE),
-                                     (self.reference_curve_plot, self.test_curve_plot, self.test_curve_plot_from_plan),
-                                     (self._ref_curve, self._test_curve, self._test_curve_from_plan)):
+        for hide, plot, curve in zip((self._hide_reference_curve, self._hide_current_curve,
+                                      self._work_mode == WorkMode.COMPARE),
+                                     (self.reference_curve_plot, self.current_curve_plot, self.test_curve_plot),
+                                     (self._reference_curve, self._current_curve, self._test_curve)):
             if not hide:
                 plot.set_curve(curve)
             else:
                 plot.set_curve(None)
 
         # Update score
-        if self._ref_curve and self._test_curve and self._work_mode != WorkMode.WRITE:
+        if self._reference_curve and self._current_curve and self._work_mode != WorkMode.WRITE:
             assert settings is not None
-            score = self._calculate_score(self._ref_curve, self._test_curve, settings)
+            score = self._calculate_score(self._reference_curve, self._current_curve, settings)
             self._score_wrapper.set_score(score)
             self._player.score_updated(score)
         else:
@@ -1350,9 +1361,9 @@ class EPLabWindow(QMainWindow):
         """
 
         if self.sender() is self.hide_curve_a_action:
-            self._hide_curve_test = state
+            self._hide_current_curve = state
         elif self.sender() is self.hide_curve_b_action:
-            self._hide_curve_ref = state
+            self._hide_reference_curve = state
 
     @pyqtSlot()
     def load_board(self, filename: Optional[str] = None) -> None:
