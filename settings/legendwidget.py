@@ -11,27 +11,27 @@ class LegendWidget(QToolBar):
 
     ICON_SIZE: int = 20
 
-    def __init__(self, text: str, color_path: str, left_margin: int) -> None:
+    def __init__(self, text: str, color_name: str, left_margin: int) -> None:
         """
         :param text: legend text;
-        :param color_path: path to icon with legend color;
+        :param color_name: name of icon with legend color;
         :param left_margin: left margin.
         """
 
         super().__init__()
         self._pixmap_select: QPixmap = self._load_select_pixmap()
-        self._init_ui(text, color_path, left_margin)
+        self._init_ui(text, color_name, left_margin)
 
     def _init_ui(self, text: str, color_path: str, left_margin: int) -> None:
         """
         :param text: legend text;
-        :param color_path: path to icon with legend color;
+        :param color_path: name of icon with legend color;
         :param left_margin: left margin.
         """
 
         self.label_color: QLabel = QLabel()
         self.label_color.setContentsMargins(left_margin, 0, 0, 0)
-        pixmap = QPixmap(color_path)
+        pixmap = QPixmap(os.path.join(DIR_MEDIA, color_path))
         self.label_color.setPixmap(pixmap.scaled(LegendWidget.ICON_SIZE, LegendWidget.ICON_SIZE, Qt.KeepAspectRatio))
         self.label_text: QLabel = QLabel(text)
         self.label_status: QLabel = QLabel()

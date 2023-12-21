@@ -737,8 +737,8 @@ class EPLabWindow(QMainWindow):
         sensitivity = sensitivity_widget.get_checked_option_label()
         voltage_per_division, current_per_division = self._iv_window.plot.get_minor_axis_step()
         param_dict = {"current_per_div": current_per_division,
-                      "max_voltage": settings.max_voltage,
                       "frequency": settings.probe_signal_frequency,
+                      "max_voltage": settings.max_voltage,
                       "score": self._score_wrapper.get_friendly_score(),
                       "sensitivity": sensitivity,
                       "voltage_per_div": voltage_per_division}

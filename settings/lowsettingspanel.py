@@ -1,9 +1,7 @@
-import os
 from typing import Dict, List
 from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtWidgets import QGridLayout, QLabel, QToolBar, QWidget
 from settings.legendwidget import LegendWidget
-from window.utils import DIR_MEDIA
 
 
 class LowSettingsPanel(QWidget):
@@ -27,7 +25,7 @@ class LowSettingsPanel(QWidget):
         colors = ["reference_signature.png", "test_signature.png", "current_signature.png"]
         row = 2
         for column, (name, text, color) in enumerate(zip(names, texts, colors)):
-            legend = LegendWidget(text, os.path.join(DIR_MEDIA, color), LowSettingsPanel.LEFT_MARGIN)
+            legend = LegendWidget(text, color, LowSettingsPanel.LEFT_MARGIN)
             self._legends[name] = legend
             self.grid_layout.addWidget(legend, row, column)
 
