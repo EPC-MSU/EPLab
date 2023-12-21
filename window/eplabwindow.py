@@ -378,6 +378,15 @@ class EPLabWindow(QMainWindow):
                 self.search_optimal_action.setEnabled(False)
                 return
 
+    def _get_curves_for_legend(self) -> Dict[str, bool]:
+        """
+        :return: a dictionary containing the curves displayed in the application window.
+        """
+
+        return {"current": bool(self.current_curve_plot.curve),
+                "reference": bool(self.reference_curve_plot.curve),
+                "test": bool(self.test_curve_plot.curve)}
+
     def _get_noise_amplitude(self, settings: Optional[MeasurementSettings] = None) -> Tuple[float, float]:
         """
         :param settings: measurement settings.
@@ -744,15 +753,6 @@ class EPLabWindow(QMainWindow):
                       "voltage_per_div": voltage_per_division}
         legend_dict = self._get_curves_for_legend()
         self.low_settings_panel.set_all_parameters(**param_dict, **legend_dict)
-
-    def _get_curves_for_legend(self) -> Dict[str, bool]:
-        """
-        :return:
-        """
-
-        return {"current": bool(self.current_curve_plot.curve),
-                "reference": bool(self.reference_curve_plot.curve),
-                "test": bool(self.test_curve_plot.curve)}
 
     def _set_widgets_to_init_state(self) -> None:
         self._board_window.update_board()
