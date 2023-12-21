@@ -105,9 +105,7 @@ class MeasurementPlanWidget(QWidget):
         """
 
         self.table_widget_info.insertRow(pin_index)
-        item = PinIndexTableItem(pin_index)
-        item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-        self.table_widget_info.setItem(pin_index, 0, item)
+        self.table_widget_info.setItem(pin_index, 0, PinIndexTableItem(pin_index))
         line_edit_module_number = ModifiedLineEdit()
         line_edit_module_number.textEdited.connect(lambda: self.check_channel_and_module_numbers(pin_index))
         line_edit_module_number.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))

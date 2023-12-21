@@ -30,6 +30,7 @@ from multiplexer import MuxAndPlanWindow
 from window import utils as ut
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.boardwidget import BoardWidget
+from window.commentwidget import CommentWidget
 from window.common import DeviceErrorsHandler, WorkMode
 from window.curvestates import CurveStates
 from window.dirwatcher import DirWatcher
@@ -251,8 +252,7 @@ class EPLabWindow(QMainWindow):
 
         self._player.set_work_mode(mode)
         # Comment is only for test and write mode
-        self.line_comment_pin.setEnabled(mode in (WorkMode.TEST, WorkMode.WRITE))
-        self.save_comment_push_button.setEnabled(mode in (WorkMode.TEST, WorkMode.WRITE))
+        self._comment_widget.set_work_mode(mode)
         self.search_optimal_action.setEnabled(mode in (WorkMode.COMPARE, WorkMode.WRITE))
         if mode is WorkMode.COMPARE and len(self._msystem.measurers) < 2:
             # Remove reference curve in case we have only one IVMeasurer in compare mode
@@ -301,12 +301,12 @@ class EPLabWindow(QMainWindow):
         for action in (self.comparing_mode_action, self.writing_mode_action, self.testing_mode_action):
             action.setChecked(False)
 
-        self.line_comment_pin.clear()
         self.low_settings_panel.clear_panel()
         self.measurers_menu.clear()
         self.pin_index_widget.clear()
         self._iv_window.plot.remove_all_cursors()
         self._mux_and_plan_window.close()
+        self._comment_widget.clear_table()
         self._score_wrapper.set_dummy_score()
 
         self._settings_update_next_cycle = None
@@ -531,9 +531,6 @@ class EPLabWindow(QMainWindow):
         self.create_report_action.triggered.connect(self.create_report)
         self.about_action.triggered.connect(show_product_info)
         self.action_keymap.triggered.connect(lambda: show_keymap_info(self))
-        self.save_comment_push_button.clicked.connect(self.save_comment)
-        self.line_comment_pin.installEventFilter(self)
-        self.line_comment_pin.returnPressed.connect(self.save_comment)
         self.sound_enabled_action.toggled.connect(self.enable_sound)
         self.freeze_curve_a_action.toggled.connect(partial(self.freeze_curve, 0))
         self.freeze_curve_b_action.toggled.connect(partial(self.freeze_curve, 1))
@@ -550,6 +547,10 @@ class EPLabWindow(QMainWindow):
         self.writing_mode_action.triggered.connect(lambda: self._switch_work_mode(WorkMode.WRITE))
         self.testing_mode_action.triggered.connect(lambda: self._switch_work_mode(WorkMode.TEST))
         self.settings_mode_action.triggered.connect(self.show_settings_window)
+
+        self._comment_widget: CommentWidget = CommentWidget(self)
+        self._comment_widget.installEventFilter(self)
+        self.comment_vertical_layout.insertWidget(0, self._comment_widget)
 
         # Update plot settings at next measurement cycle (place settings here or None)
         self._settings_update_next_cycle: MeasurementSettings = None
@@ -800,6 +801,7 @@ class EPLabWindow(QMainWindow):
             options = self._product.settings_to_options(settings)
             self._set_options_to_ui(options)
         self._mux_and_plan_window.update_info()
+        self._comment_widget.update_info()
         self._switch_work_mode(WorkMode.COMPARE)
         self._init_tolerance()
         with self._device_errors_handler:
@@ -839,7 +841,6 @@ class EPLabWindow(QMainWindow):
             return round(value, 2)
 
         current_pin = self._measurement_plan.get_current_pin()
-        self.line_comment_pin.setText(current_pin.comment or "")
         ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
         with self._device_errors_handler:
             if settings:
@@ -881,7 +882,6 @@ class EPLabWindow(QMainWindow):
 
     def _update_current_pin_in_test_and_write_mode(self) -> None:
         current_pin = self._measurement_plan.get_current_pin()
-        self.line_comment_pin.setText(current_pin.comment or "")
         ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
         with self._device_errors_handler:
             if settings:
@@ -1087,6 +1087,7 @@ class EPLabWindow(QMainWindow):
             self._board_window.update_board()
             self.update_current_pin()
             self._mux_and_plan_window.update_info()
+            self._comment_widget.update_info()
             self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
@@ -1103,7 +1104,6 @@ class EPLabWindow(QMainWindow):
             pin = Pin(0, 0, measurements=[], multiplexer_output=multiplexer_output)
         self._measurement_plan.append_pin(pin)
         self._board_window.add_pin(pin.x, pin.y, self._measurement_plan.get_current_index())
-        self.line_comment_pin.setText(pin.comment or "")
 
         # It is important to initialize pin with real measurement. Otherwise user can create several empty points and
         # they will not be unique. This will cause some errors during ufiv validation.
@@ -1182,8 +1182,7 @@ class EPLabWindow(QMainWindow):
         """
 
         if self.measurement_plan and isinstance(event, QKeyEvent) and \
-                not getattr(self.pin_index_widget, "is_focused", False) and \
-                not getattr(self.line_comment_pin, "is_focused", False):
+                not getattr(self.pin_index_widget, "is_focused", False):
             key_event = QKeyEvent(event)
             if key_event.type() in (QEvent.KeyPress, QEvent.ShortcutOverride):
                 return self._handle_key_press_event(key_event)
@@ -1205,7 +1204,7 @@ class EPLabWindow(QMainWindow):
         :return: True if event should be filtered out, otherwise - False.
         """
 
-        if obj in (self.pin_index_widget, self.line_comment_pin):
+        if obj in (self.pin_index_widget,):
             if isinstance(event, QKeyEvent):
                 key_event = QKeyEvent(event)
                 key = key_event.key()
@@ -1416,6 +1415,7 @@ class EPLabWindow(QMainWindow):
             self._open_board_window_if_needed()
             if self._msystem:
                 self._mux_and_plan_window.update_info()
+                self._comment_widget.update_info()
             self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
@@ -1526,15 +1526,6 @@ class EPLabWindow(QMainWindow):
         return False
 
     @pyqtSlot()
-    def save_comment(self) -> None:
-        """
-        Slot saves comment for pin.
-        """
-
-        pin_index = self._measurement_plan.get_current_index()
-        self._measurement_plan.save_comment_to_pin_with_index(pin_index, self.line_comment_pin.text())
-
-    @pyqtSlot()
     def save_image(self) -> None:
         """
         Slot saves screenshot of the main window.
@@ -1566,8 +1557,8 @@ class EPLabWindow(QMainWindow):
                 self._measurement_plan.save_last_measurement_as_reference(True)
             elif self._work_mode == WorkMode.TEST:
                 self._measurement_plan.save_last_measurement_as_test()
-        self.save_comment()
-        self.update_current_pin()
+        index = self._measurement_plan.get_current_index()
+        self._comment_widget.save_comment(index)
 
     @pyqtSlot()
     def search_optimal(self) -> None:
@@ -1710,3 +1701,4 @@ class EPLabWindow(QMainWindow):
 
         if self._mux_and_plan_window:
             self._mux_and_plan_window.select_current_pin()
+        self._comment_widget.select_current_point()

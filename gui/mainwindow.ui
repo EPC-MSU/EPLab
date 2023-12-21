@@ -159,27 +159,10 @@
     <string>Комментарий к точке</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>2</number>
+    <number>1</number>
    </attribute>
    <widget class="QWidget" name="comment_dock_widget">
-    <layout class="QVBoxLayout" name="vertical_layout_4">
-     <item>
-      <widget class="QLineEdit" name="line_comment_pin">
-       <property name="placeholderText">
-        <string>Комментарий...</string>
-       </property>
-       <property name="clearButtonEnabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="save_comment_push_button">
-       <property name="text">
-        <string>Сохранить комментарий</string>
-       </property>
-      </widget>
-     </item>
+    <layout class="QVBoxLayout" name="comment_vertical_layout">
      <item>
       <spacer name="vertical_spacer_2">
        <property name="orientation">
