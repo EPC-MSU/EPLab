@@ -19,7 +19,6 @@ class LegendWidget(QToolBar):
         """
 
         super().__init__()
-        self._pixmap_select: QPixmap = self._load_select_pixmap()
         self._init_ui(text, color_name, left_margin)
 
     def _init_ui(self, text: str, color_path: str, left_margin: int) -> None:
@@ -49,22 +48,13 @@ class LegendWidget(QToolBar):
         self.addWidget(widget)
         self.setStyleSheet("background-color: black;")
 
-    @staticmethod
-    def _load_select_pixmap() -> QPixmap:
-        """
-        :return: image of select icon.
-        """
-
-        pixmap = QPixmap(os.path.join(DIR_MEDIA, "select_white.png"))
-        return pixmap.scaled(LegendWidget.ICON_SIZE, LegendWidget.ICON_SIZE, Qt.KeepAspectRatio)
-
     def clear(self) -> None:
         self.setVisible(False)
 
     def set_active(self) -> None:
         self.setVisible(True)
         self.label_status.clear()
-        self.label_status.setPixmap(self._pixmap_select)
+        self.label_status.setText("☑")
 
     def set_inactive(self) -> None:
         self.setVisible(True)

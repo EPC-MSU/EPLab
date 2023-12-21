@@ -36,4 +36,4 @@ class TestLowSettingsPanel(unittest.TestCase):
         panel.set_all_parameters(**data)
         for curve_name, value in data.items():
             legend_widget = panel._legends[curve_name]
-            self.assertEqual(bool(legend_widget.label_status.pixmap()), value)
+            self.assertEqual(legend_widget.label_status.text() == "☑", value)
