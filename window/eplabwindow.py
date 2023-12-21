@@ -1415,7 +1415,7 @@ class EPLabWindow(QMainWindow):
             self._open_board_window_if_needed()
             if self._msystem:
                 self._mux_and_plan_window.update_info()
-                self._comment_widget.update_info()
+            self._comment_widget.update_info()
             self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
