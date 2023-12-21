@@ -16,6 +16,8 @@ class LeftRight(Enum):
 
 class LeftRightRunnableTable(QTableWidget):
 
+    DEFAULT_WIDTH: int = 20
+
     def __init__(self, main_window, headers: List[str]) -> None:
         """
         :param main_window: main window of application;
@@ -35,6 +37,8 @@ class LeftRightRunnableTable(QTableWidget):
 
         self.setColumnCount(len(headers))
         self.setHorizontalHeaderLabels(headers)
+        header = self.horizontalHeader()
+        header.setDefaultSectionSize(LeftRightRunnableTable.DEFAULT_WIDTH)
         self.verticalHeader().setVisible(False)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
