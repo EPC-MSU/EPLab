@@ -8,6 +8,9 @@ from window.common import WorkMode
 
 
 class CommentWidget(QWidget):
+    """
+    Widget for working with comments to measurement plan points.
+    """
 
     HEADERS: List[str] = ["№", qApp.translate("comment", "Комментарий")]
 
@@ -18,6 +21,7 @@ class CommentWidget(QWidget):
 
         super().__init__()
         self._parent = main_window
+        self._read_only: bool = False
         self._init_ui()
 
     def _init_ui(self) -> None:
@@ -38,21 +42,38 @@ class CommentWidget(QWidget):
         self.table_widget.setItem(index, 0, PinIndexTableItem(index))
 
         line_edit = ModifiedLineEdit()
+        line_edit.setReadOnly(self._read_only)
         line_edit.editingFinished.connect(lambda: self.save_comment(index))
         line_edit.left_pressed.connect(lambda: self.table_widget.move_left_or_right(LeftRight.LEFT))
         line_edit.right_pressed.connect(lambda: self.table_widget.move_left_or_right(LeftRight.RIGHT))
         line_edit.setText(comment)
         self.table_widget.setCellWidget(index, 1, line_edit)
 
+    def _clear_table(self) -> None:
+        self.table_widget.disconnect_item_selection_changed_signal()
+        _ = [self.table_widget.removeRow(row) for row in range(self.table_widget.rowCount(), -1, -1)]
+        self.table_widget.clearContents()
+        self.table_widget.connect_item_selection_changed_signal()
+
     def _fill_table(self) -> None:
         """
-        Method fills table for measurement plan.
+        Method fills in a table with comments for measurement plan points.
         """
 
-        self.clear_table()
+        self._clear_table()
         for index, point in self._parent.measurement_plan.all_pins_iterator():
             self._add_comment(index, point.comment)
         self.table_widget.select_row_for_current_point()
+
+    def _set_read_only(self) -> None:
+        """
+        Method switches widgets with comments to read-only state.
+        """
+
+        column = 1
+        for row in range(self.table_widget.rowCount()):
+            widget = self.table_widget.cellWidget(row, column)
+            widget.setReadOnly(self._read_only)
 
     def _update_comment(self, index: int, comment: str) -> None:
         """
@@ -68,10 +89,8 @@ class CommentWidget(QWidget):
         Method clears all information from table and removes all rows in table.
         """
 
-        self.table_widget.disconnect_item_selection_changed_signal()
-        _ = [self.table_widget.removeRow(row) for row in range(self.table_widget.rowCount(), -1, -1)]
-        self.table_widget.clearContents()
-        self.table_widget.connect_item_selection_changed_signal()
+        self._clear_table()
+        self._read_only = False
 
     @pyqtSlot(int)
     def save_comment(self, index: int) -> None:
@@ -114,12 +133,14 @@ class CommentWidget(QWidget):
         """
 
         if mode is WorkMode.READ_PLAN:
-            column = 1
-            for row in range(self.table_widget.rowCount()):
-                widget = self.table_widget.cellWidget(row, column)
-                widget.setReadOnly()
+            if not self._read_only:
+                self._read_only = True
+                self._set_read_only()
             self.setEnabled(True)
         else:
+            if self._read_only:
+                self._read_only = False
+                self._set_read_only()
             self.setEnabled(mode in (WorkMode.TEST, WorkMode.WRITE))
 
     def update_info(self) -> None:

@@ -1401,7 +1401,6 @@ class EPLabWindow(QMainWindow):
                 self._create_scroll_areas_for_parameters({EyePointProduct.Parameter.frequency: [],
                                                           EyePointProduct.Parameter.sensitive: [],
                                                           EyePointProduct.Parameter.voltage: []})
-                self._change_work_mode(WorkMode.READ_PLAN)
                 self._iv_window.plot.clear_center_text()
                 measurer = None
                 multiplexer = None
@@ -1414,11 +1413,14 @@ class EPLabWindow(QMainWindow):
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
             self._board_window.update_board()
-            self.update_current_pin()
             self._open_board_window_if_needed()
             if self._msystem:
                 self._mux_and_plan_window.update_info()
+            else:
+                self._change_work_mode(WorkMode.READ_PLAN)
             self._comment_widget.update_info()
+
+            self.update_current_pin()
             self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
