@@ -12,7 +12,7 @@ class CommentWidget(QWidget):
     Widget for working with comments to measurement plan points.
     """
 
-    HEADERS: List[str] = ["№", qApp.translate("comment", "Комментарий")]
+    HEADERS: List[str] = ["№", qApp.translate("t", "Комментарий")]
 
     def __init__(self, main_window) -> None:
         """
