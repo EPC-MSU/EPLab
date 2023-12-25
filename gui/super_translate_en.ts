@@ -278,8 +278,8 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="746"/>
-        <source>Запустить измерение всего плана</source>
-        <translation>Start entire plan measurement</translation>
+        <source>Запустить измерение всех точек</source>
+        <translation>Start measuring all points</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="755"/>
@@ -551,13 +551,13 @@
     </message>
     <message>
         <location filename="../multiplexer/multiplexer_pinout_widget.py" line="375"/>
-        <source>Запустить измерение всего плана</source>
-        <translation>Start entire plan measurement</translation>
+        <source>Запустить измерение всех точек</source>
+        <translation>Start measuring all points</translation>
     </message>
     <message>
         <location filename="../multiplexer/mux_and_plan_window.py" line="64"/>
-        <source>Остановить измерение всего плана</source>
-        <translation>Stop entire plan measurement</translation>
+        <source>Остановить измерение всех точек</source>
+        <translation>Stop measuring all points</translation>
     </message>
     <message>
         <location filename="../multiplexer/mux_and_plan_window.py" line="101"/>

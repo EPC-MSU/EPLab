@@ -5,13 +5,15 @@ File with class for widget to show short information from measurement plan.
 import os
 from enum import auto, Enum
 from typing import Dict, Generator, List, Tuple
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeyEvent, QRegExpValidator
 from PyQt5.QtWidgets import (QAbstractItemView, QHBoxLayout, QLineEdit, QProgressBar, QPushButton, QTableWidget,
                              QTableWidgetItem, QVBoxLayout, QWidget)
 from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, MIN_CHANNEL_NUMBER
 from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
 from epcore.product import EyePointProduct
+from multiplexer.leftrightrunnabletable import LeftRight
+from multiplexer.modifiedlineedit import ModifiedLineEdit
 from multiplexer.pinindextableitem import PinIndexTableItem
 from window import utils as ut
 from window.common import WorkMode
@@ -31,36 +33,6 @@ class ChannelAndModuleErrors(Enum):
     INVALID_CHANNEL = auto()
     INVALID_MODULE = auto()
     UNSUITABLE_OUTPUT = auto()
-
-
-class LeftRight(Enum):
-    """
-    Class to denote left and right.
-    """
-
-    LEFT = auto()
-    RIGHT = auto()
-
-
-class ModifiedLineEdit(QLineEdit):
-    """
-    Class for line edit widget with additional handling of left and right keystrokes.
-    """
-
-    left_pressed: pyqtSignal = pyqtSignal()
-    right_pressed: pyqtSignal = pyqtSignal()
-
-    def keyPressEvent(self, key_press_event: QKeyEvent) -> None:
-        """
-        Method handles key press event.
-        :param key_press_event: key press event.
-        """
-
-        super().keyPressEvent(key_press_event)
-        if key_press_event.key() == Qt.Key_Left and self.cursorPosition() == 0:
-            self.left_pressed.emit()
-        elif key_press_event.key() == Qt.Key_Right and self.cursorPosition() == len(self.text()):
-            self.right_pressed.emit()
 
 
 @update_scale_of_class

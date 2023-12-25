@@ -766,7 +766,7 @@
      <normaloff>../media/start_auto_test.png</normaloff>../media/start_auto_test.png</iconset>
    </property>
    <property name="text">
-    <string>Запустить измерение всего плана</string>
+    <string>Запустить измерение всех точек</string>
    </property>
   </action>
   <action name="open_mux_window_action">

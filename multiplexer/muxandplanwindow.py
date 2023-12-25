@@ -64,15 +64,14 @@ class MuxAndPlanWindow(QWidget):
         widgets = (self.multiplexer_pinout_widget.button_start_or_stop_entire_plan_measurement,
                    self._parent.start_or_stop_entire_plan_measurement_action)
         if status:
-            text = qApp.translate("t", "Остановить измерение всего плана")
+            text = qApp.translate("t", "Остановить измерение всех точек")
             icon = QIcon(os.path.join(ut.DIR_MEDIA, "stop_auto_test.png"))
         else:
-            text = qApp.translate("t", "Запустить измерение всего плана")
+            text = qApp.translate("t", "Запустить измерение всех точек")
             icon = QIcon(os.path.join(ut.DIR_MEDIA, "start_auto_test.png"))
         for widget in widgets:
             widget.setIcon(icon)
             widget.setText(text)
-            widget.setToolTip(text)
             if widget.isChecked() != status:
                 widget.setChecked(status)
 
@@ -87,7 +86,6 @@ class MuxAndPlanWindow(QWidget):
             self.multiplexer_pinout_widget.set_visible(False)
         else:
             self.multiplexer_pinout_widget.set_visible(True)
-        self.multiplexer_pinout_widget.stop_sending_channels()
 
     @staticmethod
     def _continue_plan_measurement() -> bool:

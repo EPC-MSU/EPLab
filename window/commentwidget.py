@@ -1,8 +1,8 @@
-from typing import List, Optional
+from typing import Optional
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp
 from PyQt5.QtWidgets import QVBoxLayout, QWidget
-from multiplexer.leftrightrunnabletable import LeftRightRunnableTable
-from multiplexer.measurementplanwidget import LeftRight, ModifiedLineEdit
+from multiplexer.leftrightrunnabletable import LeftRight, LeftRightRunnableTable
+from multiplexer.modifiedlineedit import ModifiedLineEdit
 from multiplexer.pinindextableitem import PinIndexTableItem
 from window.common import WorkMode
 
