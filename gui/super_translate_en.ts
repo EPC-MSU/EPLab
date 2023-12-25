@@ -57,11 +57,6 @@
         <translation>Point comment</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="145"/>
-        <source>Комментарий...</source>
-        <translation>Comment...</translation>
-    </message>
-    <message>
         <location filename="mainwindow.ui" line="155"/>
         <source>Сохранить комментарий</source>
         <translation>Save comment</translation>
@@ -300,6 +295,11 @@
 <context>
     <name>t</name>
     <message>
+        <location filename="..window/commentwidget.py" line="15"/>
+        <source>Комментарий</source>
+        <translation>Comment</translation>
+    </message>
+    <message>
         <location filename="../window/eplabwindow.py" line="222"/>
         <source>Сохранить</source>
         <translation>Save</translation>
@@ -469,7 +469,6 @@
         <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение.</source>
         <translation>Incorrect format of pin number. Pin number must be integer.</translation>
     </message>
-
     <message>
         <location filename="../multiplexer/measurement_plan_widget.py" line="84"/>
         <source>Модуль MUX</source>
@@ -494,11 +493,6 @@
         <location filename="../multiplexer/measurement_plan_widget.py" line="86"/>
         <source>Чувствительность</source>
         <translation>Sensitivity</translation>
-    </message>
-    <message>
-        <location filename="../multiplexer/measurement_plan_widget.py" line="86"/>
-        <source>Комментарий</source>
-        <translation>Comment</translation>
     </message>
     <message>
         <location filename="../multiplexer/measurement_plan_widget.py" line="254"/>

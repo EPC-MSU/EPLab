@@ -12,8 +12,6 @@ class CommentWidget(QWidget):
     Widget for working with comments to measurement plan points.
     """
 
-    HEADERS: List[str] = ["№", qApp.translate("t", "Комментарий")]
-
     def __init__(self, main_window) -> None:
         """
         :param main_window: main window of application.
@@ -25,7 +23,8 @@ class CommentWidget(QWidget):
         self._init_ui()
 
     def _init_ui(self) -> None:
-        self.table_widget: LeftRightRunnableTable = LeftRightRunnableTable(self._parent, CommentWidget.HEADERS)
+        self.table_widget: LeftRightRunnableTable = LeftRightRunnableTable(self._parent,
+                                                                           ["№", qApp.translate("t", "Комментарий")])
         self.v_layout: QVBoxLayout = QVBoxLayout()
         self.v_layout.setContentsMargins(0, 0, 0, 0)
         self.v_layout.addWidget(self.table_widget)
