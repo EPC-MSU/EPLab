@@ -2,10 +2,9 @@
 File with class for widget to show short information from measurement plan.
 """
 
-from enum import auto, Enum
 from typing import Dict, Generator, List
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
-from PyQt5.QtGui import QCloseEvent, QColor, QKeyEvent, QRegExpValidator
+from PyQt5.QtGui import QCloseEvent, QKeyEvent, QRegExpValidator
 from PyQt5.QtWidgets import (QAbstractItemView, QHBoxLayout, QProgressBar, QTableWidget, QTableWidgetItem, QVBoxLayout,
                              QWidget)
 from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
@@ -18,29 +17,13 @@ from window.language import Language
 from window.scaler import update_scale_of_class
 
 
-class ChannelAndModuleErrors(Enum):
-    """
-    Class to denote possible erroneous multiplexer outputs.
-    """
-
-    INVALID_CHANNEL = auto()
-    INVALID_MODULE = auto()
-    UNSUITABLE_OUTPUT = auto()
-
-
 @update_scale_of_class
 class MeasurementPlanWidget(QWidget):
     """
     Class for widget to show short information from measurement plan in table.
     """
 
-    COLOR_ERROR_FRAME: str = "#FF0404"
-    COLOR_ERROR: str = "#FFD8D8"
-    COLOR_NORMAL: QColor = QColor.fromRgb(255, 255, 255)
-    COLOR_NOT_TESTED: str = "#F9E154"
     HEADERS: List[str] = []
-    MAX_MODULE_NUMBER: int = 8
-    MIN_MODULE_NUMBER: int = 1
 
     def __init__(self, main_window) -> None:
         """
@@ -178,79 +161,6 @@ class MeasurementPlanWidget(QWidget):
         v_box_layout.addWidget(self.table_widget)
         v_box_layout.addLayout(h_layout)
         self.setLayout(v_box_layout)
-
-    def _paint_errors(self, row: int, errors: List[ChannelAndModuleErrors]) -> None:
-        """
-        Method colors row with given index if there is invalid multiplexer output.
-        :param row: row index to color;
-        :param errors: list with errors for multiplexer output.
-        """
-
-        color = None
-        if ChannelAndModuleErrors.INVALID_MODULE in errors:
-            color = MeasurementPlanWidget.COLOR_ERROR
-        if ChannelAndModuleErrors.INVALID_CHANNEL in errors:
-            color = MeasurementPlanWidget.COLOR_ERROR
-        for column in range(self.table_widget.columnCount()):
-            if column in (1, 2, 6):
-                widget = self.table_widget.cellWidget(row, column)
-                widget.setStyleSheet("")  # set default style and then new style
-                if color:
-                    style = widget.styleSheet()
-                    widget.setStyleSheet(style + f"background-color: {color};")
-            else:
-                item = self.table_widget.item(row, column)
-                if color:
-                    item.setBackground(QColor.fromRgb(int(color[1:], base=16)))
-                else:
-                    item.setBackground(MeasurementPlanWidget.COLOR_NORMAL)
-        self._set_error_tooltip_to_mux_output(row, errors)
-
-    def _paint_warnings(self, row: int, errors: List[ChannelAndModuleErrors]) -> None:
-        """
-        Method colors row with given index if there is invalid or unsuitable multiplexer output.
-        :param row: row index to paint;
-        :param errors: list with errors for multiplexer output.
-        """
-
-        color = None
-        if errors:
-            color = MeasurementPlanWidget.COLOR_NOT_TESTED
-        for column in range(self.table_widget.columnCount()):
-            if column in (1, 2, 6):
-                widget = self.table_widget.cellWidget(row, column)
-                widget.setStyleSheet("")
-                if color:
-                    style = widget.styleSheet()
-                    widget.setStyleSheet(style + f"background-color: {color};")
-            else:
-                item = self.table_widget.item(row, column)
-                if color:
-                    item.setBackground(QColor.fromRgb(int(color[1:], base=16)))
-                else:
-                    item.setBackground(MeasurementPlanWidget.COLOR_NORMAL)
-        self._set_error_tooltip_to_mux_output(row, errors)
-
-    def _set_error_tooltip_to_mux_output(self, row: int, errors: List[ChannelAndModuleErrors]) -> None:
-        """
-        Method sets tooltip about error to multiplexer output fields on row with given index.
-        :param row: row index;
-        :param errors: list with errors for multiplexer output.
-        """
-
-        tooltips = ["", ""]
-        if ChannelAndModuleErrors.INVALID_MODULE in errors:
-            tooltips[0] = qApp.translate("t", "Поле Модуль MUX имеет некорректное значение (должно быть 1...8), "
-                                              "точка не сохранена")
-        if ChannelAndModuleErrors.INVALID_CHANNEL in errors:
-            tooltips[1] = qApp.translate("t", "Поле Канал MUX имеет некорректное значение (должно быть 1...64), "
-                                              "точка не сохранена")
-        for index, tooltip in enumerate(tooltips):
-            widget = self.table_widget.cellWidget(row, index + 1)
-            widget.setToolTip(tooltip)
-            if tooltip:
-                style_sheet = widget.styleSheet()
-                widget.setStyleSheet(style_sheet + f"border: 1px solid {MeasurementPlanWidget.COLOR_ERROR_FRAME}")
 
     def _update_pin_in_table(self, pin_index: int, pin: Pin) -> None:
         """
