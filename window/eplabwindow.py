@@ -262,9 +262,12 @@ class EPLabWindow(QMainWindow):
         # Disable settings in test mode
         for scroll_area in self._parameters_widgets.values():
             scroll_area.enable_buttons(mode in (WorkMode.COMPARE, WorkMode.WRITE))
-        for dock_widget in (self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock, self.comment_dock):
-            if mode is WorkMode.READ_PLAN:
-                dock_widget.setEnabled(True)
+
+        if mode is WorkMode.READ_PLAN:
+            _ = [dock_widget.setEnabled(True) for dock_widget in (self.comment_dock, self.score_dock, self.freq_dock,
+                                                                  self.current_dock, self.voltage_dock)]
+            _ = [widget.setEnabled(False) for widget in self._parameters_widgets.values()]
+
         self._work_mode = mode
 
     def _change_work_mode_for_new_measurement_plan(self) -> None:
@@ -1168,7 +1171,7 @@ class EPLabWindow(QMainWindow):
                    self.next_point_action, self.previous_point_action, self.new_point_action, self.save_point_action,
                    self.add_board_image_action, self.create_report_action, self.pin_index_widget,
                    self.start_or_stop_entire_plan_measurement_action, self.add_cursor_action, self.remove_cursor_action,
-                   self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock, self.comment_dock,
+                   self.comment_dock, self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock,
                    self.measurers_menu)
         for widget in widgets:
             widget.setEnabled(enabled)
