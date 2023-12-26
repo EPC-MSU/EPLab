@@ -2,15 +2,12 @@
 File with class for widget to show multiplexer pinout.
 """
 
-import os
 from typing import Dict, List, Optional
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
-from window import utils as ut
-from window.common import DeviceErrorsHandler, WorkMode
+from window.common import DeviceErrorsHandler
 from window.scaler import update_scale_of_class
 
 
@@ -201,9 +198,6 @@ class MultiplexerPinoutWidget(QWidget):
     MIN_WIDTH: int = 500
     SCROLL_AREA_MIN_HEIGHT: int = 100
     TIMEOUT: int = 10
-    adding_channels_finished: pyqtSignal = pyqtSignal()
-    adding_channels_started: pyqtSignal = pyqtSignal(int)
-    channel_added: pyqtSignal = pyqtSignal(MultiplexerOutput)
 
     def __init__(self, main_window, device_errors_handler: Optional[DeviceErrorsHandler] = None) -> None:
         """
@@ -230,52 +224,33 @@ class MultiplexerPinoutWidget(QWidget):
         label.setStyleSheet("QLabel {font-weight: bold; font-size: 25px;}")
         return label
 
-    def _create_widgets_for_multiplexer(self) -> None:
+    def _create_widgets_for_multiplexer(self) -> QScrollArea:
         """
         Method creates widgets to work with multiplexer.
+        :return:
         """
 
         self.layout_for_modules: QVBoxLayout = QVBoxLayout()
         self.layout_for_modules.addStretch(1)
-        self.scroll_area: QScrollArea = QScrollArea()
-        self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setMinimumHeight(MultiplexerPinoutWidget.SCROLL_AREA_MIN_HEIGHT)
+        scroll_area: QScrollArea = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setMinimumHeight(MultiplexerPinoutWidget.SCROLL_AREA_MIN_HEIGHT)
         widget = QWidget()
         widget.setLayout(self.layout_for_modules)
-        self.scroll_area.setWidget(widget)
-        self.button_start_or_stop_entire_plan_measurement: QPushButton = QPushButton(
-            qApp.translate("t", "Запустить измерение всех точек"))
-        self.button_start_or_stop_entire_plan_measurement.setIcon(QIcon(os.path.join(ut.DIR_MEDIA,
-                                                                                     "start_auto_test.png")))
-        self.button_start_or_stop_entire_plan_measurement.setCheckable(True)
-
-    def _enable_widgets(self, state: bool) -> None:
-        """
-        Method enables or disables some widgets on multiplexer pinout widget.
-        :param state: if True then widgets will be enabled.
-        """
-
-        for widget in (self.button_start_or_stop_entire_plan_measurement,):
-            widget.setEnabled(state)
+        scroll_area.setWidget(widget)
+        return scroll_area
 
     def _init_ui(self) -> None:
         """
         Method initializes widgets on main widget.
         """
 
-        self._create_widgets_for_multiplexer()
+        self.scroll_area: QScrollArea = self._create_widgets_for_multiplexer()
         self.label_no_mux: QLabel = self._create_empty_widget()
         self.setMinimumWidth(MultiplexerPinoutWidget.MIN_WIDTH)
 
-        v_box_layout = QVBoxLayout()
-        v_box_layout.addWidget(self.button_start_or_stop_entire_plan_measurement)
-        h_box_layout = QHBoxLayout()
-        h_box_layout.addStretch(1)
-        h_box_layout.addLayout(v_box_layout)
-
         layout = QVBoxLayout()
         layout.addWidget(self.scroll_area)
-        layout.addLayout(h_box_layout)
         layout.addWidget(self.label_no_mux, alignment=Qt.AlignHCenter)
         self.setLayout(layout)
 
@@ -311,7 +286,6 @@ class MultiplexerPinoutWidget(QWidget):
             if connected_output:
                 self._modules[connected_output.module_number].set_connected_channel(connected_output.channel_number)
                 self._turned_on_output = connected_output
-            self._enable_widgets(len(chain) != 0)
 
     def enable_widgets(self, state: bool) -> None:
         """
@@ -319,7 +293,6 @@ class MultiplexerPinoutWidget(QWidget):
         :param state: if True then widgets will be enabled.
         """
 
-        self._enable_widgets(state)
         for module in self._modules.values():
             module.setEnabled(state)
 
@@ -340,23 +313,9 @@ class MultiplexerPinoutWidget(QWidget):
 
         visible = bool(self._parent.measurement_plan and self._parent.measurement_plan.multiplexer) if status is None \
             else status
-        for widget in (self.button_start_or_stop_entire_plan_measurement, self.scroll_area):
+        for widget in (self.scroll_area,):
             widget.setVisible(visible)
         self.label_no_mux.setVisible(not visible)
-
-    def set_work_mode(self, work_mode: WorkMode) -> None:
-        """
-        Method enables or disables widgets on multiplexer pinout widget according to given work mode.
-        :param work_mode: work mode.
-        """
-
-        with self._device_errors_handler:
-            if work_mode != WorkMode.COMPARE and self._parent.measurement_plan and \
-                    self._parent.measurement_plan.multiplexer and \
-                    len(self._parent.measurement_plan.multiplexer.get_chain_info()):
-                self._enable_widgets(True)
-            else:
-                self._enable_widgets(False)
 
     @pyqtSlot(MultiplexerOutput)
     def turn_off_output(self, output: MultiplexerOutput) -> None:

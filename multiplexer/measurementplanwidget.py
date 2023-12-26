@@ -5,8 +5,7 @@ File with class for widget to show short information from measurement plan.
 from typing import Dict, Generator, List
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
 from PyQt5.QtGui import QCloseEvent, QKeyEvent, QRegExpValidator
-from PyQt5.QtWidgets import (QAbstractItemView, QHBoxLayout, QProgressBar, QTableWidget, QTableWidgetItem, QVBoxLayout,
-                             QWidget)
+from PyQt5.QtWidgets import QAbstractItemView, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
 from epcore.product import EyePointProduct
 from multiplexer.leftrightrunnabletable import LeftRight
@@ -34,8 +33,6 @@ class MeasurementPlanWidget(QWidget):
         self.HEADERS: List[str] = ["№", qApp.translate("t", "Модуль MUX"), qApp.translate("t", "Канал MUX"),
                                    qApp.translate("t", "Частота"), qApp.translate("t", "Напряжение"),
                                    qApp.translate("t", "Чувствительность")]
-        self.progress_bar: QProgressBar = None
-        self.table_widget: QTableWidget = None
         self._dont_go_to_selected_pin: bool = False
         self._lang: Language = qApp.instance().property("language")
         self._parent = main_window
@@ -129,38 +126,33 @@ class MeasurementPlanWidget(QWidget):
                 if available_option.name == options[parameter]:
                     yield available_option.label_ru if self._lang is Language.RU else available_option.label_en
 
-    def _init_table(self) -> None:
+    def _init_table(self) -> QTableWidget:
         """
         Method initializes table for measurement plan.
+        :return: table for measurement plan.
         """
 
-        self.table_widget: QTableWidget = QTableWidget()
-        self.table_widget.setColumnCount(len(MeasurementPlanWidget.HEADERS))
-        self.table_widget.setHorizontalHeaderLabels(MeasurementPlanWidget.HEADERS)
-        self.table_widget.verticalHeader().setVisible(False)
-        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.table_widget.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.table_widget.horizontalHeader().setStretchLastSection(True)
-        self.table_widget.cellClicked.connect(self.set_pin_as_current)
-        self.table_widget.itemSelectionChanged.connect(self.set_pin_as_current)
+        table_widget = QTableWidget()
+        table_widget.setColumnCount(len(MeasurementPlanWidget.HEADERS))
+        table_widget.setHorizontalHeaderLabels(MeasurementPlanWidget.HEADERS)
+        table_widget.verticalHeader().setVisible(False)
+        table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        table_widget.setSelectionMode(QAbstractItemView.SingleSelection)
+        table_widget.horizontalHeader().setStretchLastSection(True)
+        table_widget.cellClicked.connect(self.set_pin_as_current)
+        table_widget.itemSelectionChanged.connect(self.set_pin_as_current)
+        return table_widget
 
     def _init_ui(self) -> None:
         """
         Method initializes widgets on main widget.
         """
 
-        self._init_table()
-        self.progress_bar: QProgressBar = QProgressBar()
-        self.progress_bar.setVisible(False)
+        self.table_widget: QTableWidget = self._init_table()
 
-        h_layout = QHBoxLayout()
-        h_layout.addWidget(self.progress_bar, 2)
-        h_layout.addStretch(1)
-
-        v_box_layout = QVBoxLayout()
-        v_box_layout.addWidget(self.table_widget)
-        v_box_layout.addLayout(h_layout)
-        self.setLayout(v_box_layout)
+        layout = QVBoxLayout()
+        layout.addWidget(self.table_widget)
+        self.setLayout(layout)
 
     def _update_pin_in_table(self, pin_index: int, pin: Pin) -> None:
         """
@@ -185,25 +177,6 @@ class MeasurementPlanWidget(QWidget):
             for index in range(3):
                 item = self.table_widget.item(pin_index, 3 + index)
                 item.setText("")
-
-    @pyqtSlot(MultiplexerOutput)
-    def add_pin_with_mux_output_to_plan(self, channel: MultiplexerOutput) -> None:
-        """
-        Slot adds pin with multiplexer output to measurement plan.
-        :param channel: channel from multiplexer to be added.
-        """
-
-        self._parent.create_new_pin(channel)
-        self.change_progress()
-
-    @pyqtSlot()
-    def change_progress(self) -> None:
-        """
-        Slots changes value for progress bar.
-        """
-
-        value = self.progress_bar.value()
-        self.progress_bar.setValue(value + 1)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """
@@ -311,7 +284,6 @@ class MeasurementPlanWidget(QWidget):
 
         self._standby_mode = False
         self._enable_widgets(True)
-        self.progress_bar.setVisible(False)
 
     def turn_on_standby_mode(self, total_number: int) -> None:
         """
@@ -321,10 +293,6 @@ class MeasurementPlanWidget(QWidget):
 
         self._standby_mode = True
         self._enable_widgets(False)
-        self.progress_bar.setVisible(True)
-        self.progress_bar.setMinimum(0)
-        self.progress_bar.setMaximum(total_number)
-        self.progress_bar.setValue(0)
 
     def update_info(self) -> None:
         """
