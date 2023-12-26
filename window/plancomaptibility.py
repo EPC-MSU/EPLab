@@ -5,7 +5,7 @@ from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMessageBox
 from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER
-from epcore.elements import Board, MultiplexerOutput
+from epcore.elements import Board, Element, MultiplexerOutput, Pin
 from epcore.measurementmanager import MeasurementPlan, MeasurementSystem
 from epcore.product import EyePointProduct
 from window import utils as ut
@@ -87,7 +87,24 @@ class PlanCompatibility:
         return True
 
     def _create_plan_for_mux(self) -> Union[Board, MeasurementPlan]:
-        return
+        """
+        Method creates an empty measurement plan for the connected multiplexer.
+        :return: empty plan.
+        """
+
+        multiplexer = self._measurement_system.multiplexers[0]
+        x, y = 0, 0
+        pins = []
+        for module, _ in enumerate(multiplexer.get_chain_info(), start=1):
+            for channel in range(1, MAX_CHANNEL_NUMBER + 1):
+                pins.append(Pin(x=x, y=y, multiplexer_output=MultiplexerOutput(channel, module)))
+        board = Board(elements=[Element(pins=pins)], image=self._plan.image)
+        if isinstance(self._plan, MeasurementPlan):
+            measurer = self._measurement_system.measurers[0]
+            plan = MeasurementPlan(board, measurer, multiplexer)
+        else:
+            plan = board
+        return plan
 
     @staticmethod
     def _show_warning_incompatibility_with_mux() -> int:
@@ -140,6 +157,11 @@ class PlanCompatibility:
         ut.show_message(qApp.translate("t", "Ошибка"), error)
 
     def _transform_plan(self) -> Union[Board, MeasurementPlan]:
+        """
+        Method creates an empty measurement plan for the connected multiplexer.
+        :return: empty plan.
+        """
+
         return self._plan
 
     def check_compatibility(self) -> Optional[Union[Board, MeasurementPlan]]:
@@ -172,7 +194,7 @@ class PlanCompatibility:
             plan = None
         else:
             plan = None
-        return self._plan
+        return plan
 
     def check_compatibility_with_product(self) -> Optional[Union[Board, MeasurementPlan]]:
         """
