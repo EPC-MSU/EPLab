@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 from functools import partial
 from platform import system
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt, QTimer,
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
@@ -40,6 +40,7 @@ from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
 from window.pedalhandler import add_pedal_handler
 from window.pinindexwidget import PinIndexWidget
+from window.plancomaptibility import PlanCompatibility
 from window.scaler import update_scale_of_class
 from window.scorewrapper import ScoreWrapper
 from window.soundplayer import SoundPlayer
@@ -279,19 +280,6 @@ class EPLabWindow(QMainWindow):
 
         if self._work_mode == WorkMode.TEST and not self._measured_pins_checker.is_measured_pin:
             self._change_work_mode(WorkMode.COMPARE)
-
-    def _check_board_for_compatibility(self, board: Union[Board, MeasurementPlan], error_message: str
-                                       ) -> Optional[Union[Board, MeasurementPlan]]:
-        """
-        :param board: board to check for compatibility with measurement system;
-        :param error_message: message to display if the board is not compatible.
-        :return: verified board or None if the board did not pass the test.
-        """
-
-        if self._msystem and not ut.check_compatibility(self._product, board):
-            ut.show_message(qApp.translate("t", "Ошибка"), error_message)
-            board = None
-        return board
 
     def _clear_widgets(self) -> None:
         """
@@ -1048,11 +1036,9 @@ class EPLabWindow(QMainWindow):
         self.enable_widgets(True)
 
         if self._measurement_plan:
-            error_message = qApp.translate("t", "План тестирования {}не соответствует режиму работы EPLab и будет "
-                                                "закрыт.")
-            board_filename = self._measurement_plan_path.path
-            error_message = error_message.format(f"'{board_filename}' " if board_filename else "")
-            self._measurement_plan = self._check_board_for_compatibility(self._measurement_plan, error_message)
+            compatibility_checker = PlanCompatibility(self._msystem, self._product, self._measurement_plan, False,
+                                                      self._measurement_plan_path.path)
+            self._measurement_plan = compatibility_checker.check_compatibility()
             self._measured_pins_checker.set_new_plan()
 
         if self._measurement_plan:
@@ -1394,10 +1380,8 @@ class EPLabWindow(QMainWindow):
 
         board, filename = self._read_measurement_plan(filename)
         if board:
-            error_message = qApp.translate("t", "План тестирования {}нельзя загрузить, поскольку он не соответствует "
-                                                "режиму работы EPLab.")
-            error_message = error_message.format(f"'{filename}' " if filename else "")
-            board = self._check_board_for_compatibility(board, error_message)
+            compatibility_checker = PlanCompatibility(self._msystem, self._product, board, True, filename)
+            board = compatibility_checker.check_compatibility()
 
         if board:
             if not self._msystem:

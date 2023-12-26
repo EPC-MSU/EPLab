@@ -15,11 +15,10 @@ from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QCheckBox, QLayout, QMessageBox
 from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerBase, AnalogMultiplexerVirtual
-from epcore.elements import Board, MeasurementSettings
+from epcore.elements import MeasurementSettings
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
-from epcore.product import EyePointProduct
 
 
 logger = logging.getLogger("eplab")
@@ -36,27 +35,6 @@ def calculate_scales(settings: MeasurementSettings) -> Tuple[float, float]:
     x_scale = scale_coefficient * settings.max_voltage
     y_scale = 1000 * x_scale / settings.internal_resistance
     return x_scale, y_scale
-
-
-def check_compatibility(product: EyePointProduct, board: Board) -> bool:
-    """
-    Function checks operating mode and loaded test plan for compatibility.
-    :param product: product;
-    :param board: board of loaded test plan.
-    :return: True if operating mode and loaded test plan are compatible.
-    """
-
-    for element in board.elements:
-        for pin in element.pins:
-            for measurement in pin.measurements:
-                measurement_settings = measurement.settings
-                try:
-                    options = product.settings_to_options(measurement_settings)
-                    if len(options) < 3:
-                        return False
-                except Exception:
-                    return False
-    return True
 
 
 def check_is_running_from_exe() -> bool:
@@ -93,12 +71,11 @@ def create_measurers(url_1: str, url_2: str) -> Tuple[Optional[List[IVMeasurerBa
         new_meaurers, new_bad_ports, _, _ = initialize_measurers(bad_ports_by_firmware, True)
         measurers.extend(new_meaurers)
         bad_ports.extend(new_bad_ports)
+
     if len(measurers) == 0:
-        # Logically it will be correctly to abort here. But for better user
-        # experience we will add single virtual IVM
-        # measurers.append(IVMeasurerVirtual())
         return None, bad_ports
-    elif len(measurers) == 2:
+
+    if len(measurers) == 2:
         # Reorder measurers according to their addresses in USB hubs tree
         measurers = sort_devices_by_usb_numbers(measurers)
     # Set pretty names for measurers
@@ -158,12 +135,14 @@ def create_multiplexer(mux_url: Optional[str] = None) -> Tuple[Optional[AnalogMu
     try:
         if mux_url == "virtual":
             return AnalogMultiplexerVirtual(mux_url, defer_open=True), []
-        elif mux_url is not None and "com:" in mux_url:
+
+        if mux_url is not None and "com:" in mux_url:
             mux = AnalogMultiplexer(mux_url)
             mux.close_device()
             return mux, []
     except Exception:
         return None, [mux_url]
+
     return None, []
 
 
