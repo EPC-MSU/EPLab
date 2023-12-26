@@ -97,6 +97,15 @@ class PlanCompatibility:
                         return False
         return True
 
+    def _create_new_plan(self, board: Board) -> Union[Board, MeasurementPlan]:
+        if isinstance(self._plan, MeasurementPlan):
+            measurer = self._measurement_system.measurers[0]
+            multiplexer = self._measurement_system.multiplexers[0]
+            plan = MeasurementPlan(board, measurer, multiplexer)
+        else:
+            plan = board
+        return plan
+
     def _create_plan_for_mux(self) -> Union[Board, MeasurementPlan]:
         """
         Method creates an empty measurement plan for the connected multiplexer.
@@ -110,12 +119,7 @@ class PlanCompatibility:
             for channel in range(1, MAX_CHANNEL_NUMBER + 1):
                 pins.append(Pin(x=x, y=y, multiplexer_output=MultiplexerOutput(channel, module)))
         board = Board(elements=[Element(pins=pins)], image=self._plan.image)
-        if isinstance(self._plan, MeasurementPlan):
-            measurer = self._measurement_system.measurers[0]
-            plan = MeasurementPlan(board, measurer, multiplexer)
-        else:
-            plan = board
-        return plan
+        return self._create_new_plan(board)
 
     @staticmethod
     def _show_warning_incompatibility_with_mux() -> int:
@@ -182,7 +186,9 @@ class PlanCompatibility:
         elif total_points < mux_channels:
             add_points(elements, mux_channels - total_points)
         set_mux_output(elements, data)
-        return self._plan
+
+        board = Board(elements=elements, image=self._plan.image)
+        return self._create_new_plan(board)
 
     def check_compatibility(self) -> Optional[Union[Board, MeasurementPlan]]:
         """
@@ -244,7 +250,7 @@ def add_points(elements: List[Element], number: int) -> None:
         number -= 1
 
 
-def get_free_mux_output(data: PlanCompatibility.AnalyzedData, index: int) -> Optional[MultiplexerOutput]:
+def get_free_mux_output(data: PlanCompatibility.AnalyzedData, index: int) -> Optional[Tuple[int, int]]:
     """
     :param data:
     :param index:
@@ -256,7 +262,7 @@ def get_free_mux_output(data: PlanCompatibility.AnalyzedData, index: int) -> Opt
         for channel in range(1, MAX_CHANNEL_NUMBER + 1):
             if len(module_channels[channel]) == 0:
                 module_channels[channel].append(index)
-                return MultiplexerOutput(channel, module)
+                return channel, module
     return None
 
 
@@ -324,6 +330,6 @@ def set_mux_output(elements: List[Element], data: PlanCompatibility.AnalyzedData
         for pin in element.pins:
             if pin.multiplexer_output is None or pin.multiplexer_output in mux_outputs:
                 mux_output = get_free_mux_output(data, index)
-                pin.multiplexer_output = mux_output
+                pin.multiplexer_output = MultiplexerOutput(*mux_output)
                 mux_outputs.add(mux_output)
             index += 1
