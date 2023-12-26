@@ -1,6 +1,7 @@
 import os
-from enum import IntEnum
-from typing import Optional, Union
+from collections import namedtuple
+from enum import auto, IntEnum
+from typing import List, Optional, Tuple, Union
 from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMessageBox
@@ -16,10 +17,16 @@ class PlanCompatibility:
     Class for checking the plan for compatibility with the product and multiplexer.
     """
 
+    AnalyzedData = namedtuple("AnalyzedData", ["channels", "empty", "extra"])
+
     class Action(IntEnum):
-        TRANSFORM = 0
-        CLOSE_PLAN = 1
-        CLOSE_MUX = 2
+        """
+        Class listing possible actions to correct incompatibility with the multiplexer.
+        """
+
+        CLOSE_MUX = auto()
+        CLOSE_PLAN = auto()
+        TRANSFORM = auto()
 
     def __init__(self, measurement_system: MeasurementSystem, product: EyePointProduct,
                  plan: Union[Board, MeasurementPlan], new_plan: bool, filename: str) -> None:
@@ -38,7 +45,7 @@ class PlanCompatibility:
         self._plan: Union[Board, MeasurementPlan] = plan
         self._product: EyePointProduct = product
 
-    def _check_compatibility_with_mux(self) -> bool:
+    def _check_compatibility_with_mux(self) -> Tuple[bool, "PlanCompatibility.AnalyzedData"]:
         """
         Method checks the plan for compatibility with the multiplexer.
         :return: True if the plan is compatible, otherwise not.
@@ -46,7 +53,7 @@ class PlanCompatibility:
 
         multiplexer = self._measurement_system.multiplexers[0]
         modules = len(multiplexer.get_chain_info())
-        channels = {module + 1: {channel + 1 for channel in range(MAX_CHANNEL_NUMBER)} for module in range(modules)}
+        channels = {module + 1: {channel + 1: [] for channel in range(MAX_CHANNEL_NUMBER)} for module in range(modules)}
         empty_points = []
         extra_points = []
 
@@ -56,18 +63,22 @@ class PlanCompatibility:
                 mux_output = pin.multiplexer_output
                 if isinstance(mux_output, MultiplexerOutput):
                     if multiplexer.is_correct_output(mux_output):
-                        channels[mux_output.module_number].discard(mux_output.channel_number)
+                        channels[mux_output.module_number][mux_output.channel_number].append(index)
                     else:
                         extra_points.append(index)
                 else:
                     empty_points.append(index)
                 index += 1
 
-        if len(empty_points) == 0 and len(extra_points) == 0 and \
-                all(len(channels_) == 0 for channels_ in channels.values()):
-            return True
+        data = self.AnalyzedData(channels, empty_points, extra_points)
+        if len(empty_points) == 0 and len(extra_points) == 0:
+            for channels_in_module in channels.values():
+                if not all(len(channels_) == 1 for channels_ in channels_in_module.values()):
+                    break
+            else:
+                return True, data
 
-        return False
+        return False, data
 
     def _check_compatibility_with_product(self) -> bool:
         """
@@ -156,12 +167,21 @@ class PlanCompatibility:
         error = error.format(f"'{self._filename}' " if self._filename else "")
         ut.show_message(qApp.translate("t", "Ошибка"), error)
 
-    def _transform_plan(self) -> Union[Board, MeasurementPlan]:
+    def _transform_plan(self, data: "PlanCompatibility.AnalyzedData") -> Union[Board, MeasurementPlan]:
         """
-        Method creates an empty measurement plan for the connected multiplexer.
-        :return: empty plan.
+        Method transforms the plan to be compatible with the multiplexer.
+        :param data:
+        :return: transformed plan.
         """
 
+        elements = self._plan.elements
+        total_points = sum([len(element.pins) for element in elements])
+        mux_channels = len(data.channels) * MAX_CHANNEL_NUMBER
+        if total_points > mux_channels:
+            remove_extra_points(elements, data, total_points - mux_channels)
+        elif total_points < mux_channels:
+            add_points(elements, mux_channels - total_points)
+        set_mux_output(elements, data)
         return self._plan
 
     def check_compatibility(self) -> Optional[Union[Board, MeasurementPlan]]:
@@ -182,12 +202,13 @@ class PlanCompatibility:
         if not self._measurement_system or not self._measurement_system.multiplexers:
             return self._plan
 
-        if self._check_compatibility_with_mux():
+        compatible, data = self._check_compatibility_with_mux()
+        if compatible:
             return self._plan
 
         action = self._show_warning_incompatibility_with_mux()
         if action == PlanCompatibility.Action.TRANSFORM:
-            plan = self._transform_plan()
+            plan = self._transform_plan(data)
         elif action == PlanCompatibility.Action.CLOSE_PLAN:
             plan = self._create_plan_for_mux()
         elif action == PlanCompatibility.Action.CLOSE_MUX:
@@ -208,3 +229,101 @@ class PlanCompatibility:
         else:
             plan = self._plan
         return plan
+
+
+def add_points(elements: List[Element], number: int) -> None:
+    """
+    :param elements:
+    :param number:
+    """
+
+    element = elements[-1]
+    x, y = 0, 0
+    while number > 0:
+        element.pins.append(Pin(x=x, y=y))
+        number -= 1
+
+
+def get_free_mux_output(data: PlanCompatibility.AnalyzedData, index: int) -> Optional[MultiplexerOutput]:
+    """
+    :param data:
+    :param index:
+    :return:
+    """
+
+    for module in range(1, len(data.channels) + 1):
+        module_channels = data.channels[module]
+        for channel in range(1, MAX_CHANNEL_NUMBER + 1):
+            if len(module_channels[channel]) == 0:
+                module_channels[channel].append(index)
+                return MultiplexerOutput(channel, module)
+    return None
+
+
+def get_point_index_to_remove(elements: List[Element], data: PlanCompatibility.AnalyzedData) -> int:
+    """
+    Function returns the index of a point that can be removed from the list of points.
+    :param elements: list of board elements;
+    :param data:
+    :return:
+    """
+
+    if data.extra:
+        return data.extra.pop(-1)
+
+    if data.empty:
+        return data.empty.pop(-1)
+
+    for module_channels in data.channels:
+        for channel, indeces in module_channels.items():
+            if len(indeces) > 1:
+                return indeces.pop(-1)
+
+    return sum(len(element.pins) for element in elements) - 1
+
+
+def remove_extra_points(elements: List[Element], data: PlanCompatibility.AnalyzedData, number: int) -> None:
+    """
+    Function removes a given number of points from the list of points.
+    :param elements: list of board elements;
+    :param data:
+    :param number: number of points to remove.
+    """
+
+    while number > 0:
+        remove_point(elements, data)
+        number -= 1
+
+
+def remove_point(elements: List[Element], data: PlanCompatibility.AnalyzedData) -> None:
+    """
+    Function removes a point from the list of points.
+    :param elements: list of board elements;
+    :param data:
+    """
+
+    index_to_remove = get_point_index_to_remove(elements, data)
+    pin_index = 0
+    for element in elements:
+        for i, pin in enumerate(element.pins):
+            if pin_index == index_to_remove:
+                element.pins.pop(i)
+                return
+
+
+def set_mux_output(elements: List[Element], data: PlanCompatibility.AnalyzedData) -> None:
+    """
+    Function
+    :param elements:
+    :param data:
+    """
+
+    index = 0
+    mux_outputs = set()
+    for element in elements:
+        for pin in element.pins:
+            if pin.multiplexer_output is None or pin.multiplexer_output in mux_outputs:
+                mux_output = get_free_mux_output(data, index)
+                pin.multiplexer_output = mux_output
+                mux_outputs.add(mux_output)
+            index += 1
