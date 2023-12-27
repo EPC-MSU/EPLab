@@ -2,7 +2,7 @@ from enum import auto, Enum
 from typing import List
 from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5.QtGui import QKeyEvent
-from PyQt5.QtWidgets import QAbstractItemView, QTableWidget
+from PyQt5.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget
 
 
 class LeftRight(Enum):
@@ -16,35 +16,32 @@ class LeftRight(Enum):
 
 class LeftRightRunnableTable(QTableWidget):
 
-    DEFAULT_WIDTH: int = 20
-
     def __init__(self, main_window, headers: List[str]) -> None:
         """
         :param main_window: main window of application;
-        :param headers:
+        :param headers: list with headers for table.
         """
 
         super().__init__()
         self._dont_go_to_selected_pin: bool = False
         self._main_window = main_window
-        self._standby_mode: bool = False
         self._init_ui(headers)
 
     def _init_ui(self, headers: List[str]) -> None:
         """
-        :param headers:
+        :param headers: list with headers for table.
         """
 
         self.setColumnCount(len(headers))
         self.setHorizontalHeaderLabels(headers)
-        header = self.horizontalHeader()
-        header.setDefaultSectionSize(LeftRightRunnableTable.DEFAULT_WIDTH)
         self.verticalHeader().setVisible(False)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.horizontalHeader().setStretchLastSection(True)
         self.cellClicked.connect(self.set_point_as_current)
         self.itemSelectionChanged.connect(self.set_point_as_current)
+        header = self.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeToContents)
 
     def connect_item_selection_changed_signal(self, callback_function=None) -> None:
         if not callback_function:
@@ -111,7 +108,7 @@ class LeftRightRunnableTable(QTableWidget):
         Slot sets point activated on table as current.
         """
 
-        if not self._dont_go_to_selected_pin or self._standby_mode:
+        if not self._dont_go_to_selected_pin:
             row_index = self.currentRow()
             self._main_window.go_to_selected_pin(row_index)
         elif self._dont_go_to_selected_pin:
