@@ -46,7 +46,7 @@ class MuxAndPlanWindow(QWidget):
     DEFAULT_HEIGHT: int = 500
     DEFAULT_MUX_HEIGHT: int = 300
     DEFAULT_WIDTH: int = 700
-    MARGIN: int = 2
+    MARGIN: int = 10
 
     def __init__(self, main_window) -> None:
         """
@@ -136,7 +136,7 @@ class MuxAndPlanWindow(QWidget):
 
         h_layout = QHBoxLayout()
         h_layout.setSpacing(0)
-        h_layout.setContentsMargins(MuxAndPlanWindow.MARGIN, 0, MuxAndPlanWindow.MARGIN, 0)
+        h_layout.setContentsMargins(MuxAndPlanWindow.MARGIN, 0, MuxAndPlanWindow.MARGIN, MuxAndPlanWindow.MARGIN)
         h_layout.addWidget(self.progress_bar, 2)
         h_layout.addStretch(1)
 
