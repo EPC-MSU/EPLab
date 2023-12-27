@@ -3,11 +3,12 @@ File with class to show window with information about multiplexer and measuremen
 """
 
 import os
-from typing import Tuple
+from typing import Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QToolBar,
                              QVBoxLayout, QWidget)
+from epcore.analogmultiplexer import AnalogMultiplexerBase
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
 from dialogs.save_geometry import update_widget_to_save_geometry
 from multiplexer.measurementplanrunner import MeasurementPlanRunner
@@ -17,6 +18,20 @@ from window import utils as ut
 from window.common import WorkMode
 from window.pedalhandler import add_pedal_handler
 from window.scaler import update_scale_of_class
+
+
+def check_multiplexer(func):
+    """
+    Decorator checks for a connected multiplexer.
+    :param func: function to be decorated.
+    """
+
+    def wrapper(self, *args, **kwargs):
+        if not self.multiplexer:
+            return
+        return func(self, *args, **kwargs)
+
+    return wrapper
 
 
 @add_pedal_handler
@@ -54,6 +69,16 @@ class MuxAndPlanWindow(QWidget):
         self.measurement_plan_runner.measurements_finished.connect(self.create_report)
         self.measurement_plan_runner.measurements_started.connect(self.turn_on_standby_mode)
 
+    @property
+    def multiplexer(self) -> Optional[AnalogMultiplexerBase]:
+        """
+        :return: multiplexer.
+        """
+
+        if self._parent.measurement_plan:
+            return self._parent.measurement_plan.multiplexer
+        return None
+
     def _change_widgets_to_start_plan_measurement(self, status: bool) -> None:
         """
         Method changes widgets to start or stop plan measurements according status of one of them.
@@ -75,7 +100,7 @@ class MuxAndPlanWindow(QWidget):
 
     def _check_multiplexer_connection(self) -> None:
         """
-        Method checks connection of multiplexer.
+        Method checks the connection of the multiplexer.
         """
 
         try:
@@ -101,6 +126,10 @@ class MuxAndPlanWindow(QWidget):
                                    yes_button=True, no_button=True)
 
     def _create_bottom_widget(self) -> QWidget:
+        """
+        :return: widgets that are located at the bottom of the dialog box.
+        """
+
         self.measurement_plan_widget: MeasurementPlanWidget = MeasurementPlanWidget(self._parent)
         self.progress_bar: QProgressBar = QProgressBar()
         self.progress_bar.setVisible(False)
@@ -121,6 +150,10 @@ class MuxAndPlanWindow(QWidget):
         return widget
 
     def _create_top_widget(self) -> QWidget:
+        """
+        :return: widgets that are located at the top of the dialog box.
+        """
+
         self.label: QLabel = QLabel(qApp.translate("t", "Режим тестирования:"))
         self.tool_bar: QToolBar = QToolBar()
         self.tool_bar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
@@ -229,7 +262,7 @@ class MuxAndPlanWindow(QWidget):
 
     def _stop_plan_measurement(self) -> None:
         """
-        Method stops measurements by multiplexer according to measurement plan.
+        Method stops measurements by the multiplexer according to the measurement plan.
         """
 
         self._manual_stop = True
@@ -240,7 +273,7 @@ class MuxAndPlanWindow(QWidget):
     @pyqtSlot()
     def arrange_windows(self) -> None:
         """
-        Slot arranges windows.
+        Slot arranges the application's main window and this dialog window.
         """
 
         main_window_pos, main_window_size, window_pos, window_size = self._is_arranged()[1:]
@@ -284,24 +317,20 @@ class MuxAndPlanWindow(QWidget):
 
         self.measurement_plan_widget.select_row_for_current_pin()
 
+    @check_multiplexer
     def set_connection_mode(self) -> None:
         """
         Method switches window to mode when devices are connected to application.
         """
 
-        if not self._parent.measurement_plan.multiplexer:
-            return
-
         self.setEnabled(True)
         self._check_multiplexer_connection()
 
+    @check_multiplexer
     def set_disconnection_mode(self) -> None:
         """
         Method switches window to mode when devices are disconnected from application.
         """
-
-        if not self._parent.measurement_plan.multiplexer:
-            return
 
         if self.isEnabled():
             self._stop_plan_measurement()
@@ -359,7 +388,7 @@ class MuxAndPlanWindow(QWidget):
 
     def update_info(self) -> None:
         """
-        Method updates information about measurement plan and multiplexer.
+        Method updates information about the measurement plan and the multiplexer.
         """
 
         self.measurement_plan_widget.update_info()
