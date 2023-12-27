@@ -281,6 +281,20 @@ class EPLabWindow(QMainWindow):
         if self._work_mode == WorkMode.TEST and not self._measured_pins_checker.is_measured_pin:
             self._change_work_mode(WorkMode.COMPARE)
 
+    def _check_plan_compatibility(self, new_plan: bool = False, empty_plan: bool = False,
+                                  filename: Optional[str] = None) -> None:
+        """
+        Method checks the measurement plan for compatibility with the product (available measurement settings) and
+        multiplexer.
+        :param new_plan: if True, then the new measurement plan will be checked for compatibility;
+        :param empty_plan:
+        :param filename:
+        """
+
+        compatibility_checker = PlanCompatibility(self, self._msystem, self._product, self._measurement_plan)
+        self._measurement_plan = compatibility_checker.check_compatibility(new_plan, empty_plan, filename)
+        self._measured_pins_checker.set_new_plan()
+
     def _clear_widgets(self) -> None:
         """
         Method clears widgets on the main window.
@@ -683,15 +697,16 @@ class EPLabWindow(QMainWindow):
         self.test_plan_menu_action.insertAction(self.add_board_image_action, self.save_point_action)
         self.toolbar_write.addAction(self.save_point_action)
 
-    def _reset_board(self) -> None:
+    def _reset_board(self, filename: Optional[str] = None) -> None:
         """
         Method sets the measurement plan to the default empty board with 1 pin.
+        :param filename:
         """
 
         self._measurement_plan = MeasurementPlan(
             Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]), measurer=self._msystem.measurers[0],
             multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
-        self._measured_pins_checker.set_new_plan()
+        self._check_plan_compatibility(True, True, filename)
         self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
 
     def _save_changes_in_measurement_plan(self, additional_info: str = None) -> bool:
@@ -794,6 +809,7 @@ class EPLabWindow(QMainWindow):
             self._create_scroll_areas_for_parameters(self._product.get_available_options(settings))
             options = self._product.settings_to_options(settings)
             self._set_options_to_ui(options)
+
         self._mux_and_plan_window.update_info()
         self._comment_widget.update_info()
         self._switch_work_mode(WorkMode.COMPARE)
@@ -984,9 +1000,9 @@ class EPLabWindow(QMainWindow):
     def connect_measurers(self, port_1: Optional[str], port_2: Optional[str],
                           product_name: Optional[cw.ProductName] = None, mux_port: str = None) -> None:
         """
-        Method connects measurers with given ports.
-        :param port_1: port for first measurer;
-        :param port_2: port for second measurer;
+        Method connects IV-measurers and a multiplexer with given ports.
+        :param port_1: port for first IV-measurer;
+        :param port_2: port for second IV-measurer;
         :param product_name: name of product to work with application;
         :param mux_port: port for multiplexer.
         """
@@ -1036,10 +1052,7 @@ class EPLabWindow(QMainWindow):
         self.enable_widgets(True)
 
         if self._measurement_plan:
-            compatibility_checker = PlanCompatibility(self._msystem, self._product, self._measurement_plan, False,
-                                                      self._measurement_plan_path.path)
-            self._measurement_plan = compatibility_checker.check_compatibility()
-            self._measured_pins_checker.set_new_plan()
+            self._check_plan_compatibility(False, False, self._measurement_plan_path.path)
 
         if self._measurement_plan:
             self._measurement_plan.measurer = self._msystem.measurers[0]
@@ -1047,6 +1060,7 @@ class EPLabWindow(QMainWindow):
         else:
             self._reset_board()
             self._measurement_plan_path.path = None
+
         self._set_widgets_to_init_state()
         self.measurers_connected.emit(True)
         self._timer.start()
@@ -1073,7 +1087,7 @@ class EPLabWindow(QMainWindow):
         filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Создать план тестирования"),
                                                filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
         if filename:
-            self._reset_board()
+            self._reset_board(filename)
             self._measurement_plan_path.path = filename
             epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self._board_window.update_board()
@@ -1231,6 +1245,19 @@ class EPLabWindow(QMainWindow):
                 self._msystem.measurers[measurer_id].unfreeze()
                 self._skip_curve = True
 
+    def get_default_pin_coordinates(self) -> Tuple[float, float]:
+        """
+        :return: default pin coordinates.
+        """
+
+        if self._measurement_plan.image:
+            # Place at the center of current viewpoint by default
+            point = self._board_window.get_default_pin_xy()
+            x, y = point.x(), point.y()
+        else:
+            x, y = 0, 0
+        return x, y
+
     def get_measurers(self) -> List[IVMeasurerBase]:
         """
         :return: list of measurers.
@@ -1380,10 +1407,6 @@ class EPLabWindow(QMainWindow):
 
         board, filename = self._read_measurement_plan(filename)
         if board:
-            compatibility_checker = PlanCompatibility(self._msystem, self._product, board, True, filename)
-            board = compatibility_checker.check_compatibility()
-
-        if board:
             if not self._msystem:
                 self._create_scroll_areas_for_parameters({EyePointProduct.Parameter.frequency: [],
                                                           EyePointProduct.Parameter.sensitive: [],
@@ -1395,7 +1418,9 @@ class EPLabWindow(QMainWindow):
                 measurer = self._msystem.measurers[0]
                 multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
             self._measurement_plan = MeasurementPlan(board, measurer, multiplexer)
-            self._measured_pins_checker.set_new_plan()
+            self._check_plan_compatibility(True, False, filename)
+
+        if self._measurement_plan:
             self._measurement_plan_path.path = filename
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here

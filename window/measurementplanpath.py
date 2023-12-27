@@ -18,11 +18,11 @@ class MeasurementPlanPath(QObject):
 
         super().__init__()
         self._main_window = main_window
-        self._path: str = None
+        self._path: Optional[str] = None
         self.path = path
 
     @property
-    def path(self) -> str:
+    def path(self) -> Optional[str]:
         """
         :return: path to measurement plan.
         """
