@@ -6,7 +6,8 @@ import os
 from typing import Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QToolBar,
+                             QVBoxLayout, QWidget)
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
 from dialogs.save_geometry import update_widget_to_save_geometry
 from multiplexer.measurementplanrunner import MeasurementPlanRunner
@@ -30,6 +31,7 @@ class MuxAndPlanWindow(QWidget):
     DEFAULT_HEIGHT: int = 500
     DEFAULT_MUX_HEIGHT: int = 300
     DEFAULT_WIDTH: int = 700
+    MARGIN: int = 2
 
     def __init__(self, main_window) -> None:
         """
@@ -44,6 +46,7 @@ class MuxAndPlanWindow(QWidget):
         self._previous_window_pos: QPoint = None
         self._previous_window_size: QSize = None
         self._init_ui()
+
         self.measurement_plan_runner: MeasurementPlanRunner = MeasurementPlanRunner(main_window,
                                                                                     self.measurement_plan_widget)
         self.measurement_plan_runner.measurement_done.connect(self.change_progress)
@@ -103,9 +106,14 @@ class MuxAndPlanWindow(QWidget):
         self.progress_bar.setVisible(False)
 
         h_layout = QHBoxLayout()
+        h_layout.setSpacing(0)
+        h_layout.setContentsMargins(MuxAndPlanWindow.MARGIN, 0, MuxAndPlanWindow.MARGIN, 0)
         h_layout.addWidget(self.progress_bar, 2)
         h_layout.addStretch(1)
+
         v_layout = QVBoxLayout()
+        v_layout.setSpacing(0)
+        v_layout.setContentsMargins(0, 0, 0, 0)
         v_layout.addWidget(self.measurement_plan_widget)
         v_layout.addWidget(self.progress_bar)
         widget = QWidget()
@@ -113,11 +121,11 @@ class MuxAndPlanWindow(QWidget):
         return widget
 
     def _create_top_widget(self) -> QWidget:
-        self.label: QLabel = QLabel(qApp.translate("t", "Режим тестирования"))
-        self.button_write_mode: QPushButton = QPushButton(qApp.translate("t", "Запись плана тестирования"))
-        self.button_write_mode.setCheckable(True)
-        self.button_test_mode: QPushButton = QPushButton(qApp.translate("t", "Тестирование по плану"))
-        self.button_test_mode.setCheckable(True)
+        self.label: QLabel = QLabel(qApp.translate("t", "Режим тестирования:"))
+        self.tool_bar: QToolBar = QToolBar()
+        self.tool_bar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        self.tool_bar.addAction(self._parent.writing_mode_action)
+        self.tool_bar.addAction(self._parent.testing_mode_action)
         self.button_start_or_stop_plan_measurement: QPushButton = QPushButton(
             qApp.translate("t", "Запустить измерение всех точек"))
         self.button_start_or_stop_plan_measurement.clicked.connect(self.start_or_stop_plan_measurement)
@@ -126,13 +134,16 @@ class MuxAndPlanWindow(QWidget):
         self.multiplexer_pinout_widget: MultiplexerPinoutWidget = MultiplexerPinoutWidget(self._parent)
 
         h_layout = QHBoxLayout()
+        h_layout.setSpacing(0)
+        h_layout.setContentsMargins(MuxAndPlanWindow.MARGIN, 0, MuxAndPlanWindow.MARGIN, 0)
         h_layout.addWidget(self.label)
-        h_layout.addWidget(self.button_write_mode)
-        h_layout.addWidget(self.button_test_mode)
+        h_layout.addWidget(self.tool_bar)
         h_layout.addStretch(1)
         h_layout.addWidget(self.button_start_or_stop_plan_measurement)
 
         v_layout = QVBoxLayout()
+        v_layout.setSpacing(0)
+        v_layout.setContentsMargins(0, 0, 0, 0)
         v_layout.addWidget(self.multiplexer_pinout_widget)
         v_layout.addLayout(h_layout)
 
@@ -152,6 +163,7 @@ class MuxAndPlanWindow(QWidget):
         self.button_arrange_windows.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "arrange_windows.png")))
         self.button_arrange_windows.setToolTip(qApp.translate("t", "Упорядочить окна"))
         self.button_arrange_windows.clicked.connect(self.arrange_windows)
+
         h_layout = QHBoxLayout()
         h_layout.addStretch(1)
         h_layout.addWidget(self.button_arrange_windows)

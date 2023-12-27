@@ -1495,8 +1495,7 @@ class EPLabWindow(QMainWindow):
             size = EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_EN if lang is Language.EN else \
                 EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_RU
         # Change style of toolbars
-        tool_bars = self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search
-        for tool_bar in tool_bars:
+        for tool_bar in (self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search):
             if self.width() < size:
                 style = Qt.ToolButtonIconOnly
             else:
