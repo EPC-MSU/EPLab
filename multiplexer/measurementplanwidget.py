@@ -2,13 +2,13 @@
 File with class for widget to show short information from measurement plan.
 """
 
-from typing import Any, Dict, Generator, List, Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtGui import QCloseEvent, QKeyEvent
-from PyQt5.QtWidgets import QAbstractItemView, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
-from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
+from typing import Any, Generator, List, Optional
+from PyQt5.QtCore import QCoreApplication as qApp, Qt
+from PyQt5.QtGui import QCloseEvent
+from PyQt5.QtWidgets import QTableWidgetItem, QVBoxLayout, QWidget
+from epcore.elements import MeasurementSettings, Pin
 from epcore.product import EyePointProduct
-from multiplexer.leftrightrunnabletable import LeftRight
+from multiplexer.leftrightrunnabletable import LeftRightRunnableTable
 from multiplexer.pinindextableitem import PinIndexTableItem
 from window.common import WorkMode
 from window.language import Language
@@ -33,7 +33,6 @@ class MeasurementPlanWidget(QWidget):
                                     qApp.translate("t", "Чувствительность")]
         self._lang: Language = qApp.instance().property("language")
         self._parent = main_window
-        self._saved_mux_outputs: Dict[int, MultiplexerOutput] = {}
         self._standby_mode: bool = False
         self._init_ui()
 
@@ -57,7 +56,6 @@ class MeasurementPlanWidget(QWidget):
         self.table_widget.setItem(index, 1, item_module)
         item_channel = self._create_table_item(channel)
         self.table_widget.setItem(index, 2, item_channel)
-        self._saved_mux_outputs[index] = pin.multiplexer_output
 
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
@@ -76,10 +74,10 @@ class MeasurementPlanWidget(QWidget):
         Method clears all information from table for measurement plan and removes all rows in table.
         """
 
-        self._saved_mux_outputs = {}
-        for row in range(self.table_widget.rowCount(), -1, -1):
-            self.table_widget.removeRow(row)
+        self.table_widget.disconnect_item_selection_changed_signal()
+        _ = [self.table_widget.removeRow(row) for row in range(self.table_widget.rowCount(), -1, -1)]
         self.table_widget.clearContents()
+        self.table_widget.connect_item_selection_changed_signal()
 
     @staticmethod
     def _create_table_item(value: Optional[Any] = None) -> QTableWidgetItem:
@@ -103,12 +101,10 @@ class MeasurementPlanWidget(QWidget):
         Method fills table for measurement plan.
         """
 
-        self.table_widget.itemSelectionChanged.disconnect()
         self._clear_table()
-        self.table_widget.itemSelectionChanged.connect(self.set_pin_as_current)
         for pin_index, pin in self._parent.measurement_plan.all_pins_iterator():
             self._add_pin_to_table(pin_index, pin)
-        self.select_row_for_current_pin()
+        self.table_widget.select_row_for_current_point()
 
     def _get_values_for_parameters(self, settings: MeasurementSettings) -> Generator:
         """
@@ -126,30 +122,12 @@ class MeasurementPlanWidget(QWidget):
                 if available_option.name == options[parameter]:
                     yield available_option.label_ru if self._lang is Language.RU else available_option.label_en
 
-    def _init_table(self) -> QTableWidget:
-        """
-        Method initializes table for measurement plan.
-        :return: table for measurement plan.
-        """
-
-        table_widget = QTableWidget()
-        table_widget.setColumnCount(len(self._headers))
-        table_widget.setHorizontalHeaderLabels(self._headers)
-        table_widget.verticalHeader().setVisible(False)
-        table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        table_widget.setSelectionMode(QAbstractItemView.SingleSelection)
-        table_widget.horizontalHeader().setStretchLastSection(True)
-        table_widget.cellClicked.connect(self.set_pin_as_current)
-        table_widget.itemSelectionChanged.connect(self.set_pin_as_current)
-        return table_widget
-
     def _init_ui(self) -> None:
         """
         Method initializes widgets on main widget.
         """
 
-        self.table_widget: QTableWidget = self._init_table()
-
+        self.table_widget: LeftRightRunnableTable = LeftRightRunnableTable(self._parent, self._headers)
         layout = QVBoxLayout()
         layout.addWidget(self.table_widget)
         self.setLayout(layout)
@@ -195,53 +173,12 @@ class MeasurementPlanWidget(QWidget):
 
         return self.table_widget.rowCount()
 
-    def keyPressEvent(self, key_press_event: QKeyEvent) -> None:
-        """
-        Method performs additional processing of pressing left key on keyboard.
-        :param key_press_event: key press event.
-        """
-
-        super().keyPressEvent(key_press_event)
-        if key_press_event.key() == Qt.Key_Left and self.table_widget.currentColumn() == 0:
-            self.move_left_or_right(LeftRight.LEFT)
-
-    @pyqtSlot(LeftRight)
-    def move_left_or_right(self, direction: LeftRight) -> None:
-        """
-        Slot moves focus in table between columns.
-        :param direction: left or right direction in which to move focus.
-        """
-
-        column = self.table_widget.currentColumn()
-        row = self.table_widget.currentRow()
-        if direction == LeftRight.LEFT and column > 0:
-            self.table_widget.setFocus()
-            self.table_widget.setCurrentCell(row, column - 1)
-        elif direction == LeftRight.LEFT and column == 0:
-            if row > 0:
-                row -= 1
-                column = self.table_widget.columnCount() - 1
-            self.table_widget.setFocus()
-            self.table_widget.setCurrentCell(row, column)
-        elif direction == LeftRight.RIGHT and column < self.table_widget.columnCount() - 1:
-            self.table_widget.setFocus()
-            self.table_widget.setCurrentCell(row, column + 1)
-        elif direction == LeftRight.RIGHT and column == self.table_widget.columnCount() - 1:
-            if row < self.table_widget.rowCount() - 1:
-                row += 1
-                column = 0
-            self.table_widget.setFocus()
-            self.table_widget.setCurrentCell(row, column)
-
     def select_row_for_current_pin(self) -> None:
         """
         Method selects row in table for current pin index.
         """
 
-        pin_index = self._parent.measurement_plan.get_current_index()
-        if pin_index != self.table_widget.currentRow():
-            self._dont_go_to_selected_pin = True
-            self.table_widget.selectRow(pin_index)
+        self.table_widget.select_row_for_current_point()
 
     def set_new_pin_parameters(self, pin_index: int) -> None:
         """
@@ -254,18 +191,6 @@ class MeasurementPlanWidget(QWidget):
             self._add_pin_to_table(pin_index, pin)
         else:
             self._update_pin_in_table(pin_index, pin)
-
-    @pyqtSlot()
-    def set_pin_as_current(self) -> None:
-        """
-        Slot sets pin activated on measurement plan table as current.
-        """
-
-        if not self._dont_go_to_selected_pin or self._standby_mode:
-            row_index = self.table_widget.currentRow()
-            self._parent.go_to_selected_pin(row_index)
-        elif self._dont_go_to_selected_pin:
-            self._dont_go_to_selected_pin = False
 
     def set_work_mode(self, work_mode: WorkMode) -> None:
         """
