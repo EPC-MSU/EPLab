@@ -132,7 +132,7 @@ class MuxAndPlanWindow(QWidget):
 
         self.measurement_plan_widget: MeasurementPlanWidget = MeasurementPlanWidget(self._parent)
         self.progress_bar: QProgressBar = QProgressBar()
-        self.progress_bar.setVisible(False)
+        self.progress_bar.setVisible(True)
 
         h_layout = QHBoxLayout()
         h_layout.setSpacing(0)
@@ -144,7 +144,7 @@ class MuxAndPlanWindow(QWidget):
         v_layout.setSpacing(0)
         v_layout.setContentsMargins(0, 0, 0, 0)
         v_layout.addWidget(self.measurement_plan_widget)
-        v_layout.addWidget(self.progress_bar)
+        v_layout.addLayout(h_layout)
         widget = QWidget()
         widget.setLayout(v_layout)
         return widget

@@ -2,14 +2,13 @@
 File with class for widget to show short information from measurement plan.
 """
 
-from typing import Dict, Generator, List
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
-from PyQt5.QtGui import QCloseEvent, QKeyEvent, QRegExpValidator
+from typing import Any, Dict, Generator, List, Optional
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt5.QtGui import QCloseEvent, QKeyEvent
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 from epcore.elements import MeasurementSettings, MultiplexerOutput, Pin
 from epcore.product import EyePointProduct
 from multiplexer.leftrightrunnabletable import LeftRight
-from multiplexer.modifiedlineedit import ModifiedLineEdit
 from multiplexer.pinindextableitem import PinIndexTableItem
 from window.common import WorkMode
 from window.language import Language
@@ -22,60 +21,53 @@ class MeasurementPlanWidget(QWidget):
     Class for widget to show short information from measurement plan in table.
     """
 
-    HEADERS: List[str] = []
-
     def __init__(self, main_window) -> None:
         """
         :param main_window: main window of application.
         """
 
         super().__init__()
-        self.HEADERS: List[str] = ["№", qApp.translate("t", "Модуль MUX"), qApp.translate("t", "Канал MUX"),
-                                   qApp.translate("t", "Частота"), qApp.translate("t", "Напряжение"),
-                                   qApp.translate("t", "Чувствительность")]
         self._dont_go_to_selected_pin: bool = False
+        self._headers: List[str] = ["№", qApp.translate("t", "Модуль MUX"), qApp.translate("t", "Канал MUX"),
+                                    qApp.translate("t", "Частота"), qApp.translate("t", "Напряжение"),
+                                    qApp.translate("t", "Чувствительность")]
         self._lang: Language = qApp.instance().property("language")
         self._parent = main_window
         self._saved_mux_outputs: Dict[int, MultiplexerOutput] = {}
         self._standby_mode: bool = False
         self._init_ui()
 
-    def _add_point_to_table(self, index: int, point: Pin) -> None:
+    def _add_pin_to_table(self, index: int, pin: Pin) -> None:
         """
-        Method adds point to table with information about measurement plan.
+        Method adds pin to table with information about measurement plan.
         :param index: index of pin to be added;
-        :param point: point to be added.
+        :param pin: point to be added.
         """
 
         self.table_widget.insertRow(index)
         self.table_widget.setItem(index, 0, PinIndexTableItem(index))
 
-        line_edit_module_number = ModifiedLineEdit()
-        line_edit_module_number.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))
-        line_edit_module_number.right_pressed.connect(lambda: self.move_left_or_right(LeftRight.RIGHT))
-        self.table_widget.setCellWidget(index, 1, line_edit_module_number)
-
-        line_edit_channel_number = ModifiedLineEdit()
-        line_edit_channel_number.left_pressed.connect(lambda: self.move_left_or_right(LeftRight.LEFT))
-        line_edit_channel_number.right_pressed.connect(lambda: self.move_left_or_right(LeftRight.RIGHT))
-        line_edit_channel_number.setValidator(QRegExpValidator(QRegExp(r"\d+")))
-        self.table_widget.setCellWidget(index, 2, line_edit_channel_number)
-
-        self._saved_mux_outputs[index] = point.multiplexer_output
-        if point.multiplexer_output:
-            line_edit_module_number.setText(str(point.multiplexer_output.module_number))
-            line_edit_channel_number.setText(str(point.multiplexer_output.channel_number))
-        settings = point.get_reference_and_test_measurements()[-1]
-        if settings:
-            for index, value in enumerate(self._get_values_for_parameters(settings)):
-                item = QTableWidgetItem(value)
-                item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-                self.table_widget.setItem(index, 3 + index, item)
+        if pin.multiplexer_output:
+            channel = pin.multiplexer_output.channel_number
+            module = pin.multiplexer_output.module_number
         else:
-            for index in range(3):
-                item = QTableWidgetItem()
-                item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-                self.table_widget.setItem(index, 3 + index, item)
+            channel = None
+            module = None
+        item_module = self._create_table_item(module)
+        self.table_widget.setItem(index, 1, item_module)
+        item_channel = self._create_table_item(channel)
+        self.table_widget.setItem(index, 2, item_channel)
+        self._saved_mux_outputs[index] = pin.multiplexer_output
+
+        settings = pin.get_reference_and_test_measurements()[-1]
+        if settings:
+            for i, value in enumerate(self._get_values_for_parameters(settings)):
+                item = self._create_table_item(value)
+                self.table_widget.setItem(index, 3 + i, item)
+        else:
+            for i in range(3):
+                item = self._create_table_item()
+                self.table_widget.setItem(index, 3 + i, item)
 
         self.table_widget.resizeRowsToContents()
 
@@ -88,6 +80,14 @@ class MeasurementPlanWidget(QWidget):
         for row in range(self.table_widget.rowCount(), -1, -1):
             self.table_widget.removeRow(row)
         self.table_widget.clearContents()
+
+    @staticmethod
+    def _create_table_item(value: Optional[Any] = None) -> QTableWidgetItem:
+        item = QTableWidgetItem()
+        item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+        if value:
+            item.setText(str(value))
+        return item
 
     def _enable_widgets(self, state: bool) -> None:
         """
@@ -107,7 +107,7 @@ class MeasurementPlanWidget(QWidget):
         self._clear_table()
         self.table_widget.itemSelectionChanged.connect(self.set_pin_as_current)
         for pin_index, pin in self._parent.measurement_plan.all_pins_iterator():
-            self._add_point_to_table(pin_index, pin)
+            self._add_pin_to_table(pin_index, pin)
         self.select_row_for_current_pin()
 
     def _get_values_for_parameters(self, settings: MeasurementSettings) -> Generator:
@@ -133,8 +133,8 @@ class MeasurementPlanWidget(QWidget):
         """
 
         table_widget = QTableWidget()
-        table_widget.setColumnCount(len(MeasurementPlanWidget.HEADERS))
-        table_widget.setHorizontalHeaderLabels(MeasurementPlanWidget.HEADERS)
+        table_widget.setColumnCount(len(self._headers))
+        table_widget.setHorizontalHeaderLabels(self._headers)
         table_widget.verticalHeader().setVisible(False)
         table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         table_widget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -162,11 +162,10 @@ class MeasurementPlanWidget(QWidget):
         """
 
         if pin.multiplexer_output:
-            module_number = str(pin.multiplexer_output.module_number)
-            self.table_widget.cellWidget(pin_index, 1).setText(module_number)
-
-            channel_number = str(pin.multiplexer_output.channel_number)
-            self.table_widget.cellWidget(pin_index, 2).setText(channel_number)
+            values = pin.multiplexer_output.module_number, pin.multiplexer_output.channel_number
+            for column, value in enumerate(values, start=1):
+                item = self.table_widget.item(pin_index, column)
+                item.setText(str(value))
 
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
@@ -252,7 +251,7 @@ class MeasurementPlanWidget(QWidget):
 
         pin = self._parent.measurement_plan.get_pin_with_index(pin_index)
         if self.table_widget.rowCount() <= pin_index:
-            self._add_point_to_table(pin_index, pin)
+            self._add_pin_to_table(pin_index, pin)
         else:
             self._update_pin_in_table(pin_index, pin)
 
@@ -296,7 +295,7 @@ class MeasurementPlanWidget(QWidget):
 
     def update_info(self) -> None:
         """
-        Method updates information about measurement plan.
+        Method updates information about the measurement plan.
         """
 
         # self._parent.measurement_plan.remove_all_callback_funcs_for_pin_changes()
