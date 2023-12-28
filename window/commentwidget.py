@@ -1,14 +1,31 @@
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject
-from PyQt5.QtGui import QFocusEvent
-from PyQt5.QtWidgets import QVBoxLayout, QWidget
-from multiplexer.leftrightrunnabletable import LeftRight, LeftRightRunnableTable
-from multiplexer.pinindextableitem import PinIndexTableItem
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
+from PyQt5.QtGui import QFocusEvent, QKeyEvent
+from PyQt5.QtWidgets import QLineEdit, QTableWidgetItem
 from window.common import WorkMode
-from window.modifiedlineedit import ModifiedLineEdit
+from window.pinindextableitem import PinIndexTableItem
+from window.tablewidget import TableWidget
 
 
-class CommentWidget(QWidget):
+def disconnect_signal(func):
+    """
+    Decorator disconnects and reconnects the slot to the signal itemChanged.
+    :param func: function to be decorated.
+    """
+
+    def wrapper(self, *args, **kwargs):
+        try:
+            self.itemChanged.disconnect()
+        except Exception:
+            pass
+        result = func(self, *args, **kwargs)
+        self.itemChanged.connect(self.handle_item_changed)
+        return result
+
+    return wrapper
+
+
+class CommentWidget(TableWidget):
     """
     Widget for working with comments to measurement plan pins.
     """
@@ -18,19 +35,8 @@ class CommentWidget(QWidget):
         :param main_window: main window of application.
         """
 
-        super().__init__()
-        self._main_window = main_window
+        super().__init__(main_window, ["№", qApp.translate("t", "Комментарий")])
         self._read_only: bool = False
-        self._init_ui()
-
-    def _init_ui(self) -> None:
-        self.table_widget: LeftRightRunnableTable = LeftRightRunnableTable(self._main_window,
-                                                                           ["№", qApp.translate("t", "Комментарий")])
-        self.v_layout: QVBoxLayout = QVBoxLayout()
-        self.v_layout.setSpacing(0)
-        self.v_layout.setContentsMargins(0, 0, 0, 0)
-        self.v_layout.addWidget(self.table_widget)
-        self.setLayout(self.v_layout)
 
     def _add_comment(self, index: int, comment: Optional[str] = None) -> None:
         """
@@ -39,25 +45,21 @@ class CommentWidget(QWidget):
         :param comment: new comment.
         """
 
-        self.table_widget.insertRow(index)
-        self.table_widget.setItem(index, 0, PinIndexTableItem(index))
+        self.insertRow(index)
+        self.setItem(index, 0, PinIndexTableItem(index))
 
-        line_edit = ModifiedLineEdit()
-        line_edit.setReadOnly(self._read_only)
-        line_edit.editingFinished.connect(lambda: self.save_comment(index))
-        line_edit.returnPressed.connect(lambda: self.save_comment(index))
-        line_edit.left_pressed.connect(lambda: self.table_widget.move_left_or_right(LeftRight.LEFT))
-        line_edit.right_pressed.connect(lambda: self.table_widget.move_left_or_right(LeftRight.RIGHT))
-        line_edit.setText(comment)
-        line_edit.installEventFilter(self)
-        self.table_widget.setCellWidget(index, 1, line_edit)
+        item = QTableWidgetItem()
+        item.setText(comment)
+        self._set_item_read_only(item)
+        self.setItem(index, 1, item)
 
     def _clear_table(self) -> None:
-        self.table_widget.disconnect_item_selection_changed_signal()
-        _ = [self.table_widget.removeRow(row) for row in range(self.table_widget.rowCount(), -1, -1)]
-        self.table_widget.clearContents()
-        self.table_widget.connect_item_selection_changed_signal()
+        self.disconnect_item_selection_changed_signal()
+        _ = [self.removeRow(row) for row in range(self.rowCount(), -1, -1)]
+        self.clearContents()
+        self.connect_item_selection_changed_signal()
 
+    @disconnect_signal
     def _fill_table(self) -> None:
         """
         Method fills in a table with comments for measurement plan pins.
@@ -66,7 +68,13 @@ class CommentWidget(QWidget):
         self._clear_table()
         for index, pin in self._main_window.measurement_plan.all_pins_iterator():
             self._add_comment(index, pin.comment)
-        self.table_widget.select_row_for_current_point()
+        self.select_row_for_current_pin()
+
+    def _set_item_read_only(self, item: QTableWidgetItem) -> None:
+        if self._read_only:
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+        else:
+            item.setFlags(item.flags() | Qt.ItemIsEditable)
 
     def _set_read_only(self) -> None:
         """
@@ -74,9 +82,9 @@ class CommentWidget(QWidget):
         """
 
         column = 1
-        for row in range(self.table_widget.rowCount()):
-            widget = self.table_widget.cellWidget(row, column)
-            widget.setReadOnly(self._read_only)
+        for row in range(self.rowCount()):
+            item = self.item(row, column)
+            self._set_item_read_only(item)
 
     def _update_comment(self, index: int, comment: str) -> None:
         """
@@ -85,8 +93,9 @@ class CommentWidget(QWidget):
         :param comment: new comment.
         """
 
-        self.table_widget.cellWidget(index, 1).setText(comment)
+        self.item(index, 1).setText(comment)
 
+    @disconnect_signal
     def clear_table(self) -> None:
         """
         Method clears all information from table and removes all rows in table.
@@ -102,13 +111,32 @@ class CommentWidget(QWidget):
         :return: True if event should be filtered out, otherwise - False.
         """
 
-        if isinstance(event, QFocusEvent):
+        if isinstance(event, QKeyEvent) and isinstance(obj, QLineEdit):
+            key_event = QKeyEvent(event)
+            key = key_event.key()
+            key_type = key_event.type()
+            if key in (Qt.Key_Right, Qt.Key_Left) and key_type == QKeyEvent.ShortcutOverride:
+                obj.keyPressEvent(event)
+            elif key not in (Qt.Key_Right, Qt.Key_Left) and key_type == QKeyEvent.KeyPress:
+                obj.keyPressEvent(event)
+            return True
+
+        if isinstance(event, QFocusEvent) and isinstance(obj, QLineEdit):
             filter_event = QFocusEvent(event)
             if filter_event.type() == QFocusEvent.FocusIn:
                 setattr(self, "is_focused", True)
             elif filter_event.type() == QFocusEvent.FocusOut:
                 setattr(self, "is_focused", False)
-        return super().eventFilter(obj, event)
+        return False
+
+    @pyqtSlot(QTableWidgetItem)
+    def handle_item_changed(self, item: QTableWidgetItem) -> None:
+        """
+        :param item: item whose data changed.
+        """
+
+        pin_index = self.row(item)
+        self.save_comment(pin_index)
 
     @pyqtSlot(int)
     def save_comment(self, index: int) -> None:
@@ -121,15 +149,8 @@ class CommentWidget(QWidget):
         if not pin:
             return
 
-        pin.comment = self.table_widget.cellWidget(index, 1).text()
+        pin.comment = self.item(index, 1).text()
         self._main_window.update_current_pin()
-
-    def select_current_pin(self) -> None:
-        """
-        Method selects row in table for current pin index.
-        """
-
-        self.table_widget.select_row_for_current_point()
 
     def set_new_comment(self, index: int) -> None:
         """
@@ -138,7 +159,7 @@ class CommentWidget(QWidget):
         """
 
         comment = self._main_window.measurement_plan.get_pin_with_index(index).comment
-        if self.table_widget.rowCount() <= index:
+        if self.rowCount() <= index:
             self._add_comment(index, comment)
         else:
             self._update_comment(index, comment)

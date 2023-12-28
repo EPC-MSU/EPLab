@@ -115,7 +115,6 @@ class EPLabWindow(QMainWindow):
 
         self._load_translation(english)
         self._init_ui()
-        self._install_event_filters()
         self._connect_scale_change_signal()
 
         if port_1 is None and port_2 is None:
@@ -425,7 +424,8 @@ class EPLabWindow(QMainWindow):
 
         return {param: widget.get_checked_option() for param, widget in self._parameters_widgets.items()}
 
-    def _handle_event_on_obj(self, obj: QObject, event: QEvent) -> Optional[bool]:
+    @staticmethod
+    def _handle_event_on_obj(obj: QObject, event: QEvent) -> Optional[bool]:
         """
         :param obj: object for which event occurred;
         :param event: event.
@@ -447,10 +447,8 @@ class EPLabWindow(QMainWindow):
             filter_event = QFocusEvent(event)
             if filter_event.type() == QFocusEvent.FocusIn:
                 setattr(obj, "is_focused", True)
-                print(obj == self._comment_widget, "focused")
             elif filter_event.type() == QFocusEvent.FocusOut:
                 setattr(obj, "is_focused", False)
-                print(obj == self._comment_widget, "not focused")
 
     def _handle_freezing_curves_with_pedal(self, pressed: bool) -> None:
         """
@@ -559,6 +557,7 @@ class EPLabWindow(QMainWindow):
         self.pin_index_widget.setEnabled(False)
         self.toolbar_test.insertWidget(self.next_point_action, self.pin_index_widget)
         self.pin_index_widget.returnPressed.connect(self.go_to_pin_selected_in_widget)
+        self.pin_index_widget.installEventFilter(self)
         self.next_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(False))
         self.new_point_action.triggered.connect(self.create_new_pin)
         self._replace_save_point_action()
@@ -595,10 +594,6 @@ class EPLabWindow(QMainWindow):
         self.work_mode_changed.connect(self._mux_and_plan_window.change_work_mode)
         self.start_or_stop_entire_plan_measurement_action.triggered.connect(
             self._mux_and_plan_window.start_or_stop_plan_measurement)
-
-    def _install_event_filters(self) -> None:
-        self._comment_widget.installEventFilter(self)
-        self.pin_index_widget.installEventFilter(self)
 
     def _load_translation(self, english: Optional[bool] = None) -> None:
         """
@@ -1245,7 +1240,7 @@ class EPLabWindow(QMainWindow):
         :return: True if event should be filtered out, otherwise - False.
         """
 
-        if obj in (self._comment_widget, self.pin_index_widget):
+        if obj in (self.pin_index_widget,):
             result = self._handle_event_on_obj(obj, event)
             if isinstance(result, bool):
                 return result
@@ -1738,4 +1733,4 @@ class EPLabWindow(QMainWindow):
 
         if self._mux_and_plan_window:
             self._mux_and_plan_window.select_current_pin()
-        self._comment_widget.select_current_pin()
+        self._comment_widget.select_row_for_current_pin()

@@ -141,8 +141,7 @@ class MuxAndPlanWindow(QWidget):
         h_layout.addStretch(1)
 
         v_layout = QVBoxLayout()
-        v_layout.setSpacing(0)
-        v_layout.setContentsMargins(0, 0, 0, 0)
+        v_layout.setContentsMargins(MuxAndPlanWindow.MARGIN, 0, MuxAndPlanWindow.MARGIN, 0)
         v_layout.addWidget(self.measurement_plan_widget)
         v_layout.addLayout(h_layout)
         widget = QWidget()
@@ -372,7 +371,7 @@ class MuxAndPlanWindow(QWidget):
         :param total_number: number of steps in standby mode.
         """
 
-        self.measurement_plan_widget.turn_on_standby_mode(total_number)
+        self.measurement_plan_widget.turn_on_standby_mode()
         self.progress_bar.setVisible(True)
         self.progress_bar.setMinimum(0)
         self.progress_bar.setMaximum(total_number)

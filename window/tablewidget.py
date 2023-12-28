@@ -1,22 +1,11 @@
-from enum import auto, Enum
 from typing import Any, Callable, List
-from PyQt5.QtCore import pyqtSlot, Qt
-from PyQt5.QtGui import QKeyEvent
+from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget
 
 
-class LeftRight(Enum):
+class TableWidget(QTableWidget):
     """
-    Class to denote left and right.
-    """
-
-    LEFT = auto()
-    RIGHT = auto()
-
-
-class LeftRightRunnableTable(QTableWidget):
-    """
-    Class for a table in which you can continuously move between cells using the Left and Right keys.
+    Class for a table.
     """
 
     def __init__(self, main_window, headers: List[str]) -> None:
@@ -43,8 +32,6 @@ class LeftRightRunnableTable(QTableWidget):
         header = self.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeToContents)
         header.setStretchLastSection(True)
-
-        self.cellClicked.connect(self.set_pin_as_current)
         self.itemSelectionChanged.connect(self.set_pin_as_current)
 
     def connect_item_selection_changed_signal(self, callback_function: Callable[..., Any] = None) -> None:
@@ -62,44 +49,9 @@ class LeftRightRunnableTable(QTableWidget):
         except Exception:
             pass
 
-    def keyPressEvent(self, key_press_event: QKeyEvent) -> None:
+    def select_row_for_current_pin(self) -> None:
         """
-        Method performs additional processing of pressing left key on keyboard.
-        :param key_press_event: key press event.
-        """
-
-        super().keyPressEvent(key_press_event)
-        if key_press_event.key() == Qt.Key_Left and self.currentColumn() == 0:
-            self.move_left_or_right(LeftRight.LEFT)
-
-    @pyqtSlot(LeftRight)
-    def move_left_or_right(self, direction: LeftRight) -> None:
-        """
-        Slot moves focus in table between columns.
-        :param direction: left or right direction in which to move focus.
-        """
-
-        print(direction)
-        column = self.currentColumn()
-        row = self.currentRow()
-        if direction == LeftRight.LEFT:
-            if column > 0:
-                column -= 1
-            elif column == 0 and row > 0:
-                row -= 1
-                column = self.columnCount() - 1
-        elif direction == LeftRight.RIGHT:
-            if column < self.columnCount() - 1:
-                column += 1
-            elif column == self.columnCount() - 1 and row < self.rowCount() - 1:
-                row += 1
-                column = 0
-        self.setFocus()
-        self.setCurrentCell(row, column)
-
-    def select_row_for_current_point(self) -> None:
-        """
-        Method selects row in table for current point index.
+        Method selects row in table for current pin index.
         """
 
         index = self._main_window.measurement_plan.get_current_index()
