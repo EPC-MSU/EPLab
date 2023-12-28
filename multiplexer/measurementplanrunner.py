@@ -16,9 +16,9 @@ class MeasurementPlanRunner(QObject):
     measurements_finished: pyqtSignal = pyqtSignal()
     measurements_started: pyqtSignal = pyqtSignal(int)
 
-    def __init__(self, parent, measurement_plan_widget: MeasurementPlanWidget) -> None:
+    def __init__(self, main_window, measurement_plan_widget: MeasurementPlanWidget) -> None:
         """
-        :param parent: main window of application;
+        :param main_window: main window of application;
         :param measurement_plan_widget: measurement plan widget.
         """
 
@@ -30,7 +30,7 @@ class MeasurementPlanRunner(QObject):
         self._measurement_plan_widget: MeasurementPlanWidget = measurement_plan_widget
         self._measurement_saved: bool = False
         self._need_to_save_measurement: bool = False
-        self._parent = parent
+        self._parent = main_window
 
     @property
     def is_running(self) -> bool:
@@ -84,7 +84,7 @@ class MeasurementPlanRunner(QObject):
         Method moves to next pin in measurement plan.
         """
 
-        if isinstance(self._amount_of_pins, int) and isinstance(self._current_pin_index, int) and\
+        if isinstance(self._amount_of_pins, int) and isinstance(self._current_pin_index, int) and \
                 self._current_pin_index < self._amount_of_pins:
             self._parent.go_to_selected_pin(self._current_pin_index)
             self._measurement_saved = False

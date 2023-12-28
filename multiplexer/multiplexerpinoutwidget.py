@@ -2,7 +2,7 @@
 File with class for widget to show multiplexer pinout.
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 from epcore.analogmultiplexer import ModuleTypes
@@ -139,15 +139,6 @@ class ModuleWidget(QWidget):
         self.setLayout(h_layout)
         self.setToolTip(qApp.translate("t", "Модуль {}").format(self._module_number))
 
-    def get_channels(self) -> List[MultiplexerOutput]:
-        """
-        Method returns channels for the module.
-        :return: list with channels.
-        """
-
-        return [MultiplexerOutput(channel_number, self._module_number)
-                for channel_number in sorted(self._channels.keys())]
-
     def set_connected_channel(self, channel_number: int) -> None:
         """
         Method sets given channel of module as turned on.
@@ -198,6 +189,7 @@ class MultiplexerPinoutWidget(QWidget):
     MIN_WIDTH: int = 500
     SCROLL_AREA_MIN_HEIGHT: int = 100
     TIMEOUT: int = 10
+    mux_output_turned_on: pyqtSignal = pyqtSignal(MultiplexerOutput)
 
     def __init__(self, main_window, device_errors_handler: Optional[DeviceErrorsHandler] = None) -> None:
         """
@@ -210,7 +202,6 @@ class MultiplexerPinoutWidget(QWidget):
             main_window.device_errors_handler
         self._modules: Dict[int, ModuleWidget] = {}
         self._parent = main_window
-        self._selected_channels: List[MultiplexerOutput] = []
         self._turned_on_output: MultiplexerOutput = None
         self._init_ui()
 
@@ -227,7 +218,7 @@ class MultiplexerPinoutWidget(QWidget):
     def _create_widgets_for_multiplexer(self) -> QScrollArea:
         """
         Method creates widgets to work with multiplexer.
-        :return:
+        :return: scroll area.
         """
 
         self.layout_for_modules: QVBoxLayout = QVBoxLayout()
@@ -344,6 +335,7 @@ class MultiplexerPinoutWidget(QWidget):
         if self._turned_on_output and output.module_number != self._turned_on_output.module_number:
             self._modules[self._turned_on_output.module_number].turn_off()
         self._turned_on_output = output
+        self.mux_output_turned_on.emit(output)
 
     def update_info(self) -> None:
         """

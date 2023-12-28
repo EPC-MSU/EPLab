@@ -8,7 +8,7 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QToolBar,
                              QVBoxLayout, QWidget)
-from epcore.analogmultiplexer import AnalogMultiplexerBase
+from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MultiplexerOutput
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
 from dialogs.save_geometry import update_widget_to_save_geometry
 from multiplexer.measurementplanrunner import MeasurementPlanRunner
@@ -164,6 +164,7 @@ class MuxAndPlanWindow(QWidget):
         self.button_start_or_stop_plan_measurement.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "start_auto_test.png")))
         self.button_start_or_stop_plan_measurement.setCheckable(True)
         self.multiplexer_pinout_widget: MultiplexerPinoutWidget = MultiplexerPinoutWidget(self._parent)
+        self.multiplexer_pinout_widget.mux_output_turned_on.connect(self.handle_mux_output_turned_on)
 
         h_layout = QHBoxLayout()
         h_layout.setSpacing(0)
@@ -308,6 +309,18 @@ class MuxAndPlanWindow(QWidget):
         if self._parent.work_mode is WorkMode.TEST and not self._manual_stop:
             self._parent.create_report(True)
         self._manual_stop = False
+
+    @pyqtSlot(MultiplexerOutput)
+    def handle_mux_output_turned_on(self, mux_output: MultiplexerOutput) -> None:
+        """
+        Slot processes the signal to turn on the given multiplexer output.
+        :param mux_output: multiplexer output.
+        """
+
+        index = self.measurement_plan_widget.get_pin_index(mux_output)
+        if index is not None:
+            self._parent.measurement_plan._current_pin_index = index
+            self.measurement_plan_widget.select_row_for_current_pin()
 
     def select_current_pin(self) -> None:
         """

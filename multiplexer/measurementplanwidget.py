@@ -6,6 +6,7 @@ from typing import Any, Generator, List, Optional
 from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtWidgets import QTableWidgetItem
+from epcore.analogmultiplexer.base import MultiplexerOutput
 from epcore.elements import MeasurementSettings, Pin
 from epcore.product import EyePointProduct
 from window.common import WorkMode
@@ -150,6 +151,20 @@ class MeasurementPlanWidget(TableWidget):
         """
 
         return self.rowCount()
+
+    def get_pin_index(self, mux_output: MultiplexerOutput) -> Optional[int]:
+        """
+        :param mux_output: multiplexer output.
+        :return: pin index with a given multiplexer output.
+        """
+
+        channel = str(mux_output.channel_number)
+        module = str(mux_output.module_number)
+        for index in range(self.rowCount()):
+            pin_module = self.item(index, 1).text()
+            pin_channel = self.item(index, 2).text()
+            if pin_channel == channel and pin_module == module:
+                return index
 
     def set_new_pin_parameters(self, pin_index: int) -> None:
         """
