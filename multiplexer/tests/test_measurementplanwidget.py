@@ -12,6 +12,25 @@ from .utils import create_dummy_main_window
 
 class TestMeasurementPlanWidget(unittest.TestCase):
 
+    def test_table_content(self):
+        """
+        Test checks content of table for measurement plan.
+        """
+
+        app = QApplication(sys.argv)
+        dummy_main_window = create_dummy_main_window()
+        board_path = os.path.join(os.path.dirname(__file__), "test_data", "test_board.json")
+        dummy_main_window.update_measurement_plan(board_path)
+        measurement_plan_widget = MeasurementPlanWidget(dummy_main_window)
+        measurement_plan_widget.update_info()
+        content = [["1", "", "", "100 Hz", "5.0 V", "Middle"],
+                   ["2", "2", "45", "100 Hz", "5.0 V", "Middle"]]
+        for row in range(2):
+            for column in range(5):
+                widget_or_item = measurement_plan_widget.item(row, column)
+                self.assertEqual(widget_or_item.text(), content[row][column])
+        app.exit(0)
+
     def test_table_creation(self):
         """
         Test checks creation of empty table for measurement plan.
@@ -20,7 +39,7 @@ class TestMeasurementPlanWidget(unittest.TestCase):
         app = QApplication(sys.argv)
         dummy_main_window = create_dummy_main_window()
         measurement_plan_widget = MeasurementPlanWidget(dummy_main_window)
-        self.assertEqual(measurement_plan_widget.table_widget.rowCount(), 0)
+        self.assertEqual(measurement_plan_widget.rowCount(), 0)
         app.exit(0)
 
     def test_table_update(self):
@@ -34,27 +53,5 @@ class TestMeasurementPlanWidget(unittest.TestCase):
         dummy_main_window.update_measurement_plan(board_path)
         measurement_plan_widget = MeasurementPlanWidget(dummy_main_window)
         measurement_plan_widget.update_info()
-        self.assertEqual(measurement_plan_widget.table_widget.rowCount(), 2)
-        app.exit(0)
-
-    def test_table_content(self):
-        """
-        Test checks content of table for measurement plan.
-        """
-
-        app = QApplication(sys.argv)
-        dummy_main_window = create_dummy_main_window()
-        board_path = os.path.join(os.path.dirname(__file__), "test_data", "test_board.json")
-        dummy_main_window.update_measurement_plan(board_path)
-        measurement_plan_widget = MeasurementPlanWidget(dummy_main_window)
-        measurement_plan_widget.update_info()
-        content = [["1", "", "", "100 Hz", "5.0 V", "Middle", ""],
-                   ["2", "2", "45", "100 Hz", "5.0 V", "Middle", ""]]
-        for row in range(2):
-            for column in range(5):
-                if column in (1, 2, 6):
-                    widget_or_item = measurement_plan_widget.table_widget.cellWidget(row, column)
-                else:
-                    widget_or_item = measurement_plan_widget.table_widget.item(row, column)
-                self.assertEqual(widget_or_item.text(), content[row][column])
+        self.assertEqual(measurement_plan_widget.rowCount(), 2)
         app.exit(0)
