@@ -1,7 +1,6 @@
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
-from PyQt5.QtGui import QFocusEvent, QKeyEvent
-from PyQt5.QtWidgets import QLineEdit, QTableWidgetItem
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt5.QtWidgets import QTableWidgetItem
 from window.common import WorkMode
 from window.pinindextableitem import PinIndexTableItem
 from window.tablewidget import TableWidget
@@ -71,6 +70,10 @@ class CommentWidget(TableWidget):
         self.select_row_for_current_pin()
 
     def _set_item_read_only(self, item: QTableWidgetItem) -> None:
+        """
+        :param item: set table widget item as editable or not editable.
+        """
+
         if self._read_only:
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
         else:
@@ -104,31 +107,6 @@ class CommentWidget(TableWidget):
         self._clear_table()
         self._read_only = False
 
-    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
-        """
-        :param obj: object for which event occurred;
-        :param event: event.
-        :return: True if event should be filtered out, otherwise - False.
-        """
-
-        if isinstance(event, QKeyEvent) and isinstance(obj, QLineEdit):
-            key_event = QKeyEvent(event)
-            key = key_event.key()
-            key_type = key_event.type()
-            if key in (Qt.Key_Right, Qt.Key_Left) and key_type == QKeyEvent.ShortcutOverride:
-                obj.keyPressEvent(event)
-            elif key not in (Qt.Key_Right, Qt.Key_Left) and key_type == QKeyEvent.KeyPress:
-                obj.keyPressEvent(event)
-            return True
-
-        if isinstance(event, QFocusEvent) and isinstance(obj, QLineEdit):
-            filter_event = QFocusEvent(event)
-            if filter_event.type() == QFocusEvent.FocusIn:
-                setattr(self, "is_focused", True)
-            elif filter_event.type() == QFocusEvent.FocusOut:
-                setattr(self, "is_focused", False)
-        return False
-
     @pyqtSlot(QTableWidgetItem)
     def handle_item_changed(self, item: QTableWidgetItem) -> None:
         """
@@ -149,8 +127,9 @@ class CommentWidget(TableWidget):
         if not pin:
             return
 
-        pin.comment = self.item(index, 1).text()
-        self._main_window.update_current_pin()
+        item = self.item(index, 1)
+        if item:
+            pin.comment = item.text()
 
     def set_new_comment(self, index: int) -> None:
         """

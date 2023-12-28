@@ -1591,6 +1591,7 @@ class EPLabWindow(QMainWindow):
                 self._measurement_plan.save_last_measurement_as_test()
         index = self._measurement_plan.get_current_index()
         self._comment_widget.save_comment(index)
+        self.update_current_pin()
 
     @pyqtSlot()
     def search_optimal(self) -> None:
