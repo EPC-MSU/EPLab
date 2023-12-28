@@ -1,5 +1,5 @@
 from enum import auto, Enum
-from typing import List
+from typing import Any, Callable, List
 from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget
@@ -15,6 +15,9 @@ class LeftRight(Enum):
 
 
 class LeftRightRunnableTable(QTableWidget):
+    """
+    Class for a table in which you can continuously move between cells using the Left and Right keys.
+    """
 
     def __init__(self, main_window, headers: List[str]) -> None:
         """
@@ -37,15 +40,20 @@ class LeftRightRunnableTable(QTableWidget):
         self.verticalHeader().setVisible(False)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.horizontalHeader().setStretchLastSection(True)
-        self.cellClicked.connect(self.set_point_as_current)
-        self.itemSelectionChanged.connect(self.set_point_as_current)
         header = self.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        header.setStretchLastSection(True)
 
-    def connect_item_selection_changed_signal(self, callback_function=None) -> None:
+        self.cellClicked.connect(self.set_pin_as_current)
+        self.itemSelectionChanged.connect(self.set_pin_as_current)
+
+    def connect_item_selection_changed_signal(self, callback_function: Callable[..., Any] = None) -> None:
+        """
+        :param callback_function:
+        """
+
         if not callback_function:
-            callback_function = self.set_point_as_current
+            callback_function = self.set_pin_as_current
         self.itemSelectionChanged.connect(callback_function)
 
     def disconnect_item_selection_changed_signal(self) -> None:
@@ -71,26 +79,23 @@ class LeftRightRunnableTable(QTableWidget):
         :param direction: left or right direction in which to move focus.
         """
 
+        print(direction)
         column = self.currentColumn()
         row = self.currentRow()
-        if direction == LeftRight.LEFT and column > 0:
-            self.setFocus()
-            self.setCurrentCell(row, column - 1)
-        elif direction == LeftRight.LEFT and column == 0:
-            if row > 0:
+        if direction == LeftRight.LEFT:
+            if column > 0:
+                column -= 1
+            elif column == 0 and row > 0:
                 row -= 1
                 column = self.columnCount() - 1
-            self.setFocus()
-            self.setCurrentCell(row, column)
-        elif direction == LeftRight.RIGHT and column < self.columnCount() - 1:
-            self.setFocus()
-            self.setCurrentCell(row, column + 1)
-        elif direction == LeftRight.RIGHT and column == self.columnCount() - 1:
-            if row < self.rowCount() - 1:
+        elif direction == LeftRight.RIGHT:
+            if column < self.columnCount() - 1:
+                column += 1
+            elif column == self.columnCount() - 1 and row < self.rowCount() - 1:
                 row += 1
                 column = 0
-            self.setFocus()
-            self.setCurrentCell(row, column)
+        self.setFocus()
+        self.setCurrentCell(row, column)
 
     def select_row_for_current_point(self) -> None:
         """
@@ -103,13 +108,13 @@ class LeftRightRunnableTable(QTableWidget):
             self.selectRow(index)
 
     @pyqtSlot()
-    def set_point_as_current(self) -> None:
+    def set_pin_as_current(self) -> None:
         """
-        Slot sets point activated on table as current.
+        Slot sets pin activated on table as current.
         """
 
         if not self._dont_go_to_selected_pin:
-            row_index = self.currentRow()
-            self._main_window.go_to_selected_pin(row_index)
-        elif self._dont_go_to_selected_pin:
+            pin_index = self.currentRow()
+            self._main_window.go_to_selected_pin(pin_index)
+        else:
             self._dont_go_to_selected_pin = False

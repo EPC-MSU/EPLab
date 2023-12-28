@@ -11,6 +11,10 @@ class ModifiedLineEdit(QLineEdit):
     left_pressed: pyqtSignal = pyqtSignal()
     right_pressed: pyqtSignal = pyqtSignal()
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._cursor_previous_position: int = 0
+
     def keyPressEvent(self, key_press_event: QKeyEvent) -> None:
         """
         Method handles key press event.
@@ -18,7 +22,10 @@ class ModifiedLineEdit(QLineEdit):
         """
 
         super().keyPressEvent(key_press_event)
-        if key_press_event.key() == Qt.Key_Left and self.cursorPosition() == 0:
+        text_length = len(self.text())
+        if key_press_event.key() == Qt.Key_Left and self.cursorPosition() == 0 and self._cursor_previous_position == 0:
             self.left_pressed.emit()
-        elif key_press_event.key() == Qt.Key_Right and self.cursorPosition() == len(self.text()):
+        elif key_press_event.key() == Qt.Key_Right and self.cursorPosition() == text_length and \
+                self._cursor_previous_position == text_length:
             self.right_pressed.emit()
+        self._cursor_previous_position = self.cursorPosition()

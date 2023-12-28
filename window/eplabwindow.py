@@ -115,6 +115,7 @@ class EPLabWindow(QMainWindow):
 
         self._load_translation(english)
         self._init_ui()
+        self._install_event_filters()
         self._connect_scale_change_signal()
 
         if port_1 is None and port_2 is None:
@@ -424,6 +425,33 @@ class EPLabWindow(QMainWindow):
 
         return {param: widget.get_checked_option() for param, widget in self._parameters_widgets.items()}
 
+    def _handle_event_on_obj(self, obj: QObject, event: QEvent) -> Optional[bool]:
+        """
+        :param obj: object for which event occurred;
+        :param event: event.
+        :return: True if event should be filtered out, otherwise - False.
+        """
+
+        if isinstance(event, QKeyEvent):
+            key_event = QKeyEvent(event)
+            key = key_event.key()
+            if key in (Qt.Key_Enter, Qt.Key_Return):
+                event_type = key_event.type()
+                if (key == Qt.Key_Enter and event_type == QKeyEvent.ShortcutOverride) or \
+                        (key == Qt.Key_Return and event_type == QKeyEvent.KeyPress):
+                    obj.keyPressEvent(event)
+                return True
+            return False
+
+        if isinstance(event, QFocusEvent):
+            filter_event = QFocusEvent(event)
+            if filter_event.type() == QFocusEvent.FocusIn:
+                setattr(obj, "is_focused", True)
+                print(obj == self._comment_widget, "focused")
+            elif filter_event.type() == QFocusEvent.FocusOut:
+                setattr(obj, "is_focused", False)
+                print(obj == self._comment_widget, "not focused")
+
     def _handle_freezing_curves_with_pedal(self, pressed: bool) -> None:
         """
         Method freezes the measurers curves using a pedal. If at least one curve is not frozen, then all curves are
@@ -529,7 +557,6 @@ class EPLabWindow(QMainWindow):
         self.previous_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(True))
         self.pin_index_widget: PinIndexWidget = PinIndexWidget(self)
         self.pin_index_widget.setEnabled(False)
-        self.pin_index_widget.installEventFilter(self)
         self.toolbar_test.insertWidget(self.next_point_action, self.pin_index_widget)
         self.pin_index_widget.returnPressed.connect(self.go_to_pin_selected_in_widget)
         self.next_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(False))
@@ -557,7 +584,6 @@ class EPLabWindow(QMainWindow):
         self.settings_mode_action.triggered.connect(self.show_settings_window)
 
         self._comment_widget: CommentWidget = CommentWidget(self)
-        self._comment_widget.installEventFilter(self)
         self.comment_vertical_layout.insertWidget(0, self._comment_widget)
 
         # Update plot settings at next measurement cycle (place settings here or None)
@@ -569,6 +595,10 @@ class EPLabWindow(QMainWindow):
         self.work_mode_changed.connect(self._mux_and_plan_window.change_work_mode)
         self.start_or_stop_entire_plan_measurement_action.triggered.connect(
             self._mux_and_plan_window.start_or_stop_plan_measurement)
+
+    def _install_event_filters(self) -> None:
+        self._comment_widget.installEventFilter(self)
+        self.pin_index_widget.installEventFilter(self)
 
     def _load_translation(self, english: Optional[bool] = None) -> None:
         """
@@ -1187,8 +1217,13 @@ class EPLabWindow(QMainWindow):
         :return: True if the event was recognized and processed.
         """
 
-        if self.measurement_plan and isinstance(event, QKeyEvent) and \
-                not getattr(self.pin_index_widget, "is_focused", False):
+        def check_focus_on_main_window() -> bool:
+            for widget in (self._comment_widget, self.pin_index_widget):
+                if getattr(widget, "is_focused", False):
+                    return False
+            return True
+
+        if self.measurement_plan and isinstance(event, QKeyEvent) and check_focus_on_main_window():
             key_event = QKeyEvent(event)
             if key_event.type() in (QEvent.KeyPress, QEvent.ShortcutOverride):
                 return self._handle_key_press_event(key_event)
@@ -1210,24 +1245,10 @@ class EPLabWindow(QMainWindow):
         :return: True if event should be filtered out, otherwise - False.
         """
 
-        if obj in (self.pin_index_widget,):
-            if isinstance(event, QKeyEvent):
-                key_event = QKeyEvent(event)
-                key = key_event.key()
-                if key in (Qt.Key_Enter, Qt.Key_Return):
-                    event_type = key_event.type()
-                    if (key == Qt.Key_Enter and event_type == QKeyEvent.ShortcutOverride) or \
-                            (key == Qt.Key_Return and event_type == QKeyEvent.KeyPress):
-                        obj.keyPressEvent(event)
-                    return True
-                return False
-
-            if isinstance(event, QFocusEvent):
-                filter_event = QFocusEvent(event)
-                if filter_event.type() == QFocusEvent.FocusIn:
-                    setattr(obj, "is_focused", True)
-                elif filter_event.type() == QFocusEvent.FocusOut:
-                    setattr(obj, "is_focused", False)
+        if obj in (self._comment_widget, self.pin_index_widget):
+            result = self._handle_event_on_obj(obj, event)
+            if isinstance(result, bool):
+                return result
 
         return super().eventFilter(obj, event)
 
@@ -1717,4 +1738,4 @@ class EPLabWindow(QMainWindow):
 
         if self._mux_and_plan_window:
             self._mux_and_plan_window.select_current_pin()
-        self._comment_widget.select_current_point()
+        self._comment_widget.select_current_pin()
