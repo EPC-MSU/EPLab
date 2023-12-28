@@ -242,7 +242,9 @@ class EPLabWindow(QMainWindow):
         self.next_point_action.setEnabled(mode is not WorkMode.COMPARE)
         self.previous_point_action.setEnabled(mode is not WorkMode.COMPARE)
         self.pin_index_widget.setEnabled(mode is not WorkMode.COMPARE)
-        self.new_point_action.setEnabled(mode is WorkMode.WRITE)
+        enable = bool(mode is WorkMode.WRITE and
+                      not (self._measurement_plan and self.measurement_plan.multiplexer is not None))
+        self.new_point_action.setEnabled(enable)
         self.save_point_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
         self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
         self.create_report_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
