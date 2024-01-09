@@ -3,7 +3,7 @@ File with class to show window with information about multiplexer and measuremen
 """
 
 import os
-from typing import Optional, Tuple
+from typing import Any, Callable, Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QToolBar,
@@ -20,13 +20,13 @@ from window.pedalhandler import add_pedal_handler
 from window.scaler import update_scale_of_class
 
 
-def check_multiplexer(func):
+def check_multiplexer(func: Callable[..., Any]):
     """
     Decorator checks for a connected multiplexer.
     :param func: function to be decorated.
     """
 
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, *args, **kwargs) -> Any:
         if not self.multiplexer:
             return
         return func(self, *args, **kwargs)
