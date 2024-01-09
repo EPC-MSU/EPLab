@@ -952,9 +952,15 @@ class EPLabWindow(QMainWindow):
                 plot.set_curve(None)
 
         # Update score
-        if self._reference_curve and self._current_curve and self._work_mode != WorkMode.WRITE:
-            assert settings is not None
-            score = self._calculate_score(self._reference_curve, self._current_curve, settings)
+        curve_1 = self._reference_curve
+        if self._work_mode in (WorkMode.COMPARE, WorkMode.TEST):
+            curve_2 = self._current_curve
+        elif self._work_mode is WorkMode.READ_PLAN:
+            curve_2 = self._test_curve
+        else:
+            curve_2 = None
+        if None not in (curve_1, curve_2, settings):
+            score = self._calculate_score(curve_1, curve_2, settings)
             self._score_wrapper.set_score(score)
             self._player.score_updated(score)
         else:
@@ -1008,6 +1014,18 @@ class EPLabWindow(QMainWindow):
             self.setWindowTitle(f"{measurement_plan_name} - EPLab {Version.full}")
         else:
             self.setWindowTitle(f"EPLab {Version.full}")
+
+    def check_good_score(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> bool:
+        """
+        Method calculates the score for the given IV-curves and compares the calculated value with the threshold.
+        :param curve_1: first IV-curve;
+        :param curve_2: second IV-curve;
+        :param settings: measurement settings.
+        :return: True if score is not greater than the threshold, otherwise False.
+        """
+
+        score = self._calculate_score(curve_1, curve_2, settings)
+        return self._score_wrapper.check_score(score)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """

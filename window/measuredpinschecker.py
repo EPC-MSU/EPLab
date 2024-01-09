@@ -103,7 +103,7 @@ class MeasuredPinsChecker(QObject):
 
     def check_measurement_plan_for_empty_pins(self) -> bool:
         """
-        :return: True if there are pins without measurements in measurement plan.
+        :return: True if there are pins without reference measurements in measurement plan.
         """
 
         if len(self._empty_pins) > 0:

@@ -37,6 +37,16 @@ class ScoreWrapper:
         self._label.setText(f'<html><head/><body><p><span style="font-size:48pt;color:{color};">{text}</span>'
                             f"</p></body></html>")
 
+    def check_score(self, score: float) -> bool:
+        """
+        Method compares the given score with the threshold.
+        :param score: score.
+        :return: True if score is not greater than the threshold, otherwise False.
+        """
+
+        score = convert_to_percent_with_tenths(score)
+        return score <= self._tolerance_with_tenths
+
     def get_friendly_score(self) -> str:
         """
         :return: user friendly score value.

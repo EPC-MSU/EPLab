@@ -1,6 +1,8 @@
 from typing import Any, Callable, Optional
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QSize, Qt
+from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtWidgets import QTableWidgetItem
+from epcore.elements import Pin
 from window.common import WorkMode
 from window.pinindextableitem import PinIndexTableItem
 from window.tablewidget import TableWidget
@@ -29,7 +31,10 @@ class CommentWidget(TableWidget):
     Widget for working with comments to measurement plan pins.
     """
 
+    BAD_BRUSH: QBrush = QBrush(QColor(255, 129, 129, 200))
     DEFAULT_WIDTH: int = 150
+    GOOD_BRUSH: QBrush = QBrush(QColor(152, 251, 152, 200))
+    WHITE_BRUSH: QBrush = QBrush(QColor(255, 255, 255))
 
     def __init__(self, main_window) -> None:
         """
@@ -39,6 +44,14 @@ class CommentWidget(TableWidget):
         super().__init__(main_window, ["№", qApp.translate("t", "Комментарий")])
         self._read_only: bool = False
         self.adjustSize()
+
+    @property
+    def read_only(self) -> bool:
+        """
+        :return:
+        """
+
+        return self._read_only
 
     def _add_comment(self, index: int, comment: Optional[str] = None) -> None:
         """
@@ -55,6 +68,25 @@ class CommentWidget(TableWidget):
         self._set_item_read_only(item)
         self.setItem(index, 1, item)
 
+    def _change_row_color(self, index: int, pin: Pin) -> None:
+        """
+        Method sets the color of the row depending on the score value. If the pin to which the row corresponds has
+        test and reference IV-curves, then the score is calculated. If score is not greater than the threshold, then
+        the row is colored light green, otherwise pink.
+        :param index: index of the pin;
+        :param pin: pin.
+        """
+
+        reference, test, settings = pin.get_reference_and_test_measurements()
+        if None not in (reference, test, settings):
+            brush = CommentWidget.GOOD_BRUSH if self._main_window.check_good_score(reference.ivc, test.ivc, settings) \
+                else CommentWidget.BAD_BRUSH
+        else:
+            brush = CommentWidget.WHITE_BRUSH
+        for column in range(self.columnCount()):
+            item = self.item(index, column)
+            item.setBackground(brush)
+
     def _clear_table(self) -> None:
         self.disconnect_item_selection_changed_signal()
         _ = [self.removeRow(row) for row in range(self.rowCount(), -1, -1)]
@@ -70,6 +102,7 @@ class CommentWidget(TableWidget):
         self._clear_table()
         for index, pin in self._main_window.measurement_plan.all_pins_iterator():
             self._add_comment(index, pin.comment)
+            self._change_row_color(index, pin)
         self.select_row_for_current_pin()
 
     def _set_item_read_only(self, item: QTableWidgetItem) -> None:
@@ -140,11 +173,12 @@ class CommentWidget(TableWidget):
         :param index: index of the pin for which a comment needs to be specified.
         """
 
-        comment = self._main_window.measurement_plan.get_pin_with_index(index).comment
+        pin = self._main_window.measurement_plan.get_pin_with_index(index)
         if self.rowCount() <= index:
-            self._add_comment(index, comment)
+            self._add_comment(index, pin.comment)
         else:
-            self._update_comment(index, comment)
+            self._update_comment(index, pin.comment)
+        self._change_row_color(index, pin)
 
     @pyqtSlot(WorkMode)
     def set_work_mode(self, mode: WorkMode) -> None:

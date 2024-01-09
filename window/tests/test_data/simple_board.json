@@ -1,0 +1,51 @@
+{
+  "version": "1.1.2",
+  "elements": [
+    {
+      "pins": [
+        {
+          "comment": "comment for pin 1",
+          "x": 0,
+          "y": 0,
+          "iv_curves": [
+            {
+              "measurement_settings": {
+                "sampling_rate": 0,
+                "internal_resistance": 0,
+                "max_voltage": 0,
+                "probe_signal_frequency": 0
+              },
+              "currents": [0, 1, 2, 3],
+              "voltages": [0, 1, 2, 3],
+              "is_reference": true
+            }
+          ]
+        },
+        {
+          "comment": "comment for pin 2",
+          "x": 1,
+          "y": 1,
+          "iv_curves": []
+        },
+        {
+          "comment": "comment for pin 3",
+          "x": 2,
+          "y": 2,
+          "iv_curves": [
+            {
+              "measurement_settings": {
+                "sampling_rate": 0,
+                "internal_resistance": 0,
+                "max_voltage": 0,
+                "probe_signal_frequency": 0
+              },
+              "currents": [0, 1, 2, 3],
+              "voltages": [0, 1, 2, 3],
+              "is_reference": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
