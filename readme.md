@@ -34,20 +34,6 @@
    bash rebuild_venv.sh
    ```
 
-## Примечание к установке в Windows и Linux
-
-Для установки всех необходимых зависимостей нужен доступ на https://github.com к репозиториям [ep_report_generator](https://github.com/EPC-MSU/ep_report_generator/), [epcore](https://gitlab.ximc.ru/eyepoint/epcore) и [ivviewer](https://gitlab.ximc.ru/eyepoint/ivviewer).
-
-Чтобы установить зависимости через **git**:
-
-1. Следуя [инструкциям](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token), получите **access_token**.
-
-2. В файле **requirements.txt** замените строчку с ep_report_generator на следующую (здесь **username** - имя пользователя в https://github.com):
-
-   ```bash
-   git+https://username:access_token@github.com/EPC-MSU/ep_report_generator@vX.X.X#egg=ep_report_generator
-   ```
-
 ## Запуск в Windows
 
 ПО предоставляет возможность работать с устройствами IVM10 и АСА (Meridian) по отдельности.
@@ -190,7 +176,7 @@ bash run.sh
 
 ## Дополнительно
 
-- Для работы с сетевым устройством АСА нужно запустить сервер версии 4.3.2.
+- Для работы с сетевым устройством АСА нужно запустить сервер версии >= 4.3.2.
 
 - Для корректной работы приложения необходимо отключить брандмауэр (firewall) на компьютере.
 
