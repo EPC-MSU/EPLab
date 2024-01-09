@@ -146,6 +146,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="comment_dock">
+   <property name="minimumSize">
+    <size>
+     <width>150</width>
+     <height>40</height>
+    </size>
+   </property>
    <property name="maximumSize">
     <size>
      <width>524287</width>

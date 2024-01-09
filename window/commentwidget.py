@@ -1,18 +1,18 @@
-from typing import Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
+from typing import Any, Callable, Optional
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QSize, Qt
 from PyQt5.QtWidgets import QTableWidgetItem
 from window.common import WorkMode
 from window.pinindextableitem import PinIndexTableItem
 from window.tablewidget import TableWidget
 
 
-def disconnect_signal(func):
+def disconnect_signal(func: Callable[..., Any]):
     """
     Decorator disconnects and reconnects the slot to the signal itemChanged.
     :param func: function to be decorated.
     """
 
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, *args, **kwargs) -> Any:
         try:
             self.itemChanged.disconnect()
         except Exception:
@@ -29,6 +29,8 @@ class CommentWidget(TableWidget):
     Widget for working with comments to measurement plan pins.
     """
 
+    DEFAULT_WIDTH: int = 150
+
     def __init__(self, main_window) -> None:
         """
         :param main_window: main window of application.
@@ -36,6 +38,7 @@ class CommentWidget(TableWidget):
 
         super().__init__(main_window, ["№", qApp.translate("t", "Комментарий")])
         self._read_only: bool = False
+        self.adjustSize()
 
     def _add_comment(self, index: int, comment: Optional[str] = None) -> None:
         """
@@ -133,7 +136,7 @@ class CommentWidget(TableWidget):
 
     def set_new_comment(self, index: int) -> None:
         """
-        Method set a new comment for a pin.
+        Method sets a new comment for a pin.
         :param index: index of the pin for which a comment needs to be specified.
         """
 
@@ -160,6 +163,14 @@ class CommentWidget(TableWidget):
                 self._read_only = False
                 self._set_read_only()
             self.setEnabled(mode in (WorkMode.TEST, WorkMode.WRITE))
+
+    def sizeHint(self) -> QSize:
+        """
+        :return: recommended size for the widget.
+        """
+
+        height = super().sizeHint().height()
+        return QSize(CommentWidget.DEFAULT_WIDTH, height)
 
     def update_info(self) -> None:
         """

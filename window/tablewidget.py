@@ -36,7 +36,7 @@ class TableWidget(QTableWidget):
 
     def connect_item_selection_changed_signal(self, callback_function: Callable[..., Any] = None) -> None:
         """
-        :param callback_function:
+        :param callback_function: callback function that should be called when the selected item changes.
         """
 
         if not callback_function:
