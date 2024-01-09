@@ -73,4 +73,7 @@ def convert_to_percent_with_tenths(value: float) -> float:
     :return: percent with tenths.
     """
 
-    return round(100 * value, 1)
+    value = round(100 * value, 1)
+    if value == 100.0:
+        value = 100
+    return value
