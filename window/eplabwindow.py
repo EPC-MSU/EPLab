@@ -1611,8 +1611,9 @@ class EPLabWindow(QMainWindow):
             elif self._work_mode == WorkMode.TEST:
                 self._measurement_plan.save_last_measurement_as_test()
         index = self._measurement_plan.get_current_index()
-        self._comment_widget.save_comment(index)
         self.update_current_pin()
+        self._comment_widget.save_comment(index)
+        self._comment_widget.update_table_for_new_tolerance(index)
 
     @pyqtSlot()
     def search_optimal(self) -> None:

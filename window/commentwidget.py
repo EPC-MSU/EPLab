@@ -244,13 +244,16 @@ class CommentWidget(TableWidget):
         self._main_window.measurement_plan.add_callback_func_for_pin_changes(self.set_new_comment)
         self._fill_table()
 
-    def update_table_for_new_tolerance(self) -> None:
+    def update_table_for_new_tolerance(self, *indexes) -> None:
         """
         Method updates the display style of cells in the table. The method must be called when the score for pins or
         tolerance changes.
+        :param indexes: indexes of pins for which you need to update the display style.
         """
 
-        for index in range(self.rowCount()):
+        if len(indexes) == 0:
+            indexes = range(self.rowCount())
+        for index in indexes:
             pin = self._main_window.measurement_plan.get_pin_with_index(index)
             self._change_row_color(index, pin)
         self._change_style_for_selected_row()
