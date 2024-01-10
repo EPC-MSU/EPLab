@@ -986,6 +986,7 @@ class EPLabWindow(QMainWindow):
 
         self._score_wrapper.set_tolerance(tolerance)
         self._player.set_tolerance(tolerance)
+        self._comment_widget.update_table_for_new_tolerance()
 
     @pyqtSlot(Settings)
     def apply_settings(self, new_settings: Settings) -> None:

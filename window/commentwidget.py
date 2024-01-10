@@ -199,7 +199,12 @@ class CommentWidget(TableWidget):
             self._update_comment(index, pin.comment)
         self._change_row_color(index, pin)
 
+    @pyqtSlot()
     def set_pin_as_current(self) -> None:
+        """
+        Slot sets pin activated on table as current.
+        """
+
         super().set_pin_as_current()
         for model_index in self.selectedIndexes():
             self._change_style_for_selected_row(model_index.row())
@@ -238,3 +243,14 @@ class CommentWidget(TableWidget):
 
         self._main_window.measurement_plan.add_callback_func_for_pin_changes(self.set_new_comment)
         self._fill_table()
+
+    def update_table_for_new_tolerance(self) -> None:
+        """
+        Method updates the display style of cells in the table. The method must be called when the score for pins or
+        tolerance changes.
+        """
+
+        for index in range(self.rowCount()):
+            pin = self._main_window.measurement_plan.get_pin_with_index(index)
+            self._change_row_color(index, pin)
+        self._change_style_for_selected_row()
