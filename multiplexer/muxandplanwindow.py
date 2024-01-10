@@ -192,9 +192,8 @@ class MuxAndPlanWindow(QWidget):
         self.setWindowTitle(qApp.translate("t", "Мультиплексор и план измерения"))
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
 
-        self.button_arrange_windows: QPushButton = QPushButton()
+        self.button_arrange_windows: QPushButton = QPushButton(qApp.translate("t", "Упорядочить окна"))
         self.button_arrange_windows.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "arrange_windows.png")))
-        self.button_arrange_windows.setToolTip(qApp.translate("t", "Упорядочить окна"))
         self.button_arrange_windows.clicked.connect(self.arrange_windows)
 
         h_layout = QHBoxLayout()
