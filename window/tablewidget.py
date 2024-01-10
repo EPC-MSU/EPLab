@@ -26,12 +26,14 @@ class TableWidget(QTableWidget):
 
         self.setColumnCount(len(headers))
         self.setHorizontalHeaderLabels(headers)
-        self.verticalHeader().setVisible(False)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
-        header = self.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeToContents)
-        header.setStretchLastSection(True)
+        horizontal_header = self.horizontalHeader()
+        horizontal_header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        horizontal_header.setStretchLastSection(True)
+        vertical_header = self.verticalHeader()
+        vertical_header.setVisible(False)
+        vertical_header.setSectionResizeMode(QHeaderView.ResizeToContents)
         self.itemSelectionChanged.connect(self.set_pin_as_current)
 
     def connect_item_selection_changed_signal(self, callback_function: Callable[..., Any] = None) -> None:
