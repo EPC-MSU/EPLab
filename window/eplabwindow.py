@@ -118,7 +118,7 @@ class EPLabWindow(QMainWindow):
         self._connect_scale_change_signal()
 
         if port_1 is None and port_2 is None:
-            self.disconnect_measurers()
+            self._disconnect_measurers()
         else:
             self.connect_measurers(port_1, port_2)
 
@@ -399,6 +399,27 @@ class EPLabWindow(QMainWindow):
             if not isinstance(measurer, (IVMeasurerIVM10, IVMeasurerVirtual)):
                 self.search_optimal_action.setEnabled(False)
                 return
+
+    def _disconnect_measurers(self) -> None:
+        self._timer.stop()
+        if self.start_or_stop_entire_plan_measurement_action.isChecked():
+            self.start_or_stop_entire_plan_measurement_action.setChecked(False)
+        if self._msystem:
+            for measurer in self._msystem.measurers:
+                measurer.close_device()
+            for multiplexer in self._msystem.multiplexers:
+                multiplexer.close_device()
+        self._last_saved_measurement_plan_data = None
+        self._measurement_plan = None
+        self._measured_pins_checker.set_new_plan()
+        self._measurement_plan_path.path = None
+        self._msystem = None
+        self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
+        self.enable_widgets(False)
+        self._clear_widgets()
+        self._board_window.close()
+        self._product_name = None
+        self.measurers_connected.emit(False)
 
     def _get_curves_for_legend(self) -> Dict[str, bool]:
         """
@@ -1084,7 +1105,7 @@ class EPLabWindow(QMainWindow):
             ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
 
         if not self._msystem:
-            self.disconnect_measurers()
+            self._disconnect_measurers()
             return
 
         self._clear_widgets()
@@ -1176,25 +1197,15 @@ class EPLabWindow(QMainWindow):
                                           self.tolerance, self.work_mode)
 
     def disconnect_measurers(self) -> None:
-        self._timer.stop()
-        if self.start_or_stop_entire_plan_measurement_action.isChecked():
-            self.start_or_stop_entire_plan_measurement_action.setChecked(False)
-        if self._msystem:
-            for measurer in self._msystem.measurers:
-                measurer.close_device()
-            for multiplexer in self._msystem.multiplexers:
-                multiplexer.close_device()
-        self._last_saved_measurement_plan_data = None
-        self._measurement_plan = None
-        self._measured_pins_checker.set_new_plan()
-        self._measurement_plan_path.path = None
-        self._msystem = None
-        self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
-        self.enable_widgets(False)
-        self._clear_widgets()
-        self._board_window.close()
-        self._product_name = None
-        self.measurers_connected.emit(False)
+        """
+        Method disconnects the measurers from the application. Before disconnecting, the method checks that all changes
+        to the measurement plan have been saved.
+        """
+
+        if not self._save_changes_in_measurement_plan(qApp.translate("t", "План тестирования не был сохранен.")):
+            return
+
+        self._disconnect_measurers()
 
     @pyqtSlot(bool)
     def enable_sound(self, state: bool) -> None:
