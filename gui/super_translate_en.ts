@@ -469,113 +469,91 @@
         <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение.</source>
         <translation>Incorrect format of pin number. Pin number must be integer.</translation>
     </message>
+</context>
+<context>
+    <name>mux</name>
     <message>
-        <location filename="../multiplexer/measurement_plan_widget.py" line="84"/>
+        <location filename="../multiplexer/measurementplanwidget.py" line="30"/>
         <source>Модуль MUX</source>
         <translation>MUX module</translation>
     </message>
     <message>
-        <location filename="../multiplexer/measurement_plan_widget.py" line="84"/>
+        <location filename="../multiplexer/measurementplanwidget.py" line="30"/>
         <source>Канал MUX</source>
         <translation>MUX channel</translation>
     </message>
     <message>
-        <location filename="../multiplexer/measurement_plan_widget.py" line="85"/>
+        <location filename="../multiplexer/measurementplanwidget.py" line="31"/>
         <source>Частота</source>
         <translation>Frequency</translation>
     </message>
     <message>
-        <location filename="../multiplexer/measurement_plan_widget.py" line="85"/>
+        <location filename="../multiplexer/measurementplanwidget.py" line="31"/>
         <source>Напряжение</source>
         <translation>Voltage</translation>
     </message>
     <message>
-        <location filename="../multiplexer/measurement_plan_widget.py" line="86"/>
+        <location filename="../multiplexer/measurementplanwidget.py" line="32"/>
         <source>Чувствительность</source>
         <translation>Sensitivity</translation>
     </message>
     <message>
-        <location filename="../multiplexer/measurement_plan_widget.py" line="254"/>
-        <source>Новая точка</source>
-        <translation>New point</translation>
-    </message>
-    <message>
-        <location filename="../multiplexer/measurement_plan_widget.py" line="323"/>
-        <source>Поле Модуль MUX имеет некорректное значение (должно быть 1...8), точка не сохранена</source>
-        <translation>MUX module field has an incorrect value (should be 1...8), the point is not saved</translation>
-    </message>
-    <message>
-        <location filename="../multiplexer/measurement_plan_widget.py" line="326"/>
-        <source>Поле Канал MUX имеет некорректное значение (должно быть 1...64), точка не сохранена</source>
-        <translation>MUX channel field has an incorrect value (should be 1...64), the point is not saved</translation>
-    </message>
-    <message>
-        <location filename="../multiplexer/multiplexer_pinout_widget.py" line="48"/>
+        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="36"/>
         <source>Включить/выключить канал {}</source>
         <translation>Turn on/off channel {}</translation>
     </message>
     <message>
-        <location filename="../multiplexer/multiplexer_pinout_widget.py" line="57"/>
-        <source>Выбрать канал {}</source>
-        <translation>Select channel {}</translation>
-    </message>
-    <message>
-        <location filename="../multiplexer/multiplexer_pinout_widget.py" line="72"/>
+        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="50"/>
         <source>Канал {}</source>
         <translation>Channel {}</translation>
     </message>
     <message>
-        <location filename="../multiplexer/multiplexer_pinout_widget.py" line="166"/>
-        <source>Выбрать все каналы</source>
-        <translation>Select all channels</translation>
-    </message>
-    <message>
-        <location filename="../multiplexer/multiplexer_pinout_widget.py" line="200"/>
+        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="132"/>
         <source>Номер модуля</source>
         <translation>Module number</translation>
     </message>
     <message>
-        <location filename="../multiplexer/multiplexer_pinout_widget.py" line="207"/>
+        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="140"/>
         <source>Модуль {}</source>
         <translation>Module {}</translation>
     </message>
     <message>
-        <location filename="../multiplexer/multiplexer_pinout_widget.py" line="351"/>
+        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="214"/>
         <source>Нет мультиплексора</source>
         <translation>No multiplexer</translation>
     </message>
     <message>
-        <location filename="../multiplexer/multiplexer_pinout_widget.py" line="370"/>
-        <source>Добавить выбранные каналы в план</source>
-        <translation>Add selected channels to plan</translation>
-    </message>
-    <message>
-        <location filename="../multiplexer/multiplexer_pinout_widget.py" line="375"/>
-        <source>Запустить измерение всех точек</source>
-        <translation>Start measuring all points</translation>
-    </message>
-    <message>
-        <location filename="../multiplexer/mux_and_plan_window.py" line="64"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="89"/>
         <source>Остановить измерение всех точек</source>
         <translation>Stop measuring all points</translation>
     </message>
     <message>
-        <location filename="../multiplexer/mux_and_plan_window.py" line="101"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="92"/>
+        <source>Запустить измерение всех точек</source>
+        <translation>Start measuring all points</translation>
+    </message>
+    <message>
+        <location filename="../multiplexer/muxandplanwindow.py" line="121"/>
         <source>жёлтым</source>
         <translation>yellow</translation>
     </message>
     <message>
-        <location filename="../multiplexer/mux_and_plan_window.py" line="102"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="122"/>
         <source>Не все точки имеют выходы мультиплексора и/или не все выходы могут быть установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите продолжить?</source>
         <translation>Not all points have multiplexer outputs and/or not all outputs can be set. Therefore, the points excluded from the test will be highlighted with {} color. Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="../multiplexer/mux_and_plan_window.py" line="115"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="156"/>
+        <source>Режим тестирования:</source>
+        <translation>Test mode:</translation>
+    </message>
+    <message>
+        <location filename="../multiplexer/muxandplanwindow.py" line="192"/>
         <source>Мультиплексор и план измерения</source>
         <translation>Multiplexer and measurement plan</translation>
     </message>
     <message>
-        <location filename="../multiplexer/mux_and_plan_window.py" line="119"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="195"/>
         <source>Упорядочить окна</source>
         <translation>Arrange windows</translation>
     </message>

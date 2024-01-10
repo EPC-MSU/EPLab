@@ -27,9 +27,9 @@ class MeasurementPlanWidget(TableWidget):
         :param main_window: main window of application.
         """
 
-        headers: List[str] = ["№", qApp.translate("t", "Модуль MUX"), qApp.translate("t", "Канал MUX"),
-                              qApp.translate("t", "Частота"), qApp.translate("t", "Напряжение"),
-                              qApp.translate("t", "Чувствительность")]
+        headers: List[str] = ["№", qApp.translate("mux", "Модуль MUX"), qApp.translate("mux", "Канал MUX"),
+                              qApp.translate("mux", "Частота"), qApp.translate("mux", "Напряжение"),
+                              qApp.translate("mux", "Чувствительность")]
         super().__init__(main_window, headers)
         self._lang: Language = qApp.instance().property("language")
         self._standby_mode: bool = False

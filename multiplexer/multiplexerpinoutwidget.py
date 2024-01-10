@@ -33,7 +33,7 @@ class ChannelWidget(QWidget):
     def _init_ui(self) -> None:
         self.button_turn_on_off: QPushButton = QPushButton(str(self._channel_number))
         self.button_turn_on_off.setCheckable(True)
-        self.button_turn_on_off.setToolTip(qApp.translate("t", "Включить/выключить канал {}"
+        self.button_turn_on_off.setToolTip(qApp.translate("mux", "Включить/выключить канал {}"
                                                           ).format(self._channel_number))
         self.button_turn_on_off.clicked.connect(self.send_to_turn_on_off)
         self.button_turn_on_off.setStyleSheet(
@@ -47,7 +47,7 @@ class ChannelWidget(QWidget):
         v_box_layout.setSpacing(0)
         v_box_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(v_box_layout)
-        self.setToolTip(qApp.translate("t", "Канал {}").format(self._channel_number))
+        self.setToolTip(qApp.translate("mux", "Канал {}").format(self._channel_number))
 
     @pyqtSlot(bool)
     def send_to_turn_on_off(self, state: bool) -> None:
@@ -129,7 +129,7 @@ class ModuleWidget(QWidget):
         self.frame_module: QWidget = self._create_pinout()
         label_module_number = QLabel(str(self._module_number))
         label_module_number.setStyleSheet("QLabel {border: none; font-size: 15px; font-weight: bold;}")
-        label_module_number.setToolTip(qApp.translate("t", "Номер модуля"))
+        label_module_number.setToolTip(qApp.translate("mux", "Номер модуля"))
 
         h_layout = QHBoxLayout()
         h_layout.setContentsMargins(0, 0, 0, 0)
@@ -137,7 +137,7 @@ class ModuleWidget(QWidget):
         h_layout.addWidget(self.frame_module)
         h_layout.addStretch(1)
         self.setLayout(h_layout)
-        self.setToolTip(qApp.translate("t", "Модуль {}").format(self._module_number))
+        self.setToolTip(qApp.translate("mux", "Модуль {}").format(self._module_number))
 
     def set_connected_channel(self, channel_number: int) -> None:
         """
@@ -211,7 +211,7 @@ class MultiplexerPinoutWidget(QWidget):
         :return: empty widget.
         """
 
-        label = QLabel(qApp.translate("t", "Нет мультиплексора"))
+        label = QLabel(qApp.translate("mux", "Нет мультиплексора"))
         label.setStyleSheet("QLabel {font-weight: bold; font-size: 25px;}")
         return label
 

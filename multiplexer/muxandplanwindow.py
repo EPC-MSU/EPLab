@@ -86,10 +86,10 @@ class MuxAndPlanWindow(QWidget):
         """
 
         if status:
-            text = qApp.translate("t", "Остановить измерение всех точек")
+            text = qApp.translate("mux", "Остановить измерение всех точек")
             icon = QIcon(os.path.join(ut.DIR_MEDIA, "stop_auto_test.png"))
         else:
-            text = qApp.translate("t", "Запустить измерение всех точек")
+            text = qApp.translate("mux", "Запустить измерение всех точек")
             icon = QIcon(os.path.join(ut.DIR_MEDIA, "start_auto_test.png"))
         for widget in (self.button_start_or_stop_plan_measurement,
                        self._parent.start_or_stop_entire_plan_measurement_action):
@@ -118,10 +118,10 @@ class MuxAndPlanWindow(QWidget):
         """
 
         color = '<span style="background-color: {};">{}</span>'.format(MuxAndPlanWindow.COLOR_NOT_TESTED,
-                                                                       qApp.translate("t", "жёлтым"))
-        text = qApp.translate("t", "Не все точки имеют выходы мультиплексора и/или не все выходы могут быть "
-                                   "установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите "
-                                   "продолжить?")
+                                                                       qApp.translate("mux", "жёлтым"))
+        text = qApp.translate("mux", "Не все точки имеют выходы мультиплексора и/или не все выходы могут быть "
+                                     "установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите "
+                                     "продолжить?")
         return not ut.show_message(qApp.translate("t", "Внимание"), text.format(color), icon=QMessageBox.Information,
                                    yes_button=True, no_button=True)
 
@@ -153,13 +153,13 @@ class MuxAndPlanWindow(QWidget):
         :return: widgets that are located at the top of the dialog box.
         """
 
-        self.label: QLabel = QLabel(qApp.translate("t", "Режим тестирования:"))
+        self.label: QLabel = QLabel(qApp.translate("mux", "Режим тестирования:"))
         self.tool_bar: QToolBar = QToolBar()
         self.tool_bar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.tool_bar.addAction(self._parent.writing_mode_action)
         self.tool_bar.addAction(self._parent.testing_mode_action)
         self.button_start_or_stop_plan_measurement: QPushButton = QPushButton(
-            qApp.translate("t", "Запустить измерение всех точек"))
+            qApp.translate("mux", "Запустить измерение всех точек"))
         self.button_start_or_stop_plan_measurement.clicked.connect(self.start_or_stop_plan_measurement)
         self.button_start_or_stop_plan_measurement.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "start_auto_test.png")))
         self.button_start_or_stop_plan_measurement.setCheckable(True)
@@ -189,10 +189,10 @@ class MuxAndPlanWindow(QWidget):
         Method initializes widgets on dialog window.
         """
 
-        self.setWindowTitle(qApp.translate("t", "Мультиплексор и план измерения"))
+        self.setWindowTitle(qApp.translate("mux", "Мультиплексор и план измерения"))
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
 
-        self.button_arrange_windows: QPushButton = QPushButton(qApp.translate("t", "Упорядочить окна"))
+        self.button_arrange_windows: QPushButton = QPushButton(qApp.translate("mux", "Упорядочить окна"))
         self.button_arrange_windows.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "arrange_windows.png")))
         self.button_arrange_windows.clicked.connect(self.arrange_windows)
 
