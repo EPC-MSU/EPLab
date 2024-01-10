@@ -46,8 +46,6 @@ class MuxAndPlanWindow(QWidget):
     DEFAULT_HEIGHT: int = 500
     DEFAULT_MUX_HEIGHT: int = 300
     DEFAULT_WIDTH: int = 700
-    HANDLE_MARGIN: int = 2
-    HANDLE_WIDTH: int = 1
     MARGIN: int = 10
 
     def __init__(self, main_window) -> None:
@@ -210,12 +208,10 @@ class MuxAndPlanWindow(QWidget):
         self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(top_widget)
         self.splitter.addWidget(bottom_widget)
-        self.splitter.setHandleWidth(MuxAndPlanWindow.HANDLE_WIDTH)
+        self.splitter.setHandleWidth(1)
         self.splitter.handle(1).setAttribute(Qt.WA_Hover)
-        self.splitter.setStyleSheet(f"QSplitter::handle {{background-color: gray;"
-                                    f"margin: {MuxAndPlanWindow.HANDLE_MARGIN}px;}}"
-                                    f"QSplitter::handle:hover {{background-color: black;"
-                                    f"margin: {MuxAndPlanWindow.HANDLE_MARGIN}px;}}")
+        self.splitter.setStyleSheet("QSplitter::handle {background-color: gray; margin: 5px 0px;}"
+                                    "QSplitter::handle:hover {background-color: black; margin: 5px 0px;}")
 
         layout = QVBoxLayout()
         layout.setSpacing(0)
