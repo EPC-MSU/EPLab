@@ -31,9 +31,9 @@ class CommentWidget(TableWidget):
     Widget for working with comments to measurement plan pins.
     """
 
-    BAD_BRUSH: QBrush = QBrush(QColor(255, 129, 129, 200))
+    BAD_BRUSH: QBrush = QBrush(QColor(255, 129, 129))
     DEFAULT_WIDTH: int = 150
-    GOOD_BRUSH: QBrush = QBrush(QColor(152, 251, 152, 200))
+    GOOD_BRUSH: QBrush = QBrush(QColor(152, 251, 152))
     WHITE_BRUSH: QBrush = QBrush(QColor(255, 255, 255))
 
     def __init__(self, main_window) -> None:
@@ -42,6 +42,7 @@ class CommentWidget(TableWidget):
         """
 
         super().__init__(main_window, ["№", qApp.translate("t", "Комментарий")])
+        self._default_style_sheet: str = self.styleSheet()
         self._read_only: bool = False
         self.adjustSize()
 
@@ -86,6 +87,24 @@ class CommentWidget(TableWidget):
         for column in range(self.columnCount()):
             item = self.item(index, column)
             item.setBackground(brush)
+
+    def _change_style_for_selected_row(self, index: Optional[int] = None) -> None:
+        """
+        :param index: index of selected row.
+        """
+
+        index = self.currentRow() if index is None else index
+        item = self.item(index, 1)
+        color = item.background().color().name()
+        selected_style = ("QTableView::item:selected {"
+                          f"background-color: {color};"
+                          "border: 2px solid #0000CD;"
+                          "color: black;}")
+        selected_and_disabled_style = ("QTableView::item:selected:disabled {"
+                                       f"background-color: {color};"
+                                       "border: 1px solid #0000CD;"
+                                       "color: gray;}")
+        self.setStyleSheet(self._default_style_sheet + selected_style + selected_and_disabled_style)
 
     def _clear_table(self) -> None:
         self.disconnect_item_selection_changed_signal()
@@ -179,6 +198,12 @@ class CommentWidget(TableWidget):
         else:
             self._update_comment(index, pin.comment)
         self._change_row_color(index, pin)
+
+    def set_pin_as_current(self) -> None:
+        super().set_pin_as_current()
+        for model_index in self.selectedIndexes():
+            self._change_style_for_selected_row(model_index.row())
+            break
 
     @pyqtSlot(WorkMode)
     def set_work_mode(self, mode: WorkMode) -> None:
