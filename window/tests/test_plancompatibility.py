@@ -68,7 +68,6 @@ def prepare_data(board_name: str) -> Tuple[SimpleMainWindow, PlanCompatibility]:
     dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
     board_path = os.path.join(dir_name, board_name)
     window = SimpleMainWindow(board_path)
-
     checker = PlanCompatibility(window, window.measurement_system, window.product, window.measurement_plan)
     return window, checker
 
@@ -80,7 +79,7 @@ class TestPlanCompatibility(unittest.TestCase):
 
     def test_check_compatibility_with_product(self) -> None:
         window, checker = prepare_data("simple_board.json")
-        self.assertIsNotNone(checker.check_compatibility_with_product(False, ""))
+        self.assertTrue(checker._check_compatibility_with_product())
 
         window, checker = prepare_data("board_with_strange_settings.json")
-        self.assertIsNone(checker.check_compatibility_with_product(False, ""))
+        self.assertFalse(checker._check_compatibility_with_product())

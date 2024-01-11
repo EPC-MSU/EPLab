@@ -129,7 +129,7 @@ class PlanCompatibility:
         for module in range(1, modules + 1):
             for channel in range(1, MAX_CHANNEL_NUMBER + 1):
                 pins.append(Pin(x=x, y=y, multiplexer_output=MultiplexerOutput(channel, module)))
-        board = Board(elements=[Element(pins=pins)], image=self._plan.image)
+        board = Board(elements=[Element(pins=pins)], image=self._plan.image if self._plan else None)
         return self._create_new_plan(board)
 
     def _transform_plan(self, data: "PlanCompatibility.AnalyzedData") -> MeasurementPlan:
@@ -175,8 +175,11 @@ class PlanCompatibility:
 
         if empty_plan:
             action = PlanCompatibility.Action.TRANSFORM
+        elif self._plan is None:
+            action = PlanCompatibility.Action.CLOSE_PLAN
         else:
             action = show_warning_incompatibility_with_mux()
+
         if action == PlanCompatibility.Action.TRANSFORM:
             plan = self._transform_plan(data)
         elif action == PlanCompatibility.Action.CLOSE_PLAN:
@@ -213,7 +216,7 @@ def add_points(elements: List[Element], channels: Dict[int, Dict[int, List[int]]
     :param empty: number of points where there are no multiplexer outputs.
     """
 
-    element = elements[-1]
+    element = elements[-1] if len(elements) > 0 else Element(pins=[])
     x, y = 0, 0
     for modules in channels.values():
         for module_channels in modules.values():
