@@ -40,7 +40,7 @@ from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
 from window.pedalhandler import add_pedal_handler
 from window.pinindexwidget import PinIndexWidget
-from window.plancomaptibility import PlanCompatibility
+from window.plancompatibility import PlanCompatibility
 from window.scaler import update_scale_of_class
 from window.scorewrapper import ScoreWrapper
 from window.soundplayer import SoundPlayer
