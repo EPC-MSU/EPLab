@@ -316,7 +316,6 @@ class EPLabWindow(QMainWindow):
         self.pin_index_widget.clear()
         self._iv_window.plot.remove_all_cursors()
         self._mux_and_plan_window.close()
-        self._comment_widget.clear_table()
         self._score_wrapper.set_dummy_score()
 
         self._settings_update_next_cycle = None
@@ -417,6 +416,7 @@ class EPLabWindow(QMainWindow):
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
         self.enable_widgets(False)
         self._clear_widgets()
+        self._comment_widget.clear_table()
         self._board_window.close()
         self._product_name = None
         self.measurers_connected.emit(False)
@@ -1109,6 +1109,7 @@ class EPLabWindow(QMainWindow):
             return
 
         self._clear_widgets()
+        self._comment_widget.clear_table()
         self._iv_window.plot.clear_center_text()
         options_data = self._read_options_from_json()
         self._product.change_options(options_data)

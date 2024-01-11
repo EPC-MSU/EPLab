@@ -65,7 +65,7 @@ class CommentWidget(TableWidget):
         self.setItem(index, 0, PinIndexTableItem(index))
 
         item = QTableWidgetItem()
-        item.setText(comment)
+        item.setText(comment or "")
         self._set_item_read_only(item)
         self.setItem(index, 1, item)
 
