@@ -405,11 +405,6 @@
         <translation>Failed to connect to {0}. Make sure {0} is EyePoint devices and not some other devices.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1024"/>
-        <source>План тестирования {}не соответствует режиму работы EPLab и будет закрыт.</source>
-        <translation>The test plan {} does not correspond to the EPLab work mode and will be closed.</translation>
-    </message>
-    <message>
         <location filename="../window/eplabwindow.py" line="1100"/>
         <source>Выбрать папку</source>
         <translation>Select directory</translation>
@@ -423,11 +418,6 @@
         <location filename="../window/eplabwindow.py" line="1300"/>
         <source>Точка с таким номером не найдена на данной плате.</source>
         <translation>Pin with this number was not found on this board.</translation>
-    </message>
-    <message>
-        <location filename="../window/eplabwindow.py" line="1379"/>
-        <source>План тестирования {}нельзя загрузить, поскольку он не соответствует режиму работы EPLab.</source>
-        <translation>Test plan {}cannot be loaded because it does not correspond to the EPLab operating mode.</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1414"/>
@@ -468,6 +458,36 @@
         <location filename="../window/pinindexwidget.py" line="37"/>
         <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение.</source>
         <translation>Incorrect format of pin number. Pin number must be integer.</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="306"/>
+        <source>Текущий план тестирования несовместим с подключенным мультиплексором. Для продолжения работы можно выполнить одно из следующих действий:&lt;ul&gt;&lt;li&gt;Преобразовать план тестирования для обеспечения совместимости. Если число точек меньше числа каналов, то план будет дополнен новыми точками. Если число точек больше числа каналов, то лишние точки будут удалены из плана.&lt;/li&gt;&lt;li&gt;Закрыть текущий план тестирования. После этого можно будет создать новый или открыть другой план тестирования.&lt;/li&gt;&lt;li&gt;Отключить мультиплексор.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>The current test plan is not compatible with the connected multiplexer. To continue, you can do one of the following:&lt;ul&gt;&lt;li&gt;Convert your test plan to ensure compatibility. If the number of points is less than the number of channels, then the plan will be supplemented with new points. If the number of points is greater than the number of channels, then the extra points will be removed from the plan.&lt;/li&gt;&lt;li&gt;Close the current test plan. After this, you can create a new or open another test plan.&lt;/li&gt;&lt;li&gt;Disable the multiplexer.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="319"/>
+        <source>Преобразовать</source>
+        <translation>Convert</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="320"/>
+        <source>Закрыть план тестирования</source>
+        <translation>Close test plan</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="321"/>
+        <source>Отключить мультиплексор</source>
+        <translation>Disable multiplexer</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="340"/>
+        <source>План тестирования {}нельзя загрузить, поскольку он не соответствует режиму работы EPLab.</source>
+        <translation>Test plan {}cannot be loaded because it does not correspond to the EPLab operating mode.</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="343"/>
+        <source>План тестирования {}не соответствует режиму работы EPLab и будет закрыт.</source>
+        <translation>The test plan {} does not correspond to the EPLab work mode and will be closed.</translation>
     </message>
 </context>
 <context>
