@@ -17,7 +17,7 @@ class PlanCompatibility:
     Class for checking the plan for compatibility with the product and multiplexer.
     """
 
-    AnalyzedData = namedtuple("AnalyzedData", ["channels", "empty", "extra"])
+    AnalyzedData = namedtuple("AnalyzedData", ["channels", "empty", "invalid"])
 
     class Action(IntEnum):
         """
@@ -42,6 +42,32 @@ class PlanCompatibility:
         self._plan: MeasurementPlan = plan
         self._product: EyePointProduct = product
 
+    def _add_points(self, elements: List[Element], channels: Dict[int, Dict[int, List[int]]],
+                    empty: List[Tuple[int, int]]) -> None:
+        """
+        Method adds a given number of points to the list of points on the board.
+        :param elements: list of elements on the board;
+        :param channels: dictionary with point indices that correspond to the corresponding numbers of the module and
+        channel of the multiplexer;
+        :param empty: list with indices of points where there are no multiplexer outputs.
+        """
+
+        if len(elements) == 0:
+            elements.append(Element(pins=[]))
+        element = elements[-1]
+
+        x, y = self._parent.get_default_pin_coordinates()
+        for module in sorted(channels):
+            channels_in_module = channels[module]
+            for channel in sorted(channels_in_module):
+                if len(channels_in_module[channel]) == 0:
+                    mux_output = MultiplexerOutput(channel, module)
+                    if len(empty) == 0:
+                        element.pins.append(Pin(x=x, y=y, multiplexer_output=mux_output))
+                    else:
+                        element_index, pin_index = empty.pop()
+                        elements[element_index].pins[pin_index].multiplexer_output = mux_output
+
     def _check_compatibility_with_mux(self) -> Tuple[bool, "PlanCompatibility.AnalyzedData"]:
         """
         Method checks the plan for compatibility with the multiplexer.
@@ -54,25 +80,26 @@ class PlanCompatibility:
         channels = {module: {channel: [] for channel in range(1, MAX_CHANNEL_NUMBER + 1)}
                     for module in range(1, modules + 1)}
         empty_pins = []
-        extra_pins = []
+        invalid_pins = []
 
         if self._plan:
-            index = 0
-            for element in self._plan.elements:
-                for pin in element.pins:
+            for element_index, element in enumerate(self._plan.elements):
+                for pin_index, pin in enumerate(element.pins):
                     mux_output = pin.multiplexer_output
+
                     if isinstance(mux_output, MultiplexerOutput):
                         if multiplexer.is_correct_output(mux_output):
-                            channels[mux_output.module_number][mux_output.channel_number].append(index)
+                            channels[mux_output.module_number][mux_output.channel_number].append(
+                                (element_index, pin_index))
                         else:
-                            extra_pins.append(index)
+                            invalid_pins.append((element_index, pin_index))
                     else:
-                        empty_pins.append(index)
-                    index += 1
+                        empty_pins.append((element_index, pin_index))
 
-        extra_pins.reverse()
-        data = self.AnalyzedData(channels, empty_pins, extra_pins)
-        if len(empty_pins) == 0 and len(extra_pins) == 0:
+        empty_pins.reverse()
+        invalid_pins.reverse()
+        data = self.AnalyzedData(channels, empty_pins, invalid_pins)
+        if len(empty_pins) == 0 and len(invalid_pins) == 0:
             for channels_in_module in channels.values():
                 if not all(len(channels_) > 0 for channels_ in channels_in_module.values()):
                     break
@@ -122,15 +149,28 @@ class PlanCompatibility:
         :return: empty plan.
         """
 
+        elements = []
         multiplexer = self._measurement_system.multiplexers[0]
         modules = len(multiplexer.get_chain_info())
-        x, y = self._parent.get_default_pin_coordinates()
-        pins = []
-        for module in range(1, modules + 1):
-            for channel in range(1, MAX_CHANNEL_NUMBER + 1):
-                pins.append(Pin(x=x, y=y, multiplexer_output=MultiplexerOutput(channel, module)))
-        board = Board(elements=[Element(pins=pins)], image=self._plan.image if self._plan else None)
+        channels = {module: {channel: [] for channel in range(1, MAX_CHANNEL_NUMBER + 1)}
+                    for module in range(1, modules + 1)}
+        self._add_points(elements, channels, [])
+        board = Board(elements=elements, image=self._plan.image if self._plan else None)
         return self._create_new_plan(board)
+
+    @staticmethod
+    def _remove_invalid_points(elements: List[Element], invalid: List[Tuple[int, int]]) -> None:
+        """
+        Method removes points with invalid multiplexer outputs.
+        :param elements: list of board elements;
+        :param invalid: list with indices of points that have incorrect multiplexer outputs.
+        """
+
+        for element_index, pin_index in invalid:
+            element = elements[element_index]
+            element.pins.pop(pin_index)
+            if len(element.pins) == 0:
+                elements.pop(element_index)
 
     def _transform_plan(self, data: "PlanCompatibility.AnalyzedData") -> MeasurementPlan:
         """
@@ -140,9 +180,8 @@ class PlanCompatibility:
         """
 
         elements = self._plan.elements
-        remove_extra_points(elements, data.extra)
-        add_points(elements, data.channels, len(data.empty))
-        set_mux_output(elements, data.channels)
+        self._add_points(elements, data.channels, data.empty)
+        self._remove_invalid_points(elements, data.invalid)
         board = Board(elements=elements, image=self._plan.image)
         return self._create_new_plan(board)
 
@@ -206,89 +245,6 @@ class PlanCompatibility:
         else:
             plan = self._plan
         return plan
-
-
-def add_points(elements: List[Element], channels: Dict[int, Dict[int, List[int]]], empty: int) -> None:
-    """
-    Function adds a given number of points to the list of points on the board.
-    :param elements: list of elements on the board;
-    :param channels: dictionary with point indices that correspond to the corresponding numbers of the module and
-    channel of the multiplexer;
-    :param empty: number of points where there are no multiplexer outputs.
-    """
-
-    element = elements[-1] if len(elements) > 0 else Element(pins=[])
-    x, y = 0, 0
-    for modules in channels.values():
-        for module_channels in modules.values():
-            if len(module_channels) == 0:
-                if empty > 0:
-                    empty -= 1
-                else:
-                    element.pins.append(Pin(x=x, y=y))
-
-
-def get_free_mux_output(channels: Dict[int, Dict[int, List[int]]], index: int) -> Optional[Tuple[int, int]]:
-    """
-    Function returns the free output of the multiplexer.
-    :param channels:
-    :param index: index of the point for which to return the multiplexer output.
-    :return: channel and module numbers of multiplexer output.
-    """
-
-    for module in range(1, len(channels) + 1):
-        module_channels = channels[module]
-        for channel in range(1, MAX_CHANNEL_NUMBER + 1):
-            if len(module_channels[channel]) == 0:
-                module_channels[channel].append(index)
-                return channel, module
-    return None
-
-
-def remove_extra_points(elements: List[Element], extra: List[int]) -> None:
-    """
-    Function removes points with invalid multiplexer outputs.
-    :param elements: list of board elements;
-    :param extra: list with indices of points that have incorrect multiplexer outputs.
-    """
-
-    for index in sorted(extra, reverse=True):
-        remove_point(elements, index)
-
-
-def remove_point(elements: List[Element], index: int) -> None:
-    """
-    Function removes a point from the list of points.
-    :param elements: list of board elements;
-    :param index: index of the point to be deleted.
-    """
-
-    pin_index = 0
-    for element in elements:
-        for i, _ in enumerate(element.pins):
-            if pin_index == index:
-                element.pins.pop(i)
-                return
-
-
-def set_mux_output(elements: List[Element], channels: Dict[int, Dict[int, List[int]]]) -> None:
-    """
-    Function sets multiplexer outputs to points where there are no outputs.
-    :param elements: list of board elements;
-    :param channels:
-    """
-
-    index = 0
-    mux_outputs = set()
-    for element in elements:
-        for pin in element.pins:
-            if pin.multiplexer_output is None:
-                channel_and_module = get_free_mux_output(channels, index)
-                if channel_and_module is None:
-                    continue
-                pin.multiplexer_output = MultiplexerOutput(*channel_and_module)
-                mux_outputs.add(channel_and_module)
-            index += 1
 
 
 def show_warning_incompatibility_with_mux() -> int:
