@@ -83,7 +83,23 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="freq_dock_widget">
-    <layout class="QVBoxLayout" name="vertical_layout"/>
+    <layout class="QVBoxLayout" name="vertical_layout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+    </layout>
    </widget>
   </widget>
   <widget class="QDockWidget" name="current_dock">
@@ -109,7 +125,23 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="current_dock_widget">
-    <layout class="QVBoxLayout" name="vertical_layout_2"/>
+    <layout class="QVBoxLayout" name="vertical_layout_2">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+    </layout>
    </widget>
   </widget>
   <widget class="QDockWidget" name="voltage_dock">
@@ -129,7 +161,23 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="voltage_dock_widget">
-    <layout class="QVBoxLayout" name="vertical_layout_3"/>
+    <layout class="QVBoxLayout" name="vertical_layout_3">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+    </layout>
    </widget>
   </widget>
   <widget class="QDockWidget" name="comment_dock">

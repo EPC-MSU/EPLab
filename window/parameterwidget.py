@@ -44,6 +44,7 @@ class ParameterWidget(QScrollArea):
             button.setText(option.label_ru if language is Language.RU else option.label_en)
             button.clicked.connect(self.select_option)
             self._option_buttons[option.name] = button
+        layout.addStretch(1)
         widget = QWidget()
         widget.setLayout(layout)
         return widget
