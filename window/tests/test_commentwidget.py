@@ -11,8 +11,8 @@ from .simplemainwindow import SimpleMainWindow
 
 def prepare_data(board_name: str) -> Tuple[SimpleMainWindow, CommentWidget]:
     """
-    :param board_name:
-    :return:
+    :param board_name: file name with board.
+    :return: an object that models a simple application window, and a widget with a table of pin comments.
     """
 
     dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")

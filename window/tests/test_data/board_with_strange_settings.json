@@ -10,10 +10,10 @@
           "iv_curves": [
             {
               "measurement_settings": {
-                "sampling_rate": 2000000,
-                "internal_resistance": 47500.0,
-                "max_voltage": 3.3,
-                "probe_signal_frequency": 100000
+                "sampling_rate": 0,
+                "internal_resistance": 0,
+                "max_voltage": 0,
+                "probe_signal_frequency": 0
               },
               "currents": [0, 1, 2, 3],
               "voltages": [0, 1, 2, 3],
@@ -34,10 +34,10 @@
           "iv_curves": [
             {
               "measurement_settings": {
-                "sampling_rate": 2000000,
-                "internal_resistance": 47500.0,
-                "max_voltage": 3.3,
-                "probe_signal_frequency": 100000
+                "sampling_rate": 0,
+                "internal_resistance": 0,
+                "max_voltage": 0,
+                "probe_signal_frequency": 0
               },
               "currents": [0, 1, 2, 3],
               "voltages": [0, 1, 2, 3],

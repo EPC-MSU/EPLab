@@ -51,7 +51,8 @@ class PlanCompatibility:
 
         multiplexer = self._measurement_system.multiplexers[0]
         modules = len(multiplexer.get_chain_info())
-        channels = {module + 1: {channel + 1: [] for channel in range(MAX_CHANNEL_NUMBER)} for module in range(modules)}
+        channels = {module: {channel: [] for channel in range(1, MAX_CHANNEL_NUMBER + 1)}
+                    for module in range(1, modules + 1)}
         empty_pins = []
         extra_pins = []
 
@@ -190,7 +191,7 @@ class PlanCompatibility:
     def check_compatibility_with_product(self, new_plan: bool, filename: str) -> Optional[MeasurementPlan]:
         """
         Method checks the plan for compatibility with the product (available measurement settings).
-        :param new_plan: if True, then the new measurement plan will be checked for compatibility;
+        :param new_plan: if True, then the new measurement plan (that to be loaded) will be checked for compatibility;
         :param filename: name of the measurement plan file.
         :return: verified measurement plan or None if the plan did not pass the test.
         """
@@ -326,8 +327,8 @@ def show_warning_incompatibility_with_mux() -> int:
 def show_warning_incompatibility_with_product(new_plan: bool, filename: str) -> None:
     """
     Function displays a message stating that the plan is incompatible with the product.
-    :param new_plan: True if the new plan needs to be checked. Otherwise, the already loaded plan needs to be
-    checked;
+    :param new_plan: True if the new plan (that to be loaded) needs to be checked. Otherwise, the already loaded plan
+    needs to be checked;
     :param filename: name of the measurement plan file.
     """
 
