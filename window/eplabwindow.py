@@ -296,6 +296,7 @@ class EPLabWindow(QMainWindow):
         compatibility_checker = PlanCompatibility(self, self._msystem, self._product, self._measurement_plan)
         self._measurement_plan = compatibility_checker.check_compatibility(new_plan, empty_plan, filename)
         self._measured_pins_checker.set_new_plan()
+        self._update_mux_actions()
 
     def _clear_widgets(self) -> None:
         """
@@ -988,6 +989,19 @@ class EPLabWindow(QMainWindow):
             self._score_wrapper.set_dummy_score()
         if settings is not None:
             self._set_plot_parameters_to_low_settings_panel(settings)
+
+    def _update_mux_actions(self) -> None:
+        """
+        Method updates the state of menu actions responsible for working with the multiplexer.
+        """
+
+        enable = bool(self._measurement_plan and self._measurement_plan.multiplexer is not None)
+        self.open_mux_window_action.setEnabled(enable)
+        if not enable:
+            self._mux_and_plan_window.close()
+        enable = bool(self.work_mode is not WorkMode.COMPARE and self._measurement_plan and
+                      self._measurement_plan.multiplexer is not None)
+        self.start_or_stop_entire_plan_measurement_action.setEnabled(enable)
 
     def _update_scroll_areas_for_parameters(self, available: Dict[EyePointProduct.Parameter,
                                                                   List[MeasurementParameterOption]]) -> None:

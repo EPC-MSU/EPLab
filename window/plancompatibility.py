@@ -187,6 +187,7 @@ class PlanCompatibility:
         elif action == PlanCompatibility.Action.CLOSE_MUX:
             self._close_mux()
             plan = self._plan
+            plan.multiplexer = None
         else:
             plan = self._plan
         return plan
