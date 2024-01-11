@@ -65,8 +65,6 @@ class MeasurementPlanWidget(TableWidget):
                 item = self._create_table_item()
                 self.setItem(index, 3 + i, item)
 
-        self.resizeRowsToContents()
-
     def _clear_table(self) -> None:
         """
         Method clears all information from table for measurement plan and removes all rows in table.
