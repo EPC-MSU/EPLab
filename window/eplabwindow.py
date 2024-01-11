@@ -164,6 +164,14 @@ class EPLabWindow(QMainWindow):
         return False
 
     @property
+    def is_measured_pin(self) -> bool:
+        """
+        :return: True, if the measurement plan contains a pin with a measured reference IV-curve.
+        """
+
+        return self._measured_pins_checker.is_measured_pin
+
+    @property
     def measurement_plan(self) -> MeasurementPlan:
         """
         :return: object with measurement plan.

@@ -553,29 +553,34 @@
         <translation>Start measuring all points</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="121"/>
-        <source>жёлтым</source>
-        <translation>yellow</translation>
-    </message>
-    <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="122"/>
-        <source>Не все точки имеют выходы мультиплексора и/или не все выходы могут быть установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите продолжить?</source>
-        <translation>Not all points have multiplexer outputs and/or not all outputs can be set. Therefore, the points excluded from the test will be highlighted with {} color. Do you want to continue?</translation>
-    </message>
-    <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="156"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="152"/>
         <source>Режим тестирования:</source>
         <translation>Test mode:</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="192"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="188"/>
         <source>Мультиплексор и план измерения</source>
         <translation>Multiplexer and measurement plan</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="195"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="191"/>
         <source>Упорядочить окна</source>
         <translation>Arrange windows</translation>
+    </message>
+    <message>
+        <location filename="../multiplexer/muxandplanwindow.py" line="358"/>
+        <source>жёлтым</source>
+        <translation>yellow</translation>
+    </message>
+    <message>
+        <location filename="../multiplexer/muxandplanwindow.py" line="359"/>
+        <source>Не все точки имеют выходы мультиплексора и/или не все выходы могут быть установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите продолжить?</source>
+        <translation>Not all points have multiplexer outputs and/or not all outputs can be set. Therefore, the points excluded from the test will be highlighted with {} color. Do you want to continue?</translation>
+    </message>
+    <message>
+        <location filename="../multiplexer/muxandplanwindow.py" line="367"/>
+        <source>В плане тестирования есть эталонные сигнатуры. При запуске измерений в режиме записи плана все имеющиеся сигнатуры будут перезаписаны. Вы точно хотите запустить измерение всех точек?</source>
+        <translation>There are reference signatures in the test plan. When starting measurements in plan writing mode, all existing signatures will be overwritten. Are you sure you want to start measuring all points?</translation>
     </message>
 </context>
 <context>

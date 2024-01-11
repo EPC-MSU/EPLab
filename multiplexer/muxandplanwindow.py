@@ -111,19 +111,15 @@ class MuxAndPlanWindow(QWidget):
             self.multiplexer_pinout_widget.set_visible(True)
 
     @staticmethod
-    def _continue_plan_measurement() -> bool:
+    def _continue_plan_measurement(text: str) -> bool:
         """
         Method asks user whether it is necessary to continue measurements according to measurement plan.
+        :param text: message text for the user.
         :return: True if measurements should be continued.
         """
 
-        color = '<span style="background-color: {};">{}</span>'.format(MuxAndPlanWindow.COLOR_NOT_TESTED,
-                                                                       qApp.translate("mux", "жёлтым"))
-        text = qApp.translate("mux", "Не все точки имеют выходы мультиплексора и/или не все выходы могут быть "
-                                     "установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите "
-                                     "продолжить?")
-        return not ut.show_message(qApp.translate("t", "Внимание"), text.format(color), icon=QMessageBox.Information,
-                                   yes_button=True, no_button=True)
+        return not ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information, yes_button=True,
+                                   no_button=True)
 
     def _create_bottom_widget(self) -> QWidget:
         """
@@ -358,8 +354,21 @@ class MuxAndPlanWindow(QWidget):
         :param status: if True then measurements should be started.
         """
 
+        color = '<span style="background-color: {};">{}</span>'.format(MuxAndPlanWindow.COLOR_NOT_TESTED,
+                                                                       qApp.translate("mux", "жёлтым"))
+        text = qApp.translate("mux", "Не все точки имеют выходы мультиплексора и/или не все выходы могут быть "
+                                     "установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите "
+                                     "продолжить?")
         if status and self.measurement_plan_runner.get_pins_without_multiplexer_outputs() and \
-                not self._continue_plan_measurement():
+                not self._continue_plan_measurement(text.format(color)):
+            self.sender().setChecked(False)
+            return
+
+        text = qApp.translate("mux", "В плане тестирования есть эталонные сигнатуры. При запуске измерений в режиме "
+                                     "записи плана все имеющиеся сигнатуры будут перезаписаны. Вы точно хотите "
+                                     "запустить измерение всех точек?")
+        if status and self._parent.is_measured_pin and self._parent.work_mode is WorkMode.WRITE and \
+                not self._continue_plan_measurement(text):
             self.sender().setChecked(False)
             return
 
