@@ -56,6 +56,9 @@ def update_scale(widget: QWidget) -> None:
         if isinstance(child_widget, (QCheckBox, QComboBox, QDialogButtonBox, QDoubleSpinBox, QGroupBox, QLabel,
                                      QLineEdit, QProgressBar, QPushButton, QSpinBox, QTextBrowser, QToolBar,
                                      PinIndexWidget)):
+            if isinstance(child_widget, QToolBar):
+                for action in child_widget.actions():
+                    scale_font_on_widget(action, font_size)
             scale_font_on_widget(child_widget, font_size)
             child_widget.adjustSize()
         elif isinstance(child_widget, LowSettingsPanel):
