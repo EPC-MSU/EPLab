@@ -852,6 +852,12 @@ class EPLabWindow(QMainWindow):
                        self.hide_curve_b_action):
             action.setChecked(False)
 
+        self.add_cursor_action.setChecked(False)
+        self.remove_cursor_action.setCheckable(False)
+        self.remove_cursor_action.setChecked(False)
+        self._iv_window.plot.set_state_adding_cursor(False)
+        self._iv_window.plot.set_state_removing_cursor(False)
+
         # Set ui settings state to current device
         with self._device_errors_handler:
             settings = self._auto_settings.get_measurement_settings(self._product)
@@ -1706,6 +1712,7 @@ class EPLabWindow(QMainWindow):
         """
 
         if state:
+            self.remove_cursor_action.setCheckable(False)
             self.remove_cursor_action.setChecked(False)
         self._iv_window.plot.set_state_adding_cursor(state)
 
