@@ -6,4 +6,4 @@ pyserial==3.5
 git+https://github.com/EPC-MSU/board-view@master#egg=boardview
 git+https://github.com/EPC-MSU/ep_report_generator@v0.1.14#egg=ep_report_generator
 git+https://github.com/EPC-MSU/epcore@v0.1.20#egg=epcore
-git+https://github.com/EPC-MSU/ivviewer@v0.1.14#egg=ivviewer
+-e git+https://github.com/EPC-MSU/ivviewer@dev-0.1#egg=ivviewer
