@@ -997,7 +997,7 @@ class EPLabWindow(QMainWindow):
         if None not in (curve_1, curve_2, settings):
             score = self._calculate_score(curve_1, curve_2, settings)
             self._score_wrapper.set_score(score)
-            self._player.score_updated(score)
+            self._player.update_score(score)
         else:
             self._score_wrapper.set_dummy_score()
         if settings is not None:

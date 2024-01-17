@@ -39,6 +39,26 @@ class SoundPlayer:
             # Another sound in progress - it's ok to get error here...
             pass
 
+    def _play_sound_in_compare_mode(self, score: float) -> None:
+        """
+        :param score: score.
+        """
+
+        if score > self._tolerance:
+            try:
+                sound_num = self._score_to_sound_n(self._score)
+                self._play(f"{sound_num}")
+            except ValueError:
+                pass
+
+    def _play_sound_in_test_mode(self, score: float) -> None:
+        """
+        :param score: score.
+        """
+
+        if self._score > self._tolerance > score:
+            self._play("test")
+
     @staticmethod
     def _score_to_sound_n(score: float) -> int:
         """
@@ -49,25 +69,6 @@ class SoundPlayer:
         # TODO: When will stabilise ivcmp library, add exceptions here
         sound_n = min(int(score * 10.0) + 1, 10)
         return max(1, sound_n)
-
-    def score_updated(self, score: float) -> None:
-        """
-        :param score: score.
-        """
-
-        # Logic described here #39296
-        # FIXME: in case of *very fast* score update in asynchronous mode here may be big stack of wav files
-        if self._work_mode is WorkMode.COMPARE:
-            if score > self._tolerance:
-                try:
-                    sound_num = self._score_to_sound_n(self._score)
-                    self._play(f"{sound_num}")
-                except ValueError:  # NaN score or smth else strange
-                    return
-        elif self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
-            if self._score > self._tolerance > score:
-                self._play("test")
-        self._score = score
 
     def set_mute(self, mute: bool = True) -> None:
         """
@@ -90,3 +91,19 @@ class SoundPlayer:
         """
 
         self._work_mode = mode
+
+    def update_score(self, score: float) -> None:
+        """
+        :param score: score.
+        """
+
+        # Logic described here #39296
+        # FIXME: in case of *very fast* score update in asynchronous mode here may be big stack of wav files
+        if self._work_mode is WorkMode.COMPARE:
+            # Users do not like the original sound in comparison mode. Therefore, in task #92261 it was decided to
+            # replace it with the same one as in test plan mode
+            # self._play_sound_in_compare_mode(score)
+            self._play_sound_in_test_mode(score)
+        elif self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
+            self._play_sound_in_test_mode(score)
+        self._score = score
