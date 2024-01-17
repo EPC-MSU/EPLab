@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMen
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
-from epcore.elements import Board, Element, IVCurve, MeasurementSettings, Pin
+from epcore.elements import Board, Element, IVCurve, MeasurementSettings, MultiplexerOutput, Pin
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.measurementmanager import IVCComparator, MeasurementPlan, MeasurementSystem, Searcher
 from epcore.product import EyePointProduct, MeasurementParameterOption
@@ -297,8 +297,8 @@ class EPLabWindow(QMainWindow):
         Method checks the measurement plan for compatibility with the product (available measurement settings) and
         multiplexer.
         :param new_plan: if True, then the new measurement plan will be checked for compatibility;
-        :param empty_plan:
-        :param filename:
+        :param empty_plan: if True, then the measurement plan is empty;
+        :param filename: name of the measurement plan file.
         """
 
         compatibility_checker = PlanCompatibility(self, self._msystem, self._product, self._measurement_plan)
@@ -750,22 +750,22 @@ class EPLabWindow(QMainWindow):
         self.test_plan_menu_action.insertAction(self.add_board_image_action, self.save_point_action)
         self.toolbar_write.addAction(self.save_point_action)
 
-    def _reset_board(self, filename: Optional[str] = None) -> None:
+    def _reset_board(self) -> None:
         """
         Method sets the measurement plan to the default empty board with 1 pin.
-        :param filename:
         """
 
         self._measurement_plan = MeasurementPlan(
             Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]), measurer=self._msystem.measurers[0],
             multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
-        self._check_plan_compatibility(True, True, filename)
+        self._check_plan_compatibility(True, True)
         self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
 
     def _save_changes_in_measurement_plan(self, additional_info: str = None) -> bool:
         """
         :param additional_info: additional text to the question.
-        :return:
+        :return: True if the user has chosen to either save the changes or ignore them. If False, then the user has not
+        selected anything.
         """
 
         result = 0
@@ -1178,21 +1178,16 @@ class EPLabWindow(QMainWindow):
         if not self._save_changes_in_measurement_plan():
             return
 
-        default_path = os.path.join(self._dir_watcher.reference, "board.uzf")
-        filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Создать план тестирования"),
-                                               filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
-        if filename:
-            self._reset_board(filename)
-            self._measurement_plan_path.path = filename
-            epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
-            self._board_window.update_board()
-            self.update_current_pin()
-            self._mux_and_plan_window.update_info()
-            self._comment_widget.update_info()
-            self._change_work_mode_for_new_measurement_plan()
+        self._reset_board()
+        self._measurement_plan_path.path = None
+        self._board_window.update_board()
+        self.update_current_pin()
+        self._mux_and_plan_window.update_info()
+        self._comment_widget.update_info()
+        self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
-    def create_new_pin(self, multiplexer_output=None) -> None:
+    def create_new_pin(self, multiplexer_output: Optional[MultiplexerOutput] = None) -> None:
         """
         :param multiplexer_output: multiplexer output for new pin.
         """

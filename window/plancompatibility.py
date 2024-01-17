@@ -190,7 +190,7 @@ class PlanCompatibility:
         Method checks the measurement plan for compatibility with the product (available measurement settings) and
         multiplexer.
         :param new_plan: if True, then the new measurement plan will be checked for compatibility;
-        :param empty_plan:
+        :param empty_plan: if True, then the measurement plan is empty;
         :param filename: name of the measurement plan file.
         :return: verified measurement plan or None if the plan did not pass the test.
         """
@@ -201,7 +201,7 @@ class PlanCompatibility:
     def check_compatibility_with_mux(self, empty_plan: bool) -> Optional[MeasurementPlan]:
         """
         Method checks the measurement plan for compatibility with the multiplexer.
-        :param empty_plan:
+        :param empty_plan: if True, then the measurement plan is empty.
         :return: verified measurement plan or None if the plan did not pass the test.
         """
 
