@@ -121,6 +121,8 @@ class ConnectionWindow(QDialog):
 
         self.button_connect.setEnabled(not connected)
         self.button_disconnect.setEnabled(connected)
+        if connected:
+            self.close()
 
 
 def show_connection_window(main_window, product_name: ProductName) -> None:
