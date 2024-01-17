@@ -365,7 +365,12 @@
         <translation>DISCONNECTED</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="684"/>
+        <location filename="../window/eplabwindow.py" line="774"/>
+        <source>Сохранить изменения в &apos;{}&apos;?</source>
+        <translation>Do you want to save changes in &apos;{}&apos;?</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="776"/>
         <source>Сохранить изменения в файл?</source>
         <translation>Do you want to save changes in file?</translation>
     </message>

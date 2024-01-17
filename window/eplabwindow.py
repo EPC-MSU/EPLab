@@ -770,7 +770,10 @@ class EPLabWindow(QMainWindow):
 
         result = 0
         if self._measurement_plan and self._last_saved_measurement_plan_data != self._measurement_plan.to_json():
-            main_text = qApp.translate("t", "Сохранить изменения в файл?")
+            if self._measurement_plan_path.path:
+                main_text = qApp.translate("t", "Сохранить изменения в '{}'?").format(self._measurement_plan_path.path)
+            else:
+                main_text = qApp.translate("t", "Сохранить изменения в файл?")
             text = f"{additional_info} {main_text}" if additional_info else main_text
             result = ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information,
                                      yes_button=True, no_button=True, cancel_button=True)
