@@ -115,6 +115,7 @@ class EPLabWindow(QMainWindow):
         self._load_translation(english)
         self._init_ui()
         self._connect_scale_change_signal()
+        self.measurers_connected.connect(self.handle_connection)
 
         if port_1 is None and port_2 is None:
             self._disconnect_measurers()
@@ -1417,6 +1418,27 @@ class EPLabWindow(QMainWindow):
         """
 
         self.go_to_pin_selected_in_widget(pin_index + 1)
+
+    @pyqtSlot(bool)
+    def handle_connection(self, connected: bool) -> None:
+        """
+        :param connected: if True, then the devices are connected, otherwise they are disconnected.
+        """
+
+        def get_port(devices: list, index: int) -> Optional[str]:
+            return devices[index]._url if len(devices) > index else None
+
+        if connected and self._msystem:
+            measurer_1_port = get_port(self._msystem.measurers, 0)
+            measurer_2_port = get_port(self._msystem.measurers, 1)
+            mux_port = get_port(self._msystem.multiplexers, 0)
+            product = self._product_name.name
+        else:
+            measurer_1_port = None
+            measurer_2_port = None
+            mux_port = None
+            product = None
+        self._auto_settings.save_connection_params(measurer_1_port, measurer_2_port, mux_port, product)
 
     @pyqtSlot(bool)
     def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:

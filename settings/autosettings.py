@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Callable, Dict, Optional
 from PyQt5.QtCore import QSettings
 from epcore.elements import MeasurementSettings
 from epcore.product import EyePointProduct
@@ -6,12 +6,34 @@ from settings.settingshandler import SettingsHandler
 from window.language import Language, Translator
 
 
+def save_settings(func: Callable[..., Any]):
+    """
+    Decorator for saving settings after executing the decorated method.
+    :param func: decorated method.
+    """
+
+    def wrapper(self, *args, **kwargs) -> Any:
+        result = func(self, *args, **kwargs)
+        self.write()
+        return result
+
+    return wrapper
+
+
 class AutoSettings(SettingsHandler):
+    """
+    Class for working with basic software settings. These settings are saved when the software is closed and updated
+    upon startup.
+    """
 
     frequency: str = None
     language: str = None
     sensitive: str = None
     voltage: str = None
+    measurer_1_port: str = None
+    measurer_2_port: str = None
+    mux_port: str = None
+    product: str = None
 
     def _read(self, settings: QSettings) -> None:
         params = {"frequency": {},
@@ -26,6 +48,14 @@ class AutoSettings(SettingsHandler):
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
 
+        params = {"measurer_1_port": {},
+                  "measurer_2_port": {},
+                  "mux_port": {},
+                  "product": {}}
+        settings.beginGroup("Connection")
+        self._read_parameters_from_settings(settings, params)
+        settings.endGroup()
+
     def _write(self, settings: QSettings) -> None:
         params = {"frequency": {},
                   "sensitive": {},
@@ -34,12 +64,35 @@ class AutoSettings(SettingsHandler):
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 
-        params = {"language": {}}
+        params = {"language": {"convert": str}}
         settings.beginGroup("Main")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 
+        params = {"measurer_1_port": {"convert": str},
+                  "measurer_2_port": {"convert": str},
+                  "mux_port": {"convert": str},
+                  "product": {"convert": str}}
+        settings.beginGroup("Connection")
+        self._write_parameters_to_settings(settings, params)
+        settings.endGroup()
+
+    def get_connection_params(self) -> Dict[str, str]:
+        """
+        :return: dictionary with port of the connected first and second IV-measurers, port of the connected multiplexer
+        and name of the connected device.
+        """
+
+        return {"measurer_1_port": self.measurer_1_port,
+                "measurer_2_port": self.measurer_2_port,
+                "mux_port": self.mux_port,
+                "product": self.product}
+
     def get_language(self) -> Language:
+        """
+        :return: the language that was set during the previous work.
+        """
+
         language = Translator.get_language_value(self.language)
         if language is None:
             return Language.EN
@@ -47,7 +100,7 @@ class AutoSettings(SettingsHandler):
 
     def get_measurement_settings(self, product: EyePointProduct) -> Optional[MeasurementSettings]:
         """
-        :param product:
+        :param product: product.
         :return: measurement settings that were specified for device during previous work.
         """
 
@@ -65,12 +118,34 @@ class AutoSettings(SettingsHandler):
 
         return measurement_settings
 
-    def save_language(self, language: str):
-        self.language = language
-        self.write()
+    @save_settings
+    def save_connection_params(self, measurer_1_port: str, measurer_2_port: str, mux_port: str, product: str) -> None:
+        """
+        :param measurer_1_port: port of the connected first IV-measurer;
+        :param measurer_2_port: port of the connected second IV-measurer;
+        :param mux_port: port of the connected multiplexer;
+        :param product: name of the connected device.
+        """
 
-    def save_measurement_settings(self, options) -> None:
+        self.measurer_1_port = measurer_1_port
+        self.measurer_2_port = measurer_2_port
+        self.mux_port = mux_port
+        self.product = product
+
+    @save_settings
+    def save_language(self, language: str) -> None:
+        """
+        :param language: new language for software.
+        """
+
+        self.language = language
+
+    @save_settings
+    def save_measurement_settings(self, options: Dict[EyePointProduct.Parameter, str]) -> None:
+        """
+        :param options: dictionary with new measurement settings.
+        """
+
         self.frequency = options[EyePointProduct.Parameter.frequency]
         self.sensitive = options[EyePointProduct.Parameter.sensitive]
         self.voltage = options[EyePointProduct.Parameter.voltage]
-        self.write()
