@@ -67,7 +67,6 @@ class EPLabWindow(QMainWindow):
     CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1350
     DEFAULT_COMPARATOR_MIN_CURRENT: float = 0.002
     DEFAULT_COMPARATOR_MIN_VOLTAGE: float = 0.6
-    DEFAULT_PATH: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
     DEFAULT_POS_X: int = 50
     DEFAULT_POS_Y: int = 50
     FILENAME_FOR_AUTO_SETTINGS: str = os.path.join(ut.get_dir_name(), "eplab_settings_for_auto_save_and_read.ini")
