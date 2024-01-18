@@ -701,7 +701,7 @@ class EPLabWindow(QMainWindow):
 
     def _reconnect_periodic_task(self) -> None:
         """
-        Method try to reconnect measurer devices to app.
+        Method tries to reconnect measurer devices to app.
         """
 
         self.measurers_disconnected.emit()
