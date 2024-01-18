@@ -8,7 +8,7 @@ class TestSoundPlayer(unittest.TestCase):
 
     def test_here_no_fails(self) -> None:
         """
-        Just test that here are no unexpected errors like ValueError, RuntimeError, etc
+        Just test that here are no unexpected errors like ValueError, RuntimeError, etc.
         """
 
         player = SoundPlayer()

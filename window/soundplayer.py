@@ -41,7 +41,7 @@ class SoundPlayer:
 
     def _play_sound_in_compare_mode(self, score: float) -> None:
         """
-        :param score: score.
+        :param score: signature difference value.
         """
 
         if score > self._tolerance:
@@ -53,7 +53,7 @@ class SoundPlayer:
 
     def _play_sound_in_test_mode(self, score: float) -> None:
         """
-        :param score: score.
+        :param score: signature difference value.
         """
 
         if self._score > self._tolerance > score:
@@ -62,7 +62,7 @@ class SoundPlayer:
     @staticmethod
     def _score_to_sound_n(score: float) -> int:
         """
-        :param score: score.
+        :param score: signature difference value.
         :return: number of the sound file that corresponds to the given score.
         """
 
@@ -94,7 +94,7 @@ class SoundPlayer:
 
     def update_score(self, score: float) -> None:
         """
-        :param score: score.
+        :param score: signature difference value.
         """
 
         # Logic described here #39296
