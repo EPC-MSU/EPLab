@@ -67,7 +67,6 @@ class EPLabWindow(QMainWindow):
     CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1350
     DEFAULT_COMPARATOR_MIN_CURRENT: float = 0.002
     DEFAULT_COMPARATOR_MIN_VOLTAGE: float = 0.6
-    DEFAULT_PATH: str = os.path.join(ut.get_dir_name(), "EPLab-Files")
     DEFAULT_POS_X: int = 50
     DEFAULT_POS_Y: int = 50
     FILENAME_FOR_AUTO_SETTINGS: str = os.path.join(ut.get_dir_name(), "eplab_settings_for_auto_save_and_read.ini")
@@ -557,7 +556,6 @@ class EPLabWindow(QMainWindow):
                                              solid_axis_enabled=False, axis_label_enabled=False)
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
         self._iv_window.plot.enable_context_menu(False)
-        self._iv_window.plot.set_path_to_directory(self._dir_watcher.screenshot)
         self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
         self.current_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_CURRENT)
         self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
@@ -654,12 +652,13 @@ class EPLabWindow(QMainWindow):
 
         if not (isinstance(filename, str) and os.path.exists(filename)):
             filename = QFileDialog.getOpenFileName(self, qApp.translate("MainWindow", "Открыть план тестирования"),
-                                                   directory=self._dir_watcher.reference,
+                                                   directory=self.dir_chosen_by_user,
                                                    filter="Board Files (*.json *.uzf)")[0]
         board = None
         if filename:
             try:
                 board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
+                self.dir_chosen_by_user = filename
             except Exception as exc:
                 ut.show_message(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит."),
                                 str(exc))
@@ -1214,10 +1213,13 @@ class EPLabWindow(QMainWindow):
 
         dir_path = self._dir_watcher.reports
         if not default_path:
-            dir_path = QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"), dir_path)
+            dir_path = QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"),
+                                                        self.dir_chosen_by_user)
         if dir_path:
             show_report_generation_window(self, self._report_generation_thread, self.measurement_plan, dir_path,
                                           self.tolerance, self.work_mode)
+            if not default_path:
+                self.dir_chosen_by_user = dir_path
 
     def disconnect_measurers(self) -> None:
         """
@@ -1603,12 +1605,13 @@ class EPLabWindow(QMainWindow):
         if self._measured_pins_checker.check_measurement_plan_for_empty_pins():
             return None
 
-        default_path = os.path.join(self._dir_watcher.reference, "board.uzf")
+        default_path = os.path.join(self.dir_chosen_by_user, "board.uzf")
         filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить план тестирования"),
                                                filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
         if filename:
             self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             self._measurement_plan_path.path = epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
+            self.dir_chosen_by_user = filename
             return True
         return False
 
@@ -1619,7 +1622,7 @@ class EPLabWindow(QMainWindow):
         """
 
         filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
-        default_name = os.path.join(self._dir_watcher.screenshot, filename)
+        default_name = os.path.join(self.dir_chosen_by_user, filename)
         if system().lower() == "windows":
             filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
                                                    filter="Image (*.png)", directory=default_name)[0]
@@ -1632,6 +1635,7 @@ class EPLabWindow(QMainWindow):
                 filename += ".png"
             image = self.grab(self.rect())
             image.save(filename)
+            self.dir_chosen_by_user = filename
 
     @pyqtSlot()
     def save_pin(self) -> None:
