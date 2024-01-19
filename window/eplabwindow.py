@@ -32,6 +32,7 @@ from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.boardwidget import BoardWidget
 from window.commentwidget import CommentWidget
 from window.common import DeviceErrorsHandler, WorkMode
+from window.connectionchecker import ConnectionChecker
 from window.curvestates import CurveStates
 from window.dirwatcher import DirWatcher
 from window.language import Language, Translator
@@ -116,6 +117,10 @@ class EPLabWindow(QMainWindow):
         self._init_ui()
         self._connect_scale_change_signal()
         self.measurers_connected.connect(self.handle_connection)
+        self._connection_checker: ConnectionChecker = ConnectionChecker(self._auto_settings, port_1, port_2)
+        self._connection_checker.connect_signal.connect(self.connect_measurers)
+        self._connection_checker.disconnect_signal.connect(self._disconnect_measurers)
+        self._connection_checker.run()
 
         if port_1 is None and port_2 is None:
             self._disconnect_measurers()
