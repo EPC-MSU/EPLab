@@ -1210,6 +1210,9 @@ class EPLabWindow(QMainWindow):
         Slot starts report generation.
         :param auto_detection_report_path: if true, then it is needed to try to determine the path to save the
         generated report automatically. Otherwise, it is needed to ask the user where to save the report.
+        In task #92258, the algorithm for determining the directory in which to save the generated report during
+        automatic testing with a multiplexer has been changed. If the path to the uzf-file with the measurement plan is
+        known, then the report should be saved nearby. Otherwise it is needed to ask the user for the path.
         """
 
         if auto_detection_report_path and self._measurement_plan_path.path and \
