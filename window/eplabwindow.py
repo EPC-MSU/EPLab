@@ -10,7 +10,7 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt, QTimer,
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QDir, QEvent, QObject, QPoint, Qt, QTimer,
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMenu, QMessageBox, QVBoxLayout, QWidget
@@ -33,7 +33,6 @@ from window.boardwidget import BoardWidget
 from window.commentwidget import CommentWidget
 from window.common import DeviceErrorsHandler, WorkMode
 from window.curvestates import CurveStates
-from window.dirwatcher import DirWatcher
 from window.language import Language, Translator
 from window.measuredpinschecker import MeasuredPinsChecker
 from window.measurementplanpath import MeasurementPlanPath
@@ -90,8 +89,7 @@ class EPLabWindow(QMainWindow):
         self._auto_settings: AutoSettings = AutoSettings(path=EPLabWindow.FILENAME_FOR_AUTO_SETTINGS)
         self._comparator: IVCComparator = IVCComparator()
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
-        self._dir_chosen_by_user: str = ut.get_dir_name()
-        self._dir_watcher: DirWatcher = DirWatcher(ut.get_dir_name())
+        self._dir_chosen_by_user: str = QDir.homePath()
         self._hide_reference_curve: bool = False
         self._hide_current_curve: bool = False
         self._last_saved_measurement_plan_data: Dict[str, Any] = None
@@ -138,7 +136,9 @@ class EPLabWindow(QMainWindow):
         :return: the last directory that the user selected when working with the application.
         """
 
-        return self._dir_chosen_by_user
+        if os.path.exists(self._dir_chosen_by_user) and os.path.isdir(self._dir_chosen_by_user):
+            return self._dir_chosen_by_user
+        return QDir.homePath()
 
     @dir_chosen_by_user.setter
     def dir_chosen_by_user(self, path: str) -> None:
@@ -1205,20 +1205,26 @@ class EPLabWindow(QMainWindow):
         self.update_current_pin()
 
     @pyqtSlot()
-    def create_report(self, default_path: bool = False) -> None:
+    def create_report(self, auto_detection_report_path: bool = False) -> None:
         """
-        Slot shows a dialog window to create report for the board.
-        :param default_path: if True, then the report should be created in the default directory.
+        Slot starts report generation.
+        :param auto_detection_report_path: if true, then it is needed to try to determine the path to save the
+        generated report automatically. Otherwise, it is needed to ask the user where to save the report.
         """
 
-        dir_path = self._dir_watcher.reports
-        if not default_path:
+        if auto_detection_report_path and self._measurement_plan_path.path and \
+                os.path.exists(self._measurement_plan_path.path):
+            dir_path = self._measurement_plan_path.path
+            is_user_defined_path = False
+        else:
             dir_path = QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"),
                                                         self.dir_chosen_by_user)
+            is_user_defined_path = True
+
         if dir_path:
             show_report_generation_window(self, self._report_generation_thread, self.measurement_plan, dir_path,
                                           self.tolerance, self.work_mode)
-            if not default_path:
+            if is_user_defined_path:
                 self.dir_chosen_by_user = dir_path
 
     def disconnect_measurers(self) -> None:
@@ -1479,6 +1485,9 @@ class EPLabWindow(QMainWindow):
             return
 
         board, filename = self._read_measurement_plan(filename)
+        if not filename:
+            return
+
         if board:
             if not self._msystem:
                 self._create_scroll_areas_for_parameters({EyePointProduct.Parameter.frequency: [],
@@ -1587,7 +1596,7 @@ class EPLabWindow(QMainWindow):
         if self._measured_pins_checker.check_measurement_plan_for_empty_pins():
             return None
 
-        if not self._measurement_plan_path.path:
+        if not self._measurement_plan_path.path or not os.path.exists(self._measurement_plan_path.path):
             return self.save_board_as()
 
         self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
