@@ -40,7 +40,7 @@ from window.parameterwidget import ParameterWidget
 from window.pedalhandler import add_pedal_handler
 from window.pinindexwidget import PinIndexWidget
 from window.plancompatibility import PlanCompatibility
-from window.scaler import update_scale_of_class
+from window.scaler import get_scale_factor, update_scale_of_class
 from window.scorewrapper import ScoreWrapper
 from window.soundplayer import SoundPlayer
 from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
@@ -112,6 +112,7 @@ class EPLabWindow(QMainWindow):
 
         self._load_translation(english)
         self._init_ui()
+        self._adjust_critical_width()
         self._connect_scale_change_signal()
 
         if port_1 is None and port_2 is None:
@@ -201,6 +202,19 @@ class EPLabWindow(QMainWindow):
         """
 
         return self._work_mode
+
+    def _adjust_critical_width(self) -> None:
+        """
+        Method updates the critical window width at which it is necessary to change the toolbar display mode from text
+        to icon. When updating the width, the current screen scale is taken into account.
+        """
+
+        scale_factor = get_scale_factor()
+        for width in ("CRITICAL_WIDTH_FOR_LINUX_EN", "CRITICAL_WIDTH_FOR_LINUX_RU", "CRITICAL_WIDTH_FOR_WINDOWS_EN",
+                      "CRITICAL_WIDTH_FOR_WINDOWS_RU"):
+            width_value = getattr(self, width, None)
+            if width_value is not None:
+                setattr(self, width, scale_factor * width_value)
 
     def _adjust_plot_params(self, settings: MeasurementSettings) -> None:
         """
@@ -1574,11 +1588,9 @@ class EPLabWindow(QMainWindow):
         # Determine the critical width of the window for given language and OS
         lang = qApp.instance().property("language")
         if system().lower() == "windows":
-            size = EPLabWindow.CRITICAL_WIDTH_FOR_WINDOWS_EN if lang is Language.EN else \
-                EPLabWindow.CRITICAL_WIDTH_FOR_WINDOWS_RU
+            size = self.CRITICAL_WIDTH_FOR_WINDOWS_EN if lang is Language.EN else self.CRITICAL_WIDTH_FOR_WINDOWS_RU
         else:
-            size = EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_EN if lang is Language.EN else \
-                EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_RU
+            size = self.CRITICAL_WIDTH_FOR_LINUX_EN if lang is Language.EN else self.CRITICAL_WIDTH_FOR_LINUX_RU
         # Change style of toolbars
         for tool_bar in (self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search):
             if self.width() < size:
