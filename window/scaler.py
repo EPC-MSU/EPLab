@@ -1,4 +1,6 @@
 import platform
+from typing import Any, Callable, Optional
+from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox, QDoubleSpinBox, QGroupBox, QLabel, QLineEdit,
                              QProgressBar, QPushButton, QSpinBox, QTextBrowser, QToolBar, QWidget)
 
@@ -13,20 +15,38 @@ def get_font_size() -> int:
     return 11
 
 
-def scale_font_on_widget(widget: QWidget, font_size: int) -> None:
+def get_scale_factor() -> float:
+    """
+    :return: scale factor for the current screen scale relative to the normal scale 96.
+    """
+
+    app = qApp.instance()
+    for screen in app.screens():
+        return screen.logicalDotsPerInch() / 96
+    return 1
+
+
+def scale_font_on_widget(widget: QWidget, font_size: int, scale_factor: Optional[float] = 1) -> None:
     """
     :param widget: widget whose font needs to be scaled;
-    :param font_size: required font size.
+    :param font_size: required font size;
+    :param scale_factor: scale factor for the current screen scale relative to the normal scale 96.
     """
 
     font = widget.font()
     font.setPointSize(font_size)
     widget.setFont(font)
 
+    if hasattr(widget, "minimumSize"):
+        min_size = widget.minimumSize()
+        min_size.setHeight(int(round(min_size.height() * scale_factor)))
+        min_size.setWidth(int(round(min_size.width() * scale_factor)))
+        widget.setMinimumSize(min_size)
+
 
 def scale_low_settings_panel(widget, font_size: int) -> None:
     """
-    :param widget:
+    :param widget: low settings panel widget;
     :param font_size: required font size.
     """
 
@@ -45,6 +65,7 @@ def update_scale(widget: QWidget) -> None:
     from window.pinindexwidget import PinIndexWidget
 
     font_size = get_font_size()
+    scale_factor = get_scale_factor()
     if isinstance(widget, MeasurerSettingsWindow):
         for child_widget in widget.all_widgets:
             scale_font_on_widget(child_widget, font_size)
@@ -59,19 +80,19 @@ def update_scale(widget: QWidget) -> None:
             if isinstance(child_widget, QToolBar):
                 for action in child_widget.actions():
                     scale_font_on_widget(action, font_size)
-            scale_font_on_widget(child_widget, font_size)
+            scale_font_on_widget(child_widget, font_size, scale_factor)
             child_widget.adjustSize()
         elif isinstance(child_widget, LowSettingsPanel):
             scale_low_settings_panel(child_widget, font_size)
 
 
-def update_scale_decorator(func):
+def update_scale_decorator(func: Callable[..., Any]):
     """
     A decorator that will scale the ParameterWidget after creating option widgets.
     :param func: decorated method.
     """
 
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs) -> Any:
 
         result = func(*args, **kwargs)
         update_scale(args[0])
