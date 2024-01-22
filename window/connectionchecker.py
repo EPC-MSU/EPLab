@@ -32,6 +32,7 @@ class ConnectionChecker(QObject):
 
         super().__init__()
         self._auto_settings: AutoSettings = auto_settings
+        self._errors_need_to_display: bool = False
         self._measurer_1_port: str = None
         self._measurer_2_port: str = None
         self._mux_port: str = None
@@ -81,13 +82,12 @@ class ConnectionChecker(QObject):
         port = connection_params.get("mux_port", None)
         self._mux_port = get_port(port)
 
-    @staticmethod
-    def _print_errors(*bad_ports: str) -> None:
+    def _print_errors(self, *bad_ports: str) -> None:
         """
         :param bad_ports: list of ports that could not be connected to.
         """
 
-        if len(bad_ports) == 0:
+        if not self._errors_need_to_display or len(bad_ports) == 0:
             return
 
         if len(bad_ports) == 1:
@@ -103,7 +103,8 @@ class ConnectionChecker(QObject):
         if not self._check_connection():
             self._timer.start()
 
-    def run(self) -> None:
+    def run(self, errors_need_to_display: Optional[bool] = False) -> None:
+        self._errors_need_to_display = errors_need_to_display
         self._get_connection_params()
         self._timer.start()
 
