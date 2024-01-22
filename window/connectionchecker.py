@@ -31,7 +31,6 @@ class ConnectionChecker(QObject):
 
         super().__init__()
         self._auto_settings: AutoSettings = auto_settings
-        self._errors_need_to_display: bool = False
         self._measurer_1_port: str = None
         self._measurer_2_port: str = None
         self._mux_port: str = None
@@ -46,23 +45,12 @@ class ConnectionChecker(QObject):
         :return: True if IV-measurers and multiplexer have been created to connect.
         """
 
-        measurers, bad_measurer_ports = create_measurers_by_force(self._measurer_1_port, self._measurer_2_port)
-        mux, bad_mux_ports = create_multiplexer(self._mux_port)
-        self._print_errors(*bad_measurer_ports, *bad_mux_ports)
-
-        if not bad_measurer_ports:
-            if len(measurers) > 1:
-                # Reorder measurers according to their addresses in USB hubs tree
-                measurers = ut.sort_devices_by_usb_numbers(measurers)
-
-            if len(measurers) > 0:
-                measurement_system = create_measurement_system(measurers, mux)
-            else:
-                measurement_system = None
-            self.connect_signal.emit(ConnectionData(measurement_system, self._product_name))
+        connection_data = connect_devices(self._measurer_1_port, self._measurer_2_port, self._mux_port,
+                                          self._product_name)
+        if connection_data:
+            self.connect_signal.emit(connection_data)
             return True
 
-        close_devices(*measurers, mux)
         return False
 
     def _get_connection_params(self) -> None:
@@ -82,31 +70,17 @@ class ConnectionChecker(QObject):
         port = connection_params.get("mux_port", None)
         self._mux_port = get_port(port)
 
-    def _print_errors(self, *bad_ports: str) -> None:
-        """
-        :param bad_ports: list of ports that could not be connected to.
-        """
-
-        if not self._errors_need_to_display or len(bad_ports) == 0:
-            return
-
-        if len(bad_ports) == 1:
-            text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство "
-                                       "EyePoint, а не какое-то другое устройство.")
-        else:
-            text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства "
-                                       "EyePoint, а не какие-то другие устройства.")
-        ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_ports)))
-
     @pyqtSlot()
     def check_connection(self) -> None:
         if not self._connect_devices():
             self._timer.start()
 
-    def run(self, errors_need_to_display: Optional[bool] = False) -> None:
-        self._errors_need_to_display = errors_need_to_display
+    def run(self) -> None:
         self._get_connection_params()
         self._timer.start()
+
+    def stop(self) -> None:
+        self._timer.stop()
 
 
 def close_devices(*devices: Union[IVMeasurerBase, AnalogMultiplexerBase]) -> None:
@@ -120,6 +94,42 @@ def close_devices(*devices: Union[IVMeasurerBase, AnalogMultiplexerBase]) -> Non
                 device.close_device()
             except Exception:
                 pass
+
+
+def connect_devices(measurer_1_port: Optional[str], measurer_2_port: Optional[str], mux_port: Optional[str],
+                    product_name: Optional[cw.ProductName], error_report_required: Optional[bool] = False
+                    ) -> Optional[ConnectionData]:
+    """
+    :param measurer_1_port:
+    :param measurer_2_port:
+    :param mux_port:
+    :param product_name:
+    :param error_report_required:
+    :return:
+    """
+
+    measurers, bad_measurer_ports = create_measurers_by_force(measurer_1_port, measurer_2_port)
+    mux, bad_mux_ports = create_multiplexer(mux_port)
+
+    if error_report_required:
+        print_errors(*bad_measurer_ports, *bad_mux_ports)
+
+    if not bad_measurer_ports:
+        if len(measurers) > 1:
+            # Reorder measurers according to their addresses in USB hubs tree
+            measurers = ut.sort_devices_by_usb_numbers(measurers)
+
+        if len(measurers) > 0:
+            measurers[0].name = "test"
+            if len(measurers) == 2:
+                measurers[1].name = "ref"
+            measurement_system = create_measurement_system(measurers, mux)
+        else:
+            measurement_system = None
+        return ConnectionData(measurement_system, product_name)
+
+    close_devices(*measurers, mux)
+    return None
 
 
 def create_measurement_system(measurers: List[Optional[IVMeasurerBase]], mux: Optional[AnalogMultiplexerBase]
@@ -237,3 +247,20 @@ def create_multiplexer(port: Optional[str] = None) -> Tuple[Optional[AnalogMulti
         return None, [port]
 
     return None, []
+
+
+def print_errors(*bad_ports: str) -> None:
+    """
+    :param bad_ports: list of ports that could not be connected to.
+    """
+
+    if len(bad_ports) == 0:
+        return
+
+    if len(bad_ports) == 1:
+        text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство "
+                                   "EyePoint, а не какое-то другое устройство.")
+    else:
+        text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства "
+                                   "EyePoint, а не какие-то другие устройства.")
+    ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_ports)))
