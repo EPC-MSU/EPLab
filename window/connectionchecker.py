@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 from collections import namedtuple
 from typing import List, Optional, Tuple, Union
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QCoreApplication as qApp, QTimer
@@ -42,9 +41,9 @@ class ConnectionChecker(QObject):
         self._timer.setInterval(ConnectionChecker.TIMEOUT)
         self._timer.setSingleShot(True)
 
-    def _check_connection(self) -> bool:
+    def _connect_devices(self) -> bool:
         """
-        :return: True if connection is possible.
+        :return: True if IV-measurers and multiplexer have been created to connect.
         """
 
         measurers, bad_measurer_ports = create_measurers_by_force(self._measurer_1_port, self._measurer_2_port)
@@ -55,6 +54,7 @@ class ConnectionChecker(QObject):
             if len(measurers) > 1:
                 # Reorder measurers according to their addresses in USB hubs tree
                 measurers = ut.sort_devices_by_usb_numbers(measurers)
+
             if len(measurers) > 0:
                 measurement_system = create_measurement_system(measurers, mux)
             else:
@@ -100,7 +100,7 @@ class ConnectionChecker(QObject):
 
     @pyqtSlot()
     def check_connection(self) -> None:
-        if not self._check_connection():
+        if not self._connect_devices():
             self._timer.start()
 
     def run(self, errors_need_to_display: Optional[bool] = False) -> None:
@@ -118,7 +118,7 @@ def close_devices(*devices: Union[IVMeasurerBase, AnalogMultiplexerBase]) -> Non
         if device is not None:
             try:
                 device.close_device()
-            except:
+            except Exception:
                 pass
 
 
@@ -126,20 +126,13 @@ def create_measurement_system(measurers: List[Optional[IVMeasurerBase]], mux: Op
                               ) -> MeasurementSystem:
     """
     :param measurers: list of IV-measurers for the measurement system;
-    :param mux: multiplexer for measurement system.
+    :param mux: multiplexer for the measurement system.
     :return: created measurement system.
     """
 
-    measurers_ = []
-    for i, measurer in enumerate(measurers):
-        if measurer:
-            measurers_.append(measurer)
-
-    multiplexers = []
-    if mux:
-        multiplexers.append(mux)
-
-    return MeasurementSystem(measurers_, multiplexers)
+    measurers_without_none = [measurer for measurer in measurers if measurer]
+    multiplexers = [mux_ for mux_ in (mux, ) if mux_]
+    return MeasurementSystem(measurers_without_none, multiplexers)
 
 
 def create_measurer(port: str, force_open: Optional[bool] = False, virtual_was: Optional[bool] = False
@@ -176,7 +169,8 @@ def create_measurers(*ports: str, force_open: Optional[bool] = False
     """
     :param ports: ports for which to create IV-measurers;
     :param force_open: if True, then the IV-measurer must be created even if the IV-measurer firmware is incorrect.
-    :return:
+    :return: list of IV-measurers created for a given list of ports, list of ports for which IV-measurers could not be
+    created, error text for IV-measurers with incorrect firmware and list of IV-measurer ports with incorrect firmware.
     """
 
     measurers = []
@@ -198,8 +192,7 @@ def create_measurers(*ports: str, force_open: Optional[bool] = False
             bad_firmwares_ports.append((i, port))
             measurer = None
         except Exception:
-            logger.error("An error occurred when connecting the IV-measurer to the port '%s'", port,
-                         exc_info=sys.exc_info())
+            logger.error("An error occurred when connecting the IV-measurer to the port '%s'", port)
             bad_ports.append(port)
             measurer = None
         measurers.append(measurer)
@@ -208,8 +201,11 @@ def create_measurers(*ports: str, force_open: Optional[bool] = False
 
 def create_measurers_by_force(*ports: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str]]:
     """
+    Method creates IV-measurers for the given list of ports. If during creation it turns out that the IV-measurer has
+    the wrong firmware, then you can create the IV-measurer anyway.
     :param ports: ports for which to create IV-measurers.
-    :return:
+    :return: list of IV-measurers created for a given list of ports and list of ports for which IV-measurers could not
+    be created.
     """
 
     measurers, bad_ports, bad_firmwares, bad_firmwares_ports = create_measurers(*ports)

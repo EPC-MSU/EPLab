@@ -16,7 +16,7 @@ from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKey
 from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMenu, QMessageBox, QVBoxLayout, QWidget
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
-from epcore.analogmultiplexer import AnalogMultiplexerBase, BadMultiplexerOutputError
+from epcore.analogmultiplexer import BadMultiplexerOutputError
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, MultiplexerOutput, Pin
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.measurementmanager import IVCComparator, MeasurementPlan, MeasurementSystem, Searcher
@@ -426,6 +426,11 @@ class EPLabWindow(QMainWindow):
 
     def _connect_devices_(self, measurement_system: MeasurementSystem, product_name: Optional[cw.ProductName] = None
                           ) -> None:
+        """
+        :param measurement_system:
+        :param product_name:
+        """
+
         self._msystem = measurement_system
 
         self._clear_widgets()
