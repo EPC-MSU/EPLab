@@ -33,9 +33,10 @@ class AutoSettings(SettingsHandler):
     measurer_1_port: str = None
     measurer_2_port: str = None
     mux_port: str = None
-    product: str = None
+    product_name: str = None
 
     def _read(self, settings: QSettings) -> None:
+
         params = {"frequency": {},
                   "sensitive": {},
                   "voltage": {}}
@@ -48,10 +49,15 @@ class AutoSettings(SettingsHandler):
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
 
-        params = {"measurer_1_port": {},
-                  "measurer_2_port": {},
-                  "mux_port": {},
-                  "product": {}}
+        def check_none(value: str) -> Optional[str]:
+            if value and value.lower() == "none":
+                return None
+            return str(value)
+
+        params = {"measurer_1_port": {"convert": check_none},
+                  "measurer_2_port": {"convert": check_none},
+                  "mux_port": {"convert": check_none},
+                  "product_name": {"convert": check_none}}
         settings.beginGroup("Connection")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
@@ -72,7 +78,7 @@ class AutoSettings(SettingsHandler):
         params = {"measurer_1_port": {"convert": str},
                   "measurer_2_port": {"convert": str},
                   "mux_port": {"convert": str},
-                  "product": {"convert": str}}
+                  "product_name": {"convert": str}}
         settings.beginGroup("Connection")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
@@ -86,7 +92,7 @@ class AutoSettings(SettingsHandler):
         return {"measurer_1_port": self.measurer_1_port,
                 "measurer_2_port": self.measurer_2_port,
                 "mux_port": self.mux_port,
-                "product": self.product}
+                "product_name": self.product_name}
 
     def get_language(self) -> Language:
         """
@@ -119,18 +125,19 @@ class AutoSettings(SettingsHandler):
         return measurement_settings
 
     @save_settings
-    def save_connection_params(self, measurer_1_port: str, measurer_2_port: str, mux_port: str, product: str) -> None:
+    def save_connection_params(self, measurer_1_port: str, measurer_2_port: str, mux_port: str, product_name: str
+                               ) -> None:
         """
         :param measurer_1_port: port of the connected first IV-measurer;
         :param measurer_2_port: port of the connected second IV-measurer;
         :param mux_port: port of the connected multiplexer;
-        :param product: name of the connected device.
+        :param product_name: name of the connected device.
         """
 
         self.measurer_1_port = measurer_1_port
         self.measurer_2_port = measurer_2_port
         self.mux_port = mux_port
-        self.product = product
+        self.product_name = product_name
 
     @save_settings
     def save_language(self, language: str) -> None:

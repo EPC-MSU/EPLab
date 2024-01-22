@@ -167,6 +167,10 @@ def find_address_in_usb_hubs_tree(url: str) -> Optional[str]:
     return None
 
 
+def get_device_port(devices: List[Any], index: int) -> Optional[str]:
+    return devices[index]._url if len(devices) > index else None
+
+
 def get_dir_name() -> str:
     """
     Function returns path to directory with executable file or code files.
@@ -216,14 +220,14 @@ def initialize_measurers(measurer_ports: Iterable[str], force_open: bool = False
         try:
             if measurer_arg == "virtual":
                 measurer_type = "IVMeasurerVirtual"
-                measurer = IVMeasurerVirtual()
+                measurer = IVMeasurerVirtual(measurer_arg)
                 if virtual_already_has_been:
                     measurer.nominal = 1000
                 measurers.append(measurer)
                 virtual_already_has_been = True
             elif measurer_arg == "virtualasa":
                 measurer_type = "IVMeasurerVirtualASA"
-                measurer = IVMeasurerVirtualASA(defer_open=True)
+                measurer = IVMeasurerVirtualASA(measurer_arg, defer_open=True)
                 measurers.append(measurer)
             elif measurer_arg is not None and ("com:" in measurer_arg or "xi-net:" in measurer_arg):
                 measurer_type = "IVMeasurerIVM10"

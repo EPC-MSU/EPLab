@@ -16,7 +16,7 @@ from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKey
 from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMenu, QMessageBox, QVBoxLayout, QWidget
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
-from epcore.analogmultiplexer import BadMultiplexerOutputError
+from epcore.analogmultiplexer import AnalogMultiplexerBase, BadMultiplexerOutputError
 from epcore.elements import Board, Element, IVCurve, MeasurementSettings, MultiplexerOutput, Pin
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.measurementmanager import IVCComparator, MeasurementPlan, MeasurementSystem, Searcher
@@ -32,7 +32,7 @@ from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.boardwidget import BoardWidget
 from window.commentwidget import CommentWidget
 from window.common import DeviceErrorsHandler, WorkMode
-from window.connectionchecker import ConnectionChecker
+from window.connectionchecker import ConnectionChecker, ConnectionData
 from window.curvestates import CurveStates
 from window.language import Language, Translator
 from window.measuredpinschecker import MeasuredPinsChecker
@@ -80,8 +80,8 @@ class EPLabWindow(QMainWindow):
                  english: Optional[bool] = None, path: str = None) -> None:
         """
         :param product: product;
-        :param port_1: port for the first measurer;
-        :param port_2: port for the second measurer;
+        :param port_1: port for the first IV-measurer;
+        :param port_2: port for the second IV-measurer;
         :param english: if True then interface language will be English;
         :param path: path to the test plan to be opened.
         """
@@ -116,12 +116,11 @@ class EPLabWindow(QMainWindow):
         self._adjust_critical_width()
         self._connect_scale_change_signal()
         self.measurers_connected.connect(self.handle_connection)
-        self._connection_checker: ConnectionChecker = ConnectionChecker(self._auto_settings, port_1, port_2)
-        self._connection_checker.connect_signal.connect(self.connect_measurers)
-        self._connection_checker.disconnect_signal.connect(self._disconnect_measurers)
-        self._connection_checker.run()
+        self._connection_checker: ConnectionChecker = ConnectionChecker(self._auto_settings)
+        self._connection_checker.connect_signal.connect(self.handle_connection_signal_from_checker)
 
         if port_1 is None and port_2 is None:
+            self._connection_checker.run()
             self._disconnect_measurers()
         else:
             self.connect_measurers(port_1, port_2)
@@ -356,6 +355,104 @@ class EPLabWindow(QMainWindow):
         self._test_curve = None
         self._change_save_point_name()
 
+    def _connect_devices(self, port_1: Optional[str] = None, port_2: Optional[str] = None,
+                         mux_port: str = None, product_name: Optional[cw.ProductName] = None) -> None:
+        """
+        Method connects IV-measurers and a multiplexer with given ports.
+        :param port_1: port for the first IV-measurer;
+        :param port_2: port for the second IV-measurer;
+        :param mux_port: port for multiplexer;
+        :param product_name: name of product to work with application.
+        """
+
+        if self._timer.isActive():
+            self._timer.stop()
+        if self.start_or_stop_entire_plan_measurement_action.isChecked():
+            self.start_or_stop_entire_plan_measurement_action.setChecked(False)
+        if self._msystem:
+            for measurer in self._msystem.measurers:
+                measurer.close_device()
+            for multiplexer in self._msystem.multiplexers:
+                multiplexer.close_device()
+
+        good_com_ports, bad_com_ports = cw.utils.check_com_ports([port_1, port_2, mux_port])
+        if bad_com_ports:
+            if len(bad_com_ports) == 1:
+                text = qApp.translate("t", "Проверьте, что устройство {} подключено к компьютеру и не удерживается "
+                                           "другой программой.")
+            else:
+                text = qApp.translate("t", "Проверьте, что устройства {} подключены к компьютеру и не удерживаются "
+                                           "другой программой.")
+            ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
+
+        self._msystem, bad_com_ports = ut.create_measurement_system(*good_com_ports)
+        if bad_com_ports:
+            if len(bad_com_ports) == 1:
+                text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство "
+                                           "EyePoint, а не какое-то другое устройство.")
+            else:
+                text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства "
+                                           "EyePoint, а не какие-то другие устройства.")
+            ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
+
+        if not self._msystem:
+            self._disconnect_measurers()
+            return
+
+        self._clear_widgets()
+        self._comment_widget.clear_table()
+        self._iv_window.plot.clear_center_text()
+        options_data = self._read_options_from_json()
+        self._product.change_options(options_data)
+        if product_name is None:
+            self._product_name = cw.ProductName.get_default_product_name_for_measurers(self._msystem.measurers)
+        else:
+            self._product_name = product_name
+        self.enable_widgets(True)
+
+        if self._measurement_plan:
+            self._check_plan_compatibility(False, False, self._measurement_plan_path.path)
+
+        if self._measurement_plan:
+            self._measurement_plan.measurer = self._msystem.measurers[0]
+            self._measurement_plan.multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
+        else:
+            self._reset_board()
+            self._measurement_plan_path.path = None
+
+        self._set_widgets_to_init_state()
+        self.measurers_connected.emit(True)
+        self._timer.start()
+
+    def _connect_devices_(self, measurement_system: MeasurementSystem, product_name: Optional[cw.ProductName] = None
+                          ) -> None:
+        self._msystem = measurement_system
+
+        self._clear_widgets()
+        self._comment_widget.clear_table()
+        self._iv_window.plot.clear_center_text()
+        options_data = self._read_options_from_json()
+        self._product.change_options(options_data)
+        if product_name is None:
+            self._product_name = cw.ProductName.get_default_product_name_for_measurers(self._msystem.measurers)
+        else:
+            self._product_name = product_name
+        self.enable_widgets(True)
+
+        if self._measurement_plan:
+            self._check_plan_compatibility(False, False, self._measurement_plan_path.path)
+
+        if self._measurement_plan:
+            self._measurement_plan.measurer = self._msystem.measurers[0]
+            self._measurement_plan.multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
+        else:
+            self._reset_board()
+            self._measurement_plan_path.path = None
+
+        self._set_widgets_to_init_state()
+        self.measurers_connected.emit(True)
+        self._timer.start()
+
     def _connect_scale_change_signal(self) -> None:
         """
         Method connects the screen zoom signal.
@@ -447,7 +544,6 @@ class EPLabWindow(QMainWindow):
         self._comment_widget.clear_table()
         self._board_window.close()
         self._product_name = None
-        self.measurers_connected.emit(False)
 
     def _get_curves_for_legend(self) -> Dict[str, bool]:
         """
@@ -539,10 +635,11 @@ class EPLabWindow(QMainWindow):
             with self._device_errors_handler:
                 self._read_curves_periodic_task()
             self._mux_and_plan_window.measurement_plan_runner.save_pin()
+            self._timer.start()  # add this task to event loop
         else:
-            self._reconnect_periodic_task()
-        # Add this task to event loop
-        self._timer.start()
+            self._device_errors_handler.reset_error()
+            self._disconnect_measurers()
+            self._connection_checker.run()
 
     def _init_tolerance(self) -> None:
         """
@@ -768,6 +865,9 @@ class EPLabWindow(QMainWindow):
         self.save_point_action.triggered.connect(self.save_pin)
         self.test_plan_menu_action.insertAction(self.add_board_image_action, self.save_point_action)
         self.toolbar_write.addAction(self.save_point_action)
+
+    def _report_measurers_disconnected(self) -> None:
+        self.measurers_connected.emit(False)
 
     def _reset_board(self) -> None:
         """
@@ -1110,74 +1210,17 @@ class EPLabWindow(QMainWindow):
             self._report_generation_thread.stop_thread()
             self._report_generation_thread.wait()
 
-    def connect_measurers(self, port_1: Optional[str], port_2: Optional[str],
-                          product_name: Optional[cw.ProductName] = None, mux_port: str = None) -> None:
+    def connect_measurers(self, port_1: Optional[str] = None, port_2: Optional[str] = None,
+                          mux_port: str = None, product_name: Optional[cw.ProductName] = None) -> None:
         """
         Method connects IV-measurers and a multiplexer with given ports.
-        :param port_1: port for first IV-measurer;
-        :param port_2: port for second IV-measurer;
-        :param product_name: name of product to work with application;
-        :param mux_port: port for multiplexer.
+        :param port_1: port for the first IV-measurer;
+        :param port_2: port for the second IV-measurer;
+        :param mux_port: port for multiplexer;
+        :param product_name: name of product to work with application
         """
 
-        if self._timer.isActive():
-            self._timer.stop()
-        if self.start_or_stop_entire_plan_measurement_action.isChecked():
-            self.start_or_stop_entire_plan_measurement_action.setChecked(False)
-        if self._msystem:
-            for measurer in self._msystem.measurers:
-                measurer.close_device()
-            for multiplexer in self._msystem.multiplexers:
-                multiplexer.close_device()
-
-        good_com_ports, bad_com_ports = cw.utils.check_com_ports([port_1, port_2, mux_port])
-        if bad_com_ports:
-            if len(bad_com_ports) == 1:
-                text = qApp.translate("t", "Проверьте, что устройство {} подключено к компьютеру и не удерживается "
-                                           "другой программой.")
-            else:
-                text = qApp.translate("t", "Проверьте, что устройства {} подключены к компьютеру и не удерживаются "
-                                           "другой программой.")
-            ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
-
-        self._msystem, bad_com_ports = ut.create_measurement_system(*good_com_ports)
-        if bad_com_ports:
-            if len(bad_com_ports) == 1:
-                text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство "
-                                           "EyePoint, а не какое-то другое устройство.")
-            else:
-                text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства "
-                                           "EyePoint, а не какие-то другие устройства.")
-            ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_com_ports)))
-
-        if not self._msystem:
-            self._disconnect_measurers()
-            return
-
-        self._clear_widgets()
-        self._comment_widget.clear_table()
-        self._iv_window.plot.clear_center_text()
-        options_data = self._read_options_from_json()
-        self._product.change_options(options_data)
-        if product_name is None:
-            self._product_name = cw.ProductName.get_default_product_name_for_measurers(self._msystem.measurers)
-        else:
-            self._product_name = product_name
-        self.enable_widgets(True)
-
-        if self._measurement_plan:
-            self._check_plan_compatibility(False, False, self._measurement_plan_path.path)
-
-        if self._measurement_plan:
-            self._measurement_plan.measurer = self._msystem.measurers[0]
-            self._measurement_plan.multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
-        else:
-            self._reset_board()
-            self._measurement_plan_path.path = None
-
-        self._set_widgets_to_init_state()
-        self.measurers_connected.emit(True)
-        self._timer.start()
+        self._connect_devices(port_1, port_2, mux_port, product_name)
 
     @pyqtSlot()
     def connect_or_disconnect(self) -> None:
@@ -1260,6 +1303,7 @@ class EPLabWindow(QMainWindow):
             return
 
         self._disconnect_measurers()
+        self._report_measurers_disconnected()
 
     @pyqtSlot(bool)
     def enable_sound(self, state: bool) -> None:
@@ -1456,13 +1500,10 @@ class EPLabWindow(QMainWindow):
         :param connected: if True, then the devices are connected, otherwise they are disconnected.
         """
 
-        def get_port(devices: list, index: int) -> Optional[str]:
-            return devices[index]._url if len(devices) > index else None
-
         if connected and self._msystem:
-            measurer_1_port = get_port(self._msystem.measurers, 0)
-            measurer_2_port = get_port(self._msystem.measurers, 1)
-            mux_port = get_port(self._msystem.multiplexers, 0)
+            measurer_1_port = ut.get_device_port(self._msystem.measurers, 0)
+            measurer_2_port = ut.get_device_port(self._msystem.measurers, 1)
+            mux_port = ut.get_device_port(self._msystem.multiplexers, 0)
             product = self._product_name.name
         else:
             measurer_1_port = None
@@ -1470,6 +1511,18 @@ class EPLabWindow(QMainWindow):
             mux_port = None
             product = None
         self._auto_settings.save_connection_params(measurer_1_port, measurer_2_port, mux_port, product)
+
+    @pyqtSlot(ConnectionData)
+    def handle_connection_signal_from_checker(self, connection_data: ConnectionData) -> None:
+        """
+        :param connection_data: parameters for connecting IV-measurers and multiplexer.
+        """
+
+        measurement_system, product_name = connection_data
+        if measurement_system:
+            self._connect_devices_(measurement_system, product_name)
+        else:
+            self._disconnect_measurers()
 
     @pyqtSlot(bool)
     def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:
