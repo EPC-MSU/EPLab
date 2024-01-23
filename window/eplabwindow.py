@@ -120,7 +120,7 @@ class EPLabWindow(QMainWindow):
         self._connection_checker.connect_signal.connect(self.handle_connection_signal_from_checker)
 
         if port_1 is None and port_2 is None:
-            self._connection_checker.run()
+            self._connection_checker.run_check()
             self._disconnect_measurers()
         else:
             self.connect_measurers(port_1, port_2)
@@ -575,7 +575,7 @@ class EPLabWindow(QMainWindow):
         else:
             self._device_errors_handler.reset_error()
             self._disconnect_measurers()
-            self._connection_checker.run()
+            self._connection_checker.run_check()
 
     def _init_tolerance(self) -> None:
         """
@@ -1430,7 +1430,7 @@ class EPLabWindow(QMainWindow):
         self._auto_settings.save_connection_params(measurer_1_port, measurer_2_port, mux_port, product)
 
         if connected:
-            self._connection_checker.stop()
+            self._connection_checker.stop_check()
 
     @pyqtSlot(ConnectionData)
     def handle_connection_signal_from_checker(self, connection_data: ConnectionData) -> None:

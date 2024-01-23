@@ -49,7 +49,7 @@ class ConnectionChecker(QObject):
 
         connection_data = connect_devices(self._measurer_1_port, self._measurer_2_port, self._mux_port,
                                           self._product_name)
-        if connection_data:
+        if connection_data.measurement_system:
             self.connect_signal.emit(connection_data)
             return True
 
@@ -77,11 +77,11 @@ class ConnectionChecker(QObject):
         if not self._connect_devices():
             self._timer.start()
 
-    def run(self) -> None:
+    def run_check(self) -> None:
         self._get_connection_params()
         self._timer.start()
 
-    def stop(self) -> None:
+    def stop_check(self) -> None:
         self._timer.stop()
 
 
