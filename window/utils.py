@@ -11,7 +11,7 @@ from operator import itemgetter
 from platform import system
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 import serial.tools.list_ports
-from PyQt5.QtCore import QCoreApplication as qApp, Qt
+from PyQt5.QtCore import QCoreApplication as qApp, QDir, QStandardPaths, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QCheckBox, QLayout, QMessageBox
 from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerBase, AnalogMultiplexerVirtual
@@ -198,6 +198,16 @@ def get_port(url) -> Optional[str]:
     if not port:
         return None
     return port[0]
+
+
+def get_user_documents_path() -> str:
+    """
+    :return: path to the standard user folder in which documents are stored.
+    """
+
+    for path in QStandardPaths.standardLocations(QStandardPaths.DocumentsLocation):
+        return path
+    return QDir.homePath()
 
 
 def initialize_measurers(measurer_ports: Iterable[str], force_open: bool = False
