@@ -217,11 +217,11 @@ class MuxAndPlanWindow(QWidget):
         :return: True if windows are arranged, position and size for main window, position and size for dialog window.
         """
 
-        desktop = qApp.instance().desktop()
-        height = desktop.availableGeometry().height()
-        width = desktop.availableGeometry().width()
-        main_window_pos = QPoint(desktop.availableGeometry().x(), desktop.availableGeometry().y())
-        height -= 50
+        geometry = qApp.instance().desktop().availableGeometry()
+        height = geometry.height()
+        width = geometry.width()
+        main_window_pos = QPoint(geometry.x(), geometry.y())
+        height -= 30
         if width > 1280:
             main_window_size = QSize(width // 2, height)
             window_pos = QPoint(main_window_pos.x() + main_window_size.width(), main_window_pos.y())
