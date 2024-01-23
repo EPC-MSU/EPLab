@@ -1402,6 +1402,15 @@ class EPLabWindow(QMainWindow):
 
         self.go_to_pin_selected_in_widget(pin_index + 1)
 
+    def handle_changing_pin_in_mux(self, index: int) -> None:
+        """
+        :param index: pin index that became active through the multiplexer widget.
+        """
+
+        self.measurement_plan._current_pin_index = index
+        self._mux_and_plan_window.measurement_plan_widget.select_row_for_current_pin()
+        self._comment_widget.select_row_for_current_pin()
+
     @pyqtSlot(bool)
     def handle_connection(self, connected: bool) -> None:
         """
