@@ -300,6 +300,47 @@
         <translation>Comment</translation>
     </message>
     <message>
+        <location filename="../window/connectionchecker.py" line="237"/>
+        <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
+        <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>
+    </message>
+    <message>
+        <location filename="../window/connectionchecker.py" line="295"/>
+        <source>Не удалось подключиться к {}.
+&lt;ul&gt;
+&lt;li&gt;Проверьте, что устройство подключено к компьютеру и не удерживается другой программой.&lt;/li&gt;
+&lt;li&gt;Убедитесь, что это устройство EyePoint, а не какое-то другое устройство.&lt;/li&gt;
+&lt;/ul&gt;</source>
+        <translation>Failed to connect to {}.
+&lt;ul&gt;
+&lt;li&gt;Check that device is connected to the computer and is not being held by another program.&lt;/li&gt;
+&lt;li&gt;Make sure it is an EyePoint device and not some other device.&lt;/li&gt;
+&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../window/connectionchecker.py" line="301"/>
+        <source>Не удалось подключиться к {}.
+&lt;ul&gt;
+&lt;li&gt;Проверьте, что устройства подключены к компьютеру и не удерживаются другой программой.&lt;/li&gt;
+&lt;li&gt;Убедитесь, что это устройства EyePoint, а не какие-то другие устройства.&lt;/li&gt;
+&lt;/ul&gt;</source>
+        <translation>Failed to connect to {}.
+&lt;ul&gt;
+&lt;li&gt;Check that devices are connected to the computer and are not being held by another program.&lt;/li&gt;
+&lt;li&gt;Make sure it is EyePoint devices and not some other devices.&lt;/li&gt;
+&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../window/connectionchecker.py" line="306"/>
+        <source>Ошибка подключения</source>
+        <translation>Connection error</translation>
+    </message>
+    <message>
+        <location filename="../window/connectionchecker.py" line="322"/>
+        <source>Все равно открыть</source>
+        <translation>Force open</translation>
+    </message>
+    <message>
         <location filename="../window/eplabwindow.py" line="222"/>
         <source>Сохранить</source>
         <translation>Save</translation>
@@ -385,31 +426,6 @@
         <translation>The measurement plan was not saved.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="992"/>
-        <source>Проверьте, что устройство {} подключено к компьютеру и не удерживается другой программой.</source>
-        <translation>Check that device {} is connected to the computer and is not being held by another program.</translation>
-    </message>
-    <message>
-        <location filename="../window/eplabwindow.py" line="995"/>
-        <source>Проверьте, что устройства {} подключены к компьютеру и не удерживаются другой программой.</source>
-        <translation>Check that devices {} are connected to the computer and are not being held by another program.</translation>
-    </message>
-    <message>
-        <location filename="../window/eplabwindow.py" line="997"/>
-        <source>Ошибка подключения</source>
-        <translation>Connection error</translation>
-    </message>
-    <message>
-        <location filename="../window/eplabwindow.py" line="1002"/>
-        <source>Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство EyePoint, а не какое-то другое устройство.</source>
-        <translation>Failed to connect to {0}. Make sure {0} is an EyePoint device and not some other device.</translation>
-    </message>
-    <message>
-        <location filename="../window/eplabwindow.py" line="1005"/>
-        <source>Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства EyePoint, а не какие-то другие устройства.</source>
-        <translation>Failed to connect to {0}. Make sure {0} is EyePoint devices and not some other devices.</translation>
-    </message>
-    <message>
         <location filename="../window/eplabwindow.py" line="1100"/>
         <source>Выбрать папку</source>
         <translation>Select directory</translation>
@@ -493,6 +509,21 @@
         <location filename="../window/plancompatibility.py" line="343"/>
         <source>План тестирования {}не соответствует режиму работы EPLab и будет закрыт.</source>
         <translation>The test plan {} does not correspond to the EPLab work mode and will be closed.</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="157"/>
+        <source>Да</source>
+        <translation>Yes</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="161"/>
+        <source>Нет</source>
+        <translation>No</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="163"/>
+        <source>Отмена</source>
+        <translation>Cancel</translation>
     </message>
 </context>
 <context>
@@ -845,39 +876,6 @@
         <location filename="../settings/utils.py" line="56"/>
         <source>Значение параметра &apos;{}&apos; не задано в конфигурационном файле.</source>
         <translation>The parameter &apos;{}&apos; value is not specified in the configuration file.</translation>
-    </message>
-</context>
-<context>
-    <name>utils</name>
-    <message>
-        <location filename="../window/utils.py" line="270"/>
-        <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
-        <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>
-    </message>
-    <message>
-        <location filename="../window/utils.py" line="351"/>
-        <source>Ошибка</source>
-        <translation>Error</translation>
-    </message>
-    <message>
-        <location filename="../window/utils.py" line="352"/>
-        <source>Все равно открыть</source>
-        <translation>Force open</translation>
-    </message>
-    <message>
-        <location filename="../window/utils.py" line="405"/>
-        <source>Да</source>
-        <translation>Yes</translation>
-    </message>
-    <message>
-        <location filename="../window/utils.py" line="409"/>
-        <source>Нет</source>
-        <translation>No</translation>
-    </message>
-    <message>
-        <location filename="../window/utils.py" line="411"/>
-        <source>Отмена</source>
-        <translation>Cancel</translation>
     </message>
 </context>
 </TS>

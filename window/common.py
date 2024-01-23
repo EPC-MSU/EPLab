@@ -47,19 +47,19 @@ class DeviceErrorsHandler:
     _device_errors = (OSError, RuntimeError, AsaConnectionError, AsaServerResponseError, MuxUrpcDeviceUndefinedError,
                       UrpcDeviceUndefinedError)
 
-    def __init__(self):
-        self._all_ok = True
-        self._in_context = False
+    def __init__(self) -> None:
+        self._all_ok: bool = True
+        self._in_context: bool = False
 
     @property
-    def all_ok(self):
+    def all_ok(self) -> bool:
         return self._all_ok
 
     @all_ok.setter
-    def all_ok(self, all_ok: bool):
+    def all_ok(self, all_ok: bool) -> None:
         self._all_ok = all_ok
 
-    def reset_error(self):
+    def reset_error(self) -> None:
         self._all_ok = True
 
     def __enter__(self):
@@ -68,11 +68,13 @@ class DeviceErrorsHandler:
         self._in_context = True
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
         self._in_context = False
         if not exc_type:
             return True  # No exceptions, all is OK
+
         if exc_type in self._device_errors:
             self._all_ok = False
             return True  # Device exception occurred, ignore
+
         return False  # Here are some other exceptions, raise

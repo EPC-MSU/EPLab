@@ -59,8 +59,7 @@ def check_com_ports(com_ports: List[str]) -> Tuple[List[str], List[str]]:
     """
     Function checks that given COM-ports can be used for IV-measurer.
     :param com_ports: list of COM-ports.
-    :return: list of good COM-ports that can be used for IV-measurers and
-    list of bad COM-ports.
+    :return: list of good COM-ports that can be used for IV-measurers and list of bad COM-ports.
     """
 
     bad_com_ports = []
@@ -78,6 +77,7 @@ def check_com_ports(com_ports: List[str]) -> Tuple[List[str], List[str]]:
                 good_com_ports.append(None)
         else:
             good_com_ports.append(com_port)
+
     while True:
         try:
             bad_com_ports.remove(EXCLUSIVE_COM_PORT[get_platform()])
@@ -95,10 +95,11 @@ def check_port_name(port: str) -> bool:
     :return: True if port name is correct.
     """
 
-    platform_name = get_platform()
     if port is None:
         return True
-    if IVM10_PATTERN[platform_name].match(port) or IVMASA_PATTERN[platform_name].match(port) or\
+
+    platform_name = get_platform()
+    if IVM10_PATTERN[platform_name].match(port) or IVMASA_PATTERN[platform_name].match(port) or \
             MUX_PATTERN[platform_name].match(port):
         return True
     return False
@@ -209,8 +210,10 @@ def get_platform() -> Optional[str]:
         if 8 * struct.calcsize("P") == 32:
             return "win32"
         return "win64"
+
     if os_kind == "linux":
         return "debian"
+
     raise RuntimeError("Unexpected OS")
 
 

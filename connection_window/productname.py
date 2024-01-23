@@ -59,6 +59,21 @@ class ProductName(Enum):
         return None
 
     @classmethod
+    def get_product_name_by_string(cls, product_name: str) -> Optional["ProductName"]:
+        """
+        :param product_name:
+        :return:
+        """
+
+        if not product_name:
+            return None
+
+        for product in cls.get_product_names_for_platform():
+            if product.name.lower() == product_name.lower():
+                return product
+        return None
+
+    @classmethod
     def get_product_names_for_platform(cls) -> List["ProductName"]:
         """
         Method returns names of products for platform of system.
