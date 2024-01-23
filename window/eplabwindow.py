@@ -10,7 +10,7 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QDir, QEvent, QObject, QPoint, Qt, QTimer,
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt, QTimer,
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMenu, QMessageBox, QVBoxLayout, QWidget
@@ -89,7 +89,7 @@ class EPLabWindow(QMainWindow):
         self._auto_settings: AutoSettings = AutoSettings(path=EPLabWindow.FILENAME_FOR_AUTO_SETTINGS)
         self._comparator: IVCComparator = IVCComparator()
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
-        self._dir_chosen_by_user: str = QDir.homePath()
+        self._dir_chosen_by_user: str = ut.get_user_documents_path()
         self._hide_reference_curve: bool = False
         self._hide_current_curve: bool = False
         self._last_saved_measurement_plan_data: Dict[str, Any] = None
@@ -139,7 +139,7 @@ class EPLabWindow(QMainWindow):
 
         if os.path.exists(self._dir_chosen_by_user) and os.path.isdir(self._dir_chosen_by_user):
             return self._dir_chosen_by_user
-        return QDir.homePath()
+        return ut.get_user_documents_path()
 
     @dir_chosen_by_user.setter
     def dir_chosen_by_user(self, path: str) -> None:
