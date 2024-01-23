@@ -91,12 +91,11 @@ class MuxAndPlanWindow(QWidget):
         else:
             text = qApp.translate("mux", "Запустить измерение всех точек")
             icon = QIcon(os.path.join(ut.DIR_MEDIA, "start_auto_test.png"))
-        for widget in (self.button_start_or_stop_plan_measurement,
-                       self._parent.start_or_stop_entire_plan_measurement_action):
-            widget.setIcon(icon)
-            widget.setText(text)
-            if widget.isChecked() != status:
-                widget.setChecked(status)
+        widget = self._parent.start_or_stop_entire_plan_measurement_action
+        widget.setIcon(icon)
+        widget.setText(text)
+        if widget.isChecked() != status:
+            widget.setChecked(status)
 
     def _check_multiplexer_connection(self) -> None:
         """
@@ -154,11 +153,7 @@ class MuxAndPlanWindow(QWidget):
         self.tool_bar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.tool_bar.addAction(self._parent.writing_mode_action)
         self.tool_bar.addAction(self._parent.testing_mode_action)
-        self.button_start_or_stop_plan_measurement: QPushButton = QPushButton(
-            qApp.translate("mux", "Запустить измерение всех точек"))
-        self.button_start_or_stop_plan_measurement.clicked.connect(self.start_or_stop_plan_measurement)
-        self.button_start_or_stop_plan_measurement.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "start_auto_test.png")))
-        self.button_start_or_stop_plan_measurement.setCheckable(True)
+        self.tool_bar.addAction(self._parent.start_or_stop_entire_plan_measurement_action)
         self.multiplexer_pinout_widget: MultiplexerPinoutWidget = MultiplexerPinoutWidget(self._parent)
         self.multiplexer_pinout_widget.mux_output_turned_on.connect(self.handle_mux_output_turned_on)
 
@@ -168,7 +163,6 @@ class MuxAndPlanWindow(QWidget):
         h_layout.addWidget(self.label)
         h_layout.addWidget(self.tool_bar)
         h_layout.addStretch(1)
-        h_layout.addWidget(self.button_start_or_stop_plan_measurement)
 
         v_layout = QVBoxLayout()
         v_layout.setSpacing(0)
@@ -381,7 +375,7 @@ class MuxAndPlanWindow(QWidget):
         Slot turns off standby mode.
         """
 
-        if self.button_start_or_stop_plan_measurement.isChecked():
+        if self._parent.start_or_stop_entire_plan_measurement_action.isChecked():
             self._change_widgets_to_start_plan_measurement(False)
         self.measurement_plan_widget.turn_off_standby_mode()
         self.progress_bar.setVisible(False)
@@ -406,8 +400,7 @@ class MuxAndPlanWindow(QWidget):
         self._parent.enable_widgets(False)
         self._parent.connection_action.setEnabled(False)
         self._parent.open_mux_window_action.setEnabled(True)
-        if self.button_start_or_stop_plan_measurement.isChecked():
-            self.button_start_or_stop_plan_measurement.setEnabled(True)
+        if self._parent.start_or_stop_entire_plan_measurement_action.isChecked():
             self._parent.start_or_stop_entire_plan_measurement_action.setEnabled(True)
 
     def update_info(self) -> None:
