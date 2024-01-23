@@ -98,14 +98,14 @@ def close_devices(*devices: Union[IVMeasurerBase, AnalogMultiplexerBase]) -> Non
 
 def connect_devices(measurer_1_port: Optional[str], measurer_2_port: Optional[str], mux_port: Optional[str],
                     product_name: Optional[cw.ProductName], error_report_required: Optional[bool] = False
-                    ) -> Optional[ConnectionData]:
+                    ) -> ConnectionData:
     """
-    :param measurer_1_port:
-    :param measurer_2_port:
-    :param mux_port:
-    :param product_name:
-    :param error_report_required:
-    :return:
+    :param measurer_1_port: port for the first IV-measurer;
+    :param measurer_2_port: port for the second IV-measurer;
+    :param mux_port: port for multiplexer;
+    :param product_name: name of product to work with application.
+    :param error_report_required: if True, then connection errors must be reported, otherwise errors are ignored.
+    :return: an object with a created measurement system and product name.
     """
 
     measurers, bad_measurer_ports = create_measurers_by_force(measurer_1_port, measurer_2_port)
@@ -129,7 +129,7 @@ def connect_devices(measurer_1_port: Optional[str], measurer_2_port: Optional[st
         return ConnectionData(measurement_system, product_name)
 
     close_devices(*measurers, mux)
-    return None
+    return ConnectionData(None, product_name)
 
 
 def create_measurement_system(measurers: List[Optional[IVMeasurerBase]], mux: Optional[AnalogMultiplexerBase]

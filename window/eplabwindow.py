@@ -1121,7 +1121,7 @@ class EPLabWindow(QMainWindow):
         :param port_1: port for the first IV-measurer;
         :param port_2: port for the second IV-measurer;
         :param mux_port: port for multiplexer;
-        :param product_name: name of product to work with application
+        :param product_name: name of product to work with application.
         """
 
         measurement_system, product_name = connect_devices(port_1, port_2, mux_port, product_name, True)
@@ -1426,7 +1426,7 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot(ConnectionData)
     def handle_connection_signal_from_checker(self, connection_data: ConnectionData) -> None:
         """
-        :param connection_data: parameters for connecting IV-measurers and multiplexer.
+        :param connection_data: an object with a created measurement system and product name.
         """
 
         measurement_system, product_name = connection_data
