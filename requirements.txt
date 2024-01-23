@@ -3,7 +3,7 @@ psutil==5.8.0
 PyQt5<=5.15.0
 PyQt5-stubs
 pyserial==3.5
-git+https://github.com/EPC-MSU/board-view@master#egg=boardview
+git+https://github.com/EPC-MSU/board-view@v0.1.2#egg=boardview
 git+https://github.com/EPC-MSU/ep_report_generator@v0.1.14#egg=ep_report_generator
 git+https://github.com/EPC-MSU/epcore@v0.1.20#egg=epcore
-git+https://github.com/EPC-MSU/ivviewer@dev-0.1#egg=ivviewer
+git+https://github.com/EPC-MSU/ivviewer@v0.1.15#egg=ivviewer
