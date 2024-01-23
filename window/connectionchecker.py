@@ -234,7 +234,7 @@ def create_measurers(*ports: str, force_open: Optional[bool] = False
         except BadFirmwareVersion as exc:
             logger.error("%s firmware version %s is not compatible with this version of EPLab", exc.args[0],
                          exc.args[2])
-            text = qApp.translate("utils", "{}: версия прошивки {} {} несовместима с данной версией EPLab."
+            text = qApp.translate("t", "{}: версия прошивки {} {} несовместима с данной версией EPLab."
                                   ).format(port, exc.args[0], exc.args[2])
             bad_firmwares.append(text)
             bad_firmwares_ports.append((i, port))
@@ -292,11 +292,17 @@ def print_errors(*bad_ports: str) -> None:
         return
 
     if len(bad_ports) == 1:
-        text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройство "
-                                   "EyePoint, а не какое-то другое устройство.")
+        text = qApp.translate("t", "Не удалось подключиться к {}.\n<ul>\n"
+                                   "<li>Проверьте, что устройство подключено к компьютеру и не удерживается другой "
+                                   "программой.</li>\n"
+                                   "<li>Убедитесь, что это устройство EyePoint, а не какое-то другое устройство.</li>\n"
+                                   "</ul>")
     else:
-        text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства "
-                                   "EyePoint, а не какие-то другие устройства.")
+        text = qApp.translate("t", "Не удалось подключиться к {}.\n<ul>\n"
+                                   "<li>Проверьте, что устройства подключены к компьютеру и не удерживаются другой "
+                                   "программой.</li>\n"
+                                   "<li>Убедитесь, что это устройства EyePoint, а не какие-то другие устройства.</li>\n"
+                                   "</ul>")
     ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_ports)))
 
 
@@ -308,12 +314,12 @@ def request_opening_by_force(text: str) -> bool:
     :return: True if measurers need to be opened by force.
     """
 
-    message_box = create_message_box(qApp.translate("utils", "Ошибка"), text)
+    message_box = create_message_box(qApp.translate("t", "Ошибка"), text)
     layout = message_box.layout()
     item_with_ok_button = layout.itemAtPosition(2, 2)
     layout.removeItem(item_with_ok_button)
 
-    check_box_force_open = QCheckBox(qApp.translate("utils", "Все равно открыть"))
+    check_box_force_open = QCheckBox(qApp.translate("t", "Все равно открыть"))
     h_layout = QHBoxLayout()
     h_layout.addWidget(check_box_force_open)
     h_layout.addStretch(1)

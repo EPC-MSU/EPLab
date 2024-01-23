@@ -154,13 +154,13 @@ def show_message(header: str, message: str, additional_info: str = None, icon: Q
     if additional_info:
         message_box.setInformativeText(additional_info)
     if yes_button:
-        message_box.addButton(qApp.translate("utils", "Да"), QMessageBox.AcceptRole)
+        message_box.addButton(qApp.translate("t", "Да"), QMessageBox.AcceptRole)
     else:
         message_box.addButton("OK", QMessageBox.AcceptRole)
     if no_button:
-        message_box.addButton(qApp.translate("utils", "Нет"), QMessageBox.NoRole)
+        message_box.addButton(qApp.translate("t", "Нет"), QMessageBox.NoRole)
     if cancel_button:
-        message_box.addButton(qApp.translate("utils", "Отмена"), QMessageBox.RejectRole)
+        message_box.addButton(qApp.translate("t", "Отмена"), QMessageBox.RejectRole)
     return message_box.exec()
 
 
