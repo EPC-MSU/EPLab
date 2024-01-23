@@ -312,8 +312,7 @@ class MuxAndPlanWindow(QWidget):
 
         index = self.measurement_plan_widget.get_pin_index(mux_output)
         if index is not None:
-            self._parent.measurement_plan._current_pin_index = index
-            self.measurement_plan_widget.select_row_for_current_pin()
+            self._parent.handle_changing_pin_in_mux(index)
 
     def select_current_pin(self) -> None:
         """
