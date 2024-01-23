@@ -2,7 +2,9 @@ import logging
 import os
 from collections import namedtuple
 from typing import List, Optional, Tuple, Union
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QCoreApplication as qApp, QTimer
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QCoreApplication as qApp, Qt, QTimer
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QMessageBox
 from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerBase, AnalogMultiplexerVirtual
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
@@ -219,7 +221,7 @@ def create_measurers_by_force(*ports: str) -> Tuple[Optional[List[IVMeasurerBase
     """
 
     measurers, bad_ports, bad_firmwares, bad_firmwares_ports = create_measurers(*ports)
-    if bad_firmwares and ut.request_opening_by_force(bad_firmwares):
+    if bad_firmwares and request_opening_by_force(bad_firmwares):
         for i, port in bad_firmwares_ports:
             new_measurers, new_bad_ports, _, _ = create_measurers(port, force_open=True)
             if new_measurers:
@@ -227,6 +229,22 @@ def create_measurers_by_force(*ports: str) -> Tuple[Optional[List[IVMeasurerBase
             else:
                 bad_ports.extend(new_bad_ports)
     return [measurer for measurer in measurers if measurer is not None], bad_ports
+
+
+def create_message_box(msg_title: str, msg_text: str) -> QMessageBox:
+    """
+    Function creates message box.
+    :param msg_title: title of message box;
+    :param msg_text: message text.
+    :return: message box.
+    """
+
+    message_box = QMessageBox()
+    message_box.setIcon(QMessageBox.Warning)
+    message_box.setWindowTitle(msg_title)
+    message_box.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
+    message_box.setText(msg_text)
+    return message_box
 
 
 def create_multiplexer(port: Optional[str] = None) -> Tuple[Optional[AnalogMultiplexerBase], List[str]]:
@@ -264,3 +282,27 @@ def print_errors(*bad_ports: str) -> None:
         text = qApp.translate("t", "Не удалось подключиться к {0}. Убедитесь, что {0} - это устройства "
                                    "EyePoint, а не какие-то другие устройства.")
     ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_ports)))
+
+
+def request_opening_by_force(text: str) -> bool:
+    """
+    Function reports that the user has selected measurers with firmware incompatible with program. Function also asks
+    if measurers need to be opened by force.
+    :param text: error text.
+    :return: True if measurers need to be opened by force.
+    """
+
+    message_box = create_message_box(qApp.translate("utils", "Ошибка"), text)
+    layout = message_box.layout()
+    item_with_ok_button = layout.itemAtPosition(2, 2)
+    layout.removeItem(item_with_ok_button)
+
+    check_box_force_open = QCheckBox(qApp.translate("utils", "Все равно открыть"))
+    h_layout = QHBoxLayout()
+    h_layout.addWidget(check_box_force_open)
+    h_layout.addStretch(1)
+    h_layout.addItem(item_with_ok_button)
+
+    layout.addLayout(h_layout, 2, 2, Qt.AlignCenter)
+    message_box.exec_()
+    return check_box_force_open.checkState() == Qt.Checked
