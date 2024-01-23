@@ -33,6 +33,7 @@ class ConnectionChecker(QObject):
 
         super().__init__()
         self._auto_settings: AutoSettings = auto_settings
+        self._force_open: bool = None
         self._measurer_1_port: str = None
         self._measurer_2_port: str = None
         self._mux_port: str = None
@@ -42,18 +43,76 @@ class ConnectionChecker(QObject):
         self._timer.setInterval(ConnectionChecker.TIMEOUT)
         self._timer.setSingleShot(True)
 
-    def _connect_devices(self) -> bool:
+    def _connect_devices(self, measurer_1_port: Optional[str], measurer_2_port: Optional[str], mux_port: Optional[str],
+                         product_name: Optional[cw.ProductName], error_report_required: Optional[bool] = False
+                         ) -> ConnectionData:
+        """
+        :param measurer_1_port: port for the first IV-measurer;
+        :param measurer_2_port: port for the second IV-measurer;
+        :param mux_port: port for multiplexer;
+        :param product_name: name of product to work with application.
+        :param error_report_required: if True, then connection errors must be reported, otherwise errors are ignored.
+        :return: an object with a created measurement system and product name.
+        """
+
+        measurers, bad_measurer_ports = self._create_measurers_by_force(measurer_1_port, measurer_2_port)
+        mux, bad_mux_ports = create_multiplexer(mux_port)
+
+        if error_report_required:
+            print_errors(*bad_measurer_ports, *bad_mux_ports)
+
+        if not bad_measurer_ports:
+            if len(measurers) > 1:
+                # Reorder measurers according to their addresses in USB hubs tree
+                measurers = ut.sort_devices_by_usb_numbers(measurers)
+
+            if len(measurers) > 0:
+                measurers[0].name = "test"
+                if len(measurers) == 2:
+                    measurers[1].name = "ref"
+                measurement_system = create_measurement_system(measurers, mux)
+            else:
+                measurement_system = None
+            return ConnectionData(measurement_system, product_name)
+
+        close_devices(*measurers, mux)
+        return ConnectionData(None, product_name)
+
+    def _connect_devices_in_background(self) -> bool:
         """
         :return: True if IV-measurers and multiplexer have been created to connect.
         """
 
-        connection_data = connect_devices(self._measurer_1_port, self._measurer_2_port, self._mux_port,
-                                          self._product_name)
+        connection_data = self._connect_devices(self._measurer_1_port, self._measurer_2_port, self._mux_port,
+                                                self._product_name)
         if connection_data.measurement_system:
             self.connect_signal.emit(connection_data)
             return True
 
         return False
+
+    def _create_measurers_by_force(self, *ports: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str]]:
+        """
+        Method creates IV-measurers for the given list of ports. If during creation it turns out that the IV-measurer
+        has the wrong firmware, then you can create the IV-measurer anyway.
+        :param ports: ports for which to create IV-measurers.
+        :return: list of IV-measurers created for a given list of ports and list of ports for which IV-measurers could
+        not be created.
+        """
+
+        measurers, bad_ports, bad_firmwares, bad_firmwares_ports = create_measurers(*ports)
+        if bad_firmwares:
+            if self._force_open is None:
+                self._force_open = request_opening_by_force(bad_firmwares)
+
+            if self._force_open:
+                for i, port in bad_firmwares_ports:
+                    new_measurers, new_bad_ports, _, _ = create_measurers(port, force_open=True)
+                    if new_measurers:
+                        measurers[i] = new_measurers[0]
+                    else:
+                        bad_ports.extend(new_bad_ports)
+        return [measurer for measurer in measurers if measurer is not None], bad_ports
 
     def _get_connection_params(self) -> None:
         """
@@ -72,9 +131,22 @@ class ConnectionChecker(QObject):
         port = connection_params.get("mux_port", None)
         self._mux_port = get_port(port)
 
+    def connect_devices_by_user(self, measurer_1_port: Optional[str], measurer_2_port: Optional[str],
+                                mux_port: Optional[str], product_name: Optional[cw.ProductName]) -> ConnectionData:
+        """
+        :param measurer_1_port: port for the first IV-measurer;
+        :param measurer_2_port: port for the second IV-measurer;
+        :param mux_port: port for multiplexer;
+        :param product_name: name of product to work with application.
+        :return: an object with a created measurement system and product name.
+        """
+
+        self._force_open = None
+        return self._connect_devices(measurer_1_port, measurer_2_port, mux_port, product_name, True)
+
     @pyqtSlot()
     def check_connection(self) -> None:
-        if not self._connect_devices():
+        if not self._connect_devices_in_background():
             self._timer.start()
 
     def run_check(self) -> None:
@@ -96,42 +168,6 @@ def close_devices(*devices: Union[IVMeasurerBase, AnalogMultiplexerBase]) -> Non
                 device.close_device()
             except Exception:
                 pass
-
-
-def connect_devices(measurer_1_port: Optional[str], measurer_2_port: Optional[str], mux_port: Optional[str],
-                    product_name: Optional[cw.ProductName], error_report_required: Optional[bool] = False
-                    ) -> ConnectionData:
-    """
-    :param measurer_1_port: port for the first IV-measurer;
-    :param measurer_2_port: port for the second IV-measurer;
-    :param mux_port: port for multiplexer;
-    :param product_name: name of product to work with application.
-    :param error_report_required: if True, then connection errors must be reported, otherwise errors are ignored.
-    :return: an object with a created measurement system and product name.
-    """
-
-    measurers, bad_measurer_ports = create_measurers_by_force(measurer_1_port, measurer_2_port)
-    mux, bad_mux_ports = create_multiplexer(mux_port)
-
-    if error_report_required:
-        print_errors(*bad_measurer_ports, *bad_mux_ports)
-
-    if not bad_measurer_ports:
-        if len(measurers) > 1:
-            # Reorder measurers according to their addresses in USB hubs tree
-            measurers = ut.sort_devices_by_usb_numbers(measurers)
-
-        if len(measurers) > 0:
-            measurers[0].name = "test"
-            if len(measurers) == 2:
-                measurers[1].name = "ref"
-            measurement_system = create_measurement_system(measurers, mux)
-        else:
-            measurement_system = None
-        return ConnectionData(measurement_system, product_name)
-
-    close_devices(*measurers, mux)
-    return ConnectionData(None, product_name)
 
 
 def create_measurement_system(measurers: List[Optional[IVMeasurerBase]], mux: Optional[AnalogMultiplexerBase]
@@ -209,26 +245,6 @@ def create_measurers(*ports: str, force_open: Optional[bool] = False
             measurer = None
         measurers.append(measurer)
     return measurers, bad_ports, "\n".join(bad_firmwares), bad_firmwares_ports
-
-
-def create_measurers_by_force(*ports: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str]]:
-    """
-    Method creates IV-measurers for the given list of ports. If during creation it turns out that the IV-measurer has
-    the wrong firmware, then you can create the IV-measurer anyway.
-    :param ports: ports for which to create IV-measurers.
-    :return: list of IV-measurers created for a given list of ports and list of ports for which IV-measurers could not
-    be created.
-    """
-
-    measurers, bad_ports, bad_firmwares, bad_firmwares_ports = create_measurers(*ports)
-    if bad_firmwares and request_opening_by_force(bad_firmwares):
-        for i, port in bad_firmwares_ports:
-            new_measurers, new_bad_ports, _, _ = create_measurers(port, force_open=True)
-            if new_measurers:
-                measurers[i] = new_measurers[0]
-            else:
-                bad_ports.extend(new_bad_ports)
-    return [measurer for measurer in measurers if measurer is not None], bad_ports
 
 
 def create_message_box(msg_title: str, msg_text: str) -> QMessageBox:

@@ -32,7 +32,7 @@ from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.boardwidget import BoardWidget
 from window.commentwidget import CommentWidget
 from window.common import DeviceErrorsHandler, WorkMode
-from window.connectionchecker import connect_devices, ConnectionChecker, ConnectionData
+from window.connectionchecker import ConnectionChecker, ConnectionData
 from window.curvestates import CurveStates
 from window.language import Language, Translator
 from window.measuredpinschecker import MeasuredPinsChecker
@@ -1124,7 +1124,9 @@ class EPLabWindow(QMainWindow):
         :param product_name: name of product to work with application.
         """
 
-        measurement_system, product_name = connect_devices(port_1, port_2, mux_port, product_name, True)
+        self._connection_checker.stop_check()
+        measurement_system, product_name = self._connection_checker.connect_devices_by_user(port_1, port_2, mux_port,
+                                                                                            product_name)
         if measurement_system:
             self._connect_devices(measurement_system, product_name)
         else:
