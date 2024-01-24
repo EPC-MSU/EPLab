@@ -30,6 +30,7 @@ from multiplexer import MuxAndPlanWindow
 from window import utils as ut
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.boardwidget import BoardWidget
+from window.breaksignaturessaver import BreakSignaturesSaver
 from window.commentwidget import CommentWidget
 from window.common import DeviceErrorsHandler, WorkMode
 from window.connectionchecker import ConnectionChecker, ConnectionData
@@ -40,7 +41,7 @@ from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
 from window.pedalhandler import add_pedal_handler
 from window.pinindexwidget import PinIndexWidget
-from window.planautotransition import BreakSignaturesSaver, PlanAutoTransition
+from window.planautotransition import PlanAutoTransition
 from window.plancompatibility import PlanCompatibility
 from window.scaler import get_scale_factor, update_scale_of_class
 from window.scorewrapper import ScoreWrapper
@@ -119,7 +120,7 @@ class EPLabWindow(QMainWindow):
         self.measurers_connected.connect(self.handle_connection)
         self._connection_checker: ConnectionChecker = ConnectionChecker(self._auto_settings)
         self._connection_checker.connect_signal.connect(self.handle_connection_signal_from_checker)
-        self._break_signature_saver: BreakSignaturesSaver = BreakSignaturesSaver(self, self._auto_settings)
+        self._break_signature_saver: BreakSignaturesSaver = BreakSignaturesSaver(self._auto_settings)
         self._break_signature_saver.new_settings_signal.connect(self.set_measurement_settings_and_update_ui)
         self._plan_auto_transition: PlanAutoTransition = PlanAutoTransition(self._auto_settings)
 
