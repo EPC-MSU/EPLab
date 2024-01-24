@@ -1700,7 +1700,7 @@ class EPLabWindow(QMainWindow):
 
         language = show_language_selection_window()
         if language is not None and language != qApp.instance().property("language"):
-            self._auto_settings.save_language(Translator.get_language_name(language))
+            self._auto_settings.save_language(language)
             text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
             text_en = "The language settings are saved. Restart the program for the changes to take effect."
             if qApp.instance().property("language") is Language.RU:

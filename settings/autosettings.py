@@ -27,9 +27,10 @@ class AutoSettings(SettingsHandler):
     """
 
     frequency: str = None
-    language: str = None
     sensitive: str = None
     voltage: str = None
+    auto_transition: bool = False
+    language: Language = Language.EN
     measurer_1_port: str = None
     measurer_2_port: str = None
     mux_port: str = None
@@ -37,22 +38,18 @@ class AutoSettings(SettingsHandler):
 
     def _read(self, settings: QSettings) -> None:
 
-        params = {"frequency": {},
-                  "sensitive": {},
-                  "voltage": {}}
+        params = {"frequency": {"convert": check_none},
+                  "sensitive": {"convert": check_none},
+                  "voltage": {"convert": check_none}}
         settings.beginGroup("MeasurementSettings")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
 
-        params = {"language": {}}
+        params = {"auto_transition": {"convert": get_bool_from_str},
+                  "language": {"convert": get_language_from_str}}
         settings.beginGroup("Main")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
-
-        def check_none(value: str) -> Optional[str]:
-            if value and value.lower() == "none":
-                return None
-            return str(value)
 
         params = {"measurer_1_port": {"convert": check_none},
                   "measurer_2_port": {"convert": check_none},
@@ -63,14 +60,15 @@ class AutoSettings(SettingsHandler):
         settings.endGroup()
 
     def _write(self, settings: QSettings) -> None:
-        params = {"frequency": {},
-                  "sensitive": {},
-                  "voltage": {}}
+        params = {"frequency": {"convert": str},
+                  "sensitive": {"convert": str},
+                  "voltage": {"convert": str}}
         settings.beginGroup("MeasurementSettings")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 
-        params = {"language": {"convert": str}}
+        params = {"auto_transition": {"convert": str},
+                  "language": {"convert": convert_language_to_str}}
         settings.beginGroup("Main")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
@@ -82,6 +80,13 @@ class AutoSettings(SettingsHandler):
         settings.beginGroup("Connection")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
+
+    def get_auto_transition(self) -> bool:
+        """
+        :return: auto transition mode is enabled or disabled during testing according to plan.
+        """
+
+        return self.auto_transition
 
     def get_connection_params(self) -> Dict[str, str]:
         """
@@ -99,10 +104,7 @@ class AutoSettings(SettingsHandler):
         :return: the language that was set during the previous work.
         """
 
-        language = Translator.get_language_value(self.language)
-        if language is None:
-            return Language.EN
-        return language
+        return self.language
 
     def get_measurement_settings(self, product: EyePointProduct) -> Optional[MeasurementSettings]:
         """
@@ -125,6 +127,14 @@ class AutoSettings(SettingsHandler):
         return measurement_settings
 
     @save_settings
+    def save_auto_transition(self, auto_transition: bool) -> None:
+        """
+        :param auto_transition: auto transition mode is enabled or disabled during testing according to plan.
+        """
+
+        self.auto_transition = bool(auto_transition)
+
+    @save_settings
     def save_connection_params(self, measurer_1_port: str, measurer_2_port: str, mux_port: str, product_name: str
                                ) -> None:
         """
@@ -140,12 +150,12 @@ class AutoSettings(SettingsHandler):
         self.product_name = product_name
 
     @save_settings
-    def save_language(self, language: str) -> None:
+    def save_language(self, language: Language) -> None:
         """
         :param language: new language for software.
         """
 
-        self.language = language
+        self.language = language if language is not None else Language.EN
 
     @save_settings
     def save_measurement_settings(self, options: Dict[EyePointProduct.Parameter, str]) -> None:
@@ -156,3 +166,35 @@ class AutoSettings(SettingsHandler):
         self.frequency = options[EyePointProduct.Parameter.frequency]
         self.sensitive = options[EyePointProduct.Parameter.sensitive]
         self.voltage = options[EyePointProduct.Parameter.voltage]
+
+
+def check_none(value: str) -> Optional[str]:
+    return None if value and value.lower() == "none" else str(value)
+
+
+def convert_language_to_str(language: Language) -> str:
+    """
+    :param language: language.
+    :return: language value in string format.
+    """
+
+    return str(Translator.get_language_name(language))
+
+
+def get_bool_from_str(value: str) -> bool:
+    """
+    :param value: string value to be converted to bool.
+    :return: bool value.
+    """
+
+    return value.lower() == "true"
+
+
+def get_language_from_str(value: str) -> Language:
+    """
+    :param value: language value in string format.
+    :return: language.
+    """
+
+    language = Translator.get_language_value(value)
+    return Language.EN if language is None else language
