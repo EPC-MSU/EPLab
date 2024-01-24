@@ -40,6 +40,7 @@ from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
 from window.pedalhandler import add_pedal_handler
 from window.pinindexwidget import PinIndexWidget
+from window.planautotransition import BreakSignaturesSaver, PlanAutoTransition
 from window.plancompatibility import PlanCompatibility
 from window.scaler import get_scale_factor, update_scale_of_class
 from window.scorewrapper import ScoreWrapper
@@ -118,6 +119,9 @@ class EPLabWindow(QMainWindow):
         self.measurers_connected.connect(self.handle_connection)
         self._connection_checker: ConnectionChecker = ConnectionChecker(self._auto_settings)
         self._connection_checker.connect_signal.connect(self.handle_connection_signal_from_checker)
+        self._break_signature_saver: BreakSignaturesSaver = BreakSignaturesSaver(self, self._auto_settings)
+        self._break_signature_saver.new_settings_signal.connect(self.set_measurement_settings_and_update_ui)
+        self._plan_auto_transition: PlanAutoTransition = PlanAutoTransition(self._auto_settings)
 
         if port_1 is None and port_2 is None:
             self._connection_checker.run_check()
@@ -729,6 +733,7 @@ class EPLabWindow(QMainWindow):
                     # Display two current curves
                     curves["reference"] = self._msystem.measurers[1].get_last_cached_iv_curve()
                 self._update_curves(curves, self._msystem.get_settings())
+                self._break_signature_saver.save_signature()
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.check_pin()
                 if self._settings_update_next_cycle:
@@ -1746,6 +1751,15 @@ class EPLabWindow(QMainWindow):
             self.remove_cursor_action.setChecked(False)
         self._iv_window.plot.set_state_adding_cursor(state)
 
+    def set_measurement_settings_and_update_ui(self, settings: MeasurementSettings) -> None:
+        """
+        :param settings:
+        """
+
+        self._set_msystem_settings(settings)
+        options = self._product.settings_to_options(settings)
+        self._set_options_to_ui(options)
+
     @pyqtSlot()
     def set_remove_cursor_state(self) -> None:
         """
@@ -1806,6 +1820,7 @@ class EPLabWindow(QMainWindow):
         settings_window.apply_settings_signal.connect(self.apply_settings)
         settings_window.exec()
         self.dir_chosen_by_user = settings_window.settings_directory
+        self._break_signature_saver.save_break_signatures_if_necessary(self.product)
 
     def update_current_pin(self, pin_centering: bool = True) -> None:
         """
