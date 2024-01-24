@@ -3,6 +3,7 @@ from PyQt5.QtCore import QSettings
 from epcore.elements import MeasurementSettings
 from epcore.product import EyePointProduct
 from settings.settingshandler import SettingsHandler
+from settings import utils as ut
 from window.language import Language, Translator
 
 
@@ -45,7 +46,7 @@ class AutoSettings(SettingsHandler):
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
 
-        params = {"auto_transition": {"convert": get_bool_from_str},
+        params = {"auto_transition": {"convert": ut.to_bool},
                   "language": {"convert": get_language_from_str}}
         settings.beginGroup("Main")
         self._read_parameters_from_settings(settings, params)
@@ -179,15 +180,6 @@ def convert_language_to_str(language: Language) -> str:
     """
 
     return str(Translator.get_language_name(language))
-
-
-def get_bool_from_str(value: str) -> bool:
-    """
-    :param value: string value to be converted to bool.
-    :return: bool value.
-    """
-
-    return value.lower() == "true"
 
 
 def get_language_from_str(value: str) -> Language:

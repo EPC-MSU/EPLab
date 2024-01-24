@@ -28,9 +28,10 @@ class SettingsEditor:
 
 class Settings(SettingsHandler):
 
-    ATTRIBUTE_NAMES: List[str] = ["frequency", "hide_curve_a", "hide_curve_b", "internal_resistance", "max_voltage",
-                                  "sound_enabled", "tolerance", "work_mode"]
+    ATTRIBUTE_NAMES: List[str] = ["auto_transition", "frequency", "hide_curve_a", "hide_curve_b", "internal_resistance",
+                                  "max_voltage", "sound_enabled", "tolerance", "work_mode"]
     changed: pyqtSignal = pyqtSignal()
+    auto_transition: bool = False
     frequency: Tuple[int, int] = None
     hide_curve_a: bool = False
     hide_curve_b: bool = False
@@ -60,7 +61,8 @@ class Settings(SettingsHandler):
         :param settings: QSettings object from which parameter values ​​need to be read.
         """
 
-        params = {"frequency": {"convert": lambda value: tuple(map(int, value))},
+        params = {"auto_transition": ut.to_bool,
+                  "frequency": {"convert": lambda value: tuple(map(int, value))},
                   "hide_curve_a": {"convert": ut.to_bool},
                   "hide_curve_b": {"convert": ut.to_bool},
                   "internal_resistance": {"convert": float},
@@ -84,7 +86,8 @@ class Settings(SettingsHandler):
                     return key
             return "Compare"
 
-        params = {"frequency": {"convert": lambda value: list(map(int, value))},
+        params = {"auto_settings": {},
+                  "frequency": {"convert": lambda value: list(map(int, value))},
                   "hide_curve_a": {},
                   "hide_curve_b": {},
                   "internal_resistance": {"convert": ut.float_to_str},

@@ -1074,6 +1074,7 @@ class EPLabWindow(QMainWindow):
         self.hide_curve_a_action.setChecked(new_settings.hide_curve_a)
         self.hide_curve_b_action.setChecked(new_settings.hide_curve_b)
         self.sound_enabled_action.setChecked(new_settings.sound_enabled)
+        self._auto_settings.save_auto_transition(new_settings.auto_transition)
         self._update_tolerance(new_settings.tolerance)
 
     @pyqtSlot(str)
@@ -1334,10 +1335,11 @@ class EPLabWindow(QMainWindow):
             settings.work_mode = WorkMode.WRITE
         else:
             settings.work_mode = WorkMode.COMPARE
-        settings.tolerance = self.tolerance
+        settings.auto_transition = self._auto_settings.get_auto_transition()
         settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
+        settings.tolerance = self.tolerance
         return settings
 
     @pyqtSlot(bool)
