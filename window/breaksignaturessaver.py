@@ -1,7 +1,9 @@
+import json
+import math
 import os
-from typing import Generator, Tuple
+from typing import Generator, Optional, Tuple
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QObject, QTimer
-from epcore.elements import MeasurementSettings
+from epcore.elements import IVCurve, MeasurementSettings
 from epcore.product import EyePointProduct, MeasurementParameterOption
 from dialogs import ProgressWindow
 from settings.autosettings import AutoSettings
@@ -15,12 +17,19 @@ class BreakSignaturesSaver(QObject):
     new_settings_signal: pyqtSignal = pyqtSignal(MeasurementSettings)
 
     def __init__(self, auto_settings: AutoSettings) -> None:
+        """
+        :param auto_settings:
+        """
+
         super().__init__()
         self._auto_settings: AutoSettings = auto_settings
+        self._current_frequency: MeasurementParameterOption = None
+        self._current_sensitive: MeasurementParameterOption = None
+        self._current_voltage: MeasurementParameterOption = None
         self._dir: str = os.path.join(os.path.curdir, "break_signatures")
         self._is_running: bool = False
         self._language: Language = self._get_language()
-        self._new_settings_required: bool = True
+        self._new_settings_required: bool = False
         self._product: EyePointProduct = None
         self._settings = None
         self._timer: QTimer = QTimer()
@@ -48,30 +57,35 @@ class BreakSignaturesSaver(QObject):
 
         return True
 
+    def _check_required_settings(self, settings: MeasurementSettings) -> bool:
+        abs_tol = 1e-6
+        if self._current_frequency and self._current_sensitive and self._current_voltage:
+            return (math.isclose(settings.probe_signal_frequency, self._current_frequency.value[0], abs_tol=abs_tol) and
+                    math.isclose(settings.max_voltage, self._current_voltage.value, abs_tol=abs_tol) and
+                    math.isclose(settings.internal_resistance, self._current_sensitive.value, abs_tol=abs_tol))
+        return False
+
     @staticmethod
     def _get_language() -> Language:
         language = qApp.instance().property("language")
         return Language.EN if language is None else language
 
-    @staticmethod
-    def _get_settings(frequency: MeasurementParameterOption, voltage: MeasurementParameterOption,
-                      sensitive: MeasurementParameterOption) -> MeasurementSettings:
-        probe_frequency, sampling_rate = frequency.value
+    def _get_settings(self) -> MeasurementSettings:
+        probe_frequency, sampling_rate = self._current_frequency.value
         return MeasurementSettings(sampling_rate=sampling_rate,
-                                   internal_resistance=sensitive.value,
-                                   max_voltage=voltage.value,
+                                   internal_resistance=self._current_sensitive.value,
+                                   max_voltage=self._current_voltage.value,
                                    probe_signal_frequency=probe_frequency)
 
-    def _get_settings_info(self, frequency: MeasurementParameterOption, voltage: MeasurementParameterOption,
-                           sensitive: MeasurementParameterOption) -> str:
+    def _get_settings_info(self) -> str:
 
         def get_info(option: MeasurementParameterOption) -> str:
             return option.label_en if self._language is Language.EN else option.label_ru
 
-        frequency_info = get_info(frequency)
-        sensitive_info = get_info(sensitive)
-        voltage_info = get_info(voltage)
-        return f"{frequency_info}, {voltage_info}, {sensitive_info}"
+        frequency_info = get_info(self._current_frequency)
+        sensitive_info = get_info(self._current_sensitive)
+        voltage_info = get_info(self._current_voltage)
+        return f"{frequency_info}, {voltage_info}, {sensitive_info}..."
 
     def _get_settings_total_number(self) -> int:
         parameters = self._product.get_parameters()
@@ -96,10 +110,10 @@ class BreakSignaturesSaver(QObject):
     def _send_settings(self) -> None:
         if self._new_settings_required:
             try:
-                frequency, voltage, sensitive = next(self._settings)
-                measurement_settings = self._get_settings(frequency, voltage, sensitive)
+                self._current_frequency, self._current_voltage, self._current_sensitive = next(self._settings)
+                measurement_settings = self._get_settings()
                 self.new_settings_signal.emit(measurement_settings)
-                info = self._get_settings_info(frequency, voltage, sensitive)
+                info = self._get_settings_info()
                 self._window.change_progress(info)
                 self._new_settings_required = False
             except StopIteration:
@@ -119,9 +133,11 @@ class BreakSignaturesSaver(QObject):
         self._product = product
         self._settings = self._iterate_settings()
 
-    def save_signature(self) -> None:
-        if self.is_running:
-            self._request_new_settings()
+    def _save_signature(self, curve: IVCurve) -> None:
+        filename = create_name(self._current_frequency, self._current_voltage, self._current_sensitive)
+        path = os.path.join(self._dir, filename)
+        with open(path, "w") as file:
+            json.dump(curve.to_json(), file)
 
     def save_break_signatures_if_necessary(self, product: EyePointProduct) -> None:
         self._update_product(product)
@@ -130,13 +146,19 @@ class BreakSignaturesSaver(QObject):
                                      qApp.translate("t", "Чтобы включить автопереход в режиме тестирования по плану, "
                                                          "нужно измерить сигнатуры разрыва. Для этого:\n<ul>\n"
                                                          "<li>разомкните щупы;</li>\n"
-                                                         "<li>нажмите 'OK';</li>\n"
+                                                         "<li>нажмите 'Да';</li>\n"
                                                          "<li>дождитесь появления сообщения о завершении процедуры."
                                                          "</li>\n</ul>"), yes_button=True, no_button=True)
             if not result:
+                self._request_new_settings()
                 self._start_settings_iteration()
+
+    def save_signature(self, curve: Optional[IVCurve] = None, settings: Optional[MeasurementSettings] = None) -> None:
+        if self.is_running and curve and settings and self._check_required_settings(settings):
+            self._save_signature(curve)
+            self._request_new_settings()
 
 
 def create_name(frequency: MeasurementParameterOption, voltage: MeasurementParameterOption,
                 sensitive: MeasurementParameterOption) -> str:
-    return f"{frequency.name}-{voltage.name}-{sensitive.name}.txt"
+    return f"{frequency.name}-{voltage.name}-{sensitive.name}.json"

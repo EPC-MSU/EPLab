@@ -733,8 +733,9 @@ class EPLabWindow(QMainWindow):
                 if self._work_mode is WorkMode.COMPARE and len(self._msystem.measurers) > 1:
                     # Display two current curves
                     curves["reference"] = self._msystem.measurers[1].get_last_cached_iv_curve()
-                self._update_curves(curves, self._msystem.get_settings())
-                self._break_signature_saver.save_signature()
+                measurement_settings = self._msystem.get_settings()
+                self._update_curves(curves, measurement_settings)
+                self._break_signature_saver.save_signature(curves["current"], measurement_settings)
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.check_pin()
                 if self._settings_update_next_cycle:
