@@ -125,6 +125,7 @@ class EPLabWindow(QMainWindow):
         self._plan_auto_transition: PlanAutoTransition = PlanAutoTransition(self.product, self._auto_settings,
                                                                             self._score_wrapper, self._calculate_score)
         self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin)
+        self._plan_auto_transition.save_pin_signal.connect(self.save_pin)
 
         if port_1 is None and port_2 is None:
             self._connection_checker.run_check()
@@ -577,7 +578,7 @@ class EPLabWindow(QMainWindow):
         if self._device_errors_handler.all_ok:
             with self._device_errors_handler:
                 self._read_curves_periodic_task()
-            self._plan_auto_transition.move_to_next()
+            self._plan_auto_transition.save_pin()
             self._mux_and_plan_window.measurement_plan_runner.save_pin()
             self._timer.start()  # add this task to event loop
         else:
@@ -739,8 +740,7 @@ class EPLabWindow(QMainWindow):
                 measurement_settings = self._msystem.get_settings()
                 self._update_curves(curves, measurement_settings)
                 self._plan_auto_transition.check_auto_transition(self.work_mode, self._current_curve,
-                                                                 self._reference_curve, measurement_settings,
-                                                                 self._measurement_plan)
+                                                                 self._reference_curve, measurement_settings)
                 self._break_signature_saver.save_signature(curves["current"], measurement_settings)
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.check_pin()

@@ -1,9 +1,10 @@
 import json
 import os
+import time
+from enum import auto, Enum
 from typing import Callable, Dict, Optional
-from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QTimer
 from epcore.elements import IVCurve, MeasurementSettings
-from epcore.measurementmanager import MeasurementPlan
 from epcore.product import EyePointProduct
 from settings.autosettings import AutoSettings
 from window.breaksignaturessaver import create_filename, iterate_settings
@@ -13,8 +14,16 @@ from window.scorewrapper import ScoreWrapper
 
 class PlanAutoTransition(QObject):
 
+    class Process(Enum):
+        GO_TO_NEXT = auto()
+        MEASURE = auto()
+        SAVE = auto()
+
     BREAK_THRESHOLD: float = 0.15
+    TIME_TO_GO_TO_NEXT: float = 6
+    TIME_TO_SHOW: float = 2
     go_to_next_signal: pyqtSignal = pyqtSignal(bool)
+    save_pin_signal: pyqtSignal = pyqtSignal()
 
     def __init__(self, product: EyePointProduct, auto_settings: AutoSettings, score_wrapper: ScoreWrapper,
                  calculate_score: Callable[[IVCurve, IVCurve, MeasurementSettings], float]) -> None:
@@ -30,9 +39,16 @@ class PlanAutoTransition(QObject):
         self._break_signatures: Dict[str, IVCurve] = dict()
         self._calculate_score: Callable[[IVCurve, IVCurve, MeasurementSettings], float] = calculate_score
         self._dir: str = os.path.join(os.path.curdir, "break_signatures")
-        self._move_to_next: bool = False
+        self._need_to_save: bool = False
         self._product: EyePointProduct = product
+        self._process: "PlanAutoTransition.Process" = self.Process.MEASURE
         self._score_wrapper: ScoreWrapper = score_wrapper
+        self._start_time: float = None
+        self._timer: QTimer = QTimer()
+        self._timer.setInterval(10)
+        self._timer.setSingleShot(True)
+        self._timer.timeout.connect(self.handle_timeout)
+
         self._load_break_signatures()
 
     @property
@@ -70,18 +86,14 @@ class PlanAutoTransition(QObject):
                 self._break_signatures[filename] = self._load_break_signature(path)
 
     def check_auto_transition(self, work_mode: WorkMode, curve_current: Optional[IVCurve] = None,
-                              curve_reference: Optional[IVCurve] = None, settings: Optional[MeasurementSettings] = None,
-                              measurement_plan: Optional[MeasurementPlan] = None) -> None:
-        self._move_to_next = False
-        break_signature = self._get_break_signature_for_settings(settings)
-        if work_mode is not WorkMode.TEST or not self.auto_transition or break_signature is None:
+                              curve_reference: Optional[IVCurve] = None, settings: Optional[MeasurementSettings] = None
+                              ) -> None:
+        self._need_to_save = False
+        if self._process != self.Process.MEASURE:
             return
 
-        pin = measurement_plan.get_current_pin()
-        test_measurements = pin.get_non_reference_measurements()
-        curve_test = test_measurements[0].ivc if len(test_measurements) else None
-        score = self._calculate_score_for_curves(curve_test, curve_reference, settings)
-        if score is not None and self._score_wrapper.check_score(score):
+        break_signature = self._get_break_signature_for_settings(settings)
+        if work_mode is not WorkMode.TEST or not self.auto_transition or break_signature is None:
             return
 
         score = self._calculate_score_for_curves(curve_current, break_signature, settings)
@@ -90,10 +102,24 @@ class PlanAutoTransition(QObject):
 
         score = self._calculate_score_for_curves(curve_current, curve_reference, settings)
         if score is not None and self._score_wrapper.check_score(score):
-            measurement_plan.save_last_measurement_as_test()
-            self._move_to_next = True
+            self._need_to_save = True
 
-    def move_to_next(self) -> None:
-        if self._move_to_next:
+    @pyqtSlot()
+    def handle_timeout(self) -> None:
+        if self._process == self.Process.SAVE and time.monotonic() - self._start_time > self.TIME_TO_SHOW:
             self.go_to_next_signal.emit(False)
-            self._move_to_next = False
+            self._process = self.Process.GO_TO_NEXT
+            self._start_time = time.monotonic()
+        elif self._process == self.Process.GO_TO_NEXT and time.monotonic() - self._start_time > self.TIME_TO_GO_TO_NEXT:
+            self._process = self.Process.MEASURE
+            return
+
+        self._timer.start()
+
+    def save_pin(self) -> None:
+        if self._need_to_save:
+            self._need_to_save = False
+            self.save_pin_signal.emit()
+            self._process = self.Process.SAVE
+            self._start_time = time.monotonic()
+            self._timer.start()
