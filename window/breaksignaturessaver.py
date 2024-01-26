@@ -106,6 +106,14 @@ class BreakSignaturesSaver(QObject):
     def _request_new_settings(self) -> None:
         self._new_settings_required = True
 
+    def _save_signature(self, curve: IVCurve) -> None:
+        filename = create_name(self._current_frequency, self._current_voltage, self._current_sensitive)
+        path = os.path.join(self._dir, filename)
+        if not os.path.exists(self._dir):
+            os.makedirs(self._dir, exist_ok=True)
+        with open(path, "w") as file:
+            json.dump(curve.to_json(), file)
+
     @pyqtSlot()
     def _send_settings(self) -> None:
         if self._new_settings_required:
@@ -132,12 +140,6 @@ class BreakSignaturesSaver(QObject):
     def _update_product(self, product: EyePointProduct) -> None:
         self._product = product
         self._settings = self._iterate_settings()
-
-    def _save_signature(self, curve: IVCurve) -> None:
-        filename = create_name(self._current_frequency, self._current_voltage, self._current_sensitive)
-        path = os.path.join(self._dir, filename)
-        with open(path, "w") as file:
-            json.dump(curve.to_json(), file)
 
     def save_break_signatures_if_necessary(self, product: EyePointProduct) -> None:
         self._update_product(product)
