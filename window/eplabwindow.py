@@ -120,9 +120,11 @@ class EPLabWindow(QMainWindow):
         self.measurers_connected.connect(self.handle_connection)
         self._connection_checker: ConnectionChecker = ConnectionChecker(self._auto_settings)
         self._connection_checker.connect_signal.connect(self.handle_connection_signal_from_checker)
-        self._break_signature_saver: BreakSignaturesSaver = BreakSignaturesSaver(self._auto_settings)
+        self._break_signature_saver: BreakSignaturesSaver = BreakSignaturesSaver(self.product, self._auto_settings)
         self._break_signature_saver.new_settings_signal.connect(self.set_measurement_settings_and_update_ui)
-        self._plan_auto_transition: PlanAutoTransition = PlanAutoTransition(self._auto_settings)
+        self._plan_auto_transition: PlanAutoTransition = PlanAutoTransition(self.product, self._auto_settings,
+                                                                            self._score_wrapper, self._calculate_score)
+        self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin)
 
         if port_1 is None and port_2 is None:
             self._connection_checker.run_check()
@@ -575,6 +577,7 @@ class EPLabWindow(QMainWindow):
         if self._device_errors_handler.all_ok:
             with self._device_errors_handler:
                 self._read_curves_periodic_task()
+            self._plan_auto_transition.move_to_next()
             self._mux_and_plan_window.measurement_plan_runner.save_pin()
             self._timer.start()  # add this task to event loop
         else:
@@ -735,6 +738,9 @@ class EPLabWindow(QMainWindow):
                     curves["reference"] = self._msystem.measurers[1].get_last_cached_iv_curve()
                 measurement_settings = self._msystem.get_settings()
                 self._update_curves(curves, measurement_settings)
+                self._plan_auto_transition.check_auto_transition(self.work_mode, self._current_curve,
+                                                                 self._reference_curve, measurement_settings,
+                                                                 self._measurement_plan)
                 self._break_signature_saver.save_signature(curves["current"], measurement_settings)
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.check_pin()
@@ -1822,7 +1828,7 @@ class EPLabWindow(QMainWindow):
         settings_window.apply_settings_signal.connect(self.apply_settings)
         settings_window.exec()
         self.dir_chosen_by_user = settings_window.settings_directory
-        self._break_signature_saver.save_break_signatures_if_necessary(self.product)
+        self._break_signature_saver.save_break_signatures_if_necessary()
 
     def update_current_pin(self, pin_centering: bool = True) -> None:
         """
