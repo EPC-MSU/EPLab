@@ -320,7 +320,13 @@ class EPLabWindow(QMainWindow):
         """
 
         compatibility_checker = PlanCompatibility(self, self._msystem, self._product, self._measurement_plan)
-        self._measurement_plan = compatibility_checker.check_compatibility(new_plan, empty_plan, filename)
+        self._measurement_plan, is_new_plan = compatibility_checker.check_compatibility(new_plan, empty_plan, filename)
+        if is_new_plan:
+            self._measurement_plan_path.path = None
+        elif filename is not None:
+            self._measurement_plan_path.path = filename
+        self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
+
         self._measured_pins_checker.set_new_plan()
         self._update_mux_actions()
 
@@ -377,13 +383,8 @@ class EPLabWindow(QMainWindow):
 
         if self._measurement_plan:
             self._check_plan_compatibility(False, False, self._measurement_plan_path.path)
-
-        if self._measurement_plan:
-            self._measurement_plan.measurer = self._msystem.measurers[0]
-            self._measurement_plan.multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
         else:
             self._reset_board()
-            self._measurement_plan_path.path = None
 
         self._set_widgets_to_init_state()
         self.measurers_connected.emit(True)
@@ -782,7 +783,7 @@ class EPLabWindow(QMainWindow):
             Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]), measurer=self._msystem.measurers[0],
             multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
         self._check_plan_compatibility(True, True)
-        self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
+        self._measurement_plan_path.path = None
 
     def _save_changes_in_measurement_plan(self, additional_info: str = None) -> bool:
         """
@@ -1151,7 +1152,6 @@ class EPLabWindow(QMainWindow):
             return
 
         self._reset_board()
-        self._measurement_plan_path.path = None
         self._board_window.update_board()
         self.update_current_pin()
         self._mux_and_plan_window.update_info()
@@ -1522,8 +1522,6 @@ class EPLabWindow(QMainWindow):
             self._check_plan_compatibility(True, False, filename)
 
         if self._measurement_plan:
-            self._measurement_plan_path.path = filename
-            self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
             # New workspace will be created here
             self._board_window.update_board()
             self._open_board_window_if_needed()
