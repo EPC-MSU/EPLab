@@ -183,11 +183,16 @@ def check_break_signatures(dir_path: str, product: EyePointProduct, required_fre
     if not os.path.isdir(dir_path):
         return False
 
-    for frequency, sensitive, voltage in iterate_settings(product, required_frequency, required_sensitive):
-        filename = create_filename(frequency, sensitive, voltage)
-        path = os.path.join(dir_path, filename)
-        if not os.path.exists(path):
-            return False
+    try:
+        for frequency, sensitive, voltage in iterate_settings(product, required_frequency, required_sensitive):
+            filename = create_filename(frequency, sensitive, voltage)
+            path = os.path.join(dir_path, filename)
+            if not os.path.exists(path):
+                return False
+
+            load_signature(path)
+    except Exception:
+        return False
 
     return True
 
@@ -253,3 +258,15 @@ def iterate_settings(product: EyePointProduct, required_frequency: Optional[str]
 
             for voltage in parameters[EyePointProduct.Parameter.voltage].options:
                 yield frequency, sensitive, voltage
+
+
+def load_signature(path: str) -> Optional[IVCurve]:
+    """
+    :param path: path to the signature file.
+    :return: signature.
+    """
+
+    if os.path.exists(path):
+        with open(path, "r") as file:
+            return IVCurve.create_from_json(json.load(file))
+    return None

@@ -1,5 +1,5 @@
-import json
 import logging
+import math
 import os
 import time
 from enum import auto, Enum
@@ -9,7 +9,7 @@ from epcore.elements import IVCurve, MeasurementSettings
 from epcore.product import EyePointProduct
 from connection_window.productname import ProductName
 from settings.autosettings import AutoSettings
-from window.breaksignaturessaver import create_filename, iterate_settings
+from window.breaksignaturessaver import create_filename, iterate_settings, load_signature
 from window.common import WorkMode
 from window.scorewrapper import ScoreWrapper
 
@@ -93,6 +93,17 @@ class PlanAutoTransition(QObject):
 
         return self._calculate_score(curve_1, curve_2, settings)
 
+    @staticmethod
+    def _check_frequency(settings: MeasurementSettings) -> bool:
+        """
+        :param settings: measurement settings.
+        :return: True if the specified frequency is valid. Auto transition can only occur when the frequency is not
+        1 Hz (see #92265).
+        """
+
+        abs_tol = 1e-6
+        return not math.isclose(settings.probe_signal_frequency, 1, abs_tol=abs_tol)
+
     def _check_probes_raised(self, settings: MeasurementSettings, curve: IVCurve, break_signature: IVCurve) -> None:
         """
         Method checks that the probes are raised. The probes are considered to be raised if the measured signature
@@ -145,7 +156,7 @@ class PlanAutoTransition(QObject):
         """
 
         if product_name in (None, ProductName.EYEPOINT_H10) or work_mode is not WorkMode.TEST or \
-                not self.auto_transition:
+                not self.auto_transition or not self._check_frequency(settings):
             return
 
         break_signature = self._get_break_signature_for_settings(settings)
@@ -203,15 +214,3 @@ class PlanAutoTransition(QObject):
             self._process = self.Process.SAVE
             self._start_time = time.monotonic()
             self._timer.start()
-
-
-def load_signature(path: str) -> Optional[IVCurve]:
-    """
-    :param path: path to the signature file.
-    :return: signature.
-    """
-
-    if os.path.exists(path):
-        with open(path, "r") as file:
-            return IVCurve.create_from_json(json.load(file))
-    return None
