@@ -44,7 +44,7 @@ from window.pinindexwidget import PinIndexWidget
 from window.planautotransition import PlanAutoTransition
 from window.plancompatibility import PlanCompatibility
 from window.scaler import get_scale_factor, update_scale_of_class
-from window.scorewrapper import ScoreWrapper
+from window.scorewrapper import check_score_not_greater_tolerance, ScoreWrapper
 from window.soundplayer import SoundPlayer
 from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
 from version import Version
@@ -1114,7 +1114,7 @@ class EPLabWindow(QMainWindow):
         """
 
         score = self._calculate_score(curve_1, curve_2, settings)
-        return self._score_wrapper.check_score(score)
+        return check_score_not_greater_tolerance(score, self._score_wrapper.tolerance)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """
