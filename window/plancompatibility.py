@@ -195,37 +195,40 @@ class PlanCompatibility:
         board = Board(elements=elements, image=self._plan.image)
         return self._create_new_plan(board)
 
-    def check_compatibility(self, new_plan: bool, empty_plan: bool, filename: str) -> Optional[MeasurementPlan]:
+    def check_compatibility(self, new_plan: bool, empty_plan: bool, filename: str
+                            ) -> Tuple[Optional[MeasurementPlan], bool]:
         """
         Method checks the measurement plan for compatibility with the product (available measurement settings) and
         multiplexer.
         :param new_plan: if True, then the new measurement plan will be checked for compatibility;
         :param empty_plan: if True, then the measurement plan is empty;
         :param filename: name of the measurement plan file.
-        :return: verified measurement plan or None if the plan did not pass the test.
+        :return: verified measurement plan or None if the plan did not pass the test. True if a new plan is created,
+        otherwise False.
         """
 
         if not self._measurement_system:
-            return self._plan
+            return self._plan, False
 
         self._plan = self.check_compatibility_with_product(new_plan, filename)
         if not self._measurement_system.multiplexers:
             if self._plan is None:
-                self._plan = self._create_plan_without_mux()
-            return self._plan
+                return self._create_plan_without_mux(), True
+            return self._plan, False
 
         return self.check_compatibility_with_mux(empty_plan)
 
-    def check_compatibility_with_mux(self, empty_plan: bool) -> Optional[MeasurementPlan]:
+    def check_compatibility_with_mux(self, empty_plan: bool) -> Tuple[Optional[MeasurementPlan], bool]:
         """
         Method checks the measurement plan for compatibility with the multiplexer.
         :param empty_plan: if True, then the measurement plan is empty.
-        :return: verified measurement plan or None if the plan did not pass the test.
+        :return: verified measurement plan or None if the plan did not pass the test. True if a new plan is created,
+        otherwise False.
         """
 
         compatible, data = self._check_compatibility_with_mux()
         if compatible:
-            return self._plan
+            return self._plan, False
 
         if empty_plan:
             action = PlanCompatibility.Action.TRANSFORM
@@ -234,17 +237,19 @@ class PlanCompatibility:
         else:
             action = show_warning_incompatibility_with_mux()
 
+        is_new_plan = False
         if action == PlanCompatibility.Action.TRANSFORM:
             plan = self._transform_plan(data)
         elif action == PlanCompatibility.Action.CLOSE_PLAN:
             plan = self._create_plan_for_mux()
+            is_new_plan = True
         elif action == PlanCompatibility.Action.CLOSE_MUX:
             self._close_mux()
             plan = self._plan
             plan.multiplexer = None
         else:
             plan = self._plan
-        return plan
+        return plan, is_new_plan
 
     def check_compatibility_with_product(self, new_plan: bool, filename: str) -> Optional[MeasurementPlan]:
         """
