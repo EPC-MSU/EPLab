@@ -42,8 +42,8 @@ class PlanCompatibility:
         self._plan: MeasurementPlan = plan
         self._product: EyePointProduct = product
 
-    def _add_points(self, elements: List[Element], channels: Dict[int, Dict[int, List[int]]],
-                    empty: List[Tuple[int, int]]) -> None:
+    def _add_points_from_mux_channels(self, elements: List[Element], channels: Dict[int, Dict[int, List[int]]],
+                                      empty: List[Tuple[int, int]]) -> None:
         """
         Method adds a given number of points to the list of points on the board.
         :param elements: list of elements on the board;
@@ -140,7 +140,7 @@ class PlanCompatibility:
         """
 
         measurer = self._measurement_system.measurers[0]
-        multiplexer = self._measurement_system.multiplexers[0]
+        multiplexer = self._measurement_system.multiplexers[0] if self._measurement_system.multiplexers else None
         return MeasurementPlan(board, measurer, multiplexer)
 
     def _create_plan_for_mux(self) -> MeasurementPlan:
@@ -154,8 +154,18 @@ class PlanCompatibility:
         modules = len(multiplexer.get_chain_info())
         channels = {module: {channel: [] for channel in range(1, MAX_CHANNEL_NUMBER + 1)}
                     for module in range(1, modules + 1)}
-        self._add_points(elements, channels, [])
+        self._add_points_from_mux_channels(elements, channels, [])
         board = Board(elements=elements, image=self._plan.image if self._plan else None)
+        return self._create_new_plan(board)
+
+    def _create_plan_without_mux(self) -> MeasurementPlan:
+        """
+        Method creates an empty measurement plan without multiplexer.
+        :return: empty plan.
+        """
+
+        x, y = self._parent.get_default_pin_coordinates()
+        board = Board(elements=[Element(pins=[Pin(x=x, y=y)])])
         return self._create_new_plan(board)
 
     @staticmethod
@@ -180,7 +190,7 @@ class PlanCompatibility:
         """
 
         elements = self._plan.elements
-        self._add_points(elements, data.channels, data.empty)
+        self._add_points_from_mux_channels(elements, data.channels, data.empty)
         self._remove_invalid_points(elements, data.invalid)
         board = Board(elements=elements, image=self._plan.image)
         return self._create_new_plan(board)
@@ -195,7 +205,15 @@ class PlanCompatibility:
         :return: verified measurement plan or None if the plan did not pass the test.
         """
 
+        if not self._measurement_system:
+            return self._plan
+
         self._plan = self.check_compatibility_with_product(new_plan, filename)
+        if not self._measurement_system.multiplexers:
+            if self._plan is None:
+                self._plan = self._create_plan_without_mux()
+            return self._plan
+
         return self.check_compatibility_with_mux(empty_plan)
 
     def check_compatibility_with_mux(self, empty_plan: bool) -> Optional[MeasurementPlan]:
@@ -204,9 +222,6 @@ class PlanCompatibility:
         :param empty_plan: if True, then the measurement plan is empty.
         :return: verified measurement plan or None if the plan did not pass the test.
         """
-
-        if not self._measurement_system or not self._measurement_system.multiplexers:
-            return self._plan
 
         compatible, data = self._check_compatibility_with_mux()
         if compatible:
@@ -239,7 +254,7 @@ class PlanCompatibility:
         :return: verified measurement plan or None if the plan did not pass the test.
         """
 
-        if self._measurement_system and not self._check_compatibility_with_product():
+        if not self._check_compatibility_with_product():
             show_warning_incompatibility_with_product(new_plan, filename)
             plan = None
         else:

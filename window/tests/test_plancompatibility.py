@@ -94,7 +94,7 @@ class TestPlanCompatibility(unittest.TestCase):
         channels_number = 10
         channels = {module: {channel: [] for channel in range(1, channels_number + 1)}
                     for module in range(1, modules_number + 1)}
-        checker._add_points(elements, channels, [])
+        checker._add_points_from_mux_channels(elements, channels, [])
         self.assertEqual(len(elements), 1)
         channel = 1
         module = 1
@@ -111,7 +111,7 @@ class TestPlanCompatibility(unittest.TestCase):
         empty = [(0, i) for i in range(pins_number - 1, -1, -1)]
         pins = [Pin(x=i, y=i, comment=f"comment {i}") for i in range(pins_number)]
         elements = [Element(pins=pins)]
-        checker._add_points(elements, channels, empty)
+        checker._add_points_from_mux_channels(elements, channels, empty)
         self.assertEqual(len(elements), 1)
         channel = 1
         module = 1
