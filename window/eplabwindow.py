@@ -35,7 +35,7 @@ from window.commentwidget import CommentWidget
 from window.common import DeviceErrorsHandler, WorkMode
 from window.connectionchecker import ConnectionChecker, ConnectionData
 from window.curvestates import CurveStates
-from window.language import Language, Translator
+from window.language import get_language, Language, Translator
 from window.measuredpinschecker import MeasuredPinsChecker
 from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
@@ -739,11 +739,13 @@ class EPLabWindow(QMainWindow):
                     curves["reference"] = self._msystem.measurers[1].get_last_cached_iv_curve()
                 measurement_settings = self._msystem.get_settings()
                 self._update_curves(curves, measurement_settings)
-                self._plan_auto_transition.check_auto_transition(self.work_mode, self._current_curve,
-                                                                 self._reference_curve, measurement_settings)
-                self._break_signature_saver.save_signature(curves["current"], measurement_settings)
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.check_pin()
+                else:
+                    self._plan_auto_transition.check_auto_transition(self.work_mode, self._product_name,
+                                                                     measurement_settings,
+                                                                     self._current_curve, self._reference_curve)
+                    self._break_signature_saver.save_signature(measurement_settings, curves["current"])
                 if self._settings_update_next_cycle:
                     # New curve with new settings - we must update plot parameters
                     self._adjust_plot_params(self._settings_update_next_cycle)
@@ -1714,11 +1716,12 @@ class EPLabWindow(QMainWindow):
         """
 
         language = show_language_selection_window()
-        if language is not None and language != qApp.instance().property("language"):
+        current_language = get_language()
+        if language is not None and language != current_language:
             self._auto_settings.save_language(language)
             text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
             text_en = "The language settings are saved. Restart the program for the changes to take effect."
-            if qApp.instance().property("language") is Language.RU:
+            if current_language is Language.RU:
                 text = text_ru + "<br>" + text_en
             else:
                 text = text_en + "<br>" + text_ru

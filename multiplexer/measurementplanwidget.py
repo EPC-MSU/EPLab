@@ -10,7 +10,7 @@ from epcore.analogmultiplexer.base import MultiplexerOutput
 from epcore.elements import MeasurementSettings, Pin
 from epcore.product import EyePointProduct
 from window.common import WorkMode
-from window.language import Language
+from window.language import get_language, Language
 from window.pinindextableitem import PinIndexTableItem
 from window.scaler import update_scale_of_class
 from window.tablewidget import TableWidget
@@ -31,7 +31,7 @@ class MeasurementPlanWidget(TableWidget):
                               qApp.translate("mux", "Частота"), qApp.translate("mux", "Напряжение"),
                               qApp.translate("mux", "Чувствительность")]
         super().__init__(main_window, headers)
-        self._lang: Language = qApp.instance().property("language")
+        self._lang: Language = get_language()
         self._standby_mode: bool = False
 
     def _add_pin_to_table(self, index: int, pin: Pin) -> None:

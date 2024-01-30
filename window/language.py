@@ -5,6 +5,7 @@ File with the language class.
 import os
 from enum import auto, Enum
 from typing import Optional, Tuple
+from PyQt5.QtCore import QCoreApplication as qApp
 
 
 class Language(Enum):
@@ -65,3 +66,12 @@ class Translator:
         """
 
         return cls._FILES.get(value)
+
+
+def get_language() -> Language:
+    """
+    :return: current language.
+    """
+
+    language = qApp.instance().property("language")
+    return Language.EN if language is None else language

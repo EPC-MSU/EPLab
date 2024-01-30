@@ -8,7 +8,7 @@ from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QLabel, QLayout, QVBoxLayout
 from window import utils as ut
-from window.language import Language, Translator
+from window.language import get_language, Language, Translator
 from window.scaler import update_scale_of_class
 
 
@@ -33,7 +33,7 @@ class LanguageSelectionWindow(QDialog):
         self.combo_box_languages: QComboBox = QComboBox()
         for value, language in Translator.get_languages():
             self.combo_box_languages.addItem(language, value)
-        language = Translator.get_language_name(qApp.instance().property("language"))
+        language = Translator.get_language_name(get_language())
         self.combo_box_languages.setCurrentText(language)
         self.button_box: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.button_box.button(QDialogButtonBox.Cancel).setText(qApp.translate("dialogs", "Отмена"))

@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QLayout, QPush
 from connection_window.utils import get_platform
 from version import Version
 from window import utils as ut
-from window.language import Language
+from window.language import get_language, Language
 from window.scaler import update_scale_of_class
 
 
@@ -25,10 +25,10 @@ class AboutWindow(QDialog):
 
     def __init__(self) -> None:
         super().__init__()
+        self._language: Language = get_language()
         self._init_ui()
 
-    @staticmethod
-    def _create_info_text_and_link() -> Tuple[str, str]:
+    def _create_info_text_and_link(self) -> Tuple[str, str]:
         """
         Method creates text with main information and hyperlink to website.
         :return: text with main information and hyperlink.
@@ -43,7 +43,7 @@ class AboutWindow(QDialog):
                                          "режиме (при помощи ручных щупов). Более подробную информацию вы можете найти "
                                          "{}")
         page_url = "https://eyepoint.physlab.ru/"
-        if qApp.instance().property("language") is Language.RU:
+        if self._language is Language.RU:
             page_url += "ru/"
         else:
             page_url += "en/"
@@ -51,14 +51,13 @@ class AboutWindow(QDialog):
         text = app_name + text.format(link)
         return text.format(link), page_url
 
-    @staticmethod
-    def _get_logo_name() -> str:
+    def _get_logo_name(self) -> str:
         """
         Method returns file name with logo.
         :return: file name with logo.
         """
 
-        return "logo.png" if qApp.instance().property("language") is Language.RU else "logo_en.png"
+        return "logo.png" if self._language is Language.RU else "logo_en.png"
 
     def _init_ui(self) -> None:
         """
