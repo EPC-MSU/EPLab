@@ -6,5 +6,5 @@ PyQt5-stubs
 git+https://github.com/pyserial/pyserial@7aeea35429d15f3eefed10bbb659674638903e3a#egg=pyserial
 git+https://github.com/EPC-MSU/board-view@v0.1.2#egg=boardview
 git+https://github.com/EPC-MSU/ep_report_generator@v0.1.14#egg=ep_report_generator
-git+https://github.com/EPC-MSU/epcore@v0.1.20#egg=epcore
+git+https://github.com/EPC-MSU/epcore@t-89686#egg=epcore
 git+https://github.com/EPC-MSU/ivviewer@v0.1.15#egg=ivviewer
