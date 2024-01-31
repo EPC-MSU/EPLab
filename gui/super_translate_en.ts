@@ -295,6 +295,26 @@
 <context>
     <name>t</name>
     <message>
+        <location filename="../window/breaksignaturessaver.py" line="131"/>
+        <source>Сохранение сигнатур разрыва</source>
+        <translation>Saving break signatures</translation>
+    </message>
+    <message>
+        <location filename="../window/breaksignaturessaver.py" line="150"/>
+        <source>Чтобы включить автопереход в режиме тестирования по плану, нужно измерить сигнатуры разрыва. Для этого:
+&lt;ul&gt;
+&lt;li&gt;Разомкните щупы.&lt;/li&gt;
+&lt;li&gt;Нажмите &apos;Да&apos;.&lt;/li&gt;
+&lt;li&gt;Дождитесь завершения процедуры.&lt;/li&gt;
+&lt;/ul&gt;</source>
+        <translation>To enable auto-transition in plan test mode, you need to measure break signatures. For this:
+&lt;ul&gt;
+&lt;li&gt;Open the probes.&lt;/li&gt;
+&lt;li&gt;Click &apos;Yes&apos;.&lt;/li&gt;
+&lt;li&gt;Wait for the procedure to complete.&lt;/li&gt;
+&lt;/ul&gt;</translation>
+    </message>
+    <message>
         <location filename="..window/commentwidget.py" line="15"/>
         <source>Комментарий</source>
         <translation>Comment</translation>

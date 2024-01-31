@@ -16,6 +16,7 @@ class BreakSignaturesSaver(QObject):
     Class for storing break signatures for different measurement settings.
     """
 
+    DIR_PATH: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "break_signatures")
     TIMEOUT: int = 10
     new_settings_signal: pyqtSignal = pyqtSignal(MeasurementSettings)
 
@@ -35,7 +36,6 @@ class BreakSignaturesSaver(QObject):
         self._current_frequency: MeasurementParameterOption = None
         self._current_sensitive: MeasurementParameterOption = None
         self._current_voltage: MeasurementParameterOption = None
-        self._dir: str = os.path.join(os.path.curdir, "break_signatures")
         self._is_running: bool = False
         self._language: Language = get_language()
         self._new_settings_required: bool = False
@@ -105,9 +105,9 @@ class BreakSignaturesSaver(QObject):
         """
 
         filename = create_filename(self._current_frequency, self._current_sensitive, self._current_voltage)
-        path = os.path.join(self._dir, filename)
-        if not os.path.exists(self._dir):
-            os.makedirs(self._dir, exist_ok=True)
+        path = os.path.join(BreakSignaturesSaver.DIR_PATH, filename)
+        if not os.path.exists(BreakSignaturesSaver.DIR_PATH):
+            os.makedirs(BreakSignaturesSaver.DIR_PATH, exist_ok=True)
         with open(path, "w") as file:
             json.dump(curve.to_json(), file)
 
@@ -144,15 +144,15 @@ class BreakSignaturesSaver(QObject):
         """
 
         self._update_product()
-        if self.auto_transition and not check_break_signatures(self._dir, self._product, self._required_frequency,
-                                                               self._required_sensitive):
+        if self.auto_transition and not check_break_signatures(BreakSignaturesSaver.DIR_PATH, self._product,
+                                                               self._required_frequency, self._required_sensitive):
             result = ut.show_message(qApp.translate("t", "Информация"),
                                      qApp.translate("t", "Чтобы включить автопереход в режиме тестирования по плану, "
                                                          "нужно измерить сигнатуры разрыва. Для этого:\n<ul>\n"
-                                                         "<li>разомкните щупы;</li>\n"
-                                                         "<li>нажмите 'Да';</li>\n"
-                                                         "<li>дождитесь появления сообщения о завершении процедуры."
-                                                         "</li>\n</ul>"), yes_button=True, no_button=True)
+                                                         "<li>Разомкните щупы.</li>\n"
+                                                         "<li>Нажмите 'Да'.</li>\n"
+                                                         "<li>Дождитесь завершения процедуры.</li>\n</ul>"),
+                                     yes_button=True, no_button=True)
             if not result:
                 self._request_new_settings()
                 self._start_settings_iteration()
