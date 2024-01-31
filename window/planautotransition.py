@@ -39,13 +39,14 @@ class PlanAutoTransition(QObject):
     save_pin_signal: pyqtSignal = pyqtSignal()
 
     def __init__(self, product: EyePointProduct, auto_settings: AutoSettings, score_wrapper: ScoreWrapper,
-                 calculate_score: Callable[[IVCurve, IVCurve, MeasurementSettings], float],
+                 calculate_score: Callable[[IVCurve, IVCurve, MeasurementSettings], float], dir_path: str,
                  frequency: Optional[str] = None, sensitive: Optional[str] = None) -> None:
         """
         :param product: product;
         :param auto_settings: object with basic application settings;
         :param score_wrapper: an object that determines whether a signature difference is valid or not;
         :param calculate_score: function to calculate the difference between two signatures;
+        :param dir_path: path to the directory containing break signature files;
         :param frequency: name of the frequency mode for break signatures. If None, then each frequency requires its
         own break signature;
         :param sensitive: name of the sensitivity mode for break signatures. If None, then each sensitivity requires
@@ -57,7 +58,7 @@ class PlanAutoTransition(QObject):
         self._break_number: int = 0
         self._break_signatures: Dict[str, IVCurve] = dict()
         self._calculate_score: Callable[[IVCurve, IVCurve, MeasurementSettings], float] = calculate_score
-        self._dir: str = os.path.join(os.path.curdir, "break_signatures")
+        self._dir: str = dir_path
         self._need_to_save: bool = False
         self._product: EyePointProduct = product
         self._process: "PlanAutoTransition.Process" = self.Process.MEASURE

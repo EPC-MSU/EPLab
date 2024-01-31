@@ -168,8 +168,8 @@ class BreakSignaturesSaver(QObject):
             self._request_new_settings()
 
 
-def check_break_signatures(dir_path: str, product: EyePointProduct, required_frequency: str, required_sensitive: str
-                           ) -> bool:
+def check_break_signatures(dir_path: str, product: EyePointProduct, required_frequency: Optional[str] = None,
+                           required_sensitive: Optional[str] = None) -> bool:
     """
     :param dir_path: directory containing files with break signatures;
     :param product: product;

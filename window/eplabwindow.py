@@ -30,7 +30,7 @@ from multiplexer import MuxAndPlanWindow
 from window import utils as ut
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.boardwidget import BoardWidget
-from window.breaksignaturessaver import BreakSignaturesSaver
+from window.breaksignaturessaver import BreakSignaturesSaver, check_break_signatures
 from window.commentwidget import CommentWidget
 from window.common import DeviceErrorsHandler, WorkMode
 from window.connectionchecker import ConnectionChecker, ConnectionData
@@ -123,7 +123,8 @@ class EPLabWindow(QMainWindow):
         self._break_signature_saver: BreakSignaturesSaver = BreakSignaturesSaver(self.product, self._auto_settings)
         self._break_signature_saver.new_settings_signal.connect(self.set_measurement_settings_and_update_ui)
         self._plan_auto_transition: PlanAutoTransition = PlanAutoTransition(self.product, self._auto_settings,
-                                                                            self._score_wrapper, self._calculate_score)
+                                                                            self._score_wrapper, self._calculate_score,
+                                                                            self._break_signature_saver.DIR_PATH)
         self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin)
         self._plan_auto_transition.save_pin_signal.connect(self.save_pin)
 
@@ -304,6 +305,8 @@ class EPLabWindow(QMainWindow):
             _ = [dock_widget.setEnabled(True) for dock_widget in (self.comment_dock, self.score_dock, self.freq_dock,
                                                                   self.current_dock, self.voltage_dock)]
             _ = [widget.setEnabled(False) for widget in self._parameters_widgets.values()]
+        elif mode is WorkMode.TEST:
+            self._check_break_signatures_for_auto_transition()
 
         self._work_mode = mode
 
@@ -316,6 +319,19 @@ class EPLabWindow(QMainWindow):
 
         if self._work_mode == WorkMode.TEST and not self._measured_pins_checker.is_measured_pin:
             self._change_work_mode(WorkMode.COMPARE)
+
+    def _check_break_signatures_for_auto_transition(self) -> None:
+        """
+        Method checks whether auto transition is set in test mode according to plan. If auto transition is set, then
+        the presence of break signatures is checked for all measurement settings.
+        """
+
+        if self._auto_settings.get_auto_transition() and self._product_name not in (None, cw.ProductName.EYEPOINT_H10):
+            if not check_break_signatures(self._break_signature_saver.DIR_PATH, self._product):
+                ut.show_message(qApp.translate("t", "Информация"),
+                                qApp.translate("t", "Включен автопереход в режиме тестирования по плану. Но в "
+                                                    "приложении нет некоторых сигнатур разрыва, поэтому автопереход "
+                                                    "может работать некорректно."))
 
     def _check_plan_compatibility(self, new_plan: bool = False, empty_plan: bool = False,
                                   filename: Optional[str] = None) -> None:
@@ -746,7 +762,8 @@ class EPLabWindow(QMainWindow):
                     self._plan_auto_transition.check_auto_transition(self.work_mode, self._product_name,
                                                                      measurement_settings,
                                                                      self._current_curve, self._reference_curve)
-                    self._break_signature_saver.save_signature(measurement_settings, curves["current"])
+                    # Break signatures are only saved when debugging the application
+                    # self._break_signature_saver.save_signature(measurement_settings, curves["current"])
                 if self._settings_update_next_cycle:
                     # New curve with new settings - we must update plot parameters
                     self._adjust_plot_params(self._settings_update_next_cycle)
@@ -1829,7 +1846,9 @@ class EPLabWindow(QMainWindow):
         settings_window.apply_settings_signal.connect(self.apply_settings)
         settings_window.exec()
         self.dir_chosen_by_user = settings_window.settings_directory
-        self._break_signature_saver.save_break_signatures_if_necessary()
+        self._check_break_signatures_for_auto_transition()
+        # Break signatures are only saved when debugging the application
+        # self._break_signature_saver.save_break_signatures_if_necessary()
 
     def update_current_pin(self, pin_centering: bool = True) -> None:
         """
