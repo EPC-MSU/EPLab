@@ -30,19 +30,21 @@ from multiplexer import MuxAndPlanWindow
 from window import utils as ut
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.boardwidget import BoardWidget
+from window.breaksignaturessaver import BreakSignaturesSaver
 from window.commentwidget import CommentWidget
 from window.common import DeviceErrorsHandler, WorkMode
 from window.connectionchecker import ConnectionChecker, ConnectionData
 from window.curvestates import CurveStates
-from window.language import Language, Translator
+from window.language import get_language, Language, Translator
 from window.measuredpinschecker import MeasuredPinsChecker
 from window.measurementplanpath import MeasurementPlanPath
 from window.parameterwidget import ParameterWidget
 from window.pedalhandler import add_pedal_handler
 from window.pinindexwidget import PinIndexWidget
+from window.planautotransition import PlanAutoTransition
 from window.plancompatibility import PlanCompatibility
 from window.scaler import get_scale_factor, update_scale_of_class
-from window.scorewrapper import ScoreWrapper
+from window.scorewrapper import check_score_not_greater_tolerance, ScoreWrapper
 from window.soundplayer import SoundPlayer
 from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
 from version import Version
@@ -118,6 +120,12 @@ class EPLabWindow(QMainWindow):
         self.measurers_connected.connect(self.handle_connection)
         self._connection_checker: ConnectionChecker = ConnectionChecker(self._auto_settings)
         self._connection_checker.connect_signal.connect(self.handle_connection_signal_from_checker)
+        self._break_signature_saver: BreakSignaturesSaver = BreakSignaturesSaver(self.product, self._auto_settings)
+        self._break_signature_saver.new_settings_signal.connect(self.set_measurement_settings_and_update_ui)
+        self._plan_auto_transition: PlanAutoTransition = PlanAutoTransition(self.product, self._auto_settings,
+                                                                            self._score_wrapper, self._calculate_score)
+        self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin)
+        self._plan_auto_transition.save_pin_signal.connect(self.save_pin)
 
         if port_1 is None and port_2 is None:
             self._connection_checker.run_check()
@@ -571,6 +579,7 @@ class EPLabWindow(QMainWindow):
         if self._device_errors_handler.all_ok:
             with self._device_errors_handler:
                 self._read_curves_periodic_task()
+            self._plan_auto_transition.save_pin()
             self._mux_and_plan_window.measurement_plan_runner.save_pin()
             self._timer.start()  # add this task to event loop
         else:
@@ -729,9 +738,15 @@ class EPLabWindow(QMainWindow):
                 if self._work_mode is WorkMode.COMPARE and len(self._msystem.measurers) > 1:
                     # Display two current curves
                     curves["reference"] = self._msystem.measurers[1].get_last_cached_iv_curve()
-                self._update_curves(curves, self._msystem.get_settings())
+                measurement_settings = self._msystem.get_settings()
+                self._update_curves(curves, measurement_settings)
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.check_pin()
+                else:
+                    self._plan_auto_transition.check_auto_transition(self.work_mode, self._product_name,
+                                                                     measurement_settings,
+                                                                     self._current_curve, self._reference_curve)
+                    self._break_signature_saver.save_signature(measurement_settings, curves["current"])
                 if self._settings_update_next_cycle:
                     # New curve with new settings - we must update plot parameters
                     self._adjust_plot_params(self._settings_update_next_cycle)
@@ -1075,6 +1090,7 @@ class EPLabWindow(QMainWindow):
         self.hide_curve_a_action.setChecked(new_settings.hide_curve_a)
         self.hide_curve_b_action.setChecked(new_settings.hide_curve_b)
         self.sound_enabled_action.setChecked(new_settings.sound_enabled)
+        self._auto_settings.save_auto_transition(new_settings.auto_transition)
         self._update_tolerance(new_settings.tolerance)
 
     @pyqtSlot(str)
@@ -1098,7 +1114,7 @@ class EPLabWindow(QMainWindow):
         """
 
         score = self._calculate_score(curve_1, curve_2, settings)
-        return self._score_wrapper.check_score(score)
+        return check_score_not_greater_tolerance(score, self._score_wrapper.tolerance)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """
@@ -1334,10 +1350,11 @@ class EPLabWindow(QMainWindow):
             settings.work_mode = WorkMode.WRITE
         else:
             settings.work_mode = WorkMode.COMPARE
-        settings.tolerance = self.tolerance
+        settings.auto_transition = self._auto_settings.get_auto_transition()
         settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
+        settings.tolerance = self.tolerance
         return settings
 
     @pyqtSlot(bool)
@@ -1697,11 +1714,12 @@ class EPLabWindow(QMainWindow):
         """
 
         language = show_language_selection_window()
-        if language is not None and language != qApp.instance().property("language"):
-            self._auto_settings.save_language(Translator.get_language_name(language))
+        current_language = get_language()
+        if language is not None and language != current_language:
+            self._auto_settings.save_language(language)
             text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
             text_en = "The language settings are saved. Restart the program for the changes to take effect."
-            if qApp.instance().property("language") is Language.RU:
+            if current_language is Language.RU:
                 text = text_ru + "<br>" + text_en
             else:
                 text = text_en + "<br>" + text_ru
@@ -1741,6 +1759,15 @@ class EPLabWindow(QMainWindow):
             self.remove_cursor_action.setCheckable(False)
             self.remove_cursor_action.setChecked(False)
         self._iv_window.plot.set_state_adding_cursor(state)
+
+    def set_measurement_settings_and_update_ui(self, settings: MeasurementSettings) -> None:
+        """
+        :param settings:
+        """
+
+        self._set_msystem_settings(settings)
+        options = self._product.settings_to_options(settings)
+        self._set_options_to_ui(options)
 
     @pyqtSlot()
     def set_remove_cursor_state(self) -> None:
@@ -1802,6 +1829,7 @@ class EPLabWindow(QMainWindow):
         settings_window.apply_settings_signal.connect(self.apply_settings)
         settings_window.exec()
         self.dir_chosen_by_user = settings_window.settings_directory
+        self._break_signature_saver.save_break_signatures_if_necessary()
 
     def update_current_pin(self, pin_centering: bool = True) -> None:
         """

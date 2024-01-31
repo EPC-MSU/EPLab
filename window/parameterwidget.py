@@ -1,9 +1,9 @@
 from typing import Dict, List, Optional
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QEvent, QObject, Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QRadioButton, QScrollArea, QVBoxLayout, QWidget
 from epcore.product import EyePointProduct, MeasurementParameterOption
-from window.language import Language
+from window.language import get_language, Language
 from window.scaler import update_scale_decorator
 
 
@@ -34,7 +34,7 @@ class ParameterWidget(QScrollArea):
         :return: widget with radio buttons.
         """
 
-        language = qApp.instance().property("language")
+        language = get_language()
         layout = QVBoxLayout()
         self._option_buttons = {}
         for option in available_options:

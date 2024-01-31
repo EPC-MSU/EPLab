@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (QComboBox, QDialog, QGroupBox, QHBoxLayout, QLabel,
                              QRadioButton, QTextBrowser, QVBoxLayout, QWidget)
 from epcore.ivmeasurer.base import IVMeasurerBase
 from window import utils as ut
-from window.language import Language
+from window.language import get_language, Language
 from window.scaler import update_scale_of_class
 
 
@@ -59,7 +59,7 @@ class MeasurerSettingsWindow(QDialog):
         self._widgets: Dict[str, QWidget] = dict()
         self.button_cancel: QPushButton = None
         self.button_ok: QPushButton = None
-        self.lang: str = "ru" if qApp.instance().property("language") == Language.RU else "en"
+        self.lang: str = "ru" if get_language() == Language.RU else "en"
         self._init_ui(settings, device_name)
         self._timer: QTimer = QTimer()
         self._timer.timeout.connect(self._fix_size)

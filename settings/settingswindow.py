@@ -30,6 +30,7 @@ class SettingsWindow(QDialog):
         self._settings: Settings = copy.copy(init_settings)
         self._settings_directory: str = settings_directory or ut.get_dir_name()
         self._init_ui()
+        self._update_auto_transition(self._init_settings.auto_transition)
         self._update_tolerance_in_settings_wnd(self._init_settings.tolerance)
 
     @property
@@ -47,6 +48,7 @@ class SettingsWindow(QDialog):
         self.button_tolerance_minus.clicked.connect(self.decrease_tolerance)
         self.button_tolerance_plus.clicked.connect(self.increase_tolerance)
         self.spin_box_tolerance.valueChanged.connect(self.update_tolerance)
+        self.check_box_auto_transition.stateChanged.connect(self.update_auto_transition)
         self.button_cancel.clicked.connect(self.discard_changes)
         self.button_load_settings.clicked.connect(self.open_settings)
         self.button_ok.clicked.connect(self.apply_changes)
@@ -65,6 +67,14 @@ class SettingsWindow(QDialog):
         """
 
         self.apply_settings_signal.emit(settings or self._settings)
+
+    def _update_auto_transition(self, auto_transition: bool) -> None:
+        """
+        :param auto_transition: new value for enabling or disabling auto transition in plan testing mode.
+        """
+
+        self.check_box_auto_transition.setChecked(auto_transition)
+        self._settings.auto_transition = auto_transition
 
     def _update_tolerance_in_settings_wnd(self, tolerance: float) -> None:
         """
@@ -151,6 +161,15 @@ class SettingsWindow(QDialog):
                 settings_path += ".ini"
             self._settings.tolerance = self._get_tolerance_value()
             self._settings.export(path=settings_path)
+
+    @pyqtSlot(int)
+    def update_auto_transition(self, state: int) -> None:
+        """
+        :param state: if True, then the auto transition mode is activated when testing according to plan.
+        """
+
+        self._update_auto_transition(state == Qt.Checked)
+        self._send_settings()
 
     @pyqtSlot(float)
     def update_tolerance(self, new_value: float) -> None:

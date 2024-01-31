@@ -12,7 +12,7 @@ from epcore.elements import Board
 from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator, ReportTypes, ScalingTypes
 from window import utils as ut
 from window.common import WorkMode
-from window.language import Language
+from window.language import get_language, Language
 from window.scaler import update_scale_of_class
 
 
@@ -74,7 +74,7 @@ class ReportGenerationThread(QThread):
         report_to_open = ReportTypes.FULL_REPORT if work_mode == WorkMode.WRITE else ReportTypes.SHORT_REPORT
         return {ConfigAttributes.BOARD: board,
                 ConfigAttributes.DIRECTORY: dir_for_report,
-                ConfigAttributes.ENGLISH: qApp.instance().property("language") == Language.EN,
+                ConfigAttributes.ENGLISH: get_language() == Language.EN,
                 ConfigAttributes.NOISE_AMPLITUDES: noise_amplitudes,
                 ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
                 ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
