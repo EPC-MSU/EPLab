@@ -9,6 +9,7 @@ python3 -m venv venv
 ./venv/bin/python3 -m pip install -r requirements.txt
 ./venv/bin/python3 -m pip install pyinstaller
 ./venv/bin/pyinstaller main.py --clean --onefile --noconsole \
+--add-data "./break_signatures/*:break_signatures" \
 --add-data "./cur.ini:." \
 --add-data "./gui/*:gui" \
 --add-data "./media/*:media" \
