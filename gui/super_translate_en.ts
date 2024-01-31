@@ -9,22 +9,27 @@
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="31"/>
+        <location filename="settings.ui" line="110"/>
         <source>Допуск</source>
         <translation>Tolerance</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="114"/>
+        <location filename="settings.ui" line="117"/>
+        <source>Включить автопереход</source>
+        <translation>Enable auto transition</translation>
+    </message>
+    <message>
+        <location filename="settings.ui" line="153"/>
         <source>Загрузить настройки</source>
         <translation>Load settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="133"/>
+        <location filename="settings.ui" line="178"/>
         <source>Сохранить настройки</source>
         <translation>Save settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="188"/>
+        <location filename="settings.ui" line="228"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>
