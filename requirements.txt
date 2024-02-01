@@ -4,7 +4,8 @@ PyQt5<=5.15.0
 PyQt5-stubs
 # To fix the bug with usb hubs in pyserial, install the module from the repo. See ticket #85293
 git+https://github.com/pyserial/pyserial@7aeea35429d15f3eefed10bbb659674638903e3a#egg=pyserial
-git+https://github.com/EPC-MSU/board-view@v0.1.2#egg=boardview
+git+https://github.com/EPC-MSU/board-view@t-89686#egg=boardview
 git+https://github.com/EPC-MSU/ep_report_generator@v0.1.14#egg=ep_report_generator
 git+https://github.com/EPC-MSU/epcore@t-89686#egg=epcore
 git+https://github.com/EPC-MSU/ivviewer@v0.1.15#egg=ivviewer
+git+https://github.com/EPC-MSU/PyQtExtendedScene@t-89686#egg=pyqtextendedscene

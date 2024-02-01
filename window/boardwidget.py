@@ -293,4 +293,4 @@ class BoardWidget(QWidget):
             self.close()
 
         for index, pin in self.measurement_plan.all_pins_iterator():
-            self._scene.add_point(QPointF(pin.x, pin.y), number=index)
+            self._scene.add_point(QPointF(pin.x, pin.y), index)
