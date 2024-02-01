@@ -153,6 +153,17 @@ class CommentWidget(TableWidget):
 
         self.item(index, 1).setText(comment)
 
+    def _update_indexes(self, start_row: Optional[int] = 0) -> None:
+        """
+        Method updates pin indexes in the table.
+        :param start_row: row number in the table, starting from which to update the pin indexes.
+        """
+
+        column = 0
+        for row in range(start_row, self.rowCount()):
+            item = self.item(row, column)
+            item.set_index(row)
+
     @disconnect_signal
     def clear_table(self) -> None:
         """
@@ -161,6 +172,20 @@ class CommentWidget(TableWidget):
 
         self._clear_table()
         self._read_only = False
+
+    def handle_current_pin_change(self, index: int) -> None:
+        """
+        Method handles changing the current pin in the measurement plan.
+        :param index: index of the current pin in the measurement plan.
+        """
+
+        pin = self._main_window.measurement_plan.get_pin_with_index(index)
+        if self._main_window.measurement_plan.pins_number > self.rowCount():
+            self._add_comment(index, pin.comment)
+        else:
+            self._update_comment(index, pin.comment)
+        self._change_row_color(index, pin)
+        self._update_indexes(index + 1)
 
     @pyqtSlot(QTableWidgetItem)
     def handle_item_changed(self, item: QTableWidgetItem) -> None:
@@ -185,19 +210,6 @@ class CommentWidget(TableWidget):
         item = self.item(index, 1)
         if item:
             pin.comment = item.text()
-
-    def set_new_comment(self, index: int) -> None:
-        """
-        Method sets a new comment for a pin.
-        :param index: index of the pin for which a comment needs to be specified.
-        """
-
-        pin = self._main_window.measurement_plan.get_pin_with_index(index)
-        if self.rowCount() <= index:
-            self._add_comment(index, pin.comment)
-        else:
-            self._update_comment(index, pin.comment)
-        self._change_row_color(index, pin)
 
     @pyqtSlot()
     def set_pin_as_current(self) -> None:
@@ -241,7 +253,7 @@ class CommentWidget(TableWidget):
         Method updates information in a table with comments.
         """
 
-        self._main_window.measurement_plan.add_callback_func_for_pin_changes(self.set_new_comment)
+        self._main_window.measurement_plan.add_callback_func_for_pin_changes(self.handle_current_pin_change)
         self._fill_table()
 
     def update_table_for_new_tolerance(self, *indexes) -> None:

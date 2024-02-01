@@ -1200,9 +1200,10 @@ class EPLabWindow(QMainWindow):
         if self._measurement_plan.image:
             # Place at the center of current viewpoint by default
             point = self._board_window.get_default_pin_xy()
-            pin = Pin(point.x(), point.y(), measurements=[], multiplexer_output=multiplexer_output)
+            x, y = point.x(), point.y()
         else:
-            pin = Pin(0, 0, measurements=[], multiplexer_output=multiplexer_output)
+            x, y = 0, 0
+        pin = Pin(x, y, measurements=[], multiplexer_output=multiplexer_output)
         self._measurement_plan.append_pin(pin)
         self._board_window.add_pin(pin.x, pin.y, self._measurement_plan.get_current_index())
 

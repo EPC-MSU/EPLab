@@ -5,5 +5,17 @@ from PyQt5.QtWidgets import QTableWidgetItem
 class PinIndexTableItem(QTableWidgetItem):
 
     def __init__(self, index: int) -> None:
-        super().__init__(str(index + 1))
+        """
+        :param index: pin index.
+        """
+
+        super().__init__()
         self.setFlags(self.flags() ^ Qt.ItemIsEditable)
+        self.set_index(index)
+
+    def set_index(self, index: int) -> None:
+        """
+        :param index: pin index.
+        """
+
+        self.setText(str(index + 1))
