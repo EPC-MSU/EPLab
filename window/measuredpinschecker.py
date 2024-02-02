@@ -101,6 +101,9 @@ class MeasuredPinsChecker(QObject):
         """
 
         pin = self.measurement_plan.get_current_pin()
+        if pin is None:
+            return True
+
         for measurement in pin.measurements:
             if measurement.is_reference:
                 return False

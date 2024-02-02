@@ -290,9 +290,10 @@ class EPLabWindow(QMainWindow):
         self.comparing_mode_action.setChecked(mode is WorkMode.COMPARE)
         self.writing_mode_action.setChecked(mode is WorkMode.WRITE)
         self.testing_mode_action.setChecked(mode is WorkMode.TEST)
-        self.next_point_action.setEnabled(mode is not WorkMode.COMPARE)
-        self.previous_point_action.setEnabled(mode is not WorkMode.COMPARE)
-        self.pin_index_widget.setEnabled(mode is not WorkMode.COMPARE)
+        enable = mode is not WorkMode.COMPARE
+        self.next_point_action.setEnabled(enable)
+        self.previous_point_action.setEnabled(enable)
+        self.pin_index_widget.setEnabled(enable)
         enable = bool(mode is WorkMode.WRITE and
                       not (self.measurement_plan and self.measurement_plan.multiplexer is not None))
         self.new_point_action.setEnabled(enable)
@@ -557,13 +558,17 @@ class EPLabWindow(QMainWindow):
         """
 
         if self.measurement_plan.pins_number == 0:
-            enable = False
+            for action in (self.next_point_action, self.previous_point_action, self.remove_point_action,
+                           self.pin_index_widget, self.save_point_action):
+                action.setEnabled(False)
         else:
             enable = bool(self.work_mode is WorkMode.WRITE and
                           not (self.measurement_plan and self.measurement_plan.multiplexer is not None))
-        for action in (self.next_point_action, self.previous_point_action, self.remove_point_action,
-                       self.pin_index_widget):
-            action.setEnabled(enable)
+            self.remove_point_action.setEnabled(enable)
+            enable = self.work_mode is not WorkMode.COMPARE
+            for action in (self.next_point_action, self.previous_point_action, self.pin_index_widget):
+                action.setEnabled(enable)
+            self.save_point_action.setEnabled(self.work_mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
 
     @staticmethod
     def _handle_event_on_obj(obj: QObject, event: QEvent) -> Optional[bool]:
