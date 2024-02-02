@@ -249,6 +249,10 @@ class BoardWidget(QWidget):
         :param pin_centering: if True, then the selected pin will be centered on the board window.
         """
 
+        if index is None:
+            self._scene.remove_all_selections()
+            return
+
         self._scene.select_point(index)
         if pin_centering:
             self.show_component_centered(index)

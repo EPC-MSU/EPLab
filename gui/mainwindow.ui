@@ -852,7 +852,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../media/close.png</normaloff>../media/close.png</iconset>
+     <normaloff>../media/remove_point.png</normaloff>../media/remove_point.png</iconset>
    </property>
    <property name="text">
     <string>Удалить точку</string>

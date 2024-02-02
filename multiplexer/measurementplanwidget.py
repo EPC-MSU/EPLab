@@ -164,17 +164,22 @@ class MeasurementPlanWidget(TableWidget):
             if pin_channel == channel and pin_module == module:
                 return index
 
-    def set_new_pin_parameters(self, pin_index: int) -> None:
+    def handle_current_pin_change(self, index: int) -> None:
         """
-        Method updates pin parameters in measurement plan table.
-        :param pin_index: index of pin whose parameters need to be updated.
+        Method handles changing the current pin in the measurement plan.
+        :param index: index of the current pin in the measurement plan.
         """
 
-        pin = self._main_window.measurement_plan.get_pin_with_index(pin_index)
-        if self.rowCount() <= pin_index:
-            self._add_pin_to_table(pin_index, pin)
+        pin = self._main_window.measurement_plan.get_pin_with_index(index)
+        if self._main_window.measurement_plan.pins_number > self.rowCount():
+            self._add_pin_to_table(index, pin)
+        elif self._main_window.measurement_plan.pins_number < self.rowCount():
+            if index is None:
+                index = 0
+            self._remove_row(index)
         else:
-            self._update_pin_in_table(pin_index, pin)
+            self._update_pin_in_table(index, pin)
+        self._update_indexes(index)
 
     def set_work_mode(self, work_mode: WorkMode) -> None:
         """
@@ -206,5 +211,5 @@ class MeasurementPlanWidget(TableWidget):
         Method updates information about the measurement plan.
         """
 
-        self._main_window.measurement_plan.add_callback_func_for_pin_changes(self.set_new_pin_parameters)
+        self._main_window.measurement_plan.add_callback_func_for_pin_changes(self.handle_current_pin_change)
         self._fill_table()

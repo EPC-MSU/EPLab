@@ -78,6 +78,9 @@ class CommentWidget(TableWidget):
         :param pin: pin.
         """
 
+        if pin is None:
+            return
+
         reference, test, settings = pin.get_reference_and_test_measurements()
         if None not in (reference, test, settings):
             brush = CommentWidget.GOOD_BRUSH if self._main_window.check_good_score(reference.ivc, test.ivc, settings) \
@@ -124,14 +127,6 @@ class CommentWidget(TableWidget):
             self._change_row_color(index, pin)
         self.select_row_for_current_pin()
 
-    def _remove_comment(self, index: int) -> None:
-        """
-        :param index: index of the comment to be deleted.
-        """
-
-        self._dont_go_to_selected_pin = True
-        self.removeRow(index)
-
     def _set_item_read_only(self, item: QTableWidgetItem) -> None:
         """
         :param item: set table widget item as editable or not editable.
@@ -161,17 +156,6 @@ class CommentWidget(TableWidget):
 
         self.item(index, 1).setText(comment)
 
-    def _update_indexes(self, start_row: Optional[int] = 0) -> None:
-        """
-        Method updates pin indexes in the table.
-        :param start_row: row number in the table, starting from which to update the pin indexes.
-        """
-
-        column = 0
-        for row in range(start_row, self.rowCount()):
-            item = self.item(row, column)
-            item.set_index(row)
-
     @disconnect_signal
     def clear_table(self) -> None:
         """
@@ -191,7 +175,9 @@ class CommentWidget(TableWidget):
         if self._main_window.measurement_plan.pins_number > self.rowCount():
             self._add_comment(index, pin.comment)
         elif self._main_window.measurement_plan.pins_number < self.rowCount():
-            self._remove_comment(index)
+            if index is None:
+                index = 0
+            self._remove_row(index)
         else:
             self._update_comment(index, pin.comment)
         self._change_row_color(index, pin)

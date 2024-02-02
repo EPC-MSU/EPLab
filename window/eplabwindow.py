@@ -1012,7 +1012,8 @@ class EPLabWindow(QMainWindow):
 
     def _update_current_pin_in_test_and_write_mode(self) -> None:
         current_pin = self._measurement_plan.get_current_pin()
-        ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
+        ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements() if current_pin else \
+            (None, None, None)
         with self._device_errors_handler:
             if settings:
                 curves = {"reference": None if not ref_for_plan else ref_for_plan.ivc,

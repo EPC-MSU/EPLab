@@ -44,4 +44,7 @@ class PinIndexWidget(QLineEdit):
         :param index: pin index in programmatic format (starts with 1).
         """
 
-        self.setText(str(index + 1))
+        if index is None:
+            self.clear()
+        else:
+            self.setText(str(index + 1))

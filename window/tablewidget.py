@@ -1,6 +1,7 @@
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Optional
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget
+from window.pinindextableitem import PinIndexTableItem
 
 
 class TableWidget(QTableWidget):
@@ -36,6 +37,26 @@ class TableWidget(QTableWidget):
         vertical_header.setSectionResizeMode(QHeaderView.ResizeToContents)
         self.itemSelectionChanged.connect(self.set_pin_as_current)
 
+    def _remove_row(self, index: int) -> None:
+        """
+        :param index: index of the row to be deleted.
+        """
+
+        self._dont_go_to_selected_pin = True
+        self.removeRow(index)
+
+    def _update_indexes(self, start_row: Optional[int] = 0) -> None:
+        """
+        Method updates row indexes in the table.
+        :param start_row: row number in the table, starting from which to update the row indexes.
+        """
+
+        column = 0
+        for row in range(start_row, self.rowCount()):
+            item = self.item(row, column)
+            if isinstance(item, PinIndexTableItem):
+                item.set_index(row)
+
     def connect_item_selection_changed_signal(self, callback_function: Callable[..., Any] = None) -> None:
         """
         :param callback_function: callback function that should be called when the selected item changes.
@@ -57,7 +78,7 @@ class TableWidget(QTableWidget):
         """
 
         index = self._main_window.measurement_plan.get_current_index()
-        if index != self.currentRow():
+        if index is not None and index != self.currentRow():
             self._dont_go_to_selected_pin = True
             self.selectRow(index)
 
