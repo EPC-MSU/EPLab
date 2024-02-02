@@ -211,5 +211,4 @@ class MeasurementPlanWidget(TableWidget):
         Method updates information about the measurement plan.
         """
 
-        self._main_window.measurement_plan.add_callback_func_for_pin_changes(self.handle_current_pin_change)
         self._fill_table()

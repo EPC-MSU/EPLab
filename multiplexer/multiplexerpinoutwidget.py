@@ -342,8 +342,6 @@ class MultiplexerPinoutWidget(QWidget):
         Method updates information about multiplexer.
         """
 
-        self._parent.measurement_plan.remove_all_callback_funcs_for_mux_output_change()
-        self._parent.measurement_plan.add_callback_func_for_mux_output_change(self.set_connected_channel)
         self._turned_on_output = None
         self._update_modules()
         self.set_visible()

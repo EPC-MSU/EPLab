@@ -249,7 +249,6 @@ class CommentWidget(TableWidget):
         Method updates information in a table with comments.
         """
 
-        self._main_window.measurement_plan.add_callback_func_for_pin_changes(self.handle_current_pin_change)
         self._fill_table()
 
     def update_table_for_new_tolerance(self, *indexes) -> None:

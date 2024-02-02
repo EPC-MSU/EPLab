@@ -217,6 +217,20 @@ class EPLabWindow(QMainWindow):
 
         return self._work_mode
 
+    def _add_callbacks_to_measurement_plan(self) -> None:
+        """
+        Method adds the required callback functions to the measurement plan.
+        """
+
+        self.measurement_plan.add_callback_func_for_pin_changes(self._handle_current_pin_change)
+        self.measurement_plan.add_callback_func_for_pin_changes(self._comment_widget.handle_current_pin_change)
+        self.measurement_plan.add_callback_func_for_pin_changes(
+            self._mux_and_plan_window.measurement_plan_widget.handle_current_pin_change)
+
+        self.measurement_plan.remove_all_callback_funcs_for_mux_output_change()
+        self.measurement_plan.add_callback_func_for_mux_output_change(
+            self._mux_and_plan_window.multiplexer_pinout_widget.set_connected_channel)
+
     def _adjust_critical_width(self) -> None:
         """
         Method updates the critical window width at which it is necessary to change the toolbar display mode from text
@@ -269,7 +283,7 @@ class EPLabWindow(QMainWindow):
 
         if mode == WorkMode.READ_PLAN:
             self.open_window_board_action.setEnabled(True)
-        enable = bool(self._measurement_plan and self._measurement_plan.multiplexer is not None)
+        enable = bool(self.measurement_plan and self.measurement_plan.multiplexer is not None)
         self.open_mux_window_action.setEnabled(enable)
         self.comparing_mode_action.setChecked(mode is WorkMode.COMPARE)
         self.writing_mode_action.setChecked(mode is WorkMode.WRITE)
@@ -278,14 +292,14 @@ class EPLabWindow(QMainWindow):
         self.previous_point_action.setEnabled(mode is not WorkMode.COMPARE)
         self.pin_index_widget.setEnabled(mode is not WorkMode.COMPARE)
         enable = bool(mode is WorkMode.WRITE and
-                      not (self._measurement_plan and self.measurement_plan.multiplexer is not None))
+                      not (self.measurement_plan and self.measurement_plan.multiplexer is not None))
         self.new_point_action.setEnabled(enable)
-        self.remove_point_action.setEnabled(enable)
+        self.remove_point_action.setEnabled(enable and self.measurement_plan.pins_number > 0)
         self.save_point_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
         self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
         self.create_report_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
-        enable = bool(mode is not WorkMode.COMPARE and self._measurement_plan and
-                      self._measurement_plan.multiplexer is not None)
+        enable = bool(mode is not WorkMode.COMPARE and self.measurement_plan and
+                      self.measurement_plan.multiplexer is not None)
         self.start_or_stop_entire_plan_measurement_action.setEnabled(enable)
         self._change_save_point_name(mode)
 
@@ -532,6 +546,20 @@ class EPLabWindow(QMainWindow):
         """
 
         return {param: widget.get_checked_option() for param, widget in self._parameters_widgets.items()}
+
+    def _handle_current_pin_change(self, index: int) -> None:
+        """
+        Method processes the change in the index of the current pin in the testing plan. In particular, it is checked
+        that there are pins in the measurement plan.
+        :param index: index of the current pin in the measurement plan.
+        """
+
+        if self.measurement_plan.pins_number == 0:
+            self.remove_point_action.setEnabled(False)
+        else:
+            enable = bool(self.work_mode is WorkMode.WRITE and
+                          not (self.measurement_plan and self.measurement_plan.multiplexer is not None))
+            self.remove_point_action.setEnabled(enable)
 
     @staticmethod
     def _handle_event_on_obj(obj: QObject, event: QEvent) -> Optional[bool]:
@@ -932,6 +960,7 @@ class EPLabWindow(QMainWindow):
 
         self._mux_and_plan_window.update_info()
         self._comment_widget.update_info()
+        self._add_callbacks_to_measurement_plan()
         self._switch_work_mode(WorkMode.COMPARE)
         self._init_tolerance()
         with self._device_errors_handler:
@@ -1192,6 +1221,7 @@ class EPLabWindow(QMainWindow):
         self.update_current_pin()
         self._mux_and_plan_window.update_info()
         self._comment_widget.update_info()
+        self._add_callbacks_to_measurement_plan()
         self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
@@ -1568,6 +1598,7 @@ class EPLabWindow(QMainWindow):
             else:
                 self._change_work_mode(WorkMode.READ_PLAN)
             self._comment_widget.update_info()
+            self._add_callbacks_to_measurement_plan()
 
             self.update_current_pin()
             self._change_work_mode_for_new_measurement_plan()
