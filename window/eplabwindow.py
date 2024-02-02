@@ -63,8 +63,8 @@ class EPLabWindow(QMainWindow):
     COLOR_FOR_CURRENT: QColor = QColor(255, 0, 0, 200)
     COLOR_FOR_REFERENCE: QColor = QColor(0, 128, 255, 200)
     COLOR_FOR_TEST: QColor = QColor(255, 129, 129, 200)
-    CRITICAL_WIDTH_FOR_LINUX_EN: int = 1420
-    CRITICAL_WIDTH_FOR_LINUX_RU: int = 1620
+    CRITICAL_WIDTH_FOR_LINUX_EN: int = 1520
+    CRITICAL_WIDTH_FOR_LINUX_RU: int = 1730
     CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1245
     CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1420
     DEFAULT_COMPARATOR_MIN_CURRENT: float = 0.002
@@ -1675,7 +1675,6 @@ class EPLabWindow(QMainWindow):
             size = self.CRITICAL_WIDTH_FOR_LINUX_EN if lang is Language.EN else self.CRITICAL_WIDTH_FOR_LINUX_RU
         # Change style of toolbars
         for tool_bar in (self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search):
-            print(self.width())
             if self.width() < size:
                 style = Qt.ToolButtonIconOnly
             else:
