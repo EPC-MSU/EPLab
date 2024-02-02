@@ -296,6 +296,11 @@
         <source>Горячие клавиши</source>
         <translation>Keymap reference</translation>
     </message>
+    <message>
+        <location filename="mainwindow.ui" line="858"/>
+        <source>Удалить точку</source>
+        <translation>Remove point</translation>
+    </message>
 </context>
 <context>
     <name>t</name>
