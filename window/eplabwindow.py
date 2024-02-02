@@ -992,6 +992,7 @@ class EPLabWindow(QMainWindow):
         self.work_mode_changed.emit(mode)
         if mode in (WorkMode.TEST, WorkMode.WRITE) and self._measurement_plan.multiplexer:
             self.open_mux_window()
+        self._handle_current_pin_change()
 
     def _update_current_pin_in_read_plan_mode(self) -> None:
 

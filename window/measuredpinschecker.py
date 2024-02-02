@@ -134,8 +134,8 @@ class MeasuredPinsChecker(QObject):
         """
 
         self._set_new_plan()
-        self._handle_measurement_plan_change(0)
         if self.measurement_plan:
+            self._handle_measurement_plan_change(self.measurement_plan.get_current_index())
             self.measurement_plan.add_callback_func_for_pin_changes(self._handle_measurement_plan_change)
 
 
