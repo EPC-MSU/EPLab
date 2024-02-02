@@ -547,7 +547,7 @@ class EPLabWindow(QMainWindow):
 
         return {param: widget.get_checked_option() for param, widget in self._parameters_widgets.items()}
 
-    def _handle_current_pin_change(self, index: int) -> None:
+    def _handle_current_pin_change(self, index: int = None) -> None:
         """
         Method processes the change in the index of the current pin in the testing plan. In particular, it is checked
         that there are pins in the measurement plan.
@@ -555,11 +555,13 @@ class EPLabWindow(QMainWindow):
         """
 
         if self.measurement_plan.pins_number == 0:
-            self.remove_point_action.setEnabled(False)
+            enable = False
         else:
             enable = bool(self.work_mode is WorkMode.WRITE and
                           not (self.measurement_plan and self.measurement_plan.multiplexer is not None))
-            self.remove_point_action.setEnabled(enable)
+        for action in (self.next_point_action, self.previous_point_action, self.remove_point_action,
+                       self.pin_index_widget):
+            action.setEnabled(enable)
 
     @staticmethod
     def _handle_event_on_obj(obj: QObject, event: QEvent) -> Optional[bool]:
@@ -961,6 +963,7 @@ class EPLabWindow(QMainWindow):
         self._mux_and_plan_window.update_info()
         self._comment_widget.update_info()
         self._add_callbacks_to_measurement_plan()
+        self._handle_current_pin_change()
         self._switch_work_mode(WorkMode.COMPARE)
         self._init_tolerance()
         with self._device_errors_handler:
@@ -1222,6 +1225,7 @@ class EPLabWindow(QMainWindow):
         self._mux_and_plan_window.update_info()
         self._comment_widget.update_info()
         self._add_callbacks_to_measurement_plan()
+        self._handle_current_pin_change()
         self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
@@ -1599,6 +1603,7 @@ class EPLabWindow(QMainWindow):
                 self._change_work_mode(WorkMode.READ_PLAN)
             self._comment_widget.update_info()
             self._add_callbacks_to_measurement_plan()
+            self._handle_current_pin_change()
 
             self.update_current_pin()
             self._change_work_mode_for_new_measurement_plan()
