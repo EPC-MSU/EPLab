@@ -51,6 +51,8 @@ class TableWidget(QTableWidget):
         :param start_row: row number in the table, starting from which to update the row indexes.
         """
 
+        if start_row is None:
+            start_row = 0
         column = 0
         for row in range(start_row, self.rowCount()):
             item = self.item(row, column)

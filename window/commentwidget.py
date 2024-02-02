@@ -178,7 +178,7 @@ class CommentWidget(TableWidget):
             if index is None:
                 index = 0
             self._remove_row(index)
-        else:
+        elif index is not None:
             self._update_comment(index, pin.comment)
         self._change_row_color(index, pin)
         self._update_indexes(index)

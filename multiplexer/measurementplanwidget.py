@@ -177,7 +177,7 @@ class MeasurementPlanWidget(TableWidget):
             if index is None:
                 index = 0
             self._remove_row(index)
-        else:
+        elif index is not None:
             self._update_pin_in_table(index, pin)
         self._update_indexes(index)
 
