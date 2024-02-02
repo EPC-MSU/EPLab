@@ -173,8 +173,10 @@ class EPLabWindow(QMainWindow):
 
         if self._work_mode is WorkMode.WRITE:
             return True
+
         if self._work_mode is WorkMode.TEST and not self._measured_pins_checker.check_empty_current_pin():
             return True
+
         return False
 
     @property
@@ -1003,7 +1005,10 @@ class EPLabWindow(QMainWindow):
             return round(value, 2)
 
         current_pin = self._measurement_plan.get_current_pin()
-        ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
+        if current_pin:
+            ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
+        else:
+            ref_for_plan, test_for_plan, settings = None, None, None
         with self._device_errors_handler:
             if settings:
                 available = {

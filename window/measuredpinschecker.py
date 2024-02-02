@@ -57,6 +57,11 @@ class MeasuredPinsChecker(QObject):
         :param pin_index: pin index in which to check the presence of a measured reference IV-curve.
         """
 
+        if pin_index is None and self.measurement_plan.pins_number == 0:
+            self._empty_pins.clear()
+            self._measured_pins.clear()
+            return
+
         pin = self.measurement_plan.get_pin_with_index(pin_index)
         if pin is not None and self._check_pin(pin):
             self._empty_pins.discard(pin_index)
