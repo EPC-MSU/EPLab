@@ -666,6 +666,7 @@ class EPLabWindow(QMainWindow):
         self.pin_index_widget.installEventFilter(self)
         self.next_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(False))
         self.new_point_action.triggered.connect(self.create_new_pin)
+        self.remove_point_action.triggered.connect(self.remove_pin)
         self._replace_save_point_action()
         self.add_board_image_action.triggered.connect(self.load_board_image)
         self.create_report_action.triggered.connect(self.create_report)
@@ -1614,6 +1615,14 @@ class EPLabWindow(QMainWindow):
         """
 
         self._iv_window.plot.remove_all_cursors()
+
+    @pyqtSlot()
+    def remove_pin(self) -> None:
+        index = self._measurement_plan.get_current_index()
+        self._measurement_plan.remove_current_pin()
+        self._board_window.remove_pin(index)
+
+        self.update_current_pin()
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         """

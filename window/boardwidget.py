@@ -227,6 +227,13 @@ class BoardWidget(QWidget):
         height = self._scene.height()
         return self._scene.mapToScene(int(width / 2), int(height / 2))
 
+    def remove_pin(self, index: int) -> None:
+        """
+        :param index: pin index to delete.
+        """
+
+        self._scene.remove_point(index)
+
     def resizeEvent(self, event: QResizeEvent) -> None:
         """
         :param event: resize event.
