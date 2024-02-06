@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>423</width>
-    <height>95</height>
+    <width>429</width>
+    <height>140</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -111,6 +111,13 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="check_box_auto_transition">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_auto_transition">
        <property name="text">
@@ -118,8 +125,17 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QCheckBox" name="check_box_auto_transition">
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_pin_shift_warning_info">
+       <property name="text">
+        <string>Показывать предупреждения при
+добавлении/удалении точек,
+приводящих к смещению нумерации</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QCheckBox" name="check_box_pin_shift_warning_info">
        <property name="text">
         <string/>
        </property>

@@ -31,6 +31,7 @@ class SettingsWindow(QDialog):
         self._settings_directory: str = settings_directory or ut.get_dir_name()
         self._init_ui()
         self._update_auto_transition(self._init_settings.auto_transition)
+        self._update_pin_shift_warning_info(self._init_settings.pin_shift_warning_info)
         self._update_tolerance_in_settings_wnd(self._init_settings.tolerance)
 
     @property
@@ -49,6 +50,7 @@ class SettingsWindow(QDialog):
         self.button_tolerance_plus.clicked.connect(self.increase_tolerance)
         self.spin_box_tolerance.valueChanged.connect(self.update_tolerance)
         self.check_box_auto_transition.stateChanged.connect(self.update_auto_transition)
+        self.check_box_pin_shift_warning_info.stateChanged.connect(self.update_pin_shift_warning_info)
         self.button_cancel.clicked.connect(self.discard_changes)
         self.button_load_settings.clicked.connect(self.open_settings)
         self.button_ok.clicked.connect(self.apply_changes)
@@ -75,6 +77,14 @@ class SettingsWindow(QDialog):
 
         self.check_box_auto_transition.setChecked(auto_transition)
         self._settings.auto_transition = auto_transition
+
+    def _update_pin_shift_warning_info(self, pin_shift_warning_info: bool) -> None:
+        """
+        :param pin_shift_warning_info: new value for enabling or disabling auto transition in plan testing mode.
+        """
+
+        self.check_box_pin_shift_warning_info.setChecked(pin_shift_warning_info)
+        self._settings.pin_shift_warning_info = pin_shift_warning_info
 
     def _update_tolerance_in_settings_wnd(self, tolerance: float) -> None:
         """
@@ -169,6 +179,15 @@ class SettingsWindow(QDialog):
         """
 
         self._update_auto_transition(state == Qt.Checked)
+        self._send_settings()
+
+    @pyqtSlot(int)
+    def update_pin_shift_warning_info(self, state: int) -> None:
+        """
+        :param state: if True, then the auto transition mode is activated when testing according to plan.
+        """
+
+        self._update_pin_shift_warning_info(state == Qt.Checked)
         self._send_settings()
 
     @pyqtSlot(float)

@@ -1154,6 +1154,7 @@ class EPLabWindow(QMainWindow):
         self.hide_curve_b_action.setChecked(new_settings.hide_curve_b)
         self.sound_enabled_action.setChecked(new_settings.sound_enabled)
         self._auto_settings.save_auto_transition(new_settings.auto_transition)
+        self._auto_settings.save_pin_shift_warning_info(new_settings.pin_shift_warning_info)
         self._update_tolerance(new_settings.tolerance)
 
     @pyqtSlot(str)
@@ -1245,7 +1246,7 @@ class EPLabWindow(QMainWindow):
         :param multiplexer_output: multiplexer output for new pin.
         """
 
-        if self.measurement_plan.check_pin_indices_change():
+        if self._auto_settings.get_pin_shift_warning_info() and self.measurement_plan.check_pin_indices_change():
             pin_index = self.measurement_plan.get_current_index() + 2
             result = ut.show_message(qApp.translate("t", "Внимание"),
                                      qApp.translate("t", "Добавление точки приведет к сдвигу нумерации. Добавленная "
@@ -1430,6 +1431,7 @@ class EPLabWindow(QMainWindow):
         settings.auto_transition = self._auto_settings.get_auto_transition()
         settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
+        settings.pin_shift_warning_info = self._auto_settings.get_pin_shift_warning_info()
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
         settings.tolerance = self.tolerance
         return settings
@@ -1677,7 +1679,7 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def remove_pin(self) -> None:
-        if self.measurement_plan.check_pin_indices_change():
+        if self._auto_settings.get_pin_shift_warning_info() and self.measurement_plan.check_pin_indices_change():
             pin_index = self.measurement_plan.get_current_index() + 2
             result = ut.show_message(qApp.translate("t", "Внимание"),
                                      qApp.translate("t", "Удаление точки приведет к сдвигу нумерации. Номера имеющихся "

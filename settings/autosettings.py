@@ -32,6 +32,7 @@ class AutoSettings(SettingsHandler):
     voltage: str = None
     auto_transition: bool = False
     language: Language = Language.EN
+    pin_shift_warning_info: bool = False
     measurer_1_port: str = None
     measurer_2_port: str = None
     mux_port: str = None
@@ -47,7 +48,8 @@ class AutoSettings(SettingsHandler):
         settings.endGroup()
 
         params = {"auto_transition": {"convert": ut.to_bool},
-                  "language": {"convert": get_language_from_str}}
+                  "language": {"convert": get_language_from_str},
+                  "pin_shift_warning_info": {"convert": ut.to_bool}}
         settings.beginGroup("Main")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
@@ -69,7 +71,8 @@ class AutoSettings(SettingsHandler):
         settings.endGroup()
 
         params = {"auto_transition": {"convert": str},
-                  "language": {"convert": convert_language_to_str}}
+                  "language": {"convert": convert_language_to_str},
+                  "pin_shift_warning_info": {"convert": str}}
         settings.beginGroup("Main")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
@@ -127,6 +130,13 @@ class AutoSettings(SettingsHandler):
 
         return measurement_settings
 
+    def get_pin_shift_warning_info(self) -> bool:
+        """
+        :return: True if to show a warning message when point numbering is shifted when adding or removing points.
+        """
+
+        return self.pin_shift_warning_info
+
     @save_settings
     def save_auto_transition(self, auto_transition: bool) -> None:
         """
@@ -167,6 +177,14 @@ class AutoSettings(SettingsHandler):
         self.frequency = options[EyePointProduct.Parameter.frequency]
         self.sensitive = options[EyePointProduct.Parameter.sensitive]
         self.voltage = options[EyePointProduct.Parameter.voltage]
+
+    @save_settings
+    def save_pin_shift_warning_info(self, pin_shift_warning_info: bool) -> None:
+        """
+        :param pin_shift_warning_info:
+        """
+
+        self.pin_shift_warning_info = bool(pin_shift_warning_info)
 
 
 def check_none(value: str) -> Optional[str]:

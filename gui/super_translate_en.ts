@@ -14,22 +14,31 @@
         <translation>Tolerance</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="117"/>
+        <location filename="settings.ui" line="124"/>
         <source>Включить автопереход</source>
         <translation>Enable auto transition</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="153"/>
+        <location filename="settings.ui" line="131"/>
+        <source>Показывать предупреждения при
+добавлении/удалении точек,
+приводящих к смещению нумерации</source>
+        <translation>Show warnings when
+adding/removing points,
+leading to a numbering shift</translation>
+    </message>
+    <message>
+        <location filename="settings.ui" line="169"/>
         <source>Загрузить настройки</source>
         <translation>Load settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="178"/>
+        <location filename="settings.ui" line="194"/>
         <source>Сохранить настройки</source>
         <translation>Save settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="228"/>
+        <location filename="settings.ui" line="244"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>

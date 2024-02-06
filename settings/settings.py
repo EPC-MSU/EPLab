@@ -29,7 +29,7 @@ class SettingsEditor:
 class Settings(SettingsHandler):
 
     ATTRIBUTE_NAMES: List[str] = ["auto_transition", "frequency", "hide_curve_a", "hide_curve_b", "internal_resistance",
-                                  "max_voltage", "sound_enabled", "tolerance", "work_mode"]
+                                  "max_voltage", "pin_shift_warning_info", "sound_enabled", "tolerance", "work_mode"]
     changed: pyqtSignal = pyqtSignal()
     auto_transition: bool = False
     frequency: Tuple[int, int] = None
@@ -37,6 +37,7 @@ class Settings(SettingsHandler):
     hide_curve_b: bool = False
     internal_resistance: float = None
     max_voltage: float = None
+    pin_shift_warning_info: bool = False
     sound_enabled: bool = False
     tolerance: float = 0.15
     work_mode: WorkMode = WorkMode.COMPARE
@@ -67,6 +68,7 @@ class Settings(SettingsHandler):
                   "hide_curve_b": {"convert": ut.to_bool},
                   "internal_resistance": {"convert": float},
                   "max_voltage": {"convert": float},
+                  "pin_shift_warning_info": {"convert": ut.to_bool},
                   "sound_enabled": {"convert": ut.to_bool},
                   "tolerance": {"convert": float},
                   "work_mode": {"convert": lambda value: MODES[value]}}
@@ -92,6 +94,7 @@ class Settings(SettingsHandler):
                   "hide_curve_b": {},
                   "internal_resistance": {"convert": ut.float_to_str},
                   "max_voltage": {"convert": ut.float_to_str},
+                  "pin_shift_warning_info": {},
                   "sound_enabled": {},
                   "tolerance": {"convert": ut.float_to_str},
                   "work_mode": {"convert": get_work_mode}}
