@@ -190,8 +190,10 @@ class CommentWidget(TableWidget):
             self._add_comment(index, pin.comment)
         elif self._main_window.measurement_plan.pins_number < self.rowCount():
             if index is None:
-                index = 0
-            self._remove_row(index)
+                row_to_remove = 0
+            else:
+                row_to_remove = index + 1
+            self._remove_row(row_to_remove)
         elif index is not None:
             self._update_comment(index, pin.comment)
         self._change_row_color(index, pin)
