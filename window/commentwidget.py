@@ -194,6 +194,8 @@ class CommentWidget(TableWidget):
             else:
                 row_to_remove = index + 1
             self._remove_row(row_to_remove)
+            if self.rowCount() > 0:
+                self.set_pin_as_current()
         elif index is not None:
             self._update_comment(index, pin.comment)
         self._change_row_color(index, pin)
