@@ -1678,7 +1678,6 @@ class EPLabWindow(QMainWindow):
         :param event: resizing event.
         """
 
-        print(self.width())
         # Determine the critical width of the window for given language and OS
         lang = qApp.instance().property("language")
         if system().lower() == "windows":
