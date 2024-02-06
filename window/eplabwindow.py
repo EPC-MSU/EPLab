@@ -1245,15 +1245,26 @@ class EPLabWindow(QMainWindow):
         :param multiplexer_output: multiplexer output for new pin.
         """
 
-        if self._measurement_plan.image:
+        if self.measurement_plan.check_pin_indices_change():
+            pin_index = self.measurement_plan.get_current_index() + 2
+            result = ut.show_message(qApp.translate("t", "Внимание"),
+                                     qApp.translate("t", "Добавление точки приведет к сдвигу нумерации. Добавленная "
+                                                         "точка будет иметь номер {0}. Номера имеющихся точек, начиная "
+                                                         "с {0}, будут увеличены на 1."
+                                                    ).format(pin_index),
+                                     cancel_button=True)
+            if result != 0:
+                return
+
+        if self.measurement_plan.image:
             # Place at the center of current viewpoint by default
             point = self._board_window.get_default_pin_xy()
             x, y = point.x(), point.y()
         else:
             x, y = 0, 0
         pin = Pin(x, y, measurements=[], multiplexer_output=multiplexer_output)
-        self._measurement_plan.append_pin(pin)
-        self._board_window.add_pin(pin.x, pin.y, self._measurement_plan.get_current_index())
+        self.measurement_plan.append_pin(pin)
+        self._board_window.add_pin(pin.x, pin.y, self.measurement_plan.get_current_index())
 
         # It is important to initialize pin with real measurement. Otherwise user can create several empty points and
         # they will not be unique. This will cause some errors during ufiv validation.
@@ -1666,6 +1677,16 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def remove_pin(self) -> None:
+        if self.measurement_plan.check_pin_indices_change():
+            pin_index = self.measurement_plan.get_current_index() + 2
+            result = ut.show_message(qApp.translate("t", "Внимание"),
+                                     qApp.translate("t", "Удаление точки приведет к сдвигу нумерации. Номера имеющихся "
+                                                         "точек, начиная с {}, будут уменьшены на 1."
+                                                    ).format(pin_index),
+                                     cancel_button=True)
+            if result != 0:
+                return
+
         index = self._measurement_plan.get_current_index()
         self._measurement_plan.remove_current_pin()
         self._board_window.remove_pin(index)

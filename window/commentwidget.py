@@ -262,12 +262,12 @@ class CommentWidget(TableWidget):
         if self._check_show_context_menu(pos):
             menu = QMenu(self)
             action_add_pin = QAction(QIcon(os.path.join(ut.DIR_MEDIA, "newpoint.png")),
-                                     qApp.translate("t", "Новая точка"), menu)
+                                     qApp.translate("MainWindow", "Новая точка"), menu)
             action_add_pin.triggered.connect(self._main_window.create_new_pin)
 
             menu.addAction(action_add_pin)
             action_remove_pin = QAction(QIcon(os.path.join(ut.DIR_MEDIA, "remove_point.png")),
-                                        qApp.translate("t", "Удалить точку"), menu)
+                                        qApp.translate("MainWindow", "Удалить точку"), menu)
             action_remove_pin.triggered.connect(self._main_window.remove_pin)
             menu.addAction(action_remove_pin)
             menu.popup(self.viewport().mapToGlobal(pos))
