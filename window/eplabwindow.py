@@ -1755,9 +1755,10 @@ class EPLabWindow(QMainWindow):
             self.dir_chosen_by_user = filename
 
     @pyqtSlot()
-    def save_pin(self) -> None:
+    def save_pin(self, pin_centering: bool = True) -> None:
         """
         Slot saves IV-curve to current pin.
+        :param pin_centering: if True, then the created pin will be centered on the board window.
         """
 
         with self._device_errors_handler:
@@ -1766,7 +1767,7 @@ class EPLabWindow(QMainWindow):
             elif self._work_mode == WorkMode.TEST:
                 self._measurement_plan.save_last_measurement_as_test()
         index = self._measurement_plan.get_current_index()
-        self.update_current_pin()
+        self.update_current_pin(pin_centering)
         self._comment_widget.save_comment(index)
         self._comment_widget.update_table_for_new_tolerance(index)
 

@@ -95,6 +95,9 @@ class BoardWidget(QWidget):
             self._parent.save_pin()
             return True
 
+        if key == Qt.Key_Delete:
+            self._parent.remove_pin()
+
         return self._parent.eventFilter(self._parent, event)
 
     def _handle_key_release_event(self, obj: QObject, event: QEvent) -> bool:
@@ -199,10 +202,15 @@ class BoardWidget(QWidget):
             pin = Pin(x=point.x(), y=point.y(), measurements=[])
             self.measurement_plan.append_pin(pin)
             self.add_pin(pin.x, pin.y, self.measurement_plan.get_current_index())
-            self._parent.update_current_pin()
-            self._parent.save_pin()
+            self._parent.save_pin(False)
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+        """
+        :param obj: object for which event occurred;
+        :param event: event.
+        :return: True if event should be filtered out, otherwise - False.
+        """
+
         if obj == self._scene and isinstance(event, QKeyEvent):
             key_event = QKeyEvent(event)
             if key_event.type() == QEvent.KeyPress:
