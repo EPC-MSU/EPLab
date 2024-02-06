@@ -1,8 +1,10 @@
+import os
 from typing import Any, Callable, Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QSize, Qt
-from PyQt5.QtGui import QBrush, QColor
-from PyQt5.QtWidgets import QTableWidgetItem
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
+from PyQt5.QtGui import QBrush, QColor, QIcon
+from PyQt5.QtWidgets import QAction, QMenu, QTableWidgetItem
 from epcore.elements import Pin
+from window import utils as ut
 from window.common import WorkMode
 from window.pinindextableitem import PinIndexTableItem
 from window.tablewidget import TableWidget
@@ -45,6 +47,9 @@ class CommentWidget(TableWidget):
         self._default_style_sheet: str = self.styleSheet()
         self._read_only: bool = False
         self.adjustSize()
+
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.show_context_menu)
 
     @property
     def read_only(self) -> bool:
@@ -114,6 +119,15 @@ class CommentWidget(TableWidget):
         _ = [self.removeRow(row) for row in range(self.rowCount(), -1, -1)]
         self.clearContents()
         self.connect_item_selection_changed_signal()
+
+    def _check_show_context_menu(self, pos: QPoint) -> bool:
+        """
+        :param pos: the position of the context menu event that the widget receives.
+        :return: True if the context menu should be shown.
+        """
+
+        return (self._main_window.new_point_action.isEnabled() and self._main_window.remove_point_action.isEnabled() and
+                self.row(self.itemAt(pos)) >= 0)
 
     @disconnect_signal
     def _fill_table(self) -> None:
@@ -235,6 +249,26 @@ class CommentWidget(TableWidget):
                 self._read_only = False
                 self._set_read_only()
             self.setEnabled(mode in (WorkMode.TEST, WorkMode.WRITE))
+
+    @pyqtSlot(QPoint)
+    def show_context_menu(self, pos: QPoint) -> None:
+        """
+        Slot shows a context menu for creating and deleting a point.
+        :param pos: the position of the context menu event that the widget receives.
+        """
+
+        if self._check_show_context_menu(pos):
+            menu = QMenu(self)
+            action_add_pin = QAction(QIcon(os.path.join(ut.DIR_MEDIA, "newpoint.png")),
+                                     qApp.translate("t", "Новая точка"), menu)
+            action_add_pin.triggered.connect(self._main_window.create_new_pin)
+
+            menu.addAction(action_add_pin)
+            action_remove_pin = QAction(QIcon(os.path.join(ut.DIR_MEDIA, "remove_point.png")),
+                                        qApp.translate("t", "Удалить точку"), menu)
+            action_remove_pin.triggered.connect(self._main_window.remove_pin)
+            menu.addAction(action_remove_pin)
+            menu.popup(self.viewport().mapToGlobal(pos))
 
     def sizeHint(self) -> QSize:
         """
