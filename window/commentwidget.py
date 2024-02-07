@@ -141,6 +141,17 @@ class CommentWidget(TableWidget):
             self._change_row_color(index, pin)
         self.select_row_for_current_pin()
 
+    def _remove_row(self, index: int) -> None:
+        """
+        :param index: index of the row to be deleted.
+        """
+
+        super()._remove_row(index)
+        if self.rowCount() > 0:
+            self.set_pin_as_current()
+            pin = self._main_window.measurement_plan.get_pin_with_index(index)
+            self._update_comment(index, pin.comment)
+
     def _set_item_read_only(self, item: QTableWidgetItem) -> None:
         """
         :param item: set table widget item as editable or not editable.
@@ -189,13 +200,8 @@ class CommentWidget(TableWidget):
         if self._main_window.measurement_plan.pins_number > self.rowCount():
             self._add_comment(index, pin.comment)
         elif self._main_window.measurement_plan.pins_number < self.rowCount():
-            if index is None:
-                row_to_remove = 0
-            else:
-                row_to_remove = index + 1
+            row_to_remove = 0 if index is None else index
             self._remove_row(row_to_remove)
-            if self.rowCount() > 0:
-                self.set_pin_as_current()
         elif index is not None:
             self._update_comment(index, pin.comment)
         self._change_row_color(index, pin)

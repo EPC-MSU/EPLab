@@ -54,6 +54,7 @@ class SettingsWindow(QDialog):
         self.button_cancel.clicked.connect(self.discard_changes)
         self.button_load_settings.clicked.connect(self.open_settings)
         self.button_ok.clicked.connect(self.apply_changes)
+        self.button_ok.setDefault(True)
         self.button_save_settings.clicked.connect(self.save_settings_to_file)
 
     def _get_tolerance_value(self) -> float:
