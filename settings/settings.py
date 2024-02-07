@@ -62,7 +62,7 @@ class Settings(SettingsHandler):
         :param settings: QSettings object from which parameter values ​​need to be read.
         """
 
-        params = {"auto_transition": ut.to_bool,
+        params = {"auto_transition": {"convert": ut.to_bool},
                   "frequency": {"convert": lambda value: tuple(map(int, value))},
                   "hide_curve_a": {"convert": ut.to_bool},
                   "hide_curve_b": {"convert": ut.to_bool},
