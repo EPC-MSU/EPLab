@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import serial.tools.list_ports
 from PyQt5.QtCore import QCoreApplication as qApp, QDir, QStandardPaths, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QLayout, QMessageBox
+from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QLayout, QMessageBox
 from epcore.elements import MeasurementSettings
 from epcore.ivmeasurer import IVMeasurerBase
 
@@ -44,6 +44,41 @@ def clear_layout(layout: QLayout) -> None:
         widget = item.widget()
         layout.removeWidget(widget)
         widget.deleteLater()
+
+
+def create_message_box(header: str, message: str, additional_info: str = None,
+                       icon: QMessageBox.Icon = QMessageBox.Warning, no_button: bool = False,
+                       cancel_button: bool = False, yes_button: bool = False) -> QMessageBox:
+    """
+    Function creates message box.
+    :param header: header;
+    :param message: message;
+    :param additional_info: additional information for the message;
+    :param icon: message box icon;
+    :param no_button: if True, then No button will be shown;
+    :param cancel_button: if True, then Cancel button will be shown;
+    :param yes_button: if True, then Yes button will be shown.
+    :return: message box.
+    """
+
+    message_box = QMessageBox()
+    message_box.setWindowTitle(header)
+    message_box.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "icon.png")))
+    message_box.setIcon(icon)
+    message_box.setTextFormat(Qt.RichText)
+    message_box.setTextInteractionFlags(Qt.TextBrowserInteraction)
+    message_box.setText(message)
+    if additional_info:
+        message_box.setInformativeText(additional_info)
+    if yes_button:
+        message_box.addButton(qApp.translate("t", "Да"), QMessageBox.AcceptRole)
+    else:
+        message_box.addButton("OK", QMessageBox.AcceptRole)
+    if no_button:
+        message_box.addButton(qApp.translate("t", "Нет"), QMessageBox.NoRole)
+    if cancel_button:
+        message_box.addButton(qApp.translate("t", "Отмена"), QMessageBox.RejectRole)
+    return message_box
 
 
 def find_address_in_usb_hubs_tree(url: str) -> Optional[str]:
@@ -144,24 +179,39 @@ def show_message(header: str, message: str, additional_info: str = None, icon: Q
     :return: code of the button that the user clicked in the message box.
     """
 
-    message_box = QMessageBox()
-    message_box.setWindowTitle(header)
-    message_box.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "icon.png")))
-    message_box.setIcon(icon)
-    message_box.setTextFormat(Qt.RichText)
-    message_box.setTextInteractionFlags(Qt.TextBrowserInteraction)
-    message_box.setText(message)
-    if additional_info:
-        message_box.setInformativeText(additional_info)
-    if yes_button:
-        message_box.addButton(qApp.translate("t", "Да"), QMessageBox.AcceptRole)
-    else:
-        message_box.addButton("OK", QMessageBox.AcceptRole)
-    if no_button:
-        message_box.addButton(qApp.translate("t", "Нет"), QMessageBox.NoRole)
-    if cancel_button:
-        message_box.addButton(qApp.translate("t", "Отмена"), QMessageBox.RejectRole)
+    message_box = create_message_box(header, message, additional_info, icon, no_button, cancel_button, yes_button)
     return message_box.exec()
+
+
+def show_message_with_option(header: str, message: str, option_text: str, additional_info: str = None,
+                             icon: QMessageBox.Icon = QMessageBox.Warning, no_button: bool = False,
+                             cancel_button: bool = False, yes_button: bool = False) -> Tuple[int, bool]:
+    """
+    Function shows message box.
+    :param header: header;
+    :param message: message;
+    :param option_text: option text;
+    :param additional_info: additional information for the message;
+    :param icon: message box icon;
+    :param no_button: if True, then No button will be shown;
+    :param cancel_button: if True, then Cancel button will be shown;
+    :param yes_button: if True, then Yes button will be shown.
+    :return: code of the button that the user clicked in the message box.
+    """
+
+    message_box = create_message_box(header, message, additional_info, icon, no_button, cancel_button, yes_button)
+    layout = message_box.layout()
+    item_with_ok_button = layout.itemAtPosition(2, 2)
+    layout.removeItem(item_with_ok_button)
+
+    check_box_force_open = QCheckBox(option_text)
+    h_layout = QHBoxLayout()
+    h_layout.addWidget(check_box_force_open)
+    h_layout.addStretch(1)
+    h_layout.addItem(item_with_ok_button)
+
+    layout.addLayout(h_layout, 2, 2, Qt.AlignCenter)
+    return message_box.exec_(), check_box_force_open.checkState() == Qt.Checked
 
 
 def sort_devices_by_usb_numbers(measurers: List[IVMeasurerBase], reverse: bool = False) -> List[IVMeasurerBase]:

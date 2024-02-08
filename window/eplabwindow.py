@@ -595,6 +595,7 @@ class EPLabWindow(QMainWindow):
                 setattr(obj, "is_focused", True)
             elif filter_event.type() == QFocusEvent.FocusOut:
                 setattr(obj, "is_focused", False)
+        return None
 
     def _handle_freezing_curves_with_pedal(self, pressed: bool) -> None:
         """
@@ -976,6 +977,22 @@ class EPLabWindow(QMainWindow):
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
 
+    def _show_pin_shift_warning(self, text: str) -> int:
+        """
+        Method displays a message stating that adding a new point or deleting an old point will cause the point
+        numbering to shift. It is also suggested to update the setting that is responsible for displaying this warning
+        in the future.
+        :param text: warning message.
+        :return: code of the button that the user clicked in the message box.
+        """
+
+        result, not_show_again = ut.show_message_with_option(qApp.translate("t", "Внимание"), text,
+                                                             qApp.translate("t", "Не показывать предупреждение"),
+                                                             cancel_button=True)
+        if not_show_again:
+            self._auto_settings.save_pin_shift_warning_info(False)
+        return result
+
     def _skip_empty_pins(self) -> None:
         """
         In TEST work mode you can make measurements only at pins where there are reference IV-curves. See ticket #89690.
@@ -1248,13 +1265,10 @@ class EPLabWindow(QMainWindow):
 
         if self._auto_settings.get_pin_shift_warning_info() and self.measurement_plan.check_pin_indices_change():
             pin_index = self.measurement_plan.get_current_index() + 2
-            result = ut.show_message(qApp.translate("t", "Внимание"),
-                                     qApp.translate("t", "Добавление точки приведет к сдвигу нумерации. Добавленная "
-                                                         "точка будет иметь номер {0}. Номера имеющихся точек, начиная "
-                                                         "с {0}, будут увеличены на 1."
-                                                    ).format(pin_index),
-                                     cancel_button=True)
-            if result != 0:
+            text = qApp.translate("t", "Добавление точки приведет к сдвигу нумерации. Добавленная точка будет иметь "
+                                       "номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1."
+                                  ).format(pin_index)
+            if self._show_pin_shift_warning(text) != 0:
                 return
 
         if self.measurement_plan.image:
@@ -1681,12 +1695,9 @@ class EPLabWindow(QMainWindow):
     def remove_pin(self) -> None:
         if self._auto_settings.get_pin_shift_warning_info() and self.measurement_plan.check_pin_indices_change():
             pin_index = self.measurement_plan.get_current_index() + 2
-            result = ut.show_message(qApp.translate("t", "Внимание"),
-                                     qApp.translate("t", "Удаление точки приведет к сдвигу нумерации. Номера имеющихся "
-                                                         "точек, начиная с {}, будут уменьшены на 1."
-                                                    ).format(pin_index),
-                                     cancel_button=True)
-            if result != 0:
+            text = qApp.translate("t", "Удаление точки приведет к сдвигу нумерации. Номера имеющихся точек, начиная с "
+                                       "{}, будут уменьшены на 1.").format(pin_index)
+            if self._show_pin_shift_warning(text) != 0:
                 return
 
         index = self._measurement_plan.get_current_index()

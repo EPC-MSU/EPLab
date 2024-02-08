@@ -2,9 +2,7 @@ import logging
 import os
 from collections import namedtuple
 from typing import List, Optional, Tuple, Union
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QCoreApplication as qApp, Qt, QTimer
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QMessageBox
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QCoreApplication as qApp, QTimer
 from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerBase, AnalogMultiplexerVirtual
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
@@ -103,7 +101,8 @@ class ConnectionChecker(QObject):
         measurers, bad_ports, bad_firmwares, bad_firmwares_ports = create_measurers(*ports)
         if bad_firmwares:
             if self._force_open is None:
-                self._force_open = request_opening_by_force(bad_firmwares)
+                self._force_open = ut.show_message_with_option(qApp.translate("t", "Ошибка"), bad_firmwares,
+                                                               qApp.translate("t", "Все равно открыть"))[1]
 
             if self._force_open:
                 for i, port in bad_firmwares_ports:
@@ -247,22 +246,6 @@ def create_measurers(*ports: str, force_open: Optional[bool] = False
     return measurers, bad_ports, "\n".join(bad_firmwares), bad_firmwares_ports
 
 
-def create_message_box(msg_title: str, msg_text: str) -> QMessageBox:
-    """
-    Function creates message box.
-    :param msg_title: title of message box;
-    :param msg_text: message text.
-    :return: message box.
-    """
-
-    message_box = QMessageBox()
-    message_box.setIcon(QMessageBox.Warning)
-    message_box.setWindowTitle(msg_title)
-    message_box.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
-    message_box.setText(msg_text)
-    return message_box
-
-
 def create_multiplexer(port: Optional[str] = None) -> Tuple[Optional[AnalogMultiplexerBase], List[str]]:
     """
     :param port: port for multiplexer.
@@ -304,27 +287,3 @@ def print_errors(*bad_ports: str) -> None:
                                    "<li>Убедитесь, что это устройства EyePoint, а не какие-то другие устройства.</li>\n"
                                    "</ul>")
     ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_ports)))
-
-
-def request_opening_by_force(text: str) -> bool:
-    """
-    Function reports that the user has selected measurers with firmware incompatible with program. Function also asks
-    if measurers need to be opened by force.
-    :param text: error text.
-    :return: True if measurers need to be opened by force.
-    """
-
-    message_box = create_message_box(qApp.translate("t", "Ошибка"), text)
-    layout = message_box.layout()
-    item_with_ok_button = layout.itemAtPosition(2, 2)
-    layout.removeItem(item_with_ok_button)
-
-    check_box_force_open = QCheckBox(qApp.translate("t", "Все равно открыть"))
-    h_layout = QHBoxLayout()
-    h_layout.addWidget(check_box_force_open)
-    h_layout.addStretch(1)
-    h_layout.addItem(item_with_ok_button)
-
-    layout.addLayout(h_layout, 2, 2, Qt.AlignCenter)
-    message_box.exec_()
-    return check_box_force_open.checkState() == Qt.Checked
