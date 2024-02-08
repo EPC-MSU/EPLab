@@ -27,6 +27,8 @@ import connection_window as cw
 from dialogs import (ReportGenerationThread, show_keymap_info, show_language_selection_window,
                      show_measurer_settings_window, show_product_info, show_report_generation_window)
 from multiplexer import MuxAndPlanWindow
+from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
+from version import Version
 from window import utils as ut
 from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from window.boardwidget import BoardWidget
@@ -46,8 +48,6 @@ from window.plancompatibility import PlanCompatibility
 from window.scaler import get_scale_factor, update_scale_of_class
 from window.scorewrapper import check_score_not_greater_tolerance, ScoreWrapper
 from window.soundplayer import SoundPlayer
-from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
-from version import Version
 
 
 logger = logging.getLogger("eplab")
