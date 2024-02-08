@@ -32,7 +32,7 @@ class AutoSettings(SettingsHandler):
     voltage: str = None
     auto_transition: bool = False
     language: Language = Language.EN
-    pin_shift_warning_info: bool = False
+    pin_shift_warning_info: bool = True
     measurer_1_port: str = None
     measurer_2_port: str = None
     mux_port: str = None

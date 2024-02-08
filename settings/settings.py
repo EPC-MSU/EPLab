@@ -37,7 +37,7 @@ class Settings(SettingsHandler):
     hide_curve_b: bool = False
     internal_resistance: float = None
     max_voltage: float = None
-    pin_shift_warning_info: bool = False
+    pin_shift_warning_info: bool = True
     sound_enabled: bool = False
     tolerance: float = 0.15
     work_mode: WorkMode = WorkMode.COMPARE
