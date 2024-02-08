@@ -21,7 +21,7 @@ class ConnectionChecker(QObject):
     Class checks whether IV-measurers and multiplexer can be connected to the given ports.
     """
 
-    TIMEOUT: int = 10
+    TIMEOUT: int = 100
     connect_signal: pyqtSignal = pyqtSignal(ConnectionData)
 
     def __init__(self, auto_settings: AutoSettings) -> None:
