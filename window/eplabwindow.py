@@ -1831,6 +1831,7 @@ class EPLabWindow(QMainWindow):
         Slot handles selection of a new option for parameter of the measuring system.
         """
 
+        self.setFocus()
         settings = self._msystem.get_settings()
         old_settings = copy.deepcopy(settings)
         options = self._get_options_from_ui()
