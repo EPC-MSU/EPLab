@@ -774,6 +774,7 @@
    <property name="icon">
     <iconset>
      <normaloff>../media/show_b.png</normaloff>
+     <normalon>../media/hide_b.png</normalon>
      <activeon>../media/hide_b.jpg</activeon>../media/show_b.png</iconset>
    </property>
    <property name="text">
