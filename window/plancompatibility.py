@@ -45,7 +45,8 @@ class PlanCompatibility:
     def _add_points_from_mux_channels(self, elements: List[Element], channels: Dict[int, Dict[int, List[int]]],
                                       empty: List[Tuple[int, int]]) -> None:
         """
-        Method adds a given number of points to the list of points on the board.
+        Method adds new points to the list of board elements. The number of new points is determined by the number of
+        multiplexer outputs for which points are not assigned on the board.
         :param elements: list of elements on the board;
         :param channels: dictionary with point indices that correspond to the corresponding numbers of the module and
         channel of the multiplexer;
@@ -135,7 +136,7 @@ class PlanCompatibility:
 
     def _create_new_plan(self, board: Board) -> MeasurementPlan:
         """
-        :param board: board for new measurement plan or new board.
+        :param board: board for new measurement plan.
         :return: new measurement plan.
         """
 
@@ -146,7 +147,7 @@ class PlanCompatibility:
     def _create_plan_for_mux(self) -> MeasurementPlan:
         """
         Method creates an empty measurement plan for the connected multiplexer.
-        :return: empty plan.
+        :return: empty plan for the connected multiplexer.
         """
 
         elements = []
@@ -185,7 +186,8 @@ class PlanCompatibility:
     def _transform_plan(self, data: "PlanCompatibility.AnalyzedData") -> MeasurementPlan:
         """
         Method transforms the plan to be compatible with the multiplexer.
-        :param data:
+        :param data: data about empty pins (in which there is no multiplexer output), points that have incorrect
+        multiplexer outputs.
         :return: transformed plan.
         """
 
@@ -193,6 +195,15 @@ class PlanCompatibility:
         self._add_points_from_mux_channels(elements, data.channels, data.empty)
         self._remove_invalid_points(elements, data.invalid)
         board = Board(elements=elements, image=self._plan.image)
+        return self._create_new_plan(board)
+
+    def _update_plan_for_measurement_system(self) -> MeasurementPlan:
+        """
+        Method updates the measurer and multiplexer in the measurement plan for the current measurement system.
+        :return: updated plan.
+        """
+
+        board = Board(elements=self._plan.elements, image=self._plan.image if self._plan else None)
         return self._create_new_plan(board)
 
     def check_compatibility(self, new_plan: bool, empty_plan: bool, filename: str
@@ -214,7 +225,7 @@ class PlanCompatibility:
         if not self._measurement_system.multiplexers:
             if self._plan is None:
                 return self._create_plan_without_mux(), True
-            return self._plan, False
+            return self._update_plan_for_measurement_system(), False
 
         return self.check_compatibility_with_mux(empty_plan)
 
