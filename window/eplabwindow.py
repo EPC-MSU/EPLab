@@ -1687,12 +1687,14 @@ class EPLabWindow(QMainWindow):
         """
 
         filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
-                                               filter="Image Files (*.png *.jpg *.bmp)")[0]
+                                               filter="Image Files (*.png *.jpg *.bmp)",
+                                               directory=self._dir_chosen_by_user)[0]
         if filename:
             epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
             self._board_window.update_board()
             self.update_current_pin()
             self._open_board_window_if_needed()
+            self.dir_chosen_by_user = filename
 
     @pyqtSlot()
     def open_board_image(self) -> None:
