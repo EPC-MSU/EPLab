@@ -298,7 +298,7 @@ class EPLabWindow(QMainWindow):
                       not (self.measurement_plan and self.measurement_plan.multiplexer is not None))
         self.new_point_action.setEnabled(enable)
         self.remove_point_action.setEnabled(enable and self.measurement_plan.pins_number > 0)
-        self.save_point_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
+        self.save_point_action.setEnabled(mode != WorkMode.READ_PLAN)
         self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
         self.create_report_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
         enable = bool(mode is not WorkMode.COMPARE and self.measurement_plan and
@@ -568,7 +568,7 @@ class EPLabWindow(QMainWindow):
             enable = self.work_mode is not WorkMode.COMPARE
             for action in (self.next_point_action, self.previous_point_action, self.pin_index_widget):
                 action.setEnabled(enable)
-            self.save_point_action.setEnabled(self.work_mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
+            self.save_point_action.setEnabled(self.work_mode != WorkMode.READ_PLAN)
 
     @staticmethod
     def _handle_event_on_obj(obj: QObject, event: QEvent) -> Optional[bool]:
