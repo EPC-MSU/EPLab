@@ -676,7 +676,7 @@
     <string>Новая точка</string>
    </property>
    <property name="iconText">
-    <string> Новая точка</string>
+    <string>Новая точка</string>
    </property>
   </action>
   <action name="save_point_action">
@@ -688,10 +688,10 @@
      <normaloff>../media/save.png</normaloff>../media/save.png</iconset>
    </property>
    <property name="text">
-    <string>Сохранить точку</string>
+    <string>Зафиксировать</string>
    </property>
    <property name="iconText">
-    <string> Сохранить точку</string>
+    <string>Зафиксировать</string>
    </property>
   </action>
   <action name="add_board_image_action">
@@ -730,7 +730,7 @@
     <string>Добавить метку</string>
    </property>
    <property name="iconText">
-    <string> Добавить метку</string>
+    <string>Добавить метку</string>
    </property>
    <property name="toolTip">
     <string>Добавить метку</string>
@@ -748,7 +748,7 @@
     <string>Удалить метку</string>
    </property>
    <property name="iconText">
-    <string> Удалить метку</string>
+    <string>Удалить метку</string>
    </property>
   </action>
   <action name="hide_curve_a_action">

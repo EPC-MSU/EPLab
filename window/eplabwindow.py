@@ -272,10 +272,10 @@ class EPLabWindow(QMainWindow):
         :param mode: new work mode.
         """
 
-        save_point_names = {WorkMode.COMPARE: qApp.translate("t", "Сохранить"),
-                            WorkMode.TEST: qApp.translate("t", "Сохранить тест"),
-                            WorkMode.WRITE: qApp.translate("t", "Сохранить эталон")}
-        self.save_point_action.setText(save_point_names.get(mode, qApp.translate("t", "Сохранить")))
+        save_point_names = {WorkMode.COMPARE: qApp.translate("t", "Зафиксировать"),
+                            WorkMode.TEST: qApp.translate("t", "Зафиксировать тест"),
+                            WorkMode.WRITE: qApp.translate("t", "Зафиксировать эталон")}
+        self.save_point_action.setText(save_point_names.get(mode, qApp.translate("t", "Зафиксировать")))
 
     def _change_work_mode(self, mode: WorkMode) -> None:
         """
@@ -1332,7 +1332,7 @@ class EPLabWindow(QMainWindow):
 
         if auto_detection_report_path and self._measurement_plan_path.path and \
                 os.path.exists(self._measurement_plan_path.path):
-            dir_path = self._measurement_plan_path.path
+            dir_path = os.path.dirname(self._measurement_plan_path.path)
             is_user_defined_path = False
         else:
             dir_path = QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"),
@@ -1340,6 +1340,7 @@ class EPLabWindow(QMainWindow):
             is_user_defined_path = True
 
         if dir_path:
+            print(dir_path)
             show_report_generation_window(self, self._report_generation_thread, self.measurement_plan, dir_path,
                                           self.tolerance, self.work_mode)
             if is_user_defined_path:

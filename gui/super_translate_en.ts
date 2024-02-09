@@ -51,262 +51,227 @@ leading to a numbering shift</translation>
         <translation>Difference</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="87"/>
+        <location filename="mainwindow.ui" line="80"/>
         <source>Частота пробного сигнала</source>
         <translation>Probe signal frequency</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="107"/>
+        <location filename="mainwindow.ui" line="122"/>
         <source>Чувствительность по току</source>
         <translation>Current sensitivity</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="121"/>
+        <location filename="mainwindow.ui" line="158"/>
         <source>Амплитуда пробного сигнала</source>
         <translation>Probe signal amplitude</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="135"/>
+        <location filename="mainwindow.ui" line="200"/>
         <source>Комментарий к точке</source>
         <translation>Point comment</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="155"/>
-        <source>Сохранить комментарий</source>
-        <translation>Save comment</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="173"/>
+        <location filename="mainwindow.ui" line="242"/>
         <source>Файл</source>
         <translation>File</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="186"/>
+        <location filename="mainwindow.ui" line="255"/>
         <source>Вид</source>
         <translation>View</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="199"/>
+        <location filename="mainwindow.ui" line="268"/>
         <source>Режим</source>
         <translation>Mode</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="211"/>
+        <location filename="mainwindow.ui" line="280"/>
         <source>Справка</source>
         <translation>Help</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="217"/>
+        <location filename="mainwindow.ui" line="287"/>
         <source>План тестирования</source>
         <translation>Test plan</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="230"/>
+        <location filename="mainwindow.ui" line="301"/>
         <source>Измерители</source>
         <translation>Measurers</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="280"/>
+        <location filename="mainwindow.ui" line="351"/>
         <source>Тестирование по плану</source>
         <translation>Plan testing</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="296"/>
+        <location filename="mainwindow.ui" line="367"/>
         <source>Запись плана тестирования</source>
         <translation>Write test plan</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="321"/>
-        <source>Курсор</source>
-        <translation>Cursor</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="337"/>
+        <location filename="mainwindow.ui" line="399"/>
         <source>Сравнение</source>
         <translation>Comparison</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="380"/>
+        <location filename="mainwindow.ui" line="444"/>
         <source>Выбор языка</source>
         <translation>Language selection</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="399"/>
+        <location filename="mainwindow.ui" line="463"/>
         <source>Создать план тестирования</source>
         <translation>Create test plan</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="408"/>
+        <location filename="mainwindow.ui" line="475"/>
         <source>Открыть план тестирования</source>
         <translation>Open test plan</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="417"/>
+        <location filename="mainwindow.ui" line="487"/>
         <source>Сохранить план тестирования</source>
         <translation>Save test plan</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="426"/>
+        <location filename="mainwindow.ui" line="499"/>
         <source>Сохранить план тестирования как</source>
         <translation>Save test plan as</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="435"/>
+        <location filename="mainwindow.ui" line="508"/>
         <source>Сохранить скриншот</source>
         <translation>Screenshot</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="444"/>
+        <location filename="mainwindow.ui" line="516"/>
         <source>Открыть окно просмотра платы</source>
         <translation>Open board window</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="456"/>
+        <location filename="mainwindow.ui" line="529"/>
         <source>Заморозить канал А</source>
         <translation>Freeze A</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="459"/>
+        <location filename="mainwindow.ui" line="532"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Заморозить канал А&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Freeze A&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="471"/>
+        <location filename="mainwindow.ui" line="544"/>
         <source>Заморозить канал B</source>
         <translation>Freeze B</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="474"/>
+        <location filename="mainwindow.ui" line="547"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Заморозить канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Freeze B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="537"/>
+        <location filename="mainwindow.ui" line="610"/>
         <source>О программе</source>
         <translation>About product</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="552"/>
+        <location filename="mainwindow.ui" line="625"/>
         <source>Звук</source>
         <translation>Sound</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="561"/>
+        <location filename="mainwindow.ui" line="634"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="573"/>
+        <location filename="mainwindow.ui" line="646"/>
         <source>Следующая точка</source>
         <translation>Next point</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="585"/>
+        <location filename="mainwindow.ui" line="661"/>
         <source>Предыдущая точка</source>
         <translation>Previous point</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="597"/>
+        <location filename="mainwindow.ui" line="676"/>
         <source>Новая точка</source>
         <translation>New point</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="600"/>
-        <source> Новая точка</source>
-        <translation> New point</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="612"/>
-        <source>Сохранить точку</source>
-        <translation>Save point</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="615"/>
-        <source> Сохранить точку</source>
-        <translation>Save point</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="627"/>
+        <location filename="mainwindow.ui" line="706"/>
         <source>Добавить изображение</source>
         <translation>Add board image</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="636"/>
+        <location filename="mainwindow.ui" line="715"/>
         <source>Автоподбор параметров</source>
         <translation>Optimal search of parameters</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="648"/>
+        <location filename="mainwindow.ui" line="730"/>
         <source>Добавить метку</source>
         <translation>Add marker</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="651"/>
-        <source> Добавить метку</source>
-        <translation> Add marker</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="666"/>
+        <location filename="mainwindow.ui" line="748"/>
         <source>Удалить метку</source>
         <translation>Delete marker</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="669"/>
-        <source> Удалить метку</source>
-        <translation> Delete marker</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="682"/>
+        <location filename="mainwindow.ui" line="764"/>
         <source>Скрыть канал А</source>
         <translation>Hide curve A</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="685"/>
+        <location filename="mainwindow.ui" line="767"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Скрыть канал А&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Hide curve A&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="698"/>
+        <location filename="mainwindow.ui" line="781"/>
         <source>Скрыть канал B</source>
         <translation>Hide curve B</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="701"/>
+        <location filename="mainwindow.ui" line="784"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Скрыть канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Hide curve B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="710"/>
+        <location filename="mainwindow.ui" line="793"/>
         <source>Подключение</source>
         <translation>Connection</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="719"/>
+        <location filename="mainwindow.ui" line="802"/>
         <source>Язык</source>
         <translation>Language</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="731"/>
+        <location filename="mainwindow.ui" line="814"/>
         <source>Сгенерировать отчет</source>
         <translation>Generate report</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="746"/>
+        <location filename="mainwindow.ui" line="829"/>
         <source>Запустить измерение всех точек</source>
         <translation>Start measuring all points</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="755"/>
+        <location filename="mainwindow.ui" line="838"/>
         <source>Открыть окно просмотра мультиплексора</source>
         <translation>Open multiplexer window</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="770"/>
+        <location filename="mainwindow.ui" line="847"/>
         <source>Горячие клавиши</source>
         <translation>Keymap reference</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="858"/>
+        <location filename="mainwindow.ui" line="859"/>
         <source>Удалить точку</source>
         <translation>Remove point</translation>
     </message>
@@ -381,18 +346,18 @@ leading to a numbering shift</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="275"/>
-        <source>Сохранить</source>
-        <translation>Save</translation>
+        <source>Зафиксировать</source>
+        <translation>Fixate</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="276"/>
-        <source>Сохранить тест</source>
-        <translation>Save test</translation>
+        <source>Зафиксировать тест</source>
+        <translation>Fixate test</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="277"/>
-        <source>Сохранить эталон</source>
-        <translation>Save reference</translation>
+        <source>Зафиксировать эталон</source>
+        <translation>Fixate reference</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="349"/>
