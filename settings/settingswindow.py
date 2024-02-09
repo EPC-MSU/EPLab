@@ -30,9 +30,7 @@ class SettingsWindow(QDialog):
         self._settings: Settings = copy.copy(init_settings)
         self._settings_directory: str = settings_directory or ut.get_dir_name()
         self._init_ui()
-        self._update_auto_transition(self._init_settings.auto_transition)
-        self._update_pin_shift_warning_info(self._init_settings.pin_shift_warning_info)
-        self._update_tolerance_in_settings_wnd(self._init_settings.tolerance)
+        self._update_options(self._init_settings)
 
     @property
     def settings_directory(self) -> str:
@@ -48,9 +46,11 @@ class SettingsWindow(QDialog):
         self.layout().setSizeConstraint(QLayout.SetFixedSize)
         self.button_tolerance_minus.clicked.connect(self.decrease_tolerance)
         self.button_tolerance_plus.clicked.connect(self.increase_tolerance)
-        self.spin_box_tolerance.valueChanged.connect(self.update_tolerance)
         self.check_box_auto_transition.stateChanged.connect(self.update_auto_transition)
         self.check_box_pin_shift_warning_info.stateChanged.connect(self.update_pin_shift_warning_info)
+        self.spin_box_tolerance.valueChanged.connect(self.update_tolerance)
+        self.spin_box_max_optimal_voltage.valueChanged.connect(self.update_max_optimal_voltage)
+
         self.button_cancel.clicked.connect(self.discard_changes)
         self.button_load_settings.clicked.connect(self.open_settings)
         self.button_ok.clicked.connect(self.apply_changes)
@@ -78,6 +78,20 @@ class SettingsWindow(QDialog):
 
         self.check_box_auto_transition.setChecked(auto_transition)
         self._settings.auto_transition = auto_transition
+
+    def _update_max_optimal_voltage(self, max_optimal_voltage: float) -> None:
+        """
+        :param max_optimal_voltage:
+        """
+
+        self.spin_box_max_optimal_voltage.setValue(max_optimal_voltage)
+        self._settings.max_optimal_voltage = max_optimal_voltage
+
+    def _update_options(self, settings: Settings) -> None:
+        self._update_auto_transition(settings.auto_transition)
+        self._update_max_optimal_voltage(settings.max_optimal_voltage)
+        self._update_pin_shift_warning_info(settings.pin_shift_warning_info)
+        self._update_tolerance_in_settings_wnd(settings.tolerance)
 
     def _update_pin_shift_warning_info(self, pin_shift_warning_info: bool) -> None:
         """
@@ -154,7 +168,7 @@ class SettingsWindow(QDialog):
 
             self._settings_directory = os.path.dirname(settings_path)
             self._settings = settings
-            self._update_tolerance_in_settings_wnd(self._settings.tolerance)
+            self._update_options(self._settings)
             self._send_settings()
 
     @pyqtSlot()
@@ -180,6 +194,15 @@ class SettingsWindow(QDialog):
         """
 
         self._update_auto_transition(state == Qt.Checked)
+        self._send_settings()
+
+    @pyqtSlot(float)
+    def update_max_optimal_voltage(self, new_value: float) -> None:
+        """
+        :param new_value: new max voltage for optimal search.
+        """
+
+        self._update_max_optimal_voltage(new_value)
         self._send_settings()
 
     @pyqtSlot(int)

@@ -1205,6 +1205,7 @@ class EPLabWindow(QMainWindow):
         self.hide_curve_b_action.setChecked(new_settings.hide_curve_b)
         self.sound_enabled_action.setChecked(new_settings.sound_enabled)
         self._auto_settings.save_auto_transition(new_settings.auto_transition)
+        self._auto_settings.save_optimal_search_settings(max_optimal_voltage=new_settings.max_optimal_voltage)
         self._auto_settings.save_pin_shift_warning_info(new_settings.pin_shift_warning_info)
         self._update_tolerance(new_settings.tolerance)
 
@@ -1479,6 +1480,7 @@ class EPLabWindow(QMainWindow):
         settings.auto_transition = self._auto_settings.get_auto_transition()
         settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
+        settings.max_optimal_voltage = self._auto_settings.get_optimal_search_settings()["max_optimal_voltage"]
         settings.pin_shift_warning_info = self._auto_settings.get_pin_shift_warning_info()
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
         settings.tolerance = self.tolerance

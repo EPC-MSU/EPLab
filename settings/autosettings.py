@@ -30,6 +30,7 @@ class AutoSettings(SettingsHandler):
     frequency: str = None
     sensitive: str = None
     voltage: str = None
+    max_optimal_voltage: float = 12
     auto_transition: bool = False
     language: Language = Language.EN
     pin_shift_warning_info: bool = True
@@ -39,11 +40,15 @@ class AutoSettings(SettingsHandler):
     product_name: str = None
 
     def _read(self, settings: QSettings) -> None:
-
         params = {"frequency": {"convert": check_none},
                   "sensitive": {"convert": check_none},
                   "voltage": {"convert": check_none}}
         settings.beginGroup("MeasurementSettings")
+        self._read_parameters_from_settings(settings, params)
+        settings.endGroup()
+
+        params = {"max_optimal_voltage": {"convert": float}}
+        settings.beginGroup("OptimalSearch")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
 
@@ -67,6 +72,11 @@ class AutoSettings(SettingsHandler):
                   "sensitive": {"convert": str},
                   "voltage": {"convert": str}}
         settings.beginGroup("MeasurementSettings")
+        self._write_parameters_to_settings(settings, params)
+        settings.endGroup()
+
+        params = {"max_optimal_voltage": {"convert": ut.float_to_str}}
+        settings.beginGroup("OptimalSearch")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 
@@ -130,6 +140,13 @@ class AutoSettings(SettingsHandler):
 
         return measurement_settings
 
+    def get_optimal_search_settings(self) -> Dict[str, float]:
+        """
+        :return:
+        """
+
+        return {"max_optimal_voltage": self.max_optimal_voltage}
+
     def get_pin_shift_warning_info(self) -> bool:
         """
         :return: True if to show a warning message when point numbering is shifted when adding or removing points.
@@ -177,6 +194,16 @@ class AutoSettings(SettingsHandler):
         self.frequency = options[EyePointProduct.Parameter.frequency]
         self.sensitive = options[EyePointProduct.Parameter.sensitive]
         self.voltage = options[EyePointProduct.Parameter.voltage]
+
+    @save_settings
+    def save_optimal_search_settings(self, **kwargs) -> None:
+        """
+        :param kwargs:
+        """
+
+        for attr_name in ("max_optimal_voltage",):
+            if attr_name in kwargs:
+                setattr(self, attr_name, kwargs[attr_name])
 
     @save_settings
     def save_pin_shift_warning_info(self, pin_shift_warning_info: bool) -> None:
