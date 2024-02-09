@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMen
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
-from epcore.elements import Board, Element, IVCurve, MeasurementSettings, MultiplexerOutput, Pin
+from epcore.elements import Board, Element, IVCurve, Measurement, MeasurementSettings, MultiplexerOutput, Pin
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.measurementmanager import IVCComparator, MeasurementPlan, MeasurementSystem, Searcher
 from epcore.product import EyePointProduct, MeasurementParameterOption
@@ -326,6 +326,7 @@ class EPLabWindow(QMainWindow):
         elif mode is WorkMode.TEST:
             self._check_break_signatures_for_auto_transition()
 
+        self._compare_measurement = None
         self._work_mode = mode
 
     def _change_work_mode_for_new_measurement_plan(self) -> None:
@@ -398,6 +399,7 @@ class EPLabWindow(QMainWindow):
         self._work_mode = None
         self._hide_current_curve = False
         self._hide_reference_curve = False
+        self._compare_measurement = None
         self._current_curve = None
         self._reference_curve = None
         self._test_curve = None
@@ -406,8 +408,8 @@ class EPLabWindow(QMainWindow):
     def _connect_devices(self, measurement_system: MeasurementSystem, product_name: Optional[cw.ProductName] = None
                          ) -> None:
         """
-        :param measurement_system:
-        :param product_name:
+        :param measurement_system: measurement system with measurers and multiplexer;
+        :param product_name: product name.
         """
 
         self._msystem = measurement_system
@@ -532,6 +534,25 @@ class EPLabWindow(QMainWindow):
         return {"current": bool(self.current_curve_plot.curve),
                 "reference": bool(self.reference_curve_plot.curve),
                 "test": bool(self.test_curve_plot.curve)}
+
+    def _get_curves_for_periodic_task(self) -> Tuple[Dict[str, IVCurve], MeasurementSettings]:
+        """
+        :return: dictionary with current measurements and measurement settings.
+        """
+
+        curves = dict()
+        curves["current"] = self._msystem.measurers[0].get_last_cached_iv_curve()
+        if self._work_mode is WorkMode.COMPARE and len(self._msystem.measurers) > 1:
+            # Display two current curves
+            curves["reference"] = self._msystem.measurers[1].get_last_cached_iv_curve()
+        measurement_settings = self._msystem.get_settings()
+
+        if self._compare_measurement:
+            if self._compare_measurement.settings == measurement_settings:
+                curves["compare"] = self._compare_measurement.ivc
+            else:
+                self._compare_measurement = None
+        return curves, measurement_settings
 
     def _get_noise_amplitude(self, settings: Optional[MeasurementSettings] = None) -> Tuple[float, float]:
         """
@@ -732,6 +753,7 @@ class EPLabWindow(QMainWindow):
 
         # Update plot settings at next measurement cycle (place settings here or None)
         self._settings_update_next_cycle: MeasurementSettings = None
+        self._compare_measurement: Measurement = None
         self._current_curve: IVCurve = None
         self._reference_curve: IVCurve = None
         self._test_curve: IVCurve = None
@@ -788,13 +810,7 @@ class EPLabWindow(QMainWindow):
             if self._skip_curve:
                 self._skip_curve = False
             else:
-                # Get curves from devices
-                curves = dict()
-                curves["current"] = self._msystem.measurers[0].get_last_cached_iv_curve()
-                if self._work_mode is WorkMode.COMPARE and len(self._msystem.measurers) > 1:
-                    # Display two current curves
-                    curves["reference"] = self._msystem.measurers[1].get_last_cached_iv_curve()
-                measurement_settings = self._msystem.get_settings()
+                curves, measurement_settings = self._get_curves_for_periodic_task()
                 self._update_curves(curves, measurement_settings)
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.check_pin()
@@ -892,6 +908,24 @@ class EPLabWindow(QMainWindow):
                 if curve_name in curves:
                     setattr(self, attr_name, curves[curve_name])
 
+            compare_curve = curves.get("compare", None)
+            if self._work_mode is WorkMode.COMPARE:
+                if len(self._msystem.measurers) == 1:
+                    self._reference_curve = compare_curve
+                    self._test_curve = None
+                else:
+                    self._test_curve = compare_curve
+
+    def _save_measurement_in_compare_mode(self) -> None:
+        """
+        Method saves the signature in comparison mode. This functionality was added in ticket #93000.
+        """
+
+        if self._msystem and len(self._msystem.measurers) > 0:
+            curve = self._msystem.measurers[0].get_last_cached_iv_curve()
+            settings = self._msystem.get_settings()
+            self._compare_measurement = Measurement(settings=settings, ivc=curve)
+
     def _set_msystem_settings(self, settings: MeasurementSettings) -> None:
         """
         :param settings: measurement settings to set.
@@ -943,6 +977,7 @@ class EPLabWindow(QMainWindow):
         self._skip_curve = False
         self._hide_current_curve = False
         self._hide_reference_curve = False
+        self._compare_measurement = None
         self._current_curve = None
         self._reference_curve = None
         self._test_curve = None
@@ -1096,8 +1131,7 @@ class EPLabWindow(QMainWindow):
         self._save_last_curves(curves)
 
         # Update plots
-        for hide, plot, curve in zip((self._hide_reference_curve, self._hide_current_curve,
-                                      self._work_mode == WorkMode.COMPARE),
+        for hide, plot, curve in zip((self._hide_reference_curve, self._hide_current_curve, False),
                                      (self.reference_curve_plot, self.current_curve_plot, self.test_curve_plot),
                                      (self._reference_curve, self._current_curve, self._test_curve)):
             if not hide:
@@ -1796,14 +1830,18 @@ class EPLabWindow(QMainWindow):
         """
 
         with self._device_errors_handler:
-            if self._work_mode == WorkMode.WRITE:
-                self._measurement_plan.save_last_measurement_as_reference(True)
+            if self._work_mode == WorkMode.COMPARE:
+                self._save_measurement_in_compare_mode()
             elif self._work_mode == WorkMode.TEST:
-                self._measurement_plan.save_last_measurement_as_test()
-        index = self._measurement_plan.get_current_index()
-        self.update_current_pin(pin_centering)
-        self._comment_widget.save_comment(index)
-        self._comment_widget.update_table_for_new_tolerance(index)
+                self.measurement_plan.save_last_measurement_as_test()
+            elif self._work_mode == WorkMode.WRITE:
+                self.measurement_plan.save_last_measurement_as_reference(True)
+
+        if self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
+            index = self.measurement_plan.get_current_index()
+            self.update_current_pin(pin_centering)
+            self._comment_widget.save_comment(index)
+            self._comment_widget.update_table_for_new_tolerance(index)
 
     @pyqtSlot()
     def search_optimal(self) -> None:
@@ -1874,7 +1912,7 @@ class EPLabWindow(QMainWindow):
 
     def set_measurement_settings_and_update_ui(self, settings: MeasurementSettings) -> None:
         """
-        :param settings:
+        :param settings: new measurement settings.
         """
 
         self._set_msystem_settings(settings)
