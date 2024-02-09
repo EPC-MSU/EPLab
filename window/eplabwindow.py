@@ -64,7 +64,7 @@ class EPLabWindow(QMainWindow):
     COLOR_FOR_REFERENCE: QColor = QColor(0, 128, 255, 200)
     COLOR_FOR_TEST: QColor = QColor(255, 129, 129, 200)
     CRITICAL_WIDTH_FOR_LINUX_EN: int = 1585
-    CRITICAL_WIDTH_FOR_LINUX_RU: int = 1780
+    CRITICAL_WIDTH_FOR_LINUX_RU: int = 1806
     CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1295
     CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1475
     DEFAULT_COMPARATOR_MIN_CURRENT: float = 0.002
@@ -1340,7 +1340,6 @@ class EPLabWindow(QMainWindow):
             is_user_defined_path = True
 
         if dir_path:
-            print(dir_path)
             show_report_generation_window(self, self._report_generation_thread, self.measurement_plan, dir_path,
                                           self.tolerance, self.work_mode)
             if is_user_defined_path:
@@ -1747,7 +1746,6 @@ class EPLabWindow(QMainWindow):
         :param event: resizing event.
         """
 
-        print(self.width())
         # Determine the critical width of the window for given language and OS
         lang = qApp.instance().property("language")
         if system().lower() == "windows":
