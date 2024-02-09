@@ -14,11 +14,6 @@
         <translation>Tolerance</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="124"/>
-        <source>Включить автопереход</source>
-        <translation>Enable auto transition</translation>
-    </message>
-    <message>
         <location filename="settings.ui" line="131"/>
         <source>Показывать предупреждения при
 добавлении/удалении точек,
@@ -28,17 +23,29 @@ adding/removing points,
 leading to a numbering shift</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="169"/>
+        <location filename="settings.ui" line="140"/>
+        <source>Включить автопереход</source>
+        <translation>Enable auto transition</translation>
+    </message>
+    <message>
+        <location filename="settings.ui" line="147"/>
+        <source>Максимальное напряжение при
+автоподборе, В</source>
+        <translation>Max voltage at
+auto-selection, V</translation>
+    </message>
+    <message>
+        <location filename="settings.ui" line="180"/>
         <source>Загрузить настройки</source>
         <translation>Load settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="194"/>
+        <location filename="settings.ui" line="205"/>
         <source>Сохранить настройки</source>
         <translation>Save settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="244"/>
+        <location filename="settings.ui" line="255"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>
