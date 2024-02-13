@@ -574,7 +574,7 @@ class EPLabWindow(QMainWindow):
 
     def _go_to_left_or_right_pin_for_hotkeys(self, prev_pin: bool) -> None:
         """
-        Method processes signals from hotkeys UP and DOMN to move through pins.
+        Method processes signals from hotkeys UP and DOWN to move through pins.
         :param prev_pin: if True, then there will be a transition to the previous pin in measurement plan, otherwise -
         to the next pin.
         """
@@ -942,7 +942,7 @@ class EPLabWindow(QMainWindow):
 
     def _set_hotkeys_for_moving_through_pins(self) -> None:
         """
-        Method sets hotkeys UP and DOWM for moving to the previous and next pins.
+        Method sets hotkeys UP and DOWN for moving to the previous and next pins.
         """
 
         self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key_Down), self)
