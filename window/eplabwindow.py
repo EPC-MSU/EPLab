@@ -1854,7 +1854,8 @@ class EPLabWindow(QMainWindow):
         """
 
         with self._device_errors_handler:
-            searcher = Searcher(self._msystem.measurers[0], self._product.get_parameters())
+            max_voltage = self._auto_settings.get_optimal_search_settings()["max_optimal_voltage"]
+            searcher = Searcher(self._msystem.measurers[0], self._product.get_parameters(), max_voltage, True)
             optimal_settings = searcher.search_optimal_settings()
             self._set_msystem_settings(optimal_settings)
             options = self._product.settings_to_options(optimal_settings)
