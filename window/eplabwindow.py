@@ -13,7 +13,8 @@ from typing import Any, Dict, List, Optional, Tuple
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt, QTimer,
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
-from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMenu, QMessageBox, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMenu, QMessageBox, QShortcut, QVBoxLayout,
+                             QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
@@ -571,6 +572,18 @@ class EPLabWindow(QMainWindow):
 
         return {param: widget.get_checked_option() for param, widget in self._parameters_widgets.items()}
 
+    def _go_to_left_or_right_pin_for_hotkeys(self, prev_pin: bool) -> None:
+        """
+        Method processes signals from hotkeys UP and DOMN to move through pins.
+        :param prev_pin: if True, then there will be a transition to the previous pin in measurement plan, otherwise -
+        to the next pin.
+        """
+
+        if prev_pin and self.previous_point_action.isEnabled():
+            self.go_to_left_or_right_pin(True)
+        elif not prev_pin and self.previous_point_action.isEnabled():
+            self.go_to_left_or_right_pin(False)
+
     def _handle_current_pin_change(self, index: int = None) -> None:
         """
         Method processes the change in the index of the current pin in the testing plan. In particular, it is checked
@@ -724,6 +737,7 @@ class EPLabWindow(QMainWindow):
         self.pin_index_widget.returnPressed.connect(self.go_to_pin_selected_in_widget)
         self.pin_index_widget.installEventFilter(self)
         self.next_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(False))
+        self._set_hotkeys_for_moving_through_pins()
         self.new_point_action.triggered.connect(self.create_new_pin)
         self.remove_point_action.triggered.connect(self.remove_pin)
         self._replace_save_point_action()
@@ -925,6 +939,16 @@ class EPLabWindow(QMainWindow):
             curve = self._msystem.measurers[0].get_last_cached_iv_curve()
             settings = self._msystem.get_settings()
             self._compare_measurement = Measurement(settings=settings, ivc=curve)
+
+    def _set_hotkeys_for_moving_through_pins(self) -> None:
+        """
+        Method sets hotkeys UP and DOWM for moving to the previous and next pins.
+        """
+
+        self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key_Down), self)
+        self._shortcut_down.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(False))
+        self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key_Up), self)
+        self._shortcut_up.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(True))
 
     def _set_msystem_settings(self, settings: MeasurementSettings) -> None:
         """
