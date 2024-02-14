@@ -83,14 +83,11 @@ class BoardWidget(QWidget):
         if self._control_pressed and key in (Qt.Key_Down, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up):
             return super().eventFilter(obj, event)
 
-        if key in (Qt.Key_Down, Qt.Key_Up):
-            return True
-
-        if key == Qt.Key_Left:
+        if key in (Qt.Key_Left, Qt.Key_Up):
             self._parent.go_to_left_or_right_pin(True)
             return True
 
-        if key == Qt.Key_Right:
+        if key in (Qt.Key_Down, Qt.Key_Right):
             self._parent.go_to_left_or_right_pin(False)
             return True
 
