@@ -484,7 +484,7 @@ auto-selection, V</translation>
     <message>
         <location filename="../window/measuredpinschecker.py" line="123"/>
         <source>Точки {} не содержат сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
-        <translation>Points {} do not contain saved measurements. To save the test plan all points must contain measurements.</translation>
+        <translation>Points {} do not contain any saved measurements. To save the test plan all points must contain measurements.</translation>
     </message>
     <message>
         <location filename="../window/measuredpinschecker.py" line="126"/>
