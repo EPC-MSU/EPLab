@@ -684,13 +684,13 @@ auto-selection, V</translation>
     </message>
     <message>
         <location filename="../connection_window/measurerurlswidget.py" line="237"/>
-        <source>Введите значение последовательного порта в формате com:\\.\COMx или адрес XiNet сервера в формате xi-net://x.x.x.x/x.</source>
-        <translation>Enter serial port value in format com:\\.\COMx or XiNet server address in format xi-net://x.x.x.x/x.</translation>
+        <source>Введите значение последовательного порта в формате com:\\.\COMx.</source>
+        <translation>Enter serial port value in format com:\\.\COMx.</translation>
     </message>
     <message>
         <location filename="../connection_window/measurerurlswidget.py" line="241"/>
-        <source>Введите значение последовательного порта в формате com:///dev/ttyACMx или адрес XiNet сервера в формате xi-net://x.x.x.x/x.</source>
-        <translation>Enter serial port value in format com:///dev/ttyACMx or XiNet server address in format xi-net://x.x.x.x/x.</translation>
+        <source>Введите значение последовательного порта в формате com:///dev/ttyACMx.</source>
+        <translation>Enter serial port value in format com:///dev/ttyACMx.</translation>
     </message>
     <message>
         <location filename="../connection_window/measurerurlswidget.py" line="245"/>
@@ -701,16 +701,6 @@ auto-selection, V</translation>
         <location filename="../connection_window/muxwidget.py" line="56"/>
         <source>Мультиплексор</source>
         <translation>Multiplexer</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/muxwidget.py" line="102"/>
-        <source>Введите значение последовательного порта в формате com:\\.\COMx.</source>
-        <translation>Enter serial port value in format com:\\.\COMx.</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/muxwidget.py" line="105"/>
-        <source>Введите значение последовательного порта в формате com:///dev/ttyACMx.</source>
-        <translation>Enter serial port value in format com:///dev/ttyACMx.</translation>
     </message>
 </context>
 <context>

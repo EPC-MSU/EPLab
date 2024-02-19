@@ -29,9 +29,9 @@ COM_PATTERN = {
     "win32": re.compile(r"^com:\\\\\.\\COM\d+$"),
     "win64": re.compile(r"^com:\\\\\.\\COM\d+$")}
 IVM10_PATTERN = {
-    "debian": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+|virtual)$"),
-    "win32": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+|virtual)$"),
-    "win64": re.compile(r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+|virtual)$")}
+    "debian": re.compile(r"^(com:///dev/ttyACM\d+|virtual)$"),
+    "win32": re.compile(r"^(com:\\\\\.\\COM\d+|virtual)$"),
+    "win64": re.compile(r"^(com:\\\\\.\\COM\d+|virtual)$")}
 IVMASA_PATTERN = {
     "debian": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$"),
     "win32": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$"),

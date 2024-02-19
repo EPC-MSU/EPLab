@@ -200,7 +200,7 @@ def create_measurer(port: str, force_open: Optional[bool] = False, virtual_was: 
     if port == "virtualasa":
         return IVMeasurerVirtualASA(port, defer_open=True)
 
-    if port is not None and ("com:" in port or "xi-net:" in port):
+    if port is not None and ("com:" in port):
         dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         config_file = os.path.join(dir_name, "cur.ini")
         return IVMeasurerIVM10(port, config=config_file, defer_open=True, force_open=force_open)

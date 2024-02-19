@@ -21,14 +21,14 @@ class MeasurerURLsWidget(QWidget):
     BUTTON_HELP_WIDTH: int = 20
     BUTTON_UPDATE_WIDTH: int = 25
     COMBO_BOX_MIN_WIDTH: int = 160
-    IP_ASA_REG_EXP = r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual)$"
-    PLACEHOLDER_ASA = "xmlrpc://x.x.x.x"
+    IP_ASA_REG_EXP: str = r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual)$"
+    PLACEHOLDER_ASA: str = "xmlrpc://x.x.x.x"
     if ut.get_platform() == "debian":
-        IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:///dev/ttyACM\d+|virtual)$"
-        PLACEHOLDER_IVM = "com:///dev/ttyACMx {} xi-net://x.x.x.x/x"
+        IP_IVM10_REG_EXP: str = r"^(com:///dev/ttyACM\d+|virtual)$"
+        PLACEHOLDER_IVM: str = "com:///dev/ttyACMx"
     else:
-        IP_IVM10_REG_EXP = r"^(xi-net://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d+|com:\\\\\.\\COM\d+|virtual)$"
-        PLACEHOLDER_IVM = "com:\\\\.\\COMx {} xi-net://x.x.x.x/x"
+        IP_IVM10_REG_EXP: str = r"^(com:\\\\\.\\COM\d+|virtual)$"
+        PLACEHOLDER_IVM: str = "com:\\\\.\\COMx"
 
     def __init__(self, initial_ports: List[str]) -> None:
         """
@@ -212,7 +212,7 @@ class MeasurerURLsWidget(QWidget):
         self._show_two_channels = show_two_channels
         self._measurer_type = measurer_type
         if measurer_type == MeasurerType.IVM10:
-            placeholder_text = MeasurerURLsWidget.PLACEHOLDER_IVM.format(qApp.translate("t", "или"))
+            placeholder_text = MeasurerURLsWidget.PLACEHOLDER_IVM
             validator = QRegExpValidator(QRegExp(MeasurerURLsWidget.IP_IVM10_REG_EXP), self)
             self._init_ivm10(*self._initial_ports)
         else:
@@ -235,12 +235,10 @@ class MeasurerURLsWidget(QWidget):
         if self._measurer_type == MeasurerType.IVM10:
             if "win" in ut.get_platform():
                 info = qApp.translate("connection_window", "Введите значение последовательного порта в формате "
-                                                           "com:\\\\.\\COMx или адрес XiNet сервера в формате "
-                                                           "xi-net://x.x.x.x/x.")
+                                                           "com:\\\\.\\COMx.")
             else:
                 info = qApp.translate("connection_window", "Введите значение последовательного порта в формате "
-                                                           "com:///dev/ttyACMx или адрес XiNet сервера в формате "
-                                                           "xi-net://x.x.x.x/x.")
+                                                           "com:///dev/ttyACMx.")
         else:
             info = qApp.translate("connection_window", "Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.")
         show_message(qApp.translate("connection_window", "Помощь"), info, icon=QMessageBox.Information)
