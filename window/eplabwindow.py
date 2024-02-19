@@ -1896,7 +1896,7 @@ class EPLabWindow(QMainWindow):
         if language is not None and language != current_language:
             self._auto_settings.save_language(language)
             text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
-            text_en = "The language settings are saved. Restart the program for the changes to take effect."
+            text_en = "The language settings have been saved. Restart the program for the changes to take effect."
             if current_language is Language.RU:
                 text = text_ru + "<br>" + text_en
             else:
