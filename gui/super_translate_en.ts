@@ -464,7 +464,7 @@ auto-selection, V</translation>
     <message>
         <location filename="../window/eplabwindow.py" line="1733"/>
         <source>Удаление точки приведет к сдвигу нумерации. Номера имеющихся точек, начиная с {}, будут уменьшены на 1.</source>
-        <translation>Deleting a point will cause the numbering to shift. The numbers of existing points, starting with {}, will be reduced by 1.</translation>
+        <translation>Deleting a point will cause the numbering to shift. The numbers of existing points, starting from {}, will be reduced by 1.</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1897"/>
