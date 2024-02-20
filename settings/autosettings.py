@@ -1,3 +1,4 @@
+import locale
 from typing import Any, Callable, Dict, Optional
 from PyQt5.QtCore import QSettings
 from epcore.elements import MeasurementSettings
@@ -32,12 +33,28 @@ class AutoSettings(SettingsHandler):
     voltage: str = None
     max_optimal_voltage: float = 12
     auto_transition: bool = False
-    language: Language = Language.EN
+    language: Language = None
     pin_shift_warning_info: bool = True
     measurer_1_port: str = None
     measurer_2_port: str = None
     mux_port: str = None
     product_name: str = None
+
+    def __init__(self, parent=None, *args, settings: QSettings = None, path: str = None) -> None:
+        super().__init__(parent, *args, settings=settings, path=path)
+        self._init_language()
+
+    def _init_language(self) -> None:
+        """
+        Method automatically determines the appropriate language based on the system locale. This method added at
+        ticket #94289.
+        """
+
+        code = locale.getdefaultlocale()[0]
+        if code in ("be", "be_BY", "ce_RU", "kk", "kk_KZ", "ru", "ru_BY", "ru_KZ", "ru_RU"):
+            self.language = Language.RU
+        else:
+            self.language = Language.EN
 
     def _read(self, settings: QSettings) -> None:
         params = {"frequency": {"convert": check_none},
