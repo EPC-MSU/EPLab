@@ -4,10 +4,11 @@ File with class for widget to select multiplexer.
 
 import os
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt
-from PyQt5.QtGui import QIcon, QPixmap, QRegExpValidator
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QRegExp, Qt
+from PyQt5.QtGui import QFocusEvent, QIcon, QPixmap, QRegExpValidator
 from PyQt5.QtWidgets import QComboBox, QGroupBox, QHBoxLayout, QLabel, QMessageBox, QPushButton, QVBoxLayout
 import connection_window.utils as ut
+from connection_window.urlchecker import URLChecker
 from window.utils import DIR_MEDIA, show_message
 
 
@@ -23,9 +24,7 @@ class MuxWidget(QGroupBox):
 
     def __init__(self):
         super().__init__()
-        self.button_show_help: QPushButton = None
-        self.button_update: QPushButton = None
-        self.combo_box_com_ports: QComboBox = None
+        self._url_checker: URLChecker = URLChecker(True)
         self._init_ui()
 
     def _init_combo_box(self) -> QComboBox:
@@ -37,15 +36,10 @@ class MuxWidget(QGroupBox):
         combo_box = QComboBox()
         combo_box.setEditable(True)
         combo_box.setMinimumWidth(MuxWidget.COMBO_BOX_MIN_WIDTH)
-        if ut.get_platform() == "debian":
-            reg_exp = r"^(com:///dev/ttyACM\d+|virtual|none)$"
-            placeholder = "com:///dev/ttyACMx"
-        else:
-            reg_exp = r"^(com:\\\\\.\\COM\d+|virtual|none)$"
-            placeholder = "com:\\\\.\\COMx"
-        combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(reg_exp), self))
+        combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(r".{24}"), self))
+        placeholder = "com:///dev/ttyACMx" if ut.get_platform() == "debian" else "com:\\\\.\\COMx"
         combo_box.lineEdit().setPlaceholderText(placeholder)
-        combo_box.setToolTip(placeholder)
+        combo_box.installEventFilter(self)
         return combo_box
 
     def _init_ui(self) -> None:
@@ -54,17 +48,19 @@ class MuxWidget(QGroupBox):
         """
 
         self.setTitle(qApp.translate("connection_window", "Мультиплексор"))
+        self.setFocusPolicy(Qt.ClickFocus)
+
         mux_image = QPixmap(os.path.join(DIR_MEDIA, "mux.png"))
         label = QLabel("")
         label.setPixmap(mux_image.scaled(MuxWidget.IMAGE_SIZE, MuxWidget.IMAGE_SIZE, Qt.KeepAspectRatio))
-        self.combo_box_com_ports = self._init_combo_box()
+        self.combo_box_com_ports: QComboBox = self._init_combo_box()
         self.update_com_ports()
-        self.button_update = QPushButton()
+        self.button_update: QPushButton = QPushButton()
         self.button_update.setFixedWidth(MuxWidget.BUTTON_UPDATE_WIDTH)
         self.button_update.setIcon(QIcon(os.path.join(DIR_MEDIA, "update.png")))
         self.button_update.setToolTip(qApp.translate("connection_window", "Обновить"))
         self.button_update.clicked.connect(self.update_com_ports)
-        self.button_show_help = QPushButton()
+        self.button_show_help: QPushButton = QPushButton()
         self.button_show_help.setIcon(QIcon(os.path.join(DIR_MEDIA, "info.png")))
         self.button_show_help.setToolTip(qApp.translate("connection_window", "Помощь"))
         self.button_show_help.setFixedWidth(MuxWidget.BUTTON_HELP_WIDTH)
@@ -80,13 +76,24 @@ class MuxWidget(QGroupBox):
         v_box_layout.addStretch(1)
         self.setLayout(v_box_layout)
 
+    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+        """
+        :param obj:
+        :param event:
+        :return:
+        """
+
+        if isinstance(event, QFocusEvent) and obj == self.combo_box_com_ports:
+            self._url_checker.color_widget(obj, QFocusEvent(event))
+        return False
+
     def get_com_port(self) -> Optional[str]:
         """
         Method returns selected COM-port of multiplexer.
         :return: selected COM-port of multiplexer.
         """
 
-        if self.combo_box_com_ports.lineEdit().hasAcceptableInput():
+        if self._url_checker.check_url_for_correctness(self.combo_box_com_ports):
             if self.combo_box_com_ports.currentText() == "none":
                 return None
             return self.combo_box_com_ports.currentText()
@@ -117,3 +124,5 @@ class MuxWidget(QGroupBox):
         ports.extend(["none", "virtual"])
         self.combo_box_com_ports.addItems(ports)
         self.combo_box_com_ports.setCurrentText(ports[0])
+
+        self._url_checker.color_widgets(self.combo_box_com_ports)

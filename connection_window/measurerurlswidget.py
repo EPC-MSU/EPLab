@@ -4,12 +4,13 @@ File with classes to select measurers.
 
 import ipaddress
 import os
-from typing import List
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp
-from PyQt5.QtGui import QIcon, QRegExpValidator
+from typing import Callable, List
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QRegExp, Qt
+from PyQt5.QtGui import QFocusEvent, QIcon, QRegExpValidator
 from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QMessageBox, QPushButton, QWidget
 import connection_window.utils as ut
 from connection_window.productname import MeasurerType
+from connection_window.urlchecker import URLChecker
 from window.utils import DIR_MEDIA, show_message
 
 
@@ -21,13 +22,10 @@ class MeasurerURLsWidget(QWidget):
     BUTTON_HELP_WIDTH: int = 20
     BUTTON_UPDATE_WIDTH: int = 25
     COMBO_BOX_MIN_WIDTH: int = 160
-    IP_ASA_REG_EXP: str = r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual)$"
     PLACEHOLDER_ASA: str = "xmlrpc://x.x.x.x"
     if ut.get_platform() == "debian":
-        IP_IVM10_REG_EXP: str = r"^(com:///dev/ttyACM\d+|virtual)$"
         PLACEHOLDER_IVM: str = "com:///dev/ttyACMx"
     else:
-        IP_IVM10_REG_EXP: str = r"^(com:\\\\\.\\COM\d+|virtual)$"
         PLACEHOLDER_IVM: str = "com:\\\\.\\COMx"
 
     def __init__(self, initial_ports: List[str]) -> None:
@@ -36,18 +34,16 @@ class MeasurerURLsWidget(QWidget):
         """
 
         super().__init__()
-        self.button_update: QPushButton = None
-        self.buttons_show_help: List[QPushButton] = []
-        self.combo_boxes_measurers: List[QComboBox] = []
-        self.labels_measurers: List[QLabel] = []
+        self._check_url: Callable[[str], bool] = None
+        self._combo_box_init_style: str = ""
         self._initial_ports: List[str] = initial_ports
         self._measurer_type: MeasurerType = None
         self._show_two_channels: bool = None
+        self._url_checker: URLChecker = URLChecker()
         self._init_ui()
 
     def _get_ports_for_ivm10(self, ports: List[str], port_1: str = None, port_2: str = None) -> List[List[str]]:
         """
-        Method returns lists of available ports for first and second measurers.
         :param ports: all available ports;
         :param port_1: selected port for first measurer;
         :param port_2: selected port for second measurer.
@@ -96,6 +92,8 @@ class MeasurerURLsWidget(QWidget):
         else:
             self.combo_boxes_measurers[0].setCurrentText("virtual")
 
+        self._url_checker.color_widgets(*self.combo_boxes_measurers)
+
     def _init_ivm10(self, port_1: str = None, port_2: str = None) -> None:
         """
         Method initializes available ports for first and second measurers of type IVM10.
@@ -119,38 +117,47 @@ class MeasurerURLsWidget(QWidget):
         if port_1 is None and port_2 is None:
             self._set_real_ivm10_ports()
 
+        self._url_checker.color_widgets(*self.combo_boxes_measurers)
+
     def _init_ui(self) -> None:
         """
         Method initializes widgets on main widget.
         """
 
+        self.setFocusPolicy(Qt.ClickFocus)
         grid_layout = QGridLayout()
-        for index in range(1, 3):
-            label_text = qApp.translate("connection_window", "Канал #{}")
-            label = QLabel(label_text.format(index))
-            grid_layout.addWidget(label, index - 1, 0)
+        self.buttons_show_help: List[QPushButton] = []
+        self.combo_boxes_measurers: List[QComboBox] = []
+        self.labels_measurers: List[QLabel] = []
+        for index in range(2):
+            label = QLabel(qApp.translate("connection_window", "Канал #{}").format(index + 1))
+            grid_layout.addWidget(label, index, 0)
             self.labels_measurers.append(label)
+
             combo_box = QComboBox()
             combo_box.setMinimumWidth(MeasurerURLsWidget.COMBO_BOX_MIN_WIDTH)
             combo_box.setEditable(True)
-            combo_box.setToolTip(label_text.format(index))
             combo_box.textActivated.connect(self.change_ports)
-            grid_layout.addWidget(combo_box, index - 1, 1)
+            combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(r".{24}")))
+            combo_box.installEventFilter(self)
+            grid_layout.addWidget(combo_box, index, 1)
             self.combo_boxes_measurers.append(combo_box)
-            if index == 1:
-                self.button_update = QPushButton()
-                self.button_update.setFixedWidth(MeasurerURLsWidget.BUTTON_UPDATE_WIDTH)
-                self.button_update.setIcon(QIcon(os.path.join(DIR_MEDIA, "update.png")))
-                self.button_update.setToolTip(qApp.translate("connection_window", "Обновить"))
-                self.button_update.clicked.connect(self.update_ports)
-                grid_layout.addWidget(self.button_update, index - 1, 2)
+            self._combo_box_init_style = combo_box.styleSheet()
+
             button = QPushButton()
             button.setIcon(QIcon(os.path.join(DIR_MEDIA, "info.png")))
             button.setToolTip(qApp.translate("connection_window", "Помощь"))
             button.setFixedWidth(MeasurerURLsWidget.BUTTON_HELP_WIDTH)
             button.clicked.connect(self.show_help)
-            grid_layout.addWidget(button, index - 1, 3)
+            grid_layout.addWidget(button, index, 3)
             self.buttons_show_help.append(button)
+
+        self.button_update: QPushButton = QPushButton()
+        self.button_update.setFixedWidth(MeasurerURLsWidget.BUTTON_UPDATE_WIDTH)
+        self.button_update.setIcon(QIcon(os.path.join(DIR_MEDIA, "update.png")))
+        self.button_update.setToolTip(qApp.translate("connection_window", "Обновить"))
+        self.button_update.clicked.connect(self.update_ports)
+        grid_layout.addWidget(self.button_update, 0, 2)
         self.setLayout(grid_layout)
 
     def _set_real_ivm10_ports(self) -> None:
@@ -188,6 +195,19 @@ class MeasurerURLsWidget(QWidget):
         else:
             self._init_asa(ports[0])
 
+    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+        """
+        :param obj:
+        :param event:
+        :return:
+        """
+
+        if isinstance(event, QFocusEvent):
+            for combo_box in self.combo_boxes_measurers:
+                if obj == combo_box:
+                    self._url_checker.color_widget(obj, QFocusEvent(event))
+        return False
+
     def get_selected_ports(self) -> List[str]:
         """
         Method returns selected ports for measurers.
@@ -196,7 +216,7 @@ class MeasurerURLsWidget(QWidget):
 
         ports = []
         for combo_box in self.combo_boxes_measurers:
-            if not combo_box.isVisible() or not combo_box.lineEdit().hasAcceptableInput():
+            if not combo_box.isVisible() or not self._url_checker.check_url_for_correctness(combo_box):
                 continue
             ports.append(combo_box.currentText())
         return ports
@@ -211,17 +231,16 @@ class MeasurerURLsWidget(QWidget):
 
         self._show_two_channels = show_two_channels
         self._measurer_type = measurer_type
+        self._url_checker.set_measurer_type(measurer_type)
         if measurer_type == MeasurerType.IVM10:
             placeholder_text = MeasurerURLsWidget.PLACEHOLDER_IVM
-            validator = QRegExpValidator(QRegExp(MeasurerURLsWidget.IP_IVM10_REG_EXP), self)
             self._init_ivm10(*self._initial_ports)
         else:
             placeholder_text = MeasurerURLsWidget.PLACEHOLDER_ASA
-            validator = QRegExpValidator(QRegExp(MeasurerURLsWidget.IP_ASA_REG_EXP), self)
             self._init_asa(self._initial_ports[0])
         for combo_box in self.combo_boxes_measurers:
-            combo_box.setValidator(validator)
             combo_box.lineEdit().setPlaceholderText(placeholder_text)
+
         self.buttons_show_help[1].setVisible(show_two_channels)
         self.combo_boxes_measurers[1].setVisible(show_two_channels)
         self.labels_measurers[1].setVisible(show_two_channels)
@@ -250,7 +269,7 @@ class MeasurerURLsWidget(QWidget):
         """
 
         for combo_box in self.combo_boxes_measurers:
-            if combo_box.isVisible() and not combo_box.lineEdit().hasAcceptableInput():
+            if combo_box.isVisible() and not self._url_checker.check_url_for_correctness(combo_box):
                 return False
         return True
 
