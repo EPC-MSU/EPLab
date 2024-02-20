@@ -8,6 +8,19 @@ from settings import utils as ut
 from window.language import Language, Translator
 
 
+def get_default_language() -> Language:
+    """
+    Method automatically determines the appropriate language based on the system locale. This method added at
+    ticket #94289.
+    :return: default language for the system.
+    """
+
+    code = locale.getdefaultlocale()[0]
+    if code in ("be", "be_BY", "ce_RU", "kk", "kk_KZ", "ru", "ru_BY", "ru_KZ", "ru_RU"):
+        return Language.RU
+    return Language.EN
+
+
 def save_settings(func: Callable[..., Any]):
     """
     Decorator for saving settings after executing the decorated method.
@@ -33,28 +46,12 @@ class AutoSettings(SettingsHandler):
     voltage: str = None
     max_optimal_voltage: float = 12
     auto_transition: bool = False
-    language: Language = None
+    language: Language = get_default_language()
     pin_shift_warning_info: bool = True
     measurer_1_port: str = None
     measurer_2_port: str = None
     mux_port: str = None
     product_name: str = None
-
-    def __init__(self, parent=None, *args, settings: QSettings = None, path: str = None) -> None:
-        super().__init__(parent, *args, settings=settings, path=path)
-        self._init_language()
-
-    def _init_language(self) -> None:
-        """
-        Method automatically determines the appropriate language based on the system locale. This method added at
-        ticket #94289.
-        """
-
-        code = locale.getdefaultlocale()[0]
-        if code in ("be", "be_BY", "ce_RU", "kk", "kk_KZ", "ru", "ru_BY", "ru_KZ", "ru_RU"):
-            self.language = Language.RU
-        else:
-            self.language = Language.EN
 
     def _read(self, settings: QSettings) -> None:
         params = {"frequency": {"convert": check_none},
@@ -251,4 +248,4 @@ def get_language_from_str(value: str) -> Language:
     """
 
     language = Translator.get_language_value(value)
-    return Language.EN if language is None else language
+    return get_default_language() if language is None else language
