@@ -138,7 +138,7 @@ class MeasurerURLsWidget(QWidget):
             combo_box.setMinimumWidth(MeasurerURLsWidget.COMBO_BOX_MIN_WIDTH)
             combo_box.setEditable(True)
             combo_box.textActivated.connect(self.change_ports)
-            combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(r".{24}")))
+            combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(r".{24}"), self))
             combo_box.installEventFilter(self)
             grid_layout.addWidget(combo_box, index, 1)
             self.combo_boxes_measurers.append(combo_box)
