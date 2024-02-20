@@ -1,6 +1,6 @@
 import ipaddress
 import re
-from typing import Any, Callable, Optional, Tuple, Union
+from typing import Callable, Optional, Tuple, Union
 from PyQt5.QtGui import QFocusEvent
 from PyQt5.QtWidgets import QComboBox
 import connection_window.utils as ut
@@ -19,7 +19,7 @@ class URLChecker:
 
         if for_mux:
             self._reg_exp = re.compile(self._mux_reg_exp)
-            self._check_url = self._check_ivm10_and_asa_url
+            self._check_url = self._check_ivm10_and_mux_url
 
     def _check_asa_url(self, url: str) -> bool:
         if not self._reg_exp.match(url):
@@ -32,7 +32,7 @@ class URLChecker:
                 return False
         return True
 
-    def _check_ivm10_and_asa_url(self, url: str) -> bool:
+    def _check_ivm10_and_mux_url(self, url: str) -> bool:
         return bool(self._reg_exp.match(url))
 
     @staticmethod
@@ -72,7 +72,7 @@ class URLChecker:
     def set_measurer_type(self, measurer_type: MeasurerType) -> None:
         if measurer_type == MeasurerType.IVM10:
             self._reg_exp = re.compile(self._ivm10_reg_exp)
-            self._check_url = self._check_ivm10_and_asa_url
+            self._check_url = self._check_ivm10_and_mux_url
         else:
             self._reg_exp = re.compile(self._asa_reg_exp)
             self._check_url = self._check_asa_url

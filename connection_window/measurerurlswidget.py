@@ -4,7 +4,7 @@ File with classes to select measurers.
 
 import ipaddress
 import os
-from typing import Callable, List
+from typing import Callable, List, Optional
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QRegExp, Qt
 from PyQt5.QtGui import QFocusEvent, QIcon, QRegExpValidator
 from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QMessageBox, QPushButton, QWidget
@@ -35,7 +35,6 @@ class MeasurerURLsWidget(QWidget):
 
         super().__init__()
         self._check_url: Callable[[str], bool] = None
-        self._combo_box_init_style: str = ""
         self._initial_ports: List[str] = initial_ports
         self._measurer_type: MeasurerType = None
         self._show_two_channels: bool = None
@@ -110,9 +109,8 @@ class MeasurerURLsWidget(QWidget):
         for index, combo_box in enumerate(self.combo_boxes_measurers):
             combo_box.clear()
             combo_box.addItems(ports_for_first_and_second[index])
-            if ports[index] in ports_for_first_and_second[index]:
-                combo_box.setCurrentText(ports[index])
-            else:
+            print(ports_for_first_and_second[index], ports[index])
+            if not set_current_item(combo_box, ports[index]):
                 combo_box.setCurrentText("virtual")
         if port_1 is None and port_2 is None:
             self._set_real_ivm10_ports()
@@ -142,7 +140,6 @@ class MeasurerURLsWidget(QWidget):
             combo_box.installEventFilter(self)
             grid_layout.addWidget(combo_box, index, 1)
             self.combo_boxes_measurers.append(combo_box)
-            self._combo_box_init_style = combo_box.styleSheet()
 
             button = QPushButton()
             button.setIcon(QIcon(os.path.join(DIR_MEDIA, "info.png")))
@@ -165,6 +162,7 @@ class MeasurerURLsWidget(QWidget):
         Method sets real IVM10 device to current ports.
         """
 
+        print("_set")
         ports = ["virtual", "virtual"]
         initial_current_ports = [combo_box.currentText() for combo_box in self.combo_boxes_measurers]
         for combo_box_index, combo_box in enumerate(self.combo_boxes_measurers):
@@ -189,6 +187,7 @@ class MeasurerURLsWidget(QWidget):
         Slot handles signal that port for measurer was changed.
         """
 
+        print("change")
         ports = [combo_box.currentText() for combo_box in self.combo_boxes_measurers if combo_box.isVisible()]
         if self._measurer_type == MeasurerType.IVM10:
             self._init_ivm10(*ports)
@@ -229,6 +228,7 @@ class MeasurerURLsWidget(QWidget):
         :param show_two_channels: True if two channels (ports for measurers) should be shown.
         """
 
+        print("set", self._initial_ports)
         self._show_two_channels = show_two_channels
         self._measurer_type = measurer_type
         self._url_checker.set_measurer_type(measurer_type)
@@ -279,7 +279,32 @@ class MeasurerURLsWidget(QWidget):
         Slot updates ports for measurers.
         """
 
+        print("update")
         if self._measurer_type == MeasurerType.IVM10:
             self._init_ivm10(*self._initial_ports)
         else:
             self._init_asa()
+
+
+def set_current_item(widget: QComboBox, text: Optional[str]) -> bool:
+    """
+    :param widget:
+    :param text:
+    """
+
+    def check_equal(text_1: str, text_2: str) -> bool:
+        print(text_1, " - ", text_2)
+        if ut.get_platform() == "debian":
+            return text_1 == text_2
+        return text_1.lower() == text_2.lower()
+
+    if text is None:
+        return False
+
+    for i in range(widget.count()):
+        item_text = widget.itemText(i)
+        if check_equal(item_text, text):
+            widget.setCurrentIndex(i)
+            return True
+
+    return False
