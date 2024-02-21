@@ -109,6 +109,7 @@ class LowSettingsPanel(QWidget):
         """
         :param voltage_per_division: voltage value per division.
         """
+
         self._param_dict["voltage_per_div"].setText(qApp.translate("settings", "Напряжение: ") +
                                                     str(voltage_per_division) + qApp.translate("settings", " В / дел."))
 

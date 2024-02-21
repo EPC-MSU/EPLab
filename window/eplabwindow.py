@@ -706,6 +706,7 @@ class EPLabWindow(QMainWindow):
 
         self._iv_window: IVViewer = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
                                              solid_axis_enabled=False, axis_label_enabled=False)
+        self._iv_window.setFocusPolicy(Qt.ClickFocus)
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
         self._iv_window.plot.enable_context_menu(False)
         self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
