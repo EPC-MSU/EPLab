@@ -60,6 +60,7 @@ class LowSettingsPanel(QWidget):
         :param current_per_division: current value per division.
         """
 
+        current_per_division *= 1e-3
         current_per_division, unit = convert_value_by_order(current_per_division)
         self._param_dict["current_per_div"].setText(qApp.translate("settings", "Ток: ") +
                                                     f"{current_per_division} {unit}" +
