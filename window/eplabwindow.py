@@ -781,10 +781,7 @@ class EPLabWindow(QMainWindow):
         :param english: if True then the interface language will be English.
         """
 
-        if english:
-            language = Language.EN
-        else:
-            language = self._auto_settings.get_language()
+        language = Language.EN if english else self._auto_settings.get_language()
         if language is not Language.RU:
             translation_file = Translator.get_translator_file(language)
             self._translator: QTranslator = QTranslator()

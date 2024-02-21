@@ -1,3 +1,4 @@
+import locale
 from typing import Any, Callable, Dict, Optional
 from PyQt5.QtCore import QSettings
 from epcore.elements import MeasurementSettings
@@ -5,6 +6,20 @@ from epcore.product import EyePointProduct
 from settings.settingshandler import SettingsHandler
 from settings import utils as ut
 from window.language import Language, Translator
+
+
+def get_default_language() -> Language:
+    """
+    Method automatically determines the appropriate language based on the system locale. This method added at
+    ticket #94289.
+    :return: default language for the system.
+    """
+
+    code = locale.getdefaultlocale()[0]
+    if code in ("ba_RU", "be", "be_BY", "ce", "ce_RU", "kk", "kk_KZ", "ru", "ru_BY", "ru_KG", "ru_KZ", "ru_MD", "ru_RU",
+                "ru_UA", "sah_RU", "tt_RU"):
+        return Language.RU
+    return Language.EN
 
 
 def save_settings(func: Callable[..., Any]):
@@ -32,7 +47,7 @@ class AutoSettings(SettingsHandler):
     voltage: str = None
     max_optimal_voltage: float = 12
     auto_transition: bool = False
-    language: Language = Language.EN
+    language: Language = get_default_language()
     pin_shift_warning_info: bool = True
     measurer_1_port: str = None
     measurer_2_port: str = None
@@ -234,4 +249,4 @@ def get_language_from_str(value: str) -> Language:
     """
 
     language = Translator.get_language_value(value)
-    return Language.EN if language is None else language
+    return get_default_language() if language is None else language
