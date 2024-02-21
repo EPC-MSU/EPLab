@@ -591,6 +591,9 @@ class EPLabWindow(QMainWindow):
         :param index: index of the current pin in the measurement plan.
         """
 
+        if self._mux_and_plan_window.measurement_plan_runner.is_running:
+            return
+
         if self.measurement_plan.pins_number == 0:
             for action in (self.next_point_action, self.previous_point_action, self.remove_point_action,
                            self.pin_index_widget, self.save_point_action):
@@ -1050,14 +1053,6 @@ class EPLabWindow(QMainWindow):
             self._auto_settings.save_pin_shift_warning_info(False)
         return result
 
-    def _skip_empty_pins(self) -> None:
-        """
-        In TEST work mode you can make measurements only at pins where there are reference IV-curves. See ticket #89690.
-        """
-
-        if self._work_mode == WorkMode.TEST:
-            self.save_point_action.setEnabled(not self._measured_pins_checker.check_empty_current_pin())
-
     @pyqtSlot(WorkMode)
     def _switch_work_mode(self, mode: WorkMode) -> None:
         """
@@ -1065,7 +1060,7 @@ class EPLabWindow(QMainWindow):
         """
 
         self._change_work_mode(mode)
-        self._skip_empty_pins()
+        self.set_enabled_save_point_action_at_test_mode()
 
         self.update_current_pin()
         self.work_mode_changed.emit(mode)
@@ -1529,7 +1524,7 @@ class EPLabWindow(QMainWindow):
         except Exception:
             self._device_errors_handler.all_ok = False
 
-        self._skip_empty_pins()
+        self.set_enabled_save_point_action_at_test_mode()
         self.update_current_pin()
         self._open_board_window_if_needed()
 
@@ -1560,7 +1555,7 @@ class EPLabWindow(QMainWindow):
                             qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
             return
 
-        self._skip_empty_pins()
+        self.set_enabled_save_point_action_at_test_mode()
         self.update_current_pin()
         self._open_board_window_if_needed()
 
@@ -2009,6 +2004,14 @@ class EPLabWindow(QMainWindow):
         self._check_break_signatures_for_auto_transition()
         # Break signatures are only saved when debugging the application
         # self._break_signature_saver.save_break_signatures_if_necessary()
+
+    def set_enabled_save_point_action_at_test_mode(self) -> None:
+        """
+        In TEST work mode you can make measurements only at pins where there are reference IV-curves. See ticket #89690.
+        """
+
+        if self._work_mode == WorkMode.TEST and not self._mux_and_plan_window.measurement_plan_runner.is_running:
+            self.save_point_action.setEnabled(not self._measured_pins_checker.check_empty_current_pin())
 
     def update_current_pin(self, pin_centering: bool = True) -> None:
         """

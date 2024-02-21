@@ -378,9 +378,15 @@ class MuxAndPlanWindow(QWidget):
             self._change_widgets_to_start_plan_measurement(False)
         self.measurement_plan_widget.turn_off_standby_mode()
         self.progress_bar.setVisible(False)
+
         self.multiplexer_pinout_widget.enable_widgets(True)
         self._parent.enable_widgets(True)
-        self._parent.connection_action.setEnabled(True)
+        for action in (self._parent.connection_action, self._parent.new_point_action, self._parent.open_file_action,
+                       self._parent.remove_point_action):
+            action.setEnabled(True)
+        for action in (self._parent.new_point_action, self._parent.remove_point_action):
+            action.setEnabled(False)
+        self._parent.set_enabled_save_point_action_at_test_mode()
 
     @pyqtSlot(int)
     def turn_on_standby_mode(self, total_number: int) -> None:
@@ -397,8 +403,9 @@ class MuxAndPlanWindow(QWidget):
 
         self.multiplexer_pinout_widget.enable_widgets(False)
         self._parent.enable_widgets(False)
-        self._parent.connection_action.setEnabled(False)
-        self._parent.open_mux_window_action.setEnabled(True)
+        for action in (self._parent.connection_action, self._parent.open_file_action,
+                       self._parent.open_mux_window_action):
+            action.setEnabled(False)
         if self._parent.start_or_stop_entire_plan_measurement_action.isChecked():
             self._parent.start_or_stop_entire_plan_measurement_action.setEnabled(True)
 
