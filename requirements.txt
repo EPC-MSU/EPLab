@@ -1,5 +1,4 @@
 epsound==0.0.13
-ivviewer==1.0.1
 psutil==5.8.0
 PyQt5<=5.15.0
 PyQt5-stubs
@@ -9,3 +8,4 @@ git+https://github.com/pyserial/pyserial@7aeea35429d15f3eefed10bbb659674638903e3
 git+https://github.com/EPC-MSU/board-view@v0.1.3#egg=boardview
 git+https://github.com/EPC-MSU/ep_report_generator@v0.1.14#egg=ep_report_generator
 git+https://github.com/EPC-MSU/epcore@dev-0.1#egg=epcore
+git+https://github.com/EPC-MSU/ivviewer@dev-1.0#egg=ivviewer
