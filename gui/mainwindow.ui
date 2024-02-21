@@ -465,6 +465,9 @@
    <property name="shortcut">
     <string>Ctrl+N</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="open_file_action">
    <property name="icon">
@@ -477,6 +480,9 @@
    <property name="shortcut">
     <string>Ctrl+O</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="save_file_action">
    <property name="icon">
@@ -488,6 +494,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="save_as_file_action">
@@ -648,6 +657,9 @@
    <property name="shortcut">
     <string>Right</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="previous_point_action">
    <property name="enabled">
@@ -662,6 +674,9 @@
    </property>
    <property name="shortcut">
     <string>Left</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="new_point_action">
@@ -716,6 +731,9 @@
    </property>
    <property name="shortcut">
     <string>Alt+A</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="add_cursor_action">
