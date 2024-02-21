@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtWidgets import QGridLayout, QLabel, QToolBar, QWidget
 from settings.legendwidget import LegendWidget
@@ -60,8 +60,10 @@ class LowSettingsPanel(QWidget):
         :param current_per_division: current value per division.
         """
 
-        self._param_dict["current_per_div"].setText(qApp.translate("settings", "Ток: ") + str(current_per_division) +
-                                                    qApp.translate("settings", " мА / дел."))
+        current_per_division, unit = convert_value_by_order(current_per_division)
+        self._param_dict["current_per_div"].setText(qApp.translate("settings", "Ток: ") +
+                                                    f"{current_per_division} {unit}" +
+                                                    qApp.translate("settings", "А / дел."))
 
     def _set_legend(self, **kwargs) -> None:
         """
@@ -110,8 +112,10 @@ class LowSettingsPanel(QWidget):
         :param voltage_per_division: voltage value per division.
         """
 
+        voltage_per_division, unit = convert_value_by_order(voltage_per_division)
         self._param_dict["voltage_per_div"].setText(qApp.translate("settings", "Напряжение: ") +
-                                                    str(voltage_per_division) + qApp.translate("settings", " В / дел."))
+                                                    f"{voltage_per_division} {unit}" +
+                                                    qApp.translate("settings", "В / дел."))
 
     def clear_panel(self) -> None:
         _ = [label.clear() for label in self._param_dict.values()]
@@ -133,3 +137,28 @@ class LowSettingsPanel(QWidget):
                 method(value)
 
         self._set_legend(**kwargs)
+
+
+def convert_value_by_order(value: float) -> Tuple[float, str]:
+    """
+    :param value: number to be converted in order.
+    :return: converted number and unit prefix.
+    """
+
+    value = abs(value)
+    if value >= 1:
+        value = round(value, 2)
+        unit = ""
+    elif 1e-3 <= value < 1:
+        value = round(10**3 * value, 2)
+        unit = qApp.translate("settings", "м")
+    elif 1e-6 <= value < 1e-3:
+        value = round(10**6 * value, 2)
+        unit = qApp.translate("settings", "мк")
+    elif 1e-9 <= value < 1e-6:
+        value = round(10**9 * value, 2)
+        unit = qApp.translate("settings", "н")
+    else:
+        value = round(10**12 * value, 2)
+        unit = qApp.translate("settings", "п")
+    return value, unit
