@@ -1932,6 +1932,14 @@ class EPLabWindow(QMainWindow):
             self.remove_cursor_action.setChecked(False)
         self._iv_window.plot.set_state_adding_cursor(state)
 
+    def set_enabled_save_point_action_at_test_mode(self) -> None:
+        """
+        In TEST work mode you can make measurements only at pins where there are reference IV-curves. See ticket #89690.
+        """
+
+        if self._work_mode == WorkMode.TEST and not self._mux_and_plan_window.measurement_plan_runner.is_running:
+            self.save_point_action.setEnabled(not self._measured_pins_checker.check_empty_current_pin())
+
     def set_measurement_settings_and_update_ui(self, settings: MeasurementSettings) -> None:
         """
         :param settings: new measurement settings.
@@ -2004,14 +2012,6 @@ class EPLabWindow(QMainWindow):
         self._check_break_signatures_for_auto_transition()
         # Break signatures are only saved when debugging the application
         # self._break_signature_saver.save_break_signatures_if_necessary()
-
-    def set_enabled_save_point_action_at_test_mode(self) -> None:
-        """
-        In TEST work mode you can make measurements only at pins where there are reference IV-curves. See ticket #89690.
-        """
-
-        if self._work_mode == WorkMode.TEST and not self._mux_and_plan_window.measurement_plan_runner.is_running:
-            self.save_point_action.setEnabled(not self._measured_pins_checker.check_empty_current_pin())
 
     def update_current_pin(self, pin_centering: bool = True) -> None:
         """
