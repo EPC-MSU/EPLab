@@ -16,7 +16,8 @@ def get_default_language() -> Language:
     """
 
     code = locale.getdefaultlocale()[0]
-    if code in ("be", "be_BY", "ce_RU", "kk", "kk_KZ", "ru", "ru_BY", "ru_KZ", "ru_RU"):
+    if code in ("be", "be_BY", "ce", "ce_RU", "kk", "kk_KZ", "ru", "ru_BY", "ru_KG", "ru_KZ", "ru_MD", "ru_RU",
+                "ru_UA"):
         return Language.RU
     return Language.EN
 
