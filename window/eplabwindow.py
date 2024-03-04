@@ -1034,15 +1034,20 @@ class EPLabWindow(QMainWindow):
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
 
-    def _show_pin_shift_warning(self, text: str) -> int:
+    def _show_pin_shift_warning(self, main_text: str, text: str) -> int:
         """
         Method displays a message stating that adding a new point or deleting an old point will cause the point
         numbering to shift. It is also suggested to update the setting that is responsible for displaying this warning
         in the future.
+        :param main_text: main text;
         :param text: warning message.
         :return: code of the button that the user clicked in the message box.
         """
 
+        if main_text and text:
+            text = f'<font color="#003399" size="+1">{main_text}</font><br><br>{text}'
+        elif main_text:
+            text = main_text
         result, not_show_again = ut.show_message_with_option(qApp.translate("t", "Внимание"), text,
                                                              qApp.translate("t", "Не показывать предупреждение"),
                                                              cancel_button=True)
@@ -1314,10 +1319,10 @@ class EPLabWindow(QMainWindow):
 
         if self._auto_settings.get_pin_shift_warning_info() and self.measurement_plan.check_pin_indices_change():
             pin_index = self.measurement_plan.get_current_index() + 2
-            text = qApp.translate("t", "Добавление точки приведет к сдвигу нумерации. Добавленная точка будет иметь "
-                                       "номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1."
-                                  ).format(pin_index)
-            if self._show_pin_shift_warning(text) != 0:
+            main_text = qApp.translate("t", "Добавление точки приведет к сдвигу нумерации.")
+            text = qApp.translate("t", "Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0},"
+                                       " будут увеличены на 1.").format(pin_index)
+            if self._show_pin_shift_warning(main_text, text) != 0:
                 return
 
         if self.measurement_plan.image:
@@ -1747,9 +1752,9 @@ class EPLabWindow(QMainWindow):
     def remove_pin(self) -> None:
         if self._auto_settings.get_pin_shift_warning_info() and self.measurement_plan.check_pin_indices_change():
             pin_index = self.measurement_plan.get_current_index() + 2
-            text = qApp.translate("t", "Удаление точки приведет к сдвигу нумерации. Номера имеющихся точек, начиная с "
-                                       "{}, будут уменьшены на 1.").format(pin_index)
-            if self._show_pin_shift_warning(text) != 0:
+            main_text = qApp.translate("t", "Удаление точки приведет к сдвигу нумерации.")
+            text = qApp.translate("t", "Номера имеющихся точек, начиная с {}, будут уменьшены на 1.").format(pin_index)
+            if self._show_pin_shift_warning(main_text, text) != 0:
                 return
 
         index = self._measurement_plan.get_current_index()

@@ -210,7 +210,7 @@ def show_message_with_option(header: str, message: str, option_text: str, additi
     h_layout.addStretch(1)
     h_layout.addItem(item_with_ok_button)
 
-    layout.addLayout(h_layout, 2, 2, Qt.AlignCenter)
+    layout.addLayout(h_layout, 2, 2, Qt.AlignLeft)
     return message_box.exec_(), check_box_force_open.checkState() == Qt.Checked
 
 

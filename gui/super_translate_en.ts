@@ -427,9 +427,14 @@ auto-selection, V</translation>
         <translation>The measurement plan was not saved.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1317"/>
-        <source>Добавление точки приведет к сдвигу нумерации. Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1.</source>
-        <translation>Adding a point will shift the numbering. The added point will have the number {0}. The numbers of existing points, starting from {0}, will be increased by 1.</translation>
+        <location filename="../window/eplabwindow.py" line="1322"/>
+        <source>Добавление точки приведет к сдвигу нумерации.</source>
+        <translation>Adding a point will shift the numbering.</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="1323"/>
+        <source>Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1.</source>
+        <translation>The added point will have the number {0}. The numbers of existing points, starting from {0}, will be increased by 1.</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1353"/>
@@ -462,9 +467,14 @@ auto-selection, V</translation>
         <translation>Not found image for current board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1750"/>
-        <source>Удаление точки приведет к сдвигу нумерации. Номера имеющихся точек, начиная с {}, будут уменьшены на 1.</source>
-        <translation>Deleting a point will cause the numbering to shift. The numbers of existing points, starting from {}, will be reduced by 1.</translation>
+        <location filename="../window/eplabwindow.py" line="1755"/>
+        <source>Удаление точки приведет к сдвигу нумерации.</source>
+        <translation>Deleting a point will cause the numbering to shift.</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="1756"/>
+        <source>Номера имеющихся точек, начиная с {}, будут уменьшены на 1.</source>
+        <translation>The numbers of existing points, starting from {}, will be reduced by 1.</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1915"/>
