@@ -352,132 +352,132 @@ auto-selection, V</translation>
         <translation>Connection error</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="275"/>
+        <location filename="../window/eplabwindow.py" line="276"/>
         <source>Зафиксировать</source>
         <translation>Fixate</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="276"/>
+        <location filename="../window/eplabwindow.py" line="277"/>
         <source>Зафиксировать тест</source>
         <translation>Fixate test</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="277"/>
+        <location filename="../window/eplabwindow.py" line="278"/>
         <source>Зафиксировать эталон</source>
         <translation>Fixate reference</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="350"/>
+        <location filename="../window/eplabwindow.py" line="351"/>
         <source>Информация</source>
         <translation>Information</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="351"/>
+        <location filename="../window/eplabwindow.py" line="352"/>
         <source>Включен автопереход в режиме тестирования по плану. Но в приложении нет некоторых сигнатур разрыва, поэтому автопереход может работать некорректно.</source>
         <translation>Auto-transition is enabled in test mode according to plan. But the application does not have some break signatures, so auto-transition may not work correctly.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="455"/>
+        <location filename="../window/eplabwindow.py" line="453"/>
         <source>Эмулятор</source>
         <translation>Emulator</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="472"/>
+        <location filename="../window/eplabwindow.py" line="470"/>
         <source>Неизвестный измеритель</source>
         <translation>Unknown measurer</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="522"/>
+        <location filename="../window/eplabwindow.py" line="520"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="804"/>
+        <location filename="../window/eplabwindow.py" line="816"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="804"/>
+        <location filename="../window/eplabwindow.py" line="816"/>
         <source>Формат файла не подходит.</source>
         <translation>The file format is not suitable.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="886"/>
+        <location filename="../window/eplabwindow.py" line="898"/>
         <source>Сохранить изменения в &apos;{}&apos;?</source>
         <translation>Do you want to save changes in &apos;{}&apos;?</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="888"/>
+        <location filename="../window/eplabwindow.py" line="900"/>
         <source>Сохранить изменения в файл?</source>
         <translation>Do you want to save changes in file?</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="890"/>
+        <location filename="../window/eplabwindow.py" line="902"/>
         <source>Внимание</source>
         <translation>Warning</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1025"/>
+        <location filename="../window/eplabwindow.py" line="1047"/>
         <source>Не показывать предупреждение</source>
         <translation>Don't show warning</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1239"/>
+        <location filename="../window/eplabwindow.py" line="1254"/>
         <source>План тестирования не был сохранен.</source>
         <translation>The measurement plan was not saved.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1302"/>
+        <location filename="../window/eplabwindow.py" line="1317"/>
         <source>Добавление точки приведет к сдвигу нумерации. Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1.</source>
         <translation>Adding a point will shift the numbering. The added point will have the number {0}. The numbers of existing points, starting from {0}, will be increased by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1338"/>
+        <location filename="../window/eplabwindow.py" line="1353"/>
         <source>Выбрать папку</source>
         <translation>Select directory</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1504"/>
+        <location filename="../window/eplabwindow.py" line="1519"/>
         <source>Подключенный мультиплексор имеет другую конфигурацию, выход точки не был установлен.</source>
         <translation>The connected multiplexer has a different configuration, point output is not set.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1537"/>
+        <location filename="../window/eplabwindow.py" line="1552"/>
         <source>Точка с таким номером не найдена на данной плате.</source>
         <translation>Point with this number was not found on this board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1627"/>
+        <location filename="../window/eplabwindow.py" line="1642"/>
         <source>Изменен масштаб экрана. Закройте приложение и откройте снова.</source>
         <translation>Screen scale has been changed. Close the application and open again.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1690"/>
+        <location filename="../window/eplabwindow.py" line="1705"/>
         <source>Открыть изображение платы</source>
         <translation>Open board image</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1706"/>
+        <location filename="../window/eplabwindow.py" line="1723"/>
         <source>Для данной платы изображение не задано.</source>
         <translation>Not found image for current board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1733"/>
+        <location filename="../window/eplabwindow.py" line="1750"/>
         <source>Удаление точки приведет к сдвигу нумерации. Номера имеющихся точек, начиная с {}, будут уменьшены на 1.</source>
         <translation>Deleting a point will cause the numbering to shift. The numbers of existing points, starting from {}, will be reduced by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1897"/>
+        <location filename="../window/eplabwindow.py" line="1915"/>
         <source>Ошибка при установке настроек устройства.</source>
         <translation>Error occurred while configuring device settings.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1949"/>
+        <location filename="../window/eplabwindow.py" line="1975"/>
         <source>Удалить метку</source>
         <translation>Delete marker</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1953"/>
+        <location filename="../window/eplabwindow.py" line="1979"/>
         <source>Удалить все метки</source>
         <translation>Delete all markers</translation>
     </message>
@@ -494,37 +494,27 @@ auto-selection, V</translation>
     <message>
         <location filename="../window/pinindexwidget.py" line="37"/>
         <source>Неверный формат номера точки. Номер точки может принимать только целочисленное значение.</source>
-        <translation>Incorrect format of pin number. Pin number must be integer.</translation>
+        <translation>Incorrect format of point number. Point number must be integer.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="294"/>
-        <source>Текущий план тестирования несовместим с подключенным мультиплексором. Для продолжения работы можно выполнить одно из следующих действий:&lt;ul&gt;&lt;li&gt;Преобразовать план тестирования для обеспечения совместимости. Если число точек меньше числа каналов, то план будет дополнен новыми точками. Если число точек больше числа каналов, то лишние точки будут удалены из плана.&lt;/li&gt;&lt;li&gt;Закрыть текущий план тестирования. После этого можно будет создать новый или открыть другой план тестирования.&lt;/li&gt;&lt;li&gt;Отключить мультиплексор.&lt;/li&gt;&lt;/ul&gt;</source>
-        <translation>The current test plan is not compatible with the connected multiplexer. To continue, you can do one of the following:&lt;ul&gt;&lt;li&gt;Convert your test plan to ensure compatibility. If the number of points is less than the number of channels, then the plan will be supplemented with new points. If the number of points is greater than the number of channels, then the extra points will be removed from the plan.&lt;/li&gt;&lt;li&gt;Close the current test plan. After this, you can create a new or open another test plan.&lt;/li&gt;&lt;li&gt;Disable the multiplexer.&lt;/li&gt;&lt;/ul&gt;</translation>
+        <location filename="../window/plancompatibility.py" line="183"/>
+        <source>Подключен мультиплексор с {} выходами. План с {} точками не совместим с данным мультиплексором. Количество точек в плане должно совпадать с количеством выходов мультиплексора. Для тестирования данного плана подключите устройство без мультиплексора.</source>
+        <translation>A multiplexer with {} outputs is connected. Plan with {} points is not compatible with this multiplexer. The number of points in the plan must match the number of multiplexer outputs. To test this plan, connect a device without a multiplexer.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="307"/>
-        <source>Преобразовать</source>
-        <translation>Convert</translation>
+        <location filename="../window/plancompatibility.py" line="188"/>
+        <source>Подключен мультиплексор с {} выходами. План с {} точками не совместим с данным мультиплексором. Количество точек в плане должно совпадать с количеством выходов мультиплексора. Для тестирования данного плана подключите устройство без мультиплексора. Мультиплексор будет закрыт.</source>
+        <translation>A multiplexer with {} outputs is connected. Plan with {} points is not compatible with this multiplexer. The number of points in the plan must match the number of multiplexer outputs. To test this plan, connect a device without a multiplexer. The multiplexer will be closed.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="308"/>
-        <source>Закрыть план тестирования</source>
-        <translation>Close test plan</translation>
-    </message>
-    <message>
-        <location filename="../window/plancompatibility.py" line="309"/>
-        <source>Отключить мультиплексор</source>
-        <translation>Disable multiplexer</translation>
-    </message>
-    <message>
-        <location filename="../window/plancompatibility.py" line="328"/>
+        <location filename="../window/plancompatibility.py" line="204"/>
         <source>План тестирования {}нельзя загрузить, поскольку он не соответствует режиму работы EPLab.</source>
         <translation>Test plan {}cannot be loaded because it does not correspond to the EPLab operating mode.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="331"/>
+        <location filename="../window/plancompatibility.py" line="207"/>
         <source>План тестирования {}не соответствует режиму работы EPLab и будет закрыт.</source>
-        <translation>The test plan {} does not correspond to the EPLab work mode and will be closed.</translation>
+        <translation>Test plan {}does not correspond to the EPLab work mode and will be closed.</translation>
     </message>
     <message>
         <location filename="../window/utils.py" line="74"/>

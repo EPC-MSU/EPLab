@@ -1,46 +1,64 @@
-import os
-from collections import namedtuple
-from enum import auto, IntEnum
-from typing import Dict, List, Optional, Tuple
-from PyQt5.QtCore import QCoreApplication as qApp, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMessageBox
-from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER
+from typing import Callable, Dict, List, Optional, Tuple
+from PyQt5.QtCore import QCoreApplication as qApp
+from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MAX_CHANNEL_NUMBER
 from epcore.elements import Board, Element, MultiplexerOutput, Pin
+from epcore.ivmeasurer import IVMeasurerBase
 from epcore.measurementmanager import MeasurementPlan, MeasurementSystem
 from epcore.product import EyePointProduct
 from window import utils as ut
 
 
+def update_plan_for_measurement_system(func: Callable[..., Tuple[MeasurementPlan, bool]]):
+    """
+    Method updates the measurer and multiplexer in the measurement plan for the current measurement system.
+    :return: updated plan.
+    """
+
+    def wrapper(self, *args, **kwargs) -> Tuple[MeasurementPlan, bool]:
+        plan, new_file_created = func(self, *args, **kwargs)
+        board = Board(elements=plan.elements, image=plan.image if plan else None)
+        self.create_plan_with_measurer_and_mux(board)
+        return plan, new_file_created
+
+    return wrapper
+
+
 class PlanCompatibility:
     """
     Class for checking the plan for compatibility with the product and multiplexer.
+    There was already a measurement plan conversion, but it was removed in #94274.
     """
 
-    AnalyzedData = namedtuple("AnalyzedData", ["channels", "empty", "invalid"])
-
-    class Action(IntEnum):
-        """
-        Class listing possible actions to correct incompatibility with the multiplexer.
-        """
-
-        CLOSE_MUX = auto()
-        CLOSE_PLAN = auto()
-        TRANSFORM = auto()
-
-    def __init__(self, main_window, measurement_system: MeasurementSystem, product: EyePointProduct,
-                 plan: MeasurementPlan) -> None:
+    def __init__(self, main_window, measurement_system: MeasurementSystem, product: EyePointProduct) -> None:
         """
         :param main_window: main window of application;
         :param measurement_system: measurement system;
-        :param product: product;
-        :param plan: measurement plan to check.
+        :param product: product.
         """
 
         self._measurement_system: MeasurementSystem = measurement_system
         self._parent = main_window
-        self._plan: MeasurementPlan = plan
         self._product: EyePointProduct = product
+
+    @property
+    def measurer(self) -> Optional[IVMeasurerBase]:
+        """
+        :return: measurer in measurement system.
+        """
+
+        if self._measurement_system and self._measurement_system.measurers:
+            return self._measurement_system.measurers[0]
+        return None
+
+    @property
+    def multiplexer(self) -> Optional[AnalogMultiplexerBase]:
+        """
+        :return: multiplexer in measurement system.
+        """
+
+        if self._measurement_system and self._measurement_system.multiplexers:
+            return self._measurement_system.multiplexers[0]
+        return None
 
     def _add_points_from_mux_channels(self, elements: List[Element], channels: Dict[int, Dict[int, List[int]]],
                                       empty: List[Tuple[int, int]]) -> None:
@@ -69,22 +87,22 @@ class PlanCompatibility:
                         element_index, pin_index = empty.pop()
                         elements[element_index].pins[pin_index].multiplexer_output = mux_output
 
-    def _check_compatibility_with_mux(self) -> Tuple[bool, "PlanCompatibility.AnalyzedData"]:
+    def _check_compatibility_with_mux(self, plan: MeasurementPlan) -> bool:
         """
         Method checks the plan for compatibility with the multiplexer.
-        :return: True if the plan is compatible, otherwise not. Data is also returned about empty pins (in which
-        there is no multiplexer output), pins that have incorrect multiplexer outputs.
+        :param plan: plan to check for compatibility.
+        :return: True if the plan is compatible, otherwise not.
         """
 
-        multiplexer = self._measurement_system.multiplexers[0]
+        multiplexer = self.multiplexer
         modules = len(multiplexer.get_chain_info())
         channels = {module: {channel: [] for channel in range(1, MAX_CHANNEL_NUMBER + 1)}
                     for module in range(1, modules + 1)}
         empty_pins = []
         invalid_pins = []
 
-        if self._plan:
-            for element_index, element in enumerate(self._plan.elements):
+        if plan:
+            for element_index, element in enumerate(plan.elements):
                 for pin_index, pin in enumerate(element.pins):
                     mux_output = pin.multiplexer_output
 
@@ -97,25 +115,22 @@ class PlanCompatibility:
                     else:
                         empty_pins.append((element_index, pin_index))
 
-        empty_pins.reverse()
-        invalid_pins.reverse()
-        data = self.AnalyzedData(channels, empty_pins, invalid_pins)
         if len(empty_pins) == 0 and len(invalid_pins) == 0:
             for channels_in_module in channels.values():
                 if not all(len(channels_) > 0 for channels_ in channels_in_module.values()):
                     break
             else:
-                return True, data
+                return True
+        return False
 
-        return False, data
-
-    def _check_compatibility_with_product(self) -> bool:
+    def _check_compatibility_with_product(self, plan: MeasurementPlan) -> bool:
         """
         Method checks the plan for compatibility with the product (available measurement settings).
+        :param plan: plan to check for compatibility.
         :return: True if the plan is compatible, otherwise not.
         """
 
-        for element in self._plan.elements:
+        for element in plan.elements:
             for pin in element.pins:
                 for measurement in pin.measurements:
                     try:
@@ -134,16 +149,6 @@ class PlanCompatibility:
             multiplexer.close_device()
         self._measurement_system.multiplexers = []
 
-    def _create_new_plan(self, board: Board) -> MeasurementPlan:
-        """
-        :param board: board for new measurement plan.
-        :return: new measurement plan.
-        """
-
-        measurer = self._measurement_system.measurers[0]
-        multiplexer = self._measurement_system.multiplexers[0] if self._measurement_system.multiplexers else None
-        return MeasurementPlan(board, measurer, multiplexer)
-
     def _create_plan_for_mux(self) -> MeasurementPlan:
         """
         Method creates an empty measurement plan for the connected multiplexer.
@@ -151,13 +156,12 @@ class PlanCompatibility:
         """
 
         elements = []
-        multiplexer = self._measurement_system.multiplexers[0]
-        modules = len(multiplexer.get_chain_info())
+        modules = len(self.multiplexer.get_chain_info())
         channels = {module: {channel: [] for channel in range(1, MAX_CHANNEL_NUMBER + 1)}
                     for module in range(1, modules + 1)}
         self._add_points_from_mux_channels(elements, channels, [])
-        board = Board(elements=elements, image=self._plan.image if self._plan else None)
-        return self._create_new_plan(board)
+        board = Board(elements=elements)
+        return self.create_plan_with_measurer_and_mux(board)
 
     def _create_plan_without_mux(self) -> MeasurementPlan:
         """
@@ -167,167 +171,86 @@ class PlanCompatibility:
 
         x, y = self._parent.get_default_pin_coordinates()
         board = Board(elements=[Element(pins=[Pin(x=x, y=y)])])
-        return self._create_new_plan(board)
+        return self.create_plan_with_measurer_and_mux(board)
+
+    def _display_incompatibility_with_mux(self, plan: MeasurementPlan, is_new_plan: bool) -> None:
+        """
+        :param plan: measurement plan that was checked for compatibility;
+        :param is_new_plan: if True, then the new measurement plan was checked for compatibility.
+        """
+
+        if is_new_plan:
+            error = qApp.translate("t", "Подключен мультиплексор с {} выходами. План с {} точками не совместим с "
+                                        "данным мультиплексором. Количество точек в плане должно совпадать с "
+                                        "количеством выходов мультиплексора. Для тестирования данного плана подключите "
+                                        "устройство без мультиплексора.")
+        else:
+            error = qApp.translate("t", "Подключен мультиплексор с {} выходами. План с {} точками не совместим с "
+                                        "данным мультиплексором. Количество точек в плане должно совпадать с "
+                                        "количеством выходов мультиплексора. Для тестирования данного плана подключите "
+                                        "устройство без мультиплексора. Мультиплексор будет закрыт.")
+        mux_pins = MAX_CHANNEL_NUMBER * len(self.multiplexer.get_chain_info())
+        error = error.format(mux_pins, plan.pins_number)
+        ut.show_message(qApp.translate("t", "Ошибка"), error)
 
     @staticmethod
-    def _remove_invalid_points(elements: List[Element], invalid: List[Tuple[int, int]]) -> None:
+    def _display_incompatibility_with_product(is_new_plan: bool, filename: str) -> None:
         """
-        Method removes points with invalid multiplexer outputs.
-        :param elements: list of board elements;
-        :param invalid: list with indices of points that have incorrect multiplexer outputs.
-        """
-
-        for element_index, pin_index in invalid:
-            element = elements[element_index]
-            element.pins.pop(pin_index)
-            if len(element.pins) == 0:
-                elements.pop(element_index)
-
-    def _transform_plan(self, data: "PlanCompatibility.AnalyzedData") -> MeasurementPlan:
-        """
-        Method transforms the plan to be compatible with the multiplexer.
-        :param data: data about empty pins (in which there is no multiplexer output), points that have incorrect
-        multiplexer outputs.
-        :return: transformed plan.
+        :param is_new_plan: if True, then the new test plan was checked for compatibility;
+        :param filename: name of the measurement plan file.
         """
 
-        elements = self._plan.elements
-        self._add_points_from_mux_channels(elements, data.channels, data.empty)
-        self._remove_invalid_points(elements, data.invalid)
-        board = Board(elements=elements, image=self._plan.image)
-        return self._create_new_plan(board)
+        if is_new_plan:
+            error = qApp.translate("t", "План тестирования {}нельзя загрузить, поскольку он не соответствует режиму "
+                                        "работы EPLab.")
+        else:
+            error = qApp.translate("t", "План тестирования {}не соответствует режиму работы EPLab и будет закрыт.")
+        error = error.format(f"'{filename}' " if filename else "")
+        ut.show_message(qApp.translate("t", "Ошибка"), error)
 
-    def _update_plan_for_measurement_system(self) -> MeasurementPlan:
+    def create_plan_with_measurer_and_mux(self, board: Board) -> MeasurementPlan:
         """
-        Method updates the measurer and multiplexer in the measurement plan for the current measurement system.
-        :return: updated plan.
+        :param board: board for new measurement plan.
+        :return: new measurement plan.
         """
 
-        board = Board(elements=self._plan.elements, image=self._plan.image if self._plan else None)
-        return self._create_new_plan(board)
+        return MeasurementPlan(board, self.measurer, self.multiplexer)
 
-    def check_compatibility(self, new_plan: bool, empty_plan: bool, filename: str
-                            ) -> Tuple[Optional[MeasurementPlan], bool]:
+    @update_plan_for_measurement_system
+    def get_compatible_plan(self, plan: MeasurementPlan, is_new_plan: bool, filename: str
+                            ) -> Tuple[MeasurementPlan, bool]:
         """
         Method checks the measurement plan for compatibility with the product (available measurement settings) and
         multiplexer.
-        :param new_plan: if True, then the new measurement plan will be checked for compatibility;
-        :param empty_plan: if True, then the measurement plan is empty;
+        :param plan: measurement plan that is checked for compatibility;
+        :param is_new_plan: if True, then the new measurement plan will be checked for compatibility;
         :param filename: name of the measurement plan file.
-        :return: verified measurement plan or None if the plan did not pass the test. True if a new plan is created,
-        otherwise False.
+        :return: compatible measurement plan and True if a new plan is created.
         """
 
         if not self._measurement_system:
-            return self._plan, False
+            return plan, False
 
-        self._plan = self.check_compatibility_with_product(new_plan, filename)
-        if not self._measurement_system.multiplexers:
-            if self._plan is None:
-                return self._create_plan_without_mux(), True
-            return self._update_plan_for_measurement_system(), False
-
-        return self.check_compatibility_with_mux(empty_plan)
-
-    def check_compatibility_with_mux(self, empty_plan: bool) -> Tuple[Optional[MeasurementPlan], bool]:
-        """
-        Method checks the measurement plan for compatibility with the multiplexer.
-        :param empty_plan: if True, then the measurement plan is empty.
-        :return: verified measurement plan or None if the plan did not pass the test. True if a new plan is created,
-        otherwise False.
-        """
-
-        compatible, data = self._check_compatibility_with_mux()
-        if compatible:
-            return self._plan, False
-
-        if empty_plan:
-            action = PlanCompatibility.Action.TRANSFORM
-        elif self._plan is None:
-            action = PlanCompatibility.Action.CLOSE_PLAN
+        if not self._check_compatibility_with_product(plan):
+            self._display_incompatibility_with_product(is_new_plan, filename)
+            plan = self._create_plan_without_mux()
+            new_plan_created = True
         else:
-            action = show_warning_incompatibility_with_mux()
+            new_plan_created = False
 
-        is_new_plan = False
-        if action == PlanCompatibility.Action.TRANSFORM:
-            plan = self._transform_plan(data)
-        elif action == PlanCompatibility.Action.CLOSE_PLAN:
+        if not self.multiplexer:
+            return plan, new_plan_created
+
+        if self._check_compatibility_with_mux(plan):
+            return plan, new_plan_created
+
+        if not (new_plan_created or not filename):
+            self._display_incompatibility_with_mux(plan, is_new_plan)
+
+        if is_new_plan:
             plan = self._create_plan_for_mux()
-            is_new_plan = True
-        elif action == PlanCompatibility.Action.CLOSE_MUX:
+            new_plan_created = True
+        else:
             self._close_mux()
-            plan = self._plan
-            plan.multiplexer = None
-        else:
-            plan = self._plan
-        return plan, is_new_plan
 
-    def check_compatibility_with_product(self, new_plan: bool, filename: str) -> Optional[MeasurementPlan]:
-        """
-        Method checks the plan for compatibility with the product (available measurement settings).
-        :param new_plan: if True, then the new measurement plan (that to be loaded) will be checked for compatibility;
-        :param filename: name of the measurement plan file.
-        :return: verified measurement plan or None if the plan did not pass the test.
-        """
-
-        if not self._check_compatibility_with_product():
-            show_warning_incompatibility_with_product(new_plan, filename)
-            plan = None
-        else:
-            plan = self._plan
-        return plan
-
-
-def show_warning_incompatibility_with_mux() -> int:
-    """
-    Function displays a message stating that the plan is incompatible with the multiplexer and suggests possible
-    actions.
-    """
-
-    message_box = QMessageBox()
-    message_box.setWindowTitle(qApp.translate("t", "Ошибка"))
-    message_box.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
-    message_box.setWindowFlags(Qt.CustomizeWindowHint | Qt.WindowTitleHint)
-    message_box.setIcon(QMessageBox.Warning)
-    message_box.setTextFormat(Qt.RichText)
-    message_box.setTextInteractionFlags(Qt.TextBrowserInteraction)
-    message = qApp.translate("t", "Текущий план тестирования несовместим с подключенным мультиплексором. Для "
-                                  "продолжения работы можно выполнить одно из следующих действий:"
-                                  "<ul>"
-                                  "<li>Преобразовать план тестирования для обеспечения совместимости. Если число "
-                                  "точек меньше числа каналов, то план будет дополнен новыми точками. Если число "
-                                  "точек больше числа каналов, то лишние точки будут удалены из плана.</li>"
-                                  "<li>Закрыть текущий план тестирования. После этого можно будет создать новый или"
-                                  " открыть другой план тестирования.</li>"
-                                  "<li>Отключить мультиплексор.</li>"
-                                  "</ul>")
-    message_box.setText(message)
-
-    buttons = dict()
-    for name, action, role in zip((qApp.translate("t", "Преобразовать"),
-                                   qApp.translate("t", "Закрыть план тестирования"),
-                                   qApp.translate("t", "Отключить мультиплексор")),
-                                  (PlanCompatibility.Action.TRANSFORM, PlanCompatibility.Action.CLOSE_PLAN,
-                                   PlanCompatibility.Action.CLOSE_MUX),
-                                  (QMessageBox.AcceptRole, QMessageBox.NoRole, QMessageBox.ApplyRole)):
-        buttons[message_box.addButton(name, role)] = action
-    message_box.exec()
-    clicked_button = message_box.clickedButton()
-    return buttons.get(clicked_button, PlanCompatibility.Action.CLOSE_PLAN)
-
-
-def show_warning_incompatibility_with_product(new_plan: bool, filename: str) -> None:
-    """
-    Function displays a message stating that the plan is incompatible with the product.
-    :param new_plan: True if the new plan (that to be loaded) needs to be checked. Otherwise, the already loaded plan
-    needs to be checked;
-    :param filename: name of the measurement plan file.
-    """
-
-    if new_plan:
-        error = qApp.translate("t", "План тестирования {}нельзя загрузить, поскольку он не соответствует режиму "
-                                    "работы EPLab.")
-    else:
-        error = qApp.translate("t", "План тестирования {}не соответствует режиму работы EPLab и будет закрыт.")
-    error = error.format(f"'{filename}' " if filename else "")
-    ut.show_message(qApp.translate("t", "Ошибка"), error)
+        return plan, new_plan_created
