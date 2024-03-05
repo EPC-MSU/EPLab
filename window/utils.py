@@ -187,7 +187,7 @@ def show_message_with_option(header: str, message: str, option_text: str, additi
                              icon: QMessageBox.Icon = QMessageBox.Warning, no_button: bool = False,
                              cancel_button: bool = False, yes_button: bool = False) -> Tuple[int, bool]:
     """
-    Function shows message box.
+    Function shows message box with an additional option.
     :param header: header;
     :param message: message;
     :param option_text: option text;
@@ -196,7 +196,8 @@ def show_message_with_option(header: str, message: str, option_text: str, additi
     :param no_button: if True, then No button will be shown;
     :param cancel_button: if True, then Cancel button will be shown;
     :param yes_button: if True, then Yes button will be shown.
-    :return: code of the button that the user clicked in the message box.
+    :return: code of the button that the user clicked in the message box and True if the additional option has been
+    selected.
     """
 
     message_box = create_message_box(header, message, additional_info, icon, no_button, cancel_button, yes_button)
@@ -210,7 +211,7 @@ def show_message_with_option(header: str, message: str, option_text: str, additi
     h_layout.addStretch(1)
     h_layout.addItem(item_with_ok_button)
 
-    layout.addLayout(h_layout, 2, 2, Qt.AlignLeft)
+    layout.addLayout(h_layout, 2, 0, 1, 3, Qt.AlignLeft)
     return message_box.exec_(), check_box_force_open.checkState() == Qt.Checked
 
 

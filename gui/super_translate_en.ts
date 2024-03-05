@@ -306,7 +306,7 @@ auto-selection, V</translation>
 &lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="..window/commentwidget.py" line="46"/>
+        <location filename="../window/commentwidget.py" line="46"/>
         <source>Комментарий</source>
         <translation>Comment</translation>
     </message>
@@ -417,77 +417,77 @@ auto-selection, V</translation>
         <translation>Warning</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1047"/>
-        <source>Не показывать предупреждение</source>
-        <translation>Don't show warning</translation>
+        <location filename="../window/eplabwindow.py" line="1049"/>
+        <source>Не показывать снова</source>
+        <translation>Don't show again</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1254"/>
+        <location filename="../window/eplabwindow.py" line="1256"/>
         <source>План тестирования не был сохранен.</source>
         <translation>The measurement plan was not saved.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1322"/>
+        <location filename="../window/eplabwindow.py" line="1319"/>
         <source>Добавление точки приведет к сдвигу нумерации.</source>
         <translation>Adding a point will shift the numbering.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1323"/>
+        <location filename="../window/eplabwindow.py" line="1320"/>
         <source>Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1.</source>
         <translation>The added point will have the number {0}. The numbers of existing points, starting from {0}, will be increased by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1353"/>
+        <location filename="../window/eplabwindow.py" line="1355"/>
         <source>Выбрать папку</source>
         <translation>Select directory</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1519"/>
+        <location filename="../window/eplabwindow.py" line="1521"/>
         <source>Подключенный мультиплексор имеет другую конфигурацию, выход точки не был установлен.</source>
         <translation>The connected multiplexer has a different configuration, point output is not set.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1552"/>
+        <location filename="../window/eplabwindow.py" line="1554"/>
         <source>Точка с таким номером не найдена на данной плате.</source>
         <translation>Point with this number was not found on this board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1642"/>
+        <location filename="../window/eplabwindow.py" line="1644"/>
         <source>Изменен масштаб экрана. Закройте приложение и откройте снова.</source>
         <translation>Screen scale has been changed. Close the application and open again.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1705"/>
+        <location filename="../window/eplabwindow.py" line="1707"/>
         <source>Открыть изображение платы</source>
         <translation>Open board image</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1723"/>
+        <location filename="../window/eplabwindow.py" line="1725"/>
         <source>Для данной платы изображение не задано.</source>
         <translation>Not found image for current board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1755"/>
+        <location filename="../window/eplabwindow.py" line="1752"/>
         <source>Удаление точки приведет к сдвигу нумерации.</source>
         <translation>Deleting a point will cause the numbering to shift.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1756"/>
+        <location filename="../window/eplabwindow.py" line="1753"/>
         <source>Номера имеющихся точек, начиная с {}, будут уменьшены на 1.</source>
         <translation>The numbers of existing points, starting from {}, will be reduced by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1915"/>
+        <location filename="../window/eplabwindow.py" line="1917"/>
         <source>Ошибка при установке настроек устройства.</source>
         <translation>Error occurred while configuring device settings.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1975"/>
+        <location filename="../window/eplabwindow.py" line="1977"/>
         <source>Удалить метку</source>
         <translation>Delete marker</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1979"/>
+        <location filename="../window/eplabwindow.py" line="1981"/>
         <source>Удалить все метки</source>
         <translation>Delete all markers</translation>
     </message>
@@ -678,22 +678,17 @@ auto-selection, V</translation>
         <translation>Help</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurerurlswidget.py" line="215"/>
-        <source>или</source>
-        <translation>or</translation>
-    </message>
-    <message>
         <location filename="../connection_window/measurerurlswidget.py" line="237"/>
         <source>Введите значение последовательного порта в формате com:\\.\COMx.</source>
         <translation>Enter serial port value in format com:\\.\COMx.</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurerurlswidget.py" line="241"/>
+        <location filename="../connection_window/measurerurlswidget.py" line="240"/>
         <source>Введите значение последовательного порта в формате com:///dev/ttyACMx.</source>
         <translation>Enter serial port value in format com:///dev/ttyACMx.</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurerurlswidget.py" line="245"/>
+        <location filename="../connection_window/measurerurlswidget.py" line="243"/>
         <source>Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.</source>
         <translation>Enter H10 server address in format xmlrpc://x.x.x.x.</translation>
     </message>
@@ -799,92 +794,92 @@ auto-selection, V</translation>
         <translation>Current</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="64"/>
+        <location filename="../settings/lowsettingspanel.py" line="65"/>
         <source>Ток: </source>
         <translation>Current: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="66"/>
+        <location filename="../settings/lowsettingspanel.py" line="67"/>
         <source>А / дел.</source>
         <translation>A / div.</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="85"/>
+        <location filename="../settings/lowsettingspanel.py" line="86"/>
         <source>Ампл. проб. сигнала: </source>
         <translation>Probe signal amplitude: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="86"/>
+        <location filename="../settings/lowsettingspanel.py" line="87"/>
         <source> В</source>
         <translation> V</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="93"/>
+        <location filename="../settings/lowsettingspanel.py" line="94"/>
         <source>Частота: </source>
         <translation>Frequency: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="94"/>
+        <location filename="../settings/lowsettingspanel.py" line="95"/>
         <source> Гц</source>
         <translation> Hz</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="101"/>
+        <location filename="../settings/lowsettingspanel.py" line="102"/>
         <source>Различие: </source>
         <translation>Difference: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="108"/>
+        <location filename="../settings/lowsettingspanel.py" line="109"/>
         <source>Чувствительность: </source>
         <translation>Sensitivity: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="116"/>
+        <location filename="../settings/lowsettingspanel.py" line="117"/>
         <source>Напряжение: </source>
         <translation>Voltage: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="118"/>
+        <location filename="../settings/lowsettingspanel.py" line="119"/>
         <source>В / дел.</source>
         <translation>V / div.</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="154"/>
+        <location filename="../settings/lowsettingspanel.py" line="155"/>
         <source>м</source>
         <translation>m</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="157"/>
+        <location filename="../settings/lowsettingspanel.py" line="158"/>
         <source>мк</source>
         <translation>µ</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="160"/>
+        <location filename="../settings/lowsettingspanel.py" line="161"/>
         <source>н</source>
         <translation>n</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="163"/>
+        <location filename="../settings/lowsettingspanel.py" line="164"/>
         <source>п</source>
         <translation>p</translation>
     </message>
     <message>
-        <location filename="../settings/settingswindow.py" line="142"/>
+        <location filename="../settings/settingswindow.py" line="156"/>
         <source>Открыть файл</source>
         <translation>Open file</translation>
     </message>
     <message>
-        <location filename="../settings/settingswindow.py" line="150"/>
+        <location filename="../settings/settingswindow.py" line="164"/>
         <source>Проверьте конфигурационный файл &apos;{}&apos;.</source>
         <translation>Check the configuration file &apos;{}&apos;.</translation>
     </message>
     <message>
-        <location filename="../settings/settingswindow.py" line="152"/>
+        <location filename="../settings/settingswindow.py" line="166"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../settings/settingswindow.py" line="166"/>
+        <location filename="../settings/settingswindow.py" line="180"/>
         <source>Сохранить файл</source>
         <translation>Save file</translation>
     </message>

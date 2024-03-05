@@ -1044,12 +1044,9 @@ class EPLabWindow(QMainWindow):
         :return: code of the button that the user clicked in the message box.
         """
 
-        if main_text and text:
-            text = f'<font color="#003399" size="+1">{main_text}</font><br><br>{text}'
-        elif main_text:
-            text = main_text
-        result, not_show_again = ut.show_message_with_option(qApp.translate("t", "Внимание"), text,
-                                                             qApp.translate("t", "Не показывать предупреждение"),
+        main_text = f'<font color="#003399" size="+1">{main_text}</font>'
+        result, not_show_again = ut.show_message_with_option(qApp.translate("t", "Внимание"), main_text,
+                                                             qApp.translate("t", "Не показывать снова"), text,
                                                              cancel_button=True)
         if not_show_again:
             self._auto_settings.save_pin_shift_warning_info(False)
