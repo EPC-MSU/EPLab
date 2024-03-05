@@ -429,7 +429,7 @@ auto-selection, V</translation>
     <message>
         <location filename="../window/eplabwindow.py" line="1319"/>
         <source>Добавление точки приведет к сдвигу нумерации.</source>
-        <translation>Adding a point will shift the numbering.</translation>
+        <translation>Adding a point will cause the numbering to shift.</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1320"/>
