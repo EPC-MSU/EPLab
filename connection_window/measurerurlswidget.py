@@ -5,8 +5,8 @@ File with classes to select measurers.
 import ipaddress
 import os
 from typing import Callable, List, Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QRegExp, Qt
-from PyQt5.QtGui import QFocusEvent, QIcon, QRegExpValidator
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
+from PyQt5.QtGui import QFocusEvent, QIcon
 from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QMessageBox, QPushButton, QWidget
 import connection_window.utils as ut
 from connection_window.productname import MeasurerType
@@ -23,10 +23,7 @@ class MeasurerURLsWidget(QWidget):
     BUTTON_UPDATE_WIDTH: int = 25
     COMBO_BOX_MIN_WIDTH: int = 160
     PLACEHOLDER_ASA: str = "xmlrpc://x.x.x.x"
-    if ut.get_platform() == "debian":
-        PLACEHOLDER_IVM: str = "com:///dev/ttyACMx"
-    else:
-        PLACEHOLDER_IVM: str = "com:\\\\.\\COMx"
+    PLACEHOLDER_IVM: str = "com:///dev/ttyACMx" if ut.get_platform() == "debian" else "com:\\\\.\\COMx"
 
     def __init__(self, initial_ports: List[str]) -> None:
         """
@@ -136,7 +133,6 @@ class MeasurerURLsWidget(QWidget):
             combo_box.setMinimumWidth(MeasurerURLsWidget.COMBO_BOX_MIN_WIDTH)
             combo_box.setEditable(True)
             combo_box.textActivated.connect(self.change_ports)
-            combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(r".{24}"), self))
             combo_box.installEventFilter(self)
             grid_layout.addWidget(combo_box, index, 1)
             self.combo_boxes_measurers.append(combo_box)
