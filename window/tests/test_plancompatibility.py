@@ -76,7 +76,7 @@ def prepare_data(board_name: str) -> Tuple[SimpleMainWindow, PlanCompatibility]:
     dir_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
     board_path = os.path.join(dir_name, board_name)
     window = SimpleMainWindow(board_path)
-    checker = PlanCompatibility(window, window.measurement_system, window.product, window.measurement_plan)
+    checker = PlanCompatibility(window, window.measurement_system, window.product)
     return window, checker
 
 
@@ -87,7 +87,7 @@ class TestPlanCompatibility(unittest.TestCase):
 
     def test_add_points(self) -> None:
         window = VerySimpleMainWindow()
-        checker = PlanCompatibility(window, None, None, None)
+        checker = PlanCompatibility(window, None, None)
 
         elements = []
         modules_number = 2

@@ -353,24 +353,21 @@ class EPLabWindow(QMainWindow):
                                                     "приложении нет некоторых сигнатур разрыва, поэтому автопереход "
                                                     "может работать некорректно."))
 
-    def _check_plan_compatibility(self, new_plan: bool = False, empty_plan: bool = False,
+    def _check_plan_compatibility(self, plan: MeasurementPlan, is_new_plan: bool = False,
                                   filename: Optional[str] = None) -> None:
         """
         Method checks the measurement plan for compatibility with the product (available measurement settings) and
         multiplexer.
-        :param new_plan: if True, then the new measurement plan will be checked for compatibility;
-        :param empty_plan: if True, then the measurement plan is empty;
+        :param plan: measurement plan that is checked for compatibility;
+        :param is_new_plan: if True, then the new measurement plan will be checked for compatibility;
         :param filename: name of the measurement plan file.
         """
 
-        compatibility_checker = PlanCompatibility(self, self._msystem, self._product, self._measurement_plan)
-        self._measurement_plan, is_new_plan = compatibility_checker.check_compatibility(new_plan, empty_plan, filename)
-        if is_new_plan:
-            self._measurement_plan_path.path = None
-        elif filename is not None:
-            self._measurement_plan_path.path = filename
-        self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
+        checker = PlanCompatibility(self, self._msystem, self._product)
+        self._measurement_plan, new_plan_created = checker.get_compatible_plan(plan, is_new_plan, filename)
+        self._measurement_plan_path.path = None if new_plan_created else filename
 
+        self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
         self._measured_pins_checker.set_new_plan()
         self._update_mux_actions()
 
@@ -427,7 +424,7 @@ class EPLabWindow(QMainWindow):
         self.enable_widgets(True)
 
         if self._measurement_plan:
-            self._check_plan_compatibility(False, False, self._measurement_plan_path.path)
+            self._check_plan_compatibility(self.measurement_plan, False, self._measurement_plan_path.path)
         else:
             self._reset_board()
 
@@ -885,7 +882,7 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan = MeasurementPlan(
             Board(elements=[Element(pins=[Pin(0, 0, measurements=[])])]), measurer=self._msystem.measurers[0],
             multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
-        self._check_plan_compatibility(True, True)
+        self._check_plan_compatibility(self._measurement_plan, True)
         self._measurement_plan_path.path = None
 
     def _save_changes_in_measurement_plan(self, additional_info: str = None) -> bool:
@@ -1037,17 +1034,19 @@ class EPLabWindow(QMainWindow):
         with self._device_errors_handler:
             self._msystem.trigger_measurements()
 
-    def _show_pin_shift_warning(self, text: str) -> int:
+    def _show_pin_shift_warning(self, main_text: str, text: str) -> int:
         """
         Method displays a message stating that adding a new point or deleting an old point will cause the point
         numbering to shift. It is also suggested to update the setting that is responsible for displaying this warning
         in the future.
+        :param main_text: main text;
         :param text: warning message.
         :return: code of the button that the user clicked in the message box.
         """
 
-        result, not_show_again = ut.show_message_with_option(qApp.translate("t", "Внимание"), text,
-                                                             qApp.translate("t", "Не показывать предупреждение"),
+        main_text = f'<font color="#003399" size="+1">{main_text}</font>'
+        result, not_show_again = ut.show_message_with_option(qApp.translate("t", "Внимание"), main_text,
+                                                             qApp.translate("t", "Не показывать снова"), text,
                                                              cancel_button=True)
         if not_show_again:
             self._auto_settings.save_pin_shift_warning_info(False)
@@ -1317,10 +1316,10 @@ class EPLabWindow(QMainWindow):
 
         if self._auto_settings.get_pin_shift_warning_info() and self.measurement_plan.check_pin_indices_change():
             pin_index = self.measurement_plan.get_current_index() + 2
-            text = qApp.translate("t", "Добавление точки приведет к сдвигу нумерации. Добавленная точка будет иметь "
-                                       "номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1."
-                                  ).format(pin_index)
-            if self._show_pin_shift_warning(text) != 0:
+            main_text = qApp.translate("t", "Добавление точки приведет к сдвигу нумерации.")
+            text = qApp.translate("t", "Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0},"
+                                       " будут увеличены на 1.").format(pin_index)
+            if self._show_pin_shift_warning(main_text, text) != 0:
                 return
 
         if self.measurement_plan.image:
@@ -1681,8 +1680,8 @@ class EPLabWindow(QMainWindow):
             else:
                 measurer = self._msystem.measurers[0]
                 multiplexer = self._msystem.multiplexers[0] if self._msystem.multiplexers else None
-            self._measurement_plan = MeasurementPlan(board, measurer, multiplexer)
-            self._check_plan_compatibility(True, False, filename)
+            measurement_plan = MeasurementPlan(board, measurer, multiplexer)
+            self._check_plan_compatibility(measurement_plan, True, filename)
 
         if self._measurement_plan:
             # New workspace will be created here
@@ -1750,9 +1749,9 @@ class EPLabWindow(QMainWindow):
     def remove_pin(self) -> None:
         if self._auto_settings.get_pin_shift_warning_info() and self.measurement_plan.check_pin_indices_change():
             pin_index = self.measurement_plan.get_current_index() + 2
-            text = qApp.translate("t", "Удаление точки приведет к сдвигу нумерации. Номера имеющихся точек, начиная с "
-                                       "{}, будут уменьшены на 1.").format(pin_index)
-            if self._show_pin_shift_warning(text) != 0:
+            main_text = qApp.translate("t", "Удаление точки приведет к сдвигу нумерации.")
+            text = qApp.translate("t", "Номера имеющихся точек, начиная с {}, будут уменьшены на 1.").format(pin_index)
+            if self._show_pin_shift_warning(main_text, text) != 0:
                 return
 
         index = self._measurement_plan.get_current_index()
