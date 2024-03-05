@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Optional, Tuple
 from PyQt5.QtCore import QCoreApplication as qApp
 from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MAX_CHANNEL_NUMBER
 from epcore.elements import Board, Element, MultiplexerOutput, Pin
@@ -59,33 +59,6 @@ class PlanCompatibility:
         if self._measurement_system and self._measurement_system.multiplexers:
             return self._measurement_system.multiplexers[0]
         return None
-
-    def _add_points_from_mux_channels(self, elements: List[Element], channels: Dict[int, Dict[int, List[int]]],
-                                      empty: List[Tuple[int, int]]) -> None:
-        """
-        Method adds new points to the list of board elements. The number of new points is determined by the number of
-        multiplexer outputs for which points are not assigned on the board.
-        :param elements: list of elements on the board;
-        :param channels: dictionary with point indices that correspond to the corresponding numbers of the module and
-        channel of the multiplexer;
-        :param empty: list with indices of points where there are no multiplexer outputs.
-        """
-
-        if len(elements) == 0:
-            elements.append(Element(pins=[]))
-        element = elements[-1]
-
-        x, y = self._parent.get_default_pin_coordinates()
-        for module in sorted(channels):
-            channels_in_module = channels[module]
-            for channel in sorted(channels_in_module):
-                if len(channels_in_module[channel]) == 0:
-                    mux_output = MultiplexerOutput(channel, module)
-                    if len(empty) == 0:
-                        element.pins.append(Pin(x=x, y=y, multiplexer_output=mux_output))
-                    else:
-                        element_index, pin_index = empty.pop()
-                        elements[element_index].pins[pin_index].multiplexer_output = mux_output
 
     def _check_compatibility_with_mux(self, plan: MeasurementPlan) -> bool:
         """
@@ -155,12 +128,15 @@ class PlanCompatibility:
         :return: empty plan for the connected multiplexer.
         """
 
-        elements = []
         modules = len(self.multiplexer.get_chain_info())
-        channels = {module: {channel: [] for channel in range(1, MAX_CHANNEL_NUMBER + 1)}
-                    for module in range(1, modules + 1)}
-        self._add_points_from_mux_channels(elements, channels, [])
-        board = Board(elements=elements)
+        pins = []
+        x, y = self._parent.get_default_pin_coordinates()
+        for module in range(1, modules + 1):
+            for channel in range(1, MAX_CHANNEL_NUMBER + 1):
+                mux_output = MultiplexerOutput(channel, module)
+                pins.append(Pin(x=x, y=y, multiplexer_output=mux_output))
+
+        board = Board(elements=[Element(pins=pins)])
         return self.create_plan_with_measurer_and_mux(board)
 
     def _create_plan_without_mux(self) -> MeasurementPlan:

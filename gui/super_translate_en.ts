@@ -507,22 +507,22 @@ auto-selection, V</translation>
         <translation>Incorrect format of point number. Point number must be integer.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="183"/>
+        <location filename="../window/plancompatibility.py" line="159"/>
         <source>Подключен мультиплексор с {} выходами. План с {} точками не совместим с данным мультиплексором. Количество точек в плане должно совпадать с количеством выходов мультиплексора. Для тестирования данного плана подключите устройство без мультиплексора.</source>
         <translation>A multiplexer with {} outputs is connected. Plan with {} points is not compatible with this multiplexer. The number of points in the plan must match the number of multiplexer outputs. To test this plan, connect a device without a multiplexer.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="188"/>
+        <location filename="../window/plancompatibility.py" line="164"/>
         <source>Подключен мультиплексор с {} выходами. План с {} точками не совместим с данным мультиплексором. Количество точек в плане должно совпадать с количеством выходов мультиплексора. Для тестирования данного плана подключите устройство без мультиплексора. Мультиплексор будет закрыт.</source>
         <translation>A multiplexer with {} outputs is connected. Plan with {} points is not compatible with this multiplexer. The number of points in the plan must match the number of multiplexer outputs. To test this plan, connect a device without a multiplexer. The multiplexer will be closed.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="204"/>
+        <location filename="../window/plancompatibility.py" line="180"/>
         <source>План тестирования {}нельзя загрузить, поскольку он не соответствует режиму работы EPLab.</source>
         <translation>Test plan {}cannot be loaded because it does not correspond to the EPLab operating mode.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="207"/>
+        <location filename="../window/plancompatibility.py" line="183"/>
         <source>План тестирования {}не соответствует режиму работы EPLab и будет закрыт.</source>
         <translation>Test plan {}does not correspond to the EPLab work mode and will be closed.</translation>
     </message>
