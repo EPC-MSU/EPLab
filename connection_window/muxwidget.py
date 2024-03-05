@@ -4,8 +4,8 @@ File with class for widget to select multiplexer.
 
 import os
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QRegExp, Qt
-from PyQt5.QtGui import QFocusEvent, QIcon, QPixmap, QRegExpValidator
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
+from PyQt5.QtGui import QFocusEvent, QIcon, QPixmap
 from PyQt5.QtWidgets import QComboBox, QGroupBox, QHBoxLayout, QLabel, QMessageBox, QPushButton, QVBoxLayout
 import connection_window.utils as ut
 from connection_window.urlchecker import URLChecker
@@ -36,8 +36,7 @@ class MuxWidget(QGroupBox):
         combo_box = QComboBox()
         combo_box.setEditable(True)
         combo_box.setMinimumWidth(MuxWidget.COMBO_BOX_MIN_WIDTH)
-        combo_box.lineEdit().setValidator(QRegExpValidator(QRegExp(r".{24}"), self))
-        placeholder = "com:///dev/ttyACMx" if ut.get_platform() == "debian" else "com:\\\\.\\COMx"
+        placeholder = "com:///dev/ttyx" if ut.get_platform() == "debian" else "com:\\\\.\\COMx"
         combo_box.lineEdit().setPlaceholderText(placeholder)
         combo_box.installEventFilter(self)
         return combo_box
@@ -94,7 +93,7 @@ class MuxWidget(QGroupBox):
         """
 
         if self._url_checker.check_url_for_correctness(self.combo_box_com_ports):
-            if self.combo_box_com_ports.currentText() == "none":
+            if self.combo_box_com_ports.currentText().lower() == "none":
                 return None
             return self.combo_box_com_ports.currentText()
         return None
@@ -105,12 +104,9 @@ class MuxWidget(QGroupBox):
         Slot shows help information how to enter COM-port.
         """
 
-        if "win" in ut.get_platform():
-            info = qApp.translate("connection_window", "Введите значение последовательного порта в формате "
-                                                       "com:\\\\.\\COMx.")
-        else:
-            info = qApp.translate("connection_window", "Введите значение последовательного порта в формате "
-                                                       "com:///dev/ttyACMx.")
+        port_format = "com:///dev/ttyx" if ut.get_platform() == "debian" else "com:\\\\.\\COMx"
+        info = qApp.translate("connection_window", "Введите значение последовательного порта в формате {}."
+                              ).format(port_format)
         show_message(qApp.translate("connection_window", "Помощь"), info, icon=QMessageBox.Information)
 
     @pyqtSlot()

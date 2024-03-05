@@ -56,7 +56,12 @@ class MeasurerURLsWidget(QWidget):
         :return: lists of available ports for first and second measurers.
         """
 
-        selected_ports = port_1, port_2
+        selected_ports = [port_1, port_2]
+        for port_index, port in enumerate(selected_ports):
+            i = get_string_index_in_list(port, ports)
+            if i is not None:
+                selected_ports[port_index] = ports[i]
+
         ports_for_first_and_second = []
         for port in selected_ports:
             ports_list = [port] if port is not None and URLChecker.check_ivm10(port) else []
@@ -76,10 +81,11 @@ class MeasurerURLsWidget(QWidget):
                     pass
             spec_ports = [*selected_ports, None, MeasurerType.IVM10_VIRTUAL.value]
             for port in self._initial_ports:
-                if port not in spec_ports and port is not None and URLChecker.check_ivm10(port) and \
-                        port not in ports_for_first_and_second[index]:
+                if port is not None and URLChecker.check_ivm10(port) and not check_string_in_list(port, spec_ports) and\
+                        not check_string_in_list(port, ports_for_first_and_second[index]):
                     ports_for_first_and_second[index].append(port)
             ports_for_first_and_second[index] = sorted(ports_for_first_and_second[index])
+
         return ports_for_first_and_second
 
     def _get_selected_urls(self) -> Tuple[List[str], List[str]]:
@@ -177,7 +183,6 @@ class MeasurerURLsWidget(QWidget):
         Method sets real IVM10 device to current ports.
         """
 
-        print("_set")
         ports = ["virtual", "virtual"]
         initial_current_ports = [combo_box.currentText() for combo_box in self.combo_boxes_measurers]
         for combo_box_index, combo_box in enumerate(self.combo_boxes_measurers):
@@ -203,7 +208,6 @@ class MeasurerURLsWidget(QWidget):
         Slot handles signal that port for measurer was changed.
         """
 
-        print("change")
         ports = [combo_box.currentText() for combo_box in self.combo_boxes_measurers if combo_box.isVisible()]
         if self._measurer_type == MeasurerType.IVM10:
             self._init_ivm10(*ports)
@@ -246,7 +250,6 @@ class MeasurerURLsWidget(QWidget):
         :param show_two_channels: True if two channels (ports for measurers) should be shown.
         """
 
-        print("set", self._initial_ports)
         self._show_two_channels = show_two_channels
         self._measurer_type = measurer_type
         self._url_checker.set_measurer_type(measurer_type)
@@ -270,12 +273,9 @@ class MeasurerURLsWidget(QWidget):
         """
 
         if self._measurer_type == MeasurerType.IVM10:
-            if "win" in ut.get_platform():
-                info = qApp.translate("connection_window", "Введите значение последовательного порта в формате "
-                                                           "com:\\\\.\\COMx.")
-            else:
-                info = qApp.translate("connection_window", "Введите значение последовательного порта в формате "
-                                                           "com:///dev/ttyx.")
+            port_format = "com:///dev/ttyx" if ut.get_platform() == "debian" else "com:\\\\.\\COMx"
+            info = qApp.translate("connection_window", "Введите значение последовательного порта в формате {}."
+                                  ).format(port_format)
         else:
             info = qApp.translate("connection_window", "Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.")
         show_message(qApp.translate("connection_window", "Помощь"), info, icon=QMessageBox.Information)
@@ -303,11 +303,38 @@ class MeasurerURLsWidget(QWidget):
         Slot updates ports for measurers.
         """
 
-        print("update")
         if self._measurer_type == MeasurerType.IVM10:
             self._init_ivm10(*self._initial_ports)
         else:
             self._init_asa()
+
+
+def check_string_in_list(string: str, list_of_strings: List[str]) -> bool:
+    """
+    :param string:
+    :param list_of_strings:
+    :return:
+    """
+
+    return get_string_index_in_list(string, list_of_strings) is not None
+
+
+def get_string_index_in_list(string: Optional[str], list_of_strings: List[Optional[str]]) -> Optional[int]:
+    """
+    :param string:
+    :param list_of_strings:
+    :return:
+    """
+
+    def get_string_to_compare(str_: str) -> str:
+        return str_ if str_ is None or ut.get_platform() == "debian" else str_.lower()
+
+    str_cmp = get_string_to_compare(string)
+    for i, str_from_list in enumerate(list_of_strings):
+        str_from_list_cmp = get_string_to_compare(str_from_list)
+        if str_from_list_cmp == str_cmp:
+            return i
+    return None
 
 
 def set_current_item(widget: QComboBox, text: Optional[str]) -> bool:
@@ -316,18 +343,12 @@ def set_current_item(widget: QComboBox, text: Optional[str]) -> bool:
     :param text:
     """
 
-    def check_equal(text_1: str, text_2: str) -> bool:
-        print(text_1, " - ", text_2)
-        if ut.get_platform() == "debian":
-            return text_1 == text_2
-        return text_1.lower() == text_2.lower()
-
     if text is None:
         return False
 
     for i in range(widget.count()):
         item_text = widget.itemText(i)
-        if check_equal(item_text, text):
+        if check_string_in_list(item_text, [text]):
             widget.setCurrentIndex(i)
             return True
 

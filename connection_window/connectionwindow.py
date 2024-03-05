@@ -56,6 +56,7 @@ class ConnectionWindow(QDialog):
         v_box_layout.addWidget(self.widget_measurer_type)
         v_box_layout.addWidget(self.widget_measurer_urls)
         self.group_box_measurers: QGroupBox = QGroupBox(qApp.translate("connection_window", "Измерители"))
+        self.group_box_measurers.setFocusPolicy(Qt.ClickFocus)
         self.group_box_measurers.setLayout(v_box_layout)
         self.widget_mux: MuxWidget = MuxWidget()
 
