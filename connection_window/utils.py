@@ -3,6 +3,7 @@ File with useful functions.
 """
 
 import configparser
+import ipaddress
 import logging
 import os
 import re
@@ -28,18 +29,6 @@ COM_PATTERN = {
     "debian": re.compile(r"^com:///dev/ttyACM\d+$"),
     "win32": re.compile(r"^com:\\\\\.\\COM\d+$"),
     "win64": re.compile(r"^com:\\\\\.\\COM\d+$")}
-IVM10_PATTERN = {
-    "debian": re.compile(r"^(com:///dev/ttyACM\d+|virtual)$"),
-    "win32": re.compile(r"^(com:\\\\\.\\COM\d+|virtual)$"),
-    "win64": re.compile(r"^(com:\\\\\.\\COM\d+|virtual)$")}
-IVMASA_PATTERN = {
-    "debian": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$"),
-    "win32": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$"),
-    "win64": re.compile(r"^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$")}
-MUX_PATTERN = {
-    "debian": re.compile(r"^(com:///dev/ttyACM\d+|virtual)$"),
-    "win32": re.compile(r"^(com:\\\\\.\\COM\d+|virtual)$"),
-    "win64": re.compile(r"^(com:\\\\\.\\COM\d+|virtual)$")}
 
 
 def check_com_port(com_port: str) -> bool:
@@ -62,6 +51,7 @@ def check_com_ports(com_ports: List[str]) -> Tuple[List[str], List[str]]:
     :return: list of good COM-ports that can be used for IV-measurers and list of bad COM-ports.
     """
 
+    from connection_window.urlchecker import check_port_name
     bad_com_ports = []
     good_com_ports = []
     for com_port in com_ports:
@@ -86,23 +76,6 @@ def check_com_ports(com_ports: List[str]) -> Tuple[List[str], List[str]]:
         except ValueError:
             break
     return good_com_ports, bad_com_ports
-
-
-def check_port_name(port: str) -> bool:
-    """
-    Function checks that port name is correct.
-    :param port: port name.
-    :return: True if port name is correct.
-    """
-
-    if port is None:
-        return True
-
-    platform_name = get_platform()
-    if IVM10_PATTERN[platform_name].match(port) or IVMASA_PATTERN[platform_name].match(port) or \
-            MUX_PATTERN[platform_name].match(port):
-        return True
-    return False
 
 
 def create_uri_name(com_port: str) -> str:
@@ -185,18 +158,35 @@ def get_current_measurers_ports(main_window) -> List[str]:
     return ports
 
 
-def get_different_ports(ports: List[str]) -> List[str]:
+def get_different_urls(urls: List[str]) -> List[str]:
     """
-    Function returns only different real ports in list of ports.
-    :param ports: initial list of ports.
-    :return: ports.
+    Function returns only different real URLs in list of URLs.
+    :param urls: initial list of URLs.
+    :return: list with different real URLs.
     """
 
-    different_ports = []
-    for port in ports:
-        if port == "virtual" or port not in different_ports:
-            different_ports.append(port)
-    return different_ports
+    different_urls = []
+    for url in urls:
+        if url is None:
+            continue
+
+        if url.lower() == "virtual":
+            different_urls.append(url)
+            continue
+
+        for registered_url in different_urls:
+            if get_platform() == "debian":
+                registered_url_cmp = registered_url
+                url_cmp = url
+            else:
+                registered_url_cmp = registered_url.lower()
+                url_cmp = url.lower()
+
+            if registered_url_cmp == url_cmp:
+                break
+        else:
+            different_urls.append(url)
+    return different_urls
 
 
 def get_platform() -> Optional[str]:
@@ -217,7 +207,7 @@ def get_platform() -> Optional[str]:
     raise RuntimeError("Unexpected OS")
 
 
-def reveal_asa(timeout: float = None) -> List[str]:
+def reveal_asa(timeout: float = None) -> List[ipaddress.IPv4Address]:
     """
     Function detects ASA in the local network.
     :param timeout: max waiting time for responses from ASA.
@@ -252,7 +242,7 @@ def reveal_asa(timeout: float = None) -> List[str]:
                         if ready[0]:
                             data, addr = sock.recvfrom(4096)
                             if data.startswith("DISCOVER_CUBIELORD_RESPONSE ".encode()):
-                                ip_addresses.append(str(addr[0]))
+                                ip_addresses.append(ipaddress.ip_address(str(addr[0])))
             except Exception as exc:
                 logger.error("Failed to bind to interface %s and address %s: %s", iface_name, address.address, exc)
     return ip_addresses

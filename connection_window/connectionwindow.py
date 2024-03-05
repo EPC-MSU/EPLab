@@ -10,7 +10,7 @@ import connection_window.utils as ut
 from connection_window.measurertypewidget import MeasurerTypeWidget
 from connection_window.measurerurlswidget import MeasurerURLsWidget
 from connection_window.muxwidget import MuxWidget
-from connection_window.productname import MeasurerType, ProductName
+from connection_window.productname import ProductName
 from window.scaler import update_scale_of_class
 
 
@@ -88,21 +88,12 @@ class ConnectionWindow(QDialog):
         """
 
         if not self.widget_measurer_urls.validate():
-            self.widget_measurer_urls.show_help()
             return
 
-        measurer_ports = self.widget_measurer_urls.get_selected_ports()
-        measurer_ports = ut.get_different_ports(measurer_ports)
-        while len(measurer_ports) < 2:
-            measurer_ports.append(None)
-        selected_product_name = self.widget_measurer_type.get_product_name()
-        for index, port in enumerate(measurer_ports):
-            if (port == "virtual" and
-                    ProductName.get_measurer_type_by_product_name(selected_product_name) == MeasurerType.ASA):
-                measurer_ports[index] = "virtualasa"
+        measurer_ports = self.widget_measurer_urls.get_selected_urls()
         data = {"port_1": measurer_ports[0],
                 "port_2": measurer_ports[1],
-                "product_name": selected_product_name,
+                "product_name": self.widget_measurer_type.get_product_name(),
                 "mux_port": self.widget_mux.get_com_port() or None}
         self.connect_measurers_signal.emit(data)
 
