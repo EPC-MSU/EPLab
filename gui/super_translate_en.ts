@@ -311,17 +311,17 @@ auto-selection, V</translation>
         <translation>Comment</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="105"/>
+        <location filename="../window/connectionchecker.py" line="107"/>
         <source>Все равно открыть</source>
         <translation>Force open</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="236"/>
+        <location filename="../window/connectionchecker.py" line="269"/>
         <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
         <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="278"/>
+        <location filename="../window/connectionchecker.py" line="311"/>
         <source>Не удалось подключиться к {}.
 &lt;ul&gt;
 &lt;li&gt;Проверьте, что устройство подключено к компьютеру и не удерживается другой программой.&lt;/li&gt;
@@ -334,7 +334,7 @@ auto-selection, V</translation>
 &lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="284"/>
+        <location filename="../window/connectionchecker.py" line="317"/>
         <source>Не удалось подключиться к {}.
 &lt;ul&gt;
 &lt;li&gt;Проверьте, что устройства подключены к компьютеру и не удерживаются другой программой.&lt;/li&gt;
@@ -347,147 +347,147 @@ auto-selection, V</translation>
 &lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="289"/>
+        <location filename="../window/connectionchecker.py" line="322"/>
         <source>Ошибка подключения</source>
         <translation>Connection error</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="276"/>
+        <location filename="../window/eplabwindow.py" line="277"/>
         <source>Зафиксировать</source>
         <translation>Fixate</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="277"/>
+        <location filename="../window/eplabwindow.py" line="278"/>
         <source>Зафиксировать тест</source>
         <translation>Fixate test</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="278"/>
+        <location filename="../window/eplabwindow.py" line="279"/>
         <source>Зафиксировать эталон</source>
         <translation>Fixate reference</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="351"/>
+        <location filename="../window/eplabwindow.py" line="352"/>
         <source>Информация</source>
         <translation>Information</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="352"/>
+        <location filename="../window/eplabwindow.py" line="353"/>
         <source>Включен автопереход в режиме тестирования по плану. Но в приложении нет некоторых сигнатур разрыва, поэтому автопереход может работать некорректно.</source>
         <translation>Auto-transition is enabled in test mode according to plan. But the application does not have some break signatures, so auto-transition may not work correctly.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="453"/>
+        <location filename="../window/eplabwindow.py" line="454"/>
         <source>Эмулятор</source>
         <translation>Emulator</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="470"/>
+        <location filename="../window/eplabwindow.py" line="471"/>
         <source>Неизвестный измеритель</source>
         <translation>Unknown measurer</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="520"/>
+        <location filename="../window/eplabwindow.py" line="521"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="816"/>
+        <location filename="../window/eplabwindow.py" line="817"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="816"/>
+        <location filename="../window/eplabwindow.py" line="817"/>
         <source>Формат файла не подходит.</source>
         <translation>The file format is not suitable.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="898"/>
+        <location filename="../window/eplabwindow.py" line="899"/>
         <source>Сохранить изменения в &apos;{}&apos;?</source>
         <translation>Do you want to save changes in &apos;{}&apos;?</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="900"/>
+        <location filename="../window/eplabwindow.py" line="901"/>
         <source>Сохранить изменения в файл?</source>
         <translation>Do you want to save changes in file?</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="902"/>
+        <location filename="../window/eplabwindow.py" line="903"/>
         <source>Внимание</source>
         <translation>Warning</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1049"/>
+        <location filename="../window/eplabwindow.py" line="1050"/>
         <source>Не показывать снова</source>
         <translation>Don't show again</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1256"/>
+        <location filename="../window/eplabwindow.py" line="1257"/>
         <source>План тестирования не был сохранен.</source>
         <translation>The measurement plan was not saved.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1319"/>
+        <location filename="../window/eplabwindow.py" line="1320"/>
         <source>Добавление точки приведет к сдвигу нумерации.</source>
         <translation>Adding a point will cause the numbering to shift.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1320"/>
+        <location filename="../window/eplabwindow.py" line="1321"/>
         <source>Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1.</source>
         <translation>The added point will have the number {0}. The numbers of existing points, starting from {0}, will be increased by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1355"/>
+        <location filename="../window/eplabwindow.py" line="1356"/>
         <source>Выбрать папку</source>
         <translation>Select directory</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1521"/>
+        <location filename="../window/eplabwindow.py" line="1522"/>
         <source>Подключенный мультиплексор имеет другую конфигурацию, выход точки не был установлен.</source>
         <translation>The connected multiplexer has a different configuration, point output is not set.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1554"/>
+        <location filename="../window/eplabwindow.py" line="1555"/>
         <source>Точка с таким номером не найдена на данной плате.</source>
         <translation>Point with this number was not found on this board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1644"/>
+        <location filename="../window/eplabwindow.py" line="1645"/>
         <source>Изменен масштаб экрана. Закройте приложение и откройте снова.</source>
         <translation>Screen scale has been changed. Close the application and open again.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1707"/>
+        <location filename="../window/eplabwindow.py" line="1708"/>
         <source>Открыть изображение платы</source>
         <translation>Open board image</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1725"/>
+        <location filename="../window/eplabwindow.py" line="1726"/>
         <source>Для данной платы изображение не задано.</source>
         <translation>Not found image for current board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1752"/>
+        <location filename="../window/eplabwindow.py" line="1753"/>
         <source>Удаление точки приведет к сдвигу нумерации.</source>
         <translation>Deleting a point will cause the numbering to shift.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1753"/>
+        <location filename="../window/eplabwindow.py" line="1754"/>
         <source>Номера имеющихся точек, начиная с {}, будут уменьшены на 1.</source>
         <translation>The numbers of existing points, starting from {}, will be reduced by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1917"/>
+        <location filename="../window/eplabwindow.py" line="1918"/>
         <source>Ошибка при установке настроек устройства.</source>
         <translation>Error occurred while configuring device settings.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1977"/>
+        <location filename="../window/eplabwindow.py" line="1978"/>
         <source>Удалить метку</source>
         <translation>Delete marker</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1981"/>
+        <location filename="../window/eplabwindow.py" line="1982"/>
         <source>Удалить все метки</source>
         <translation>Delete all markers</translation>
     </message>
@@ -658,42 +658,42 @@ auto-selection, V</translation>
         <translation>Disconnect</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurertypewidget.py" line="71"/>
+        <location filename="../connection_window/measurertypewidget.py" line="70"/>
         <source>Тип измерителя</source>
         <translation>Measurer type</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurerurlswidget.py" line="153"/>
+        <location filename="../connection_window/measureruriswidget.py" line="172"/>
         <source>Канал #{}</source>
         <translation>Channel #{}</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurerurlswidget.py" line="176"/>
-        <source>Обновить</source>
-        <translation>Update</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/measurerurlswidget.py" line="281"/>
+        <location filename="../connection_window/measureruriswidget.py" line="187"/>
         <source>Помощь</source>
         <translation>Help</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurerurlswidget.py" line="277"/>
+        <location filename="../connection_window/measureruriswidget.py" line="196"/>
+        <source>Обновить</source>
+        <translation>Update</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/measureruriswidget.py" line="307"/>
         <source>Введите значение последовательного порта в формате {}.</source>
         <translation>Enter serial port value in format {}.</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurerurlswidget.py" line="280"/>
+        <location filename="../connection_window/measureruriswidget.py" line="310"/>
         <source>Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.</source>
         <translation>Enter H10 server address in format xmlrpc://x.x.x.x.</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurerurlswidget.py" line="295"/>
+        <location filename="../connection_window/measureruriswidget.py" line="336"/>
         <source>Введите разные порты.</source>
         <translation>Enter different ports.</translation>
     </message>
     <message>
-        <location filename="../connection_window/muxwidget.py" line="49"/>
+        <location filename="../connection_window/muxwidget.py" line="48"/>
         <source>Мультиплексор</source>
         <translation>Multiplexer</translation>
     </message>
