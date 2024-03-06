@@ -143,6 +143,21 @@ class MeasurerURIsWidget(QWidget):
 
         self._uri_checker.color_widgets(*self.combo_boxes_measurers)
 
+    def _update_ivm10(self, port_1: str = None, port_2: str = None) -> None:
+        """
+        :param port_1: selected port for first measurer;
+        :param port_2: selected port for second measurer.
+        """
+
+        ports = [port_1, port_2]
+        available_ports = ut.find_urpc_ports("ivm")
+        ports_for_first_and_second = self._get_ports_for_ivm10(available_ports, *ports)
+        for i, (combo_box, ports_for_combo_box) in enumerate(zip(self.combo_boxes_measurers,
+                                                                 ports_for_first_and_second)):
+            combo_box.clear()
+            combo_box.addItems(ports_for_combo_box)
+            combo_box.lineEdit().setText(ports[i])
+
     def _init_ui(self) -> None:
         """
         Method initializes widgets on main widget.
@@ -161,7 +176,8 @@ class MeasurerURIsWidget(QWidget):
             combo_box = QComboBox()
             combo_box.setMinimumWidth(MeasurerURIsWidget.COMBO_BOX_MIN_WIDTH)
             combo_box.setEditable(True)
-            combo_box.textActivated.connect(self.change_uris)
+            combo_box.textActivated.connect(self.handle_text_activated)
+            combo_box.lineEdit().textEdited.connect(self.handle_text_edited)
             combo_box.installEventFilter(self)
             grid_layout.addWidget(combo_box, index, 1)
             self.combo_boxes_measurers.append(combo_box)
@@ -207,18 +223,6 @@ class MeasurerURIsWidget(QWidget):
         if initial_current_ports != ports:
             self._init_ivm10(*ports)
 
-    @pyqtSlot()
-    def change_uris(self) -> None:
-        """
-        Slot handles signal that URI for measurer was changed.
-        """
-
-        uris = [combo_box.currentText() for combo_box in self.combo_boxes_measurers if combo_box.isVisible()]
-        if self._measurer_type == MeasurerType.IVM10:
-            self._init_ivm10(*uris)
-        else:
-            self._init_asa(uris[0])
-
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         """
         :param obj: the object with which the event occurred;
@@ -246,6 +250,27 @@ class MeasurerURIsWidget(QWidget):
             if uri and uri.lower() == "virtual" and self._measurer_type == MeasurerType.ASA:
                 uris[index] = "virtualasa"
         return uris
+
+    @pyqtSlot()
+    def handle_text_activated(self) -> None:
+        """
+        Slot handles signal which is sent when the user chooses an item in the combobox.
+        """
+
+        self.handle_text_edited()
+        self._uri_checker.color_widgets(*self.combo_boxes_measurers)
+
+    @pyqtSlot()
+    def handle_text_edited(self) -> None:
+        """
+        Slot handles signal which is sent when the user chooses an item in the combobox.
+        """
+
+        uris = [combo_box.lineEdit().text() for combo_box in self.combo_boxes_measurers if combo_box.isVisible()]
+        if self._measurer_type == MeasurerType.IVM10:
+            self._update_ivm10(*uris)
+        else:
+            self._init_asa(uris[0])
 
     @pyqtSlot(MeasurerType, bool)
     def set_measurer_type(self, measurer_type: MeasurerType, show_two_channels: bool) -> None:
@@ -285,6 +310,17 @@ class MeasurerURIsWidget(QWidget):
             info = qApp.translate("connection_window", "Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.")
         show_message(qApp.translate("connection_window", "Помощь"), info, icon=QMessageBox.Information)
 
+    @pyqtSlot()
+    def update_uris(self) -> None:
+        """
+        Slot updates URLs for measurers.
+        """
+
+        if self._measurer_type == MeasurerType.IVM10:
+            self._init_ivm10(*self._initial_uris)
+        else:
+            self._init_asa()
+
     def validate(self) -> bool:
         """
         Method checks that there are correct values for URIs.
@@ -301,17 +337,6 @@ class MeasurerURIsWidget(QWidget):
             return False
 
         return True
-
-    @pyqtSlot()
-    def update_uris(self) -> None:
-        """
-        Slot updates URIs for measurers.
-        """
-
-        if self._measurer_type == MeasurerType.IVM10:
-            self._init_ivm10(*self._initial_uris)
-        else:
-            self._init_asa()
 
 
 def check_string_in_list(string: Optional[str], list_of_strings: List[Optional[str]]) -> bool:
