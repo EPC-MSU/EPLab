@@ -10,7 +10,7 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, Qt, QTimer,
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, QPointF, Qt, QTimer,
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMenu, QMessageBox, QShortcut, QVBoxLayout,
@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMe
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
-from epcore.elements import Board, Element, IVCurve, Measurement, MeasurementSettings, MultiplexerOutput, Pin
+from epcore.elements import Board, Element, IVCurve, Measurement, MeasurementSettings, Pin
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.measurementmanager import IVCComparator, MeasurementPlan, MeasurementSystem, Searcher
 from epcore.product import EyePointProduct, MeasurementParameterOption
@@ -1310,9 +1310,10 @@ class EPLabWindow(QMainWindow):
         self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
-    def create_new_pin(self, multiplexer_output: Optional[MultiplexerOutput] = None) -> None:
+    def create_new_pin(self, point: QPointF = None, pin_centering: bool = True) -> None:
         """
-        :param multiplexer_output: multiplexer output for new pin.
+        :param point: coordinates of the point to be created;
+        :param pin_centering: if True, then the selected pin will be centered on the board window.
         """
 
         if self._auto_settings.get_pin_shift_warning_info() and self.measurement_plan.check_pin_indices_change():
@@ -1323,19 +1324,21 @@ class EPLabWindow(QMainWindow):
             if self._show_pin_shift_warning(main_text, text) != 0:
                 return
 
-        if self.measurement_plan.image:
+        if point:
+            x, y = point.x(), point.y()
+        elif self.measurement_plan.image:
             # Place at the center of current viewpoint by default
             point = self._board_window.get_default_pin_xy()
             x, y = point.x(), point.y()
         else:
             x, y = 0, 0
-        pin = Pin(x, y, measurements=[], multiplexer_output=multiplexer_output)
+        pin = Pin(x, y, measurements=[])
         self.measurement_plan.append_pin(pin)
         self._board_window.add_pin(pin.x, pin.y, self.measurement_plan.get_current_index())
 
         # It is important to initialize pin with real measurement. Otherwise user can create several empty points and
         # they will not be unique. This will cause some errors during ufiv validation.
-        self.update_current_pin()
+        self.update_current_pin(pin_centering)
 
     @pyqtSlot()
     def create_report(self, auto_detection_report_path: bool = False) -> None:

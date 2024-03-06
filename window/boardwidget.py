@@ -9,7 +9,6 @@ from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPoint, QPointF, QRect, QRec
 from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent, QWheelEvent
 from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView, GraphicsManualPinItem
-from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
 from dialogs.save_geometry import update_widget_to_save_geometry
 from window import utils as ut
@@ -199,10 +198,7 @@ class BoardWidget(QWidget):
         """
 
         if self._parent.work_mode is WorkMode.WRITE:
-            pin = Pin(x=point.x(), y=point.y(), measurements=[])
-            self.measurement_plan.append_pin(pin)
-            self.add_pin(pin.x, pin.y, self.measurement_plan.get_current_index())
-            self._parent.save_pin(False)
+            self._parent.create_new_pin(point, False)
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         """
