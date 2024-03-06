@@ -1,5 +1,5 @@
 """
-File with classes to select measurers.
+File with class to select measurer type.
 """
 
 import os
@@ -31,9 +31,7 @@ class MeasurerTypeWidget(QWidget):
 
         super().__init__()
         self.radio_buttons_products: Dict[ProductName, QRadioButton] = None
-        if initial_product_name is None:
-            initial_product_name = ProductName.EYEPOINT_A2
-        self._initial_product_name: ProductName = initial_product_name
+        self._initial_product_name: ProductName = initial_product_name or ProductName.EYEPOINT_A2
         self._init_ui()
         self._timer: QTimer = QTimer()
         self._timer.timeout.connect(self._show_initial_product)
@@ -53,6 +51,7 @@ class MeasurerTypeWidget(QWidget):
         layout.addWidget(self.scroll_area)
         grid_layout = QGridLayout()
         widget.setLayout(grid_layout)
+
         self.radio_buttons_products = {}
         for row, product_name in enumerate(ProductName.get_product_names_for_platform()):
             radio_button = QRadioButton(product_name.value, self)
@@ -83,8 +82,7 @@ class MeasurerTypeWidget(QWidget):
 
     def get_product_name(self) -> ProductName:
         """
-        Method returns checked product name.
-        :return: product name.
+        :return: checked product name.
         """
 
         for product_name, radio_button in self.radio_buttons_products.items():

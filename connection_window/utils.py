@@ -6,13 +6,12 @@ import configparser
 import ipaddress
 import logging
 import os
-import re
 import select
 import socket
 import struct
 from datetime import datetime, timedelta
 from platform import system
-from typing import List, Optional, Tuple
+from typing import List, Optional
 import psutil
 import serial.tools.list_ports
 import serial.tools.list_ports_common
@@ -21,61 +20,6 @@ from connection_window.productname import MeasurerType
 
 
 logger = logging.getLogger("eplab")
-EXCLUSIVE_COM_PORT = {
-    "debian": "com:///dev/ttyACMx",
-    "win32": "com:\\\\.\\COMx",
-    "win64": "com:\\\\.\\COMx"}
-COM_PATTERN = {
-    "debian": re.compile(r"^com:///dev/ttyACM\d+$"),
-    "win32": re.compile(r"^com:\\\\\.\\COM\d+$"),
-    "win64": re.compile(r"^com:\\\\\.\\COM\d+$")}
-
-
-def check_com_port(com_port: str) -> bool:
-    """
-    Function checks that given COM-port can be used for IV-measurer.
-    :param com_port: COM-port to check.
-    :return: True if COM-port can be used.
-    """
-
-    available_ports_in_required_format = [create_uri_name(port.device) for port in serial.tools.list_ports.comports()]
-    if com_port not in available_ports_in_required_format:
-        raise ValueError(f"COM-port {com_port} was not found in system")
-    return True
-
-
-def check_com_ports(com_ports: List[str]) -> Tuple[List[str], List[str]]:
-    """
-    Function checks that given COM-ports can be used for IV-measurer.
-    :param com_ports: list of COM-ports.
-    :return: list of good COM-ports that can be used for IV-measurers and list of bad COM-ports.
-    """
-
-    from connection_window.urlchecker import check_port_name
-    bad_com_ports = []
-    good_com_ports = []
-    for com_port in com_ports:
-        if not check_port_name(com_port):
-            bad_com_ports.append(com_port)
-            good_com_ports.append(None)
-        elif com_port is not None and COM_PATTERN[get_platform()].match(com_port) and com_port != "virtual":
-            try:
-                check_com_port(com_port)
-                good_com_ports.append(com_port)
-            except ValueError:
-                bad_com_ports.append(com_port)
-                good_com_ports.append(None)
-        else:
-            good_com_ports.append(com_port)
-
-    while True:
-        try:
-            bad_com_ports.remove(EXCLUSIVE_COM_PORT[get_platform()])
-            logger.info("Wildcard name com:\\\\.\\COMx passed that is not a real device. If you need to open a real "
-                        "device, then instead of com:\\\\.\\COMx you need to enter the real port name")
-        except ValueError:
-            break
-    return good_com_ports, bad_com_ports
 
 
 def create_uri_name(com_port: str) -> str:
@@ -103,15 +47,10 @@ def filter_ports_by_vid_and_pid(com_ports: List[serial.tools.list_ports_common.L
     :return: list of ports.
     """
 
-    filtered_ports = []
-    for com_port in com_ports:
-        if com_port.vid == vid and com_port.pid == pid:
-            filtered_ports.append(com_port)
-        else:
-            # VID or PID does not match or Hardware COM-port (not USB) without metainformation (VID and PID).
-            # It is not our device. Skip it.
-            pass
-    return filtered_ports
+    def check_vid_and_pid(port: serial.tools.list_ports_common.ListPortInfo) -> bool:
+        return port.vid == vid and port.pid == pid
+
+    return list(filter(check_vid_and_pid, com_ports))
 
 
 def find_urpc_ports(device_type: str) -> List[str]:
@@ -130,21 +69,23 @@ def find_urpc_ports(device_type: str) -> List[str]:
     except Exception as exc:
         logger.error("Cannot open '%s': %s", config_file, exc)
         raise
+
     try:
         vid = int(config["Global"]["vid"], base=16)
         pid = int(config["Global"]["pid"], base=16)
     except Exception as exc:
         logger.error("Cannot read 'VID' and 'PID' fields from '%s': %s", config_file, exc)
         raise
+
     serial_ports = serial.tools.list_ports.comports()
     serial_ports = filter_ports_by_vid_and_pid(serial_ports, vid, pid)
-    return sorted([create_uri_name(serial_port.device) for serial_port in serial_ports])
+    return sorted(map(lambda port: create_uri_name(port.device), serial_ports))
 
 
-def get_current_measurers_ports(main_window) -> List[str]:
+def get_current_measurers_uris(main_window) -> List[str]:
     """
     :param main_window: main window of application.
-    :return: list of measurer ports that the application currently works with.
+    :return: list of measurer URIs that the application currently works with.
     """
 
     ports = [None, None]
@@ -158,35 +99,36 @@ def get_current_measurers_ports(main_window) -> List[str]:
     return ports
 
 
-def get_different_urls(urls: List[str]) -> List[str]:
+def get_different_uris(uris: List[str]) -> List[str]:
     """
-    Function returns only different real URLs in list of URLs.
-    :param urls: initial list of URLs.
-    :return: list with different real URLs.
+    Function returns only different real URIs in list of URIs.
+    :param uris: initial list of URIs.
+    :return: list with different real URIs.
     """
 
-    different_urls = []
-    for url in urls:
-        if url is None:
+    os_name = get_platform()
+    different_uris = []
+    for uri in uris:
+        if uri is None:
             continue
 
-        if url.lower() == "virtual":
-            different_urls.append(url)
+        if uri.lower() == "virtual":
+            different_uris.append(uri)
             continue
 
-        for registered_url in different_urls:
-            if get_platform() == "debian":
-                registered_url_cmp = registered_url
-                url_cmp = url
+        for registered_uri in different_uris:
+            if os_name == "debian":
+                registered_uri_cmp = registered_uri
+                uri_cmp = uri
             else:
-                registered_url_cmp = registered_url.lower()
-                url_cmp = url.lower()
+                registered_uri_cmp = registered_uri.lower()
+                uri_cmp = uri.lower()
 
-            if registered_url_cmp == url_cmp:
+            if registered_uri_cmp == uri_cmp:
                 break
         else:
-            different_urls.append(url)
-    return different_urls
+            different_uris.append(uri)
+    return different_uris
 
 
 def get_platform() -> Optional[str]:
@@ -207,6 +149,28 @@ def get_platform() -> Optional[str]:
     raise RuntimeError("Unexpected OS")
 
 
+def get_unique_uris(uris: List[Optional[str]]) -> List[Optional[str]]:
+    """
+    :param uris:
+    :return:
+    """
+
+    os_name = get_platform()
+    unique_uris = []
+    unique_uris_cmp = []
+    for uri in uris:
+        if os_name != "debian" or (uri and uri.lower() == "virtual"):
+            uri_cmp = uri.lower()
+        else:
+            uri_cmp = uri
+
+        if uri_cmp == "virtual" or uri_cmp not in unique_uris_cmp:
+            unique_uris.append(uri)
+            unique_uris_cmp.append(uri_cmp)
+
+    return unique_uris
+
+
 def reveal_asa(timeout: float = None) -> List[ipaddress.IPv4Address]:
     """
     Function detects ASA in the local network.
@@ -217,6 +181,7 @@ def reveal_asa(timeout: float = None) -> List[ipaddress.IPv4Address]:
     waiting_time = 0.1
     if timeout is None:
         timeout = waiting_time
+
     timeout = timedelta(seconds=timeout)
     ifaces = psutil.net_if_addrs()
     ip_addresses = []

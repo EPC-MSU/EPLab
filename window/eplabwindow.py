@@ -36,7 +36,7 @@ from window.boardwidget import BoardWidget
 from window.breaksignaturessaver import BreakSignaturesSaver, check_break_signatures
 from window.commentwidget import CommentWidget
 from window.common import DeviceErrorsHandler, WorkMode
-from window.connectionchecker import ConnectionChecker, ConnectionData
+from window.connectionchecker import analyze_connection_params, ConnectionChecker, ConnectionData
 from window.curvestates import CurveStates
 from window.language import get_language, Language, Translator
 from window.measuredpinschecker import MeasuredPinsChecker
@@ -79,12 +79,12 @@ class EPLabWindow(QMainWindow):
     measurers_disconnected: pyqtSignal = pyqtSignal()
     work_mode_changed: pyqtSignal = pyqtSignal(WorkMode)
 
-    def __init__(self, product: EyePointProduct, port_1: Optional[str] = None, port_2: Optional[str] = None,
+    def __init__(self, product: EyePointProduct, uri_1: Optional[str] = None, uri_2: Optional[str] = None,
                  english: Optional[bool] = None, path: str = None) -> None:
         """
         :param product: product;
-        :param port_1: port for the first IV-measurer;
-        :param port_2: port for the second IV-measurer;
+        :param uri_1: URI for the first IV-measurer;
+        :param uri_2: URI for the second IV-measurer;
         :param english: if True then interface language will be English;
         :param path: path to the test plan to be opened.
         """
@@ -129,11 +129,12 @@ class EPLabWindow(QMainWindow):
         self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin)
         self._plan_auto_transition.save_pin_signal.connect(self.save_pin)
 
-        if port_1 is None and port_2 is None:
+        if uri_1 is None and uri_2 is None:
             self._connection_checker.run_check()
             self._disconnect_measurers()
         else:
-            self.connect_measurers(port_1, port_2)
+            uris, product_name = analyze_connection_params([uri_1, uri_2])
+            self.connect_measurers(*uris, product_name=product_name)
 
         if path:
             self.load_board(path)
@@ -1263,18 +1264,18 @@ class EPLabWindow(QMainWindow):
             self._report_generation_thread.stop_thread()
             self._report_generation_thread.wait()
 
-    def connect_measurers(self, port_1: Optional[str] = None, port_2: Optional[str] = None,
-                          mux_port: str = None, product_name: Optional[cw.ProductName] = None) -> None:
+    def connect_measurers(self, uri_1: Optional[str] = None, uri_2: Optional[str] = None,
+                          mux_uri: str = None, product_name: Optional[cw.ProductName] = None) -> None:
         """
-        Method connects IV-measurers and a multiplexer with given ports.
-        :param port_1: port for the first IV-measurer;
-        :param port_2: port for the second IV-measurer;
-        :param mux_port: port for multiplexer;
+        Method connects IV-measurers and a multiplexer with given URIs.
+        :param uri_1: URI for the first IV-measurer;
+        :param uri_2: URI for the second IV-measurer;
+        :param mux_uri: URI for multiplexer;
         :param product_name: name of product to work with application.
         """
 
         self._connection_checker.stop_check()
-        measurement_system, product_name = self._connection_checker.connect_devices_by_user(port_1, port_2, mux_port,
+        measurement_system, product_name = self._connection_checker.connect_devices_by_user(uri_1, uri_2, mux_uri,
                                                                                             product_name)
         if measurement_system:
             self._connect_devices(measurement_system, product_name)

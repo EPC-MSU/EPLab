@@ -9,11 +9,11 @@ from PyQt5.QtGui import QFocusEvent, QIcon
 from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QMessageBox, QPushButton, QWidget
 import connection_window.utils as ut
 from connection_window.productname import MeasurerType
-from connection_window.urlchecker import URLChecker
+from connection_window.urichecker import URIChecker
 from window.utils import DIR_MEDIA, show_message
 
 
-class MeasurerURLsWidget(QWidget):
+class MeasurerURIsWidget(QWidget):
     """
     Class for widget to select URLs for measurers.
     """
@@ -24,27 +24,27 @@ class MeasurerURLsWidget(QWidget):
     PLACEHOLDER_ASA: str = "xmlrpc://x.x.x.x"
     PLACEHOLDER_IVM: str = "com:///dev/ttyx" if ut.get_platform() == "debian" else "com:\\\\.\\COMx"
 
-    def __init__(self, initial_ports: List[str]) -> None:
+    def __init__(self, initial_uris: List[str]) -> None:
         """
-        :param initial_ports: initial ports of measurers.
+        :param initial_uris: initial URIs of measurers.
         """
 
         super().__init__()
-        self._check_url: Callable[[str], bool] = None
-        self._initial_ports: List[str] = initial_ports
+        self._check_uri: Callable[[str], bool] = None
+        self._initial_uris: List[str] = initial_uris
         self._measurer_type: MeasurerType = None
         self._show_two_channels: bool = None
-        self._url_checker: URLChecker = URLChecker()
+        self._uri_checker: URIChecker = URIChecker()
         self._init_ui()
 
-    def _check_url_correctness(self) -> bool:
+    def _check_uri_correctness(self) -> bool:
         """
-        Method checks that there are correct values for URLs.
-        :return: True if values for URLs are correct.
+        Method checks that there are correct values for URIs.
+        :return: True if values for URIs are correct.
         """
 
         for combo_box in self.combo_boxes_measurers:
-            if combo_box.isVisible() and not self._url_checker.check_url_for_correctness(combo_box):
+            if combo_box.isVisible() and not self._uri_checker.check_uri_for_correctness(combo_box):
                 return False
         return True
 
@@ -64,7 +64,7 @@ class MeasurerURLsWidget(QWidget):
 
         ports_for_first_and_second = []
         for port in selected_ports:
-            ports_list = [port] if port is not None and URLChecker.check_ivm10(port) else []
+            ports_list = [port] if port is not None and URIChecker.check_ivm10(port) else []
             ports_for_first_and_second.append(ports_list)
             if len(ports) > 0:
                 if port in ports and port != MeasurerType.IVM10_VIRTUAL.value:
@@ -80,40 +80,44 @@ class MeasurerURLsWidget(QWidget):
                 except ValueError:
                     pass
             spec_ports = [*selected_ports, None, MeasurerType.IVM10_VIRTUAL.value]
-            for port in self._initial_ports:
-                if port is not None and URLChecker.check_ivm10(port) and not check_string_in_list(port, spec_ports) and\
+            for port in self._initial_uris:
+                if port is not None and URIChecker.check_ivm10(port) and not check_string_in_list(port, spec_ports) and\
                         not check_string_in_list(port, ports_for_first_and_second[index]):
                     ports_for_first_and_second[index].append(port)
             ports_for_first_and_second[index] = sorted(ports_for_first_and_second[index])
 
         return ports_for_first_and_second
 
-    def _get_selected_urls(self) -> Tuple[List[str], List[str]]:
-        urls = []
-        for combo_box in self.combo_boxes_measurers:
-            if not combo_box.isVisible() or not self._url_checker.check_url_for_correctness(combo_box):
-                continue
-            urls.append(combo_box.currentText())
-        return urls, ut.get_different_urls(urls)
-
-    def _init_asa(self, url: str = None) -> None:
+    def _get_selected_uris(self) -> Tuple[List[str], List[str]]:
         """
-        Method initializes available ports for first measurer of type ASA.
-        :param url: selected address for first measurer.
+        :return: a list of entered URIs for measurers and a list of different URIs.
+        """
+
+        uris = []
+        for combo_box in self.combo_boxes_measurers:
+            if not combo_box.isVisible() or not self._uri_checker.check_uri_for_correctness(combo_box):
+                continue
+            uris.append(combo_box.currentText())
+        return uris, ut.get_different_uris(uris)
+
+    def _init_asa(self, uri: str = None) -> None:
+        """
+        Method initializes available URIs for first measurer of type ASA.
+        :param uri: selected address for first measurer.
         """
 
         ip_addresses = ut.reveal_asa()
         ip_addresses.sort()
-        urls_for_first = [f"xmlrpc://{host}" for host in ip_addresses]
-        urls_for_first.append("virtual")
+        uris_for_first = [f"xmlrpc://{host}" for host in ip_addresses]
+        uris_for_first.append("virtual")
         self.combo_boxes_measurers[0].clear()
-        self.combo_boxes_measurers[0].addItems(urls_for_first)
-        if url in urls_for_first:
-            self.combo_boxes_measurers[0].setCurrentText(url)
+        self.combo_boxes_measurers[0].addItems(uris_for_first)
+        if uri in uris_for_first:
+            self.combo_boxes_measurers[0].setCurrentText(uri)
         else:
             self.combo_boxes_measurers[0].setCurrentText("virtual")
 
-        self._url_checker.color_widgets(*self.combo_boxes_measurers)
+        self._uri_checker.color_widgets(*self.combo_boxes_measurers)
 
     def _init_ivm10(self, port_1: str = None, port_2: str = None) -> None:
         """
@@ -124,7 +128,7 @@ class MeasurerURLsWidget(QWidget):
 
         ports = [port_1, port_2] if self._show_two_channels else [port_1, None]
         for index, port in enumerate(ports):
-            if port is None or not URLChecker.check_ivm10(port):
+            if port is None or not URIChecker.check_ivm10(port):
                 ports[index] = None
 
         available_ports = ut.find_urpc_ports("ivm")
@@ -137,7 +141,7 @@ class MeasurerURLsWidget(QWidget):
         if port_1 is None and port_2 is None:
             self._set_real_ivm10_ports()
 
-        self._url_checker.color_widgets(*self.combo_boxes_measurers)
+        self._uri_checker.color_widgets(*self.combo_boxes_measurers)
 
     def _init_ui(self) -> None:
         """
@@ -155,9 +159,9 @@ class MeasurerURLsWidget(QWidget):
             self.labels_measurers.append(label)
 
             combo_box = QComboBox()
-            combo_box.setMinimumWidth(MeasurerURLsWidget.COMBO_BOX_MIN_WIDTH)
+            combo_box.setMinimumWidth(MeasurerURIsWidget.COMBO_BOX_MIN_WIDTH)
             combo_box.setEditable(True)
-            combo_box.textActivated.connect(self.change_ports)
+            combo_box.textActivated.connect(self.change_uris)
             combo_box.installEventFilter(self)
             grid_layout.addWidget(combo_box, index, 1)
             self.combo_boxes_measurers.append(combo_box)
@@ -165,22 +169,22 @@ class MeasurerURLsWidget(QWidget):
             button = QPushButton()
             button.setIcon(QIcon(os.path.join(DIR_MEDIA, "info.png")))
             button.setToolTip(qApp.translate("connection_window", "Помощь"))
-            button.setFixedWidth(MeasurerURLsWidget.BUTTON_HELP_WIDTH)
+            button.setFixedWidth(MeasurerURIsWidget.BUTTON_HELP_WIDTH)
             button.clicked.connect(self.show_help)
             grid_layout.addWidget(button, index, 3)
             self.buttons_show_help.append(button)
 
         self.button_update: QPushButton = QPushButton()
-        self.button_update.setFixedWidth(MeasurerURLsWidget.BUTTON_UPDATE_WIDTH)
+        self.button_update.setFixedWidth(MeasurerURIsWidget.BUTTON_UPDATE_WIDTH)
         self.button_update.setIcon(QIcon(os.path.join(DIR_MEDIA, "update.png")))
         self.button_update.setToolTip(qApp.translate("connection_window", "Обновить"))
-        self.button_update.clicked.connect(self.update_ports)
+        self.button_update.clicked.connect(self.update_uris)
         grid_layout.addWidget(self.button_update, 0, 2)
         self.setLayout(grid_layout)
 
     def _set_real_ivm10_ports(self) -> None:
         """
-        Method sets real IVM10 device to current ports.
+        Method sets real IVM10 measurer ports as to current ports.
         """
 
         ports = ["virtual", "virtual"]
@@ -199,48 +203,49 @@ class MeasurerURLsWidget(QWidget):
                     ports[combo_box_index] = "virtual"
             else:
                 ports[combo_box_index] = current_port
+
         if initial_current_ports != ports:
             self._init_ivm10(*ports)
 
     @pyqtSlot()
-    def change_ports(self) -> None:
+    def change_uris(self) -> None:
         """
-        Slot handles signal that port for measurer was changed.
+        Slot handles signal that URI for measurer was changed.
         """
 
-        ports = [combo_box.currentText() for combo_box in self.combo_boxes_measurers if combo_box.isVisible()]
+        uris = [combo_box.currentText() for combo_box in self.combo_boxes_measurers if combo_box.isVisible()]
         if self._measurer_type == MeasurerType.IVM10:
-            self._init_ivm10(*ports)
+            self._init_ivm10(*uris)
         else:
-            self._init_asa(ports[0])
+            self._init_asa(uris[0])
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         """
-        :param obj:
-        :param event:
-        :return:
+        :param obj: the object with which the event occurred;
+        :param event: event.
+        :return: to filter the event out, i.e. stop it being handled further, return True, otherwise return False.
         """
 
         if isinstance(event, QFocusEvent):
             for combo_box in self.combo_boxes_measurers:
                 if obj == combo_box:
-                    self._url_checker.color_widget(obj, QFocusEvent(event))
+                    self._uri_checker.color_widget(obj, QFocusEvent(event))
         return False
 
-    def get_selected_urls(self) -> List[str]:
+    def get_selected_uris(self) -> List[str]:
         """
-        Method returns selected URLs for measurers.
-        :return: list with selected URLs.
+        Method returns selected URIs for measurers.
+        :return: list with selected URIs.
         """
 
-        ports = self._get_selected_urls()[1]
-        while len(ports) < 2:
-            ports.append(None)
+        uris = self._get_selected_uris()[1]
+        while len(uris) < 2:
+            uris.append(None)
 
-        for index, port in enumerate(ports):
-            if port == "virtual" and self._measurer_type == MeasurerType.ASA:
-                ports[index] = "virtualasa"
-        return ports
+        for index, uri in enumerate(uris):
+            if uri and uri.lower() == "virtual" and self._measurer_type == MeasurerType.ASA:
+                uris[index] = "virtualasa"
+        return uris
 
     @pyqtSlot(MeasurerType, bool)
     def set_measurer_type(self, measurer_type: MeasurerType, show_two_channels: bool) -> None:
@@ -252,13 +257,13 @@ class MeasurerURLsWidget(QWidget):
 
         self._show_two_channels = show_two_channels
         self._measurer_type = measurer_type
-        self._url_checker.set_measurer_type(measurer_type)
+        self._uri_checker.set_measurer_type(measurer_type)
         if measurer_type == MeasurerType.IVM10:
-            placeholder_text = MeasurerURLsWidget.PLACEHOLDER_IVM
-            self._init_ivm10(*self._initial_ports)
+            placeholder_text = MeasurerURIsWidget.PLACEHOLDER_IVM
+            self._init_ivm10(*self._initial_uris)
         else:
-            placeholder_text = MeasurerURLsWidget.PLACEHOLDER_ASA
-            self._init_asa(self._initial_ports[0])
+            placeholder_text = MeasurerURIsWidget.PLACEHOLDER_ASA
+            self._init_asa(self._initial_uris[0])
         for combo_box in self.combo_boxes_measurers:
             combo_box.lineEdit().setPlaceholderText(placeholder_text)
 
@@ -269,7 +274,7 @@ class MeasurerURLsWidget(QWidget):
     @pyqtSlot()
     def show_help(self) -> None:
         """
-        Slot shows help information how to enter COM-port or server address.
+        Slot shows help information how to enter URI.
         """
 
         if self._measurer_type == MeasurerType.IVM10:
@@ -282,38 +287,39 @@ class MeasurerURLsWidget(QWidget):
 
     def validate(self) -> bool:
         """
-        Method checks that there are correct values for URLs.
-        :return: True if values for URLs are correct.
+        Method checks that there are correct values for URIs.
+        :return: True if values for URIs are correct.
         """
 
-        if not self._check_url_correctness():
+        if not self._check_uri_correctness():
             self.show_help()
             return False
 
-        urls, different_urls = self._get_selected_urls()
-        if len(urls) != len(different_urls):
+        uris, different_uris = self._get_selected_uris()
+        if len(uris) != len(different_uris):
             show_message(qApp.translate("t", "Ошибка"), qApp.translate("connection_window", "Введите разные порты."))
             return False
 
         return True
 
     @pyqtSlot()
-    def update_ports(self) -> None:
+    def update_uris(self) -> None:
         """
-        Slot updates ports for measurers.
+        Slot updates URIs for measurers.
         """
 
         if self._measurer_type == MeasurerType.IVM10:
-            self._init_ivm10(*self._initial_ports)
+            self._init_ivm10(*self._initial_uris)
         else:
             self._init_asa()
 
 
-def check_string_in_list(string: str, list_of_strings: List[str]) -> bool:
+def check_string_in_list(string: Optional[str], list_of_strings: List[Optional[str]]) -> bool:
     """
-    :param string:
-    :param list_of_strings:
-    :return:
+    :param string: string;
+    :param list_of_strings: list with strings.
+    :return: True if the string is in the list, False otherwise. It is taken into account that in Windows strings
+    do not differ in case, but in Linux they do.
     """
 
     return get_string_index_in_list(string, list_of_strings) is not None
@@ -321,9 +327,9 @@ def check_string_in_list(string: str, list_of_strings: List[str]) -> bool:
 
 def get_string_index_in_list(string: Optional[str], list_of_strings: List[Optional[str]]) -> Optional[int]:
     """
-    :param string:
-    :param list_of_strings:
-    :return:
+    :param string: string;
+    :param list_of_strings: list with strings.
+    :return: index of the element that matches the given string in the list.
     """
 
     def get_string_to_compare(str_: str) -> str:
@@ -339,8 +345,9 @@ def get_string_index_in_list(string: Optional[str], list_of_strings: List[Option
 
 def set_current_item(widget: QComboBox, text: Optional[str]) -> bool:
     """
-    :param widget:
-    :param text:
+    :param widget: combo box widget;
+    :param text: text to set as current in the widget.
+    :return: True if the given text is set as current.
     """
 
     if text is None:
@@ -348,7 +355,7 @@ def set_current_item(widget: QComboBox, text: Optional[str]) -> bool:
 
     for i in range(widget.count()):
         item_text = widget.itemText(i)
-        if check_string_in_list(item_text, [text]):
+        if check_string_in_list(text, [item_text]):
             widget.setCurrentIndex(i)
             return True
 
