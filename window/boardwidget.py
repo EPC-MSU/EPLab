@@ -199,6 +199,7 @@ class BoardWidget(QWidget):
 
         if self._parent.work_mode is WorkMode.WRITE:
             self._parent.create_new_pin(point, False)
+            self._parent.save_pin(False)
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         """
