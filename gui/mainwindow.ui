@@ -384,7 +384,7 @@
   </widget>
   <widget class="QToolBar" name="toolbar_auto_search">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Автоподбор параметров</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
