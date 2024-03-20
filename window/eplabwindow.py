@@ -10,10 +10,10 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, QPointF, Qt, QTimer,
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPointF, Qt, QTimer,
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
-from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMenu, QMessageBox, QShortcut, QVBoxLayout,
+from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QVBoxLayout,
                              QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
@@ -709,7 +709,11 @@ class EPLabWindow(QMainWindow):
                                              solid_axis_enabled=False, axis_label_enabled=False)
         self._iv_window.setFocusPolicy(Qt.ClickFocus)
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
-        self._iv_window.plot.enable_context_menu(False)
+        self._iv_window.plot.enable_context_menu("cursors", "export_ivc")
+        self._iv_window.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),
+                                             export_ivc=qApp.translate("t", "Экспортировать сигнатуры в файл"),
+                                             remove_all_cursors=qApp.translate("t", "Удалить все метки"),
+                                             remove_cursor=qApp.translate("t", "Удалить метку"))
         self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
         self.current_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_CURRENT)
         self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
@@ -753,9 +757,6 @@ class EPLabWindow(QMainWindow):
         self._curves_states: CurveStates = CurveStates(self.freeze_curve_a_action, self.freeze_curve_b_action)
         self.hide_curve_a_action.toggled.connect(self.hide_curve)
         self.hide_curve_b_action.toggled.connect(self.hide_curve)
-        self.add_cursor_action.toggled.connect(self.set_add_cursor_state)
-        self.remove_cursor_action.setCheckable(False)
-        self.remove_cursor_action.triggered.connect(self.show_context_menu_for_cursor_deletion)
         self.save_screen_action.triggered.connect(self.save_image)
         self.select_language_action.triggered.connect(self.select_language)
 
@@ -1013,9 +1014,6 @@ class EPLabWindow(QMainWindow):
                        self.hide_curve_b_action):
             action.setChecked(False)
 
-        self.add_cursor_action.setChecked(False)
-        self.remove_cursor_action.setCheckable(False)
-        self.remove_cursor_action.setChecked(False)
         self._iv_window.plot.set_state_adding_cursor(False)
         self._iv_window.plot.set_state_removing_cursor(False)
 
@@ -1402,9 +1400,8 @@ class EPLabWindow(QMainWindow):
                    self.writing_mode_action, self.testing_mode_action, self.settings_mode_action,
                    self.next_point_action, self.previous_point_action, self.new_point_action, self.remove_point_action,
                    self.save_point_action, self.add_board_image_action, self.create_report_action,
-                   self.pin_index_widget, self.start_or_stop_entire_plan_measurement_action, self.add_cursor_action,
-                   self.remove_cursor_action, self.comment_dock, self.score_dock, self.freq_dock, self.current_dock,
-                   self.voltage_dock, self.measurers_menu)
+                   self.pin_index_widget, self.start_or_stop_entire_plan_measurement_action, self.comment_dock,
+                   self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock, self.measurers_menu)
         for widget in widgets:
             widget.setEnabled(enabled)
         if enabled and len(self._msystem.measurers) < 2:
@@ -1928,17 +1925,6 @@ class EPLabWindow(QMainWindow):
             old_options = self._product.settings_to_options(old_settings)
             self._set_options_to_ui(old_options)
 
-    @pyqtSlot(bool)
-    def set_add_cursor_state(self, state: bool) -> None:
-        """
-        :param state: if True, then cursors can be placed on the widget with curves.
-        """
-
-        if state:
-            self.remove_cursor_action.setCheckable(False)
-            self.remove_cursor_action.setChecked(False)
-        self._iv_window.plot.set_state_adding_cursor(state)
-
     def set_enabled_save_point_action_at_test_mode(self) -> None:
         """
         In TEST work mode you can make measurements only at pins where there are reference IV-curves. See ticket #89690.
@@ -1955,42 +1941,6 @@ class EPLabWindow(QMainWindow):
         self._set_msystem_settings(settings)
         options = self._product.settings_to_options(settings)
         self._set_options_to_ui(options)
-
-    @pyqtSlot()
-    def set_remove_cursor_state(self) -> None:
-        """
-        Slot sets cursor deletion mode when one cursor at a time can be deleted.
-        """
-
-        self.remove_cursor_action.setCheckable(True)
-        self.remove_cursor_action.setChecked(True)
-        self.add_cursor_action.setChecked(False)
-        self._iv_window.plot.set_state_removing_cursor(True)
-
-    @pyqtSlot()
-    def show_context_menu_for_cursor_deletion(self) -> None:
-        """
-        Slot shows context menu for choosing to delete cursors one at a time or all at once.
-        """
-
-        if self.remove_cursor_action.isCheckable():
-            self.remove_cursor_action.setCheckable(False)
-            self.remove_cursor_action.setChecked(False)
-            self._iv_window.plot.set_state_removing_cursor(False)
-            return
-
-        widget = self.toolbar_compare.widgetForAction(self.remove_cursor_action)
-        menu = QMenu(widget)
-        icon = QIcon(os.path.join(ut.DIR_MEDIA, "delete_cursor.png"))
-        action_remove_cursor = QAction(icon, qApp.translate("t", "Удалить метку"), menu)
-        action_remove_cursor.triggered.connect(self.set_remove_cursor_state)
-        menu.addAction(action_remove_cursor)
-        icon = QIcon(os.path.join(ut.DIR_MEDIA, "delete_all.png"))
-        action_remove_all_cursors = QAction(icon, qApp.translate("t", "Удалить все метки"), menu)
-        action_remove_all_cursors.triggered.connect(self.remove_all_cursors)
-        menu.addAction(action_remove_all_cursors)
-        position = widget.geometry()
-        menu.popup(self.toolbar_compare.mapToGlobal(QPoint(position.x(), position.y())))
 
     @pyqtSlot(IVMeasurerBase, str, bool)
     def show_device_settings(self, selected_measurer: IVMeasurerBase, device_name: str, _: bool) -> None:

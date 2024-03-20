@@ -410,8 +410,6 @@
    <addaction name="save_screen_action"/>
    <addaction name="freeze_curve_a_action"/>
    <addaction name="freeze_curve_b_action"/>
-   <addaction name="add_cursor_action"/>
-   <addaction name="remove_cursor_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_mode">
    <property name="windowTitle">
