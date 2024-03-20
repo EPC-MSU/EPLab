@@ -397,7 +397,12 @@ auto-selection, V</translation>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="817"/>
+        <location filename="../window/eplabwindow.py" line="818"/>
+        <source>Формат файла не подходит. Указан неверный путь до изображения платы.</source>
+        <translation>The file format is not suitable. The path to the board image is incorrect.</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="821"/>
         <source>Формат файла не подходит.</source>
         <translation>The file format is not suitable.</translation>
     </message>

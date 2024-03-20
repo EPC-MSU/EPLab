@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMe
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
-from epcore.elements import Board, Element, IVCurve, Measurement, MeasurementSettings, Pin
+from epcore.elements import Board, Element, ImageNotFoundError, IVCurve, Measurement, MeasurementSettings, Pin
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.measurementmanager import IVCComparator, MeasurementPlan, MeasurementSystem, Searcher
 from epcore.product import EyePointProduct, MeasurementParameterOption
@@ -813,6 +813,10 @@ class EPLabWindow(QMainWindow):
             try:
                 board = epfilemanager.load_board_from_ufiv(filename, auto_convert_p10=True)
                 self.dir_chosen_by_user = filename
+            except ImageNotFoundError:
+                ut.show_message(qApp.translate("t", "Ошибка"),
+                                qApp.translate("t", "Формат файла не подходит. Указан неверный путь до изображения "
+                                                    "платы."))
             except Exception as exc:
                 ut.show_message(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит."),
                                 str(exc))
