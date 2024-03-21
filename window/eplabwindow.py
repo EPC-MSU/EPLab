@@ -165,6 +165,7 @@ class EPLabWindow(QMainWindow):
 
         if os.path.exists(path):
             self._dir_chosen_by_user = os.path.dirname(path) if not os.path.isdir(path) else path
+            self._iv_window.plot.set_path_to_directory(self._dir_chosen_by_user)
 
     @property
     def can_be_measured(self) -> bool:
@@ -709,11 +710,13 @@ class EPLabWindow(QMainWindow):
                                              solid_axis_enabled=False, axis_label_enabled=False)
         self._iv_window.setFocusPolicy(Qt.ClickFocus)
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
-        self._iv_window.plot.enable_context_menu("cursors", "export_ivc")
+        self._iv_window.plot.default_path_changed.connect(self.set_dir_chosen_by_user)
+        self._iv_window.plot.enable_context_menu()
         self._iv_window.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),
                                              export_ivc=qApp.translate("t", "Экспортировать сигнатуры в файл"),
                                              remove_all_cursors=qApp.translate("t", "Удалить все метки"),
                                              remove_cursor=qApp.translate("t", "Удалить метку"))
+        self._iv_window.plot.set_path_to_directory(self.dir_chosen_by_user)
         self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
         self.current_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_CURRENT)
         self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
@@ -1924,6 +1927,14 @@ class EPLabWindow(QMainWindow):
             self._set_msystem_settings(old_settings)
             old_options = self._product.settings_to_options(old_settings)
             self._set_options_to_ui(old_options)
+
+    @pyqtSlot(str)
+    def set_dir_chosen_by_user(self, dir_path: str) -> None:
+        """
+        :param dir_path: path chosen by the user when working with the application.
+        """
+
+        self.dir_chosen_by_user = dir_path
 
     def set_enabled_save_point_action_at_test_mode(self) -> None:
         """
