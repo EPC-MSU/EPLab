@@ -66,8 +66,8 @@ class EPLabWindow(QMainWindow):
     COLOR_FOR_TEST: QColor = QColor(255, 129, 129, 200)
     CRITICAL_WIDTH_FOR_LINUX_EN: int = 1585
     CRITICAL_WIDTH_FOR_LINUX_RU: int = 1806
-    CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1295
-    CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1475
+    CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1230
+    CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1415
     DEFAULT_COMPARATOR_MIN_CURRENT: float = 0.002
     DEFAULT_COMPARATOR_MIN_VOLTAGE: float = 0.6
     DEFAULT_POS_X: int = 50
@@ -1788,6 +1788,7 @@ class EPLabWindow(QMainWindow):
                 style = Qt.ToolButtonTextBesideIcon
             tool_bar.setToolButtonStyle(style)
 
+        print(self.width())
         super().resizeEvent(event)
 
     @pyqtSlot()
