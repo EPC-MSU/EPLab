@@ -1798,7 +1798,6 @@ class EPLabWindow(QMainWindow):
                 style = Qt.ToolButtonTextBesideIcon
             tool_bar.setToolButtonStyle(style)
 
-        print(self.width())
         super().resizeEvent(event)
 
     @pyqtSlot()
