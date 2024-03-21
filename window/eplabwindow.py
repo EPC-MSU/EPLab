@@ -73,6 +73,7 @@ class EPLabWindow(QMainWindow):
     DEFAULT_POS_X: int = 50
     DEFAULT_POS_Y: int = 50
     FILENAME_FOR_AUTO_SETTINGS: str = os.path.join(ut.get_dir_name(), "eplab_settings_for_auto_save_and_read.ini")
+    INIT_HEIGHT: int = 600
     MIN_WIDTH_IN_LINUX: int = 700
     MIN_WIDTH_IN_WINDOWS: int = 650
     measurers_connected: pyqtSignal = pyqtSignal(bool)
@@ -117,6 +118,7 @@ class EPLabWindow(QMainWindow):
         self._load_translation(english)
         self._init_ui()
         self._adjust_critical_width()
+        self._set_init_position()
         self._connect_scale_change_signal()
         self.measurers_connected.connect(self.handle_connection)
         self._connection_checker: ConnectionChecker = ConnectionChecker(self._auto_settings)
@@ -689,11 +691,6 @@ class EPLabWindow(QMainWindow):
         loadUi(os.path.join(os.path.dirname(ut.DIR_MEDIA), "gui", "mainwindow.ui"), self)
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
-        if system().lower() == "windows":
-            self.setMinimumWidth(EPLabWindow.MIN_WIDTH_IN_WINDOWS)
-        else:
-            self.setMinimumWidth(EPLabWindow.MIN_WIDTH_IN_LINUX)
-        self.move(EPLabWindow.DEFAULT_POS_X, EPLabWindow.DEFAULT_POS_Y)
 
         self._board_window: BoardWidget = BoardWidget(self)
         self._parameters_widgets: Dict[EyePointProduct.Parameter, ParameterWidget] = {}
@@ -956,6 +953,19 @@ class EPLabWindow(QMainWindow):
         self._shortcut_down.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(False))
         self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key_Up), self)
         self._shortcut_up.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(True))
+
+    def _set_init_position(self) -> None:
+        """
+        Method moves the window to the desired position and sets the initial dimensions.
+        """
+
+        if system().lower() == "windows":
+            self.setMinimumWidth(EPLabWindow.MIN_WIDTH_IN_WINDOWS)
+            width = EPLabWindow.CRITICAL_WIDTH_FOR_WINDOWS_RU
+        else:
+            self.setMinimumWidth(EPLabWindow.MIN_WIDTH_IN_LINUX)
+            width = EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_RU
+        self.setGeometry(EPLabWindow.DEFAULT_POS_X, EPLabWindow.DEFAULT_POS_Y, width, EPLabWindow.INIT_HEIGHT)
 
     def _set_msystem_settings(self, settings: MeasurementSettings) -> None:
         """

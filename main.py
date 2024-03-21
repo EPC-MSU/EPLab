@@ -44,7 +44,6 @@ def launch_eplab(app: QApplication, args: Namespace) -> None:
     """
 
     window = EPLabWindow(EyePointProduct(ut.read_json(args.config)), args.test, args.ref, args.en, args.plan_path)
-    window.resize(1200, 600)
     window.show()
     app.exec()
 
