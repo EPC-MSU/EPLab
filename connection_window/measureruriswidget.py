@@ -10,9 +10,11 @@ from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QMessageBox, QPushBu
 import connection_window.utils as ut
 from connection_window.productname import MeasurerType
 from connection_window.urichecker import URIChecker
+from window.scaler import update_scale_of_class
 from window.utils import DIR_MEDIA, show_message
 
 
+@update_scale_of_class
 class MeasurerURIsWidget(QWidget):
     """
     Class for widget to select URLs for measurers.
@@ -179,6 +181,7 @@ class MeasurerURIsWidget(QWidget):
             combo_box.textActivated.connect(self.handle_text_activated)
             combo_box.lineEdit().textEdited.connect(self.handle_text_edited)
             combo_box.installEventFilter(self)
+            setattr(self, f"combo_box_{index}", combo_box)  # need to scale widget
             grid_layout.addWidget(combo_box, index, 1)
             self.combo_boxes_measurers.append(combo_box)
 

@@ -91,7 +91,7 @@ def update_scale(widget: QWidget) -> None:
 
     scale_factor = get_scale_factor()
     for child_widget in vars(widget).values():
-        if isinstance(child_widget, (QCheckBox, QComboBox, QDialogButtonBox, QDoubleSpinBox, QGroupBox, QLabel,
+        if isinstance(child_widget, (QCheckBox, QDialogButtonBox, QDoubleSpinBox, QGroupBox, QLabel,
                                      QLineEdit, QProgressBar, QPushButton, QSpinBox, QTextBrowser, QToolBar,
                                      PinIndexWidget)):
             if isinstance(child_widget, QToolBar):
@@ -100,6 +100,10 @@ def update_scale(widget: QWidget) -> None:
                         scale_font_on_widget(action, font_size)
             scale_widget(child_widget, font_size, scale_factor)
             child_widget.adjustSize()
+        elif isinstance(child_widget, QComboBox):
+            if child_widget.isEditable():
+                scale_widget(child_widget.lineEdit(), font_size, scale_factor)
+            scale_widget(child_widget, font_size, scale_factor)
         elif isinstance(child_widget, LowSettingsPanel):
             scale_low_settings_panel(child_widget, font_size)
 

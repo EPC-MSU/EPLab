@@ -9,9 +9,11 @@ from PyQt5.QtGui import QFocusEvent, QIcon, QPixmap
 from PyQt5.QtWidgets import QComboBox, QGroupBox, QHBoxLayout, QLabel, QMessageBox, QPushButton, QVBoxLayout
 import connection_window.utils as ut
 from connection_window.urichecker import URIChecker
+from window.scaler import update_scale_of_class
 from window.utils import DIR_MEDIA, show_message
 
 
+@update_scale_of_class
 class MuxWidget(QGroupBox):
     """
     Class for widget to show list of COM-ports for multiplexer.
