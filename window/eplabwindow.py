@@ -314,7 +314,7 @@ class EPLabWindow(QMainWindow):
         self._player.set_work_mode(mode)
         # Comment is only for test and write mode
         self._comment_widget.set_work_mode(mode)
-        self.search_optimal_action.setEnabled(mode in (WorkMode.COMPARE, WorkMode.WRITE))
+        self._disable_optimal_parameter_searcher(mode)
         if mode is WorkMode.COMPARE and len(self._msystem.measurers) < 2:
             # Remove reference curve in case we have only one IVMeasurer in compare mode
             self._remove_ref_curve()
@@ -497,15 +497,19 @@ class EPLabWindow(QMainWindow):
             ut.clear_layout(layout)
             layout.addWidget(widget)
 
-    def _disable_optimal_parameter_searcher(self) -> None:
+    def _disable_optimal_parameter_searcher(self, mode: WorkMode = None) -> None:
         """
         Method disables searcher of the optimal parameters. Searcher can work only for IVMeasurerIVM10.
         """
 
         for measurer in self._msystem.measurers:
-            if not isinstance(measurer, (IVMeasurerIVM10, IVMeasurerVirtual)):
+            if isinstance(measurer, (IVMeasurerASA, IVMeasurerVirtualASA)):
                 self.search_optimal_action.setEnabled(False)
                 return
+
+        if mode is None:
+            mode = self.work_mode
+        self.search_optimal_action.setEnabled(mode in (WorkMode.COMPARE, WorkMode.WRITE))
 
     def _disconnect_measurers(self) -> None:
         self._timer.stop()
