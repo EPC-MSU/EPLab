@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>675</width>
-    <height>350</height>
+    <width>1207</width>
+    <height>551</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -227,7 +227,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>675</width>
+     <width>1207</width>
      <height>21</height>
     </rect>
    </property>
@@ -732,39 +732,6 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
-   </property>
-  </action>
-  <action name="add_cursor_action">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>../media/add_label.png</normaloff>../media/add_label.png</iconset>
-   </property>
-   <property name="text">
-    <string>Добавить метку</string>
-   </property>
-   <property name="iconText">
-    <string>Добавить метку</string>
-   </property>
-   <property name="toolTip">
-    <string>Добавить метку</string>
-   </property>
-  </action>
-  <action name="remove_cursor_action">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>../media/minus_label.png</normaloff>../media/minus_label.png</iconset>
-   </property>
-   <property name="text">
-    <string>Удалить метку</string>
-   </property>
-   <property name="iconText">
-    <string>Удалить метку</string>
    </property>
   </action>
   <action name="hide_curve_a_action">

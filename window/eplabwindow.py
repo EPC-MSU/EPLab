@@ -246,10 +246,10 @@ class EPLabWindow(QMainWindow):
 
         scale_factor = get_scale_factor()
         for width in ("CRITICAL_WIDTH_FOR_LINUX_EN", "CRITICAL_WIDTH_FOR_LINUX_RU", "CRITICAL_WIDTH_FOR_WINDOWS_EN",
-                      "CRITICAL_WIDTH_FOR_WINDOWS_RU"):
+                      "CRITICAL_WIDTH_FOR_WINDOWS_RU", "MIN_WIDTH_IN_LINUX", "MIN_WIDTH_IN_WINDOWS"):
             width_value = getattr(self, width, None)
             if width_value is not None:
-                setattr(self, width, scale_factor * width_value)
+                setattr(self, width, int(scale_factor * width_value))
 
     def _adjust_plot_params(self, settings: MeasurementSettings) -> None:
         """

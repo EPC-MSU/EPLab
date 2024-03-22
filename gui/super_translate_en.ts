@@ -218,16 +218,6 @@ auto-selection, V</translation>
         <translation>Optimal search of parameters</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="730"/>
-        <source>Добавить метку</source>
-        <translation>Add marker</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="748"/>
-        <source>Удалить метку</source>
-        <translation>Delete marker</translation>
-    </message>
-    <message>
         <location filename="mainwindow.ui" line="764"/>
         <source>Скрыть канал А</source>
         <translation>Hide curve A</translation>
@@ -392,6 +382,26 @@ auto-selection, V</translation>
         <translation>DISCONNECTED</translation>
     </message>
     <message>
+        <location filename="../window/eplabwindow.py" line="712"/>
+        <source>Добавить метку</source>
+        <translation>Add marker</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="713"/>
+        <source>Экспортировать сигнатуры в файл</source>
+        <translation>Export signatures to file</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="714"/>
+        <source>Удалить все метки</source>
+        <translation>Delete all markers</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="715"/>
+        <source>Удалить метку</source>
+        <translation>Delete marker</translation>
+    </message>
+    <message>
         <location filename="../window/eplabwindow.py" line="817"/>
         <source>Ошибка</source>
         <translation>Error</translation>
@@ -485,16 +495,6 @@ auto-selection, V</translation>
         <location filename="../window/eplabwindow.py" line="1918"/>
         <source>Ошибка при установке настроек устройства.</source>
         <translation>Error occurred while configuring device settings.</translation>
-    </message>
-    <message>
-        <location filename="../window/eplabwindow.py" line="1978"/>
-        <source>Удалить метку</source>
-        <translation>Delete marker</translation>
-    </message>
-    <message>
-        <location filename="../window/eplabwindow.py" line="1982"/>
-        <source>Удалить все метки</source>
-        <translation>Delete all markers</translation>
     </message>
     <message>
         <location filename="../window/measuredpinschecker.py" line="123"/>
