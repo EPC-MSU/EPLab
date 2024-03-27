@@ -707,8 +707,9 @@ class EPLabWindow(QMainWindow):
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
 
-        self._iv_window: IVViewer = IVViewer(self, grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
-                                             solid_axis_enabled=False, axis_label_enabled=False)
+        self._iv_window: IVViewer = IVViewer(self.main_widget, grid_color=QColor(255, 255, 255),
+                                             back_color=QColor(0, 0, 0), solid_axis_enabled=False,
+                                             axis_label_enabled=False)
         self._iv_window.setFocusPolicy(Qt.ClickFocus)
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
         self._iv_window.plot.default_path_changed.connect(self.set_dir_chosen_by_user)
