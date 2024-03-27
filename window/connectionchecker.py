@@ -167,17 +167,19 @@ def analyze_connection_params(uris: List[Optional[str]], product_name: Optional[
 
     not_empty_uris = cw.utils.get_unique_uris(list(filter(lambda x: bool(x), uris)))
     try:
-        default_product_name = cw.ProductName.get_default_product_name_for_uris(not_empty_uris)
+        default_product_names = cw.ProductName.get_default_product_name_for_uris(not_empty_uris)
     except ValueError:
-        default_product_name = None
+        default_product_names = []
 
-    if default_product_name and product_name:
-        if cw.ProductName.check_replaceability(default_product_name, product_name):
-            correct_product_name = product_name
+    if default_product_names and product_name:
+        for default_product_name in default_product_names:
+            if cw.ProductName.check_replaceability(default_product_name, product_name):
+                correct_product_name = product_name
+                break
         else:
-            correct_product_name = default_product_name
-    elif default_product_name and not product_name:
-        correct_product_name = default_product_name
+            correct_product_name = default_product_names[0]
+    elif default_product_names and not product_name:
+        correct_product_name = default_product_names[0]
     else:
         correct_product_name = None
         not_empty_uris = []
@@ -185,7 +187,23 @@ def analyze_connection_params(uris: List[Optional[str]], product_name: Optional[
     while len(not_empty_uris) < 2:
         not_empty_uris.append(None)
 
+    not_empty_uris = change_virtual_to_virtualasa_for_h10(not_empty_uris, correct_product_name)
     return not_empty_uris, correct_product_name
+
+
+def change_virtual_to_virtualasa_for_h10(uris: List[Optional[str]], product_name: Optional[cw.ProductName]
+                                         ) -> List[Optional[str]]:
+    """
+    :param uris: list of URIs for connecting measurers;
+    :param product_name: product name for measurers.
+    :return: corrected list of URIs.
+    """
+
+    if product_name == cw.ProductName.EYEPOINT_H10:
+        for i, uri in enumerate(uris):
+            if uri and uri.lower() == "virtual":
+                uris[i] = "virtualasa"
+    return uris
 
 
 def close_devices(*devices: Union[IVMeasurerBase, AnalogMultiplexerBase]) -> None:

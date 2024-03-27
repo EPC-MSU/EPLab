@@ -707,7 +707,7 @@ class EPLabWindow(QMainWindow):
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
 
-        self._iv_window: IVViewer = IVViewer(grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
+        self._iv_window: IVViewer = IVViewer(self, grid_color=QColor(255, 255, 255), back_color=QColor(0, 0, 0),
                                              solid_axis_enabled=False, axis_label_enabled=False)
         self._iv_window.setFocusPolicy(Qt.ClickFocus)
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
@@ -716,7 +716,8 @@ class EPLabWindow(QMainWindow):
         self._iv_window.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),
                                              export_ivc=qApp.translate("t", "Экспортировать сигнатуры в файл"),
                                              remove_all_cursors=qApp.translate("t", "Удалить все метки"),
-                                             remove_cursor=qApp.translate("t", "Удалить метку"))
+                                             remove_cursor=qApp.translate("t", "Удалить метку"),
+                                             save_screenshot=qApp.translate("MainWindow", "Сохранить скриншот"))
         self._iv_window.plot.set_path_to_directory(self.dir_chosen_by_user)
         self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
         self.current_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_CURRENT)

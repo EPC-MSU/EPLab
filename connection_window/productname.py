@@ -75,28 +75,28 @@ class ProductName(Enum):
         return product_name
 
     @classmethod
-    def get_default_product_name_for_uris(cls, uris: List[str]) -> Optional["ProductName"]:
+    def get_default_product_name_for_uris(cls, uris: List[str]) -> List["ProductName"]:
         """
         :param uris: list of URIs.
-        :return: name of a product whose measurers may have given URIs.
+        :return: names of a products whose measurers may have given URIs.
         """
 
         from connection_window.urichecker import URIChecker
 
-        product_name = None
+        product_names = []
         not_empty_uris = list(filter(lambda x: bool(x), uris))
         if len(not_empty_uris) == 1:
             uri = not_empty_uris[0]
             if URIChecker.check_asa(uri):
-                product_name = cls.EYEPOINT_H10
-            elif URIChecker.check_ivm10(uri):
-                product_name = cls.EYEPOINT_A2
+                product_names.append(cls.EYEPOINT_H10)
+            if URIChecker.check_ivm10(uri):
+                product_names.append(cls.EYEPOINT_A2)
         elif len(not_empty_uris) == 2 and len(list(filter(URIChecker.check_ivm10, not_empty_uris))) == 2:
-            product_name = cls.EYEPOINT_U22
+            product_names.append(cls.EYEPOINT_U22)
 
-        if product_name is None:
+        if not product_names:
             raise ValueError("Unknown default name of product")
-        return product_name
+        return product_names
 
     @classmethod
     def get_measurer_type_by_product_name(cls, product_name: "ProductName") -> Optional[MeasurerType]:
