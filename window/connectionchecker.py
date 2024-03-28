@@ -289,8 +289,8 @@ def create_measurers(*uris: str, force_open: Optional[bool] = False
             bad_firmwares.append(text)
             bad_firmwares_uris.append((i, uri))
             measurer = None
-        except Exception:
-            logger.error("An error occurred when connecting the IV-measurer to the URI '%s'", uri)
+        except Exception as exc:
+            logger.error("An error occurred when connecting the IV-measurer to the URI '%s': %s", uri, exc)
             bad_uris.append(uri)
             measurer = None
         measurers.append(measurer)
