@@ -90,9 +90,10 @@ class MeasurerSettingsWindow(QDialog):
         tool_tip = data.get(f"tooltip_{self.lang}")
         if tool_tip:
             button.setToolTip(tool_tip)
+
         for member_name, member in getmembers(self._measurer):
             if member_name == data.get("func", None) and ismethod(member):
-                button.clicked.connect(lambda: self.run_command(member, member_name, button_name))
+                button.clicked.connect(lambda: self.run_command(member, member_name, data))
                 return button
 
         return None
@@ -354,21 +355,25 @@ class MeasurerSettingsWindow(QDialog):
         return value
 
     @pyqtSlot()
-    def run_command(self, command_to_run: Callable[[], Any], command_name: str, user_readable_command_name: str
-                    ) -> None:
+    def run_command(self, command_to_run: Callable[[], Any], command_name: str, data: Dict[str, Any]) -> None:
         """
         Slot runs special commands for IV-measurers connected to buttons.
         :param command_to_run: command to run;
         :param command_name: name of command to run;
-        :param user_readable_command_name: user readable name of command to run.
+        :param data: dictionary with data for the command to be executed for the IV-measurer.
         """
 
+        friendly_name = data.get(f"label_{self.lang}")
         try:
-            command_to_run()
+            result = command_to_run()
+            if "required_result" in data and result != data["required_result"]:
+                text = data.get(f"error_message_{self.lang}",
+                                qApp.translate("dialogs", "Команда '{}' завершилась неудачно.").format(friendly_name))
+                ut.show_message(qApp.translate("dialogs", "Ошибка"), text)
         except Exception:
             logger.error("Failed to execute command %s for measurer %s", command_name, self._measurer.name)
-            text = qApp.translate("dialogs", "Не удалось выполнить команду '{}'.")
-            ut.show_message(qApp.translate("dialogs", "Ошибка"), text.format(user_readable_command_name))
+            text = qApp.translate("dialogs", "Не удалось выполнить команду '{}'.").format(friendly_name)
+            ut.show_message(qApp.translate("dialogs", "Ошибка"), text)
 
     def set_parameters(self) -> None:
         """

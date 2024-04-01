@@ -756,17 +756,22 @@ auto-selection, V</translation>
         <translation>No settings</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="370"/>
-        <source>Не удалось выполнить команду &apos;{}&apos;.</source>
-        <translation>Failed to execute command &apos;{}&apos;.</translation>
+        <location filename="../dialogs/measurersettingswindow.py" line="371"/>
+        <source>Команда &apos;{}&apos; завершилась неудачно.</source>
+        <translation>Command &apos;{}&apos; failed.</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="371"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="372"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="395"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="375"/>
+        <source>Не удалось выполнить команду &apos;{}&apos;.</source>
+        <translation>Failed to execute command &apos;{}&apos;.</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/measurersettingswindow.py" line="400"/>
         <source>Не удалось задать настройки для измерителя.</source>
         <translation>Failed to set settings in measurer.</translation>
     </message>
