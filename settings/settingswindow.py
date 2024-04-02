@@ -163,7 +163,7 @@ class SettingsWindow(QDialog):
             except (InvalidParameterValueError, MissingParameterError) as exc:
                 error_message = qApp.translate("settings", "Проверьте конфигурационный файл '{}'.").format(
                     settings_path)
-                ut.show_message(qApp.translate("settings", "Ошибка"), f"{exc}\n{error_message}")
+                ut.show_message(qApp.translate("t", "Ошибка"), f"{exc}\n{error_message}")
                 return
 
             self._settings_directory = os.path.dirname(settings_path)

@@ -869,11 +869,6 @@ auto-selection, V</translation>
         <translation>Check the configuration file &apos;{}&apos;.</translation>
     </message>
     <message>
-        <location filename="../settings/settingswindow.py" line="166"/>
-        <source>Ошибка</source>
-        <translation>Error</translation>
-    </message>
-    <message>
         <location filename="../settings/settingswindow.py" line="180"/>
         <source>Сохранить файл</source>
         <translation>Save file</translation>
