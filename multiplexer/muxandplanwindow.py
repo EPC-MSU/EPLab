@@ -28,7 +28,7 @@ def check_multiplexer(func: Callable[..., Any]):
 
     def wrapper(self, *args, **kwargs) -> Any:
         if not self.multiplexer:
-            return
+            return None
         return func(self, *args, **kwargs)
 
     return wrapper
