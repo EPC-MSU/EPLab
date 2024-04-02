@@ -17,8 +17,7 @@ def update_plan_for_measurement_system(func: Callable[..., Tuple[MeasurementPlan
     def wrapper(self, *args, **kwargs) -> Tuple[MeasurementPlan, bool]:
         plan, new_file_created = func(self, *args, **kwargs)
         board = Board(elements=plan.elements, image=plan.image if plan else None)
-        self.create_plan_with_measurer_and_mux(board)
-        return plan, new_file_created
+        return self.create_plan_with_measurer_and_mux(board), new_file_created
 
     return wrapper
 
