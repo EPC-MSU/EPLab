@@ -163,6 +163,7 @@ class MeasurementPlanWidget(TableWidget):
             pin_channel = self.item(index, 2).text()
             if pin_channel == channel and pin_module == module:
                 return index
+        return None
 
     def handle_current_pin_change(self, index: int) -> None:
         """
