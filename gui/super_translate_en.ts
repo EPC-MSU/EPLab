@@ -668,37 +668,37 @@ auto-selection, V</translation>
         <translation>Measurer type</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="172"/>
+        <location filename="../connection_window/measureruriswidget.py" line="174"/>
         <source>Канал #{}</source>
         <translation>Channel #{}</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="187"/>
+        <location filename="../connection_window/measureruriswidget.py" line="190"/>
         <source>Помощь</source>
         <translation>Help</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="196"/>
+        <location filename="../connection_window/measureruriswidget.py" line="199"/>
         <source>Обновить</source>
         <translation>Update</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="307"/>
+        <location filename="../connection_window/measureruriswidget.py" line="310"/>
         <source>Введите значение последовательного порта в формате {}.</source>
         <translation>Enter serial port value in format {}.</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="310"/>
+        <location filename="../connection_window/measureruriswidget.py" line="313"/>
         <source>Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.</source>
         <translation>Enter H10 server address in format xmlrpc://x.x.x.x.</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="336"/>
+        <location filename="../connection_window/measureruriswidget.py" line="339"/>
         <source>Введите разные порты.</source>
         <translation>Enter different ports.</translation>
     </message>
     <message>
-        <location filename="../connection_window/muxwidget.py" line="48"/>
+        <location filename="../connection_window/muxwidget.py" line="50"/>
         <source>Мультиплексор</source>
         <translation>Multiplexer</translation>
     </message>
