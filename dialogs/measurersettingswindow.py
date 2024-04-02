@@ -396,7 +396,7 @@ class MeasurerSettingsWindow(QDialog):
             self._measurer.set_settings()
         except Exception:
             logger.error("Failed to set settings in measurer '%s'", self._measurer.name)
-            ut.show_message(qApp.translate("dialogs", "Ошибка"),
+            ut.show_message(qApp.translate("t", "Ошибка"),
                             qApp.translate("dialogs", "Не удалось задать настройки для измерителя."))
 
 
