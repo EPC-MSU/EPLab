@@ -8,6 +8,9 @@ from window.utils import DIR_MEDIA
 
 @update_scale_of_class
 class LegendWidget(QToolBar):
+    """
+    Class with legend for curves that are displayed in the IVViewer window.
+    """
 
     ICON_SIZE: int = 20
 
