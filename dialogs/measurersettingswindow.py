@@ -3,6 +3,7 @@ File with class for dialog window with settings of measurer.
 """
 
 import logging
+from functools import partial
 from inspect import getmembers, ismethod
 from typing import Any, Callable, Dict, List, Optional, Union
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt, QTimer
@@ -93,7 +94,7 @@ class MeasurerSettingsWindow(QDialog):
 
         for member_name, member in getmembers(self._measurer):
             if member_name == data.get("func", None) and ismethod(member):
-                button.clicked.connect(lambda: self.run_command(member, member_name, data))
+                button.clicked.connect(partial(self.run_command, member, member_name, data))
                 return button
 
         return None
@@ -218,7 +219,7 @@ class MeasurerSettingsWindow(QDialog):
 
         info = data.get(f"label_{self.lang}", "")
         if not info:
-            return
+            return None
 
         text_browser = QTextBrowser()
         text_browser.setReadOnly(True)
@@ -371,7 +372,7 @@ class MeasurerSettingsWindow(QDialog):
                                 qApp.translate("dialogs", "Команда '{}' завершилась неудачно.").format(friendly_name))
                 ut.show_message(qApp.translate("dialogs", "Ошибка"), text)
         except Exception:
-            logger.error("Failed to execute command %s for measurer %s", command_name, self._measurer.name)
+            logger.error("Failed to execute command '%s' for measurer '%s'", command_name, self._measurer.name)
             text = qApp.translate("dialogs", "Не удалось выполнить команду '{}'.").format(friendly_name)
             ut.show_message(qApp.translate("dialogs", "Ошибка"), text)
 
