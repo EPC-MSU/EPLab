@@ -75,8 +75,9 @@ class ParameterWidget(QScrollArea):
         for option_name, button in self._option_buttons.items():
             if button.isChecked():
                 return option_name
+        return None
 
-    def get_checked_option_label(self) -> str:
+    def get_checked_option_label(self) -> Optional[str]:
         """
         :return: label of the checked option.
         """
@@ -84,6 +85,7 @@ class ParameterWidget(QScrollArea):
         for button in self._option_buttons.values():
             if button.isChecked():
                 return button.text()
+        return None
 
     @pyqtSlot(bool)
     def select_option(self, checked: bool) -> None:
