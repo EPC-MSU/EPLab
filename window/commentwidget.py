@@ -103,7 +103,7 @@ class CommentWidget(TableWidget):
 
         index = self.currentRow() if index is None else index
         item = self.item(index, 1)
-        if not item:
+        if item is None:
             return
 
         color = item.background().color().name()
@@ -144,12 +144,13 @@ class CommentWidget(TableWidget):
             self._change_row_color(index, pin)
         self.select_row_for_current_pin()
 
-    def _remove_row(self, index: int) -> None:
+    def _remove_row(self, row_to_remove: int, index: int) -> None:
         """
+        :param row_to_remove: row to be removed;
         :param index: index of the row to be deleted.
         """
 
-        super()._remove_row(index)
+        super()._remove_row(row_to_remove)
         if self.rowCount() > 0:
             self.set_pin_as_current()
             pin = self._main_window.measurement_plan.get_pin_with_index(index)
@@ -203,8 +204,8 @@ class CommentWidget(TableWidget):
         if self._main_window.measurement_plan.pins_number > self.rowCount():
             self._add_comment(index, pin.comment)
         elif self._main_window.measurement_plan.pins_number < self.rowCount():
-            row_to_remove = 0 if index is None else index
-            self._remove_row(row_to_remove)
+            row_to_remove = 0 if self.currentRow() is None else self.currentRow()
+            self._remove_row(row_to_remove, index)
         elif index is not None:
             self._update_comment(index, pin.comment)
         self._change_row_color(index, pin)
