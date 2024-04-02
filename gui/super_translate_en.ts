@@ -736,27 +736,27 @@ auto-selection, V</translation>
         <translation>Unknown measurer</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="325"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="324"/>
         <source>Нет настроек</source>
         <translation>No settings</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="346"/>
-        <source>Неверное значение для &apos;{}&apos;. Не удалось конвертировать &apos;{}&apos; в &apos;{}&apos;.</source>
-        <translation>Invalid value for &apos;{}&apos;. Failed to convert &apos;{}&apos; in &apos;{}&apos;.</translation>
-    </message>
-    <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="371"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="361"/>
         <source>Команда &apos;{}&apos; завершилась неудачно.</source>
         <translation>Command &apos;{}&apos; failed.</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="375"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="365"/>
         <source>Не удалось выполнить команду &apos;{}&apos;.</source>
         <translation>Failed to execute command &apos;{}&apos;.</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="400"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="387"/>
+        <source>Неверное значение для &apos;{}&apos;. Не удалось конвертировать &apos;{}&apos; в &apos;{}&apos;.</source>
+        <translation>Invalid value for &apos;{}&apos;. Failed to convert &apos;{}&apos; in &apos;{}&apos;.</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/measurersettingswindow.py" line="405"/>
         <source>Не удалось задать настройки для измерителя.</source>
         <translation>Failed to set settings in measurer.</translation>
     </message>
