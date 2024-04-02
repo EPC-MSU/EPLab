@@ -682,6 +682,7 @@ class EPLabWindow(QMainWindow):
             self._timer.start()  # add this task to event loop
         else:
             self._device_errors_handler.reset_error()
+            self._mux_and_plan_window.close_and_stop_plan_measurement()
             self._disconnect_measurers()
             self._connection_checker.run_check()
 
@@ -1619,6 +1620,7 @@ class EPLabWindow(QMainWindow):
         self._auto_settings.save_connection_params(measurer_1_port, measurer_2_port, mux_port, product)
 
         if connected:
+            self._mux_and_plan_window.set_connection_mode()
             self._connection_checker.stop_check()
 
     @pyqtSlot(ConnectionData)

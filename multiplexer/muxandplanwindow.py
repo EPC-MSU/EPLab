@@ -293,6 +293,14 @@ class MuxAndPlanWindow(QWidget):
 
         self.measurement_plan_widget.set_work_mode(new_work_mode)
 
+    def close_and_stop_plan_measurement(self) -> None:
+        """
+        Method closes dialog window and stops measurements according plan.
+        """
+
+        self._stop_plan_measurement()
+        self.close()
+
     @pyqtSlot()
     def create_report(self) -> None:
         """
@@ -403,9 +411,9 @@ class MuxAndPlanWindow(QWidget):
 
         self.multiplexer_pinout_widget.enable_widgets(False)
         self._parent.enable_widgets(False)
-        for action in (self._parent.connection_action, self._parent.open_file_action,
-                       self._parent.open_mux_window_action):
+        for action in (self._parent.connection_action, self._parent.open_file_action):
             action.setEnabled(False)
+        self._parent.open_mux_window_action.setEnabled(True)
         if self._parent.start_or_stop_entire_plan_measurement_action.isChecked():
             self._parent.start_or_stop_entire_plan_measurement_action.setEnabled(True)
 
