@@ -91,7 +91,7 @@ class Settings(SettingsHandler):
                     return key
             return "Compare"
 
-        params = {"auto_settings": {},
+        params = {"auto_transition": {},
                   "frequency": {"convert": lambda value: list(map(int, value))},
                   "hide_curve_a": {},
                   "hide_curve_b": {},
