@@ -343,8 +343,8 @@ class MeasurerSettingsWindow(QDialog):
         try:
             value = converter(text)
         except ValueError:
-            text = qApp.translate("dialogs", "Неверное значение для '{}'. Не удалось конвертировать '{}' в '{}'.").format(
-                data.get(f"parameter_name_{self.lang}"), text, data.get("value_type"))
+            text = qApp.translate("dialogs", "Неверное значение для '{}'. Не удалось конвертировать '{}' в '{}'."
+                                  ).format(data.get(f"parameter_name_{self.lang}"), text, data.get("value_type"))
             ut.show_message(qApp.translate("t", "Ошибка"), text)
             return None
 

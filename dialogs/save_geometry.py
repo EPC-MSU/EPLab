@@ -11,6 +11,9 @@ def update_widget_to_save_geometry(widget_cls: type) -> type:
     """
 
     class WidgetWithSavedGeometry(widget_cls):
+        """
+        A widget class that retains its position when closed.
+        """
 
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
