@@ -103,6 +103,9 @@ class CommentWidget(TableWidget):
 
         index = self.currentRow() if index is None else index
         item = self.item(index, 1)
+        if not item:
+            return
+
         color = item.background().color().name()
         selected_style = ("QTableView::item:selected {"
                           f"background-color: {color};"
