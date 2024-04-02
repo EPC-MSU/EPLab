@@ -150,10 +150,7 @@ class MeasurerSettingsWindow(QDialog):
             return None
 
         line_edit = QLineEdit()
-        if data.get("value_type") == "float":
-            validator = QRegExpValidator(QRegExp(r"^\d*\.\d*$"))
-            line_edit.setValidator(validator)
-        elif data.get("value_type") == "int":
+        if data.get("value_type") == "int":
             validator = QRegExpValidator(QRegExp(r"^\d+$"))
             line_edit.setValidator(validator)
         # Set current value
@@ -329,8 +326,7 @@ class MeasurerSettingsWindow(QDialog):
             v_box.addWidget(self.label, alignment=Qt.AlignHCenter)
         self.setLayout(v_box)
 
-    @staticmethod
-    def _process_line_edit(data: Dict[str, Any], text: str) -> Optional[float]:
+    def _process_line_edit(self, data: Dict[str, Any], text: str) -> Optional[float]:
         """
         Method processes the text in the line edit.
         :param data: data for parameter for which line edit is assigned;
@@ -347,6 +343,9 @@ class MeasurerSettingsWindow(QDialog):
         try:
             value = converter(text)
         except ValueError:
+            text = qApp.translate("dialogs", "Неверное значение для '{}'. Не удалось конвертировать '{}' в '{}'.").format(
+                data.get(f"parameter_name_{self.lang}"), text, data.get("value_type"))
+            ut.show_message(qApp.translate("t", "Ошибка"), text)
             return None
 
         if min_value > value:
@@ -370,11 +369,11 @@ class MeasurerSettingsWindow(QDialog):
             if "required_result" in data and result != data["required_result"]:
                 text = data.get(f"error_message_{self.lang}",
                                 qApp.translate("dialogs", "Команда '{}' завершилась неудачно.").format(friendly_name))
-                ut.show_message(qApp.translate("dialogs", "Ошибка"), text)
+                ut.show_message(qApp.translate("t", "Ошибка"), text)
         except Exception:
             logger.error("Failed to execute command '%s' for measurer '%s'", command_name, self._measurer.name)
             text = qApp.translate("dialogs", "Не удалось выполнить команду '{}'.").format(friendly_name)
-            ut.show_message(qApp.translate("dialogs", "Ошибка"), text)
+            ut.show_message(qApp.translate("t", "Ошибка"), text)
 
     def set_parameters(self) -> None:
         """
@@ -396,7 +395,7 @@ class MeasurerSettingsWindow(QDialog):
                     self._measurer.set_value_to_parameter(parameter_name, value)
             self._measurer.set_settings()
         except Exception:
-            logger.error("Failed to set settings in measurer %s", self._measurer.name)
+            logger.error("Failed to set settings in measurer '%s'", self._measurer.name)
             ut.show_message(qApp.translate("dialogs", "Ошибка"),
                             qApp.translate("dialogs", "Не удалось задать настройки для измерителя."))
 
