@@ -46,6 +46,7 @@ class ConnectionWindow(QDialog):
         """
 
         self.setWindowTitle(qApp.translate("connection_window", "Настройка подключения"))
+        self.setFocusPolicy(Qt.ClickFocus)
 
         self.widget_measurer_type: MeasurerTypeWidget = MeasurerTypeWidget(self._initial_product_name)
         self.widget_measurer_uris: MeasurerURIsWidget = MeasurerURIsWidget(self._initial_ports)

@@ -179,7 +179,6 @@ class MeasurerURIsWidget(QWidget):
             combo_box.setMinimumWidth(MeasurerURIsWidget.COMBO_BOX_MIN_WIDTH)
             combo_box.setEditable(True)
             combo_box.textActivated.connect(self.handle_text_activated)
-            combo_box.lineEdit().textEdited.connect(self.handle_text_edited)
             combo_box.installEventFilter(self)
             setattr(self, f"combo_box_{index}", combo_box)  # need to scale widget
             grid_layout.addWidget(combo_box, index, 1)
