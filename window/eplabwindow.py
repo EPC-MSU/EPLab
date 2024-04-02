@@ -502,10 +502,11 @@ class EPLabWindow(QMainWindow):
         Method disables searcher of the optimal parameters. Searcher can work only for IVMeasurerIVM10.
         """
 
-        for measurer in self._msystem.measurers:
-            if isinstance(measurer, (IVMeasurerASA, IVMeasurerVirtualASA)):
-                self.search_optimal_action.setEnabled(False)
-                return
+        if self._msystem:
+            for measurer in self._msystem.measurers:
+                if isinstance(measurer, (IVMeasurerASA, IVMeasurerVirtualASA)):
+                    self.search_optimal_action.setEnabled(False)
+                    return
 
         if mode is None:
             mode = self.work_mode
