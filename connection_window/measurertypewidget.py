@@ -4,7 +4,7 @@ File with class to select measurer type.
 
 import os
 from functools import partial
-from typing import Dict
+from typing import Dict, Optional
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QTimer
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGridLayout, QLabel, QRadioButton, QScrollArea, QVBoxLayout, QWidget
@@ -80,7 +80,7 @@ class MeasurerTypeWidget(QWidget):
         radio_button = self.radio_buttons_products[self._initial_product_name]
         self.scroll_area.ensureWidgetVisible(radio_button)
 
-    def get_product_name(self) -> ProductName:
+    def get_product_name(self) -> Optional[ProductName]:
         """
         :return: checked product name.
         """
@@ -88,6 +88,7 @@ class MeasurerTypeWidget(QWidget):
         for product_name, radio_button in self.radio_buttons_products.items():
             if radio_button.isChecked():
                 return product_name
+        return None
 
     @pyqtSlot(MeasurerType, bool)
     def select_measurer_type(self, measurer_type: MeasurerType, radio_button_status: bool) -> None:
