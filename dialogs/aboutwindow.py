@@ -64,7 +64,7 @@ class AboutWindow(QDialog):
         Method initializes widgets on dialog window.
         """
 
-        self.setWindowTitle(qApp.translate("dialogs", "О программе"))
+        self.setWindowTitle(qApp.translate("MainWindow", "О программе"))
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
 

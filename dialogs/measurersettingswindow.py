@@ -312,7 +312,7 @@ class MeasurerSettingsWindow(QDialog):
                     v_box.addWidget(widget)
             self.button_ok = QPushButton("OK")
             self.button_ok.clicked.connect(self.accept)
-            self.button_cancel = QPushButton(qApp.translate("dialogs", "Отмена"))
+            self.button_cancel = QPushButton(qApp.translate("t", "Отмена"))
             self.button_cancel.clicked.connect(self.reject)
 
             h_layout = QHBoxLayout()

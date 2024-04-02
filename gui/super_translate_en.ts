@@ -716,19 +716,9 @@ auto-selection, V</translation>
         <translation>on our website.</translation>
     </message>
     <message>
-        <location filename="../dialogs/aboutwindow.py" line="67"/>
-        <source>О программе</source>
-        <translation>About product</translation>
-    </message>
-    <message>
         <location filename="../dialogs/aboutwindow.py" line="87"/>
         <source>Копировать</source>
         <translation>Copy</translation>
-    </message>
-    <message>
-        <location filename="../dialogs/languageselectionwindow.py" line="30"/>
-        <source>Выбор языка</source>
-        <translation>Language selection</translation>
     </message>
     <message>
         <location filename="../dialogs/languageselectionwindow.py" line="32"/>
@@ -736,34 +726,29 @@ auto-selection, V</translation>
         <translation>Choose language:</translation>
     </message>
     <message>
-        <location filename="../dialogs/languageselectionwindow.py" line="39"/>
-        <source>Отмена</source>
-        <translation>Cancel</translation>
-    </message>
-    <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="236"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="235"/>
         <source>Настройки. </source>
         <translation>Settings. </translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="238"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="237"/>
         <source>Неизвестный измеритель</source>
         <translation>Unknown measurer</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="326"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="325"/>
         <source>Нет настроек</source>
         <translation>No settings</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/measurersettingswindow.py" line="346"/>
+        <source>Неверное значение для &apos;{}&apos;. Не удалось конвертировать &apos;{}&apos; в &apos;{}&apos;.</source>
+        <translation>Invalid value for &apos;{}&apos;. Failed to convert &apos;{}&apos; in &apos;{}&apos;.</translation>
     </message>
     <message>
         <location filename="../dialogs/measurersettingswindow.py" line="371"/>
         <source>Команда &apos;{}&apos; завершилась неудачно.</source>
         <translation>Command &apos;{}&apos; failed.</translation>
-    </message>
-    <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="372"/>
-        <source>Ошибка</source>
-        <translation>Error</translation>
     </message>
     <message>
         <location filename="../dialogs/measurersettingswindow.py" line="375"/>
