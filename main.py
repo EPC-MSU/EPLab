@@ -4,7 +4,8 @@ import sys
 import traceback
 from argparse import ArgumentParser, Namespace
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import qApp, QApplication, QDesktopWidget, QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import (qApp, QApplication, QDesktopWidget, QLabel, QMainWindow, QMessageBox, QPushButton,
+                             QVBoxLayout, QWidget)
 from epcore.product import EyePointProduct
 from window import utils as ut
 from window.eplabwindow import EPLabWindow
@@ -20,7 +21,7 @@ if "_PYIBoot_SPLASH" in os.environ and importlib.util.find_spec("pyi_splash"):
     pyi_splash.close()
 
 
-def exception_hook(exc_type: Exception, exc_value: Exception, exc_traceback: "traceback"):
+def exception_hook(exc_type: Exception, exc_value: Exception, exc_traceback: "traceback") -> None:
     """
     Function handles unexpected errors.
     :param exc_type: exception class;
@@ -30,7 +31,7 @@ def exception_hook(exc_type: Exception, exc_value: Exception, exc_traceback: "tr
 
     traceback.print_exception(exc_type, exc_value, exc_traceback)
     traceback_text = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-    ut.show_message("Error", str(exc_value), traceback_text)
+    ut.show_message("Error", str(exc_value), detailed_text=traceback_text, icon=QMessageBox.Critical)
     # sys.exit(1)
 
 

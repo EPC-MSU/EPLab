@@ -512,22 +512,37 @@ auto-selection, V</translation>
         <translation>Incorrect format of point number. Point number must be integer.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="159"/>
-        <source>Подключен мультиплексор с {} выходами. План с {} точками не совместим с данным мультиплексором. Количество точек в плане должно совпадать с количеством выходов мультиплексора. Для тестирования данного плана подключите устройство без мультиплексора.</source>
-        <translation>A multiplexer with {} outputs is connected. Plan with {} points is not compatible with this multiplexer. The number of points in the plan must match the number of multiplexer outputs. To test this plan, connect a device without a multiplexer.</translation>
+        <location filename="../window/plancompatibility.py" line="17"/>
+        <source>В плане тестирования заданы неверные номера выходов мультиплексора.</source>
+        <translation>The test plan contains incorrect multiplexer output numbers.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="164"/>
-        <source>Подключен мультиплексор с {} выходами. План с {} точками не совместим с данным мультиплексором. Количество точек в плане должно совпадать с количеством выходов мультиплексора. Для тестирования данного плана подключите устройство без мультиплексора. Мультиплексор будет закрыт.</source>
-        <translation>A multiplexer with {} outputs is connected. Plan with {} points is not compatible with this multiplexer. The number of points in the plan must match the number of multiplexer outputs. To test this plan, connect a device without a multiplexer. The multiplexer will be closed.</translation>
+        <location filename="../window/plancompatibility.py" line="27"/>
+        <source>В плане тестирования не заданы номера каналов мультиплексора. Вероятно, вы открыли план, созданный с помощью ручного устройства на устройстве с мультиплексором. Мультиплексор может использоваться только с планами тестирования, в которых заданы номера каналов.</source>
+        <translation>The measurement plan does not specify multiplexer output numbers. You probably opened a plan created using a manual device on a multiplexer device. The multiplexer can only be used with measurement plans that specify output numbers.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="180"/>
+        <location filename="../window/plancompatibility.py" line="47"/>
+        <source>Подключен мультиплексор с {} выходами. План с {} точками не совместим с данным мультиплексором. Количество точек в плане должно совпадать с количеством выходов мультиплексора.</source>
+        <translation>A multiplexer with {} outputs is connected. Plan with {} points is not compatible with this multiplexer. The number of points in the plan must match the number of multiplexer outputs.</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="202"/>
+        <source>Нажмите 'ОК' и откройте подходящий план тестирования.</source>
+        <translation>Click 'OK' and open the appropriate measurement plan.</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="204"/>
+        <source>Мультиплексор будет закрыт.</source>
+        <translation>The multiplexer will be closed.</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="215"/>
         <source>План тестирования {}нельзя загрузить, поскольку он не соответствует режиму работы EPLab.</source>
         <translation>Test plan {}cannot be loaded because it does not correspond to the EPLab operating mode.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="183"/>
+        <location filename="../window/plancompatibility.py" line="218"/>
         <source>План тестирования {}не соответствует режиму работы EPLab и будет закрыт.</source>
         <translation>Test plan {}does not correspond to the EPLab work mode and will be closed.</translation>
     </message>

@@ -355,7 +355,7 @@ class EPLabWindow(QMainWindow):
                 ut.show_message(qApp.translate("t", "Информация"),
                                 qApp.translate("t", "Включен автопереход в режиме тестирования по плану. Но в "
                                                     "приложении нет некоторых сигнатур разрыва, поэтому автопереход "
-                                                    "может работать некорректно."))
+                                                    "может работать некорректно."), icon=QMessageBox.Information)
 
     def _check_plan_compatibility(self, plan: MeasurementPlan, is_new_plan: bool = False,
                                   filename: Optional[str] = None) -> None:
@@ -829,7 +829,7 @@ class EPLabWindow(QMainWindow):
                                                     "платы."))
             except Exception as exc:
                 ut.show_message(qApp.translate("t", "Ошибка"), qApp.translate("t", "Формат файла не подходит."),
-                                str(exc))
+                                detailed_text=str(exc))
         return board, filename
 
     def _read_curves_periodic_task(self) -> None:
@@ -1942,7 +1942,7 @@ class EPLabWindow(QMainWindow):
             self._auto_settings.save_measurement_settings(self._product.settings_to_options(settings))
         except ValueError as exc:
             ut.show_message(qApp.translate("t", "Ошибка"),
-                            qApp.translate("t", "Ошибка при установке настроек устройства."), str(exc))
+                            qApp.translate("t", "Ошибка при установке настроек устройства."), detailed_text=str(exc))
             self._update_scroll_areas_for_parameters(self._product.get_available_options(old_settings))
             self._set_msystem_settings(old_settings)
             old_options = self._product.settings_to_options(old_settings)

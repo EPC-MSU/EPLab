@@ -3,6 +3,7 @@ import math
 import os
 from typing import Generator, Optional, Tuple, Union
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QObject, QTimer
+from PyQt5.QtWidgets import QMessageBox
 from epcore.elements import IVCurve, MeasurementSettings
 from epcore.product import EyePointProduct, MeasurementParameterOption
 from dialogs import ProgressWindow
@@ -152,7 +153,7 @@ class BreakSignaturesSaver(QObject):
                                                          "<li>Разомкните щупы.</li>\n"
                                                          "<li>Нажмите 'Да'.</li>\n"
                                                          "<li>Дождитесь завершения процедуры.</li>\n</ul>"),
-                                     yes_button=True, no_button=True)
+                                     icon=QMessageBox.Information, yes_button=True, no_button=True)
             if not result:
                 self._request_new_settings()
                 self._start_settings_iteration()

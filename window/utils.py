@@ -46,7 +46,7 @@ def clear_layout(layout: QLayout) -> None:
         widget.deleteLater()
 
 
-def create_message_box(header: str, message: str, additional_info: str = None,
+def create_message_box(header: str, message: str, additional_info: str = None, detailed_info: str = None,
                        icon: QMessageBox.Icon = QMessageBox.Warning, no_button: bool = False,
                        cancel_button: bool = False, yes_button: bool = False) -> QMessageBox:
     """
@@ -54,6 +54,7 @@ def create_message_box(header: str, message: str, additional_info: str = None,
     :param header: header;
     :param message: message;
     :param additional_info: additional information for the message;
+    :param detailed_info: text to be displayed in the details area;
     :param icon: message box icon;
     :param no_button: if True, then No button will be shown;
     :param cancel_button: if True, then Cancel button will be shown;
@@ -70,6 +71,8 @@ def create_message_box(header: str, message: str, additional_info: str = None,
     message_box.setText(message)
     if additional_info:
         message_box.setInformativeText(additional_info)
+    if detailed_info:
+        message_box.setDetailedText(detailed_info)
     if yes_button:
         message_box.addButton(qApp.translate("t", "Да"), QMessageBox.AcceptRole)
     else:
@@ -165,13 +168,15 @@ def read_json(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
         return json.load(file)
 
 
-def show_message(header: str, message: str, additional_info: str = None, icon: QMessageBox.Icon = QMessageBox.Warning,
-                 no_button: bool = False, cancel_button: bool = False, yes_button: bool = False) -> int:
+def show_message(header: str, message: str, additional_info: str = None, detailed_text: str = None,
+                 icon: QMessageBox.Icon = QMessageBox.Warning, no_button: bool = False, cancel_button: bool = False,
+                 yes_button: bool = False) -> int:
     """
     Function shows message box.
     :param header: header;
     :param message: message;
     :param additional_info: additional information for the message;
+    :param detailed_text: text to be displayed in the details area;
     :param icon: message box icon;
     :param no_button: if True, then No button will be shown;
     :param cancel_button: if True, then Cancel button will be shown;
@@ -179,7 +184,8 @@ def show_message(header: str, message: str, additional_info: str = None, icon: Q
     :return: code of the button that the user clicked in the message box.
     """
 
-    message_box = create_message_box(header, message, additional_info, icon, no_button, cancel_button, yes_button)
+    message_box = create_message_box(header, message, additional_info, detailed_text, icon, no_button, cancel_button,
+                                     yes_button)
     return message_box.exec()
 
 

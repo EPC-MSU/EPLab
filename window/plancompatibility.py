@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, Union
 from PyQt5.QtCore import QCoreApplication as qApp
 from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MAX_CHANNEL_NUMBER
 from epcore.elements import Board, Element, MultiplexerOutput, Pin
@@ -6,6 +6,47 @@ from epcore.ivmeasurer import IVMeasurerBase
 from epcore.measurementmanager import MeasurementPlan, MeasurementSystem
 from epcore.product import EyePointProduct
 from window import utils as ut
+
+
+class InvalidPinsForMuxError(Exception):
+    """
+    The exception to throw when there are points in the measurement plan that have invalid outputs for the multiplexer.
+    """
+
+    def __init__(self) -> None:
+        self.text: str = qApp.translate("t", "В плане тестирования заданы неверные номера выходов мультиплексора.")
+
+
+class PinsWithoutMuxOutputsError(Exception):
+    """
+    The exception to throw when there are points in the measurement plan for which the multiplexer output is not
+    specified.
+    """
+
+    def __init__(self) -> None:
+        self.text: str = qApp.translate("t", "В плане тестирования не заданы номера каналов мультиплексора. Вероятно, "
+                                             "вы открыли план, созданный с помощью ручного устройства на устройстве с "
+                                             "мультиплексором. Мультиплексор может использоваться только с планами "
+                                             "тестирования, в которых заданы номера каналов.")
+
+
+class WrongPinsNumberForMuxError(Exception):
+    """
+    The exception to throw when the number of points in the measurement plan does not match the number of outputs in
+    the multiplexer.
+    """
+
+    def __init__(self, mux_outputs: int, plan: Optional[MeasurementPlan]) -> None:
+        """
+        :param mux_outputs:
+        :param plan:
+        """
+
+        super().__init__()
+        pins_number = 0 if plan is None else plan.pins_number
+        self.text: str = qApp.translate("t", "Подключен мультиплексор с {} выходами. План с {} точками не совместим с "
+                                             "данным мультиплексором. Количество точек в плане должно совпадать с "
+                                             "количеством выходов мультиплексора.").format(mux_outputs, pins_number)
 
 
 def update_plan_for_measurement_system(func: Callable[..., Tuple[MeasurementPlan, bool]]):
@@ -59,41 +100,42 @@ class PlanCompatibility:
             return self._measurement_system.multiplexers[0]
         return None
 
-    def _check_compatibility_with_mux(self, plan: MeasurementPlan) -> bool:
+    def _check_compatibility_with_mux(self, plan: MeasurementPlan) -> None:
         """
         Method checks the plan for compatibility with the multiplexer.
         :param plan: plan to check for compatibility.
-        :return: True if the plan is compatible, otherwise not.
         """
 
         multiplexer = self.multiplexer
         modules = len(multiplexer.get_chain_info())
+        if not plan or modules * MAX_CHANNEL_NUMBER != plan.pins_number:
+            raise WrongPinsNumberForMuxError(modules * MAX_CHANNEL_NUMBER, plan)
+
         channels = {module: {channel: [] for channel in range(1, MAX_CHANNEL_NUMBER + 1)}
                     for module in range(1, modules + 1)}
         empty_pins = []
         invalid_pins = []
-
-        if plan:
-            for element_index, element in enumerate(plan.elements):
-                for pin_index, pin in enumerate(element.pins):
-                    mux_output = pin.multiplexer_output
-
-                    if isinstance(mux_output, MultiplexerOutput):
-                        if multiplexer.is_correct_output(mux_output):
-                            channels[mux_output.module_number][mux_output.channel_number].append(
-                                (element_index, pin_index))
-                        else:
-                            invalid_pins.append((element_index, pin_index))
+        for element_index, element in enumerate(plan.elements):
+            for pin_index, pin in enumerate(element.pins):
+                mux_output = pin.multiplexer_output
+                if isinstance(mux_output, MultiplexerOutput):
+                    if multiplexer.is_correct_output(mux_output):
+                        channels[mux_output.module_number][mux_output.channel_number].append(
+                            (element_index, pin_index))
                     else:
-                        empty_pins.append((element_index, pin_index))
+                        invalid_pins.append((element_index, pin_index))
+                else:
+                    empty_pins.append((element_index, pin_index))
 
-        if len(empty_pins) == 0 and len(invalid_pins) == 0:
-            for channels_in_module in channels.values():
-                if not all(len(channels_) > 0 for channels_ in channels_in_module.values()):
-                    break
-            else:
-                return True
-        return False
+        if len(empty_pins) != 0:
+            raise PinsWithoutMuxOutputsError()
+
+        if len(invalid_pins) != 0:
+            raise InvalidPinsForMuxError()
+
+        for channels_in_module in channels.values():
+            if not all(len(channels_) > 0 for channels_ in channels_in_module.values()):
+                raise InvalidPinsForMuxError()
 
     def _check_compatibility_with_product(self, plan: MeasurementPlan) -> bool:
         """
@@ -148,25 +190,19 @@ class PlanCompatibility:
         board = Board(elements=[Element(pins=[Pin(x=x, y=y)])])
         return self.create_plan_with_measurer_and_mux(board)
 
-    def _display_incompatibility_with_mux(self, plan: MeasurementPlan, is_new_plan: bool) -> None:
+    @staticmethod
+    def _display_incompatibility_with_mux(exc: Union[InvalidPinsForMuxError, PinsWithoutMuxOutputsError,
+                                                     WrongPinsNumberForMuxError], is_new_plan: bool) -> None:
         """
-        :param plan: measurement plan that was checked for compatibility;
+        :param exc: exception;
         :param is_new_plan: if True, then the new measurement plan was checked for compatibility.
         """
 
         if is_new_plan:
-            error = qApp.translate("t", "Подключен мультиплексор с {} выходами. План с {} точками не совместим с "
-                                        "данным мультиплексором. Количество точек в плане должно совпадать с "
-                                        "количеством выходов мультиплексора. Для тестирования данного плана подключите "
-                                        "устройство без мультиплексора.")
+            error = qApp.translate("t", "Нажмите 'ОК' и откройте подходящий план тестирования.")
         else:
-            error = qApp.translate("t", "Подключен мультиплексор с {} выходами. План с {} точками не совместим с "
-                                        "данным мультиплексором. Количество точек в плане должно совпадать с "
-                                        "количеством выходов мультиплексора. Для тестирования данного плана подключите "
-                                        "устройство без мультиплексора. Мультиплексор будет закрыт.")
-        mux_pins = MAX_CHANNEL_NUMBER * len(self.multiplexer.get_chain_info())
-        error = error.format(mux_pins, plan.pins_number)
-        ut.show_message(qApp.translate("t", "Ошибка"), error)
+            error = qApp.translate("t", "Мультиплексор будет закрыт.")
+        ut.show_message(qApp.translate("t", "Ошибка"), exc.text, additional_info=error)
 
     @staticmethod
     def _display_incompatibility_with_product(is_new_plan: bool, filename: str) -> None:
@@ -216,11 +252,13 @@ class PlanCompatibility:
         if not self.multiplexer:
             return plan, new_plan_created
 
-        if self._check_compatibility_with_mux(plan):
+        try:
+            self._check_compatibility_with_mux(plan)
+        except (InvalidPinsForMuxError, PinsWithoutMuxOutputsError, WrongPinsNumberForMuxError) as exc:
+            if not (new_plan_created or not filename):
+                self._display_incompatibility_with_mux(exc, is_new_plan)
+        else:
             return plan, new_plan_created
-
-        if not (new_plan_created or not filename):
-            self._display_incompatibility_with_mux(plan, is_new_plan)
 
         if is_new_plan:
             plan = self._create_plan_for_mux()
