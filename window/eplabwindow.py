@@ -605,13 +605,13 @@ class EPLabWindow(QMainWindow):
                            self.pin_index_widget, self.save_point_action):
                 action.setEnabled(False)
         else:
-            enable = bool(self.work_mode is WorkMode.WRITE and
-                          not (self.measurement_plan and self.measurement_plan.multiplexer is not None))
+            enable = bool(self.work_mode is WorkMode.WRITE and self.measurement_plan.multiplexer is None)
             self.remove_point_action.setEnabled(enable)
             enable = self.work_mode is not WorkMode.COMPARE
             for action in (self.next_point_action, self.previous_point_action, self.pin_index_widget):
                 action.setEnabled(enable)
             self.save_point_action.setEnabled(self.work_mode != WorkMode.READ_PLAN)
+            self.set_enabled_save_point_action_at_test_mode()
 
     @staticmethod
     def _handle_event_on_obj(obj: QObject, event: QEvent) -> Optional[bool]:
@@ -1053,7 +1053,6 @@ class EPLabWindow(QMainWindow):
         self._mux_and_plan_window.update_info()
         self._comment_widget.update_info()
         self._add_callbacks_to_measurement_plan()
-        self._handle_current_pin_change()
         self._switch_work_mode(WorkMode.COMPARE)
         self._init_tolerance()
         with self._device_errors_handler:
@@ -1084,7 +1083,6 @@ class EPLabWindow(QMainWindow):
         """
 
         self._change_work_mode(mode)
-        self.set_enabled_save_point_action_at_test_mode()
 
         self.update_current_pin()
         self.work_mode_changed.emit(mode)
@@ -1559,7 +1557,6 @@ class EPLabWindow(QMainWindow):
         except Exception:
             self._device_errors_handler.all_ok = False
 
-        self.set_enabled_save_point_action_at_test_mode()
         self.update_current_pin()
         self._open_board_window_if_needed()
 
@@ -1590,7 +1587,6 @@ class EPLabWindow(QMainWindow):
                             qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
             return
 
-        self.set_enabled_save_point_action_at_test_mode()
         self.update_current_pin()
         self._open_board_window_if_needed()
 
@@ -1794,6 +1790,7 @@ class EPLabWindow(QMainWindow):
         index = self._measurement_plan.get_current_index()
         self._measurement_plan.remove_current_pin()
         self._board_window.remove_pin(index)
+        self._measured_pins_checker.remove_pin(index)
 
         self.update_current_pin()
 

@@ -63,7 +63,10 @@ class MeasuredPinsChecker(QObject):
             return
 
         pin = self.measurement_plan.get_pin_with_index(pin_index)
-        if pin is not None and self._check_pin(pin):
+        if pin is None:
+            self._empty_pins.discard(pin_index)
+            self._measured_pins.discard(pin_index)
+        elif self._check_pin(pin):
             self._empty_pins.discard(pin_index)
             self._measured_pins.add(pin_index)
         else:
@@ -130,6 +133,17 @@ class MeasuredPinsChecker(QObject):
         else:
             empty = False
         return empty
+
+    def remove_pin(self, pin_index: int) -> None:
+        """
+        :param pin_index: pin index that has been removed from the measurement plan.
+        """
+
+        if self.measurement_plan:
+            for index in range(pin_index, self.measurement_plan.pins_number + 1):
+                self._check_pin_with_index(index)
+
+        self._handle_measurement_plan_change(pin_index)
 
     def set_new_plan(self) -> None:
         """

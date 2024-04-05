@@ -206,7 +206,8 @@ def show_message_with_option(header: str, message: str, option_text: str, additi
     selected.
     """
 
-    message_box = create_message_box(header, message, additional_info, icon, no_button, cancel_button, yes_button)
+    message_box = create_message_box(header, message, additional_info, icon=icon, no_button=no_button,
+                                     cancel_button=cancel_button, yes_button=yes_button)
     layout = message_box.layout()
     item_with_ok_button = layout.itemAtPosition(2, 2)
     layout.removeItem(item_with_ok_button)
