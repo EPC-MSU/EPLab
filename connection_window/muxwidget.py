@@ -24,8 +24,13 @@ class MuxWidget(QGroupBox):
     COMBO_BOX_MIN_WIDTH: int = 200
     IMAGE_SIZE: int = 200
 
-    def __init__(self):
+    def __init__(self, initial_mux_uri: Optional[str]) -> None:
+        """
+        :param initial_mux_uri: multiplexer URI.
+        """
+
         super().__init__()
+        self._initial_uri: str = "none" if initial_mux_uri is None else initial_mux_uri
         self._uri_checker: URIChecker = URIChecker(True)
         self._init_ui()
 
@@ -108,7 +113,7 @@ class MuxWidget(QGroupBox):
         ports = ut.find_urpc_ports("epmux")
         ports.extend(["none", "virtual"])
         self.combo_boxes.addItems(ports)
-        self.combo_boxes.setCurrentText(ports[0])
+        self.combo_boxes.setCurrentText(self._initial_uri)
 
         self._uri_checker.color_widgets(self.combo_boxes)
 

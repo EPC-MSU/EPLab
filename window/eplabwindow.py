@@ -1507,6 +1507,15 @@ class EPLabWindow(QMainWindow):
 
         return self._msystem.measurers if self._msystem else []
 
+    def get_multiplexer_uri(self) -> Optional[str]:
+        """
+        :return: multiplexer URI.
+        """
+
+        if self._msystem and self._msystem.multiplexers:
+            return getattr(self._msystem.multiplexers[0], "_url")
+        return None
+
     def get_settings(self) -> Settings:
         """
         :return: current applied settings in different objects.
