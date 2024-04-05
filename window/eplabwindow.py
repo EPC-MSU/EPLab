@@ -1150,15 +1150,14 @@ class EPLabWindow(QMainWindow):
             (None, None, None)
         with self._device_errors_handler:
             if settings:
-                curves = {"reference": None if not ref_for_plan else ref_for_plan.ivc,
-                          "test": None if not test_for_plan else test_for_plan.ivc}
+                self._reference_curve = None if not ref_for_plan else ref_for_plan.ivc
+                self._test_curve = None if not test_for_plan else test_for_plan.ivc
                 self._set_msystem_settings(settings)
                 options = self._product.settings_to_options(settings)
                 self._set_options_to_ui(options)
             else:
-                curves = {"reference": None,
-                          "test": None}
-            self._update_curves(curves, self._msystem.measurers[0].get_settings())
+                self._reference_curve = None
+                self._test_curve = None
 
     def _update_curves(self, curves: Dict[str, Optional[IVCurve]] = None, settings: MeasurementSettings = None) -> None:
         """
