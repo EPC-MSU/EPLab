@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional, Tuple
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPointF, Qt, QTimer,
                           QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
-from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QVBoxLayout,
-                             QWidget)
+from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QStyle,
+                             QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
@@ -70,10 +70,8 @@ class EPLabWindow(QMainWindow):
     CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1415
     DEFAULT_COMPARATOR_MIN_CURRENT: float = 0.002
     DEFAULT_COMPARATOR_MIN_VOLTAGE: float = 0.6
-    DEFAULT_POS_X: int = 50
-    DEFAULT_POS_Y: int = 50
     FILENAME_FOR_AUTO_SETTINGS: str = os.path.join(ut.get_dir_name(), "eplab_settings_for_auto_save_and_read.ini")
-    INIT_HEIGHT: int = 600
+    INIT_HEIGHT: int = 730
     MIN_WIDTH_IN_LINUX: int = 700
     MIN_WIDTH_IN_WINDOWS: int = 650
     measurers_connected: pyqtSignal = pyqtSignal(bool)
@@ -246,7 +244,7 @@ class EPLabWindow(QMainWindow):
 
         scale_factor = get_scale_factor()
         for width in ("CRITICAL_WIDTH_FOR_LINUX_EN", "CRITICAL_WIDTH_FOR_LINUX_RU", "CRITICAL_WIDTH_FOR_WINDOWS_EN",
-                      "CRITICAL_WIDTH_FOR_WINDOWS_RU", "MIN_WIDTH_IN_LINUX", "MIN_WIDTH_IN_WINDOWS"):
+                      "CRITICAL_WIDTH_FOR_WINDOWS_RU", "INIT_HEIGHT", "MIN_WIDTH_IN_LINUX", "MIN_WIDTH_IN_WINDOWS"):
             width_value = getattr(self, width, None)
             if width_value is not None:
                 setattr(self, width, int(scale_factor * width_value))
@@ -969,12 +967,23 @@ class EPLabWindow(QMainWindow):
         """
 
         if system().lower() == "windows":
-            self.setMinimumWidth(EPLabWindow.MIN_WIDTH_IN_WINDOWS)
-            width = EPLabWindow.CRITICAL_WIDTH_FOR_WINDOWS_RU
+            self.setMinimumWidth(self.MIN_WIDTH_IN_WINDOWS)
+            width = self.CRITICAL_WIDTH_FOR_WINDOWS_RU
         else:
-            self.setMinimumWidth(EPLabWindow.MIN_WIDTH_IN_LINUX)
-            width = EPLabWindow.CRITICAL_WIDTH_FOR_LINUX_RU
-        self.setGeometry(EPLabWindow.DEFAULT_POS_X, EPLabWindow.DEFAULT_POS_Y, width, EPLabWindow.INIT_HEIGHT)
+            self.setMinimumWidth(self.MIN_WIDTH_IN_LINUX)
+            width = self.CRITICAL_WIDTH_FOR_LINUX_RU
+        height = self.INIT_HEIGHT
+
+        geometry = qApp.instance().desktop().availableGeometry()
+        available_height = geometry.height() - self.style().pixelMetric(QStyle.PM_TitleBarHeight)
+        available_width = geometry.width()
+
+        height = min(height, available_height)
+        width = min(width, available_width)
+        pos_x = (available_width - width) / 2
+        pos_y = (available_height - height) / 2
+        self.move(pos_x, pos_y)
+        self.resize(width, height)
 
     def _set_msystem_settings(self, settings: MeasurementSettings) -> None:
         """
