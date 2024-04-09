@@ -249,6 +249,7 @@
     <addaction name="save_as_file_action"/>
     <addaction name="separator"/>
     <addaction name="save_screen_action"/>
+    <addaction name="settings_mode_action"/>
    </widget>
    <widget class="QMenu" name="view_menu_action">
     <property name="title">
@@ -273,7 +274,6 @@
     <addaction name="separator"/>
     <addaction name="sound_enabled_action"/>
     <addaction name="separator"/>
-    <addaction name="settings_mode_action"/>
    </widget>
    <widget class="QMenu" name="help_menu_action">
     <property name="title">
