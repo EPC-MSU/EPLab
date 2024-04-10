@@ -64,10 +64,6 @@ class EPLabWindow(QMainWindow):
     COLOR_FOR_CURRENT: QColor = QColor(255, 0, 0, 200)
     COLOR_FOR_REFERENCE: QColor = QColor(0, 128, 255, 200)
     COLOR_FOR_TEST: QColor = QColor(255, 129, 129, 200)
-    CRITICAL_WIDTH_FOR_LINUX_EN: int = 1535
-    CRITICAL_WIDTH_FOR_LINUX_RU: int = 1740
-    CRITICAL_WIDTH_FOR_WINDOWS_EN: int = 1230
-    CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1415
     DEFAULT_COMPARATOR_MIN_CURRENT: float = 0.002
     DEFAULT_COMPARATOR_MIN_VOLTAGE: float = 0.6
     FILENAME_FOR_AUTO_SETTINGS: str = os.path.join(ut.get_dir_name(), "eplab_settings_for_auto_save_and_read.ini")
@@ -116,7 +112,6 @@ class EPLabWindow(QMainWindow):
         self._load_translation(english)
         self._init_ui()
         self._adjust_critical_width()
-        self._set_init_position()
         self._connect_scale_change_signal()
         self.measurers_connected.connect(self.handle_connection)
         self._connection_checker: ConnectionChecker = ConnectionChecker(self._auto_settings)
@@ -138,6 +133,12 @@ class EPLabWindow(QMainWindow):
 
         if path:
             self.load_board(path)
+
+        self._init_pos_timer: QTimer = QTimer()
+        self._init_pos_timer.setInterval(10)
+        self._init_pos_timer.setSingleShot(True)
+        self._init_pos_timer.timeout.connect(self.set_init_position)
+        self._init_pos_timer.start()
 
     @property
     def device_errors_handler(self) -> DeviceErrorsHandler:
@@ -243,8 +244,7 @@ class EPLabWindow(QMainWindow):
         """
 
         scale_factor = get_scale_factor()
-        for width in ("CRITICAL_WIDTH_FOR_LINUX_EN", "CRITICAL_WIDTH_FOR_LINUX_RU", "CRITICAL_WIDTH_FOR_WINDOWS_EN",
-                      "CRITICAL_WIDTH_FOR_WINDOWS_RU", "INIT_HEIGHT", "MIN_WIDTH_IN_LINUX", "MIN_WIDTH_IN_WINDOWS"):
+        for width in ("INIT_HEIGHT", "MIN_WIDTH_IN_LINUX", "MIN_WIDTH_IN_WINDOWS"):
             width_value = getattr(self, width, None)
             if width_value is not None:
                 setattr(self, width, int(scale_factor * width_value))
@@ -257,6 +257,42 @@ class EPLabWindow(QMainWindow):
         scale = ut.calculate_scales(settings)
         self._iv_window.plot.set_scale(*scale)
         self._iv_window.plot.set_min_borders(*scale)
+
+    def _calculate_critical_width(self) -> int:
+        """
+        :return:
+        """
+
+        icon_margin = 3
+        left_handler = 11
+        label_spacing = 12
+        icon_spacing = 1
+        right_icon_margin = 2
+
+        total_width = 0
+        for tool_bar in (self.toolbar_file, self.toolbar_test, self.toolbar_write, self.toolbar_auto_search,
+                         self.toolbar_compare, self.toolbar_mode, self.toolbar_language):
+            font_metrics = tool_bar.fontMetrics()
+            actions_number = len(tool_bar.actions())
+            width = left_handler + actions_number * (tool_bar.iconSize().width() + 2 * icon_margin)
+            if tool_bar.toolButtonStyle() == Qt.ToolButtonTextBesideIcon:
+                for child in tool_bar.actions():
+                    if child == self.save_point_action:
+                        text = qApp.translate("t", "Зафиксировать эталон")
+                    elif hasattr(child, "text"):
+                        text = child.text()
+                    else:
+                        text = None
+                    if text:
+                        width += font_metrics.horizontalAdvance(text) + label_spacing
+            else:
+                for child in tool_bar.children():
+                    if isinstance(child, PinIndexWidget):
+                        width += (child.width() - (actions_number - 1) * icon_spacing -
+                                  (tool_bar.iconSize().width() + 2 * icon_margin))
+                width += (actions_number - 1) * icon_spacing + right_icon_margin
+            total_width += width
+        return total_width + 30
 
     def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> float:
         """
@@ -878,6 +914,7 @@ class EPLabWindow(QMainWindow):
         action_name = self.save_point_action.text()
         self.test_plan_menu_action.removeAction(self.save_point_action)
         self.toolbar_write.removeAction(self.save_point_action)
+        self.save_point_action.deleteLater()
         self.save_point_action: ActionWithDisabledHotkeys = ActionWithDisabledHotkeys(action_icon, action_name)
         self.save_point_action.setShortcut(QKeySequence("Enter"))
         self.save_point_action.triggered.connect(self.save_pin)
@@ -966,13 +1003,9 @@ class EPLabWindow(QMainWindow):
         Method moves the window to the desired position and sets the initial dimensions.
         """
 
-        if system().lower() == "windows":
-            self.setMinimumWidth(self.MIN_WIDTH_IN_WINDOWS)
-            width = self.CRITICAL_WIDTH_FOR_WINDOWS_RU
-        else:
-            self.setMinimumWidth(self.MIN_WIDTH_IN_LINUX)
-            width = self.CRITICAL_WIDTH_FOR_LINUX_RU
+        self.setMinimumWidth(self.MIN_WIDTH_IN_WINDOWS if system().lower() == "windows" else self.MIN_WIDTH_IN_LINUX)
         height = self.INIT_HEIGHT
+        width = self._critical_width
 
         geometry = qApp.instance().desktop().availableGeometry()
         available_height = geometry.height() - self.style().pixelMetric(QStyle.PM_TitleBarHeight)
@@ -1808,19 +1841,10 @@ class EPLabWindow(QMainWindow):
         :param event: resizing event.
         """
 
-        # Determine the critical width of the window for given language and OS
-        lang = qApp.instance().property("language")
-        if system().lower() == "windows":
-            size = self.CRITICAL_WIDTH_FOR_WINDOWS_EN if lang is Language.EN else self.CRITICAL_WIDTH_FOR_WINDOWS_RU
-        else:
-            size = self.CRITICAL_WIDTH_FOR_LINUX_EN if lang is Language.EN else self.CRITICAL_WIDTH_FOR_LINUX_RU
-        # Change style of toolbars
-        for tool_bar in (self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search):
-            if self.width() < size:
-                style = Qt.ToolButtonIconOnly
-            else:
-                style = Qt.ToolButtonTextBesideIcon
-            tool_bar.setToolButtonStyle(style)
+        if hasattr(self, "_critical_width"):
+            style = Qt.ToolButtonIconOnly if self.width() < self._critical_width else Qt.ToolButtonTextBesideIcon
+            for tool_bar in (self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search):
+                tool_bar.setToolButtonStyle(style)
 
         super().resizeEvent(event)
 
@@ -1977,6 +2001,15 @@ class EPLabWindow(QMainWindow):
 
         if self._work_mode == WorkMode.TEST and not self._mux_and_plan_window.measurement_plan_runner.is_running:
             self.save_point_action.setEnabled(not self._measured_pins_checker.check_empty_current_pin())
+
+    @pyqtSlot()
+    def set_init_position(self) -> None:
+        """
+        Slot
+        """
+
+        self._critical_width: int = self._calculate_critical_width()
+        self._set_init_position()
 
     def set_measurement_settings_and_update_ui(self, settings: MeasurementSettings) -> None:
         """
