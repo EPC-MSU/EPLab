@@ -721,11 +721,11 @@ class EPLabWindow(QMainWindow):
                                              remove_cursor=qApp.translate("t", "Удалить метку"),
                                              save_screenshot=qApp.translate("MainWindow", "Сохранить скриншот"))
         self._iv_window.plot.set_path_to_directory(self.dir_chosen_by_user)
-        self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
+        self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Current signature")
         self.current_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_CURRENT)
-        self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
+        self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Reference signature")
         self.reference_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_REFERENCE)
-        self.test_curve_plot: PlotCurve = self._iv_window.plot.add_curve()
+        self.test_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Test signature")
         self.test_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_TEST)
 
         v_box_layout = QVBoxLayout()
