@@ -32,7 +32,7 @@ leading to a numbering shift</translation>
         <source>Максимальное напряжение при
 автоподборе, В</source>
         <translation>Max voltage at
-auto-selection, V</translation>
+optimal search of parameters, V</translation>
     </message>
     <message>
         <location filename="settings.ui" line="180"/>
