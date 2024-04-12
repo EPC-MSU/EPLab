@@ -479,7 +479,7 @@ optimal search of parameters, V</translation>
     <message>
         <location filename="../window/eplabwindow.py" line="1726"/>
         <source>Для данной платы изображение не задано.</source>
-        <translation>Not found image for current board.</translation>
+        <translation>No image found for the current board.</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1753"/>
