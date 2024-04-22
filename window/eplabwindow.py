@@ -1562,7 +1562,8 @@ class EPLabWindow(QMainWindow):
                 ut.show_message(qApp.translate("t", "Ошибка"),
                                 qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
                                                     "точки не был установлен."))
-        except Exception:
+        except Exception as exc:
+            logger.error("Error when going to the previous or next pin (%s)", exc)
             self._device_errors_handler.all_ok = False
 
         self.update_current_pin()

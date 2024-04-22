@@ -215,8 +215,8 @@ def close_devices(*devices: Union[IVMeasurerBase, AnalogMultiplexerBase]) -> Non
         if device is not None:
             try:
                 device.close_device()
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.error("Error when closing device (%s)", exc)
 
 
 def create_measurement_system(measurers: List[Optional[IVMeasurerBase]], mux: Optional[AnalogMultiplexerBase]
@@ -311,7 +311,8 @@ def create_multiplexer(uri: Optional[str] = None) -> Tuple[Optional[AnalogMultip
             mux = AnalogMultiplexer(uri)
             mux.close_device()
             return mux, []
-    except Exception:
+    except Exception as exc:
+        logger.error("Error when creating multiplexer (%s)", exc)
         return None, [uri]
 
     return None, []

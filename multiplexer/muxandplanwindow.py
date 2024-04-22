@@ -2,6 +2,7 @@
 File with class to show window with information about multiplexer and measurement plan.
 """
 
+import logging
 import os
 from typing import Any, Callable, Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
@@ -18,6 +19,9 @@ from window import utils as ut
 from window.common import WorkMode
 from window.pedalhandler import add_pedal_handler
 from window.scaler import update_scale_of_class
+
+
+logger = logging.getLogger("eplab")
 
 
 def check_multiplexer(func: Callable[..., Any]):
@@ -104,7 +108,8 @@ class MuxAndPlanWindow(QWidget):
 
         try:
             self._parent.measurement_plan.multiplexer.get_identity_information()
-        except UrpcDeviceUndefinedError:
+        except UrpcDeviceUndefinedError as exc:
+            logger.error("Failed to get identity information from multiplexer (%s)", exc)
             self.multiplexer_pinout_widget.set_visible(False)
         else:
             self.multiplexer_pinout_widget.set_visible(True)

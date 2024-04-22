@@ -2,6 +2,8 @@
 File with class for widget to show multiplexer pinout.
 """
 
+import logging
+import sys
 from typing import Dict, Optional
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
@@ -9,6 +11,9 @@ from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
 from window.common import DeviceErrorsHandler
 from window.scaler import update_scale_of_class
+
+
+logger = logging.getLogger("eplab")
 
 
 class ChannelWidget(QWidget):
@@ -330,6 +335,7 @@ class MultiplexerPinoutWidget(QWidget):
         try:
             self._parent.measurement_plan.multiplexer.connect_channel(output)
         except Exception:
+            logger.error("Failed to turn on multiplexer output %s", output, exc_info=sys.exc_info())
             self._device_errors_handler.all_ok = False
             return
         if self._turned_on_output and output.module_number != self._turned_on_output.module_number:
