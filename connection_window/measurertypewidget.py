@@ -20,7 +20,7 @@ class MeasurerTypeWidget(QWidget):
     IMAGE_SIZES: Dict[str, int] = {"EyePoint a2": 70,
                                    "EyePoint H10": 100,
                                    "EyePoint S2": 100,
-                                   "EyePoint u21": 70,
+                                   "EyePoint u21": 80,
                                    "EyePoint u22": 100}
     TIME_TO_SHOW_INITIAL_PRODUCT_MS: int = 50
     WIDGET_HEIGHT: int = 200
