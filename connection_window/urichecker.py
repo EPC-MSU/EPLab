@@ -3,8 +3,8 @@ import re
 from typing import Callable, Optional, Union
 from PyQt5.QtGui import QFocusEvent
 from PyQt5.QtWidgets import QComboBox
-import connection_window.utils as ut
-from connection_window.productname import MeasurerType
+from . import utils as ut
+from .productname import MeasurerType
 
 
 def get_reg_exp_for_ivm10():

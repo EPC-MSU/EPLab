@@ -5,11 +5,11 @@ File with class to select measurer type.
 import os
 from functools import partial
 from typing import Dict, Optional
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QTimer
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QGridLayout, QLabel, QRadioButton, QScrollArea, QVBoxLayout, QWidget
-from connection_window.productname import MeasurerType, ProductName
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QTimer
+from PyQt5.QtWidgets import QGridLayout, QRadioButton, QScrollArea, QVBoxLayout, QWidget
 from window.utils import DIR_MEDIA
+from . import utils as ut
+from .productname import MeasurerType, ProductName
 
 
 class MeasurerTypeWidget(QWidget):
@@ -58,10 +58,8 @@ class MeasurerTypeWidget(QWidget):
             radio_button.setToolTip(product_name.value)
             measurer_type = ProductName.get_measurer_type_by_product_name(product_name)
             radio_button.toggled.connect(partial(self.select_measurer_type, measurer_type))
-            product_image = QPixmap(os.path.join(DIR_MEDIA, f"{product_name.value}.png"))
-            label = QLabel("")
-            label.setPixmap(product_image.scaled(MeasurerTypeWidget.IMAGE_WIDTH, MeasurerTypeWidget.IMAGE_HEIGHT,
-                                                 Qt.KeepAspectRatio))
+            label = ut.create_label_with_image(os.path.join(DIR_MEDIA, f"{product_name.value}.png"),
+                                               MeasurerTypeWidget.IMAGE_WIDTH, MeasurerTypeWidget.IMAGE_HEIGHT)
             label.setToolTip(product_name.value)
             grid_layout.addWidget(label, row, 0)
             grid_layout.addWidget(radio_button, row, 1)

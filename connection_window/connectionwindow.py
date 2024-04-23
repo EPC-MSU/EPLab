@@ -6,12 +6,12 @@ import logging
 from typing import List, Optional
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QPushButton, QVBoxLayout
-import connection_window.utils as ut
-from connection_window.measurertypewidget import MeasurerTypeWidget
-from connection_window.measureruriswidget import MeasurerURIsWidget
-from connection_window.muxwidget import MuxWidget
-from connection_window.productname import ProductName
 from window.scaler import update_scale_of_class
+from . import utils as ut
+from .measurertypewidget import MeasurerTypeWidget
+from .measureruriswidget import MeasurerURIsWidget
+from .muxwidget import MuxWidget
+from .productname import ProductName
 
 
 logger = logging.getLogger("eplab")

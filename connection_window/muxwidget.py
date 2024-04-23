@@ -5,12 +5,12 @@ File with class for widget to select multiplexer.
 import os
 from typing import Optional
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
-from PyQt5.QtGui import QFocusEvent, QIcon, QPixmap
+from PyQt5.QtGui import QFocusEvent, QIcon
 from PyQt5.QtWidgets import QComboBox, QGroupBox, QHBoxLayout, QLabel, QMessageBox, QPushButton, QVBoxLayout
-import connection_window.utils as ut
-from connection_window.urichecker import URIChecker
 from window.scaler import update_scale_of_class
 from window.utils import DIR_MEDIA, show_message
+from . import utils as ut
+from .urichecker import URIChecker
 
 
 @update_scale_of_class
@@ -55,10 +55,9 @@ class MuxWidget(QGroupBox):
         self.setTitle(qApp.translate("connection_window", "Мультиплексор"))
         self.setFocusPolicy(Qt.ClickFocus)
 
-        mux_image = QPixmap(os.path.join(DIR_MEDIA, "mux.png"))
-        label = QLabel("")
-        label.setPixmap(mux_image.scaled(MuxWidget.IMAGE_SIZE, MuxWidget.IMAGE_SIZE, Qt.KeepAspectRatio))
-        self.combo_boxes: QComboBox = self._init_combo_box()
+        self.label: QLabel = ut.create_label_with_image(os.path.join(DIR_MEDIA, "mux.png"), MuxWidget.IMAGE_SIZE,
+                                                        MuxWidget.IMAGE_SIZE)
+        self.combo_box: QComboBox = self._init_combo_box()
         self.update_uris()
         self.button_update: QPushButton = QPushButton()
         self.button_update.setFixedWidth(MuxWidget.BUTTON_UPDATE_WIDTH)
@@ -72,11 +71,11 @@ class MuxWidget(QGroupBox):
         self.button_show_help.clicked.connect(show_help)
 
         h_box_layout = QHBoxLayout()
-        h_box_layout.addWidget(self.combo_boxes)
+        h_box_layout.addWidget(self.combo_box)
         h_box_layout.addWidget(self.button_update)
         h_box_layout.addWidget(self.button_show_help)
         v_box_layout = QVBoxLayout()
-        v_box_layout.addWidget(label, alignment=Qt.AlignHCenter)
+        v_box_layout.addWidget(self.label, alignment=Qt.AlignHCenter)
         v_box_layout.addLayout(h_box_layout)
         v_box_layout.addStretch(1)
         self.setLayout(v_box_layout)
@@ -88,7 +87,7 @@ class MuxWidget(QGroupBox):
         :return: to filter the event out, i.e. stop it being handled further, return True, otherwise return False.
         """
 
-        if isinstance(event, QFocusEvent) and obj == self.combo_boxes:
+        if isinstance(event, QFocusEvent) and obj == self.combo_box:
             self._uri_checker.color_widget(obj, QFocusEvent(event))
         return False
 
@@ -97,10 +96,10 @@ class MuxWidget(QGroupBox):
         :return: selected URI of multiplexer.
         """
 
-        if self._uri_checker.check_uri_for_correctness(self.combo_boxes):
-            if self.combo_boxes.currentText().lower() == "none":
+        if self._uri_checker.check_uri_for_correctness(self.combo_box):
+            if self.combo_box.currentText().lower() == "none":
                 return None
-            return self.combo_boxes.currentText()
+            return self.combo_box.currentText()
         return None
 
     @pyqtSlot()
@@ -109,13 +108,13 @@ class MuxWidget(QGroupBox):
         Slot updates list of URIs.
         """
 
-        self.combo_boxes.clear()
+        self.combo_box.clear()
         ports = ut.find_urpc_ports("epmux")
         ports.extend(["none", "virtual"])
-        self.combo_boxes.addItems(ports)
-        self.combo_boxes.setCurrentText(self._initial_uri)
+        self.combo_box.addItems(ports)
+        self.combo_box.setCurrentText(self._initial_uri)
 
-        self._uri_checker.color_widgets(self.combo_boxes)
+        self._uri_checker.color_widgets(self.combo_box)
 
 
 def show_help() -> None:

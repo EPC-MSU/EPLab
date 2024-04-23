@@ -7,11 +7,11 @@ from typing import Callable, List, Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
 from PyQt5.QtGui import QFocusEvent, QIcon
 from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QMessageBox, QPushButton, QWidget
-import connection_window.utils as ut
-from connection_window.productname import MeasurerType
-from connection_window.urichecker import URIChecker
 from window.scaler import update_scale_of_class
 from window.utils import DIR_MEDIA, show_message
+from . import utils as ut
+from .productname import MeasurerType
+from .urichecker import URIChecker
 
 
 @update_scale_of_class

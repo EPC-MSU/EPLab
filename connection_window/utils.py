@@ -15,11 +15,32 @@ from typing import List, Optional
 import psutil
 import serial.tools.list_ports
 import serial.tools.list_ports_common
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QLabel
 from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerVirtualASA
-from connection_window.productname import MeasurerType
+from .productname import MeasurerType
 
 
 logger = logging.getLogger("eplab")
+
+
+def create_label_with_image(image_path: str, image_width: int, image_height: int) -> QLabel:
+    """
+    :param image_path: path to the image file;
+    :param image_width: desired image width;
+    :param image_height: desired image height.
+    :return: label with image.
+    """
+
+    pixmap = QPixmap(image_path)
+    height_factor = image_height / pixmap.height()
+    width_factor = image_width / pixmap.width()
+    factor = min(height_factor, width_factor)
+    label = QLabel("")
+    label.setPixmap(pixmap)
+    label.setScaledContents(True)
+    label.setFixedSize(int(factor * pixmap.width()), int(factor * pixmap.height()))
+    return label
 
 
 def create_uri_name(com_port: str) -> str:
