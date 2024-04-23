@@ -5,7 +5,7 @@ File with class to select measurer type.
 import os
 from functools import partial
 from typing import Dict, Optional
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QTimer
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QTimer
 from PyQt5.QtWidgets import QGridLayout, QRadioButton, QScrollArea, QVBoxLayout, QWidget
 from window.utils import DIR_MEDIA
 from . import utils as ut
@@ -19,6 +19,11 @@ class MeasurerTypeWidget(QWidget):
 
     IMAGE_HEIGHT: int = 100
     IMAGE_WIDTH: int = 100
+    IMAGE_SIZES: Dict[str, int] = {"EyePoint a2": 70,
+                                   "EyePoint H10": 100,
+                                   "EyePoint S2": 100,
+                                   "EyePoint u21": 70,
+                                   "EyePoint u22": 100}
     TIME_TO_SHOW_INITIAL_PRODUCT_MS: int = 50
     WIDGET_HEIGHT: int = 200
     WIDGET_WIDTH: int = 300
@@ -59,10 +64,11 @@ class MeasurerTypeWidget(QWidget):
             measurer_type = ProductName.get_measurer_type_by_product_name(product_name)
             radio_button.toggled.connect(partial(self.select_measurer_type, measurer_type))
             label = ut.create_label_with_image(os.path.join(DIR_MEDIA, f"{product_name.value}.png"),
-                                               MeasurerTypeWidget.IMAGE_WIDTH, MeasurerTypeWidget.IMAGE_HEIGHT)
+                                               MeasurerTypeWidget.IMAGE_SIZES[product_name.value],
+                                               MeasurerTypeWidget.IMAGE_SIZES[product_name.value])
             label.setToolTip(product_name.value)
-            grid_layout.addWidget(label, row, 0)
-            grid_layout.addWidget(radio_button, row, 1)
+            grid_layout.addWidget(label, row, 0, Qt.AlignHCenter | Qt.AlignVCenter)
+            grid_layout.addWidget(radio_button, row, 1, Qt.AlignVCenter)
             self.radio_buttons_products[product_name] = radio_button
         self.radio_buttons_products[self._initial_product_name].setChecked(True)
         self.setToolTip(qApp.translate("connection_window", "Тип измерителя"))
