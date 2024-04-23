@@ -17,8 +17,6 @@ class MeasurerTypeWidget(QWidget):
     Class for widget to select measurer type.
     """
 
-    IMAGE_HEIGHT: int = 100
-    IMAGE_WIDTH: int = 100
     IMAGE_SIZES: Dict[str, int] = {"EyePoint a2": 70,
                                    "EyePoint H10": 100,
                                    "EyePoint S2": 100,
@@ -26,7 +24,6 @@ class MeasurerTypeWidget(QWidget):
                                    "EyePoint u22": 100}
     TIME_TO_SHOW_INITIAL_PRODUCT_MS: int = 50
     WIDGET_HEIGHT: int = 200
-    WIDGET_WIDTH: int = 300
     measurer_type_changed: pyqtSignal = pyqtSignal(MeasurerType, bool)
 
     def __init__(self, initial_product_name: ProductName = None) -> None:
