@@ -845,6 +845,9 @@
    <property name="text">
     <string>Удалить точку</string>
    </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
   </action>
  </widget>
  <resources/>

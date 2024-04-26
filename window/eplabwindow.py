@@ -1797,6 +1797,7 @@ class EPLabWindow(QMainWindow):
                 return
 
         index = self._measurement_plan.get_current_index()
+        print(index)
         self._measurement_plan.remove_current_pin()
         self._board_window.remove_pin(index)
         self._measured_pins_checker.remove_pin(index)

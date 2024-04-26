@@ -94,8 +94,9 @@ class BoardWidget(QWidget):
             self._parent.save_pin()
             return True
 
-        if key == Qt.Key_Delete:
+        if key == Qt.Key_Delete and self._parent.remove_point_action.isEnabled():
             self._parent.remove_pin()
+            return True
 
         return self._parent.eventFilter(self._parent, event)
 

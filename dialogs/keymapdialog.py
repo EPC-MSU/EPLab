@@ -16,7 +16,7 @@ class KeymapDialog(QDialog):
     Dialog box class that displays the keyboard shortcuts used in the application.
     """
 
-    HEIGHT: int = 370
+    HEIGHT: int = 410
     WIDTH: int = 280
 
     def __init__(self, main_window) -> None:
@@ -56,7 +56,8 @@ class KeymapDialog(QDialog):
                    ("Alt+A", qApp.translate("MainWindow", "Автоподбор параметров")),
                    ("Enter", self._main_window.save_point_action.text()),
                    ("Left", qApp.translate("MainWindow", "Предыдущая точка")),
-                   ("Right", qApp.translate("MainWindow", "Следующая точка"))]
+                   ("Right", qApp.translate("MainWindow", "Следующая точка")),
+                   ("Del", qApp.translate("MainWindow", "Удалить точку"))]
         row_format = "<tr><td><b>{}</b></td><td>{}</td></tr>"
         text = "".join([row_format.format(key, description) for key, description in key_map])
         return f"{style}<table>{text}</table>"
