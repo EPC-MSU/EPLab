@@ -30,25 +30,25 @@ from dialogs import (ReportGenerationThread, show_keymap_info, show_language_sel
 from multiplexer import MuxAndPlanWindow
 from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
 from version import Version
-from window import utils as ut
-from window.actionwithdisabledhotkeys import ActionWithDisabledHotkeys
-from window.boardwidget import BoardWidget
-from window.breaksignaturessaver import BreakSignaturesSaver, check_break_signatures
-from window.commentwidget import CommentWidget
-from window.common import DeviceErrorsHandler, WorkMode
-from window.connectionchecker import analyze_connection_params, ConnectionChecker, ConnectionData
-from window.curvestates import CurveStates
-from window.language import get_language, Language, Translator
-from window.measuredpinschecker import MeasuredPinsChecker
-from window.measurementplanpath import MeasurementPlanPath
-from window.parameterwidget import ParameterWidget
-from window.pedalhandler import add_pedal_handler
-from window.pinindexwidget import PinIndexWidget
-from window.planautotransition import PlanAutoTransition
-from window.plancompatibility import PlanCompatibility
-from window.scaler import get_scale_factor, update_scale_of_class
-from window.scorewrapper import check_score_not_greater_tolerance, ScoreWrapper
-from window.soundplayer import SoundPlayer
+from . import utils as ut
+from .actionwithdisabledhotkeys import ActionWithDisabledHotkeys
+from .boardwidget import BoardWidget
+from .breaksignaturessaver import BreakSignaturesSaver, check_break_signatures
+from .commentwidget import CommentWidget
+from .common import DeviceErrorsHandler, WorkMode
+from .connectionchecker import analyze_connection_params, ConnectionChecker, ConnectionData
+from .curvestates import CurveStates
+from .language import get_language, Language, Translator
+from .measuredpinschecker import MeasuredPinsChecker
+from .measurementplanpath import MeasurementPlanPath
+from .parameterwidget import ParameterWidget
+from .pedalhandler import add_pedal_handler
+from .pinindexwidget import PinIndexWidget
+from .planautotransition import PlanAutoTransition
+from .plancompatibility import PlanCompatibility
+from .scaler import get_scale_factor, update_scale_of_class
+from .scorewrapper import check_difference_not_greater_tolerance, ScoreWrapper
+from .soundplayer import SoundPlayer
 
 
 logger = logging.getLogger("eplab")
@@ -95,15 +95,15 @@ class EPLabWindow(QMainWindow):
         self._dir_chosen_by_user: str = ut.get_user_documents_path()
         self._hide_reference_curve: bool = False
         self._hide_current_curve: bool = False
-        self._last_saved_measurement_plan_data: Dict[str, Any] = None
-        self._measurement_plan: MeasurementPlan = None
+        self._last_saved_measurement_plan_data: Optional[Dict[str, Any]] = None
+        self._measurement_plan: Optional[MeasurementPlan] = None
         self._measured_pins_checker: MeasuredPinsChecker = MeasuredPinsChecker(self)
         self._measured_pins_checker.measured_pin_in_plan_signal.connect(self.handle_measurement_plan_change)
         self._measurement_plan_path: MeasurementPlanPath = MeasurementPlanPath(self)
         self._measurement_plan_path.name_changed.connect(self.change_window_title)
-        self._msystem: MeasurementSystem = None
+        self._msystem: Optional[MeasurementSystem] = None
         self._product: EyePointProduct = product
-        self._product_name: cw.ProductName = None
+        self._product_name: Optional[cw.ProductName] = None
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
         self._report_generation_thread.start()
         self._skip_curve: bool = False  # set to True to skip next measured curves
@@ -111,7 +111,7 @@ class EPLabWindow(QMainWindow):
         self._timer.setInterval(10)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._handle_periodic_task)
-        self._work_mode: WorkMode = None
+        self._work_mode: Optional[WorkMode] = None
 
         self._load_translation(english)
         self._init_ui()
@@ -124,7 +124,8 @@ class EPLabWindow(QMainWindow):
         self._break_signature_saver: BreakSignaturesSaver = BreakSignaturesSaver(self.product, self._auto_settings)
         self._break_signature_saver.new_settings_signal.connect(self.set_measurement_settings_and_update_ui)
         self._plan_auto_transition: PlanAutoTransition = PlanAutoTransition(self.product, self._auto_settings,
-                                                                            self._score_wrapper, self._calculate_score,
+                                                                            self._score_wrapper,
+                                                                            self._calculate_difference,
                                                                             self._break_signature_saver.DIR_PATH)
         self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin)
         self._plan_auto_transition.save_pin_signal.connect(self.save_pin)
@@ -155,6 +156,7 @@ class EPLabWindow(QMainWindow):
 
         if os.path.exists(self._dir_chosen_by_user) and os.path.isdir(self._dir_chosen_by_user):
             return self._dir_chosen_by_user
+
         return ut.get_user_documents_path()
 
     @dir_chosen_by_user.setter
@@ -191,7 +193,7 @@ class EPLabWindow(QMainWindow):
         return self._measured_pins_checker.is_measured_pin
 
     @property
-    def measurement_plan(self) -> MeasurementPlan:
+    def measurement_plan(self) -> Optional[MeasurementPlan]:
         """
         :return: object with measurement plan.
         """
@@ -258,16 +260,16 @@ class EPLabWindow(QMainWindow):
         self._iv_window.plot.set_scale(*scale)
         self._iv_window.plot.set_min_borders(*scale)
 
-    def _calculate_score(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> float:
+    def _calculate_difference(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> float:
         """
         :param curve_1: first IV-curve;
         :param curve_2: second IV-curve;
         :param settings: measurement settings.
-        :return: score for given IV-curves and measurement settings.
+        :return: difference between given curves at given settings.
         """
 
         # It is very important to set relevant noise levels
-        self._comparator.set_min_ivc(*self._get_noise_amplitude(settings))
+        self._comparator.set_min_ivc(*self._get_noise_amplitudes(settings))
         return self._comparator.compare_ivc(curve_1, curve_2)
 
     def _change_save_point_name(self, mode: Optional[WorkMode] = None) -> None:
@@ -310,7 +312,6 @@ class EPLabWindow(QMainWindow):
         self._change_save_point_name(mode)
 
         self._player.set_work_mode(mode)
-        # Comment is only for test and write mode
         self._comment_widget.set_work_mode(mode)
         self._disable_optimal_parameter_searcher(mode)
         if mode is WorkMode.COMPARE and len(self._msystem.measurers) < 2:
@@ -348,12 +349,12 @@ class EPLabWindow(QMainWindow):
         the presence of break signatures is checked for all measurement settings.
         """
 
-        if self._auto_settings.get_auto_transition() and self._product_name not in (None, cw.ProductName.EYEPOINT_H10):
-            if not check_break_signatures(self._break_signature_saver.DIR_PATH, self._product):
-                ut.show_message(qApp.translate("t", "Информация"),
-                                qApp.translate("t", "Включен автопереход в режиме тестирования по плану. Но в "
-                                                    "приложении нет некоторых сигнатур разрыва, поэтому автопереход "
-                                                    "может работать некорректно."), icon=QMessageBox.Information)
+        if (self._auto_settings.get_auto_transition() and self._product_name not in (None, cw.ProductName.EYEPOINT_H10)
+                and not check_break_signatures(self._break_signature_saver.DIR_PATH, self._product)):
+            ut.show_message(qApp.translate("t", "Информация"),
+                            qApp.translate("t", "Включен автопереход в режиме тестирования по плану. Но в приложении "
+                                                "нет некоторых сигнатур разрыва, поэтому автопереход может работать "
+                                                "некорректно."), icon=QMessageBox.Information)
 
     def _check_plan_compatibility(self, plan: MeasurementPlan, is_new_plan: bool = False,
                                   filename: Optional[str] = None) -> None:
@@ -378,7 +379,7 @@ class EPLabWindow(QMainWindow):
         Method clears widgets on the main window.
         """
 
-        self._comparator.set_min_ivc(*self._get_noise_amplitude())
+        self._comparator.set_min_ivc(*self._get_noise_amplitudes())
 
         for widget in (self.freq_dock_widget, self.current_dock_widget, self.voltage_dock_widget):
             layout = widget.layout()
@@ -425,7 +426,7 @@ class EPLabWindow(QMainWindow):
             self._product_name = product_name
         self.enable_widgets(True)
 
-        if self._measurement_plan:
+        if self.measurement_plan:
             self._check_plan_compatibility(self.measurement_plan, False, self._measurement_plan_path.path)
         else:
             self._reset_board()
@@ -483,7 +484,7 @@ class EPLabWindow(QMainWindow):
         :param available: dictionary with available options for parameters.
         """
 
-        self._parameters_widgets = {}
+        self._parameters_widgets = dict()
         layouts = [widget.layout() for widget in (self.freq_dock_widget, self.voltage_dock_widget,
                                                   self.current_dock_widget)]
         parameters = (EyePointProduct.Parameter.frequency, EyePointProduct.Parameter.voltage,
@@ -498,6 +499,7 @@ class EPLabWindow(QMainWindow):
     def _disable_optimal_parameter_searcher(self, mode: WorkMode = None) -> None:
         """
         Method disables searcher of the optimal parameters. Searcher can work only for IVMeasurerIVM10.
+        :param mode: work mode.
         """
 
         if self._msystem:
@@ -524,12 +526,12 @@ class EPLabWindow(QMainWindow):
         self._measured_pins_checker.set_new_plan()
         self._measurement_plan_path.path = None
         self._msystem = None
+        self._product_name = None
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
         self.enable_widgets(False)
         self._clear_widgets()
         self._comment_widget.clear_table()
         self._board_window.close()
-        self._product_name = None
 
     def _get_curves_for_legend(self) -> Dict[str, bool]:
         """
@@ -545,8 +547,7 @@ class EPLabWindow(QMainWindow):
         :return: dictionary with current measurements and measurement settings.
         """
 
-        curves = dict()
-        curves["current"] = self._msystem.measurers[0].get_last_cached_iv_curve()
+        curves = {"current": self._msystem.measurers[0].get_last_cached_iv_curve()}
         if self._work_mode is WorkMode.COMPARE and len(self._msystem.measurers) > 1:
             # Display two current curves
             curves["reference"] = self._msystem.measurers[1].get_last_cached_iv_curve()
@@ -559,7 +560,7 @@ class EPLabWindow(QMainWindow):
                 self._compare_measurement = None
         return curves, measurement_settings
 
-    def _get_noise_amplitude(self, settings: Optional[MeasurementSettings] = None) -> Tuple[float, float]:
+    def _get_noise_amplitudes(self, settings: Optional[MeasurementSettings] = None) -> Tuple[float, float]:
         """
         :param settings: measurement settings.
         :return: noise amplitudes of voltage and current for given measurement settings.
@@ -567,6 +568,7 @@ class EPLabWindow(QMainWindow):
 
         if settings is None or self._product is None:
             return EPLabWindow.DEFAULT_COMPARATOR_MIN_VOLTAGE, EPLabWindow.DEFAULT_COMPARATOR_MIN_CURRENT
+
         return self._product.adjust_noise_amplitude(settings)
 
     def _get_options_from_ui(self) -> Dict[EyePointProduct.Parameter, str]:
@@ -600,7 +602,7 @@ class EPLabWindow(QMainWindow):
 
         if self.measurement_plan.pins_number == 0:
             for action in (self.next_point_action, self.previous_point_action, self.remove_point_action,
-                           self.pin_index_widget, self.save_point_action):
+                           self.save_point_action, self.pin_index_widget):
                 action.setEnabled(False)
         else:
             enable = bool(self.work_mode is WorkMode.WRITE and self.measurement_plan.multiplexer is None)
@@ -677,7 +679,7 @@ class EPLabWindow(QMainWindow):
                 self._read_curves_periodic_task()
             self._plan_auto_transition.save_pin()
             self._mux_and_plan_window.measurement_plan_runner.save_pin()
-            self._timer.start()  # add this task to event loop
+            self._timer.start()  # add this task to the event loop
         else:
             self._device_errors_handler.reset_error()
             self._mux_and_plan_window.close_and_stop_plan_measurement()
@@ -697,7 +699,7 @@ class EPLabWindow(QMainWindow):
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
 
         self._board_window: BoardWidget = BoardWidget(self)
-        self._parameters_widgets: Dict[EyePointProduct.Parameter, ParameterWidget] = {}
+        self._parameters_widgets: Dict[EyePointProduct.Parameter, ParameterWidget] = dict()
         self._player: SoundPlayer = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
         self._score_wrapper: ScoreWrapper = ScoreWrapper(self.score_label)
@@ -920,7 +922,7 @@ class EPLabWindow(QMainWindow):
                     result = 2
         return result in (0, 1)
 
-    def _save_last_curves(self, curves: Dict[str, Optional[IVCurve]] = None) -> None:
+    def _save_last_curves(self, curves: Dict[str, Optional[IVCurve]]) -> None:
         """
         :param curves: dictionary with new curves.
         """
@@ -928,18 +930,17 @@ class EPLabWindow(QMainWindow):
         curves_dict = {"current": "_current_curve",
                        "reference": "_reference_curve",
                        "test": "_test_curve"}
-        if isinstance(curves, dict):
-            for curve_name, attr_name in curves_dict.items():
-                if curve_name in curves:
-                    setattr(self, attr_name, curves[curve_name])
+        for curve_name, attr_name in curves_dict.items():
+            if curve_name in curves:
+                setattr(self, attr_name, curves[curve_name])
 
+        if self._work_mode is WorkMode.COMPARE:
             compare_curve = curves.get("compare", None)
-            if self._work_mode is WorkMode.COMPARE:
-                if len(self._msystem.measurers) == 1:
-                    self._reference_curve = compare_curve
-                    self._test_curve = None
-                else:
-                    self._test_curve = compare_curve
+            if len(self._msystem.measurers) == 1:
+                self._reference_curve = compare_curve
+                self._test_curve = None
+            else:
+                self._test_curve = compare_curve
 
     def _save_measurement_in_compare_mode(self) -> None:
         """
@@ -991,7 +992,7 @@ class EPLabWindow(QMainWindow):
         """
 
         self._msystem.set_settings(settings)
-        # Skip next measurement because it still have old settings
+        # Skip next measurement because it still has old settings
         self._skip_curve = True
         # When new curve will be received plot parameters will be adjusted
         self._settings_update_next_cycle = settings
@@ -1100,16 +1101,6 @@ class EPLabWindow(QMainWindow):
         self._handle_current_pin_change()
 
     def _update_current_pin_in_read_plan_mode(self) -> None:
-
-        def round_value(value: float) -> float:
-            """
-            Function rounds a real number to two decimal places.
-            :param value: value to round.
-            :return: rounded value.
-            """
-
-            return round(value, 2)
-
         current_pin = self._measurement_plan.get_current_pin()
         if current_pin:
             ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
@@ -1121,18 +1112,18 @@ class EPLabWindow(QMainWindow):
                     EyePointProduct.Parameter.frequency: [
                         MeasurementParameterOption(name=f"{settings.probe_signal_frequency}",
                                                    value=settings.probe_signal_frequency,
-                                                   label_ru=f"{round_value(settings.probe_signal_frequency)} Гц",
-                                                   label_en=f"{round_value(settings.probe_signal_frequency)} Hz")],
+                                                   label_ru=f"{round(settings.probe_signal_frequency, 2)} Гц",
+                                                   label_en=f"{round(settings.probe_signal_frequency, 2)} Hz")],
                     EyePointProduct.Parameter.sensitive: [
                         MeasurementParameterOption(name=f"{settings.internal_resistance}",
                                                    value=settings.internal_resistance,
-                                                   label_ru=f"{round_value(settings.internal_resistance)} Ом",
-                                                   label_en=f"{round_value(settings.internal_resistance)} Ohm")],
+                                                   label_ru=f"{round(settings.internal_resistance, 2)} Ом",
+                                                   label_en=f"{round(settings.internal_resistance, 2)} Ohm")],
                     EyePointProduct.Parameter.voltage: [
                         MeasurementParameterOption(name=f"{settings.max_voltage}",
                                                    value=settings.max_voltage,
-                                                   label_ru=f"{round_value(settings.max_voltage)} В",
-                                                   label_en=f"{round_value(settings.max_voltage)} V")]
+                                                   label_ru=f"{round(settings.max_voltage, 2)} В",
+                                                   label_en=f"{round(settings.max_voltage, 2)} V")]
                 }
                 self._update_scroll_areas_for_parameters(available)
                 options = {
@@ -1168,7 +1159,7 @@ class EPLabWindow(QMainWindow):
                 self._reference_curve = None
                 self._test_curve = None
 
-    def _update_curves(self, curves: Dict[str, Optional[IVCurve]] = None, settings: MeasurementSettings = None) -> None:
+    def _update_curves(self, curves: Dict[str, Optional[IVCurve]], settings: MeasurementSettings = None) -> None:
         """
         Method updates curves and calculates (if required) score.
         :param curves: dictionary with new curves;
@@ -1195,9 +1186,9 @@ class EPLabWindow(QMainWindow):
         else:
             curve_2 = None
         if None not in (curve_1, curve_2, settings):
-            score = self._calculate_score(curve_1, curve_2, settings)
-            self._score_wrapper.set_score(score)
-            self._player.update_score(score)
+            difference = self._calculate_difference(curve_1, curve_2, settings)
+            self._score_wrapper.set_score(difference)
+            self._player.update_score(difference)
         else:
             self._score_wrapper.set_dummy_score()
         if settings is not None:
@@ -1267,17 +1258,17 @@ class EPLabWindow(QMainWindow):
         else:
             self.setWindowTitle(f"EPLab {Version.full}")
 
-    def check_good_score(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> bool:
+    def check_good_difference(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> bool:
         """
-        Method calculates the score for the given IV-curves and compares the calculated value with the threshold.
+        Method calculates the difference for the given IV-curves and compares the calculated value with the tolerance.
         :param curve_1: first IV-curve;
         :param curve_2: second IV-curve;
         :param settings: measurement settings.
-        :return: True if score is not greater than the threshold, otherwise False.
+        :return: True if difference is not greater than the tolerance, otherwise False.
         """
 
-        score = self._calculate_score(curve_1, curve_2, settings)
-        return check_score_not_greater_tolerance(score, self._score_wrapper.tolerance)
+        difference = self._calculate_difference(curve_1, curve_2, settings)
+        return check_difference_not_greater_tolerance(difference, self._score_wrapper.tolerance)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """
@@ -1797,7 +1788,6 @@ class EPLabWindow(QMainWindow):
                 return
 
         index = self._measurement_plan.get_current_index()
-        print(index)
         self._measurement_plan.remove_current_pin()
         self._board_window.remove_pin(index)
         self._measured_pins_checker.remove_pin(index)

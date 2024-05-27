@@ -11,7 +11,7 @@ from connection_window.productname import ProductName
 from settings.autosettings import AutoSettings
 from window.breaksignaturessaver import create_filename, iterate_settings, load_signature
 from window.common import WorkMode
-from window.scorewrapper import check_score_not_greater_tolerance, ScoreWrapper
+from window.scorewrapper import check_difference_not_greater_tolerance, ScoreWrapper
 
 
 logger = logging.getLogger("eplab")
@@ -116,7 +116,7 @@ class PlanAutoTransition(QObject):
         """
 
         score = self._calculate_score_for_curves(settings, curve, break_signature)
-        if score is not None and check_score_not_greater_tolerance(score, self.BREAK_TOLERANCE):
+        if score is not None and check_difference_not_greater_tolerance(score, self.BREAK_TOLERANCE):
             self._break_number += 1
             logger.info("Waiting for a break: score = %f, number of sequentially measured breaks = %d", score,
                         self._break_number)
@@ -174,11 +174,11 @@ class PlanAutoTransition(QObject):
             return
 
         score = self._calculate_score_for_curves(settings, curve_current, break_signature)
-        if score is not None and check_score_not_greater_tolerance(score, self._score_wrapper.tolerance):
+        if score is not None and check_difference_not_greater_tolerance(score, self._score_wrapper.tolerance):
             return
 
         score = self._calculate_score_for_curves(settings, curve_current, curve_reference)
-        if score is not None and check_score_not_greater_tolerance(score, self._score_wrapper.tolerance):
+        if score is not None and check_difference_not_greater_tolerance(score, self._score_wrapper.tolerance):
             self._need_to_save = True
 
     @pyqtSlot()

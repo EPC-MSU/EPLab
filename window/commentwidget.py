@@ -1,18 +1,18 @@
 import os
 from typing import Any, Callable, Optional
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
-from PyQt5.QtGui import QBrush, QColor, QIcon
-from PyQt5.QtWidgets import QAction, QMenu, QTableWidgetItem
+from PyQt5.QtGui import QBrush, QColor, QIcon, QKeySequence
+from PyQt5.QtWidgets import QAction, QMenu, QShortcut, QTableWidgetItem
 from epcore.elements import Pin
-from window import utils as ut
-from window.common import WorkMode
-from window.pinindextableitem import PinIndexTableItem
-from window.tablewidget import TableWidget
+from . import utils as ut
+from .common import WorkMode
+from .pinindextableitem import PinIndexTableItem
+from .tablewidget import TableWidget
 
 
 def disconnect_signal(func: Callable[..., Any]):
     """
-    Decorator disconnects and reconnects the slot to the signal itemChanged.
+    The decorator disconnects and reconnects the itemChanged signal to the slot after executing the decorated function.
     :param func: function to be decorated.
     """
 
@@ -47,23 +47,16 @@ class CommentWidget(TableWidget):
         self._default_style_sheet: str = self.styleSheet()
         self._read_only: bool = False
         self.adjustSize()
+        self._set_f2_hotkey()
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
 
-    @property
-    def read_only(self) -> bool:
-        """
-        :return:
-        """
-
-        return self._read_only
-
     def _add_comment(self, index: int, comment: Optional[str] = None) -> None:
         """
-        Method adds a new comment to the pin.
+        Method adds a new comment to the table.
         :param index: index of the pin for which the comment needs to be added;
-        :param comment: new comment.
+        :param comment: comment.
         """
 
         self.insertRow(index)
@@ -71,14 +64,14 @@ class CommentWidget(TableWidget):
 
         item = QTableWidgetItem()
         item.setText(comment or "")
-        self._set_item_read_only(item)
+        change_item_state(item, self._read_only)
         self.setItem(index, 1, item)
 
     def _change_row_color(self, index: int, pin: Pin) -> None:
         """
-        Method sets the color of the row depending on the score value. If the pin to which the row corresponds has
-        test and reference IV-curves, then the score is calculated. If score is not greater than the threshold, then
-        the row is colored light green, otherwise pink.
+        Method sets the color of the row depending on the difference value. If the pin to which the row corresponds has
+        test and reference IV-curves, then the difference is calculated. If difference is not greater than the
+        tolerance, then the row is colored light green, otherwise pink.
         :param index: index of the pin;
         :param pin: pin.
         """
@@ -88,17 +81,19 @@ class CommentWidget(TableWidget):
 
         reference, test, settings = pin.get_reference_and_test_measurements()
         if None not in (reference, test, settings):
-            brush = CommentWidget.GOOD_BRUSH if self._main_window.check_good_score(reference.ivc, test.ivc, settings) \
+            brush = CommentWidget.GOOD_BRUSH \
+                if self._main_window.check_good_difference(reference.ivc, test.ivc, settings) \
                 else CommentWidget.BAD_BRUSH
         else:
             brush = CommentWidget.WHITE_BRUSH
+
         for column in range(self.columnCount()):
             item = self.item(index, column)
             item.setBackground(brush)
 
     def _change_style_for_selected_row(self, index: Optional[int] = None) -> None:
         """
-        :param index: index of selected row.
+        :param index: index of the selected row.
         """
 
         index = self.currentRow() if index is None else index
@@ -117,12 +112,6 @@ class CommentWidget(TableWidget):
                                        "color: gray;}")
         self.setStyleSheet(self._default_style_sheet + selected_style + selected_and_disabled_style)
 
-    def _clear_table(self) -> None:
-        self.disconnect_item_selection_changed_signal()
-        _ = [self.removeRow(row) for row in range(self.rowCount(), -1, -1)]
-        self.clearContents()
-        self.connect_item_selection_changed_signal()
-
     def _check_show_context_menu(self, pos: QPoint) -> bool:
         """
         :param pos: the position of the context menu event that the widget receives.
@@ -132,10 +121,16 @@ class CommentWidget(TableWidget):
         return (self._main_window.new_point_action.isEnabled() and self._main_window.remove_point_action.isEnabled() and
                 self.row(self.itemAt(pos)) >= 0)
 
+    def _clear_table(self) -> None:
+        self.disconnect_item_selection_changed_signal()
+        _ = [self.removeRow(row) for row in range(self.rowCount(), -1, -1)]
+        self.clearContents()
+        self.connect_item_selection_changed_signal()
+
     @disconnect_signal
     def _fill_table(self) -> None:
         """
-        Method fills in a table with comments for measurement plan pins.
+        Method fills in a table with comments on the measurement plan pins.
         """
 
         self._clear_table()
@@ -156,25 +151,33 @@ class CommentWidget(TableWidget):
             pin = self._main_window.measurement_plan.get_pin_with_index(index)
             self._update_comment(index, pin.comment)
 
-    def _set_item_read_only(self, item: QTableWidgetItem) -> None:
+    def _set_f2_hotkey(self) -> None:
         """
-        :param item: set table widget item as editable or not editable.
+        Method sets the F2 hotkey for editing comments.
         """
 
-        if self._read_only:
-            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-        else:
-            item.setFlags(item.flags() | Qt.ItemIsEditable)
+        self._shortcut: QShortcut = QShortcut(QKeySequence(Qt.Key_F2), self)
+        self._shortcut.activated.connect(self._set_focus_on_current_item)
 
-    def _set_read_only(self) -> None:
+    @pyqtSlot()
+    def _set_focus_on_current_item(self) -> None:
         """
-        Method switches widgets with comments to read-only state.
+        Slot sets the item with the current comment into editable mode.
+        """
+
+        item = self.item(self.currentRow(), 1)
+        if item and self._main_window.work_mode in (WorkMode.TEST, WorkMode.WRITE):
+            self.editItem(item)
+
+    def _set_read_only(self, read_only: bool) -> None:
+        """
+        :param read_only: if True, then set the table to an editable state, otherwise to a non-editable state.
         """
 
         column = 1
         for row in range(self.rowCount()):
             item = self.item(row, column)
-            self._set_item_read_only(item)
+            change_item_state(item, read_only)
 
     def _update_comment(self, index: int, comment: str) -> None:
         """
@@ -220,10 +223,9 @@ class CommentWidget(TableWidget):
         pin_index = self.row(item)
         self.save_comment(pin_index)
 
-    @pyqtSlot(int)
     def save_comment(self, index: int) -> None:
         """
-        Slot saves comment to pin.
+        Method saves comment to pin.
         :param index: pin index.
         """
 
@@ -246,22 +248,21 @@ class CommentWidget(TableWidget):
             self._change_style_for_selected_row(model_index.row())
             break
 
-    @pyqtSlot(WorkMode)
     def set_work_mode(self, mode: WorkMode) -> None:
         """
-        Slot sets widgets according to new work mode.
+        Method sets widgets according to new work mode. Comment is only for test and write modes.
         :param mode: new work mode.
         """
 
         if mode is WorkMode.READ_PLAN:
             if not self._read_only:
                 self._read_only = True
-                self._set_read_only()
+                self._set_read_only(self._read_only)
             self.setEnabled(True)
         else:
             if self._read_only:
                 self._read_only = False
-                self._set_read_only()
+                self._set_read_only(self._read_only)
             self.setEnabled(mode in (WorkMode.TEST, WorkMode.WRITE))
 
     @pyqtSlot(QPoint)
@@ -276,8 +277,8 @@ class CommentWidget(TableWidget):
             action_add_pin = QAction(QIcon(os.path.join(ut.DIR_MEDIA, "newpoint.png")),
                                      qApp.translate("MainWindow", "Новая точка"), menu)
             action_add_pin.triggered.connect(self._main_window.create_new_pin)
-
             menu.addAction(action_add_pin)
+
             action_remove_pin = QAction(QIcon(os.path.join(ut.DIR_MEDIA, "remove_point.png")),
                                         qApp.translate("MainWindow", "Удалить точку"), menu)
             action_remove_pin.triggered.connect(self._main_window.remove_pin)
@@ -301,14 +302,25 @@ class CommentWidget(TableWidget):
 
     def update_table_for_new_tolerance(self, *indexes) -> None:
         """
-        Method updates the display style of cells in the table. The method must be called when the score for pins or
-        tolerance changes.
+        Method updates the display style of cells in the table. The method must be called when the difference for pins
+        or tolerance changes.
         :param indexes: indexes of pins for which you need to update the display style.
         """
 
         if len(indexes) == 0:
             indexes = range(self.rowCount())
+
         for index in indexes:
             pin = self._main_window.measurement_plan.get_pin_with_index(index)
             self._change_row_color(index, pin)
         self._change_style_for_selected_row()
+
+
+def change_item_state(item: QTableWidgetItem, read_only: bool) -> None:
+    """
+    :param item: table widget item as editable or not editable;
+    :param read_only: if True, then change the table widget item to an editable state, otherwise to a non-editable
+    state.
+    """
+
+    item.setFlags(item.flags() ^ Qt.ItemIsEditable if read_only else item.flags() | Qt.ItemIsEditable)

@@ -67,15 +67,15 @@ class ScoreWrapper:
         self._get_tolerance_with_tenths()
 
 
-def check_score_not_greater_tolerance(score: float, tolerance: float) -> bool:
+def check_difference_not_greater_tolerance(difference: float, tolerance: float) -> bool:
     """
-    Function compares the given score with the tolerance.
-    :param score: score;
+    Function compares the given difference with the tolerance.
+    :param difference: difference;
     :param tolerance: tolerance.
-    :return: True if score is not greater than the threshold, otherwise False.
+    :return: True if difference is not greater than the tolerance, otherwise False.
     """
 
-    return convert_to_percent_with_tenths(score) <= convert_to_percent_with_tenths(tolerance)
+    return convert_to_percent_with_tenths(difference) <= convert_to_percent_with_tenths(tolerance)
 
 
 def convert_to_percent_with_tenths(value: float) -> float:

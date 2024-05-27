@@ -1,7 +1,7 @@
 from typing import Any, Callable, List, Optional
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget
-from window.pinindextableitem import PinIndexTableItem
+from .pinindextableitem import PinIndexTableItem
 
 
 class TableWidget(QTableWidget):
@@ -76,7 +76,7 @@ class TableWidget(QTableWidget):
 
     def select_row_for_current_pin(self) -> None:
         """
-        Method selects row in table for current pin index.
+        Method selects row in the table for current pin index.
         """
 
         index = self._main_window.measurement_plan.get_current_index()
@@ -87,7 +87,7 @@ class TableWidget(QTableWidget):
     @pyqtSlot()
     def set_pin_as_current(self) -> None:
         """
-        Slot sets pin activated on table as current.
+        Slot sets the pin activated on the table as current.
         """
 
         if not self._dont_go_to_selected_pin:
