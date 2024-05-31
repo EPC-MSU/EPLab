@@ -35,7 +35,7 @@ class PlanAutoTransition(QObject):
     BREAK_TOLERANCE: float = 0.15
     TIME_TO_SHOW: float = 0.5
     TIMEOUT: int = 10
-    go_to_next_signal: pyqtSignal = pyqtSignal(bool)
+    go_to_next_signal: pyqtSignal = pyqtSignal(bool, bool)
     save_pin_signal: pyqtSignal = pyqtSignal()
 
     def __init__(self, product: EyePointProduct, auto_settings: AutoSettings, score_wrapper: ScoreWrapper,
@@ -184,7 +184,7 @@ class PlanAutoTransition(QObject):
     @pyqtSlot()
     def handle_timeout(self) -> None:
         if self._process == self.Process.SAVE and time.monotonic() - self._start_time > self.TIME_TO_SHOW:
-            self.go_to_next_signal.emit(False)
+            self.go_to_next_signal.emit(False, True)
             self._process = self.Process.GO_TO_NEXT
             self._start_time = time.monotonic()
             self._break_number = 0

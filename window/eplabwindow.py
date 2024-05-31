@@ -68,6 +68,7 @@ class EPLabWindow(QMainWindow):
     CRITICAL_WIDTH_FOR_WINDOWS_RU: int = 1415
     DEFAULT_COMPARATOR_MIN_CURRENT: float = 0.002
     DEFAULT_COMPARATOR_MIN_VOLTAGE: float = 0.6
+    DELAY_TO_GO_TO_NEXT_PIN_MS: int = 500
     FILENAME_FOR_AUTO_SETTINGS: str = os.path.join(ut.get_dir_name(), "eplab_settings_for_auto_save_and_read.ini")
     INIT_HEIGHT: int = 730
     MIN_WIDTH_IN_LINUX: int = 700
@@ -105,10 +106,17 @@ class EPLabWindow(QMainWindow):
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
         self._report_generation_thread.start()
         self._skip_curve: bool = False  # set to True to skip next measured curves
+
         self._timer: QTimer = QTimer()
         self._timer.setInterval(10)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._handle_periodic_task)
+
+        self._timer_to_go_to_next_pin: QTimer = QTimer()
+        self._timer_to_go_to_next_pin.setInterval(EPLabWindow.DELAY_TO_GO_TO_NEXT_PIN_MS)
+        self._timer_to_go_to_next_pin.setSingleShot(True)
+        self._timer_to_go_to_next_pin.timeout.connect(lambda: self.go_to_left_or_right_pin(False, False))
+
         self._work_mode: Optional[WorkMode] = None
 
         self._load_translation(english)
@@ -371,6 +379,21 @@ class EPLabWindow(QMainWindow):
         self._last_saved_measurement_plan_data = self._measurement_plan.to_json()
         self._measured_pins_checker.set_new_plan()
         self._update_mux_actions()
+
+    def _check_transition_without_break(self, to_prev: bool) -> bool:
+        """
+        :param to_prev: if True, then the transition should be to the previous pin in the measurement plan, otherwise
+        to the next one.
+        :return: True if the transition can be made without breaking (that is, it is not a transition from the last pin
+        to the first or from the first to the last).
+        """
+
+        current_pin_index = self._measurement_plan.get_current_index()
+        if ((to_prev and current_pin_index == 0) or
+                (not to_prev and current_pin_index == self._measurement_plan.pins_number - 1)):
+            return False
+
+        return True
 
     def _clear_widgets(self) -> None:
         """
@@ -709,7 +732,7 @@ class EPLabWindow(QMainWindow):
         self._set_hotkeys_for_moving_through_pins()
         self.new_point_action.triggered.connect(self.create_new_pin)
         self.remove_point_action.triggered.connect(self.remove_pin)
-        self.save_point_action.triggered.connect(self.save_pin)
+        self.save_point_action.triggered.connect(self.save_pin_and_go_to_next)
         self.add_board_image_action.triggered.connect(self.load_board_image)
         self.create_report_action.triggered.connect(self.create_report)
         self.about_action.triggered.connect(show_product_info)
@@ -1444,13 +1467,18 @@ class EPLabWindow(QMainWindow):
         settings.tolerance = self.tolerance
         return settings
 
-    @pyqtSlot(bool)
-    def go_to_left_or_right_pin(self, to_prev: bool) -> None:
+    @pyqtSlot(bool, bool)
+    def go_to_left_or_right_pin(self, to_prev: bool, cyclic: bool = True) -> None:
         """
-        Slot moves to the next or previous pin in measurement plan.
-        :param to_prev: if True, then there will be a transition to the previous pin in measurement plan, otherwise -
-        to the next pin.
+        Slot moves to the next or previous pin in the measurement plan.
+        :param to_prev: if True, then there will be a transition to the previous pin in the measurement plan,
+        otherwise - to the next pin;
+        :param cyclic: if True, then the transition will occur even if you need to move from the last pin to the first
+        or vice versa.
         """
+
+        if not cyclic and not self._check_transition_without_break(to_prev):
+            return
 
         try:
             if to_prev:
@@ -1573,7 +1601,7 @@ class EPLabWindow(QMainWindow):
         if self.work_mode == WorkMode.COMPARE:
             self._handle_freezing_curves_with_pedal(pressed)
         elif pressed and self.work_mode in (WorkMode.TEST, WorkMode.WRITE) and self.save_point_action.isEnabled():
-            self.save_pin()
+            self.save_pin_and_go_to_next()
 
     @pyqtSlot(float)
     def handle_scale_change(self, new_scale: float) -> None:
@@ -1805,6 +1833,16 @@ class EPLabWindow(QMainWindow):
             self.update_current_pin(pin_centering)
             self._comment_widget.save_comment(index)
             self._comment_widget.update_table_for_new_tolerance(index)
+
+    @pyqtSlot()
+    def save_pin_and_go_to_next(self) -> None:
+        """
+        Slot saves the measurement to the current pin and moves to the next pin after 300 ms, if available in the
+        measurement plan.
+        """
+
+        self.save_pin()
+        self._timer_to_go_to_next_pin.start()
 
     @pyqtSlot()
     def search_optimal(self) -> None:
