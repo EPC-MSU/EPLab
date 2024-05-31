@@ -54,7 +54,7 @@ class KeymapDialog(QDialog):
                    ("Ctrl+O", qApp.translate("MainWindow", "Открыть план тестирования")),
                    ("Ctrl+S", qApp.translate("MainWindow", "Сохранить план тестирования")),
                    ("Alt+A", qApp.translate("MainWindow", "Автоподбор параметров")),
-                   ("Enter", self._main_window.save_point_action.text()),
+                   ("Space", self._main_window.save_point_action.text()),
                    ("Left", qApp.translate("MainWindow", "Предыдущая точка")),
                    ("Right", qApp.translate("MainWindow", "Следующая точка")),
                    ("Del", qApp.translate("MainWindow", "Удалить точку"))]

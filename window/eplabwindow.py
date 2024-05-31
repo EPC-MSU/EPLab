@@ -10,9 +10,8 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPointF, Qt, QTimer,
-                          QTranslator)
-from PyQt5.QtGui import QCloseEvent, QColor, QFocusEvent, QIcon, QKeyEvent, QKeySequence, QMouseEvent, QResizeEvent
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator
+from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeySequence, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QStyle,
                              QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
@@ -31,7 +30,6 @@ from multiplexer import MuxAndPlanWindow
 from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
 from version import Version
 from . import utils as ut
-from .actionwithdisabledhotkeys import ActionWithDisabledHotkeys
 from .boardwidget import BoardWidget
 from .breaksignaturessaver import BreakSignaturesSaver, check_break_signatures
 from .commentwidget import CommentWidget
@@ -613,33 +611,6 @@ class EPLabWindow(QMainWindow):
             self.save_point_action.setEnabled(self.work_mode != WorkMode.READ_PLAN)
             self.set_enabled_save_point_action_at_test_mode()
 
-    @staticmethod
-    def _handle_event_on_obj(obj: QObject, event: QEvent) -> Optional[bool]:
-        """
-        :param obj: object for which event occurred;
-        :param event: event.
-        :return: True if event should be filtered out, otherwise - False.
-        """
-
-        if isinstance(event, QKeyEvent):
-            key_event = QKeyEvent(event)
-            key = key_event.key()
-            if key in (Qt.Key_Enter, Qt.Key_Return):
-                event_type = key_event.type()
-                if (key == Qt.Key_Enter and event_type == QKeyEvent.ShortcutOverride) or \
-                        (key == Qt.Key_Return and event_type == QKeyEvent.KeyPress):
-                    obj.keyPressEvent(event)
-                return True
-            return False
-
-        if isinstance(event, QFocusEvent):
-            filter_event = QFocusEvent(event)
-            if filter_event.type() == QFocusEvent.FocusIn:
-                setattr(obj, "is_focused", True)
-            elif filter_event.type() == QFocusEvent.FocusOut:
-                setattr(obj, "is_focused", False)
-        return None
-
     def _handle_freezing_curves_with_pedal(self, pressed: bool) -> None:
         """
         Method freezes the measurers curves using a pedal. If at least one curve is not frozen, then all curves are
@@ -655,22 +626,6 @@ class EPLabWindow(QMainWindow):
                 action.setEnabled(False)
         else:
             self._curves_states.restore_states()
-
-    def _handle_key_press_event(self, event: QKeyEvent) -> bool:
-        """
-        Method handles key press events on the main window. The Enter and Return keys saves the measurement at the pin.
-        :param event: key press event.
-        :return: handling result.
-        """
-
-        key = event.key()
-        key_type = event.type()
-        if self.save_point_action.isEnabled() and ((key == Qt.Key_Enter and key_type == QEvent.ShortcutOverride) or
-                                                   (key == Qt.Key_Return and key_type == QEvent.KeyPress)):
-            self.save_pin()
-            return True
-
-        return super().event(event)
 
     @pyqtSlot()
     def _handle_periodic_task(self) -> None:
@@ -750,12 +705,11 @@ class EPLabWindow(QMainWindow):
         self.pin_index_widget.setEnabled(False)
         self.toolbar_test.insertWidget(self.next_point_action, self.pin_index_widget)
         self.pin_index_widget.returnPressed.connect(self.go_to_pin_selected_in_widget)
-        self.pin_index_widget.installEventFilter(self)
         self.next_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(False))
         self._set_hotkeys_for_moving_through_pins()
         self.new_point_action.triggered.connect(self.create_new_pin)
         self.remove_point_action.triggered.connect(self.remove_pin)
-        self._replace_save_point_action()
+        self.save_point_action.triggered.connect(self.save_pin)
         self.add_board_image_action.triggered.connect(self.load_board_image)
         self.create_report_action.triggered.connect(self.create_report)
         self.about_action.triggered.connect(show_product_info)
@@ -870,21 +824,6 @@ class EPLabWindow(QMainWindow):
 
     def _remove_ref_curve(self) -> None:
         self._reference_curve = None
-
-    def _replace_save_point_action(self) -> None:
-        """
-        Method replaces the menu item that is responsible for saving the measurement at a point.
-        """
-
-        action_icon = self.save_point_action.icon()
-        action_name = self.save_point_action.text()
-        self.test_plan_menu_action.removeAction(self.save_point_action)
-        self.toolbar_write.removeAction(self.save_point_action)
-        self.save_point_action: ActionWithDisabledHotkeys = ActionWithDisabledHotkeys(action_icon, action_name)
-        self.save_point_action.setShortcut(QKeySequence("Enter"))
-        self.save_point_action.triggered.connect(self.save_pin)
-        self.test_plan_menu_action.insertAction(self.add_board_image_action, self.save_point_action)
-        self.toolbar_write.addAction(self.save_point_action)
 
     def _report_measurers_disconnected(self) -> None:
         self.measurers_connected.emit(False)
@@ -1435,40 +1374,10 @@ class EPLabWindow(QMainWindow):
         :return: True if the event was recognized and processed.
         """
 
-        def check_focus_on_main_window() -> bool:
-            for widget in (self._comment_widget, self.pin_index_widget):
-                if getattr(widget, "is_focused", False):
-                    return False
-            return True
-
-        if self.measurement_plan and isinstance(event, QKeyEvent) and check_focus_on_main_window():
-            key_event = QKeyEvent(event)
-            if key_event.type() in (QEvent.KeyPress, QEvent.ShortcutOverride):
-                return self._handle_key_press_event(key_event)
-
         if isinstance(event, QMouseEvent):
             self.setFocus()
 
         return super().event(event)
-
-    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
-        """
-        Method handles events with line edit widgets with the point number and comment for the pin. When focus is on
-        the line edit children, method performs standard actions for those widgets. Since Enter is the hotkey for
-        saving a measurement to a pin, the method handles the Enter and Return keys presses in line edit widgets
-        (when the focus is in these line edit widgets and the Enter or Return keys are pressed, the measurement was not
-        saved).
-        :param obj: object for which event occurred;
-        :param event: event.
-        :return: True if event should be filtered out, otherwise - False.
-        """
-
-        if obj in (self.pin_index_widget,):
-            result = self._handle_event_on_obj(obj, event)
-            if isinstance(result, bool):
-                return result
-
-        return super().eventFilter(obj, event)
 
     @pyqtSlot(int, bool)
     def freeze_curve(self, measurer_id: int, state: bool) -> None:

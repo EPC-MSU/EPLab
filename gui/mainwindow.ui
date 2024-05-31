@@ -710,6 +710,9 @@
    <property name="iconText">
     <string>Зафиксировать</string>
    </property>
+   <property name="shortcut">
+    <string>Space</string>
+   </property>
   </action>
   <action name="add_board_image_action">
    <property name="enabled">
