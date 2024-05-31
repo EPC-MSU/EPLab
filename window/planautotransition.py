@@ -9,9 +9,9 @@ from epcore.elements import IVCurve, MeasurementSettings
 from epcore.product import EyePointProduct
 from connection_window.productname import ProductName
 from settings.autosettings import AutoSettings
-from window.breaksignaturessaver import create_filename, iterate_settings, load_signature
-from window.common import WorkMode
-from window.scorewrapper import check_difference_not_greater_tolerance, ScoreWrapper
+from .breaksignaturessaver import create_filename, iterate_settings, load_signature
+from .common import WorkMode
+from .scorewrapper import check_difference_not_greater_tolerance, ScoreWrapper
 
 
 logger = logging.getLogger("eplab")

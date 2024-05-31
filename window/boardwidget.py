@@ -11,9 +11,9 @@ from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView, GraphicsManualPinItem
 from epcore.measurementmanager import MeasurementPlan
 from dialogs.save_geometry import update_widget_to_save_geometry
-from window import utils as ut
-from window.common import WorkMode
-from window.pedalhandler import add_pedal_handler
+from . import utils as ut
+from .common import WorkMode
+from .pedalhandler import add_pedal_handler
 
 
 def pil_to_pixmap(image: Image) -> QPixmap:
@@ -90,8 +90,8 @@ class BoardWidget(QWidget):
             self._parent.go_to_left_or_right_pin(False)
             return True
 
-        if key in (Qt.Key_Enter, Qt.Key_Return) and self._parent.save_point_action.isEnabled():
-            self._parent.save_pin()
+        if key == Qt.Key_Space and self._parent.save_point_action.isEnabled():
+            self._parent.save_pin_and_go_to_next()
             return True
 
         if key == Qt.Key_Delete and self._parent.remove_point_action.isEnabled():
