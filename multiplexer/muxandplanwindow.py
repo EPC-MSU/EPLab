@@ -12,13 +12,13 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPu
 from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MultiplexerOutput
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
 from dialogs.save_geometry import update_widget_to_save_geometry
-from multiplexer.measurementplanrunner import MeasurementPlanRunner
-from multiplexer.measurementplanwidget import MeasurementPlanWidget
-from multiplexer.multiplexerpinoutwidget import MultiplexerPinoutWidget
 from window import utils as ut
 from window.common import WorkMode
 from window.pedalhandler import add_pedal_handler
 from window.scaler import update_scale_of_class
+from .measurementplanrunner import MeasurementPlanRunner
+from .measurementplanwidget import MeasurementPlanWidget
+from .multiplexerpinoutwidget import MultiplexerPinoutWidget
 
 
 logger = logging.getLogger("eplab")

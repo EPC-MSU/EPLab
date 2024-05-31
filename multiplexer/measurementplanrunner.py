@@ -4,7 +4,7 @@ File with class to run measurements according measurement plan.
 
 from typing import List
 from PyQt5.QtCore import pyqtSignal, QObject
-from multiplexer.measurementplanwidget import MeasurementPlanWidget
+from .measurementplanwidget import MeasurementPlanWidget
 
 
 class MeasurementPlanRunner(QObject):
