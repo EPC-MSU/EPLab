@@ -61,7 +61,7 @@ class Settings(SettingsHandler):
 
     def _read(self, settings: QSettings) -> None:
         """
-        :param settings: QSettings object from which parameter values ​​need to be read.
+        :param settings: QSettings object from which parameter values need to be read.
         """
 
         params = {"auto_transition": {"convert": ut.to_bool},
@@ -111,7 +111,7 @@ class Settings(SettingsHandler):
 
     def get_default_values(self) -> Dict[str, Any]:
         """
-        :return: dictionary with default values ​​of attributes.
+        :return: dictionary with default values of attributes.
         """
 
         return {param: self._get_default_value(param) for param in Settings.ATTRIBUTE_NAMES}
