@@ -15,11 +15,9 @@
     </message>
     <message>
         <location filename="settings.ui" line="131"/>
-        <source>Показывать предупреждения при
-добавлении/удалении точек,
+        <source>Показывать предупреждения при добавлении/удалении точек,
 приводящих к смещению нумерации</source>
-        <translation>Show warnings when
-adding/removing points,
+        <translation>Show warnings when adding/removing points,
 leading to a numbering shift</translation>
     </message>
     <message>
@@ -29,10 +27,8 @@ leading to a numbering shift</translation>
     </message>
     <message>
         <location filename="settings.ui" line="147"/>
-        <source>Максимальное напряжение при
-автоподборе, В</source>
-        <translation>Max voltage at
-optimal search of parameters, V</translation>
+        <source>Максимальное напряжение при автоподборе, В</source>
+        <translation>Max voltage at optimal search of parameters, V</translation>
     </message>
     <message>
         <location filename="settings.ui" line="180"/>
