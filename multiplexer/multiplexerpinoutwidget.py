@@ -193,7 +193,6 @@ class MultiplexerPinoutWidget(QWidget):
 
     MIN_WIDTH: int = 500
     SCROLL_AREA_MIN_HEIGHT: int = 100
-    TIMEOUT: int = 10
     mux_output_turned_on: pyqtSignal = pyqtSignal(MultiplexerOutput)
 
     def __init__(self, main_window, device_errors_handler: Optional[DeviceErrorsHandler] = None) -> None:
