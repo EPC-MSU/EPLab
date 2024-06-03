@@ -47,10 +47,8 @@ class MuxAndPlanWindow(QWidget):
     """
 
     COLOR_NOT_TESTED: str = "#F9E154"
-    DEFAULT_HEIGHT: int = 500
-    DEFAULT_MUX_HEIGHT: int = 300
-    DEFAULT_WIDTH: int = 700
     MARGIN: int = 10
+    MIN_WIDTH: int = 700
 
     def __init__(self, main_window) -> None:
         """
@@ -218,6 +216,7 @@ class MuxAndPlanWindow(QWidget):
         layout.addWidget(self.splitter)
         self.setLayout(layout)
         self.change_work_mode(self._parent.work_mode)
+        self.setMinimumWidth(MuxAndPlanWindow.MIN_WIDTH)
 
     def _is_arranged(self) -> Tuple[bool, QPoint, QSize, QPoint, QSize]:
         """
