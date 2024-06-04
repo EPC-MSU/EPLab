@@ -1,16 +1,22 @@
 import os
 from typing import Any, Dict
 from PyQt5.QtCore import pyqtSignal, QObject, QSettings
-from settings import utils as ut
+from . import utils as ut
 
 
 class SettingsHandler(QObject):
 
-    changed = pyqtSignal()
+    changed: pyqtSignal = pyqtSignal()
 
     def __init__(self, parent=None, *args, settings: QSettings = None, path: str = None) -> None:
-        super().__init__(parent=parent)
+        """
+        :param parent: parent object;
+        :param args:
+        :param settings: object that will be used during work;
+        :param path: path to the settings file.
+        """
 
+        super().__init__(parent=parent)
         if len(args) != 0:
             raise ValueError("Incorrect arguments")
 
@@ -41,10 +47,18 @@ class SettingsHandler(QObject):
 
     @property
     def settings_path(self) -> str:
+        """
+        :return: path to the settings file.
+        """
+
         return self.__settings.fileName()
 
     @settings_path.setter
     def settings_path(self, path: str) -> None:
+        """
+        :param path: new path to the settings file.
+        """
+
         if path is None:
             self.__settings = None
         else:
@@ -67,15 +81,16 @@ class SettingsHandler(QObject):
 
     def _read(self, settings: QSettings) -> None:
         """
-        Performs parameters reading. Should be implemented in sub-classes.
+        Performs parameters reading. Should be implemented in subclasses.
+        :param settings: QSettings object from which parameter values need to be read.
         """
 
         raise NotImplementedError("Read not implemented")
 
     def _read_parameters_from_settings(self, settings: QSettings, parameters: Dict[str, Dict[str, Any]]) -> None:
         """
-        :param settings: QSettings object from which parameter values ​​need to be read;
-        :param parameters: dictionary with parameters whose values ​​need to be read.
+        :param settings: QSettings object from which parameter values need to be read;
+        :param parameters: dictionary with parameters whose values need to be read.
         """
 
         for parameter_name, parameter_data in parameters.items():
@@ -88,14 +103,15 @@ class SettingsHandler(QObject):
 
     def _write(self, settings: QSettings) -> None:
         """
-        Performs parameters writing. Should be implemented in sub-classes.
+        Performs parameters writing. Should be implemented in subclasses.
+        :param settings: QSettings object into which parameter values should be written.
         """
 
         raise NotImplementedError("Write not implemented")
 
     def _write_parameters_to_settings(self, settings: QSettings, parameters: Dict[str, Dict[str, Any]]) -> None:
         """
-        :param settings: QSettings object into which parameter values ​​should be written;
+        :param settings: QSettings object into which parameter values should be written;
         :param parameters: dictionary with parameters whose values need to be written.
         """
 
@@ -109,6 +125,8 @@ class SettingsHandler(QObject):
     def export(self, *args, settings: QSettings = None, path: str = None) -> None:
         """
         Writes settings to QSettings or file and not binds to it.
+        :param settings:
+        :param path:
         """
 
         if len(args) != 0:
@@ -124,9 +142,11 @@ class SettingsHandler(QObject):
         self._write(settings)
         settings.sync()
 
-    def import_(self, *args, settings=None, path=None) -> None:
+    def import_(self, *args, settings: QSettings = None, path: str = None) -> None:
         """
         Reads settings from QSettings object or file and not binds to it.
+        :param settings:
+        :param path:
         """
 
         if len(args) != 0:
@@ -136,7 +156,7 @@ class SettingsHandler(QObject):
             pass
         elif path is not None:
             if not os.path.isfile(path):
-                raise LookupError("Settings file '{}' not found".format(path))
+                raise LookupError(f"Settings file '{path}' not found")
 
             settings = QSettings(path, QSettings.IniFormat)
         else:
@@ -148,13 +168,16 @@ class SettingsHandler(QObject):
 
         status = settings.status()
         if status == QSettings.AccessError:
-            raise RuntimeError("Failed to import settings from '{}': access error".format(settings.fileName()))
+            raise RuntimeError(f"Failed to import settings from '{settings.fileName()}': access error")
+
         if status == QSettings.FormatError:
-            raise RuntimeError("Failed to import settings from '{}': format error".format(settings.fileName()))
+            raise RuntimeError(f"Failed to import settings from '{settings.fileName()}': format error")
 
     def read(self, *args, settings: QSettings = None, path: str = None) -> None:
         """
         Reads settings from QSettings object or file and binds to it or reads from settings already bind.
+        :param settings: QSettings object from which parameter values need to be read;
+        :param path:
         """
 
         if len(args) != 0:
@@ -164,7 +187,7 @@ class SettingsHandler(QObject):
             self.__settings = settings
         elif path is not None:
             if not os.path.isfile(path):
-                raise LookupError("Settings file '{}' not found".format(path))
+                raise LookupError(f"Settings file '{path}' not found")
 
             self.__settings = QSettings(path, QSettings.IniFormat)
 
@@ -174,13 +197,14 @@ class SettingsHandler(QObject):
 
         status = self.__settings.status()
         if status == QSettings.AccessError:
-            raise RuntimeError("Failed to read settings from '{}': access error".format(self.__settings.fileName()))
+            raise RuntimeError(f"Failed to read settings from '{self.__settings.fileName()}': access error")
+
         if status == QSettings.FormatError:
-            raise RuntimeError("Failed to read settings from '{}': format error".format(self.__settings.fileName()))
+            raise RuntimeError(f"Failed to read settings from '{self.__settings.fileName()}': format error")
 
     def set_default_values(self, **kwargs) -> None:
         """
-        :param kwargs: dictionary with default values ​​of attributes.
+        :param kwargs: dictionary with default values of attributes.
         """
 
         for key, value in kwargs.items():
@@ -195,6 +219,8 @@ class SettingsHandler(QObject):
     def write(self, *args, settings: QSettings = None, path: str = None) -> None:
         """
         Writes settings to QSettings object or file and binds to it or writes to settings already bind.
+        :param settings: QSettings object into which parameter values should be written;
+        :param path:
         """
 
         if len(args) != 0:
@@ -209,7 +235,9 @@ class SettingsHandler(QObject):
 
         status = self.__settings.status()
         if status == QSettings.AccessError:
-            raise RuntimeError("Failed to write settings to '{}': access error".format(self.__settings.fileName()))
+            raise RuntimeError(f"Failed to write settings to '{self.__settings.fileName()}': access error")
+
         if status == QSettings.FormatError:
-            raise RuntimeError("Failed to write settings to '{}': format error".format(self.__settings.fileName()))
+            raise RuntimeError(f"Failed to write settings to '{self.__settings.fileName()}': format error")
+
         self.__settings.sync()

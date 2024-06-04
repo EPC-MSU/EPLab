@@ -79,7 +79,7 @@ class PlanAutoTransition(QObject):
         :return: True if auto-transition mode is saved in the settings.
         """
 
-        return self._auto_settings.get_auto_transition()
+        return self._auto_settings.auto_transition
 
     def _calculate_score_for_curves(self, settings: MeasurementSettings, curve_1: Optional[IVCurve] = None,
                                     curve_2: Optional[IVCurve] = None) -> Optional[float]:

@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtWidgets import QGridLayout, QLabel, QToolBar, QWidget
-from settings.legendwidget import LegendWidget
+from .legendwidget import LegendWidget
 
 
 class LowSettingsPanel(QWidget):

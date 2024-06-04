@@ -9,8 +9,8 @@ from epcore.elements import IVCurve, MeasurementSettings
 from epcore.product import EyePointProduct, MeasurementParameterOption
 from dialogs import ProgressWindow
 from settings.autosettings import AutoSettings
-from window.language import get_language, Language
-from window import utils as ut
+from . import utils as ut
+from .language import get_language, Language
 
 
 logger = logging.getLogger("eplab")
@@ -59,7 +59,7 @@ class BreakSignaturesSaver(QObject):
         :return: True if auto-transition mode is saved in the settings.
         """
 
-        return self._auto_settings.get_auto_transition()
+        return self._auto_settings.auto_transition
 
     def _check_required_settings(self, settings: MeasurementSettings) -> bool:
         """

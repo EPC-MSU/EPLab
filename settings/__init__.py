@@ -1,7 +1,7 @@
-from settings.autosettings import AutoSettings
-from settings.lowsettingspanel import LowSettingsPanel
-from settings.settings import Settings
-from settings.settingswindow import SettingsWindow
+from .autosettings import AutoSettings
+from .lowsettingspanel import LowSettingsPanel
+from .settings import Settings
+from .settingswindow import SettingsWindow
 
 
 __all__ = ["AutoSettings", "LowSettingsPanel", "Settings", "SettingsWindow"]

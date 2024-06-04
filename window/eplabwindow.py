@@ -355,7 +355,7 @@ class EPLabWindow(QMainWindow):
         the presence of break signatures is checked for all measurement settings.
         """
 
-        if (self._auto_settings.get_auto_transition() and self._product_name not in (None, cw.ProductName.EYEPOINT_H10)
+        if (self._auto_settings.auto_transition and self._product_name not in (None, cw.ProductName.EYEPOINT_H10)
                 and not check_break_signatures(self._break_signature_saver.DIR_PATH, self._product)):
             ut.show_message(qApp.translate("t", "Информация"),
                             qApp.translate("t", "Включен автопереход в режиме тестирования по плану. Но в приложении "
@@ -770,7 +770,7 @@ class EPLabWindow(QMainWindow):
         :param english: if True then the interface language will be English.
         """
 
-        language = Language.EN if english else self._auto_settings.get_language()
+        language = Language.EN if english else self._auto_settings.language
         if language is not Language.RU:
             translation_file = Translator.get_translator_file(language)
             self._translator: QTranslator = QTranslator()
@@ -1204,9 +1204,9 @@ class EPLabWindow(QMainWindow):
         self.hide_curve_a_action.setChecked(new_settings.hide_curve_a)
         self.hide_curve_b_action.setChecked(new_settings.hide_curve_b)
         self.sound_enabled_action.setChecked(new_settings.sound_enabled)
-        self._auto_settings.save_auto_transition(new_settings.auto_transition)
-        self._auto_settings.save_optimal_search_settings(max_optimal_voltage=new_settings.max_optimal_voltage)
-        self._auto_settings.save_pin_shift_warning_info(new_settings.pin_shift_warning_info)
+        self._auto_settings.auto_transition = new_settings.auto_transition
+        self._auto_settings.max_optimal_voltage = new_settings.max_optimal_voltage
+        self._auto_settings.pin_shift_warning_info = new_settings.pin_shift_warning_info
         self._update_tolerance(new_settings.tolerance)
 
     @pyqtSlot(str)
@@ -1299,7 +1299,7 @@ class EPLabWindow(QMainWindow):
         :param pin_centering: if True, then the selected pin will be centered on the board window.
         """
 
-        if self._auto_settings.get_pin_shift_warning_info() and self.measurement_plan.check_pin_indices_change():
+        if self._auto_settings.pin_shift_warning_info and self.measurement_plan.check_pin_indices_change():
             pin_index = self.measurement_plan.get_current_index() + 2
             main_text = qApp.translate("t", "Добавление точки приведет к сдвигу нумерации.")
             text = qApp.translate("t", "Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0},"
@@ -1458,11 +1458,11 @@ class EPLabWindow(QMainWindow):
             settings.work_mode = WorkMode.WRITE
         else:
             settings.work_mode = WorkMode.COMPARE
-        settings.auto_transition = self._auto_settings.get_auto_transition()
+        settings.auto_transition = self._auto_settings.auto_transition
         settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
         settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
-        settings.max_optimal_voltage = self._auto_settings.get_optimal_search_settings()["max_optimal_voltage"]
-        settings.pin_shift_warning_info = self._auto_settings.get_pin_shift_warning_info()
+        settings.max_optimal_voltage = self._auto_settings.max_optimal_voltage
+        settings.pin_shift_warning_info = self._auto_settings.pin_shift_warning_info
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
         settings.tolerance = self.tolerance
         return settings
@@ -1717,7 +1717,7 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def remove_pin(self) -> None:
-        if self._auto_settings.get_pin_shift_warning_info() and self.measurement_plan.check_pin_indices_change():
+        if self._auto_settings.pin_shift_warning_info and self.measurement_plan.check_pin_indices_change():
             pin_index = self.measurement_plan.get_current_index() + 2
             main_text = qApp.translate("t", "Удаление точки приведет к сдвигу нумерации.")
             text = qApp.translate("t", "Номера имеющихся точек, начиная с {}, будут уменьшены на 1.").format(pin_index)
@@ -1851,7 +1851,7 @@ class EPLabWindow(QMainWindow):
         """
 
         with self._device_errors_handler:
-            max_voltage = self._auto_settings.get_optimal_search_settings()["max_optimal_voltage"]
+            max_voltage = self._auto_settings.max_optimal_voltage
             searcher = Searcher(self._msystem.measurers[0], self._product.get_parameters(), max_voltage, True)
             optimal_settings = searcher.search_optimal_settings()
             self._set_msystem_settings(optimal_settings)
@@ -1949,6 +1949,7 @@ class EPLabWindow(QMainWindow):
         settings_window = SettingsWindow(self, self.get_settings(), self.dir_chosen_by_user)
         settings_window.apply_settings_signal.connect(self.apply_settings)
         settings_window.exec()
+        self._auto_settings.write()
         self.dir_chosen_by_user = settings_window.settings_directory
         self._check_break_signatures_for_auto_transition()
         # Break signatures are only saved when debugging the application
