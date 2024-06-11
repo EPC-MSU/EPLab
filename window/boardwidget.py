@@ -49,7 +49,7 @@ class BoardWidget(QWidget):
 
         super().__init__()
         self._board: Optional[MeasurementPlan] = None
-        self._board_image: QPixmap = None
+        self._board_image: Optional[QPixmap] = None
         self._control_pressed: bool = False
         self._parent = main_window
         self._previous_pos: Optional[QRect] = None
@@ -133,9 +133,10 @@ class BoardWidget(QWidget):
         layout.addWidget(self._scene)
         self.setLayout(layout)
 
+    @pyqtSlot()
     def _set_scene_rect(self) -> None:
         """
-        Method sets area of the scene visualized by view.
+        Slot sets area of the scene visualized by view.
         """
 
         def get_viewport_size_in_scene_coordinates() -> Tuple[float, float]:
@@ -198,8 +199,7 @@ class BoardWidget(QWidget):
         :param point: object with coordinates of new pin.
         """
 
-        if self._parent.work_mode is WorkMode.WRITE:
-            self._parent.create_new_pin(point, False)
+        if self._parent.work_mode is WorkMode.WRITE and self._parent.create_new_pin(point, False):
             self._parent.save_pin(False)
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
@@ -213,6 +213,7 @@ class BoardWidget(QWidget):
             key_event = QKeyEvent(event)
             if key_event.type() == QEvent.KeyPress:
                 return self._handle_key_press_event(obj, event)
+
             if key_event.type() == QEvent.KeyRelease:
                 return self._handle_key_release_event(obj, event)
 
@@ -266,7 +267,7 @@ class BoardWidget(QWidget):
     @pyqtSlot(int)
     def select_pin_with_index(self, index: int) -> None:
         """
-        Slot handles signal when pin
+        Slot handles signal when the pin is selected on scene.
         :param index: pin index.
         """
 
@@ -282,7 +283,7 @@ class BoardWidget(QWidget):
         if isinstance(index_or_component, GraphicsManualPinItem):
             component = index_or_component
         else:
-            for component_ in self._scene._components:
+            for component_ in getattr(self._scene, "_components", []):
                 if component_.number == index_or_component:
                     component = component_
                     break

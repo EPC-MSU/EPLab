@@ -1293,10 +1293,11 @@ class EPLabWindow(QMainWindow):
         self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
-    def create_new_pin(self, point: QPointF = None, pin_centering: bool = True) -> None:
+    def create_new_pin(self, point: QPointF = None, pin_centering: bool = True) -> bool:
         """
         :param point: coordinates of the point to be created;
         :param pin_centering: if True, then the selected pin will be centered on the board window.
+        :return: if True, then a new point was created, otherwise the point was not created.
         """
 
         if self._auto_settings.pin_shift_warning_info and self.measurement_plan.check_pin_indices_change():
@@ -1305,7 +1306,7 @@ class EPLabWindow(QMainWindow):
             text = qApp.translate("t", "Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0},"
                                        " будут увеличены на 1.").format(pin_index)
             if self._show_pin_shift_warning(main_text, text) != 0:
-                return
+                return False
 
         if point:
             x, y = point.x(), point.y()
@@ -1315,13 +1316,15 @@ class EPLabWindow(QMainWindow):
             x, y = point.x(), point.y()
         else:
             x, y = 0, 0
+
         pin = Pin(x, y, measurements=[])
         self.measurement_plan.append_pin(pin)
         self._board_window.add_pin(pin.x, pin.y, self.measurement_plan.get_current_index())
 
-        # It is important to initialize pin with real measurement. Otherwise user can create several empty points and
+        # It is important to initialize pin with real measurement. Otherwise, user can create several empty points and
         # they will not be unique. This will cause some errors during ufiv validation.
         self.update_current_pin(pin_centering)
+        return True
 
     @pyqtSlot()
     def create_report(self, auto_detection_report_path: bool = False) -> None:
