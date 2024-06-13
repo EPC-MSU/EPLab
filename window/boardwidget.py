@@ -17,7 +17,10 @@ from .pedalhandler import add_pedal_handler
 
 
 def pil_to_pixmap(image: Image) -> QPixmap:
-    # See https://stackoverflow.com/questions/34697559/pil-image-to-qpixmap-conversion-issue
+    """
+    See https://stackoverflow.com/questions/34697559/pil-image-to-qpixmap-conversion-issue
+    """
+
     if image.mode == "RGB":
         red, green, blue = image.split()
         image = Image.merge("RGB", (blue, green, red))
