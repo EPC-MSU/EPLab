@@ -54,7 +54,7 @@ class BoardWidget(QWidget):
         self._board: Optional[MeasurementPlan] = None
         self._board_image: Optional[QPixmap] = None
         self._control_pressed: bool = False
-        self._parent = main_window
+        self._main_window = main_window
         self._previous_pos: Optional[QRect] = None
         self._timer: QTimer = QTimer()
         self._timer.timeout.connect(self._set_scene_rect)
@@ -68,7 +68,7 @@ class BoardWidget(QWidget):
         :return: measurement plan.
         """
 
-        return self._parent.measurement_plan
+        return self._main_window.measurement_plan
 
     def _handle_key_press_event(self, obj: QObject, event: QEvent) -> bool:
         """
@@ -86,22 +86,22 @@ class BoardWidget(QWidget):
             return super().eventFilter(obj, event)
 
         if key in (Qt.Key_Left, Qt.Key_Up):
-            self._parent.go_to_left_or_right_pin(True)
+            self._main_window.go_to_left_or_right_pin(True)
             return True
 
         if key in (Qt.Key_Down, Qt.Key_Right):
-            self._parent.go_to_left_or_right_pin(False)
+            self._main_window.go_to_left_or_right_pin(False)
             return True
 
-        if key == Qt.Key_Space and self._parent.save_point_action.isEnabled():
-            self._parent.save_pin_and_go_to_next()
+        if key == Qt.Key_Space and self._main_window.save_point_action.isEnabled():
+            self._main_window.save_pin_and_go_to_next()
             return True
 
-        if key == Qt.Key_Delete and self._parent.remove_point_action.isEnabled():
-            self._parent.remove_pin()
+        if key == Qt.Key_Delete and self._main_window.remove_point_action.isEnabled():
+            self._main_window.remove_pin()
             return True
 
-        return self._parent.eventFilter(self._parent, event)
+        return self._main_window.eventFilter(self._main_window, event)
 
     def _handle_key_release_event(self, obj: QObject, event: QEvent) -> bool:
         """
@@ -202,8 +202,8 @@ class BoardWidget(QWidget):
         :param point: object with coordinates of new pin.
         """
 
-        if self._parent.work_mode is WorkMode.WRITE and self._parent.create_new_pin(point, False):
-            self._parent.save_pin(False)
+        if self._main_window.work_mode is WorkMode.WRITE and self._main_window.create_new_pin(point, False):
+            self._main_window.save_pin(False)
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         """
@@ -228,14 +228,15 @@ class BoardWidget(QWidget):
 
         return super().eventFilter(obj, event)
 
-    def get_default_pin_xy(self) -> QPointF:
+    def get_default_pin_xy(self) -> Tuple[float, float]:
         """
-        :return: point with coordinates in the center of the board.
+        :return: coordinates in the center of the board.
         """
 
         width = self._scene.width()
         height = self._scene.height()
-        return self._scene.mapToScene(int(width / 2), int(height / 2))
+        point = self._scene.mapToScene(int(width / 2), int(height / 2))
+        return point.x(), point.y()
 
     def remove_pin_from_board_image(self, index: int) -> None:
         """
@@ -275,7 +276,7 @@ class BoardWidget(QWidget):
         """
 
         self.measurement_plan.go_pin(index)
-        self._parent.update_current_pin(False)
+        self._main_window.update_current_pin(False)
 
     def show_component_centered(self, index_or_component: Union[int, GraphicsManualPinItem]) -> None:
         """

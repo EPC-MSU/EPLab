@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import Any, Callable, Optional
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
@@ -7,10 +8,13 @@ from epcore.elements import Pin
 from . import utils as ut
 from .common import WorkMode
 from .pinindextableitem import PinIndexTableItem
-from .tablewidget import TableWidget
+from .tablewidget import change_item_state, TableWidget
 
 
-def disconnect_signal(func: Callable[..., Any]):
+logger = logging.getLogger("eplab")
+
+
+def disconnect_item_changed_signal(func: Callable[..., Any]):
     """
     The decorator disconnects and reconnects the itemChanged signal to the slot after executing the decorated function.
     :param func: function to be decorated.
@@ -21,6 +25,7 @@ def disconnect_signal(func: Callable[..., Any]):
             self.itemChanged.disconnect()
         except Exception:
             pass
+
         result = func(self, *args, **kwargs)
         self.itemChanged.connect(self.handle_item_changed)
         return result
@@ -54,7 +59,7 @@ class CommentWidget(TableWidget):
 
     def _add_comment(self, index: int, comment: Optional[str] = None) -> None:
         """
-        Method adds a new comment to the table.
+        Method adds a new comment to the end of the table.
         :param index: index of the pin for which the comment needs to be added;
         :param comment: comment.
         """
@@ -62,9 +67,8 @@ class CommentWidget(TableWidget):
         self.insertRow(index)
         self.setItem(index, 0, PinIndexTableItem(index))
 
-        item = QTableWidgetItem()
+        item = self._create_table_item(self._read_only)
         item.setText(comment or "")
-        change_item_state(item, self._read_only)
         self.setItem(index, 1, item)
 
     def _change_row_color(self, index: int, pin: Pin) -> None:
@@ -121,13 +125,7 @@ class CommentWidget(TableWidget):
         return (self._main_window.new_point_action.isEnabled() and self._main_window.remove_point_action.isEnabled() and
                 self.row(self.itemAt(pos)) >= 0)
 
-    def _clear_table(self) -> None:
-        self.disconnect_item_selection_changed_signal()
-        _ = [self.removeRow(row) for row in range(self.rowCount(), -1, -1)]
-        self.clearContents()
-        self.connect_item_selection_changed_signal()
-
-    @disconnect_signal
+    @disconnect_item_changed_signal
     def _fill_table(self) -> None:
         """
         Method fills in a table with comments on the measurement plan pins.
@@ -188,7 +186,7 @@ class CommentWidget(TableWidget):
 
         self.item(index, 1).setText(comment)
 
-    @disconnect_signal
+    @disconnect_item_changed_signal
     def clear_table(self) -> None:
         """
         Method clears all information from table and removes all rows in table.
@@ -314,13 +312,3 @@ class CommentWidget(TableWidget):
             pin = self._main_window.measurement_plan.get_pin_with_index(index)
             self._change_row_color(index, pin)
         self._change_style_for_selected_row()
-
-
-def change_item_state(item: QTableWidgetItem, read_only: bool) -> None:
-    """
-    :param item: table widget item as editable or not editable;
-    :param read_only: if True, then change the table widget item to an editable state, otherwise to a non-editable
-    state.
-    """
-
-    item.setFlags(item.flags() ^ Qt.ItemIsEditable if read_only else item.flags() | Qt.ItemIsEditable)

@@ -2,10 +2,9 @@
 File with class for widget to show short information from measurement plan.
 """
 
-from typing import Any, Generator, List, Optional
-from PyQt5.QtCore import QCoreApplication as qApp, Qt
+from typing import Generator, List, Optional
+from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtGui import QCloseEvent
-from PyQt5.QtWidgets import QTableWidgetItem
 from epcore.analogmultiplexer.base import MultiplexerOutput
 from epcore.elements import MeasurementSettings, Pin
 from epcore.product import EyePointProduct
@@ -34,54 +33,20 @@ class MeasurementPlanWidget(TableWidget):
         self._lang: Language = get_language()
         self._standby_mode: bool = False
 
-    def _add_pin_to_table(self, index: int, pin: Pin) -> None:
+    def _add_pin(self, index: int, pin: Pin) -> None:
         """
         Method adds pin to table with information about measurement plan.
         :param index: index of pin to be added;
-        :param pin: point to be added.
+        :param pin: pin to be added.
         """
 
         self.insertRow(index)
         self.setItem(index, 0, PinIndexTableItem(index))
 
-        if pin.multiplexer_output:
-            channel = pin.multiplexer_output.channel_number
-            module = pin.multiplexer_output.module_number
-        else:
-            channel = None
-            module = None
-        item_module = self._create_table_item(module)
-        self.setItem(index, 1, item_module)
-        item_channel = self._create_table_item(channel)
-        self.setItem(index, 2, item_channel)
-
-        settings = pin.get_reference_and_test_measurements()[-1]
-        if settings:
-            for i, value in enumerate(self._get_values_for_parameters(settings)):
-                item = self._create_table_item(value)
-                self.setItem(index, 3 + i, item)
-        else:
-            for i in range(3):
-                item = self._create_table_item()
-                self.setItem(index, 3 + i, item)
-
-    def _clear_table(self) -> None:
-        """
-        Method clears all information from table for measurement plan and removes all rows in table.
-        """
-
-        self.disconnect_item_selection_changed_signal()
-        _ = [self.removeRow(row) for row in range(self.rowCount(), -1, -1)]
-        self.clearContents()
-        self.connect_item_selection_changed_signal()
-
-    @staticmethod
-    def _create_table_item(value: Optional[Any] = None) -> QTableWidgetItem:
-        item = QTableWidgetItem()
-        item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-        if value:
-            item.setText(str(value))
-        return item
+        for column, in range(1, 7):
+            item = self._create_table_item()
+            self.setItem(index, column, item)
+        self._write_pin_info_into_table(index, pin)
 
     def _fill_table(self) -> None:
         """
@@ -90,10 +55,10 @@ class MeasurementPlanWidget(TableWidget):
 
         self._clear_table()
         for pin_index, pin in self._main_window.measurement_plan.all_pins_iterator():
-            self._add_pin_to_table(pin_index, pin)
+            self._add_pin(pin_index, pin)
         self.select_row_for_current_pin()
 
-    def _get_values_for_parameters(self, settings: MeasurementSettings) -> Generator:
+    def _get_values_for_parameters(self, settings: MeasurementSettings) -> Generator[str, None, None]:
         """
         Method returns values of frequency, voltage and sensitivity for given measurement settings.
         :param settings: measurement settings.
@@ -109,27 +74,32 @@ class MeasurementPlanWidget(TableWidget):
                 if available_option.name == options[parameter]:
                     yield available_option.label_ru if self._lang is Language.RU else available_option.label_en
 
-    def _update_pin_in_table(self, pin_index: int, pin: Pin) -> None:
+    def _write_pin_info_into_table(self, index: int, pin: Pin) -> None:
         """
-        Method updates pin information in table.
-        :param pin_index: index of pin to be updated;
-        :param pin: pin to be updated.
+        Method writes pin information into the table.
+        :param index: pin index;
+        :param pin: pin.
         """
 
         if pin.multiplexer_output:
-            values = pin.multiplexer_output.module_number, pin.multiplexer_output.channel_number
-            for column, value in enumerate(values, start=1):
-                item = self.item(pin_index, column)
+            channel = pin.multiplexer_output.channel_number
+            module = pin.multiplexer_output.module_number
+        else:
+            channel = None
+            module = None
+        for column, value in enumerate((module, channel), start=1):
+            item = self.item(index, column)
+            if value:
                 item.setText(str(value))
 
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
-            for index, value in enumerate(self._get_values_for_parameters(settings)):
-                item = self.item(pin_index, 3 + index)
+            for i, value in enumerate(self._get_values_for_parameters(settings)):
+                item = self.item(index, 3 + i)
                 item.setText(value)
         else:
-            for index in range(3):
-                item = self.item(pin_index, 3 + index)
+            for i in range(3):
+                item = self.item(index, 3 + i)
                 item.setText("")
 
     def closeEvent(self, event: QCloseEvent) -> None:
@@ -144,8 +114,7 @@ class MeasurementPlanWidget(TableWidget):
 
     def get_amount_of_pins(self) -> int:
         """
-        Method returns amount of pins in measurement plan.
-        :return: amount of pins.
+        :return: amount of pins in measurement plan.
         """
 
         return self.rowCount()
@@ -163,6 +132,7 @@ class MeasurementPlanWidget(TableWidget):
             pin_channel = self.item(index, 2).text()
             if pin_channel == channel and pin_module == module:
                 return index
+
         return None
 
     def handle_current_pin_change(self, index: int) -> None:
@@ -173,13 +143,13 @@ class MeasurementPlanWidget(TableWidget):
 
         pin = self._main_window.measurement_plan.get_pin_with_index(index)
         if self._main_window.measurement_plan.pins_number > self.rowCount():
-            self._add_pin_to_table(index, pin)
+            self._add_pin(index, pin)
         elif self._main_window.measurement_plan.pins_number < self.rowCount():
             if index is None:
                 index = 0
             self._remove_row(index)
         elif index is not None:
-            self._update_pin_in_table(index, pin)
+            self._write_pin_info_into_table(index, pin)
         self._update_indexes(index)
 
     def set_work_mode(self, work_mode: WorkMode) -> None:

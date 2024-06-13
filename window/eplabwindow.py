@@ -138,10 +138,10 @@ class EPLabWindow(QMainWindow):
 
         if uri_1 is None and uri_2 is None:
             self._connection_checker.run_check()
-            self._disconnect_measurers()
+            self._disconnect_devices()
         else:
             uris, product_name = analyze_connection_params([uri_1, uri_2])
-            self.connect_measurers(*uris, product_name=product_name)
+            self.connect_devices(*uris, product_name=product_name)
 
         if path:
             self.load_board(path)
@@ -193,7 +193,7 @@ class EPLabWindow(QMainWindow):
     @property
     def is_measured_pin(self) -> bool:
         """
-        :return: True, if the measurement plan contains a pin with a measured reference IV-curve.
+        :return: True, if the measurement plan contains a pin with a measured reference signature.
         """
 
         return self._measured_pins_checker.is_measured_pin
@@ -217,7 +217,7 @@ class EPLabWindow(QMainWindow):
     @property
     def tolerance(self) -> float:
         """
-        :return: tolerance value for comparing IV curves.
+        :return: tolerance value for comparing signatures.
         """
 
         return self._score_wrapper.tolerance
@@ -235,7 +235,7 @@ class EPLabWindow(QMainWindow):
         Method adds the required callback functions to the measurement plan.
         """
 
-        self.measurement_plan.add_callback_func_for_pin_changes(self._handle_current_pin_change)
+        self.measurement_plan.add_callback_func_for_pin_changes(self._change_menu_items_for_current_pin_change)
         self.measurement_plan.add_callback_func_for_pin_changes(self._comment_widget.handle_current_pin_change)
         self.measurement_plan.add_callback_func_for_pin_changes(
             self._mux_and_plan_window.measurement_plan_widget.handle_current_pin_change)
@@ -254,7 +254,7 @@ class EPLabWindow(QMainWindow):
         for width in ("CRITICAL_WIDTH_FOR_LINUX_EN", "CRITICAL_WIDTH_FOR_LINUX_RU", "CRITICAL_WIDTH_FOR_WINDOWS_EN",
                       "CRITICAL_WIDTH_FOR_WINDOWS_RU", "INIT_HEIGHT", "MIN_WIDTH_IN_LINUX", "MIN_WIDTH_IN_WINDOWS"):
             width_value = getattr(self, width, None)
-            if width_value is not None:
+            if isinstance(width_value, (int, float)):
                 setattr(self, width, int(scale_factor * width_value))
 
     def _adjust_plot_params(self, settings: MeasurementSettings) -> None:
@@ -268,17 +268,38 @@ class EPLabWindow(QMainWindow):
 
     def _calculate_difference(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> float:
         """
-        :param curve_1: first IV-curve;
-        :param curve_2: second IV-curve;
+        :param curve_1: first signature;
+        :param curve_2: second signature;
         :param settings: measurement settings.
-        :return: difference between given curves at given settings.
+        :return: difference between given signatures at given settings.
         """
 
         # It is very important to set relevant noise levels
         self._comparator.set_min_ivc(*self._get_noise_amplitudes(settings))
         return self._comparator.compare_ivc(curve_1, curve_2)
 
-    def _change_save_point_name(self, mode: Optional[WorkMode] = None) -> None:
+    def _change_menu_items_for_current_pin_change(self, *args) -> None:
+        """
+        Method changes the states of menu items when the current pin in the measurement plan changes.
+        """
+
+        if self._mux_and_plan_window.measurement_plan_runner.is_running:
+            return
+
+        if self.measurement_plan.pins_number == 0:
+            for action in (self.next_point_action, self.previous_point_action, self.remove_point_action,
+                           self.save_point_action, self.pin_index_widget):
+                action.setEnabled(False)
+        else:
+            enable = bool(self.work_mode is WorkMode.WRITE and self.measurement_plan.multiplexer is None)
+            self.remove_point_action.setEnabled(enable)
+            enable = self.work_mode is not WorkMode.COMPARE
+            for action in (self.next_point_action, self.previous_point_action, self.pin_index_widget):
+                action.setEnabled(enable)
+            self.save_point_action.setEnabled(self.work_mode != WorkMode.READ_PLAN)
+            self.set_enabled_save_point_action_at_test_mode()
+
+    def _change_save_point_action_name(self, mode: Optional[WorkMode] = None) -> None:
         """
         :param mode: new work mode.
         """
@@ -315,7 +336,7 @@ class EPLabWindow(QMainWindow):
         enable = bool(mode is not WorkMode.COMPARE and self.measurement_plan and
                       self.measurement_plan.multiplexer is not None)
         self.start_or_stop_entire_plan_measurement_action.setEnabled(enable)
-        self._change_save_point_name(mode)
+        self._change_save_point_action_name(mode)
 
         self._player.set_work_mode(mode)
         self._comment_widget.set_work_mode(mode)
@@ -342,7 +363,7 @@ class EPLabWindow(QMainWindow):
     def _change_work_mode_for_new_measurement_plan(self) -> None:
         """
         Method changes the work mode of the main window when a new measurement plan is initialized. If the new plan
-        does not contain pins with measured reference IV-curves, and the current work mode is TEST, then you need to
+        does not contain pins with measured reference signatures, and the current work mode is TEST, then you need to
         change the work mode to COMPARE (see ticket #89690).
         """
 
@@ -425,7 +446,7 @@ class EPLabWindow(QMainWindow):
         self._current_curve = None
         self._reference_curve = None
         self._test_curve = None
-        self._change_save_point_name()
+        self._change_save_point_action_name()
 
     def _connect_devices(self, measurement_system: MeasurementSystem, product_name: Optional[cw.ProductName] = None
                          ) -> None:
@@ -533,7 +554,7 @@ class EPLabWindow(QMainWindow):
             mode = self.work_mode
         self.search_optimal_action.setEnabled(mode in (WorkMode.COMPARE, WorkMode.WRITE))
 
-    def _disconnect_measurers(self) -> None:
+    def _disconnect_devices(self) -> None:
         self._timer.stop()
         if self.start_or_stop_entire_plan_measurement_action.isChecked():
             self.start_or_stop_entire_plan_measurement_action.setChecked(False)
@@ -556,7 +577,7 @@ class EPLabWindow(QMainWindow):
 
     def _get_curves_for_legend(self) -> Dict[str, bool]:
         """
-        :return: a dictionary containing the curves displayed in the application window.
+        :return: a dictionary containing the signatures displayed in the application window.
         """
 
         return {"current": bool(self.current_curve_plot.curve),
@@ -606,38 +627,14 @@ class EPLabWindow(QMainWindow):
         to the next pin.
         """
 
-        if prev_pin and self.previous_point_action.isEnabled():
-            self.go_to_left_or_right_pin(True)
-        elif not prev_pin and self.previous_point_action.isEnabled():
-            self.go_to_left_or_right_pin(False)
-
-    def _handle_current_pin_change(self, index: int = None) -> None:
-        """
-        Method processes the change in the index of the current pin in the testing plan. In particular, it is checked
-        that there are pins in the measurement plan.
-        :param index: index of the current pin in the measurement plan.
-        """
-
-        if self._mux_and_plan_window.measurement_plan_runner.is_running:
-            return
-
-        if self.measurement_plan.pins_number == 0:
-            for action in (self.next_point_action, self.previous_point_action, self.remove_point_action,
-                           self.save_point_action, self.pin_index_widget):
-                action.setEnabled(False)
-        else:
-            enable = bool(self.work_mode is WorkMode.WRITE and self.measurement_plan.multiplexer is None)
-            self.remove_point_action.setEnabled(enable)
-            enable = self.work_mode is not WorkMode.COMPARE
-            for action in (self.next_point_action, self.previous_point_action, self.pin_index_widget):
-                action.setEnabled(enable)
-            self.save_point_action.setEnabled(self.work_mode != WorkMode.READ_PLAN)
-            self.set_enabled_save_point_action_at_test_mode()
+        action = self.previous_point_action if prev_pin else self.next_point_action
+        if action.isEnabled():
+            self.go_to_left_or_right_pin(prev_pin)
 
     def _handle_freezing_curves_with_pedal(self, pressed: bool) -> None:
         """
-        Method freezes the measurers curves using a pedal. If at least one curve is not frozen, then all curves are
-        frozen by pedal. If all curves are frozen, unfreeze all curves.
+        Method freezes the measurers signatures using a pedal. The signatures are frozen when the pedal is pressed in
+        comparison mode. And they defrost when the pedal is released.
         :param pressed: if True, then the pedal is pressed, otherwise it is released.
         """
 
@@ -661,7 +658,7 @@ class EPLabWindow(QMainWindow):
         else:
             self._device_errors_handler.reset_error()
             self._mux_and_plan_window.close_and_stop_plan_measurement()
-            self._disconnect_measurers()
+            self._disconnect_devices()
             self._connection_checker.run_check()
 
     def _init_tolerance(self) -> None:
@@ -815,7 +812,7 @@ class EPLabWindow(QMainWindow):
                 self._skip_curve = False
             else:
                 curves, measurement_settings = self._get_curves_for_periodic_task()
-                self._update_curves(curves, measurement_settings)
+                self._update_signatures(curves, measurement_settings)
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.check_pin()
                 else:
@@ -824,6 +821,7 @@ class EPLabWindow(QMainWindow):
                                                                      self._current_curve, self._reference_curve)
                     # Break signatures are only saved when debugging the application
                     # self._break_signature_saver.save_signature(measurement_settings, curves["current"])
+
                 if self._settings_update_next_cycle:
                     # New curve with new settings - we must update plot parameters
                     self._adjust_plot_params(self._settings_update_next_cycle)
@@ -849,6 +847,10 @@ class EPLabWindow(QMainWindow):
         self._reference_curve = None
 
     def _report_measurers_disconnected(self) -> None:
+        """
+        Method sends a signal that the measurers have been disconnected by user.
+        """
+
         self.measurers_connected.emit(False)
 
     def _reset_board(self) -> None:
@@ -884,9 +886,9 @@ class EPLabWindow(QMainWindow):
                     result = 2
         return result in (0, 1)
 
-    def _save_last_curves(self, curves: Dict[str, Optional[IVCurve]]) -> None:
+    def _save_last_signtures(self, curves: Dict[str, Optional[IVCurve]]) -> None:
         """
-        :param curves: dictionary with new curves.
+        :param curves: dictionary with new signatures.
         """
 
         curves_dict = {"current": "_current_curve",
@@ -1060,14 +1062,77 @@ class EPLabWindow(QMainWindow):
         self.work_mode_changed.emit(mode)
         if mode in (WorkMode.TEST, WorkMode.WRITE) and self._measurement_plan.multiplexer:
             self.open_mux_window()
-        self._handle_current_pin_change()
+        self._change_menu_items_for_current_pin_change()
 
-    def _update_current_pin_in_read_plan_mode(self) -> None:
-        current_pin = self._measurement_plan.get_current_pin()
-        if current_pin:
-            ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements()
+    def _update_mux_actions(self) -> None:
+        """
+        Method updates the state of menu actions responsible for working with the multiplexer.
+        """
+
+        enable = bool(self._measurement_plan and self._measurement_plan.multiplexer is not None)
+        self.open_mux_window_action.setEnabled(enable)
+        if not enable:
+            self._mux_and_plan_window.close()
+
+        enable = bool(enable and self.work_mode is not WorkMode.COMPARE)
+        self.start_or_stop_entire_plan_measurement_action.setEnabled(enable)
+
+    def _update_scroll_areas_for_parameters(self, available: Dict[EyePointProduct.Parameter,
+                                                                  List[MeasurementParameterOption]]) -> None:
+        """
+        Method updates the scroll areas for different parameters of the measuring system.
+        :param available: dictionary with available options for parameters.
+        """
+
+        for parameter, scroll_area in self._parameters_widgets.items():
+            scroll_area.update_options(available[parameter])
+
+    def _update_signatures(self, curves: Dict[str, Optional[IVCurve]], settings: Optional[MeasurementSettings] = None
+                           ) -> None:
+        """
+        Method updates signatures and calculates (if required) their difference.
+        :param curves: dictionary with new signatures;
+        :param settings: measurement settings.
+        """
+
+        self._save_last_signtures(curves)
+
+        # Update plots
+        for hide, plot, curve in zip((self._hide_reference_curve, self._hide_current_curve, False),
+                                     (self.reference_curve_plot, self.current_curve_plot, self.test_curve_plot),
+                                     (self._reference_curve, self._current_curve, self._test_curve)):
+            if not hide:
+                plot.set_curve(curve)
+            else:
+                plot.set_curve(None)
+
+        # Update difference
+        curve_1 = self._reference_curve
+        if self._work_mode in (WorkMode.COMPARE, WorkMode.TEST):
+            curve_2 = self._current_curve
+        elif self._work_mode is WorkMode.READ_PLAN:
+            curve_2 = self._test_curve
         else:
-            ref_for_plan, test_for_plan, settings = None, None, None
+            curve_2 = None
+        if None not in (curve_1, curve_2, settings):
+            difference = self._calculate_difference(curve_1, curve_2, settings)
+            self._score_wrapper.set_score(difference)
+            self._player.update_score(difference)
+        else:
+            self._score_wrapper.set_dummy_score()
+
+        if settings is not None:
+            self._set_plot_parameters_to_low_settings_panel(settings)
+
+    def _update_signatures_and_settings_in_plan_reading_mode(self, ref_curve: Optional[Measurement],
+                                                             test_curve: Optional[Measurement],
+                                                             settings: Optional[MeasurementSettings]) -> None:
+        """
+        :param ref_curve: reference measurement;
+        :param test_curve: test measurement;
+        :param settings: measurement settings.
+        """
+
         with self._device_errors_handler:
             if settings:
                 available = {
@@ -1096,9 +1161,9 @@ class EPLabWindow(QMainWindow):
                 self._set_options_to_ui(options)
                 self._adjust_plot_params(settings)
 
-                curves = {"reference": None if not ref_for_plan else ref_for_plan.ivc,
-                          "test": None if not test_for_plan else test_for_plan.ivc}
-                self._update_curves(curves, settings)
+                curves = {"reference": None if not ref_curve else ref_curve.ivc,
+                          "test": None if not test_curve else test_curve.ivc}
+                self._update_signatures(curves, settings)
             else:
                 for plot in (self.reference_curve_plot, self.current_curve_plot, self.test_curve_plot):
                     plot.set_curve(None)
@@ -1106,78 +1171,25 @@ class EPLabWindow(QMainWindow):
                 self._clear_widgets()
                 self.pin_index_widget.setText(pin_index)
 
-    def _update_current_pin_in_test_and_write_mode(self) -> None:
-        current_pin = self._measurement_plan.get_current_pin()
-        ref_for_plan, test_for_plan, settings = current_pin.get_reference_and_test_measurements() if current_pin else \
-            (None, None, None)
+    def _update_signatures_and_settings_in_test_and_write_mode(self, ref_curve: Optional[Measurement],
+                                                               test_curve: Optional[Measurement],
+                                                               settings: Optional[MeasurementSettings]) -> None:
+        """
+        :param ref_curve: reference measurement;
+        :param test_curve: test measurement;
+        :param settings: measurement settings.
+        """
+
         with self._device_errors_handler:
             if settings:
-                self._reference_curve = None if not ref_for_plan else ref_for_plan.ivc
-                self._test_curve = None if not test_for_plan else test_for_plan.ivc
+                self._reference_curve = None if not ref_curve else ref_curve.ivc
+                self._test_curve = None if not test_curve else test_curve.ivc
                 self._set_msystem_settings(settings)
                 options = self._product.settings_to_options(settings)
                 self._set_options_to_ui(options)
             else:
                 self._reference_curve = None
                 self._test_curve = None
-
-    def _update_curves(self, curves: Dict[str, Optional[IVCurve]], settings: MeasurementSettings = None) -> None:
-        """
-        Method updates curves and calculates (if required) score.
-        :param curves: dictionary with new curves;
-        :param settings: measurement settings.
-        """
-
-        self._save_last_curves(curves)
-
-        # Update plots
-        for hide, plot, curve in zip((self._hide_reference_curve, self._hide_current_curve, False),
-                                     (self.reference_curve_plot, self.current_curve_plot, self.test_curve_plot),
-                                     (self._reference_curve, self._current_curve, self._test_curve)):
-            if not hide:
-                plot.set_curve(curve)
-            else:
-                plot.set_curve(None)
-
-        # Update score
-        curve_1 = self._reference_curve
-        if self._work_mode in (WorkMode.COMPARE, WorkMode.TEST):
-            curve_2 = self._current_curve
-        elif self._work_mode is WorkMode.READ_PLAN:
-            curve_2 = self._test_curve
-        else:
-            curve_2 = None
-        if None not in (curve_1, curve_2, settings):
-            difference = self._calculate_difference(curve_1, curve_2, settings)
-            self._score_wrapper.set_score(difference)
-            self._player.update_score(difference)
-        else:
-            self._score_wrapper.set_dummy_score()
-        if settings is not None:
-            self._set_plot_parameters_to_low_settings_panel(settings)
-
-    def _update_mux_actions(self) -> None:
-        """
-        Method updates the state of menu actions responsible for working with the multiplexer.
-        """
-
-        enable = bool(self._measurement_plan and self._measurement_plan.multiplexer is not None)
-        self.open_mux_window_action.setEnabled(enable)
-        if not enable:
-            self._mux_and_plan_window.close()
-        enable = bool(self.work_mode is not WorkMode.COMPARE and self._measurement_plan and
-                      self._measurement_plan.multiplexer is not None)
-        self.start_or_stop_entire_plan_measurement_action.setEnabled(enable)
-
-    def _update_scroll_areas_for_parameters(self, available: Dict[EyePointProduct.Parameter,
-                                                                  List[MeasurementParameterOption]]) -> None:
-        """
-        Method updates the scroll areas for different parameters of the measuring system.
-        :param available: dictionary with available options for parameters.
-        """
-
-        for parameter, scroll_area in self._parameters_widgets.items():
-            scroll_area.update_options(available[parameter])
 
     def _update_tolerance(self, tolerance: float) -> None:
         """
@@ -1222,9 +1234,9 @@ class EPLabWindow(QMainWindow):
 
     def check_good_difference(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> bool:
         """
-        Method calculates the difference for the given IV-curves and compares the calculated value with the tolerance.
-        :param curve_1: first IV-curve;
-        :param curve_2: second IV-curve;
+        Method calculates the difference for the given signatures and compares the calculated value with the tolerance.
+        :param curve_1: first signature;
+        :param curve_2: second signature;
         :param settings: measurement settings.
         :return: True if difference is not greater than the tolerance, otherwise False.
         """
@@ -1247,8 +1259,8 @@ class EPLabWindow(QMainWindow):
             self._report_generation_thread.stop_thread()
             self._report_generation_thread.wait()
 
-    def connect_measurers(self, uri_1: Optional[str] = None, uri_2: Optional[str] = None,
-                          mux_uri: str = None, product_name: Optional[cw.ProductName] = None) -> None:
+    def connect_devices(self, uri_1: Optional[str] = None, uri_2: Optional[str] = None,
+                        mux_uri: str = None, product_name: Optional[cw.ProductName] = None) -> None:
         """
         Method connects IV-measurers and a multiplexer with given URIs.
         :param uri_1: URI for the first IV-measurer;
@@ -1263,12 +1275,12 @@ class EPLabWindow(QMainWindow):
         if measurement_system:
             self._connect_devices(measurement_system, product_name)
         else:
-            self._disconnect_measurers()
+            self._disconnect_devices()
 
     @pyqtSlot()
     def connect_or_disconnect(self) -> None:
         """
-        Slot shows dialog window to select measurers for connection.
+        Slot displays a dialog box for selecting devices to connect or disconnect.
         """
 
         cw.show_connection_window(self, self._product_name)
@@ -1289,11 +1301,11 @@ class EPLabWindow(QMainWindow):
         self._mux_and_plan_window.update_info()
         self._comment_widget.update_info()
         self._add_callbacks_to_measurement_plan()
-        self._handle_current_pin_change()
+        self._change_menu_items_for_current_pin_change()
         self._change_work_mode_for_new_measurement_plan()
 
     @pyqtSlot()
-    def create_new_pin(self, point: QPointF = None, pin_centering: bool = True) -> bool:
+    def create_new_pin(self, point: Optional[QPointF] = None, pin_centering: bool = True) -> bool:
         """
         :param point: coordinates of the point to be created;
         :param pin_centering: if True, then the selected pin will be centered on the board window.
@@ -1308,15 +1320,7 @@ class EPLabWindow(QMainWindow):
             if self._show_pin_shift_warning(main_text, text) != 0:
                 return False
 
-        if point:
-            x, y = point.x(), point.y()
-        elif self.measurement_plan.image:
-            # Place at the center of current viewpoint by default
-            point = self._board_window.get_default_pin_xy()
-            x, y = point.x(), point.y()
-        else:
-            x, y = 0, 0
-
+        x, y = point.x(), point.y() if point else self.get_default_pin_coordinates()
         pin = Pin(x, y, measurements=[])
         self.measurement_plan.append_pin(pin)
         self._board_window.add_pin_to_board_image(pin.x, pin.y, self.measurement_plan.get_current_index())
@@ -1361,7 +1365,7 @@ class EPLabWindow(QMainWindow):
         if not self._save_changes_in_measurement_plan(qApp.translate("t", "План тестирования не был сохранен.")):
             return
 
-        self._disconnect_measurers()
+        self._disconnect_devices()
         self._report_measurers_disconnected()
 
     @pyqtSlot(bool)
@@ -1426,8 +1430,7 @@ class EPLabWindow(QMainWindow):
 
         if self._measurement_plan.image:
             # Place at the center of current viewpoint by default
-            point = self._board_window.get_default_pin_xy()
-            x, y = point.x(), point.y()
+            x, y = self._board_window.get_default_pin_xy()
         else:
             x, y = 0, 0
         return x, y
@@ -1579,7 +1582,7 @@ class EPLabWindow(QMainWindow):
         if measurement_system:
             self._connect_devices(measurement_system, product_name)
         else:
-            self._disconnect_measurers()
+            self._disconnect_devices()
 
     @pyqtSlot(bool)
     def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:
@@ -1666,7 +1669,7 @@ class EPLabWindow(QMainWindow):
                 self._change_work_mode(WorkMode.READ_PLAN)
             self._comment_widget.update_info()
             self._add_callbacks_to_measurement_plan()
-            self._handle_current_pin_change()
+            self._change_menu_items_for_current_pin_change()
 
             self.update_current_pin()
             self._change_work_mode_for_new_measurement_plan()
@@ -1967,10 +1970,13 @@ class EPLabWindow(QMainWindow):
         index = self._measurement_plan.get_current_index()
         self.pin_index_widget.set_index(index)
         self._board_window.select_pin_on_scene(index, pin_centering)
+
+        pin = self._measurement_plan.get_current_pin()
+        ref_curve, test_curve, settings = pin.get_reference_and_test_measurements() if pin else (None, None, None)
         if self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
-            self._update_current_pin_in_test_and_write_mode()
+            self._update_signatures_and_settings_in_test_and_write_mode(ref_curve, test_curve, settings)
         elif self._work_mode == WorkMode.READ_PLAN:
-            self._update_current_pin_in_read_plan_mode()
+            self._update_signatures_and_settings_in_plan_reading_mode(ref_curve, test_curve, settings)
 
         if self._mux_and_plan_window:
             self._mux_and_plan_window.select_current_pin()

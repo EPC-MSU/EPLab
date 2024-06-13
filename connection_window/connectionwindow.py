@@ -129,7 +129,7 @@ def show_connection_window(main_window, product_name: ProductName) -> None:
 
     window = ConnectionWindow(main_window, ut.get_current_measurers_uris(main_window),
                               main_window.get_multiplexer_uri(), product_name)
-    window.connect_measurers_signal.connect(lambda data: main_window.connect_measurers(**data))
+    window.connect_measurers_signal.connect(lambda data: main_window.connect_devices(**data))
     window.disconnect_measurers_signal.connect(main_window.disconnect_measurers)
     main_window.measurers_connected.connect(window.handle_connection)
     window.exec()

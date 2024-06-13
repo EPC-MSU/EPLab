@@ -1,7 +1,17 @@
 from typing import Any, Callable, List, Optional
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget
+from PyQt5.QtCore import pyqtSlot, Qt
+from PyQt5.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget, QTableWidgetItem
 from .pinindextableitem import PinIndexTableItem
+
+
+def change_item_state(item: QTableWidgetItem, read_only: bool) -> None:
+    """
+    :param item: table widget item as editable or not editable;
+    :param read_only: if True, then change the table widget item to an editable state, otherwise to a non-editable
+    state.
+    """
+
+    item.setFlags(item.flags() ^ Qt.ItemIsEditable if read_only else item.flags() | Qt.ItemIsEditable)
 
 
 class TableWidget(QTableWidget):
@@ -19,6 +29,38 @@ class TableWidget(QTableWidget):
         self._dont_go_to_selected_pin: bool = False
         self._main_window = main_window
         self._init_ui(headers)
+
+    def _clear_table(self) -> None:
+        self._disconnect_item_selection_changed_signal()
+        _ = [self.removeRow(row) for row in range(self.rowCount(), -1, -1)]
+        self.clearContents()
+        self._connect_item_selection_changed_signal()
+
+    def _connect_item_selection_changed_signal(self, callback_function: Callable[..., Any] = None) -> None:
+        """
+        :param callback_function: callback function that should be called when the selected item changes.
+        """
+
+        if not callback_function:
+            callback_function = self.set_pin_as_current
+        self.itemSelectionChanged.connect(callback_function)
+
+    @staticmethod
+    def _create_table_item(read_only: bool = True) -> QTableWidgetItem:
+        """
+        :param read_only: if True, then item will be non-editable.
+        :return: new table item.
+        """
+
+        item = QTableWidgetItem()
+        change_item_state(item, read_only)
+        return item
+
+    def _disconnect_item_selection_changed_signal(self) -> None:
+        try:
+            self.itemSelectionChanged.disconnect()
+        except Exception:
+            pass
 
     def _init_ui(self, headers: List[str]) -> None:
         """
@@ -58,21 +100,6 @@ class TableWidget(QTableWidget):
             item = self.item(row, column)
             if isinstance(item, PinIndexTableItem):
                 item.set_index(row)
-
-    def connect_item_selection_changed_signal(self, callback_function: Callable[..., Any] = None) -> None:
-        """
-        :param callback_function: callback function that should be called when the selected item changes.
-        """
-
-        if not callback_function:
-            callback_function = self.set_pin_as_current
-        self.itemSelectionChanged.connect(callback_function)
-
-    def disconnect_item_selection_changed_signal(self) -> None:
-        try:
-            self.itemSelectionChanged.disconnect()
-        except Exception:
-            pass
 
     def select_row_for_current_pin(self) -> None:
         """
