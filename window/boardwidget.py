@@ -165,7 +165,7 @@ class BoardWidget(QWidget):
         self._scene.setSceneRect(QRectF(x_left, y_top, x_right - x_left, y_bottom - y_top))
         self._scene.update()
 
-    def add_pin(self, x: float, y: float, index: int) -> None:
+    def add_pin_to_board_image(self, x: float, y: float, index: int) -> None:
         """
         Method adds new pin to board image.
         :param x: x coordinate of point;
@@ -177,7 +177,7 @@ class BoardWidget(QWidget):
 
     def allow_drag(self, allow: bool) -> None:
         """
-        :param allow: True, if to enable drag mode.
+        :param allow: True, if to enable drag mode (pins can be moved around the board).
         """
 
         self._scene.allow_drag(allow)
@@ -237,9 +237,9 @@ class BoardWidget(QWidget):
         height = self._scene.height()
         return self._scene.mapToScene(int(width / 2), int(height / 2))
 
-    def remove_pin(self, index: int) -> None:
+    def remove_pin_from_board_image(self, index: int) -> None:
         """
-        :param index: pin index to delete.
+        :param index: pin index to delete from board image.
         """
 
         self._scene.remove_point(index)

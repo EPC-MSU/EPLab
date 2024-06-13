@@ -1319,7 +1319,7 @@ class EPLabWindow(QMainWindow):
 
         pin = Pin(x, y, measurements=[])
         self.measurement_plan.append_pin(pin)
-        self._board_window.add_pin(pin.x, pin.y, self.measurement_plan.get_current_index())
+        self._board_window.add_pin_to_board_image(pin.x, pin.y, self.measurement_plan.get_current_index())
 
         # It is important to initialize pin with real measurement. Otherwise, user can create several empty points and
         # they will not be unique. This will cause some errors during ufiv validation.
@@ -1729,7 +1729,7 @@ class EPLabWindow(QMainWindow):
 
         index = self._measurement_plan.get_current_index()
         self._measurement_plan.remove_current_pin()
-        self._board_window.remove_pin(index)
+        self._board_window.remove_pin_from_board_image(index)
         self._measured_pins_checker.remove_pin(index)
 
         self.update_current_pin()
