@@ -43,7 +43,7 @@ class MeasurementPlanWidget(TableWidget):
         self.insertRow(index)
         self.setItem(index, 0, PinIndexTableItem(index))
 
-        for column, in range(1, 7):
+        for column in range(1, 7):
             item = self._create_table_item()
             self.setItem(index, column, item)
         self._write_pin_info_into_table(index, pin)
@@ -53,10 +53,8 @@ class MeasurementPlanWidget(TableWidget):
         Method fills table for measurement plan.
         """
 
-        self._clear_table()
         for pin_index, pin in self._main_window.measurement_plan.all_pins_iterator():
             self._add_pin(pin_index, pin)
-        self.select_row_for_current_pin()
 
     def _get_values_for_parameters(self, settings: MeasurementSettings) -> Generator[str, None, None]:
         """
@@ -135,23 +133,6 @@ class MeasurementPlanWidget(TableWidget):
 
         return None
 
-    def handle_current_pin_change(self, index: int) -> None:
-        """
-        Method handles changing the current pin in the measurement plan.
-        :param index: index of the current pin in the measurement plan.
-        """
-
-        pin = self._main_window.measurement_plan.get_pin_with_index(index)
-        if self._main_window.measurement_plan.pins_number > self.rowCount():
-            self._add_pin(index, pin)
-        elif self._main_window.measurement_plan.pins_number < self.rowCount():
-            if index is None:
-                index = 0
-            self._remove_row(index)
-        elif index is not None:
-            self._write_pin_info_into_table(index, pin)
-        self._update_indexes(index)
-
     def set_work_mode(self, work_mode: WorkMode) -> None:
         """
         Method enables or disables widgets on measurement plan widget according to given work mode.
@@ -182,4 +163,6 @@ class MeasurementPlanWidget(TableWidget):
         Method updates information about the measurement plan.
         """
 
+        self._clear_table()
         self._fill_table()
+        self.select_row()

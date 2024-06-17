@@ -334,7 +334,7 @@ class MuxAndPlanWindow(QWidget):
         Method selects row in table for measurement plan for current pin index.
         """
 
-        self.measurement_plan_widget.select_row_for_current_pin()
+        self.measurement_plan_widget.select_row()
 
     @check_multiplexer
     def set_connection_mode(self) -> None:

@@ -5,7 +5,7 @@ File with class to show image of board.
 import os
 from typing import Optional, Tuple, Union
 from PIL import Image
-from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPoint, QPointF, QRect, QRectF, Qt, QTimer
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QEvent, QObject, QPoint, QPointF, QRect, QRectF, Qt, QTimer
 from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent, QWheelEvent
 from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView, GraphicsManualPinItem
@@ -44,8 +44,9 @@ class BoardWidget(QWidget):
 
     HEIGHT: int = 600
     WIDTH: int = 600
+    current_pin_signal: pyqtSignal = pyqtSignal(int, bool)
 
-    def __init__(self, main_window=None) -> None:
+    def __init__(self, main_window) -> None:
         """
         :param main_window: main window of application.
         """
@@ -129,7 +130,7 @@ class BoardWidget(QWidget):
         self._scene: BoardView = BoardView()
         self._scene.on_right_click.connect(self.create_new_pin)
         self._scene.point_moved.connect(self.change_pin_coordinates)
-        self._scene.point_selected.connect(self.select_pin_with_index)
+        self._scene.point_selected.connect(self.send_current_pin_index)
         self._scene.installEventFilter(self)
 
         layout = QVBoxLayout(self)
@@ -269,14 +270,13 @@ class BoardWidget(QWidget):
             self.show_component_centered(index)
 
     @pyqtSlot(int)
-    def select_pin_with_index(self, index: int) -> None:
+    def send_current_pin_index(self, index: int) -> None:
         """
-        Slot handles signal when the pin is selected on scene.
+        Slot sends a signal with the number of the current pin.
         :param index: pin index.
         """
 
-        self.measurement_plan.go_pin(index)
-        self._main_window.update_current_pin(False)
+        self.current_pin_signal.emit(index, False)
 
     def show_component_centered(self, index_or_component: Union[int, GraphicsManualPinItem]) -> None:
         """

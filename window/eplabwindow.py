@@ -236,10 +236,6 @@ class EPLabWindow(QMainWindow):
         """
 
         self.measurement_plan.add_callback_func_for_pin_changes(self._change_menu_items_for_current_pin_change)
-        self.measurement_plan.add_callback_func_for_pin_changes(self._comment_widget.handle_current_pin_change)
-        self.measurement_plan.add_callback_func_for_pin_changes(
-            self._mux_and_plan_window.measurement_plan_widget.handle_current_pin_change)
-
         self.measurement_plan.remove_all_callback_funcs_for_mux_output_change()
         self.measurement_plan.add_callback_func_for_mux_output_change(
             self._mux_and_plan_window.multiplexer_pinout_widget.set_connected_channel)
@@ -307,7 +303,8 @@ class EPLabWindow(QMainWindow):
         save_point_names = {WorkMode.COMPARE: qApp.translate("t", "Зафиксировать"),
                             WorkMode.TEST: qApp.translate("t", "Зафиксировать тест"),
                             WorkMode.WRITE: qApp.translate("t", "Зафиксировать эталон")}
-        self.save_point_action.setText(save_point_names.get(mode, qApp.translate("t", "Зафиксировать")))
+        name = save_point_names.get(mode, qApp.translate("t", "Зафиксировать"))
+        self.save_point_action.setText(name)
 
     def _change_work_mode(self, mode: WorkMode) -> None:
         """
@@ -674,6 +671,7 @@ class EPLabWindow(QMainWindow):
         self.setWindowTitle(self.windowTitle() + " " + Version.full)
 
         self._board_window: BoardWidget = BoardWidget(self)
+        self._board_window.current_pin_signal.connect(self.go_to_selected_pin)
         self._parameters_widgets: Dict[EyePointProduct.Parameter, ParameterWidget] = dict()
         self._player: SoundPlayer = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
@@ -749,15 +747,17 @@ class EPLabWindow(QMainWindow):
         self.settings_mode_action.triggered.connect(self.show_settings_window)
 
         self._comment_widget: CommentWidget = CommentWidget(self)
+        self._comment_widget.current_row_signal.connect(self.go_to_selected_pin)
         self.comment_vertical_layout.insertWidget(0, self._comment_widget)
 
         # Update plot settings at next measurement cycle (place settings here or None)
-        self._settings_update_next_cycle: MeasurementSettings = None
-        self._compare_measurement: Measurement = None
-        self._current_curve: IVCurve = None
-        self._reference_curve: IVCurve = None
-        self._test_curve: IVCurve = None
+        self._settings_update_next_cycle: Optional[MeasurementSettings] = None
+        self._compare_measurement: Optional[Measurement] = None
+        self._current_curve: Optional[IVCurve] = None
+        self._reference_curve: Optional[IVCurve] = None
+        self._test_curve: Optional[IVCurve] = None
         self._mux_and_plan_window: MuxAndPlanWindow = MuxAndPlanWindow(self)
+        self._mux_and_plan_window.measurement_plan_widget.current_row_signal.connect(self.go_to_selected_pin)
         self.work_mode_changed.connect(self._mux_and_plan_window.change_work_mode)
         self.start_or_stop_entire_plan_measurement_action.triggered.connect(
             self._mux_and_plan_window.start_or_stop_plan_measurement)
@@ -817,8 +817,8 @@ class EPLabWindow(QMainWindow):
                     self._mux_and_plan_window.measurement_plan_runner.check_pin()
                 else:
                     self._plan_auto_transition.check_auto_transition(self.work_mode, self._product_name,
-                                                                     measurement_settings,
-                                                                     self._current_curve, self._reference_curve)
+                                                                     measurement_settings, self._current_curve,
+                                                                     self._reference_curve)
                     # Break signatures are only saved when debugging the application
                     # self._break_signature_saver.save_signature(measurement_settings, curves["current"])
 
@@ -841,6 +841,7 @@ class EPLabWindow(QMainWindow):
                 dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 file_name = os.path.join(dir_name, "resources", "eplab_asa_options.json")
                 return ut.read_json(file_name)
+
         return None
 
     def _remove_ref_curve(self) -> None:
@@ -886,7 +887,7 @@ class EPLabWindow(QMainWindow):
                     result = 2
         return result in (0, 1)
 
-    def _save_last_signtures(self, curves: Dict[str, Optional[IVCurve]]) -> None:
+    def _save_last_signatures(self, curves: Dict[str, Optional[IVCurve]]) -> None:
         """
         :param curves: dictionary with new signatures.
         """
@@ -1095,7 +1096,7 @@ class EPLabWindow(QMainWindow):
         :param settings: measurement settings.
         """
 
-        self._save_last_signtures(curves)
+        self._save_last_signatures(curves)
 
         # Update plots
         for hide, plot, curve in zip((self._hide_reference_curve, self._hide_current_curve, False),
@@ -1307,9 +1308,9 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def create_new_pin(self, point: Optional[QPointF] = None, pin_centering: bool = True) -> bool:
         """
-        :param point: coordinates of the point to be created;
+        :param point: coordinates of the pin to be created;
         :param pin_centering: if True, then the selected pin will be centered on the board window.
-        :return: if True, then a new point was created, otherwise the point was not created.
+        :return: if True, then a new pin was created, otherwise the pin was not created.
         """
 
         if self._auto_settings.pin_shift_warning_info and self.measurement_plan.check_pin_indices_change():
@@ -1320,10 +1321,12 @@ class EPLabWindow(QMainWindow):
             if self._show_pin_shift_warning(main_text, text) != 0:
                 return False
 
-        x, y = point.x(), point.y() if point else self.get_default_pin_coordinates()
+        x, y = (point.x(), point.y()) if point else self.get_default_pin_coordinates()
         pin = Pin(x, y, measurements=[])
         self.measurement_plan.append_pin(pin)
-        self._board_window.add_pin_to_board_image(pin.x, pin.y, self.measurement_plan.get_current_index())
+        index = self.measurement_plan.get_current_index()
+        self._board_window.add_pin_to_board_image(pin.x, pin.y, index)
+        self._comment_widget.add_comment(index, pin)
 
         # It is important to initialize pin with real measurement. Otherwise, user can create several empty points and
         # they will not be unique. This will cause some errors during ufiv validation.
@@ -1413,7 +1416,7 @@ class EPLabWindow(QMainWindow):
     def freeze_curve(self, measurer_id: int, state: bool) -> None:
         """
         :param measurer_id: index of the measurer;
-        :param state: if True, then the curve of the given measurer will be frozen, otherwise it will be unfrozen.
+        :param state: if True, then the signature of the given measurer will be frozen, otherwise it will be unfrozen.
         """
 
         if 0 <= measurer_id < len(self._msystem.measurers):
@@ -1504,10 +1507,11 @@ class EPLabWindow(QMainWindow):
         self._open_board_window_if_needed()
 
     @pyqtSlot()
-    def go_to_pin_selected_in_widget(self, user_pin_index: int = None) -> None:
+    def go_to_pin_selected_in_widget(self, user_pin_index: int = None, pin_centered: bool = True) -> None:
         """
         Slot sets given pin as current.
-        :param user_pin_index: user index of a pin to be set as current (start at 1).
+        :param user_pin_index: user index of a pin to be set as current (start at 1);
+        :param pin_centered: if True, then the selected pin will be centered on the board window.
         """
 
         if user_pin_index is not None:
@@ -1523,23 +1527,25 @@ class EPLabWindow(QMainWindow):
         except BadMultiplexerOutputError:
             if not self._mux_and_plan_window.measurement_plan_runner.is_running:
                 ut.show_message(qApp.translate("t", "Ошибка"),
-                                qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
-                                                    "точки не был установлен."))
+                                qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход точки "
+                                                    "не был установлен."))
         except ValueError:
             ut.show_message(qApp.translate("t", "Ошибка"),
                             qApp.translate("t", "Точка с таким номером не найдена на данной плате."))
             return
 
-        self.update_current_pin()
+        self.update_current_pin(pin_centered)
         self._open_board_window_if_needed()
 
-    def go_to_selected_pin(self, pin_index: int = None) -> None:
+    @pyqtSlot(int, bool)
+    def go_to_selected_pin(self, pin_index: int, pin_centered: bool = True) -> None:
         """
         Slot sets given pin as current.
-        :param pin_index: index of a pin to be set as current (starts at 0).
+        :param pin_index: index of a pin to be set as current (starts at 0);
+        :param pin_centered: if True, then the selected pin will be centered on the board window.
         """
 
-        self.go_to_pin_selected_in_widget(pin_index + 1)
+        self.go_to_pin_selected_in_widget(pin_index + 1, pin_centered)
 
     def handle_changing_pin_in_mux(self, index: int) -> None:
         """
@@ -1547,8 +1553,8 @@ class EPLabWindow(QMainWindow):
         """
 
         self.measurement_plan._current_pin_index = index
-        self._mux_and_plan_window.measurement_plan_widget.select_row_for_current_pin()
-        self._comment_widget.select_row_for_current_pin()
+        self._mux_and_plan_window.measurement_plan_widget.select_row()
+        self._comment_widget.select_row()
 
     @pyqtSlot(bool)
     def handle_connection(self, connected: bool) -> None:
@@ -1587,10 +1593,11 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot(bool)
     def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:
         """
-        Slot processes the signal after checking the measurement plan for pins with the measured reference IV-curves.
+        Slot processes the signal after checking the measurement plan for pins with the measured reference signatures.
         If there are no such pins in the measurement plan, then switching to TEST work mode is prohibited.
         See ticket #89690.
-        :param there_are_measured_pins: True, if the measurement plan contains a pin with a measured reference IV-curve.
+        :param there_are_measured_pins: True, if the measurement plan contains a pin with a measured reference
+        signature.
         """
 
         if self.comparing_mode_action.isEnabled():
@@ -1610,10 +1617,9 @@ class EPLabWindow(QMainWindow):
             self.save_pin_and_go_to_next()
 
     @pyqtSlot(float)
-    def handle_scale_change(self, new_scale: float) -> None:
+    def handle_scale_change(self, *args) -> None:
         """
         Slot processes the signal that the screen scale has been changed.
-        :param new_scale: new screen scale.
         """
 
         ut.show_message(qApp.translate("t", "Информация"),
@@ -1714,14 +1720,6 @@ class EPLabWindow(QMainWindow):
             self._mux_and_plan_window.activateWindow()
 
     @pyqtSlot()
-    def remove_all_cursors(self) -> None:
-        """
-        Slot removes all cursors from the plot.
-        """
-
-        self._iv_window.plot.remove_all_cursors()
-
-    @pyqtSlot()
     def remove_pin(self) -> None:
         if self._auto_settings.pin_shift_warning_info and self.measurement_plan.check_pin_indices_change():
             pin_index = self.measurement_plan.get_current_index() + 2
@@ -1732,9 +1730,12 @@ class EPLabWindow(QMainWindow):
 
         index = self._measurement_plan.get_current_index()
         self._measurement_plan.remove_current_pin()
-        self._board_window.remove_pin_from_board_image(index)
-        self._measured_pins_checker.remove_pin(index)
+        if index is None:
+            return
 
+        self._board_window.remove_pin_from_board_image(index)
+        self._comment_widget.remove_comment(index)
+        self._measured_pins_checker.remove_pin(index)
         self.update_current_pin()
 
     def resizeEvent(self, event: QResizeEvent) -> None:
@@ -1822,7 +1823,7 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def save_pin(self, pin_centering: bool = True) -> None:
         """
-        Slot saves IV-curve to current pin.
+        Slot saves signature to current pin.
         :param pin_centering: if True, then the created pin will be centered on the board window.
         """
 
@@ -1980,4 +1981,4 @@ class EPLabWindow(QMainWindow):
 
         if self._mux_and_plan_window:
             self._mux_and_plan_window.select_current_pin()
-        self._comment_widget.select_row_for_current_pin()
+        self._comment_widget.select_row()
