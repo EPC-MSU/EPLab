@@ -2,7 +2,7 @@
 File with class to run measurements according measurement plan.
 """
 
-from typing import List
+from typing import List, Optional
 from PyQt5.QtCore import pyqtSignal, QObject
 from .measurementplanwidget import MeasurementPlanWidget
 
@@ -23,14 +23,14 @@ class MeasurementPlanRunner(QObject):
         """
 
         super().__init__()
-        self._amount_of_pins: int = None
+        self._amount_of_pins: Optional[int] = None
         self._bad_pin_indexes: List[int] = []
-        self._current_pin_index: int = None
+        self._current_pin_index: Optional[int] = None
         self._is_running: bool = False
+        self._main_window = main_window
         self._measurement_plan_widget: MeasurementPlanWidget = measurement_plan_widget
         self._measurement_saved: bool = False
         self._need_to_save_measurement: bool = False
-        self._parent = main_window
 
     @property
     def is_running(self) -> bool:
@@ -76,17 +76,17 @@ class MeasurementPlanRunner(QObject):
         :return: True if there are such pins.
         """
 
-        self._bad_pin_indexes = self._parent.measurement_plan.get_pins_without_multiplexer_outputs()
+        self._bad_pin_indexes = self._main_window.measurement_plan.get_pins_without_multiplexer_outputs()
         return bool(self._bad_pin_indexes)
 
     def go_to_pin(self) -> None:
         """
-        Method moves to next pin in measurement plan.
+        Method moves to the next pin in the measurement plan.
         """
 
         if isinstance(self._amount_of_pins, int) and isinstance(self._current_pin_index, int) and \
                 self._current_pin_index < self._amount_of_pins:
-            self._parent.go_to_selected_pin(self._current_pin_index)
+            self._main_window.go_to_selected_pin(self._current_pin_index)
             self._measurement_saved = False
         else:
             self._stop_measurements()
@@ -96,9 +96,9 @@ class MeasurementPlanRunner(QObject):
         Method saves measurement in current pin if required.
         """
 
-        if self._is_running and (self._need_to_save_measurement or self._current_pin_index in self._bad_pin_indexes):
-            if self._current_pin_index not in self._bad_pin_indexes and self._parent.can_be_measured:
-                self._parent.save_pin()
+        if self.is_running and (self._need_to_save_measurement or self._current_pin_index in self._bad_pin_indexes):
+            if self._current_pin_index not in self._bad_pin_indexes and self._main_window.can_be_measured:
+                self._main_window.save_pin()
             self.measurement_done.emit()
             self._measurement_saved = True
             self._need_to_save_measurement = False

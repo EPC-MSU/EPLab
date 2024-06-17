@@ -12,7 +12,7 @@ from window.common import WorkMode
 from window.language import get_language, Language
 from window.pinindextableitem import PinIndexTableItem
 from window.scaler import update_scale_of_class
-from window.tablewidget import TableWidget
+from window.tablewidget import disconnect_item_signals, TableWidget
 
 
 @update_scale_of_class
@@ -48,6 +48,7 @@ class MeasurementPlanWidget(TableWidget):
             self.setItem(index, column, item)
         self._write_pin_info_into_table(index, pin)
 
+    @disconnect_item_signals
     def _fill_table(self) -> None:
         """
         Method fills table for measurement plan.
