@@ -304,7 +304,7 @@ class EPLabWindow(QMainWindow):
                             WorkMode.TEST: qApp.translate("t", "Зафиксировать тест"),
                             WorkMode.WRITE: qApp.translate("t", "Зафиксировать эталон")}
         name = save_point_names.get(mode, qApp.translate("t", "Зафиксировать"))
-        self.save_point_action.setText(name)
+        self.save_point_action.setIconText(name)
 
     def _change_work_mode(self, mode: WorkMode) -> None:
         """
