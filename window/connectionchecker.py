@@ -9,7 +9,7 @@ from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
 import connection_window as cw
 from settings.autosettings import AutoSettings
-from window import utils as ut
+from . import utils as ut
 
 
 logger = logging.getLogger("eplab")
@@ -31,11 +31,11 @@ class ConnectionChecker(QObject):
 
         super().__init__()
         self._auto_settings: AutoSettings = auto_settings
-        self._force_open: bool = None
-        self._measurer_1_uri: str = None
-        self._measurer_2_uri: str = None
-        self._mux_uri: str = None
-        self._product_name: cw.ProductName = None
+        self._force_open: Optional[bool] = None
+        self._measurer_1_uri: Optional[str] = None
+        self._measurer_2_uri: Optional[str] = None
+        self._mux_uri: Optional[str] = None
+        self._product_name: Optional[cw.ProductName] = None
         self._timer: QTimer = QTimer()
         self._timer.timeout.connect(self.check_connection)
         self._timer.setInterval(ConnectionChecker.TIMEOUT)
@@ -59,7 +59,7 @@ class ConnectionChecker(QObject):
         if error_report_required:
             print_errors(*bad_measurer_uris, *bad_mux_uris)
 
-        if not bad_measurer_uris:
+        if not bad_measurer_uris and not bad_mux_uris:
             if len(measurers) > 1:
                 # Reorder measurers according to their addresses in USB hubs tree
                 measurers = ut.sort_devices_by_usb_numbers(measurers)
@@ -117,7 +117,7 @@ class ConnectionChecker(QObject):
 
     def _get_connection_params(self) -> None:
         """
-        Method gets connection parameters to IV-measurers and multiplexer from auto settings.
+        Method gets URI of the IV-measurers and multiplexer from auto settings.
         """
 
         def get_uri(uri_str: Optional[str] = None) -> Optional[str]:
@@ -150,10 +150,18 @@ class ConnectionChecker(QObject):
         return self._connect_devices(measurer_1_uri, measurer_2_uri, mux_uri, product_name, True)
 
     def run_check(self) -> None:
+        """
+        Method starts checking the connection of IV-measurers and multiplexer.
+        """
+
         self._get_connection_params()
         self._timer.start()
 
     def stop_check(self) -> None:
+        """
+        Method stops checking the connection of IV-measurers and multiplexer.
+        """
+
         self._timer.stop()
 
 
@@ -165,7 +173,7 @@ def analyze_connection_params(uris: List[Optional[str]], product_name: Optional[
     :return: product name.
     """
 
-    not_empty_uris = cw.utils.get_unique_uris(list(filter(lambda x: bool(x), uris)))
+    not_empty_uris = cw.utils.get_unique_uris(list(filter(bool, uris)))
     try:
         default_product_names = cw.ProductName.get_default_product_name_for_uris(not_empty_uris)
     except ValueError:
