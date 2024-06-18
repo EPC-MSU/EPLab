@@ -436,7 +436,7 @@ class EPLabWindow(QMainWindow):
         self.pin_index_widget.clear()
         self._iv_window.plot.remove_all_cursors()
         self._mux_and_plan_window.close()
-        self._score_wrapper.set_dummy_score()
+        self._score_wrapper.set_dummy_difference()
 
         self._settings_update_next_cycle = None
         self._skip_curve = False
@@ -539,6 +539,12 @@ class EPLabWindow(QMainWindow):
             ut.clear_layout(layout)
             layout.addWidget(widget)
 
+    def _delete_measurement_plan(self) -> None:
+        self._last_saved_measurement_plan_data = None
+        self._measurement_plan = None
+        self._measured_pins_checker.set_new_plan()
+        self._measurement_plan_path.path = None
+
     def _disable_optimal_parameter_searcher(self, mode: WorkMode = None) -> None:
         """
         Method disables searcher of the optimal parameters. Searcher can work only for IVMeasurerIVM10.
@@ -564,10 +570,7 @@ class EPLabWindow(QMainWindow):
                 measurer.close_device()
             for multiplexer in self._msystem.multiplexers:
                 multiplexer.close_device()
-        self._last_saved_measurement_plan_data = None
-        self._measurement_plan = None
-        self._measured_pins_checker.set_new_plan()
-        self._measurement_plan_path.path = None
+
         self._msystem = None
         self._product_name = None
         self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
@@ -1123,10 +1126,10 @@ class EPLabWindow(QMainWindow):
             curve_2 = None
         if None not in (curve_1, curve_2, settings):
             difference = self._calculate_difference(curve_1, curve_2, settings)
-            self._score_wrapper.set_score(difference)
-            self._player.update_score(difference)
+            self._score_wrapper.set_difference(difference)
+            self._player.update_difference(difference)
         else:
-            self._score_wrapper.set_dummy_score()
+            self._score_wrapper.set_dummy_difference()
 
         if settings is not None:
             self._set_plot_parameters_to_low_settings_panel(settings)
@@ -1283,6 +1286,7 @@ class EPLabWindow(QMainWindow):
             self._connect_devices(measurement_system, product_name)
         else:
             self._disconnect_devices()
+            self._delete_measurement_plan()
 
     @pyqtSlot()
     def connect_or_disconnect(self) -> None:
@@ -1375,6 +1379,7 @@ class EPLabWindow(QMainWindow):
             return
 
         self._disconnect_devices()
+        self._delete_measurement_plan()
         self._report_measurers_disconnected()
 
     @pyqtSlot(bool)
@@ -1595,6 +1600,7 @@ class EPLabWindow(QMainWindow):
             self._connect_devices(measurement_system, product_name)
         else:
             self._disconnect_devices()
+            self._delete_measurement_plan()
 
     @pyqtSlot(bool)
     def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:

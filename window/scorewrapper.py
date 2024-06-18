@@ -3,16 +3,16 @@ from PyQt5.QtWidgets import QLabel
 
 class ScoreWrapper:
 
-    _COLOR_BAD: str = "#cc0000"
-    _COLOR_GOOD: str = "#73d216"
+    COLOR_BAD: str = "#cc0000"
+    COLOR_GOOD: str = "#73d216"
     DEFAULT_SCORE_TOLERANCE: float = 0.15
 
     def __init__(self, label: QLabel) -> None:
         """
-        :param label: QLabel widget for score value.
+        :param label: QLabel widget for difference value.
         """
 
-        self._friendly_score: str = "-"
+        self._friendly_difference: str = "-"
         self._label: QLabel = label
         self._tolerance: float = ScoreWrapper.DEFAULT_SCORE_TOLERANCE
         self._get_tolerance_with_tenths()
@@ -28,9 +28,9 @@ class ScoreWrapper:
     def _get_tolerance_with_tenths(self) -> None:
         self._tolerance_with_tenths: float = convert_to_percent_with_tenths(self._tolerance)
 
-    def _set_score_text(self, text: str, color: str) -> None:
+    def _set_difference_text(self, text: str, color: str) -> None:
         """
-        :param text: user friendly score value to display in the label widget;
+        :param text: user-friendly difference value to display in the label widget;
         :param color: display color.
         """
 
@@ -39,24 +39,24 @@ class ScoreWrapper:
 
     def get_friendly_score(self) -> str:
         """
-        :return: user friendly score value.
+        :return: user-friendly difference value.
         """
 
-        return self._friendly_score
+        return self._friendly_difference
 
-    def set_dummy_score(self) -> None:
-        self._friendly_score = "-"
-        self._set_score_text(self._friendly_score, self._COLOR_GOOD)
-
-    def set_score(self, score: float) -> None:
+    def set_difference(self, difference: float) -> None:
         """
-        :param score: new score value.
+        :param difference: new difference value.
         """
 
-        score = convert_to_percent_with_tenths(score)
-        color = self._COLOR_GOOD if score <= self._tolerance_with_tenths else self._COLOR_BAD
-        self._friendly_score = str(score) + "%"
-        self._set_score_text(self._friendly_score, color)
+        difference = convert_to_percent_with_tenths(difference)
+        color = self.COLOR_GOOD if difference <= self._tolerance_with_tenths else self.COLOR_BAD
+        self._friendly_difference = str(difference) + "%"
+        self._set_difference_text(self._friendly_difference, color)
+
+    def set_dummy_difference(self) -> None:
+        self._friendly_difference = "-"
+        self._set_difference_text(self._friendly_difference, self.COLOR_GOOD)
 
     def set_tolerance(self, new_tolerance: float) -> None:
         """

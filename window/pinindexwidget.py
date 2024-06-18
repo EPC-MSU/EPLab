@@ -2,7 +2,7 @@ from typing import Optional
 from PyQt5.QtCore import QCoreApplication as qApp, QRegExp
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QLineEdit
-from window import utils as ut
+from . import utils as ut
 
 
 class PinIndexWidget(QLineEdit):

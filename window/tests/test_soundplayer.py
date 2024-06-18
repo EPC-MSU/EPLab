@@ -16,6 +16,6 @@ class TestSoundPlayer(unittest.TestCase):
             player.set_work_mode(mode)
             for score in range(-1, 11):
                 player.set_tolerance(0)
-                player.update_score(score)
+                player.update_difference(score)
                 time.sleep(0.1)
         self.assertTrue(True)

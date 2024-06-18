@@ -3,8 +3,8 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QEvent, QObject, Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QRadioButton, QScrollArea, QVBoxLayout, QWidget
 from epcore.product import EyePointProduct, MeasurementParameterOption
-from window.language import get_language, Language
-from window.scaler import update_scale_decorator
+from .language import get_language, Language
+from .scaler import update_scale_decorator
 
 
 class ParameterWidget(QScrollArea):

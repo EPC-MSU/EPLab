@@ -5,7 +5,7 @@ from epcore.elements import Board, Element, MultiplexerOutput, Pin
 from epcore.ivmeasurer import IVMeasurerBase
 from epcore.measurementmanager import MeasurementPlan, MeasurementSystem
 from epcore.product import EyePointProduct
-from window import utils as ut
+from . import utils as ut
 
 
 class InvalidPinsForMuxError(Exception):
