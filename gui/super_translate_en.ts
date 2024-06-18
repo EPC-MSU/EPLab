@@ -449,8 +449,8 @@ leading to a numbering shift</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1356"/>
-        <source>Выбрать папку</source>
-        <translation>Select directory</translation>
+        <source>Выберите папку, в которую сохранить отчет</source>
+        <translation>Select the folder where to save the report</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1522"/>

@@ -1345,7 +1345,7 @@ class EPLabWindow(QMainWindow):
         generated report automatically. Otherwise, it is needed to ask the user where to save the report.
         In task #92258, the algorithm for determining the directory in which to save the generated report during
         automatic testing with a multiplexer has been changed. If the path to the uzf-file with the measurement plan is
-        known, then the report should be saved nearby. Otherwise it is needed to ask the user for the path.
+        known, then the report should be saved nearby. Otherwise, it is needed to ask the user for the path.
         """
 
         if auto_detection_report_path and self._measurement_plan_path.path and \
@@ -1353,8 +1353,8 @@ class EPLabWindow(QMainWindow):
             dir_path = os.path.dirname(self._measurement_plan_path.path)
             is_user_defined_path = False
         else:
-            dir_path = QFileDialog.getExistingDirectory(self, qApp.translate("t", "Выбрать папку"),
-                                                        self.dir_chosen_by_user)
+            dir_path = QFileDialog.getExistingDirectory(
+                self, qApp.translate("t", "Выберите папку, в которую сохранить отчет"), self.dir_chosen_by_user)
             is_user_defined_path = True
 
         if dir_path:
