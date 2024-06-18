@@ -112,7 +112,8 @@ class MuxWidget(QGroupBox):
         ports = ut.find_urpc_ports("epmux")
         ports.extend(["none", "virtual"])
         self.combo_box.addItems(ports)
-        self.combo_box.setCurrentText(self._initial_uri)
+        current_uri = ports[0] if self._initial_uri == "none" else self._initial_uri
+        self.combo_box.setCurrentText(current_uri)
 
         self._uri_checker.color_widgets(self.combo_box)
 
