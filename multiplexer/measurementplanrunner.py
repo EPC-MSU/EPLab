@@ -9,7 +9,7 @@ from .measurementplanwidget import MeasurementPlanWidget
 
 class MeasurementPlanRunner(QObject):
     """
-    Class to run measurements according plan.
+    Class for carrying out measurements according to plan.
     """
 
     measurement_done: pyqtSignal = pyqtSignal()
