@@ -2,12 +2,12 @@ from typing import List, Optional, Set, Tuple
 from PyQt5.QtCore import pyqtSignal, QCoreApplication as qApp, QObject
 from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
-from window import utils as ut
+from . import utils as ut
 
 
 class MeasuredPinsChecker(QObject):
     """
-    Class for checking a measurement plan for the presence of pins with measured reference IV-curves.
+    Class for checking a measurement plan for the presence of pins with measured reference signatures.
     """
 
     measured_pin_in_plan_signal: pyqtSignal = pyqtSignal(bool)
@@ -25,7 +25,7 @@ class MeasuredPinsChecker(QObject):
     @property
     def is_measured_pin(self) -> bool:
         """
-        :return: True, if the measurement plan contains a pin with a measured reference IV-curve.
+        :return: True, if the measurement plan contains a pin with a measured reference signature.
         """
 
         return len(self._measured_pins) != 0
@@ -41,9 +41,9 @@ class MeasuredPinsChecker(QObject):
     @staticmethod
     def _check_pin(pin: Pin) -> bool:
         """
-        Method checks whether there is a reference IV-curve in a given pin.
-        :param pin: pin in which to check the presence of a measured reference IV-curve.
-        :return: True, if the reference IV-curve is measured in the pin.
+        Method checks whether there is a reference signature in a given pin.
+        :param pin: pin in which to check the presence of a measured reference signature.
+        :return: True, if the reference signature is measured in the pin.
         """
 
         for measurement in pin.measurements:
@@ -53,8 +53,8 @@ class MeasuredPinsChecker(QObject):
 
     def _check_pin_with_index(self, pin_index: int) -> None:
         """
-        Method checks whether there is a reference IV-curve in a pin with a given index.
-        :param pin_index: pin index in which to check the presence of a measured reference IV-curve.
+        Method checks whether there is a reference signature in a pin with a given index.
+        :param pin_index: pin index in which to check the presence of a measured reference signature.
         """
 
         if pin_index is None and self.measurement_plan.pins_number == 0:
@@ -73,19 +73,9 @@ class MeasuredPinsChecker(QObject):
             self._empty_pins.add(pin_index)
             self._measured_pins.discard(pin_index)
 
-    def _handle_measurement_plan_change(self, pin_index: int) -> None:
-        """
-        :param pin_index: pin index that has changed.
-        """
-
-        if self.measurement_plan:
-            self._check_pin_with_index(pin_index)
-        measured = len(self._measured_pins) != 0
-        self.measured_pin_in_plan_signal.emit(measured)
-
     def _set_new_plan(self) -> None:
         """
-        Method checks a new measurement plan for the presence of pins with measured reference IV-curves.
+        Method checks a new measurement plan for the presence of pins with measured reference signatures.
         """
 
         self._empty_pins.clear()
@@ -99,8 +89,8 @@ class MeasuredPinsChecker(QObject):
 
     def check_empty_current_pin(self) -> bool:
         """
-        Method checks that the current pin does not have a measured reference IV-curve.
-        :return: True if there is no measured reference IV-curve in the current pin.
+        Method checks that the current pin does not have a measured reference signature.
+        :return: True if there is no measured reference signature in the current pin.
         """
 
         pin = self.measurement_plan.get_current_pin()
@@ -114,7 +104,7 @@ class MeasuredPinsChecker(QObject):
 
     def check_measurement_plan_for_empty_pins(self) -> bool:
         """
-        :return: True if there are pins without reference measurements in measurement plan.
+        :return: True if there are pins without reference signatures in measurement plan.
         """
 
         if len(self._empty_pins) > 0:
@@ -134,6 +124,16 @@ class MeasuredPinsChecker(QObject):
             empty = False
         return empty
 
+    def handle_measurement_plan_change(self, pin_index: int) -> None:
+        """
+        :param pin_index: pin index that has changed.
+        """
+
+        if self.measurement_plan:
+            self._check_pin_with_index(pin_index)
+        measured = len(self._measured_pins) != 0
+        self.measured_pin_in_plan_signal.emit(measured)
+
     def remove_pin(self, pin_index: int) -> None:
         """
         :param pin_index: pin index that has been removed from the measurement plan.
@@ -143,7 +143,7 @@ class MeasuredPinsChecker(QObject):
             for index in range(pin_index, self.measurement_plan.pins_number + 1):
                 self._check_pin_with_index(index)
 
-        self._handle_measurement_plan_change(pin_index)
+        self.handle_measurement_plan_change(pin_index)
 
     def set_new_plan(self) -> None:
         """
@@ -152,8 +152,7 @@ class MeasuredPinsChecker(QObject):
 
         self._set_new_plan()
         if self.measurement_plan:
-            self._handle_measurement_plan_change(self.measurement_plan.get_current_index())
-            self.measurement_plan.add_callback_func_for_pin_changes(self._handle_measurement_plan_change)
+            self.handle_measurement_plan_change(self.measurement_plan.get_current_index())
 
 
 def get_borders(array: List[int]) -> List[Tuple[int, int]]:

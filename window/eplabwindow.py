@@ -84,7 +84,7 @@ class EPLabWindow(QMainWindow):
         :param uri_1: URI for the first IV-measurer;
         :param uri_2: URI for the second IV-measurer;
         :param english: if True then interface language will be English;
-        :param path: path to the test plan to be opened.
+        :param path: path to the measurement plan to be opened.
         """
 
         super().__init__()
@@ -235,7 +235,10 @@ class EPLabWindow(QMainWindow):
         Method adds the required callback functions to the measurement plan.
         """
 
+        self.measurement_plan.remove_all_callback_funcs_for_pin_changes()
         self.measurement_plan.add_callback_func_for_pin_changes(self._change_menu_items_for_current_pin_change)
+        self.measurement_plan.add_callback_func_for_pin_changes(
+            self._measured_pins_checker.handle_measurement_plan_change)
         self.measurement_plan.remove_all_callback_funcs_for_mux_output_change()
         self.measurement_plan.add_callback_func_for_mux_output_change(
             self._mux_and_plan_window.multiplexer_pinout_widget.set_connected_channel)
@@ -309,7 +312,7 @@ class EPLabWindow(QMainWindow):
 
     def _change_work_mode(self, mode: WorkMode) -> None:
         """
-        Method sets window settings for given work mode.
+        Method changes window widgets for given work mode.
         :param mode: new work mode.
         """
 
@@ -365,7 +368,7 @@ class EPLabWindow(QMainWindow):
         change the work mode to COMPARE (see ticket #89690).
         """
 
-        if self._work_mode == WorkMode.TEST and not self._measured_pins_checker.is_measured_pin:
+        if self._work_mode == WorkMode.TEST and not self.is_measured_pin:
             self._change_work_mode(WorkMode.COMPARE)
 
     def _check_break_signatures_for_auto_transition(self) -> None:
