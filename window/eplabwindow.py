@@ -927,8 +927,10 @@ class EPLabWindow(QMainWindow):
         """
 
         self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key_Down), self)
+        self._shortcut_down.setContext(Qt.ApplicationShortcut)
         self._shortcut_down.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(False))
         self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key_Up), self)
+        self._shortcut_up.setContext(Qt.ApplicationShortcut)
         self._shortcut_up.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(True))
 
     def _set_init_position(self) -> None:
@@ -1853,7 +1855,8 @@ class EPLabWindow(QMainWindow):
         """
 
         self.save_pin()
-        self._timer_to_go_to_next_pin.start()
+        if self.work_mode in (WorkMode.TEST, WorkMode.WRITE):
+            self._timer_to_go_to_next_pin.start()
 
     @pyqtSlot()
     def search_optimal(self) -> None:

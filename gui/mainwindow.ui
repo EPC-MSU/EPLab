@@ -713,6 +713,9 @@
    <property name="shortcut">
     <string>Space</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="add_board_image_action">
    <property name="enabled">
@@ -850,6 +853,9 @@
    </property>
    <property name="shortcut">
     <string>Del</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
  </widget>

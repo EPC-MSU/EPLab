@@ -86,22 +86,6 @@ class BoardWidget(QWidget):
         if self._control_pressed and key in (Qt.Key_Down, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up):
             return super().eventFilter(obj, event)
 
-        if key in (Qt.Key_Left, Qt.Key_Up):
-            self._main_window.go_to_left_or_right_pin(True)
-            return True
-
-        if key in (Qt.Key_Down, Qt.Key_Right):
-            self._main_window.go_to_left_or_right_pin(False)
-            return True
-
-        if key == Qt.Key_Space and self._main_window.save_point_action.isEnabled():
-            self._main_window.save_pin_and_go_to_next()
-            return True
-
-        if key == Qt.Key_Delete and self._main_window.remove_point_action.isEnabled():
-            self._main_window.remove_pin()
-            return True
-
         return self._main_window.eventFilter(self._main_window, event)
 
     def _handle_key_release_event(self, obj: QObject, event: QEvent) -> bool:

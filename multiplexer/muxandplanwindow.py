@@ -6,9 +6,9 @@ import logging
 import os
 from typing import Any, Callable, Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
-from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QShortcut, QSplitter, QStyle,
-                             QToolBar, QVBoxLayout, QWidget)
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QStyle, QToolBar,
+                             QVBoxLayout, QWidget)
 from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MultiplexerOutput
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
 from dialogs.save_geometry import update_widget_to_save_geometry
@@ -70,9 +70,6 @@ class MuxAndPlanWindow(QWidget):
         self.measurement_plan_runner.measurements_finished.connect(self.turn_off_standby_mode)
         self.measurement_plan_runner.measurements_finished.connect(self.create_report)
         self.measurement_plan_runner.measurements_started.connect(self.turn_on_standby_mode)
-
-        self._shortcut_save_pin: QShortcut = QShortcut(QKeySequence(Qt.Key_Space), self)
-        self._shortcut_save_pin.activated.connect(self._parent.save_pin_and_go_to_next)
 
     @property
     def multiplexer(self) -> Optional[AnalogMultiplexerBase]:
