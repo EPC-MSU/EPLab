@@ -7,5 +7,5 @@ PyQtExtendedScene==1.0.14
 git+https://github.com/pyserial/pyserial@7aeea35429d15f3eefed10bbb659674638903e3a#egg=pyserial
 git+https://github.com/EPC-MSU/board-view@v0.1.3#egg=boardview
 git+https://github.com/EPC-MSU/ep_report_generator@v0.1.15#egg=ep_report_generator
--e git+https://gitlab.ximc.ru/eyepoint/epcore@dev-0.1#egg=epcore
+git+https://github.com/EPC-MSU/epcore@v0.1.23#egg=epcore
 git+https://github.com/EPC-MSU/ivviewer@v1.0.4#egg=ivviewer
