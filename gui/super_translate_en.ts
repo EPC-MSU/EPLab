@@ -450,7 +450,7 @@ leading to a numbering shift</translation>
     <message>
         <location filename="../window/eplabwindow.py" line="1356"/>
         <source>Выберите папку, в которую сохранить отчет</source>
-        <translation>Select the folder where to save the report</translation>
+        <translation>Select folder where to save report</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1522"/>
