@@ -430,7 +430,7 @@ leading to a numbering shift</translation>
     <message>
         <location filename="../window/eplabwindow.py" line="1050"/>
         <source>Не показывать снова</source>
-        <translation>Don't show again</translation>
+        <translation>Don&apos;t show again</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1257"/>
@@ -491,6 +491,11 @@ leading to a numbering shift</translation>
         <location filename="../window/eplabwindow.py" line="1918"/>
         <source>Ошибка при установке настроек устройства.</source>
         <translation>Error occurred while configuring device settings.</translation>
+    </message>
+    <message>
+        <location filename="../window/exceptionhook.py" line="17"/>
+        <source>Что-то пошло не так и произошла ошибка:</source>
+        <translation>Something went wrong and an error occurred:</translation>
     </message>
     <message>
         <location filename="../window/measuredpinschecker.py" line="123"/>
