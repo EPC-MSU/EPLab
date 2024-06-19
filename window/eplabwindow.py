@@ -657,7 +657,7 @@ class EPLabWindow(QMainWindow):
             with self._device_errors_handler:
                 self._read_curves_periodic_task()
             self._plan_auto_transition.save_pin()
-            self._mux_and_plan_window.measurement_plan_runner.save_pin()
+            self._mux_and_plan_window.measurement_plan_runner.save_measurements()
             self._timer.start()  # add this task to the event loop
         else:
             self._device_errors_handler.reset_error()
