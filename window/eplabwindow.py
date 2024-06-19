@@ -1852,6 +1852,8 @@ class EPLabWindow(QMainWindow):
             self.update_current_pin(pin_centering)
             self._comment_widget.save_comment(index)
             self._comment_widget.update_table_for_new_tolerance(index)
+            if self.measurement_plan and self.measurement_plan.multiplexer:
+                self._mux_and_plan_window.measurement_plan_widget.save_measurement(index)
 
     @pyqtSlot()
     def save_pin_and_go_to_next(self) -> None:
@@ -1992,6 +1994,5 @@ class EPLabWindow(QMainWindow):
         elif self._work_mode == WorkMode.READ_PLAN:
             self._update_signatures_and_settings_in_plan_reading_mode(ref_curve, test_curve, settings)
 
-        if self._mux_and_plan_window:
-            self._mux_and_plan_window.select_current_pin()
+        self._mux_and_plan_window.select_current_pin()
         self._comment_widget.select_row()

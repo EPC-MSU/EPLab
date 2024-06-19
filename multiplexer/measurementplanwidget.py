@@ -91,6 +91,14 @@ class MeasurementPlanWidget(TableWidget):
             if value:
                 item.setText(str(value))
 
+        self._write_pin_measurements(index, pin)
+
+    def _write_pin_measurements(self, index: int, pin: Pin) -> None:
+        """
+        :param index: pin index;
+        :param pin: pin.
+        """
+
         settings = pin.get_reference_and_test_measurements()[-1]
         if settings:
             for i, value in enumerate(self._get_values_for_parameters(settings)):
@@ -133,6 +141,17 @@ class MeasurementPlanWidget(TableWidget):
                 return index
 
         return None
+
+    def save_measurement(self, index: int) -> None:
+        """
+        :param index: index of the pin whose measurements need to be saved to the table.
+        """
+
+        pin = self._main_window.measurement_plan.get_pin_with_index(index)
+        if not pin:
+            return
+
+        self._write_pin_measurements(index, pin)
 
     def set_work_mode(self, work_mode: WorkMode) -> None:
         """

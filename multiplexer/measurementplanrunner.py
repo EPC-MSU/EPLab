@@ -12,6 +12,7 @@ class MeasurementPlanRunner(QObject):
     Class for carrying out measurements according to plan.
     """
 
+    go_to_pin_signal: pyqtSignal = pyqtSignal(int, bool)
     measurement_done: pyqtSignal = pyqtSignal()
     measurements_finished: pyqtSignal = pyqtSignal()
     measurements_started: pyqtSignal = pyqtSignal(int)
@@ -29,7 +30,7 @@ class MeasurementPlanRunner(QObject):
         self._is_running: bool = False
         self._main_window = main_window
         self._measurement_plan_widget: MeasurementPlanWidget = measurement_plan_widget
-        self._measurement_saved: bool = False
+        self._need_to_go_to_pin: bool = False
         self._need_to_save_measurement: bool = False
 
     @property
@@ -63,13 +64,13 @@ class MeasurementPlanRunner(QObject):
 
     def check_pin(self) -> None:
         """
-        Method checks if all necessary parameters for current pin are set from the measurement plan.
+        Method checks whether the measurement plan is in the desired pin.
         """
 
-        if not self._measurement_saved:
+        if not self._need_to_go_to_pin:
             self._need_to_save_measurement = True
 
-    def get_pins_without_multiplexer_outputs(self) -> bool:
+    def check_pins_without_multiplexer_outputs(self) -> bool:
         """
         Method gets list of indices of pins whose multiplexer output is None or output cannot be set using current
         multiplexer configuration.
@@ -87,7 +88,7 @@ class MeasurementPlanRunner(QObject):
         if isinstance(self._amount_of_pins, int) and isinstance(self._current_pin_index, int) and \
                 self._current_pin_index < self._amount_of_pins:
             self._main_window.go_to_selected_pin(self._current_pin_index)
-            self._measurement_saved = False
+            self._need_to_go_to_pin = False
         else:
             self._stop_measurements()
 
@@ -100,7 +101,7 @@ class MeasurementPlanRunner(QObject):
             if self._current_pin_index not in self._bad_pin_indexes and self._main_window.can_be_measured:
                 self._main_window.save_pin()
             self.measurement_done.emit()
-            self._measurement_saved = True
+            self._need_to_go_to_pin = True
             self._need_to_save_measurement = False
             self._current_pin_index += 1
             self.go_to_pin()
