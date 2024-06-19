@@ -390,6 +390,8 @@ class MuxAndPlanWindow(QWidget):
 
         self.multiplexer_pinout_widget.enable_widgets(True)
         self._main_window.enable_widgets(True)
+        if self._main_window.work_mode is WorkMode.TEST:
+            self._main_window.search_optimal_action.setEnabled(False)
         for action in (self._main_window.connection_action, self._main_window.new_point_action,
                        self._main_window.open_file_action, self._main_window.remove_point_action):
             action.setEnabled(True)
