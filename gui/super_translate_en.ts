@@ -494,7 +494,7 @@ leading to a numbering shift</translation>
     </message>
     <message>
         <location filename="../window/exceptionhook.py" line="17"/>
-        <source>Что-то пошло не так и произошла ошибка:</source>
+        <source>Что-то пошло не так, и произошла ошибка:</source>
         <translation>Something went wrong and an error occurred:</translation>
     </message>
     <message>
