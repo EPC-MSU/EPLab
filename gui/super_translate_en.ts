@@ -737,6 +737,11 @@ leading to a numbering shift</translation>
         <translation>Copy</translation>
     </message>
     <message>
+        <location filename="../dialogs/keymapdialog.py" line="61"/>
+        <source>Редактировать комментарий</source>
+        <translation>Edit comment</translation>
+    </message>
+    <message>
         <location filename="../dialogs/languageselectionwindow.py" line="32"/>
         <source>Выберите язык:</source>
         <translation>Choose language:</translation>

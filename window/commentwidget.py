@@ -122,6 +122,7 @@ class CommentWidget(TableWidget):
         """
 
         self._shortcut: QShortcut = QShortcut(QKeySequence(Qt.Key_F2), self)
+        self._shortcut.setContext(Qt.ApplicationShortcut)
         self._shortcut.activated.connect(self._set_focus_on_current_item)
 
     @pyqtSlot()
@@ -132,6 +133,7 @@ class CommentWidget(TableWidget):
 
         item = self.item(self.currentRow(), 1)
         if item and self._main_window.work_mode in (WorkMode.TEST, WorkMode.WRITE):
+            self._main_window.activateWindow()
             self.editItem(item)
 
     def _set_read_only(self, read_only: bool) -> None:

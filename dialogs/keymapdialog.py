@@ -57,7 +57,8 @@ class KeymapDialog(QDialog):
                    ("Space", self._main_window.save_point_action.text()),
                    ("Left", qApp.translate("MainWindow", "Предыдущая точка")),
                    ("Right", qApp.translate("MainWindow", "Следующая точка")),
-                   ("Del", qApp.translate("MainWindow", "Удалить точку"))]
+                   ("Del", qApp.translate("MainWindow", "Удалить точку")),
+                   ("F2", qApp.translate("dialogs", "Редактировать комментарий"))]
         row_format = "<tr><td><b>{}</b></td><td>{}</td></tr>"
         text = "".join([row_format.format(key, description) for key, description in key_map])
         return f"{style}<table>{text}</table>"
