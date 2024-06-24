@@ -101,8 +101,8 @@ def add_pedal_handler(widget_cls: type) -> type:
             self._pedal_handler: PedalHandler = PedalHandler()
             if hasattr(self, "handle_pedal_signal"):
                 self._pedal_handler.pedal_signal.connect(self.handle_pedal_signal)
-            elif hasattr(self, "_parent") and hasattr(self._parent, "handle_pedal_signal"):
-                self._pedal_handler.pedal_signal.connect(self._parent.handle_pedal_signal)
+            elif hasattr(self, "_main_window") and hasattr(self._main_window, "handle_pedal_signal"):
+                self._pedal_handler.pedal_signal.connect(self._main_window.handle_pedal_signal)
 
         def keyPressEvent(self, event: QKeyEvent) -> None:
             """
