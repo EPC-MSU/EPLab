@@ -656,7 +656,7 @@ class EPLabWindow(QMainWindow):
         if self._device_errors_handler.all_ok:
             with self._device_errors_handler:
                 self._read_curves_periodic_task()
-            self._plan_auto_transition.save_pin()
+            self._plan_auto_transition.save_measurements()
             self._mux_and_plan_window.measurement_plan_runner.save_measurements()
             self._timer.start()  # add this task to the event loop
         else:
@@ -822,7 +822,7 @@ class EPLabWindow(QMainWindow):
                 self._update_signatures(curves, measurement_settings)
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.check_pin()
-                else:
+                elif self.measurement_plan and not self.measurement_plan.multiplexer:
                     self._plan_auto_transition.check_auto_transition(self.work_mode, self._product_name,
                                                                      measurement_settings, self._current_curve,
                                                                      self._reference_curve)

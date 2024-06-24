@@ -205,7 +205,7 @@ class PlanAutoTransition(QObject):
                 path = os.path.join(self._dir, filename)
                 self._break_signatures[filename] = load_signature(path)
 
-    def save_pin(self) -> None:
+    def save_measurements(self) -> None:
         """
         Method, if necessary, sends a signal to save measurements in a pin.
         """

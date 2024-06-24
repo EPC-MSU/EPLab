@@ -18,14 +18,14 @@ class SettingsWindow(QDialog):
     THRESHOLD_STEP: float = 0.05
     apply_settings_signal: pyqtSignal = pyqtSignal(Settings)
 
-    def __init__(self, parent, init_settings: Settings, settings_directory: str = None) -> None:
+    def __init__(self, main_window, init_settings: Settings, settings_directory: str = None) -> None:
         """
-        :param parent: main window;
+        :param main_window: main window of application;
         :param init_settings: initial settings of the application;
         :param settings_directory: directory for settings file.
         """
 
-        super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        super().__init__(main_window, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self._init_settings: Settings = init_settings
         self._settings: Settings = copy.copy(init_settings)
         self._settings_directory: str = settings_directory or ut.get_dir_name()
@@ -43,10 +43,12 @@ class SettingsWindow(QDialog):
     def _init_ui(self) -> None:
         dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         uic.loadUi(os.path.join(dir_name, "gui", "settings.ui"), self)
-        self.layout().setSizeConstraint(QLayout.SetFixedSize)
         self.button_tolerance_minus.clicked.connect(self.decrease_tolerance)
         self.button_tolerance_plus.clicked.connect(self.increase_tolerance)
         self.check_box_auto_transition.stateChanged.connect(self.update_auto_transition)
+        if self.parent().measurement_plan and self.parent().measurement_plan.multiplexer:
+            self.label_auto_transition.hide()
+            self.check_box_auto_transition.hide()
         self.check_box_pin_shift_warning_info.stateChanged.connect(self.update_pin_shift_warning_info)
         self.spin_box_tolerance.valueChanged.connect(self.update_tolerance)
         self.spin_box_max_optimal_voltage.valueChanged.connect(self.update_max_optimal_voltage)
@@ -56,6 +58,8 @@ class SettingsWindow(QDialog):
         self.button_ok.clicked.connect(self.apply_changes)
         self.button_ok.setDefault(True)
         self.button_save_settings.clicked.connect(self.save_settings_to_file)
+        self.adjustSize()
+        self.layout().setSizeConstraint(QLayout.SetFixedSize)
 
     def _get_tolerance_value(self) -> float:
         """
