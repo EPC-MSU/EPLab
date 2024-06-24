@@ -509,6 +509,12 @@
    <property name="text">
     <string>Сохранить план тестирования как</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="save_screen_action">
    <property name="icon">
