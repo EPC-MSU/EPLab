@@ -1360,7 +1360,7 @@ class EPLabWindow(QMainWindow):
             is_user_defined_path = False
         else:
             dir_path = QFileDialog.getExistingDirectory(
-                self, qApp.translate("t", "Выберите папку, в которую сохранить отчет"), self.dir_chosen_by_user)
+                self, qApp.translate("t", "Выберите папку, в которую будет сохранен отчет"), self.dir_chosen_by_user)
             is_user_defined_path = True
 
         if dir_path:
