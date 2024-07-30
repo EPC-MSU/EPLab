@@ -40,7 +40,6 @@ python3 -m venv venv
 --icon media/icon.ico \
 --splash media/banner.png
 
-cp ./resources/readme.md ./dist/readme.md
 mv dist release
 mv ./release/main ./release/eplab
 rm -rf build
