@@ -1,8 +1,8 @@
 import platform
 from typing import Any, Callable, Optional
 from PyQt5.QtCore import QCoreApplication as qApp
-from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox, QDoubleSpinBox, QGroupBox, QLabel, QLineEdit,
-                             QProgressBar, QPushButton, QSpinBox, QTextBrowser, QToolBar, QWidget)
+from PyQt5.QtWidgets import (QAction, QCheckBox, QComboBox, QDialogButtonBox, QDoubleSpinBox, QGroupBox, QLabel,
+                             QLineEdit, QProgressBar, QPushButton, QSpinBox, QTextBrowser, QToolBar, QWidget)
 
 
 def get_font_size() -> int:
@@ -91,15 +91,16 @@ def update_scale(widget: QWidget) -> None:
 
     scale_factor = get_scale_factor()
     for child_widget in vars(widget).values():
-        if isinstance(child_widget, (QCheckBox, QDialogButtonBox, QDoubleSpinBox, QGroupBox, QLabel,
-                                     QLineEdit, QProgressBar, QPushButton, QSpinBox, QTextBrowser, QToolBar,
-                                     PinIndexWidget)):
+        if isinstance(child_widget, (QCheckBox, QDialogButtonBox, QDoubleSpinBox, QGroupBox, QLabel, QLineEdit,
+                                     QProgressBar, QPushButton, QSpinBox, QTextBrowser, QToolBar, PinIndexWidget)):
             if isinstance(child_widget, QToolBar):
                 for action in child_widget.actions():
                     if action.objectName():
                         scale_font_on_widget(action, font_size)
             scale_widget(child_widget, font_size, scale_factor)
             child_widget.adjustSize()
+        elif isinstance(child_widget, QAction):
+            scale_widget(child_widget, font_size, scale_factor)
         elif isinstance(child_widget, QComboBox):
             if child_widget.isEditable():
                 scale_widget(child_widget.lineEdit(), font_size, scale_factor)
