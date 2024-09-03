@@ -124,6 +124,16 @@ def update_scale_decorator(func: Callable[..., Any]):
     return wrapper
 
 
+def update_scale_of_action(action: QAction) -> None:
+    """
+    :param action: menu action.
+    """
+
+    font_size = get_font_size()
+    scale_factor = get_scale_factor()
+    scale_widget(action, font_size, scale_factor)
+
+
 def update_scale_of_class(widget_cls: type) -> type:
     """
     A decorator that will scale a widget created from a given class.
