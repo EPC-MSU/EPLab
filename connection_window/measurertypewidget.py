@@ -17,11 +17,12 @@ class MeasurerTypeWidget(QWidget):
     Class for widget to select measurer type.
     """
 
-    IMAGE_SIZES: Dict[str, int] = {"EyePoint a2": 70,
-                                   "EyePoint H10": 100,
-                                   "EyePoint S2": 100,
-                                   "EyePoint u21": 80,
-                                   "EyePoint u22": 100}
+    IMAGE_SIZES: Dict[str, int] = {ProductName.EYEPOINT_A2: 70,
+                                   ProductName.EYEPOINT_H10: 100,
+                                   ProductName.EYEPOINT_S2: 100,
+                                   ProductName.EYEPOINT_U21: 80,
+                                   ProductName.EYEPOINT_U22: 100,
+                                   ProductName.MK22: 80}
     TIME_TO_SHOW_INITIAL_PRODUCT_MS: int = 50
     WIDGET_HEIGHT: int = 200
     measurer_type_changed: pyqtSignal = pyqtSignal(MeasurerType, bool)
@@ -32,7 +33,7 @@ class MeasurerTypeWidget(QWidget):
         """
 
         super().__init__()
-        self.radio_buttons_products: Dict[ProductName, QRadioButton] = None
+        self.radio_buttons_products: Optional[Dict[ProductName, QRadioButton]] = None
         self._initial_product_name: ProductName = initial_product_name or ProductName.EYEPOINT_A2
         self._init_ui()
         self._timer: QTimer = QTimer()
@@ -56,14 +57,12 @@ class MeasurerTypeWidget(QWidget):
 
         self.radio_buttons_products = {}
         for row, product_name in enumerate(ProductName.get_product_names_for_platform()):
-            radio_button = QRadioButton(product_name.value, self)
-            radio_button.setToolTip(product_name.value)
+            radio_button = QRadioButton(ProductName.get_product_name_to_show_in_connection_window(product_name), self)
             measurer_type = ProductName.get_measurer_type_by_product_name(product_name)
             radio_button.toggled.connect(partial(self.select_measurer_type, measurer_type))
-            label = ut.create_label_with_image(os.path.join(DIR_MEDIA, f"{product_name.value}.png"),
-                                               MeasurerTypeWidget.IMAGE_SIZES[product_name.value],
-                                               MeasurerTypeWidget.IMAGE_SIZES[product_name.value])
-            label.setToolTip(product_name.value)
+            label = ut.create_label_with_image(os.path.join(DIR_MEDIA, f"{product_name.name}.png"),
+                                               MeasurerTypeWidget.IMAGE_SIZES[product_name],
+                                               MeasurerTypeWidget.IMAGE_SIZES[product_name])
             grid_layout.addWidget(label, row, 0, Qt.AlignHCenter | Qt.AlignVCenter)
             grid_layout.addWidget(radio_button, row, 1, Qt.AlignVCenter)
             self.radio_buttons_products[product_name] = radio_button
@@ -89,6 +88,7 @@ class MeasurerTypeWidget(QWidget):
         for product_name, radio_button in self.radio_buttons_products.items():
             if radio_button.isChecked():
                 return product_name
+
         return None
 
     @pyqtSlot(MeasurerType, bool)

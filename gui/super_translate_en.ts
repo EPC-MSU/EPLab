@@ -718,6 +718,18 @@ leading to a numbering shift</translation>
         <source>Мультиплексор</source>
         <translation>Multiplexer</translation>
     </message>
+    <message>
+        <location filename="../connection_window/productname.py" line="146"/>
+        <source>EyePoint S2/
+Сигнатурный анализатор С2</source>
+        <translation>EyePoint S2/
+Signature analyzer С2</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/productname.py" line="149"/>
+        <source>Сигнатурный анализатор мк22</source>
+        <translation>Signature analyzer мк22</translation>
+    </message>
 </context>
 <context>
     <name>dialogs</name>
