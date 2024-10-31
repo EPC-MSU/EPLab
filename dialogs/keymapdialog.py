@@ -59,6 +59,7 @@ class KeymapDialog(QDialog):
                    ("Left", qApp.translate("MainWindow", "Предыдущая точка")),
                    ("Right", qApp.translate("MainWindow", "Следующая точка")),
                    ("Del", qApp.translate("MainWindow", "Удалить точку")),
+                   ("F1", qApp.translate("MainWindow", "О программе")),
                    ("F2", qApp.translate("dialogs", "Редактировать комментарий"))]
         row_format = "<tr><td><b>{}</b></td><td>{}</td></tr>"
         text = "".join([row_format.format(key, description) for key, description in key_map])
@@ -70,7 +71,7 @@ class KeymapDialog(QDialog):
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
 
         self.text_browser: QTextBrowser = self._create_text_browser()
-        self.button_ok = QPushButton("OK")
+        self.button_ok: QPushButton = QPushButton("OK")
         self.button_ok.clicked.connect(self.close)
 
         h_layout = QHBoxLayout()

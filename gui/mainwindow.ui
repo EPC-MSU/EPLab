@@ -626,6 +626,12 @@
    <property name="text">
     <string>О программе</string>
    </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="sound_enabled_action">
    <property name="checkable">
