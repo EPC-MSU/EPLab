@@ -659,32 +659,32 @@ leading to a numbering shift</translation>
 <context>
     <name>connection_window</name>
     <message>
-        <location filename="../connection_window/connectionwindow.py" line="48"/>
-        <source>Настройка подключения</source>
-        <translation>Connection setup</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/connectionwindow.py" line="58"/>
-        <source>Измерители</source>
-        <translation>Measurers</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/connectionwindow.py" line="67"/>
+        <location filename="../connection_window/connectionwindow.py" line="50"/>
         <source>Подключить</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../connection_window/connectionwindow.py" line="70"/>
+        <location filename="../connection_window/connectionwindow.py" line="53"/>
         <source>Отключить</source>
         <translation>Disconnect</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurertypewidget.py" line="70"/>
+        <location filename="../connection_window/connectionwindow.py" line="72"/>
+        <source>Измерители</source>
+        <translation>Measurers</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/connectionwindow.py" line="81"/>
+        <source>Настройка подключения</source>
+        <translation>Connection setup</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/measurertypewidget.py" line="107"/>
         <source>Тип измерителя</source>
         <translation>Measurer type</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="174"/>
+        <location filename="../connection_window/measureruriswidget.py" line="175"/>
         <source>Канал #{}</source>
         <translation>Channel #{}</translation>
     </message>
@@ -699,36 +699,36 @@ leading to a numbering shift</translation>
         <translation>Update</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="310"/>
-        <source>Введите значение последовательного порта в формате {}.</source>
-        <translation>Enter serial port value in format {}.</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/measureruriswidget.py" line="313"/>
-        <source>Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.</source>
-        <translation>Enter H10 server address in format xmlrpc://x.x.x.x.</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/measureruriswidget.py" line="339"/>
+        <location filename="../connection_window/measureruriswidget.py" line="333"/>
         <source>Введите разные порты.</source>
         <translation>Enter different ports.</translation>
     </message>
     <message>
-        <location filename="../connection_window/muxwidget.py" line="50"/>
+        <location filename="../connection_window/muxwidget.py" line="55"/>
         <source>Мультиплексор</source>
         <translation>Multiplexer</translation>
     </message>
     <message>
         <location filename="../connection_window/productname.py" line="146"/>
-        <source>EyePoint S2/
+        <source>EyePoint S2 /
 Сигнатурный анализатор С2</source>
-        <translation>EyePoint S2/
-Signature analyzer С2</translation>
+        <translation>EyePoint S2 /
+Signature analyzer S2</translation>
     </message>
     <message>
         <location filename="../connection_window/productname.py" line="149"/>
         <source>Сигнатурный анализатор мк22</source>
-        <translation>Signature analyzer мк22</translation>
+        <translation>Signature analyzer mk22</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/utils.py" line="248"/>
+        <source>Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.</source>
+        <translation>Enter H10 server address in format xmlrpc://x.x.x.x.</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/utils.py" line="251"/>
+        <source>Введите значение последовательного порта в формате {}.</source>
+        <translation>Enter serial port value in format {}.</translation>
     </message>
 </context>
 <context>

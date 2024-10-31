@@ -15,9 +15,11 @@ from typing import List, Optional
 import psutil
 import serial.tools.list_ports
 import serial.tools.list_ports_common
+from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLabel, QMessageBox
 from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerVirtualASA
+from window.utils import show_message
 from .productname import MeasurerType
 
 
@@ -53,8 +55,10 @@ def create_uri_name(com_port: str) -> str:
     os_name = get_platform()
     if "win" in os_name:
         return f"com:\\\\.\\{com_port}"
+
     if os_name == "debian":
         return f"com://{com_port}"
+
     raise RuntimeError("Unexpected OS")
 
 
@@ -172,8 +176,8 @@ def get_platform() -> Optional[str]:
 
 def get_unique_uris(uris: List[Optional[str]]) -> List[Optional[str]]:
     """
-    :param uris:
-    :return:
+    :param uris: list of URIs.
+    :return: list of unique URIs.
     """
 
     os_name = get_platform()
@@ -232,3 +236,18 @@ def reveal_asa(timeout: float = None) -> List[ipaddress.IPv4Address]:
             except Exception as exc:
                 logger.error("Failed to bind to interface %s and address %s: %s", iface_name, address.address, exc)
     return ip_addresses
+
+
+def show_help(h10: bool = False) -> None:
+    """
+    Function shows help information how to enter URI.
+    :param h10: if True, then the tooltip should be shown for the H10 device.
+    """
+
+    if h10:
+        info = qApp.translate("connection_window", "Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.")
+    else:
+        port_format = "com:///dev/ttyx" if get_platform() == "debian" else "com:\\\\.\\COMx"
+        info = qApp.translate("connection_window", "Введите значение последовательного порта в формате {}."
+                              ).format(port_format)
+    show_message(qApp.translate("connection_window", "Помощь"), info, icon=QMessageBox.Information)

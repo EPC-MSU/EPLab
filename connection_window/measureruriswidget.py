@@ -6,7 +6,7 @@ import os
 from typing import Callable, List, Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
 from PyQt5.QtGui import QFocusEvent, QIcon
-from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QMessageBox, QPushButton, QWidget
+from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QPushButton, QWidget
 from window.scaler import update_scale_of_class
 from window.utils import DIR_MEDIA, show_message
 from . import utils as ut
@@ -305,13 +305,7 @@ class MeasurerURIsWidget(QWidget):
         Slot shows help information how to enter URI.
         """
 
-        if self._measurer_type == MeasurerType.IVM10:
-            port_format = "com:///dev/ttyx" if ut.get_platform() == "debian" else "com:\\\\.\\COMx"
-            info = qApp.translate("connection_window", "Введите значение последовательного порта в формате {}."
-                                  ).format(port_format)
-        else:
-            info = qApp.translate("connection_window", "Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.")
-        show_message(qApp.translate("connection_window", "Помощь"), info, icon=QMessageBox.Information)
+        ut.show_help(self._measurer_type == MeasurerType.ASA)
 
     @pyqtSlot()
     def update_uris(self) -> None:

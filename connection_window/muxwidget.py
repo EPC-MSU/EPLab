@@ -6,9 +6,9 @@ import os
 from typing import Optional
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
 from PyQt5.QtGui import QFocusEvent, QIcon
-from PyQt5.QtWidgets import QComboBox, QGroupBox, QHBoxLayout, QLabel, QMessageBox, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QComboBox, QGroupBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 from window.scaler import update_scale_of_class
-from window.utils import DIR_MEDIA, show_message
+from window.utils import DIR_MEDIA
 from . import utils as ut
 from .urichecker import URIChecker
 
@@ -68,7 +68,7 @@ class MuxWidget(QGroupBox):
         self.button_show_help.setIcon(QIcon(os.path.join(DIR_MEDIA, "info.png")))
         self.button_show_help.setToolTip(qApp.translate("connection_window", "Помощь"))
         self.button_show_help.setFixedWidth(MuxWidget.BUTTON_HELP_WIDTH)
-        self.button_show_help.clicked.connect(show_help)
+        self.button_show_help.clicked.connect(ut.show_help)
 
         h_box_layout = QHBoxLayout()
         h_box_layout.addWidget(self.combo_box)
@@ -116,14 +116,3 @@ class MuxWidget(QGroupBox):
         self.combo_box.setCurrentText(current_uri)
 
         self._uri_checker.color_widgets(self.combo_box)
-
-
-def show_help() -> None:
-    """
-    Function shows help information how to enter URI.
-    """
-
-    port_format = "com:///dev/ttyx" if ut.get_platform() == "debian" else "com:\\\\.\\COMx"
-    info = qApp.translate("connection_window", "Введите значение последовательного порта в формате {}."
-                          ).format(port_format)
-    show_message(qApp.translate("connection_window", "Помощь"), info, icon=QMessageBox.Information)
