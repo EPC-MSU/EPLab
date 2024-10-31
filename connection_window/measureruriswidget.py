@@ -48,6 +48,7 @@ class MeasurerURIsWidget(QWidget):
         for combo_box in self.combo_boxes_measurers:
             if combo_box.isVisible() and not self._uri_checker.check_uri_for_correctness(combo_box):
                 return False
+
         return True
 
     def _get_ports_for_ivm10(self, ports: List[str], port_1: str = None, port_2: str = None) -> List[List[str]]:

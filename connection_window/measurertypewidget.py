@@ -17,6 +17,7 @@ class MeasurerTypeWidget(QWidget):
     Class for widget to select measurer type.
     """
 
+    ADDITIONAL_SCROLL_AREA_WIDTH: int = 20
     IMAGE_SIZES: Dict[str, int] = {ProductName.EYEPOINT_A2: 70,
                                    ProductName.EYEPOINT_H10: 100,
                                    ProductName.EYEPOINT_S2: 100,
@@ -41,21 +42,14 @@ class MeasurerTypeWidget(QWidget):
         self._timer.setSingleShot(True)
         self._timer.start(MeasurerTypeWidget.TIME_TO_SHOW_INITIAL_PRODUCT_MS)
 
-    def _init_ui(self) -> None:
+    def _create_labels_and_radio_buttons_for_products(self) -> QGridLayout:
         """
-        Method initializes widgets on main widget.
+        :return: layout, in which images and radio buttons of products are located.
         """
 
-        widget = QWidget()
-        self.scroll_area: QScrollArea = QScrollArea(self)
-        self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setWidget(widget)
-        layout = QVBoxLayout()
-        layout.addWidget(self.scroll_area)
         grid_layout = QGridLayout()
-        widget.setLayout(grid_layout)
-
-        self.radio_buttons_products = {}
+        grid_layout.setSpacing(5)
+        self.radio_buttons_products = dict()
         for row, product_name in enumerate(ProductName.get_product_names_for_platform()):
             radio_button = QRadioButton(ProductName.get_product_name_to_show_in_connection_window(product_name), self)
             measurer_type = ProductName.get_measurer_type_by_product_name(product_name)
@@ -66,10 +60,53 @@ class MeasurerTypeWidget(QWidget):
             grid_layout.addWidget(label, row, 0, Qt.AlignHCenter | Qt.AlignVCenter)
             grid_layout.addWidget(radio_button, row, 1, Qt.AlignVCenter)
             self.radio_buttons_products[product_name] = radio_button
+
         self.radio_buttons_products[self._initial_product_name].setChecked(True)
+        return grid_layout
+
+    def _get_width_hint(self) -> int:
+        """
+        :return: scroll area width hint.
+        """
+
+        grid_layout = self.scroll_area.widget().layout()
+        max_width = None
+        for row in range(grid_layout.rowCount()):
+            row_width = 0
+            for column in range(grid_layout.columnCount()):
+                widget_width = grid_layout.itemAtPosition(row, column).sizeHint().width()
+                row_width += widget_width
+
+            if max_width is None or max_width < row_width:
+                max_width = row_width
+
+        margins = grid_layout.contentsMargins()
+        max_width += (margins.left() + margins.right() + grid_layout.spacing() +
+                      self.scroll_area.verticalScrollBar().sizeHint().width() +
+                      MeasurerTypeWidget.ADDITIONAL_SCROLL_AREA_WIDTH)
+        return max_width
+
+    def _init_ui(self) -> None:
+        """
+        Method initializes widgets on main widget.
+        """
+
+        widget = QWidget()
+        self.scroll_area: QScrollArea = QScrollArea(self)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidget(widget)
+
+        layout_with_products = self._create_labels_and_radio_buttons_for_products()
+        widget.setLayout(layout_with_products)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        layout.addWidget(self.scroll_area)
+        self.setLayout(layout)
         self.setToolTip(qApp.translate("connection_window", "Тип измерителя"))
         self.setFixedHeight(MeasurerTypeWidget.WIDGET_HEIGHT)
-        self.setLayout(layout)
+        self.adjustSize()
 
     @pyqtSlot()
     def _show_initial_product(self) -> None:
@@ -79,6 +116,9 @@ class MeasurerTypeWidget(QWidget):
 
         radio_button = self.radio_buttons_products[self._initial_product_name]
         self.scroll_area.ensureWidgetVisible(radio_button)
+
+        width = self._get_width_hint()
+        self.scroll_area.setFixedWidth(width)
 
     def get_product_name(self) -> Optional[ProductName]:
         """

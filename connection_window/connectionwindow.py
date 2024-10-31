@@ -39,34 +39,13 @@ class ConnectionWindow(QDialog):
         self._initial_mux_uri: str = initial_mux_uri
         self._initial_ports: List[str] = initial_uris
         self._initial_product_name: ProductName = initial_product_name
-        self._urls: list = None
         self._init_ui()
         self.handle_connection(bool(initial_product_name))
 
-    def _init_ui(self) -> None:
+    def _create_connect_and_disconnect_buttons(self) -> QHBoxLayout:
         """
-        Method initializes widgets in the dialog window.
+        :return: layout in which the buttons are located.
         """
-
-        self.setWindowTitle(qApp.translate("connection_window", "Настройка подключения"))
-        self.setFocusPolicy(Qt.ClickFocus)
-
-        self.widget_measurer_type: MeasurerTypeWidget = MeasurerTypeWidget(self._initial_product_name)
-        self.widget_measurer_uris: MeasurerURIsWidget = MeasurerURIsWidget(self._initial_ports)
-        self.widget_measurer_type.measurer_type_changed.connect(self.widget_measurer_uris.set_measurer_type)
-        self.widget_measurer_type.send_initial_values()
-
-        v_box_layout = QVBoxLayout()
-        v_box_layout.addWidget(self.widget_measurer_type)
-        v_box_layout.addWidget(self.widget_measurer_uris)
-        self.group_box_measurers: QGroupBox = QGroupBox(qApp.translate("connection_window", "Измерители"))
-        self.group_box_measurers.setFocusPolicy(Qt.ClickFocus)
-        self.group_box_measurers.setLayout(v_box_layout)
-        self.widget_mux: MuxWidget = MuxWidget(self._initial_mux_uri)
-
-        h_box_layout = QHBoxLayout()
-        h_box_layout.addWidget(self.group_box_measurers)
-        h_box_layout.addWidget(self.widget_mux)
 
         self.button_connect: QPushButton = QPushButton(qApp.translate("connection_window", "Подключить"))
         self.button_connect.setDefault(True)
@@ -79,9 +58,39 @@ class ConnectionWindow(QDialog):
         layout.addWidget(self.button_connect)
         layout.addWidget(self.button_disconnect)
         layout.addStretch(1)
+        return layout
+
+    def _create_group_box_for_measurers(self) -> None:
+        self.widget_measurer_type: MeasurerTypeWidget = MeasurerTypeWidget(self._initial_product_name)
+        self.widget_measurer_uris: MeasurerURIsWidget = MeasurerURIsWidget(self._initial_ports)
+        self.widget_measurer_type.measurer_type_changed.connect(self.widget_measurer_uris.set_measurer_type)
+        self.widget_measurer_type.send_initial_values()
+
+        v_box_layout = QVBoxLayout()
+        v_box_layout.addWidget(self.widget_measurer_type)
+        v_box_layout.addWidget(self.widget_measurer_uris)
+        self.group_box_measurers: QGroupBox = QGroupBox(qApp.translate("connection_window", "Измерители"))
+        self.group_box_measurers.setFocusPolicy(Qt.ClickFocus)
+        self.group_box_measurers.setLayout(v_box_layout)
+
+    def _init_ui(self) -> None:
+        """
+        Method initializes widgets in the dialog window.
+        """
+
+        self.setWindowTitle(qApp.translate("connection_window", "Настройка подключения"))
+        self.setFocusPolicy(Qt.ClickFocus)
+
+        self._create_group_box_for_measurers()
+        self.widget_mux: MuxWidget = MuxWidget(self._initial_mux_uri)
+        h_box_layout = QHBoxLayout()
+        h_box_layout.addWidget(self.group_box_measurers)
+        h_box_layout.addWidget(self.widget_mux)
+        layout_with_buttons = self._create_connect_and_disconnect_buttons()
+
         v_box_layout = QVBoxLayout(self)
         v_box_layout.addLayout(h_box_layout)
-        v_box_layout.addLayout(layout)
+        v_box_layout.addLayout(layout_with_buttons)
         v_box_layout.setSizeConstraint(QLayout.SetFixedSize)
         self.setLayout(v_box_layout)
         self.adjustSize()
