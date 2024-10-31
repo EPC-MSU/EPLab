@@ -17,7 +17,7 @@ class MeasurerTypeWidget(QWidget):
     Class for widget to select measurer type.
     """
 
-    ADDITIONAL_SCROLL_AREA_WIDTH: int = 20
+    ADDITIONAL_SCROLL_AREA_WIDTH: int = 25
     IMAGE_SIZES: Dict[str, int] = {ProductName.EYEPOINT_A2: 70,
                                    ProductName.EYEPOINT_H10: 100,
                                    ProductName.EYEPOINT_S2: 100,
