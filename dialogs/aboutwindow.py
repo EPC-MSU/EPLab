@@ -3,10 +3,10 @@ File containing a dialog box class for displaying basic information about the ap
 """
 
 import os
-from typing import Tuple
+import re
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtGui import QIcon, QPalette
-from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QLayout, QPushButton, QTextBrowser, QVBoxLayout
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QDialog, QHBoxLayout, QLabel, QLayout, QPushButton, QVBoxLayout
 from connection_window.utils import get_platform
 from version import Version
 from window import utils as ut
@@ -20,7 +20,6 @@ class AboutWindow(QDialog):
     Class for dialog window to show main information about the application.
     """
 
-    TEXT_HEIGHT: int = 100
     WINDOW_WIDTH: int = 400
 
     def __init__(self) -> None:
@@ -28,10 +27,9 @@ class AboutWindow(QDialog):
         self._language: Language = get_language()
         self._init_ui()
 
-    def _create_info_text_and_link(self) -> Tuple[str, str]:
+    def _create_info_text(self) -> str:
         """
-        Method creates text with main information and hyperlink to website.
-        :return: text with main information and hyperlink.
+        :return: text with main information.
         """
 
         platform_name = {"debian": "Debian 64-bit",
@@ -42,22 +40,67 @@ class AboutWindow(QDialog):
                                          " предназначенными для поиска неисправностей на печатных платах в ручном "
                                          "режиме (при помощи ручных щупов). Более подробную информацию вы можете найти "
                                          "{}")
-        page_url = "https://eyepoint.physlab.ru/"
-        if self._language is Language.RU:
-            page_url += "ru/"
-        else:
-            page_url += "en/"
-        link = '<a href="{}">{}</a>'.format(page_url, qApp.translate("dialogs", "на нашем сайте."))
+        link = '<a href="{}">{}</a>'.format(self._get_page_url(), qApp.translate("dialogs", "на нашем сайте."))
         text = app_name + text.format(link)
-        return text.format(link), page_url
+        return text.format(link)
+
+    def _create_label_with_info(self) -> QLabel:
+        """
+        :return: label with main information text.
+        """
+
+        self.label_info: QLabel = QLabel(self._create_info_text())
+        self.label_info.setOpenExternalLinks(True)
+        self.label_info.setWordWrap(True)
+        self.label_info.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.LinksAccessibleByMouse)
+        return self.label_info
+
+    def _create_label_with_logo(self) -> QLabel:
+        """
+        :return: label with logo.
+        """
+
+        logo_name = self._get_logo_name()
+        self.label_logo: QLabel = QLabel()
+        self.label_logo.setText(f'<a href="{self._get_page_url()}"><img src="{os.path.join(ut.DIR_MEDIA, logo_name)}" '
+                                f'width="{AboutWindow.WINDOW_WIDTH}"></a>')
+        self.label_logo.setOpenExternalLinks(True)
+        return self.label_logo
+
+    def _create_layout_with_buttons(self) -> QHBoxLayout:
+        """
+        :return: horizontal layout with copy and OK buttons.
+        """
+
+        self.button_copy: QPushButton = QPushButton()
+        self.button_copy.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "copy.png")))
+        self.button_copy.setToolTip(qApp.translate("dialogs", "Копировать"))
+        self.button_copy.clicked.connect(self.copy_info)
+        self.button_ok: QPushButton = QPushButton("OK")
+        self.button_ok.setDefault(True)
+        self.button_ok.clicked.connect(self.close)
+
+        h_layout = QHBoxLayout()
+        h_layout.addStretch(1)
+        h_layout.addWidget(self.button_copy)
+        h_layout.addWidget(self.button_ok)
+        return h_layout
 
     def _get_logo_name(self) -> str:
         """
-        Method returns file name with logo.
         :return: file name with logo.
         """
 
         return "logo.png" if self._language is Language.RU else "logo_en.png"
+
+    def _get_page_url(self) -> str:
+        """
+        :return: hyperlink to website.
+        """
+
+        page_url = "https://eyepoint.physlab.ru/"
+        page_url += "ru/" if self._language is Language.RU else "en/"
+        return page_url
 
     def _init_ui(self) -> None:
         """
@@ -67,39 +110,33 @@ class AboutWindow(QDialog):
         self.setWindowTitle(qApp.translate("MainWindow", "О программе"))
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-
         self.setFixedWidth(AboutWindow.WINDOW_WIDTH)
-        color = self.palette().color(QPalette.Background)
-        text, page_url = self._create_info_text_and_link()
-        logo_name = self._get_logo_name()
-        self.label_logo = QLabel()
-        self.label_logo.setText(f'<a href="{page_url}"><img src="{os.path.join(ut.DIR_MEDIA, logo_name)}" '
-                                f'width="{AboutWindow.WINDOW_WIDTH}"></a>')
-        self.label_logo.setOpenExternalLinks(True)
-        self.text_edit_info: QTextBrowser = QTextBrowser()
-        self.text_edit_info.setFrameStyle(QFrame.NoFrame)
-        self.text_edit_info.setStyleSheet(f"background: {color.name()};")
-        self.text_edit_info.setOpenExternalLinks(True)
-        self.text_edit_info.setHtml(text)
-        self.text_edit_info.setFixedSize(AboutWindow.WINDOW_WIDTH, AboutWindow.TEXT_HEIGHT)
-        self.button_copy: QPushButton = QPushButton()
-        self.button_copy.setIcon(QIcon(os.path.join(ut.DIR_MEDIA, "copy.png")))
-        self.button_copy.setToolTip(qApp.translate("dialogs", "Копировать"))
-        self.button_copy.clicked.connect(self.copy_info)
-        self.button_ok: QPushButton = QPushButton("OK")
-        self.button_ok.setDefault(True)
-        self.button_ok.clicked.connect(self.close)
-        h_layout = QHBoxLayout()
-        h_layout.addStretch(1)
-        h_layout.addWidget(self.button_copy)
-        h_layout.addWidget(self.button_ok)
+
         layout = QVBoxLayout()
-        layout.addWidget(self.label_logo)
-        layout.addWidget(self.text_edit_info)
-        layout.addLayout(h_layout)
+        layout.addWidget(self._create_label_with_logo())
+        layout.addWidget(self._create_label_with_info())
+        layout.addLayout(self._create_layout_with_buttons())
         layout.setSizeConstraint(QLayout.SetFixedSize)
         self.setLayout(layout)
         self.adjustSize()
+
+    @staticmethod
+    def _remove_tags(text: str) -> str:
+        """
+        :param text: source text with HTML tags.
+        :return: text without HTML tags.
+        """
+
+        result = re.search(r'<a href="(?P<url>.*)">(?P<text>.*)\.</a>', text)
+        text = text[:result.start()] + result.group("text") + f" ({result.group('url')})."
+
+        tags_to_replace_with = {"<b>": "",
+                                "</b>": "",
+                                "<br>": "\n"}
+        for tag, symbol in tags_to_replace_with.items():
+            text = text.replace(tag, symbol)
+
+        return text
 
     @pyqtSlot()
     def copy_info(self):
@@ -109,7 +146,7 @@ class AboutWindow(QDialog):
 
         app = qApp.instance()
         clipboard = app.clipboard()
-        clipboard.setText(self.text_edit_info.toPlainText())
+        clipboard.setText(self._remove_tags(self.label_info.text()))
 
 
 def show_product_info() -> None:
