@@ -1,5 +1,5 @@
 cd ..
 rm -rf venv
-python3 -m venv venv
-./venv/bin/python3 -m pip install --upgrade pip
-./venv/bin/python3 -m pip install -r requirements.txt
+python3.6 -m venv venv
+./venv/bin/python -m pip install --upgrade pip
+./venv/bin/python -m pip install -r requirements.txt

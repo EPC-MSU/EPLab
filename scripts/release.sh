@@ -4,10 +4,10 @@ rm -rf dist
 rm -rf release
 rm -rf venv
 
-python3 -m venv venv
-./venv/bin/python3 -m pip install --upgrade pip
-./venv/bin/python3 -m pip install -r requirements.txt
-./venv/bin/python3 -m pip install pyinstaller
+python3.6 -m venv venv
+./venv/bin/python -m pip install --upgrade pip
+./venv/bin/python -m pip install -r requirements.txt
+./venv/bin/python -m pip install pyinstaller
 ./venv/bin/pyinstaller main.py --clean --onefile --noconsole \
 --add-data "./break_signatures/*:break_signatures" \
 --add-data "./cur.ini:." \

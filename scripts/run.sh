@@ -6,4 +6,4 @@
 cd ..
 IVM_TEST="com:///dev/ttyACMx"
 IVM_REF="com:///dev/ttyACMx"
-./venv/bin/python3 main.py
+./venv/bin/python main.py
