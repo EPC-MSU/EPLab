@@ -143,11 +143,28 @@ bash run.sh
 
    > qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.
    
-   выполните следующие команды:
+   выполните следующую команду:
 
    ```bash
    export QT_DEBUG_PLUGINS=1
+   ```
+   
+   Запустите приложение еще раз. Возможно, отладочный уровень логирования поможет Вам понять, что дополнительно требуется для Qt.
+   
+   Возможно, Вам поможет установка следующих библиотек:
+   
+   ```bash
    sudo apt-get install --reinstall libxcb-xinerama0
+   sudo apt-get install libxcb-randr0-dev libxcb-xtest0-dev libxcb-xinerama0-dev libxcb-shape0-dev libxcb-xkb-dev
+   sudo apt-get install libxkbcommon-x11-dev
+   ```
+   
+   Если у Вас не хватает *libxcb-util.so.1*, попробуйте:
+   
+   ```bash
+   sudo ln -fs /usr/lib/x86_64-linux-gnu/libxcb-util.so.0.0.0 /usr/lib/x86_64-linux-gnu/libxcb-util.so.1.0.0
+   sudo ln -fs /usr/lib/x86_64-linux-gnu/libxcb-util.so.0.0.0 /usr/lib/x86_64-linux-gnu/libxcb-util.so.1.0
+   sudo ln -fs /usr/lib/x86_64-linux-gnu/libxcb-util.so.0.0.0 /usr/lib/x86_64-linux-gnu/libxcb-util.so.1
    ```
 
 ## Запуск тестов
