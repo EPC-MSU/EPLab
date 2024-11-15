@@ -61,6 +61,9 @@ class MeasurerTypeWidget(QWidget):
             grid_layout.addWidget(radio_button, row, 1, Qt.AlignVCenter)
             self.radio_buttons_products[product_name] = radio_button
 
+            if product_name is ProductName.EYEPOINT_H10:
+                radio_button.setEnabled(False)
+
         self.radio_buttons_products[self._initial_product_name].setChecked(True)
         return grid_layout
 
