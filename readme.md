@@ -29,63 +29,65 @@
 
 ## Установка в Astra Linux
 
-1. В файле **/etc/apt/sources.list** закомментируйте все ранее записанные репозитории и добавьте репозиторий:
+1. Установка проводилась в *Astra Linux 2.12.22*.
+
+2. В файле **/etc/apt/sources.list** закомментируйте все ранее записанные репозитории и добавьте репозиторий:
 
    ```
    deb https://mirror.yandex.ru/astra/frozen/2.12_x86-64/2.12.22/repository/ orel main contrib non-free
    ```
 
-2. Установите библиотеки и пакеты для сборки Python из исходников:
+3. Установите библиотеки и пакеты для сборки Python из исходников:
 
    ```bash
    sudo apt update
    sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev liblzma-dev libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl libbz2-dev python-tk python3-tk tk-dev
    ```
 
-3. Скачайте исходники Python 3.6.8:
+4. Скачайте исходники Python 3.6.8:
 
    ```bash
    wget https://www.python.org/ftp/python/3.6.8/Python-3.6.8.tgz
    ```
 
-4. Разархивируйте скачанный архив:
+5. Разархивируйте скачанный архив:
 
    ```bash
    tar -xf Python-3.6.8.tgz
    ```
 
-5. Перейдите в папку **Python-3.6.8**, в которой находятся разархивированные файлы, и выполните команды:
+6. Перейдите в папку **Python-3.6.8**, в которой находятся разархивированные файлы, и выполните команды:
 
    ```bash
    cd Python-3.6.8
    ./configure --enable-optimizations --enable-shared --with-tcltk-includes='-I/usr/include -I/usr/include/tcl' --with-tcltk-libs='-L/usr/lib -ltcl -ltk'
    ```
 
-6. Запустите сборку Python:
+7. Запустите сборку Python:
 
    ```bash
    make
    ```
 
-7. После завершения сборки установите Python командой:
+8. После завершения сборки установите Python командой:
 
    ```bash
    sudo make altinstall
    ```
 
-8. Выполните команду:
+9. Выполните команду:
 
    ```bash
    sudo ldconfig -v
    ```
 
-9. Установите библиотеки для работы со звуком и для сборки пакетов Python:
+10. Установите библиотеки для работы со звуком и для сборки пакетов Python:
 
    ```bash
    sudo apt-get install -y python3-dev libasound2-dev
    ```
 
-10. Установите зависимости для Python, перейдя в папку **scripts** и запустив скрипт **rebuild_venv.sh**:
+11. Установите зависимости для Python, перейдя в папку **scripts** и запустив скрипт **rebuild_venv.sh**:
 
     ```bash
     bash rebuild_venv.sh
