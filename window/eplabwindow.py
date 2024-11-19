@@ -107,20 +107,12 @@ class EPLabWindow(QMainWindow):
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
         self._report_generation_thread.start()
         self._skip_curve: bool = False  # set to True to skip next measured curves
-
-        self._timer: QTimer = QTimer()
-        self._timer.setInterval(10)
-        self._timer.setSingleShot(True)
-        self._timer.timeout.connect(self._handle_periodic_task)
-
-        self._timer_to_go_to_next_pin: QTimer = QTimer()
-        self._timer_to_go_to_next_pin.setInterval(EPLabWindow.DELAY_TO_GO_TO_NEXT_PIN_MS)
-        self._timer_to_go_to_next_pin.setSingleShot(True)
-        self._timer_to_go_to_next_pin.timeout.connect(lambda: self.go_to_left_or_right_pin(False, False))
-
         self._work_mode: Optional[WorkMode] = None
 
+        self._create_timer_for_auto_transition_to_next_pin()
+        self._create_timer_for_periodic_task()
         self._load_translation(english)
+        
         self._init_ui()
         self._adjust_critical_width()
         self._set_init_position()
@@ -541,6 +533,18 @@ class EPLabWindow(QMainWindow):
             self._parameters_widgets[parameter] = widget
             ut.clear_layout(layout)
             layout.addWidget(widget)
+
+    def _create_timer_for_auto_transition_to_next_pin(self) -> None:
+        self._timer_to_go_to_next_pin: QTimer = QTimer()
+        self._timer_to_go_to_next_pin.setInterval(EPLabWindow.DELAY_TO_GO_TO_NEXT_PIN_MS)
+        self._timer_to_go_to_next_pin.setSingleShot(True)
+        self._timer_to_go_to_next_pin.timeout.connect(lambda: self.go_to_left_or_right_pin(False, False))
+
+    def _create_timer_for_periodic_task(self) -> None:
+        self._timer: QTimer = QTimer()
+        self._timer.setInterval(10)
+        self._timer.setSingleShot(True)
+        self._timer.timeout.connect(self._handle_periodic_task)
 
     def _delete_measurement_plan(self) -> None:
         self._last_saved_measurement_plan_data = None
