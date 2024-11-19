@@ -7,7 +7,7 @@ from typing import Optional, Tuple, Union
 from PIL import Image
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QEvent, QObject, QPoint, QPointF, QRect, QRectF, Qt, QTimer
 from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent, QWheelEvent
-from PyQt5.QtWidgets import QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QGraphicsScene
 from boardview.BoardViewWidget import BoardView, GraphicsManualPinItem
 from epcore.measurementmanager import MeasurementPlan
 from dialogs.save_geometry import update_widget_to_save_geometry
@@ -112,6 +112,7 @@ class BoardWidget(QWidget):
         self.setStyleSheet("background-color: black;")
 
         self._scene: BoardView = BoardView()
+        self._scene.scene().setItemIndexMethod(QGraphicsScene.NoIndex)
         self._scene.on_right_click.connect(self.create_new_pin)
         self._scene.point_moved.connect(self.change_pin_coordinates)
         self._scene.point_selected.connect(self.send_current_pin_index)
