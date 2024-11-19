@@ -10,7 +10,7 @@ class MeasuredPinsChecker(QObject):
     Class for checking a measurement plan for the presence of pins with measured reference signatures.
     """
 
-    measured_pin_in_plan_signal: pyqtSignal = pyqtSignal(bool)
+    is_pin_with_measured_reference_signature_in_plan_signal: pyqtSignal = pyqtSignal(bool)
 
     def __init__(self, main_window) -> None:
         """
@@ -20,7 +20,7 @@ class MeasuredPinsChecker(QObject):
         super().__init__()
         self._empty_pins: Set[int] = set()
         self._main_window = main_window
-        self._measured_pins: Set[int] = set()
+        self._pins_with_measured_reference_signature: Set[int] = set()
 
     @property
     def is_measured_pin(self) -> bool:
@@ -28,7 +28,7 @@ class MeasuredPinsChecker(QObject):
         :return: True, if the measurement plan contains a pin with a measured reference signature.
         """
 
-        return len(self._measured_pins) != 0
+        return len(self._pins_with_measured_reference_signature) != 0
 
     @property
     def measurement_plan(self) -> Optional[MeasurementPlan]:
@@ -60,19 +60,19 @@ class MeasuredPinsChecker(QObject):
 
         if pin_index is None and self.measurement_plan.pins_number == 0:
             self._empty_pins.clear()
-            self._measured_pins.clear()
+            self._pins_with_measured_reference_signature.clear()
             return
 
         pin = self.measurement_plan.get_pin_with_index(pin_index)
         if pin is None:
             self._empty_pins.discard(pin_index)
-            self._measured_pins.discard(pin_index)
+            self._pins_with_measured_reference_signature.discard(pin_index)
         elif self._check_pin(pin):
             self._empty_pins.discard(pin_index)
-            self._measured_pins.add(pin_index)
+            self._pins_with_measured_reference_signature.add(pin_index)
         else:
             self._empty_pins.add(pin_index)
-            self._measured_pins.discard(pin_index)
+            self._pins_with_measured_reference_signature.discard(pin_index)
 
     def _set_new_plan(self) -> None:
         """
@@ -80,11 +80,11 @@ class MeasuredPinsChecker(QObject):
         """
 
         self._empty_pins.clear()
-        self._measured_pins.clear()
+        self._pins_with_measured_reference_signature.clear()
         if self.measurement_plan:
             for pin_index, pin in self.measurement_plan.all_pins_iterator():
                 if self._check_pin(pin):
-                    self._measured_pins.add(pin_index)
+                    self._pins_with_measured_reference_signature.add(pin_index)
                 else:
                     self._empty_pins.add(pin_index)
 
@@ -95,7 +95,7 @@ class MeasuredPinsChecker(QObject):
         """
 
         pin = self.measurement_plan.get_current_pin()
-        return True if pin and self._check_pin(pin) else False
+        return bool(pin and self._check_pin(pin))
 
     def check_measurement_plan_for_empty_pins(self) -> bool:
         """
@@ -126,8 +126,8 @@ class MeasuredPinsChecker(QObject):
 
         if self.measurement_plan:
             self._check_pin_with_index(pin_index)
-        measured = len(self._measured_pins) != 0
-        self.measured_pin_in_plan_signal.emit(measured)
+        pin_with_measured_reference_signature = len(self._pins_with_measured_reference_signature) != 0
+        self.is_pin_with_measured_reference_signature_in_plan_signal.emit(pin_with_measured_reference_signature)
 
     def remove_pin(self, pin_index: int) -> None:
         """

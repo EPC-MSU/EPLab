@@ -95,9 +95,10 @@ class EPLabWindow(QMainWindow):
         self._hide_current_curve: bool = False
         self._hide_reference_curve: bool = False
         self._last_saved_measurement_plan_data: Optional[Dict[str, Any]] = None
-        self._measurement_plan: Optional[MeasurementPlan] = None
         self._measured_pins_checker: MeasuredPinsChecker = MeasuredPinsChecker(self)
-        self._measured_pins_checker.measured_pin_in_plan_signal.connect(self.handle_measurement_plan_change)
+        self._measured_pins_checker.is_pin_with_measured_reference_signature_in_plan_signal.connect(
+            self._handle_signal_from_measured_pins_checker)
+        self._measurement_plan: Optional[MeasurementPlan] = None
         self._measurement_plan_path: MeasurementPlanPath = MeasurementPlanPath(self)
         self._measurement_plan_path.name_changed.connect(self.change_window_title)
         self._msystem: Optional[MeasurementSystem] = None
@@ -666,6 +667,19 @@ class EPLabWindow(QMainWindow):
             self._mux_and_plan_window.close_and_stop_plan_measurement()
             self._disconnect_devices()
             self._connection_checker.run_check()
+
+    @pyqtSlot(bool)
+    def _handle_signal_from_measured_pins_checker(self, pin_with_measured_reference_signature: bool) -> None:
+        """
+        Slot processes the signal after checking the measurement plan for pins with the measured reference signatures.
+        If there are no such pins in the measurement plan, then switching to TEST work mode is prohibited.
+        See ticket #89690.
+        :param pin_with_measured_reference_signature: True, if the measurement plan contains a pin with a measured
+        reference signature.
+        """
+
+        if self.comparing_mode_action.isEnabled():
+            self.testing_mode_action.setEnabled(bool(self._msystem and pin_with_measured_reference_signature))
 
     def _init_tolerance(self) -> None:
         """
@@ -1603,19 +1617,6 @@ class EPLabWindow(QMainWindow):
         else:
             self._disconnect_devices()
             self._delete_measurement_plan()
-
-    @pyqtSlot(bool)
-    def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:
-        """
-        Slot processes the signal after checking the measurement plan for pins with the measured reference signatures.
-        If there are no such pins in the measurement plan, then switching to TEST work mode is prohibited.
-        See ticket #89690.
-        :param there_are_measured_pins: True, if the measurement plan contains a pin with a measured reference
-        signature.
-        """
-
-        if self.comparing_mode_action.isEnabled():
-            self.testing_mode_action.setEnabled(bool(self._msystem and there_are_measured_pins))
 
     @pyqtSlot(bool)
     def handle_pedal_signal(self, pressed: bool) -> None:
