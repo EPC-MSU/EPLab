@@ -92,8 +92,8 @@ class EPLabWindow(QMainWindow):
         self._comparator: IVCComparator = IVCComparator()
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
         self._dir_chosen_by_user: str = ut.get_user_documents_path()
-        self._hide_reference_curve: bool = False
         self._hide_current_curve: bool = False
+        self._hide_reference_curve: bool = False
         self._last_saved_measurement_plan_data: Optional[Dict[str, Any]] = None
         self._measurement_plan: Optional[MeasurementPlan] = None
         self._measured_pins_checker: MeasuredPinsChecker = MeasuredPinsChecker(self)
@@ -185,7 +185,8 @@ class EPLabWindow(QMainWindow):
         if self._work_mode is WorkMode.WRITE:
             return True
 
-        if self._work_mode is WorkMode.TEST and not self._measured_pins_checker.check_empty_current_pin():
+        if (self._work_mode is WorkMode.TEST and
+                self._measured_pins_checker.check_current_pin_with_reference_signature()):
             return True
 
         return False
@@ -1734,21 +1735,21 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def remove_pin(self) -> None:
-        if self._auto_settings.pin_shift_warning_info and self.measurement_plan.check_pin_indices_change():
-            pin_index = self.measurement_plan.get_current_index() + 2
+        if self._auto_settings.pin_shift_warning_info and self._measurement_plan.check_pin_indices_change():
+            pin_index = self._measurement_plan.get_current_index() + 2
             main_text = qApp.translate("t", "Удаление точки приведет к сдвигу нумерации.")
             text = qApp.translate("t", "Номера имеющихся точек, начиная с {}, будут уменьшены на 1.").format(pin_index)
             if self._show_pin_shift_warning(main_text, text) != 0:
                 return
 
-        index = self._measurement_plan.get_current_index()
+        current_pin_index = self._measurement_plan.get_current_index()
         self._measurement_plan.remove_current_pin()
-        if index is None:
+        if current_pin_index is None:
             return
 
-        self._board_window.remove_pin_from_board_image(index)
-        self._comment_widget.remove_comment(index)
-        self._measured_pins_checker.remove_pin(index)
+        self._board_window.remove_pin_from_board_image(current_pin_index)
+        self._comment_widget.remove_comment(current_pin_index)
+        self._measured_pins_checker.remove_pin(current_pin_index)
         self.update_current_pin()
 
     def resizeEvent(self, event: QResizeEvent) -> None:
@@ -1937,8 +1938,8 @@ class EPLabWindow(QMainWindow):
         In TEST work mode you can make measurements only at pins where there are reference IV-curves. See ticket #89690.
         """
 
-        if self._work_mode == WorkMode.TEST and not self._mux_and_plan_window.measurement_plan_runner.is_running:
-            self.save_point_action.setEnabled(not self._measured_pins_checker.check_empty_current_pin())
+        if self._work_mode is WorkMode.TEST and not self._mux_and_plan_window.measurement_plan_runner.is_running:
+            self.save_point_action.setEnabled(self._measured_pins_checker.check_current_pin_with_reference_signature())
 
     def set_measurement_settings_and_update_ui(self, settings: MeasurementSettings) -> None:
         """

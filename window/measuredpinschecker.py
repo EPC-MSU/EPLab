@@ -49,6 +49,7 @@ class MeasuredPinsChecker(QObject):
         for measurement in pin.measurements:
             if measurement.is_reference:
                 return True
+
         return False
 
     def _check_pin_with_index(self, pin_index: int) -> None:
@@ -81,26 +82,20 @@ class MeasuredPinsChecker(QObject):
         self._empty_pins.clear()
         self._measured_pins.clear()
         if self.measurement_plan:
-            for index, pin in self.measurement_plan.all_pins_iterator():
+            for pin_index, pin in self.measurement_plan.all_pins_iterator():
                 if self._check_pin(pin):
-                    self._measured_pins.add(index)
+                    self._measured_pins.add(pin_index)
                 else:
-                    self._empty_pins.add(index)
+                    self._empty_pins.add(pin_index)
 
-    def check_empty_current_pin(self) -> bool:
+    def check_current_pin_with_reference_signature(self) -> bool:
         """
-        Method checks that the current pin does not have a measured reference signature.
-        :return: True if there is no measured reference signature in the current pin.
+        Method checks that the current pin has a measured reference signature.
+        :return: True if there is measured reference signature in the current pin.
         """
 
         pin = self.measurement_plan.get_current_pin()
-        if pin is None:
-            return True
-
-        for measurement in pin.measurements:
-            if measurement.is_reference:
-                return False
-        return True
+        return True if pin and self._check_pin(pin) else False
 
     def check_measurement_plan_for_empty_pins(self) -> bool:
         """

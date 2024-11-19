@@ -25,15 +25,15 @@ class TestMeasuredPinsChecker(unittest.TestCase):
     def setUp(self) -> None:
         self._app: QApplication = QApplication(sys.argv)
 
-    def test_check_empty_current_pin(self) -> None:
+    def test_check_current_pin_with_reference_signature(self) -> None:
         window, checker = prepare_data("simple_board.json")
-        self.assertFalse(checker.check_empty_current_pin())
+        self.assertTrue(checker.check_current_pin_with_reference_signature())
 
         window.measurement_plan.go_next_pin()
-        self.assertTrue(checker.check_empty_current_pin())
+        self.assertFalse(checker.check_current_pin_with_reference_signature())
 
         window.measurement_plan.go_next_pin()
-        self.assertFalse(checker.check_empty_current_pin())
+        self.assertTrue(checker.check_current_pin_with_reference_signature())
 
     def test_check_measurement_plan_for_empty_pins(self) -> None:
         window, checker = prepare_data("simple_board.json")
