@@ -133,8 +133,8 @@ class EPLabWindow(QMainWindow):
                                                                             self._score_wrapper,
                                                                             self._calculate_difference,
                                                                             self._break_signature_saver.DIR_PATH)
-        self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin)
-        self._plan_auto_transition.save_pin_signal.connect(self.save_pin)
+        self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin, Qt.DirectConnection)
+        self._plan_auto_transition.save_pin_signal.connect(self.save_pin, Qt.DirectConnection)
 
         if uri_1 is None and uri_2 is None:
             self._connection_checker.run_check()
@@ -475,6 +475,7 @@ class EPLabWindow(QMainWindow):
             self._reset_board()
 
         self._set_widgets_to_init_state()
+        self._plan_auto_transition.set_measure_process()
         self.measurers_connected.emit(True)
         self._timer.start()
 
@@ -655,10 +656,17 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _handle_periodic_task(self) -> None:
         if self._device_errors_handler.all_ok:
+            result_of_periodic_task = False
             with self._device_errors_handler:
-                self._read_curves_periodic_task()
-            self._plan_auto_transition.save_measurements()
+                result_of_periodic_task = self._read_curves_periodic_task()
+
+            self._plan_auto_transition.save_measurements_or_go_to_next_pin()
             self._mux_and_plan_window.measurement_plan_runner.save_measurements()
+
+            with self._device_errors_handler:
+                if result_of_periodic_task:
+                    self._trigger_measurements()
+
             self._timer.start()  # add this task to the event loop
         else:
             self._device_errors_handler.reset_error()
@@ -814,7 +822,11 @@ class EPLabWindow(QMainWindow):
                                 detailed_text=str(exc))
         return board, filename
 
-    def _read_curves_periodic_task(self) -> None:
+    def _read_curves_periodic_task(self) -> bool:
+        """
+        :return: True if signatures were successfully read from meters.
+        """
+
         if self._msystem.measurements_are_ready():
             if self._skip_curve:
                 self._skip_curve = False
@@ -836,7 +848,10 @@ class EPLabWindow(QMainWindow):
                     self._settings_update_next_cycle = None
                     # You need to redraw markers with new plot parameters (the scale of the plot has changed)
                     self._iv_window.plot.redraw_cursors()
-            self._msystem.trigger_measurements()
+
+            return True
+
+        return False
 
     def _read_options_from_json(self) -> Optional[Dict[str, Any]]:
         """
@@ -1041,7 +1056,7 @@ class EPLabWindow(QMainWindow):
         self._switch_work_mode(WorkMode.COMPARE)
         self._init_tolerance()
         with self._device_errors_handler:
-            self._msystem.trigger_measurements()
+            self._trigger_measurements()
 
     def _show_pin_shift_warning(self, main_text: str, text: str) -> int:
         """
@@ -1074,6 +1089,9 @@ class EPLabWindow(QMainWindow):
         if mode in (WorkMode.TEST, WorkMode.WRITE) and self._measurement_plan.multiplexer:
             self.open_mux_window()
         self._change_menu_items_for_current_pin_change()
+
+    def _trigger_measurements(self) -> None:
+        self._msystem.trigger_measurements()
 
     def _update_mux_actions(self) -> None:
         """
@@ -1517,6 +1535,7 @@ class EPLabWindow(QMainWindow):
 
         self.update_current_pin()
         self._open_board_window_if_needed()
+        self._plan_auto_transition.set_measure_process()
 
     @pyqtSlot()
     def go_to_pin_selected_in_widget(self, user_pin_index: int = None, pin_centered: bool = True) -> None:
