@@ -823,6 +823,10 @@ class EPLabWindow(QMainWindow):
         return board, filename
 
     def _read_curves_periodic_task(self) -> bool:
+        """
+        :return: True if signatures were successfully read from meters.
+        """
+
         if self._msystem.measurements_are_ready():
             if self._skip_curve:
                 self._skip_curve = False
