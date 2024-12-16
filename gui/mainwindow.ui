@@ -10,6 +10,9 @@
     <height>551</height>
    </rect>
   </property>
+  <property name="focusPolicy">
+   <enum>Qt::ClickFocus</enum>
+  </property>
   <property name="windowTitle">
    <string>EPLab</string>
   </property>
@@ -27,6 +30,9 @@
      <height>524287</height>
     </size>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -37,6 +43,9 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="score_dock_widget">
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
       <widget class="QLabel" name="score_label">
@@ -72,6 +81,9 @@
      <width>524287</width>
      <height>524287</height>
     </size>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
    </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
@@ -115,6 +127,9 @@
      <height>524287</height>
     </size>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -150,6 +165,9 @@
      <width>524287</width>
      <height>524287</height>
     </size>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
    </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
@@ -192,6 +210,9 @@
      <width>524287</width>
      <height>524287</height>
     </size>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
    </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
@@ -236,6 +257,9 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
    </property>
    <widget class="QMenu" name="file_menu_action">
     <property name="title">
@@ -316,6 +340,9 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Файл</string>
    </property>
@@ -342,6 +369,9 @@
      <height>0</height>
     </size>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="acceptDrops">
     <bool>false</bool>
    </property>
@@ -364,6 +394,9 @@
    <addaction name="next_point_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_write">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Запись плана тестирования</string>
    </property>
@@ -384,6 +417,9 @@
    <addaction name="save_point_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_auto_search">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Автоподбор параметров</string>
    </property>
@@ -399,6 +435,9 @@
    <addaction name="search_optimal_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_compare">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Сравнение</string>
    </property>
@@ -416,6 +455,9 @@
    <addaction name="freeze_curve_b_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_mode">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Режим</string>
    </property>
@@ -442,6 +484,9 @@
    <addaction name="testing_mode_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_language">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Выбор языка</string>
    </property>
