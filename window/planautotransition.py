@@ -33,8 +33,9 @@ class PlanAutoTransition(QObject):
 
     BREAK_NUMBER: int = 10
     BREAK_TOLERANCE: float = 0.15
-    TIME_TO_SHOW: float = 0.5
-    TIMEOUT: int = 10
+    FREQUENCY_TOLERANCE: float = 1e-6
+    TIME_TO_SHOW_S: float = 0.5
+    TIMEOUT_MS: int = 10
     go_to_next_signal: pyqtSignal = pyqtSignal(bool, bool)
     save_pin_signal: pyqtSignal = pyqtSignal()
 
@@ -65,13 +66,10 @@ class PlanAutoTransition(QObject):
         self._required_frequency: Optional[str] = frequency
         self._required_sensitive: Optional[str] = sensitive
         self._score_wrapper: ScoreWrapper = score_wrapper
-        self._start_time: float = None
-        self._timer: QTimer = QTimer()
-        self._timer.setInterval(PlanAutoTransition.TIMEOUT)
-        self._timer.setSingleShot(True)
-        self._timer.timeout.connect(self.handle_timeout)
+        self._start_time: Optional[float] = None
 
-        self.load_break_signatures()
+        self._create_timer()
+        self._load_break_signatures()
 
     @property
     def auto_transition(self) -> bool:
@@ -103,8 +101,7 @@ class PlanAutoTransition(QObject):
         1 Hz (see #92265).
         """
 
-        abs_tol = 1e-6
-        return not math.isclose(settings.probe_signal_frequency, 1, abs_tol=abs_tol)
+        return not math.isclose(settings.probe_signal_frequency, 1, abs_tol=PlanAutoTransition.FREQUENCY_TOLERANCE)
 
     def _check_probes_raised(self, settings: MeasurementSettings, curve: IVCurve, break_signature: IVCurve) -> None:
         """
@@ -130,6 +127,12 @@ class PlanAutoTransition(QObject):
             self._process = self.Process.MEASURE
             self._break_number = 0
 
+    def _create_timer(self) -> None:
+        self._timer: QTimer = QTimer()
+        self._timer.setInterval(PlanAutoTransition.TIMEOUT_MS)
+        self._timer.setSingleShot(True)
+        self._timer.timeout.connect(self.handle_timeout)
+
     def _get_break_signature_for_settings(self, settings: MeasurementSettings) -> Optional[IVCurve]:
         """
         :param settings: measurement settings.
@@ -144,6 +147,19 @@ class PlanAutoTransition(QObject):
         voltage = options[EyePointProduct.Parameter.voltage]
         filename = create_filename(frequency, sensitive, voltage)
         return self._break_signatures.get(filename, None)
+
+    def _load_break_signatures(self) -> None:
+        """
+        Method loads break signatures for all required measurement settings.
+        """
+
+        self._break_signatures = dict()
+        if os.path.exists(self._dir):
+            for frequency, sensitive, voltage in iterate_settings(self._product, self._required_frequency,
+                                                                  self._required_sensitive):
+                filename = create_filename(frequency, sensitive, voltage)
+                path = os.path.join(self._dir, filename)
+                self._break_signatures[filename] = load_signature(path)
 
     def check_auto_transition(self, work_mode: WorkMode, product_name: ProductName, settings: MeasurementSettings,
                               curve_current: Optional[IVCurve] = None, curve_reference: Optional[IVCurve] = None
@@ -187,7 +203,7 @@ class PlanAutoTransition(QObject):
 
     @pyqtSlot()
     def handle_timeout(self) -> None:
-        if self._process == self.Process.SAVE and time.monotonic() - self._start_time > self.TIME_TO_SHOW:
+        if self._process == self.Process.SAVE and time.monotonic() - self._start_time > self.TIME_TO_SHOW_S:
             logger.info("Signal sent to move to the next pin")
             self.go_to_next_signal.emit(False, True)
             self._process = self.Process.GO_TO_NEXT
@@ -196,19 +212,6 @@ class PlanAutoTransition(QObject):
             return
 
         self._timer.start()
-
-    def load_break_signatures(self) -> None:
-        """
-        Method loads break signatures for all required measurement settings.
-        """
-
-        self._break_signatures = dict()
-        if os.path.exists(self._dir):
-            for frequency, sensitive, voltage in iterate_settings(self._product, self._required_frequency,
-                                                                  self._required_sensitive):
-                filename = create_filename(frequency, sensitive, voltage)
-                path = os.path.join(self._dir, filename)
-                self._break_signatures[filename] = load_signature(path)
 
     def save_measurements(self) -> None:
         """
