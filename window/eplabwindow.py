@@ -655,10 +655,18 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def _handle_periodic_task(self) -> None:
         if self._device_errors_handler.all_ok:
+            result_of_periodic_task = False
             with self._device_errors_handler:
-                self._read_curves_periodic_task()
+                result_of_periodic_task = self._read_curves_periodic_task()
+
             self._plan_auto_transition.save_measurements()
+            self._plan_auto_transition.send_signal_to_go_to_next_pin()
             self._mux_and_plan_window.measurement_plan_runner.save_measurements()
+
+            with self._device_errors_handler:
+                if result_of_periodic_task:
+                    self._trigger_measurements()
+
             self._timer.start()  # add this task to the event loop
         else:
             self._device_errors_handler.reset_error()
@@ -814,7 +822,7 @@ class EPLabWindow(QMainWindow):
                                 detailed_text=str(exc))
         return board, filename
 
-    def _read_curves_periodic_task(self) -> None:
+    def _read_curves_periodic_task(self) -> bool:
         if self._msystem.measurements_are_ready():
             if self._skip_curve:
                 self._skip_curve = False
@@ -836,7 +844,10 @@ class EPLabWindow(QMainWindow):
                     self._settings_update_next_cycle = None
                     # You need to redraw markers with new plot parameters (the scale of the plot has changed)
                     self._iv_window.plot.redraw_cursors()
-            self._msystem.trigger_measurements()
+
+            return True
+
+        return False
 
     def _read_options_from_json(self) -> Optional[Dict[str, Any]]:
         """
@@ -1041,7 +1052,7 @@ class EPLabWindow(QMainWindow):
         self._switch_work_mode(WorkMode.COMPARE)
         self._init_tolerance()
         with self._device_errors_handler:
-            self._msystem.trigger_measurements()
+            self._trigger_measurements()
 
     def _show_pin_shift_warning(self, main_text: str, text: str) -> int:
         """
@@ -1074,6 +1085,9 @@ class EPLabWindow(QMainWindow):
         if mode in (WorkMode.TEST, WorkMode.WRITE) and self._measurement_plan.multiplexer:
             self.open_mux_window()
         self._change_menu_items_for_current_pin_change()
+
+    def _trigger_measurements(self) -> None:
+        self._msystem.trigger_measurements()
 
     def _update_mux_actions(self) -> None:
         """
