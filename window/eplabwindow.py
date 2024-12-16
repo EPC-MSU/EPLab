@@ -133,8 +133,8 @@ class EPLabWindow(QMainWindow):
                                                                             self._score_wrapper,
                                                                             self._calculate_difference,
                                                                             self._break_signature_saver.DIR_PATH)
-        self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin)
-        self._plan_auto_transition.save_pin_signal.connect(self.save_pin)
+        self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin, Qt.DirectConnection)
+        self._plan_auto_transition.save_pin_signal.connect(self.save_pin, Qt.DirectConnection)
 
         if uri_1 is None and uri_2 is None:
             self._connection_checker.run_check()
@@ -475,6 +475,7 @@ class EPLabWindow(QMainWindow):
             self._reset_board()
 
         self._set_widgets_to_init_state()
+        self._plan_auto_transition.set_measure_process()
         self.measurers_connected.emit(True)
         self._timer.start()
 
@@ -659,8 +660,7 @@ class EPLabWindow(QMainWindow):
             with self._device_errors_handler:
                 result_of_periodic_task = self._read_curves_periodic_task()
 
-            self._plan_auto_transition.save_measurements()
-            self._plan_auto_transition.send_signal_to_go_to_next_pin()
+            self._plan_auto_transition.save_measurements_or_go_to_next_pin()
             self._mux_and_plan_window.measurement_plan_runner.save_measurements()
 
             with self._device_errors_handler:
@@ -1535,6 +1535,7 @@ class EPLabWindow(QMainWindow):
 
         self.update_current_pin()
         self._open_board_window_if_needed()
+        self._plan_auto_transition.set_measure_process()
 
     @pyqtSlot()
     def go_to_pin_selected_in_widget(self, user_pin_index: int = None, pin_centered: bool = True) -> None:
