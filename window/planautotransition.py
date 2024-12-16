@@ -175,15 +175,20 @@ class PlanAutoTransition(QObject):
 
         score = self._calculate_score_for_curves(settings, curve_current, break_signature)
         if score is not None and check_difference_not_greater_tolerance(score, self._score_wrapper.tolerance):
+            logger.warning("The signature matched the break: difference (%f) less then tolerance (%f)", score,
+                           self._score_wrapper.tolerance)
             return
 
         score = self._calculate_score_for_curves(settings, curve_current, curve_reference)
         if score is not None and check_difference_not_greater_tolerance(score, self._score_wrapper.tolerance):
+            logger.info("The signature matched the reference: difference (%f) less than tolerance (%f)", score,
+                        self._score_wrapper.tolerance)
             self._need_to_save = True
 
     @pyqtSlot()
     def handle_timeout(self) -> None:
         if self._process == self.Process.SAVE and time.monotonic() - self._start_time > self.TIME_TO_SHOW:
+            logger.info("Signal sent to move to the next pin")
             self.go_to_next_signal.emit(False, True)
             self._process = self.Process.GO_TO_NEXT
             self._start_time = time.monotonic()
@@ -211,6 +216,7 @@ class PlanAutoTransition(QObject):
         """
 
         if self._need_to_save:
+            logger.info("Signal sent to save signature")
             self._need_to_save = False
             self.save_pin_signal.emit()
             self._process = self.Process.SAVE
