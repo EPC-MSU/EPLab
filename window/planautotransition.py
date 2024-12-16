@@ -33,7 +33,7 @@ class PlanAutoTransition(QObject):
         SAVE = auto()
         WAIT = auto()
 
-    BREAK_NUMBER: int = 10
+    BREAK_NUMBER: int = 1
     BREAK_TOLERANCE: float = 0.15
     FREQUENCY_TOLERANCE: float = 1e-6
     TIME_TO_SHOW_S: float = 0.2
