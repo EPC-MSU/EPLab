@@ -765,6 +765,7 @@ class EPLabWindow(QMainWindow):
         self.settings_mode_action.triggered.connect(self.show_settings_window)
 
         self._comment_widget: CommentWidget = CommentWidget(self)
+        self._comment_widget.middle_pressed.connect(self.search_optimal)
         self._comment_widget.current_row_signal.connect(self.go_to_selected_pin)
         self.comment_vertical_layout.insertWidget(0, self._comment_widget)
 
@@ -1750,7 +1751,7 @@ class EPLabWindow(QMainWindow):
         :param event: mouse event.
         """
 
-        if event.button() == Qt.MiddleButton and self.search_optimal_action.isEnabled():
+        if event.button() == Qt.MiddleButton:
             self.search_optimal()
         super().mousePressEvent(event)
 
@@ -1917,6 +1918,9 @@ class EPLabWindow(QMainWindow):
         """
         Slot runs an algorithm to find optimal measurement settings.
         """
+
+        if not self.search_optimal_action.isEnabled():
+            return
 
         with self._device_errors_handler:
             max_voltage = self._auto_settings.max_optimal_voltage

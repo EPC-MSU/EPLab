@@ -116,11 +116,16 @@ class BoardWidget(QWidget):
         self._scene.on_right_click.connect(self.create_new_pin)
         self._scene.point_moved.connect(self.change_pin_coordinates)
         self._scene.point_selected.connect(self.send_current_pin_index)
+        self._scene.on_middle_click.connect(self._search_optimal)
         self._scene.installEventFilter(self)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self._scene)
         self.setLayout(layout)
+
+    @pyqtSlot()
+    def _search_optimal(self) -> None:
+        self._main_window.search_optimal()
 
     @pyqtSlot()
     def _set_scene_rect(self) -> None:

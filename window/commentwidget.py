@@ -1,8 +1,8 @@
 import logging
 import os
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
-from PyQt5.QtGui import QBrush, QColor, QIcon, QKeySequence
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
+from PyQt5.QtGui import QBrush, QColor, QIcon, QKeySequence, QMouseEvent
 from PyQt5.QtWidgets import QAction, QMenu, QShortcut, QTableWidgetItem
 from epcore.elements import Pin
 from . import utils as ut
@@ -23,6 +23,7 @@ class CommentWidget(TableWidget):
     DEFAULT_WIDTH: int = 150
     GOOD_BRUSH: QBrush = QBrush(QColor(152, 251, 152))
     WHITE_BRUSH: QBrush = QBrush(QColor(255, 255, 255))
+    middle_pressed: pyqtSignal = pyqtSignal()
 
     def __init__(self, main_window) -> None:
         """
@@ -173,6 +174,16 @@ class CommentWidget(TableWidget):
 
         pin_index = self.row(item)
         self.save_comment(pin_index)
+
+    def mousePressEvent(self, event: QMouseEvent):
+        """
+        :param event: mouse event.
+        """
+
+        if event.button() == Qt.MiddleButton and self.itemAt(event.pos()) is None:
+            self.middle_pressed.emit()
+
+        super().mousePressEvent(event)
 
     @disconnect_item_signals
     def remove_comment(self, index: int) -> None:
