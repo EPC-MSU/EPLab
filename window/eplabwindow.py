@@ -10,7 +10,8 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPointF, Qt, QTimer,
+                          QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeySequence, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QStyle,
                              QVBoxLayout, QWidget)
@@ -712,6 +713,7 @@ class EPLabWindow(QMainWindow):
                                              remove_cursor=qApp.translate("t", "Удалить метку"),
                                              save_screenshot=qApp.translate("MainWindow", "Сохранить скриншот"))
         self._iv_window.plot.set_path_to_directory(self.dir_chosen_by_user)
+        self._iv_window.plot.installEventFilter(self)
         self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Current signature")
         self.current_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_CURRENT)
         self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Reference signature")
@@ -1442,6 +1444,21 @@ class EPLabWindow(QMainWindow):
 
         return super().event(event)
 
+    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+        """
+        :param obj: the object for which the event occurred;
+        :param event: event.
+        :return:
+        """
+
+        if obj is self._iv_window.plot and isinstance(event, QMouseEvent):
+            mouse_event = QMouseEvent(event)
+            if mouse_event.button() == Qt.MiddleButton and mouse_event.type() == QEvent.MouseButtonPress:
+                self.mousePressEvent(event)
+                return True
+
+        return super().eventFilter(obj, event)
+
     @pyqtSlot(int, bool)
     def freeze_curve(self, measurer_id: int, state: bool) -> None:
         """
@@ -1727,6 +1744,15 @@ class EPLabWindow(QMainWindow):
             self.update_current_pin()
             self._open_board_window_if_needed()
             self.dir_chosen_by_user = filename
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        """
+        :param event: mouse event.
+        """
+
+        if event.button() == Qt.MiddleButton and self.search_optimal_action.isEnabled():
+            self.search_optimal()
+        super().mousePressEvent(event)
 
     @pyqtSlot()
     def open_board_image(self) -> None:
