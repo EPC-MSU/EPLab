@@ -83,9 +83,9 @@
 
 10. Установите библиотеки для работы со звуком и для сборки пакетов Python:
 
-   ```bash
-   sudo apt-get install -y python3-dev libasound2-dev
-   ```
+    ```bash
+    sudo apt-get install -y python3-dev libasound2-dev
+    ```
 
 11. Установите зависимости для Python, перейдя в папку **scripts** и запустив скрипт **rebuild_venv.sh**:
 
