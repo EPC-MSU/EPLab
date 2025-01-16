@@ -25,6 +25,7 @@ class ProductName(Enum):
     EYEPOINT_S2 = auto()
     EYEPOINT_U21 = auto()
     EYEPOINT_U22 = auto()
+    EYEPOINT_U32 = auto()
     MK22 = auto()
 
     @classmethod
@@ -38,7 +39,7 @@ class ProductName(Enum):
         if product_1 == product_2:
             return True
 
-        eyepoints_with_2_channels = cls.EYEPOINT_S2, cls.EYEPOINT_U22, cls.MK22
+        eyepoints_with_2_channels = cls.EYEPOINT_S2, cls.EYEPOINT_U22, cls.EYEPOINT_U32, cls.MK22
         if product_1 in eyepoints_with_2_channels and product_2 in eyepoints_with_2_channels:
             return True
 
@@ -113,7 +114,8 @@ class ProductName(Enum):
         if product_name == cls.EYEPOINT_H10:
             return MeasurerType.ASA
 
-        if product_name in (cls.EYEPOINT_A2, cls.EYEPOINT_S2, cls.EYEPOINT_U21, cls.EYEPOINT_U22, cls.MK22):
+        if product_name in (cls.EYEPOINT_A2, cls.EYEPOINT_S2, cls.EYEPOINT_U21, cls.EYEPOINT_U22, cls.EYEPOINT_U32,
+                            cls.MK22):
             return MeasurerType.IVM10
 
         return None
@@ -146,6 +148,7 @@ class ProductName(Enum):
                 cls.EYEPOINT_S2: qApp.translate("connection_window", "EyePoint S2 /\nСигнатурный анализатор С2"),
                 cls.EYEPOINT_U21: "EyePoint u21",
                 cls.EYEPOINT_U22: "EyePoint u22",
+                cls.EYEPOINT_U32: "EyePoint u32",
                 cls.MK22: qApp.translate("connection_window", "Сигнатурный анализатор мк22")}[product_name]
 
     @classmethod
@@ -155,7 +158,8 @@ class ProductName(Enum):
         :return: names of products.
         """
 
-        return [cls.EYEPOINT_A2, cls.EYEPOINT_U21, cls.EYEPOINT_U22, cls.EYEPOINT_S2, cls.MK22, cls.EYEPOINT_H10]
+        return [cls.EYEPOINT_A2, cls.EYEPOINT_U21, cls.EYEPOINT_U22, cls.EYEPOINT_U32, cls.EYEPOINT_S2, cls.MK22,
+                cls.EYEPOINT_H10]
 
     @classmethod
     def get_single_channel_products(cls) -> List["ProductName"]:

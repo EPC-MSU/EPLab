@@ -23,6 +23,7 @@ class MeasurerTypeWidget(QWidget):
                                    ProductName.EYEPOINT_S2: 100,
                                    ProductName.EYEPOINT_U21: 80,
                                    ProductName.EYEPOINT_U22: 100,
+                                   ProductName.EYEPOINT_U32: 80,
                                    ProductName.MK22: 80}
     TIME_TO_SHOW_INITIAL_PRODUCT_MS: int = 50
     WIDGET_HEIGHT: int = 200
