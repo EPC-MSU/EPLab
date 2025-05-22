@@ -2,9 +2,13 @@
 File with class to run measurements according measurement plan.
 """
 
+import logging
 from typing import List, Optional
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QTimer
 from .measurementplanwidget import MeasurementPlanWidget
+
+
+logger = logging.getLogger("eplab")
 
 
 class MeasurementPlanRunner(QObject):
@@ -28,12 +32,25 @@ class MeasurementPlanRunner(QObject):
         self._amount_of_pins: Optional[int] = None
         self._bad_pin_indexes: List[int] = []
         self._current_pin_index: Optional[int] = None
+        self._go_to_next_pin_required: bool = False
         self._is_running: bool = False
         self._main_window = main_window
+        self._measurement_number_in_pin: int = 0
         self._measurement_plan_widget: MeasurementPlanWidget = measurement_plan_widget
-        self._need_to_go_to_pin: bool = False
-        self._need_to_save_measurement: bool = False
+        self._measurement_save_required: bool = False
+        self.measurement_is_valid: bool = False
 
+        self._create_timers()
+
+    @property
+    def is_running(self) -> bool:
+        """
+        :return: True if measurements according plan is running.
+        """
+
+        return self._is_running
+
+    def _create_timers(self) -> None:
         self._timer_to_go_to_pin: QTimer = QTimer()
         self._timer_to_go_to_pin.timeout.connect(self._go_to_pin)
         self._timer_to_go_to_pin.setInterval(MeasurementPlanRunner.PERIOD)
@@ -43,14 +60,6 @@ class MeasurementPlanRunner(QObject):
         self._timer_to_save_measurements.timeout.connect(self._save_measurements)
         self._timer_to_save_measurements.setInterval(MeasurementPlanRunner.PERIOD)
         self._timer_to_save_measurements.setSingleShot(True)
-
-    @property
-    def is_running(self) -> bool:
-        """
-        :return: True if measurements according plan is running.
-        """
-
-        return self._is_running
 
     @pyqtSlot()
     def _go_to_pin(self) -> None:
@@ -62,7 +71,8 @@ class MeasurementPlanRunner(QObject):
         if isinstance(self._amount_of_pins, int) and isinstance(self._current_pin_index, int) and \
                 self._current_pin_index < self._amount_of_pins:
             self._main_window.go_to_selected_pin(self._current_pin_index)
-            self._need_to_go_to_pin = False
+            self._go_to_next_pin_required = False
+            logger.debug("The multiplexer has moved to pin %d", self._current_pin_index)
         else:
             self._stop_measurements()
 
@@ -72,8 +82,10 @@ class MeasurementPlanRunner(QObject):
         """
 
         self.measurement_done.emit()
-        self._need_to_go_to_pin = True
-        self._need_to_save_measurement = False
+        self._go_to_next_pin_required = True
+        self._measurement_number_in_pin = 0
+        self._measurement_save_required = False
+        self.measurement_is_valid = False
         self._current_pin_index += 1
         self._timer_to_go_to_pin.start()
 
@@ -85,6 +97,7 @@ class MeasurementPlanRunner(QObject):
         """
 
         self._main_window.save_pin()
+        logger.debug("Measurement saved in pin %d", self._current_pin_index)
         self._mark_completed_step()
 
     def _start_measurements(self) -> None:
@@ -94,7 +107,10 @@ class MeasurementPlanRunner(QObject):
 
         self._amount_of_pins = self._measurement_plan_widget.get_amount_of_pins()
         self._current_pin_index = 0
+        self._go_to_next_pin_required = True
         self._is_running = True
+        self._measurement_save_required = False
+        self.measurement_is_valid = False
         self.measurements_started.emit(self._amount_of_pins)
         self._go_to_pin()
 
@@ -110,14 +126,6 @@ class MeasurementPlanRunner(QObject):
         self._timer_to_save_measurements.stop()
         self.measurements_finished.emit()
 
-    def check_pin(self) -> None:
-        """
-        Method checks whether the measurement plan is in the desired pin.
-        """
-
-        if not self._need_to_go_to_pin:
-            self._need_to_save_measurement = True
-
     def check_pins_without_multiplexer_outputs(self) -> bool:
         """
         Method gets list of indices of pins whose multiplexer output is None or output cannot be set using current
@@ -128,13 +136,39 @@ class MeasurementPlanRunner(QObject):
         self._bad_pin_indexes = self._main_window.measurement_plan.get_pins_without_multiplexer_outputs()
         return bool(self._bad_pin_indexes)
 
+    def determine_if_measurement_is_valid(self) -> None:
+        """
+        Method determines whether the measurement in the pin is valid. The measurement is valid if the multiplexer
+        is moved to the desired pin and at least two measurements are made in this pin.
+        """
+
+        if not self.is_running or self._go_to_next_pin_required:
+            return
+
+        self._measurement_number_in_pin += 1
+        self.measurement_is_valid = self._measurement_number_in_pin >= 2
+
+    def determine_whether_to_save_measurement(self) -> None:
+        """
+        Method determines whether the measurement should be saved.
+        """
+
+        if not self.is_running:
+            return
+
+        if self._go_to_next_pin_required:
+            self._measurement_save_required = False
+            return
+
+        self._measurement_save_required = True
+
     def save_measurements(self) -> None:
         """
         Method saves measurements in current pin if required.
         """
 
-        if self.is_running and (self._need_to_save_measurement or self._current_pin_index in self._bad_pin_indexes):
-            if self._current_pin_index not in self._bad_pin_indexes and self._main_window.can_be_measured:
+        if self.is_running and (self._measurement_save_required or self._current_pin_index in self._bad_pin_indexes):
+            if self._current_pin_index not in self._bad_pin_indexes and self._main_window.measurement_can_be_saved:
                 self._timer_to_save_measurements.start()
             else:
                 self._mark_completed_step()

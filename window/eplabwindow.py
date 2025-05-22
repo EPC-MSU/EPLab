@@ -176,10 +176,18 @@ class EPLabWindow(QMainWindow):
             self._iv_window.plot.set_path_to_directory(self._dir_chosen_by_user)
 
     @property
-    def can_be_measured(self) -> bool:
+    def is_measured_pin(self) -> bool:
         """
-        :return: True if the measurement at the current pin can be carried out, otherwise False. Used for auto
-        measurement according to plan.
+        :return: True, if the measurement plan contains a pin with a measured reference signature.
+        """
+
+        return self._measured_pins_checker.is_measured_pin
+
+    @property
+    def measurement_can_be_saved(self) -> bool:
+        """
+        :return: True if the measurement at the current pin can be saved out, otherwise False. Used when measuring plan
+        with a multiplexer.
         """
 
         if self._work_mode is WorkMode.WRITE:
@@ -189,14 +197,6 @@ class EPLabWindow(QMainWindow):
             return True
 
         return False
-
-    @property
-    def is_measured_pin(self) -> bool:
-        """
-        :return: True, if the measurement plan contains a pin with a measured reference signature.
-        """
-
-        return self._measured_pins_checker.is_measured_pin
 
     @property
     def measurement_plan(self) -> Optional[MeasurementPlan]:
@@ -661,10 +661,12 @@ class EPLabWindow(QMainWindow):
                 result_of_periodic_task = self._read_curves_periodic_task()
 
             self._plan_auto_transition.save_measurements_or_go_to_next_pin()
-            self._mux_and_plan_window.measurement_plan_runner.save_measurements()
+            if self._mux_and_plan_window.measurement_plan_runner.measurement_is_valid:
+                self._mux_and_plan_window.measurement_plan_runner.save_measurements()
 
             with self._device_errors_handler:
                 if result_of_periodic_task:
+                    self._mux_and_plan_window.measurement_plan_runner.determine_if_measurement_is_valid()
                     self._trigger_measurements()
 
             self._timer.start()  # add this task to the event loop
@@ -833,8 +835,9 @@ class EPLabWindow(QMainWindow):
             else:
                 curves, measurement_settings = self._get_curves_for_periodic_task()
                 self._update_signatures(curves, measurement_settings)
+
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
-                    self._mux_and_plan_window.measurement_plan_runner.check_pin()
+                    self._mux_and_plan_window.measurement_plan_runner.determine_whether_to_save_measurement()
                 elif self.measurement_plan and not self.measurement_plan.multiplexer:
                     self._plan_auto_transition.check_auto_transition(self.work_mode, self._product_name,
                                                                      measurement_settings, self._current_curve,
