@@ -35,7 +35,7 @@ def launch_eplab(app: QApplication, args: Namespace) -> None:
 
 
 if __name__ == "__main__":
-    set_logger()
+    set_logger("eplab.logs")
 
     parser = ArgumentParser(description="EyePoint Lab")
     parser.add_argument("plan_path", help="Path to the test plan to be opened", type=str, nargs="?", default=None)
