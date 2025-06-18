@@ -21,7 +21,7 @@ class ConnectionChecker(QObject):
     Class checks whether IV-measurers and multiplexer can be connected to the given ports.
     """
 
-    TIMEOUT: int = 300
+    TIMEOUT_MS: int = 300
     connect_signal: pyqtSignal = pyqtSignal(ConnectionData)
 
     def __init__(self, auto_settings: AutoSettings) -> None:
@@ -38,7 +38,7 @@ class ConnectionChecker(QObject):
         self._product_name: Optional[cw.ProductName] = None
         self._timer: QTimer = QTimer()
         self._timer.timeout.connect(self.check_connection)
-        self._timer.setInterval(ConnectionChecker.TIMEOUT)
+        self._timer.setInterval(ConnectionChecker.TIMEOUT_MS)
         self._timer.setSingleShot(True)
 
     def _connect_devices(self, measurer_1_uri: Optional[str], measurer_2_uri: Optional[str], mux_uri: Optional[str],
@@ -81,14 +81,17 @@ class ConnectionChecker(QObject):
         """
 
         if not self._measurer_1_uri and not self._measurer_2_uri and not self._mux_uri:
+            logger.debug("Checking the connection: no devices were connected to the application")
             return True
 
         connection_data = self._connect_devices(self._measurer_1_uri, self._measurer_2_uri, self._mux_uri,
                                                 self._product_name)
         if connection_data.measurement_system:
+            logger.debug("Checking the connection: device connection restored")
             self.connect_signal.emit(connection_data)
             return True
 
+        logger.debug("Checking the connection: device connection not restored")
         return False
 
     def _create_measurers_by_force(self, *uris: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str]]:

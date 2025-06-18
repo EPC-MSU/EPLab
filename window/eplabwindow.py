@@ -176,10 +176,18 @@ class EPLabWindow(QMainWindow):
             self._iv_window.plot.set_path_to_directory(self._dir_chosen_by_user)
 
     @property
-    def can_be_measured(self) -> bool:
+    def is_measured_pin(self) -> bool:
         """
-        :return: True if the measurement at the current pin can be carried out, otherwise False. Used for auto
-        measurement according to plan.
+        :return: True, if the measurement plan contains a pin with a measured reference signature.
+        """
+
+        return self._measured_pins_checker.is_measured_pin
+
+    @property
+    def measurement_can_be_saved(self) -> bool:
+        """
+        :return: True if the measurement at the current pin can be saved out, otherwise False. Used when measuring plan
+        with a multiplexer.
         """
 
         if self._work_mode is WorkMode.WRITE:
@@ -189,14 +197,6 @@ class EPLabWindow(QMainWindow):
             return True
 
         return False
-
-    @property
-    def is_measured_pin(self) -> bool:
-        """
-        :return: True, if the measurement plan contains a pin with a measured reference signature.
-        """
-
-        return self._measured_pins_checker.is_measured_pin
 
     @property
     def measurement_plan(self) -> Optional[MeasurementPlan]:
@@ -427,6 +427,7 @@ class EPLabWindow(QMainWindow):
         for widget in (self.freq_dock_widget, self.current_dock_widget, self.voltage_dock_widget):
             layout = widget.layout()
             ut.clear_layout(layout)
+            self._parameters_widgets.clear()
 
         for action in (self.comparing_mode_action, self.writing_mode_action, self.testing_mode_action):
             action.setChecked(False)
@@ -540,6 +541,7 @@ class EPLabWindow(QMainWindow):
             self._parameters_widgets[parameter] = widget
             ut.clear_layout(layout)
             layout.addWidget(widget)
+        logger.debug("Scroll areas have been created to select measurement parameters (frequency, voltage, current)")
 
     def _delete_measurement_plan(self) -> None:
         self._last_saved_measurement_plan_data = None
@@ -661,10 +663,12 @@ class EPLabWindow(QMainWindow):
                 result_of_periodic_task = self._read_curves_periodic_task()
 
             self._plan_auto_transition.save_measurements_or_go_to_next_pin()
-            self._mux_and_plan_window.measurement_plan_runner.save_measurements()
+            if self._mux_and_plan_window.measurement_plan_runner.measurement_is_valid:
+                self._mux_and_plan_window.measurement_plan_runner.save_measurements()
 
             with self._device_errors_handler:
                 if result_of_periodic_task:
+                    self._mux_and_plan_window.measurement_plan_runner.determine_if_measurement_is_valid()
                     self._trigger_measurements()
 
             self._timer.start()  # add this task to the event loop
@@ -833,8 +837,9 @@ class EPLabWindow(QMainWindow):
             else:
                 curves, measurement_settings = self._get_curves_for_periodic_task()
                 self._update_signatures(curves, measurement_settings)
+
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
-                    self._mux_and_plan_window.measurement_plan_runner.check_pin()
+                    self._mux_and_plan_window.measurement_plan_runner.determine_whether_to_save_measurement()
                 elif self.measurement_plan and not self.measurement_plan.multiplexer:
                     self._plan_auto_transition.check_auto_transition(self.work_mode, self._product_name,
                                                                      measurement_settings, self._current_curve,
@@ -1017,12 +1022,6 @@ class EPLabWindow(QMainWindow):
         self._create_measurer_setting_actions()
         self._disable_optimal_parameter_searcher()
 
-        with self._device_errors_handler:
-            for measurer in self._msystem.measurers:
-                measurer.open_device()
-            for multiplexer in self._msystem.multiplexers:
-                multiplexer.open_device()
-
         self._settings_update_next_cycle = None
         self._skip_curve = False
         self._hide_current_curve = False
@@ -1041,6 +1040,11 @@ class EPLabWindow(QMainWindow):
 
         # Set ui settings state to current device
         with self._device_errors_handler:
+            for measurer in self._msystem.measurers:
+                measurer.open_device()
+            for multiplexer in self._msystem.multiplexers:
+                multiplexer.open_device()
+
             settings = self._auto_settings.get_measurement_settings(self._product)
             if settings is not None:
                 self._msystem.set_settings(settings)
@@ -1055,6 +1059,7 @@ class EPLabWindow(QMainWindow):
         self._add_callbacks_to_measurement_plan()
         self._switch_work_mode(WorkMode.COMPARE)
         self._init_tolerance()
+
         with self._device_errors_handler:
             self._trigger_measurements()
 
@@ -1618,9 +1623,6 @@ class EPLabWindow(QMainWindow):
         measurement_system, product_name = connection_data
         if measurement_system:
             self._connect_devices(measurement_system, product_name)
-        else:
-            self._disconnect_devices()
-            self._delete_measurement_plan()
 
     @pyqtSlot(bool)
     def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:
@@ -1878,7 +1880,7 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def save_pin_and_go_to_next(self) -> None:
         """
-        Slot saves the measurement to the current pin and moves to the next pin after 300 ms, if available in the
+        Slot saves the measurement to the current pin and moves to the next pin after 500 ms, if available in the
         measurement plan.
         """
 
