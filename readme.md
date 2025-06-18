@@ -2,6 +2,11 @@
 
 Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов).
 
+## Про ветки
+
+Ветка dev-1.4 - основная. Ветка t-astra - для ОС Astra Linux.  В ветке t-astra не поддерживается измеритель ASA.
+Все общие изменения нужно вносить сначала в ветку dev-1.4, а потом сливать в t-astra.
+
 ## Установка в Windows
 
 1. Установите [MSVC 2013 redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=40784) и [MSVC 2015 redistributable](https://www.microsoft.com/ru-ru/download/details.aspx?id=48145) (разрядность должна совпадать с разрядностью Python).
