@@ -547,7 +547,11 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _delete_all_test_signatures(self) -> None:
-        print("___delete")
+        if self.measurement_plan:
+            self.measurement_plan.remove_all_test_signatures()
+            self._comment_widget.update_table_for_new_tolerance()
+            self.update_current_pin(False)
+            logger.debug("Test signatures on all pins have been removed from the test plan")
 
     def _delete_measurement_plan(self) -> None:
         self._last_saved_measurement_plan_data = None
