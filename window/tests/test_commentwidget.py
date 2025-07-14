@@ -35,16 +35,16 @@ class TestCommentWidget(unittest.TestCase):
     def test_set_work_mode(self) -> None:
         _, comment_widget = prepare_data("simple_board.json")
         comment_widget.update_info()
-        self.assertFalse(comment_widget.read_only)
+        self.assertFalse(comment_widget._read_only)
 
         comment_widget.set_work_mode(WorkMode.READ_PLAN)
-        self.assertTrue(comment_widget.read_only)
+        self.assertTrue(comment_widget._read_only)
         for row in range(comment_widget.rowCount()):
             item = comment_widget.item(row, 1)
             self.assertFalse(bool(int(item.flags()) & Qt.ItemIsEditable))
 
         comment_widget.set_work_mode(WorkMode.WRITE)
-        self.assertFalse(comment_widget.read_only)
+        self.assertFalse(comment_widget._read_only)
         for row in range(comment_widget.rowCount()):
             item = comment_widget.item(row, 1)
             self.assertTrue(bool(int(item.flags()) & Qt.ItemIsEditable))

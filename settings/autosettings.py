@@ -3,9 +3,9 @@ from typing import Any, Callable, Dict, Optional
 from PyQt5.QtCore import QSettings
 from epcore.elements import MeasurementSettings
 from epcore.product import EyePointProduct
-from settings.settingshandler import SettingsHandler
-from settings import utils as ut
 from window.language import Language, Translator
+from . import utils as ut
+from .settingshandler import SettingsHandler
 
 
 def get_default_language() -> Language:
@@ -45,16 +45,20 @@ class AutoSettings(SettingsHandler):
     frequency: str = None
     sensitive: str = None
     voltage: str = None
-    max_optimal_voltage: float = 12
     auto_transition: bool = False
     language: Language = get_default_language()
-    pin_shift_warning_info: bool = True
+    max_optimal_voltage: float = 12
     measurer_1_port: str = None
     measurer_2_port: str = None
     mux_port: str = None
+    pin_shift_warning_info: bool = True
     product_name: str = None
 
     def _read(self, settings: QSettings) -> None:
+        """
+        :param settings: object from which to read the basic application settings.
+        """
+
         params = {"frequency": {"convert": check_none},
                   "sensitive": {"convert": check_none},
                   "voltage": {"convert": check_none}}
@@ -83,6 +87,10 @@ class AutoSettings(SettingsHandler):
         settings.endGroup()
 
     def _write(self, settings: QSettings) -> None:
+        """
+        :param settings: object in which to write the basic application settings.
+        """
+
         params = {"frequency": {"convert": str},
                   "sensitive": {"convert": str},
                   "voltage": {"convert": str}}
@@ -110,13 +118,6 @@ class AutoSettings(SettingsHandler):
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 
-    def get_auto_transition(self) -> bool:
-        """
-        :return: auto transition mode is enabled or disabled during testing according to plan.
-        """
-
-        return self.auto_transition
-
     def get_connection_params(self) -> Dict[str, str]:
         """
         :return: dictionary with port of the connected first and second IV-measurers, port of the connected multiplexer
@@ -127,13 +128,6 @@ class AutoSettings(SettingsHandler):
                 "measurer_2_port": self.measurer_2_port,
                 "mux_port": self.mux_port,
                 "product_name": self.product_name}
-
-    def get_language(self) -> Language:
-        """
-        :return: the language that was set during the previous work.
-        """
-
-        return self.language
 
     def get_measurement_settings(self, product: EyePointProduct) -> Optional[MeasurementSettings]:
         """
@@ -154,28 +148,6 @@ class AutoSettings(SettingsHandler):
             return None
 
         return measurement_settings
-
-    def get_optimal_search_settings(self) -> Dict[str, float]:
-        """
-        :return:
-        """
-
-        return {"max_optimal_voltage": self.max_optimal_voltage}
-
-    def get_pin_shift_warning_info(self) -> bool:
-        """
-        :return: True if to show a warning message when point numbering is shifted when adding or removing points.
-        """
-
-        return self.pin_shift_warning_info
-
-    @save_settings
-    def save_auto_transition(self, auto_transition: bool) -> None:
-        """
-        :param auto_transition: auto transition mode is enabled or disabled during testing according to plan.
-        """
-
-        self.auto_transition = bool(auto_transition)
 
     @save_settings
     def save_connection_params(self, measurer_1_port: str, measurer_2_port: str, mux_port: str, product_name: str
@@ -211,19 +183,10 @@ class AutoSettings(SettingsHandler):
         self.voltage = options[EyePointProduct.Parameter.voltage]
 
     @save_settings
-    def save_optimal_search_settings(self, **kwargs) -> None:
-        """
-        :param kwargs:
-        """
-
-        for attr_name in ("max_optimal_voltage",):
-            if attr_name in kwargs:
-                setattr(self, attr_name, kwargs[attr_name])
-
-    @save_settings
     def save_pin_shift_warning_info(self, pin_shift_warning_info: bool) -> None:
         """
-        :param pin_shift_warning_info:
+        :param pin_shift_warning_info: if True, then automatically during testing the transition to the next pin will
+        be carried out.
         """
 
         self.pin_shift_warning_info = bool(pin_shift_warning_info)

@@ -1,9 +1,9 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Set, Tuple
 from PyQt5.QtCore import pyqtSignal, QSettings
 from epcore.elements.measurement import MeasurementSettings
-from settings import utils as ut
-from settings.settingshandler import SettingsHandler
 from window.common import WorkMode
+from . import utils as ut
+from .settingshandler import SettingsHandler
 
 
 MODES = {"Compare": WorkMode.COMPARE,
@@ -16,7 +16,7 @@ class SettingsEditor:
     Disables settings changed signal emitting and forces it on exit.
     """
 
-    def __init__(self, settings):
+    def __init__(self, settings: "Settings") -> None:
         self.__settings = settings
 
     def __enter__(self):
@@ -46,7 +46,7 @@ class Settings(SettingsHandler):
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
-        self._active_editors = set()
+        self._active_editors: Set = set()
 
     def __copy__(self) -> "Settings":
         new_obj = type(self)()
@@ -61,7 +61,7 @@ class Settings(SettingsHandler):
 
     def _read(self, settings: QSettings) -> None:
         """
-        :param settings: QSettings object from which parameter values ​​need to be read.
+        :param settings: QSettings object from which parameter values need to be read.
         """
 
         params = {"auto_transition": {"convert": ut.to_bool},
@@ -82,7 +82,7 @@ class Settings(SettingsHandler):
 
     def _write(self, settings: QSettings) -> None:
         """
-        :param settings: QSettings object into which parameter values ​​should be written.
+        :param settings: QSettings object into which parameter values should be written.
         """
 
         def get_work_mode(work_mode: WorkMode) -> str:
@@ -91,7 +91,7 @@ class Settings(SettingsHandler):
                     return key
             return "Compare"
 
-        params = {"auto_settings": {},
+        params = {"auto_transition": {},
                   "frequency": {"convert": lambda value: list(map(int, value))},
                   "hide_curve_a": {},
                   "hide_curve_b": {},
@@ -111,7 +111,7 @@ class Settings(SettingsHandler):
 
     def get_default_values(self) -> Dict[str, Any]:
         """
-        :return: dictionary with default values ​​of attributes.
+        :return: dictionary with default values of attributes.
         """
 
         return {param: self._get_default_value(param) for param in Settings.ATTRIBUTE_NAMES}
@@ -128,7 +128,7 @@ class Settings(SettingsHandler):
 
     def get_values(self) -> Dict[str, Any]:
         """
-        :return: dictionary with default values of attributes.
+        :return: dictionary with values of attributes.
         """
 
         return {param: getattr(self, param, None) for param in Settings.ATTRIBUTE_NAMES}

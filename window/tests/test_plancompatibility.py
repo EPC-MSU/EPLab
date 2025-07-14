@@ -8,7 +8,7 @@ from epcore.filemanager import load_board_from_ufiv
 from epcore.ivmeasurer import IVMeasurerVirtual
 from epcore.measurementmanager import MeasurementPlan, MeasurementSystem
 from epcore.product import EyePointProduct
-from window.plancompatibility import PlanCompatibility
+from window.plancompatibility import PlanCompatibility, WrongPinsNumberForMuxError
 
 
 class SimpleMainWindow:
@@ -96,10 +96,11 @@ class TestPlanCompatibility(unittest.TestCase):
     def test_check_compatibility_with_mux(self) -> None:
         window, checker = create_window_and_checker(True)
         plan = create_measurement_plan_from_file("board_mux.json", window.measurer, window.multiplexer)
-        self.assertTrue(checker._check_compatibility_with_mux(plan))
+        self.assertIsNone(checker._check_compatibility_with_mux(plan))
 
         plan = create_measurement_plan_from_file("simple_board.json", window.measurer, window.multiplexer)
-        self.assertFalse(checker._check_compatibility_with_mux(plan))
+        with self.assertRaises(WrongPinsNumberForMuxError):
+            checker._check_compatibility_with_mux(plan)
 
     def test_check_compatibility_with_product(self) -> None:
         window, checker = create_window_and_checker(True)

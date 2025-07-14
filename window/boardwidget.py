@@ -5,19 +5,22 @@ File with class to show image of board.
 import os
 from typing import Optional, Tuple, Union
 from PIL import Image
-from PyQt5.QtCore import pyqtSlot, QEvent, QObject, QPoint, QPointF, QRect, QRectF, Qt, QTimer
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QEvent, QObject, QPoint, QPointF, QRect, QRectF, Qt, QTimer
 from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent, QWheelEvent
-from PyQt5.QtWidgets import QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QGraphicsScene, QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView, GraphicsManualPinItem
 from epcore.measurementmanager import MeasurementPlan
 from dialogs.save_geometry import update_widget_to_save_geometry
-from window import utils as ut
-from window.common import WorkMode
-from window.pedalhandler import add_pedal_handler
+from . import utils as ut
+from .common import WorkMode
+from .pedalhandler import add_pedal_handler
 
 
 def pil_to_pixmap(image: Image) -> QPixmap:
-    # See https://stackoverflow.com/questions/34697559/pil-image-to-qpixmap-conversion-issue
+    """
+    See https://stackoverflow.com/questions/34697559/pil-image-to-qpixmap-conversion-issue
+    """
+
     if image.mode == "RGB":
         red, green, blue = image.split()
         image = Image.merge("RGB", (blue, green, red))
@@ -41,17 +44,18 @@ class BoardWidget(QWidget):
 
     HEIGHT: int = 600
     WIDTH: int = 600
+    current_pin_signal: pyqtSignal = pyqtSignal(int, bool)
 
-    def __init__(self, main_window=None) -> None:
+    def __init__(self, main_window) -> None:
         """
         :param main_window: main window of application.
         """
 
         super().__init__()
         self._board: Optional[MeasurementPlan] = None
-        self._board_image: QPixmap = None
+        self._board_image: Optional[QPixmap] = None
         self._control_pressed: bool = False
-        self._parent = main_window
+        self._main_window = main_window
         self._previous_pos: Optional[QRect] = None
         self._timer: QTimer = QTimer()
         self._timer.timeout.connect(self._set_scene_rect)
@@ -65,7 +69,7 @@ class BoardWidget(QWidget):
         :return: measurement plan.
         """
 
-        return self._parent.measurement_plan
+        return self._main_window.measurement_plan
 
     def _handle_key_press_event(self, obj: QObject, event: QEvent) -> bool:
         """
@@ -82,22 +86,7 @@ class BoardWidget(QWidget):
         if self._control_pressed and key in (Qt.Key_Down, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up):
             return super().eventFilter(obj, event)
 
-        if key in (Qt.Key_Left, Qt.Key_Up):
-            self._parent.go_to_left_or_right_pin(True)
-            return True
-
-        if key in (Qt.Key_Down, Qt.Key_Right):
-            self._parent.go_to_left_or_right_pin(False)
-            return True
-
-        if key in (Qt.Key_Enter, Qt.Key_Return) and self._parent.save_point_action.isEnabled():
-            self._parent.save_pin()
-            return True
-
-        if key == Qt.Key_Delete:
-            self._parent.remove_pin()
-
-        return self._parent.eventFilter(self._parent, event)
+        return self._main_window.eventFilter(self._main_window, event)
 
     def _handle_key_release_event(self, obj: QObject, event: QEvent) -> bool:
         """
@@ -123,18 +112,20 @@ class BoardWidget(QWidget):
         self.setStyleSheet("background-color: black;")
 
         self._scene: BoardView = BoardView()
+        self._scene.scene().setItemIndexMethod(QGraphicsScene.NoIndex)
         self._scene.on_right_click.connect(self.create_new_pin)
         self._scene.point_moved.connect(self.change_pin_coordinates)
-        self._scene.point_selected.connect(self.select_pin_with_index)
+        self._scene.point_selected.connect(self.send_current_pin_index)
         self._scene.installEventFilter(self)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self._scene)
         self.setLayout(layout)
 
+    @pyqtSlot()
     def _set_scene_rect(self) -> None:
         """
-        Method sets area of the scene visualized by view.
+        Slot sets area of the scene visualized by view.
         """
 
         def get_viewport_size_in_scene_coordinates() -> Tuple[float, float]:
@@ -160,7 +151,7 @@ class BoardWidget(QWidget):
         self._scene.setSceneRect(QRectF(x_left, y_top, x_right - x_left, y_bottom - y_top))
         self._scene.update()
 
-    def add_pin(self, x: float, y: float, index: int) -> None:
+    def add_pin_to_board_image(self, x: float, y: float, index: int) -> None:
         """
         Method adds new pin to board image.
         :param x: x coordinate of point;
@@ -172,7 +163,7 @@ class BoardWidget(QWidget):
 
     def allow_drag(self, allow: bool) -> None:
         """
-        :param allow: True, if to enable drag mode.
+        :param allow: True, if to enable drag mode (pins can be moved around the board).
         """
 
         self._scene.allow_drag(allow)
@@ -197,9 +188,8 @@ class BoardWidget(QWidget):
         :param point: object with coordinates of new pin.
         """
 
-        if self._parent.work_mode is WorkMode.WRITE:
-            self._parent.create_new_pin(point, False)
-            self._parent.save_pin(False)
+        if self._main_window.work_mode is WorkMode.WRITE and self._main_window.create_new_pin(point, False):
+            self._main_window.save_pin(False)
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         """
@@ -212,6 +202,7 @@ class BoardWidget(QWidget):
             key_event = QKeyEvent(event)
             if key_event.type() == QEvent.KeyPress:
                 return self._handle_key_press_event(obj, event)
+
             if key_event.type() == QEvent.KeyRelease:
                 return self._handle_key_release_event(obj, event)
 
@@ -223,18 +214,19 @@ class BoardWidget(QWidget):
 
         return super().eventFilter(obj, event)
 
-    def get_default_pin_xy(self) -> QPointF:
+    def get_default_pin_xy(self) -> Tuple[float, float]:
         """
-        :return: point with coordinates in the center of the board.
+        :return: coordinates in the center of the board.
         """
 
         width = self._scene.width()
         height = self._scene.height()
-        return self._scene.mapToScene(int(width / 2), int(height / 2))
+        point = self._scene.mapToScene(int(width / 2), int(height / 2))
+        return point.x(), point.y()
 
-    def remove_pin(self, index: int) -> None:
+    def remove_pin_from_board_image(self, index: int) -> None:
         """
-        :param index: pin index to delete.
+        :param index: pin index to delete from board image.
         """
 
         self._scene.remove_point(index)
@@ -263,14 +255,13 @@ class BoardWidget(QWidget):
             self.show_component_centered(index)
 
     @pyqtSlot(int)
-    def select_pin_with_index(self, index: int) -> None:
+    def send_current_pin_index(self, index: int) -> None:
         """
-        Slot handles signal when pin
+        Slot sends a signal with the number of the current pin.
         :param index: pin index.
         """
 
-        self.measurement_plan.go_pin(index)
-        self._parent.update_current_pin(False)
+        self.current_pin_signal.emit(index, False)
 
     def show_component_centered(self, index_or_component: Union[int, GraphicsManualPinItem]) -> None:
         """
@@ -281,7 +272,7 @@ class BoardWidget(QWidget):
         if isinstance(index_or_component, GraphicsManualPinItem):
             component = index_or_component
         else:
-            for component_ in self._scene._components:
+            for component_ in getattr(self._scene, "_components", []):
                 if component_.number == index_or_component:
                     component = component_
                     break

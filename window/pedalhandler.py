@@ -13,6 +13,9 @@ class PedalHandler(QObject):
     pedal_signal: pyqtSignal = pyqtSignal(bool)
 
     class Button:
+        """
+        Class for storing key values and states.
+        """
 
         def __init__(self, key: int, status: bool = False) -> None:
             """
@@ -62,12 +65,12 @@ class PedalHandler(QObject):
         control_buttons_pressed = all(self._buttons[key].status for key in (Qt.Key_Control, Qt.Key_Shift))
 
         if control_buttons_pressed and not all_pressed:
-            pass
-        else:
-            status = PedalHandler.Status.PRESSED if all_pressed else PedalHandler.Status.RELEASED
-            if status != self._status:
-                self.pedal_signal.emit(all_pressed)
-                self._status = status
+            return
+
+        status = PedalHandler.Status.PRESSED if all_pressed else PedalHandler.Status.RELEASED
+        if status != self._status:
+            self.pedal_signal.emit(all_pressed)
+            self._status = status
 
     def handle_key_event(self, event: QKeyEvent) -> None:
         """
@@ -89,14 +92,17 @@ def add_pedal_handler(widget_cls: type) -> type:
     """
 
     class ClassWithPedalHandler(widget_cls):
+        """
+        Widget class with processing of pedal presses.
+        """
 
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
             self._pedal_handler: PedalHandler = PedalHandler()
             if hasattr(self, "handle_pedal_signal"):
                 self._pedal_handler.pedal_signal.connect(self.handle_pedal_signal)
-            elif hasattr(self, "_parent") and hasattr(self._parent, "handle_pedal_signal"):
-                self._pedal_handler.pedal_signal.connect(self._parent.handle_pedal_signal)
+            elif hasattr(self, "_main_window") and hasattr(self._main_window, "handle_pedal_signal"):
+                self._pedal_handler.pedal_signal.connect(self._main_window.handle_pedal_signal)
 
         def keyPressEvent(self, event: QKeyEvent) -> None:
             """

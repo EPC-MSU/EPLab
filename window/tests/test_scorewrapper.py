@@ -15,9 +15,9 @@ class TestScoreWrapper(unittest.TestCase):
         self.app.exit(0)
 
     def test_set_dummy_score(self) -> None:
-        self.score_wrapper.set_dummy_score()
+        self.score_wrapper.set_dummy_difference()
         self.assertEqual(self.score_wrapper.get_friendly_score(), "-")
 
     def test_set_score(self) -> None:
-        self.score_wrapper.set_score(0.692)
+        self.score_wrapper.set_difference(0.692)
         self.assertEqual(self.score_wrapper.get_friendly_score(), "69.2%")

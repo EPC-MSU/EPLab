@@ -2,6 +2,11 @@
 
 Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов).
 
+## Про ветки
+
+Ветка dev-1.4 - основная. Ветка t-astra - для ОС Astra Linux.  В ветке t-astra не поддерживается измеритель ASA.
+Все общие изменения нужно вносить сначала в ветку dev-1.4, а потом сливать в t-astra.
+
 ## Установка в Windows
 
 1. Установите [MSVC 2013 redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=40784) и [MSVC 2015 redistributable](https://www.microsoft.com/ru-ru/download/details.aspx?id=48145) (разрядность должна совпадать с разрядностью Python).
@@ -143,11 +148,28 @@ bash run.sh
 
    > qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.
    
-   выполните следующие команды:
+   выполните следующую команду:
 
    ```bash
    export QT_DEBUG_PLUGINS=1
+   ```
+   
+   Запустите приложение еще раз. Возможно, отладочный уровень логирования поможет Вам понять, что дополнительно требуется для Qt.
+   
+   Возможно, Вам поможет установка следующих библиотек:
+   
+   ```bash
    sudo apt-get install --reinstall libxcb-xinerama0
+   sudo apt-get install libxcb-randr0-dev libxcb-xtest0-dev libxcb-xinerama0-dev libxcb-shape0-dev libxcb-xkb-dev
+   sudo apt-get install libxkbcommon-x11-dev
+   ```
+   
+   Если у Вас не хватает *libxcb-util.so.1*, попробуйте:
+   
+   ```bash
+   sudo ln -fs /usr/lib/x86_64-linux-gnu/libxcb-util.so.0.0.0 /usr/lib/x86_64-linux-gnu/libxcb-util.so.1.0.0
+   sudo ln -fs /usr/lib/x86_64-linux-gnu/libxcb-util.so.0.0.0 /usr/lib/x86_64-linux-gnu/libxcb-util.so.1.0
+   sudo ln -fs /usr/lib/x86_64-linux-gnu/libxcb-util.so.0.0.0 /usr/lib/x86_64-linux-gnu/libxcb-util.so.1
    ```
 
 ## Запуск тестов
@@ -191,5 +213,3 @@ bash run.sh
   ```
   Настроить -> Сеть -> Адаптер 2 -> Включить сетевой адаптер -> Тип подключения -> NAT
   ```
-  
-  

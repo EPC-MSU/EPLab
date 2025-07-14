@@ -1,14 +1,19 @@
 import json
+import logging
 import math
 import os
 from typing import Generator, Optional, Tuple, Union
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QObject, QTimer
+from PyQt5.QtWidgets import QMessageBox
 from epcore.elements import IVCurve, MeasurementSettings
 from epcore.product import EyePointProduct, MeasurementParameterOption
 from dialogs import ProgressWindow
 from settings.autosettings import AutoSettings
-from window.language import get_language, Language
-from window import utils as ut
+from . import utils as ut
+from .language import get_language, Language
+
+
+logger = logging.getLogger("eplab")
 
 
 class BreakSignaturesSaver(QObject):
@@ -54,7 +59,7 @@ class BreakSignaturesSaver(QObject):
         :return: True if auto-transition mode is saved in the settings.
         """
 
-        return self._auto_settings.get_auto_transition()
+        return self._auto_settings.auto_transition
 
     def _check_required_settings(self, settings: MeasurementSettings) -> bool:
         """
@@ -121,7 +126,8 @@ class BreakSignaturesSaver(QObject):
                 info = self._get_settings_info()
                 self._window.change_progress(info)
                 self._new_settings_required = False
-            except StopIteration:
+            except StopIteration as exc:
+                logger.error("An error occurred while sending settings (%s)", exc)
                 self._is_running = False
                 return
 
@@ -152,7 +158,7 @@ class BreakSignaturesSaver(QObject):
                                                          "<li>Разомкните щупы.</li>\n"
                                                          "<li>Нажмите 'Да'.</li>\n"
                                                          "<li>Дождитесь завершения процедуры.</li>\n</ul>"),
-                                     yes_button=True, no_button=True)
+                                     icon=QMessageBox.Information, yes_button=True, no_button=True)
             if not result:
                 self._request_new_settings()
                 self._start_settings_iteration()
@@ -191,7 +197,8 @@ def check_break_signatures(dir_path: str, product: EyePointProduct, required_fre
                 return False
 
             load_signature(path)
-    except Exception:
+    except Exception as exc:
+        logger.error("An error occurred while checking break signatures (%s)", exc)
         return False
 
     return True

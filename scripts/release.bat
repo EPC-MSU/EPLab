@@ -48,13 +48,12 @@ venv\Scripts\pyinstaller main.py --clean --onefile --noconsole ^
 --splash media\banner.png
 
 xcopy resources\win%target_platform%\drivers\* dist\drivers\* /S /E
-copy resources\readme.md dist
 rename dist release
 cd release
 rename main.exe eplab.exe
 cd ..
-if exist build rd /S /Q build
-if exist dist rd /S /Q dist
-if exist venv rd /S /Q venv
-if exist *.spec del *.spec
+:rem:if exist build rd /S /Q build
+:rem:if exist dist rd /S /Q dist
+:rem:if exist venv rd /S /Q venv
+:rem:if exist *.spec del *.spec
 pause

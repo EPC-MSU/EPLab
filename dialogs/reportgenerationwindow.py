@@ -164,7 +164,7 @@ class ReportGenerationWindow(QDialog):
                 except Exception:
                     pass
 
-        self._thread.close_window_signal.connect(lambda: self.close())
+        self._thread.close_window_signal.connect(self.close)
         self._thread.report_generator.step_done.connect(self.change_progress)
         self._thread.report_generator.step_started.connect(self.text_edit_info.append)
         self._thread.report_generator.total_number_of_steps_calculated.connect(self.set_total_number_of_steps)

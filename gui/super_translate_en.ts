@@ -15,11 +15,9 @@
     </message>
     <message>
         <location filename="settings.ui" line="131"/>
-        <source>Показывать предупреждения при
-добавлении/удалении точек,
+        <source>Показывать предупреждения при добавлении/удалении точек,
 приводящих к смещению нумерации</source>
-        <translation>Show warnings when
-adding/removing points,
+        <translation>Show warnings when adding/removing points,
 leading to a numbering shift</translation>
     </message>
     <message>
@@ -29,10 +27,8 @@ leading to a numbering shift</translation>
     </message>
     <message>
         <location filename="settings.ui" line="147"/>
-        <source>Максимальное напряжение при
-автоподборе, В</source>
-        <translation>Max voltage at
-auto-selection, V</translation>
+        <source>Максимальное напряжение при автоподборе, В</source>
+        <translation>Max voltage at optimal search of parameters, V</translation>
     </message>
     <message>
         <location filename="settings.ui" line="180"/>
@@ -218,16 +214,6 @@ auto-selection, V</translation>
         <translation>Optimal search of parameters</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="730"/>
-        <source>Добавить метку</source>
-        <translation>Add marker</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="748"/>
-        <source>Удалить метку</source>
-        <translation>Delete marker</translation>
-    </message>
-    <message>
         <location filename="mainwindow.ui" line="764"/>
         <source>Скрыть канал А</source>
         <translation>Hide curve A</translation>
@@ -392,12 +378,37 @@ auto-selection, V</translation>
         <translation>DISCONNECTED</translation>
     </message>
     <message>
+        <location filename="../window/eplabwindow.py" line="712"/>
+        <source>Добавить метку</source>
+        <translation>Add marker</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="713"/>
+        <source>Экспортировать сигнатуры в файл</source>
+        <translation>Export signatures to file</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="714"/>
+        <source>Удалить все метки</source>
+        <translation>Delete all markers</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="715"/>
+        <source>Удалить метку</source>
+        <translation>Delete marker</translation>
+    </message>
+    <message>
         <location filename="../window/eplabwindow.py" line="817"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="817"/>
+        <location filename="../window/eplabwindow.py" line="818"/>
+        <source>Формат файла не подходит. Указан неверный путь до изображения платы.</source>
+        <translation>The file format is not suitable. The path to the board image is incorrect.</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="821"/>
         <source>Формат файла не подходит.</source>
         <translation>The file format is not suitable.</translation>
     </message>
@@ -419,7 +430,7 @@ auto-selection, V</translation>
     <message>
         <location filename="../window/eplabwindow.py" line="1050"/>
         <source>Не показывать снова</source>
-        <translation>Don't show again</translation>
+        <translation>Don&apos;t show again</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1257"/>
@@ -438,8 +449,8 @@ auto-selection, V</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1356"/>
-        <source>Выбрать папку</source>
-        <translation>Select directory</translation>
+        <source>Выберите папку, в которую будет сохранен отчет</source>
+        <translation>Select the folder where the report will be saved</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1522"/>
@@ -464,7 +475,7 @@ auto-selection, V</translation>
     <message>
         <location filename="../window/eplabwindow.py" line="1726"/>
         <source>Для данной платы изображение не задано.</source>
-        <translation>Not found image for current board.</translation>
+        <translation>No image found for the current board.</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1753"/>
@@ -482,14 +493,9 @@ auto-selection, V</translation>
         <translation>Error occurred while configuring device settings.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1978"/>
-        <source>Удалить метку</source>
-        <translation>Delete marker</translation>
-    </message>
-    <message>
-        <location filename="../window/eplabwindow.py" line="1982"/>
-        <source>Удалить все метки</source>
-        <translation>Delete all markers</translation>
+        <location filename="../window/exceptionhook.py" line="17"/>
+        <source>Что-то пошло не так, и произошла ошибка:</source>
+        <translation>Something went wrong and an error occurred:</translation>
     </message>
     <message>
         <location filename="../window/measuredpinschecker.py" line="123"/>
@@ -507,22 +513,37 @@ auto-selection, V</translation>
         <translation>Incorrect format of point number. Point number must be integer.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="159"/>
-        <source>Подключен мультиплексор с {} выходами. План с {} точками не совместим с данным мультиплексором. Количество точек в плане должно совпадать с количеством выходов мультиплексора. Для тестирования данного плана подключите устройство без мультиплексора.</source>
-        <translation>A multiplexer with {} outputs is connected. Plan with {} points is not compatible with this multiplexer. The number of points in the plan must match the number of multiplexer outputs. To test this plan, connect a device without a multiplexer.</translation>
+        <location filename="../window/plancompatibility.py" line="17"/>
+        <source>В плане тестирования заданы неверные номера выходов мультиплексора.</source>
+        <translation>The test plan contains incorrect multiplexer output numbers.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="164"/>
-        <source>Подключен мультиплексор с {} выходами. План с {} точками не совместим с данным мультиплексором. Количество точек в плане должно совпадать с количеством выходов мультиплексора. Для тестирования данного плана подключите устройство без мультиплексора. Мультиплексор будет закрыт.</source>
-        <translation>A multiplexer with {} outputs is connected. Plan with {} points is not compatible with this multiplexer. The number of points in the plan must match the number of multiplexer outputs. To test this plan, connect a device without a multiplexer. The multiplexer will be closed.</translation>
+        <location filename="../window/plancompatibility.py" line="27"/>
+        <source>В плане тестирования не заданы номера каналов мультиплексора. Вероятно, вы открыли план, созданный с помощью ручного устройства на устройстве с мультиплексором. Мультиплексор может использоваться только с планами тестирования, в которых заданы номера каналов.</source>
+        <translation>The measurement plan does not specify multiplexer output numbers. You probably opened a plan created using a manual device on a multiplexer device. The multiplexer can only be used with measurement plans that specify output numbers.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="180"/>
+        <location filename="../window/plancompatibility.py" line="47"/>
+        <source>Подключен мультиплексор с {} выходами. План с {} точками не совместим с данным мультиплексором. Количество точек в плане должно совпадать с количеством выходов мультиплексора.</source>
+        <translation>A multiplexer with {} outputs is connected. Plan with {} points is not compatible with this multiplexer. The number of points in the plan must match the number of multiplexer outputs.</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="202"/>
+        <source>Нажмите 'ОК' и откройте подходящий план тестирования.</source>
+        <translation>Click 'OK' and open the appropriate measurement plan.</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="204"/>
+        <source>Мультиплексор будет закрыт.</source>
+        <translation>The multiplexer will be closed.</translation>
+    </message>
+    <message>
+        <location filename="../window/plancompatibility.py" line="215"/>
         <source>План тестирования {}нельзя загрузить, поскольку он не соответствует режиму работы EPLab.</source>
         <translation>Test plan {}cannot be loaded because it does not correspond to the EPLab operating mode.</translation>
     </message>
     <message>
-        <location filename="../window/plancompatibility.py" line="183"/>
+        <location filename="../window/plancompatibility.py" line="218"/>
         <source>План тестирования {}не соответствует режиму работы EPLab и будет закрыт.</source>
         <translation>Test plan {}does not correspond to the EPLab work mode and will be closed.</translation>
     </message>
@@ -638,64 +659,76 @@ auto-selection, V</translation>
 <context>
     <name>connection_window</name>
     <message>
-        <location filename="../connection_window/connectionwindow.py" line="48"/>
-        <source>Настройка подключения</source>
-        <translation>Connection setup</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/connectionwindow.py" line="58"/>
-        <source>Измерители</source>
-        <translation>Measurers</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/connectionwindow.py" line="67"/>
+        <location filename="../connection_window/connectionwindow.py" line="50"/>
         <source>Подключить</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../connection_window/connectionwindow.py" line="70"/>
+        <location filename="../connection_window/connectionwindow.py" line="53"/>
         <source>Отключить</source>
         <translation>Disconnect</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurertypewidget.py" line="70"/>
+        <location filename="../connection_window/connectionwindow.py" line="72"/>
+        <source>Измерители</source>
+        <translation>Measurers</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/connectionwindow.py" line="81"/>
+        <source>Настройка подключения</source>
+        <translation>Connection setup</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/measurertypewidget.py" line="107"/>
         <source>Тип измерителя</source>
         <translation>Measurer type</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="172"/>
+        <location filename="../connection_window/measureruriswidget.py" line="175"/>
         <source>Канал #{}</source>
         <translation>Channel #{}</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="187"/>
+        <location filename="../connection_window/measureruriswidget.py" line="190"/>
         <source>Помощь</source>
         <translation>Help</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="196"/>
+        <location filename="../connection_window/measureruriswidget.py" line="199"/>
         <source>Обновить</source>
         <translation>Update</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="307"/>
-        <source>Введите значение последовательного порта в формате {}.</source>
-        <translation>Enter serial port value in format {}.</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/measureruriswidget.py" line="310"/>
-        <source>Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.</source>
-        <translation>Enter H10 server address in format xmlrpc://x.x.x.x.</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/measureruriswidget.py" line="336"/>
+        <location filename="../connection_window/measureruriswidget.py" line="333"/>
         <source>Введите разные порты.</source>
         <translation>Enter different ports.</translation>
     </message>
     <message>
-        <location filename="../connection_window/muxwidget.py" line="48"/>
+        <location filename="../connection_window/muxwidget.py" line="55"/>
         <source>Мультиплексор</source>
         <translation>Multiplexer</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/productname.py" line="146"/>
+        <source>EyePoint S2 /
+Сигнатурный анализатор С2</source>
+        <translation>EyePoint S2 /
+Signature analyzer S2</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/productname.py" line="149"/>
+        <source>Сигнатурный анализатор мк22</source>
+        <translation>Signature analyzer mk22</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/utils.py" line="248"/>
+        <source>Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.</source>
+        <translation>Enter H10 server address in format xmlrpc://x.x.x.x.</translation>
+    </message>
+    <message>
+        <location filename="../connection_window/utils.py" line="251"/>
+        <source>Введите значение последовательного порта в формате {}.</source>
+        <translation>Enter serial port value in format {}.</translation>
     </message>
 </context>
 <context>
@@ -711,19 +744,14 @@ auto-selection, V</translation>
         <translation>on our website.</translation>
     </message>
     <message>
-        <location filename="../dialogs/aboutwindow.py" line="67"/>
-        <source>О программе</source>
-        <translation>About product</translation>
-    </message>
-    <message>
         <location filename="../dialogs/aboutwindow.py" line="87"/>
         <source>Копировать</source>
         <translation>Copy</translation>
     </message>
     <message>
-        <location filename="../dialogs/languageselectionwindow.py" line="30"/>
-        <source>Выбор языка</source>
-        <translation>Language selection</translation>
+        <location filename="../dialogs/keymapdialog.py" line="61"/>
+        <source>Редактировать комментарий</source>
+        <translation>Edit comment</translation>
     </message>
     <message>
         <location filename="../dialogs/languageselectionwindow.py" line="32"/>
@@ -731,37 +759,37 @@ auto-selection, V</translation>
         <translation>Choose language:</translation>
     </message>
     <message>
-        <location filename="../dialogs/languageselectionwindow.py" line="39"/>
-        <source>Отмена</source>
-        <translation>Cancel</translation>
-    </message>
-    <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="236"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="235"/>
         <source>Настройки. </source>
         <translation>Settings. </translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="238"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="237"/>
         <source>Неизвестный измеритель</source>
         <translation>Unknown measurer</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="326"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="324"/>
         <source>Нет настроек</source>
         <translation>No settings</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="370"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="361"/>
+        <source>Команда &apos;{}&apos; завершилась неудачно.</source>
+        <translation>Command &apos;{}&apos; failed.</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/measurersettingswindow.py" line="365"/>
         <source>Не удалось выполнить команду &apos;{}&apos;.</source>
         <translation>Failed to execute command &apos;{}&apos;.</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="371"/>
-        <source>Ошибка</source>
-        <translation>Error</translation>
+        <location filename="../dialogs/measurersettingswindow.py" line="387"/>
+        <source>Неверное значение для &apos;{}&apos;. Не удалось конвертировать &apos;{}&apos; в &apos;{}&apos;.</source>
+        <translation>Invalid value for &apos;{}&apos;. Failed to convert &apos;{}&apos; in &apos;{}&apos;.</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="395"/>
+        <location filename="../dialogs/measurersettingswindow.py" line="405"/>
         <source>Не удалось задать настройки для измерителя.</source>
         <translation>Failed to set settings in measurer.</translation>
     </message>
@@ -872,11 +900,6 @@ auto-selection, V</translation>
         <location filename="../settings/settingswindow.py" line="164"/>
         <source>Проверьте конфигурационный файл &apos;{}&apos;.</source>
         <translation>Check the configuration file &apos;{}&apos;.</translation>
-    </message>
-    <message>
-        <location filename="../settings/settingswindow.py" line="166"/>
-        <source>Ошибка</source>
-        <translation>Error</translation>
     </message>
     <message>
         <location filename="../settings/settingswindow.py" line="180"/>

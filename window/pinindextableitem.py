@@ -3,6 +3,9 @@ from PyQt5.QtWidgets import QTableWidgetItem
 
 
 class PinIndexTableItem(QTableWidgetItem):
+    """
+    Table item for displaying pin indexes.
+    """
 
     def __init__(self, index: int) -> None:
         """

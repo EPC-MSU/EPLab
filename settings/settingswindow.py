@@ -3,10 +3,10 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout
-from settings.settings import Settings
-from settings.utils import InvalidParameterValueError, MissingParameterError
 from window import utils as ut
 from window.scaler import update_scale_of_class
+from .settings import Settings
+from .utils import InvalidParameterValueError, MissingParameterError
 
 
 @update_scale_of_class
@@ -18,14 +18,14 @@ class SettingsWindow(QDialog):
     THRESHOLD_STEP: float = 0.05
     apply_settings_signal: pyqtSignal = pyqtSignal(Settings)
 
-    def __init__(self, parent, init_settings: Settings, settings_directory: str = None) -> None:
+    def __init__(self, main_window, init_settings: Settings, settings_directory: str = None) -> None:
         """
-        :param parent: main window;
-        :param init_settings: initial settings of application;
+        :param main_window: main window of application;
+        :param init_settings: initial settings of the application;
         :param settings_directory: directory for settings file.
         """
 
-        super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        super().__init__(main_window, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self._init_settings: Settings = init_settings
         self._settings: Settings = copy.copy(init_settings)
         self._settings_directory: str = settings_directory or ut.get_dir_name()
@@ -43,10 +43,12 @@ class SettingsWindow(QDialog):
     def _init_ui(self) -> None:
         dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         uic.loadUi(os.path.join(dir_name, "gui", "settings.ui"), self)
-        self.layout().setSizeConstraint(QLayout.SetFixedSize)
         self.button_tolerance_minus.clicked.connect(self.decrease_tolerance)
         self.button_tolerance_plus.clicked.connect(self.increase_tolerance)
         self.check_box_auto_transition.stateChanged.connect(self.update_auto_transition)
+        if self.parent().measurement_plan and self.parent().measurement_plan.multiplexer:
+            self.label_auto_transition.hide()
+            self.check_box_auto_transition.hide()
         self.check_box_pin_shift_warning_info.stateChanged.connect(self.update_pin_shift_warning_info)
         self.spin_box_tolerance.valueChanged.connect(self.update_tolerance)
         self.spin_box_max_optimal_voltage.valueChanged.connect(self.update_max_optimal_voltage)
@@ -56,6 +58,8 @@ class SettingsWindow(QDialog):
         self.button_ok.clicked.connect(self.apply_changes)
         self.button_ok.setDefault(True)
         self.button_save_settings.clicked.connect(self.save_settings_to_file)
+        self.adjustSize()
+        self.layout().setSizeConstraint(QLayout.SetFixedSize)
 
     def _get_tolerance_value(self) -> float:
         """
@@ -81,13 +85,17 @@ class SettingsWindow(QDialog):
 
     def _update_max_optimal_voltage(self, max_optimal_voltage: float) -> None:
         """
-        :param max_optimal_voltage:
+        :param max_optimal_voltage: new value for maximum voltage when searching for optimal measurement settings.
         """
 
         self.spin_box_max_optimal_voltage.setValue(max_optimal_voltage)
         self._settings.max_optimal_voltage = max_optimal_voltage
 
     def _update_options(self, settings: Settings) -> None:
+        """
+        :param settings: new settings.
+        """
+
         self._update_auto_transition(settings.auto_transition)
         self._update_max_optimal_voltage(settings.max_optimal_voltage)
         self._update_pin_shift_warning_info(settings.pin_shift_warning_info)
@@ -163,7 +171,7 @@ class SettingsWindow(QDialog):
             except (InvalidParameterValueError, MissingParameterError) as exc:
                 error_message = qApp.translate("settings", "Проверьте конфигурационный файл '{}'.").format(
                     settings_path)
-                ut.show_message(qApp.translate("settings", "Ошибка"), f"{exc}\n{error_message}")
+                ut.show_message(qApp.translate("t", "Ошибка"), f"{exc}\n{error_message}")
                 return
 
             self._settings_directory = os.path.dirname(settings_path)

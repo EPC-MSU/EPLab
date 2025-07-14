@@ -6,13 +6,15 @@ import os
 from typing import Callable, List, Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
 from PyQt5.QtGui import QFocusEvent, QIcon
-from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QMessageBox, QPushButton, QWidget
-import connection_window.utils as ut
-from connection_window.productname import MeasurerType
-from connection_window.urichecker import URIChecker
+from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QPushButton, QWidget
+from window.scaler import update_scale_of_class
 from window.utils import DIR_MEDIA, show_message
+from . import utils as ut
+from .productname import MeasurerType
+from .urichecker import URIChecker
 
 
+@update_scale_of_class
 class MeasurerURIsWidget(QWidget):
     """
     Class for widget to select URLs for measurers.
@@ -46,6 +48,7 @@ class MeasurerURIsWidget(QWidget):
         for combo_box in self.combo_boxes_measurers:
             if combo_box.isVisible() and not self._uri_checker.check_uri_for_correctness(combo_box):
                 return False
+
         return True
 
     def _get_ports_for_ivm10(self, ports: List[str], port_1: str = None, port_2: str = None) -> List[List[str]]:
@@ -177,8 +180,8 @@ class MeasurerURIsWidget(QWidget):
             combo_box.setMinimumWidth(MeasurerURIsWidget.COMBO_BOX_MIN_WIDTH)
             combo_box.setEditable(True)
             combo_box.textActivated.connect(self.handle_text_activated)
-            combo_box.lineEdit().textEdited.connect(self.handle_text_edited)
             combo_box.installEventFilter(self)
+            setattr(self, f"combo_box_{index}", combo_box)  # need to scale widget
             grid_layout.addWidget(combo_box, index, 1)
             self.combo_boxes_measurers.append(combo_box)
 
@@ -302,13 +305,7 @@ class MeasurerURIsWidget(QWidget):
         Slot shows help information how to enter URI.
         """
 
-        if self._measurer_type == MeasurerType.IVM10:
-            port_format = "com:///dev/ttyx" if ut.get_platform() == "debian" else "com:\\\\.\\COMx"
-            info = qApp.translate("connection_window", "Введите значение последовательного порта в формате {}."
-                                  ).format(port_format)
-        else:
-            info = qApp.translate("connection_window", "Введите адрес сервера H10 в формате xmlrpc://x.x.x.x.")
-        show_message(qApp.translate("connection_window", "Помощь"), info, icon=QMessageBox.Information)
+        ut.show_help(self._measurer_type == MeasurerType.ASA)
 
     @pyqtSlot()
     def update_uris(self) -> None:

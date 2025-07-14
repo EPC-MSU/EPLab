@@ -3,8 +3,8 @@ import re
 from typing import Callable, Optional, Union
 from PyQt5.QtGui import QFocusEvent
 from PyQt5.QtWidgets import QComboBox
-import connection_window.utils as ut
-from connection_window.productname import MeasurerType
+from . import utils as ut
+from .productname import MeasurerType
 
 
 def get_reg_exp_for_ivm10():
@@ -14,6 +14,7 @@ def get_reg_exp_for_ivm10():
 
     if ut.get_platform() == "debian":
         return re.compile(r"^(com:///dev/tty.*|(?i)virtual)$")
+
     return re.compile(r"^(?i)(com:\\\\\.\\COM\d+|virtual)$")
 
 
@@ -24,6 +25,7 @@ def get_reg_exp_for_mux():
 
     if ut.get_platform() == "debian":
         return re.compile(r"^(com:///dev/tty.*|(?i)virtual|(?i)none)$")
+
     return re.compile(r"^(?i)(com:\\\\\.\\COM\d+|virtual|none)$")
 
 
@@ -91,6 +93,7 @@ class URIChecker:
         uri = uri_or_widget.currentText() if isinstance(uri_or_widget, QComboBox) else uri_or_widget
         if self._check_uri:
             return self._check_uri(uri.strip())
+
         return True
 
     def color_widget(self, combo_box: QComboBox, event: Optional[QFocusEvent] = None) -> None:

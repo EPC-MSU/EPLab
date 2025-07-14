@@ -1,5 +1,6 @@
-from enum import Enum
+from enum import auto, Enum
 from typing import List, Optional
+from PyQt5.QtCore import QCoreApplication as qApp
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 
 
@@ -19,11 +20,13 @@ class ProductName(Enum):
     Class with names of available products for application.
     """
 
-    EYEPOINT_A2 = "EyePoint a2"
-    EYEPOINT_H10 = "EyePoint H10"
-    EYEPOINT_S2 = "EyePoint S2"
-    EYEPOINT_U21 = "EyePoint u21"
-    EYEPOINT_U22 = "EyePoint u22"
+    EYEPOINT_A2 = auto()
+    EYEPOINT_H10 = auto()
+    EYEPOINT_S2 = auto()
+    EYEPOINT_U21 = auto()
+    EYEPOINT_U22 = auto()
+    EYEPOINT_U32 = auto()
+    MK22 = auto()
 
     @classmethod
     def check_replaceability(cls, product_1: "ProductName", product_2: "ProductName") -> bool:
@@ -36,7 +39,7 @@ class ProductName(Enum):
         if product_1 == product_2:
             return True
 
-        eyepoints_with_2_channels = cls.EYEPOINT_S2, cls.EYEPOINT_U22
+        eyepoints_with_2_channels = cls.EYEPOINT_S2, cls.EYEPOINT_U22, cls.EYEPOINT_U32, cls.MK22
         if product_1 in eyepoints_with_2_channels and product_2 in eyepoints_with_2_channels:
             return True
 
@@ -72,31 +75,33 @@ class ProductName(Enum):
 
         if product_name is None:
             raise ValueError("Unknown default name of product")
+
         return product_name
 
     @classmethod
-    def get_default_product_name_for_uris(cls, uris: List[str]) -> Optional["ProductName"]:
+    def get_default_product_name_for_uris(cls, uris: List[str]) -> List["ProductName"]:
         """
         :param uris: list of URIs.
-        :return: name of a product whose measurers may have given URIs.
+        :return: names of a products whose measurers may have given URIs.
         """
 
         from connection_window.urichecker import URIChecker
 
-        product_name = None
+        product_names = []
         not_empty_uris = list(filter(lambda x: bool(x), uris))
         if len(not_empty_uris) == 1:
             uri = not_empty_uris[0]
             if URIChecker.check_asa(uri):
-                product_name = cls.EYEPOINT_H10
-            elif URIChecker.check_ivm10(uri):
-                product_name = cls.EYEPOINT_A2
+                product_names.append(cls.EYEPOINT_H10)
+            if URIChecker.check_ivm10(uri):
+                product_names.append(cls.EYEPOINT_A2)
         elif len(not_empty_uris) == 2 and len(list(filter(URIChecker.check_ivm10, not_empty_uris))) == 2:
-            product_name = cls.EYEPOINT_U22
+            product_names.append(cls.EYEPOINT_U22)
 
-        if product_name is None:
+        if not product_names:
             raise ValueError("Unknown default name of product")
-        return product_name
+
+        return product_names
 
     @classmethod
     def get_measurer_type_by_product_name(cls, product_name: "ProductName") -> Optional[MeasurerType]:
@@ -108,8 +113,11 @@ class ProductName(Enum):
 
         if product_name == cls.EYEPOINT_H10:
             return MeasurerType.ASA
-        if product_name in (cls.EYEPOINT_A2, cls.EYEPOINT_U21, cls.EYEPOINT_U22, cls.EYEPOINT_S2):
+
+        if product_name in (cls.EYEPOINT_A2, cls.EYEPOINT_S2, cls.EYEPOINT_U21, cls.EYEPOINT_U22, cls.EYEPOINT_U32,
+                            cls.MK22):
             return MeasurerType.IVM10
+
         return None
 
     @classmethod
@@ -125,7 +133,23 @@ class ProductName(Enum):
         for product in cls.get_product_names_for_platform():
             if product.name.lower() == product_name.lower():
                 return product
+
         return None
+
+    @classmethod
+    def get_product_name_to_show_in_connection_window(cls, product_name: "ProductName") -> str:
+        """
+        :param product_name: product name.
+        :return: the product name to display in the device connection dialog box.
+        """
+
+        return {cls.EYEPOINT_A2: "EyePoint a2",
+                cls.EYEPOINT_H10: "EyePoint H10",
+                cls.EYEPOINT_S2: qApp.translate("connection_window", "EyePoint S2 /\nСигнатурный анализатор С2"),
+                cls.EYEPOINT_U21: "EyePoint u21",
+                cls.EYEPOINT_U22: "EyePoint u22",
+                cls.EYEPOINT_U32: "EyePoint u32",
+                cls.MK22: qApp.translate("connection_window", "Сигнатурный анализатор мк22")}[product_name]
 
     @classmethod
     def get_product_names_for_platform(cls) -> List["ProductName"]:
@@ -134,7 +158,8 @@ class ProductName(Enum):
         :return: names of products.
         """
 
-        return [cls.EYEPOINT_A2, cls.EYEPOINT_U21, cls.EYEPOINT_U22, cls.EYEPOINT_S2, cls.EYEPOINT_H10]
+        return [cls.EYEPOINT_A2, cls.EYEPOINT_U21, cls.EYEPOINT_U22, cls.EYEPOINT_U32, cls.EYEPOINT_S2, cls.MK22,
+                cls.EYEPOINT_H10]
 
     @classmethod
     def get_single_channel_products(cls) -> List["ProductName"]:

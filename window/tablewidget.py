@@ -1,13 +1,51 @@
 from typing import Any, Callable, List, Optional
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget
-from window.pinindextableitem import PinIndexTableItem
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt5.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget, QTableWidgetItem
+from .pinindextableitem import PinIndexTableItem
+
+
+def change_item_state(item: QTableWidgetItem, read_only: bool) -> None:
+    """
+    :param item: table widget item as editable or not editable;
+    :param read_only: if True, then change the table widget item to an editable state, otherwise to a non-editable
+    state.
+    """
+
+    item.setFlags(item.flags() ^ Qt.ItemIsEditable if read_only else item.flags() | Qt.ItemIsEditable)
+
+
+def disconnect_item_signals(func: Callable[..., Any]):
+    """
+    The decorator disconnects and reconnects the itemChanged and itemSelectionChanged signals to the slots after
+    executing the decorated function.
+    :param func: function to be decorated.
+    """
+
+    def wrapper(self, *args, **kwargs) -> Any:
+        try:
+            self.itemChanged.disconnect()
+        except Exception:
+            pass
+
+        try:
+            self.itemSelectionChanged.disconnect()
+        except Exception:
+            pass
+
+        result = func(self, *args, **kwargs)
+        self.itemChanged.connect(self.handle_item_changed)
+        self.itemSelectionChanged.connect(self.send_current_row_index)
+        return result
+
+    return wrapper
 
 
 class TableWidget(QTableWidget):
     """
     Class for a table.
     """
+
+    current_row_signal: pyqtSignal = pyqtSignal(int, bool)
 
     def __init__(self, main_window, headers: List[str]) -> None:
         """
@@ -16,9 +54,24 @@ class TableWidget(QTableWidget):
         """
 
         super().__init__()
-        self._dont_go_to_selected_pin: bool = False
         self._main_window = main_window
         self._init_ui(headers)
+
+    @disconnect_item_signals
+    def _clear_table(self) -> None:
+        _ = [self.removeRow(row) for row in range(self.rowCount(), -1, -1)]
+        self.clearContents()
+
+    @staticmethod
+    def _create_table_item(read_only: bool = True) -> QTableWidgetItem:
+        """
+        :param read_only: if True, then item will be non-editable.
+        :return: new table item.
+        """
+
+        item = QTableWidgetItem()
+        change_item_state(item, read_only)
+        return item
 
     def _init_ui(self, headers: List[str]) -> None:
         """
@@ -35,16 +88,17 @@ class TableWidget(QTableWidget):
         vertical_header = self.verticalHeader()
         vertical_header.setVisible(False)
         vertical_header.setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.itemSelectionChanged.connect(self.set_pin_as_current)
+        self.itemSelectionChanged.connect(self.send_current_row_index)
 
+    @disconnect_item_signals
     def _remove_row(self, index: int) -> None:
         """
         :param index: index of the row to be deleted.
         """
 
-        self._dont_go_to_selected_pin = True
         self.removeRow(index)
 
+    @disconnect_item_signals
     def _update_indexes(self, start_row: Optional[int] = 0) -> None:
         """
         Method updates row indexes in the table.
@@ -59,39 +113,27 @@ class TableWidget(QTableWidget):
             if isinstance(item, PinIndexTableItem):
                 item.set_index(row)
 
-    def connect_item_selection_changed_signal(self, callback_function: Callable[..., Any] = None) -> None:
+    @pyqtSlot(QTableWidgetItem)
+    def handle_item_changed(self, item: QTableWidgetItem) -> None:
         """
-        :param callback_function: callback function that should be called when the selected item changes.
+        :param item: item whose data changed.
         """
 
-        if not callback_function:
-            callback_function = self.set_pin_as_current
-        self.itemSelectionChanged.connect(callback_function)
-
-    def disconnect_item_selection_changed_signal(self) -> None:
-        try:
-            self.itemSelectionChanged.disconnect()
-        except Exception:
-            pass
-
-    def select_row_for_current_pin(self) -> None:
+    @disconnect_item_signals
+    def select_row(self) -> None:
         """
-        Method selects row in table for current pin index.
+        Method selects row in the table for current pin index.
         """
 
         index = self._main_window.measurement_plan.get_current_index()
-        if index is not None and index != self.currentRow():
-            self._dont_go_to_selected_pin = True
+        if index is not None:
             self.selectRow(index)
 
     @pyqtSlot()
-    def set_pin_as_current(self) -> None:
+    def send_current_row_index(self) -> None:
         """
-        Slot sets pin activated on table as current.
+        Slot sends a signal with the number of the table row that is activated.
         """
 
-        if not self._dont_go_to_selected_pin:
-            pin_index = self.currentRow()
-            self._main_window.go_to_selected_pin(pin_index)
-        else:
-            self._dont_go_to_selected_pin = False
+        pin_index = self.currentRow()
+        self.current_row_signal.emit(pin_index, True)

@@ -6,9 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>940</width>
-    <height>452</height>
+    <width>1207</width>
+    <height>551</height>
    </rect>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::ClickFocus</enum>
   </property>
   <property name="windowTitle">
    <string>EPLab</string>
@@ -27,6 +30,9 @@
      <height>524287</height>
     </size>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -37,6 +43,9 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="score_dock_widget">
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
       <widget class="QLabel" name="score_label">
@@ -72,6 +81,9 @@
      <width>524287</width>
      <height>524287</height>
     </size>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
    </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
@@ -115,6 +127,9 @@
      <height>524287</height>
     </size>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -150,6 +165,9 @@
      <width>524287</width>
      <height>524287</height>
     </size>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
    </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
@@ -193,6 +211,9 @@
      <height>524287</height>
     </size>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -227,7 +248,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>940</width>
+     <width>1207</width>
      <height>21</height>
     </rect>
    </property>
@@ -236,6 +257,9 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
    </property>
    <widget class="QMenu" name="file_menu_action">
     <property name="title">
@@ -249,6 +273,8 @@
     <addaction name="save_as_file_action"/>
     <addaction name="separator"/>
     <addaction name="save_screen_action"/>
+    <addaction name="separator"/>
+    <addaction name="settings_mode_action"/>
    </widget>
    <widget class="QMenu" name="view_menu_action">
     <property name="title">
@@ -273,7 +299,6 @@
     <addaction name="separator"/>
     <addaction name="sound_enabled_action"/>
     <addaction name="separator"/>
-    <addaction name="settings_mode_action"/>
    </widget>
    <widget class="QMenu" name="help_menu_action">
     <property name="title">
@@ -315,6 +340,9 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Файл</string>
    </property>
@@ -341,6 +369,9 @@
      <height>0</height>
     </size>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="acceptDrops">
     <bool>false</bool>
    </property>
@@ -363,6 +394,9 @@
    <addaction name="next_point_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_write">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Запись плана тестирования</string>
    </property>
@@ -383,8 +417,14 @@
    <addaction name="save_point_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_auto_search">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Автоподбор параметров</string>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -395,6 +435,9 @@
    <addaction name="search_optimal_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_compare">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Сравнение</string>
    </property>
@@ -410,10 +453,11 @@
    <addaction name="save_screen_action"/>
    <addaction name="freeze_curve_a_action"/>
    <addaction name="freeze_curve_b_action"/>
-   <addaction name="add_cursor_action"/>
-   <addaction name="remove_cursor_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_mode">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Режим</string>
    </property>
@@ -440,6 +484,9 @@
    <addaction name="testing_mode_action"/>
   </widget>
   <widget class="QToolBar" name="toolbar_language">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Выбор языка</string>
    </property>
@@ -506,6 +553,12 @@
    </property>
    <property name="text">
     <string>Сохранить план тестирования как</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="save_screen_action">
@@ -618,6 +671,12 @@
    <property name="text">
     <string>О программе</string>
    </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="sound_enabled_action">
    <property name="checkable">
@@ -708,6 +767,12 @@
    <property name="iconText">
     <string>Зафиксировать</string>
    </property>
+   <property name="shortcut">
+    <string>Space</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="add_board_image_action">
    <property name="enabled">
@@ -734,39 +799,6 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
-   </property>
-  </action>
-  <action name="add_cursor_action">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>../media/add_label.png</normaloff>../media/add_label.png</iconset>
-   </property>
-   <property name="text">
-    <string>Добавить метку</string>
-   </property>
-   <property name="iconText">
-    <string>Добавить метку</string>
-   </property>
-   <property name="toolTip">
-    <string>Добавить метку</string>
-   </property>
-  </action>
-  <action name="remove_cursor_action">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>../media/minus_label.png</normaloff>../media/minus_label.png</iconset>
-   </property>
-   <property name="text">
-    <string>Удалить метку</string>
-   </property>
-   <property name="iconText">
-    <string>Удалить метку</string>
    </property>
   </action>
   <action name="hide_curve_a_action">
@@ -875,6 +907,12 @@
    </property>
    <property name="text">
     <string>Удалить точку</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
  </widget>

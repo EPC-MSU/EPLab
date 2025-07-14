@@ -9,9 +9,9 @@ from epcore.elements import IVCurve, MeasurementSettings
 from epcore.product import EyePointProduct
 from connection_window.productname import ProductName
 from settings.autosettings import AutoSettings
-from window.breaksignaturessaver import create_filename, iterate_settings, load_signature
-from window.common import WorkMode
-from window.scorewrapper import check_score_not_greater_tolerance, ScoreWrapper
+from .breaksignaturessaver import create_filename, iterate_settings, load_signature
+from .common import WorkMode
+from .scorewrapper import check_difference_not_greater_tolerance, ScoreWrapper
 
 
 logger = logging.getLogger("eplab")
@@ -29,13 +29,16 @@ class PlanAutoTransition(QObject):
 
         GO_TO_NEXT = auto()
         MEASURE = auto()
+        RAISE_PROBES = auto()
         SAVE = auto()
+        WAIT = auto()
 
-    BREAK_NUMBER: int = 10
+    BREAK_NUMBER: int = 1
     BREAK_TOLERANCE: float = 0.15
-    TIME_TO_SHOW: float = 0.5
-    TIMEOUT: int = 10
-    go_to_next_signal: pyqtSignal = pyqtSignal(bool)
+    FREQUENCY_TOLERANCE: float = 1e-6
+    TIME_TO_SHOW_S: float = 0.3
+    TIMEOUT_MS: int = 10
+    go_to_next_signal: pyqtSignal = pyqtSignal(bool, bool)
     save_pin_signal: pyqtSignal = pyqtSignal()
 
     def __init__(self, product: EyePointProduct, auto_settings: AutoSettings, score_wrapper: ScoreWrapper,
@@ -59,19 +62,15 @@ class PlanAutoTransition(QObject):
         self._break_signatures: Dict[str, IVCurve] = dict()
         self._calculate_score: Callable[[IVCurve, IVCurve, MeasurementSettings], float] = calculate_score
         self._dir: str = dir_path
-        self._need_to_save: bool = False
         self._product: EyePointProduct = product
         self._process: "PlanAutoTransition.Process" = self.Process.MEASURE
         self._required_frequency: Optional[str] = frequency
         self._required_sensitive: Optional[str] = sensitive
         self._score_wrapper: ScoreWrapper = score_wrapper
-        self._start_time: float = None
-        self._timer: QTimer = QTimer()
-        self._timer.setInterval(PlanAutoTransition.TIMEOUT)
-        self._timer.setSingleShot(True)
-        self._timer.timeout.connect(self.handle_timeout)
+        self._start_time: Optional[float] = None
 
-        self.load_break_signatures()
+        self._create_timer()
+        self._load_break_signatures()
 
     @property
     def auto_transition(self) -> bool:
@@ -79,7 +78,7 @@ class PlanAutoTransition(QObject):
         :return: True if auto-transition mode is saved in the settings.
         """
 
-        return self._auto_settings.get_auto_transition()
+        return self._auto_settings.auto_transition
 
     def _calculate_score_for_curves(self, settings: MeasurementSettings, curve_1: Optional[IVCurve] = None,
                                     curve_2: Optional[IVCurve] = None) -> Optional[float]:
@@ -103,8 +102,7 @@ class PlanAutoTransition(QObject):
         1 Hz (see #92265).
         """
 
-        abs_tol = 1e-6
-        return not math.isclose(settings.probe_signal_frequency, 1, abs_tol=abs_tol)
+        return not math.isclose(settings.probe_signal_frequency, 1, abs_tol=PlanAutoTransition.FREQUENCY_TOLERANCE)
 
     def _check_probes_raised(self, settings: MeasurementSettings, curve: IVCurve, break_signature: IVCurve) -> None:
         """
@@ -116,7 +114,7 @@ class PlanAutoTransition(QObject):
         """
 
         score = self._calculate_score_for_curves(settings, curve, break_signature)
-        if score is not None and check_score_not_greater_tolerance(score, self.BREAK_TOLERANCE):
+        if score is not None and check_difference_not_greater_tolerance(score, PlanAutoTransition.BREAK_TOLERANCE):
             self._break_number += 1
             logger.info("Waiting for a break: score = %f, number of sequentially measured breaks = %d", score,
                         self._break_number)
@@ -125,10 +123,17 @@ class PlanAutoTransition(QObject):
                         "sequentially measured breaks is reset to zero", score)
             self._break_number = 0
 
-        if self._break_number >= self.BREAK_NUMBER:
+        if self._break_number >= PlanAutoTransition.BREAK_NUMBER:
             logger.info("Probes raised")
-            self._process = self.Process.MEASURE
             self._break_number = 0
+            self._process = self.Process.WAIT
+            self._timer.start()
+
+    def _create_timer(self) -> None:
+        self._timer: QTimer = QTimer()
+        self._timer.setInterval(PlanAutoTransition.TIMEOUT_MS)
+        self._timer.setSingleShot(True)
+        self._timer.timeout.connect(self.handle_timeout)
 
     def _get_break_signature_for_settings(self, settings: MeasurementSettings) -> Optional[IVCurve]:
         """
@@ -144,6 +149,30 @@ class PlanAutoTransition(QObject):
         voltage = options[EyePointProduct.Parameter.voltage]
         filename = create_filename(frequency, sensitive, voltage)
         return self._break_signatures.get(filename, None)
+
+    def _load_break_signatures(self) -> None:
+        """
+        Method loads break signatures for all required measurement settings.
+        """
+
+        self._break_signatures = dict()
+        if os.path.exists(self._dir):
+            for frequency, sensitive, voltage in iterate_settings(self._product, self._required_frequency,
+                                                                  self._required_sensitive):
+                filename = create_filename(frequency, sensitive, voltage)
+                path = os.path.join(self._dir, filename)
+                self._break_signatures[filename] = load_signature(path)
+
+    def _save_measurements(self) -> None:
+        logger.info("Signal sent to save signature")
+        self._process = self.Process.RAISE_PROBES
+        self.save_pin_signal.emit()
+        self._start_time = time.monotonic()
+
+    def _send_signal_to_go_to_next_pin(self) -> None:
+        logger.info("Signal sent to move to the next pin")
+        self._process = self.Process.MEASURE
+        self.go_to_next_signal.emit(False, True)
 
     def check_auto_transition(self, work_mode: WorkMode, product_name: ProductName, settings: MeasurementSettings,
                               curve_current: Optional[IVCurve] = None, curve_reference: Optional[IVCurve] = None
@@ -165,54 +194,39 @@ class PlanAutoTransition(QObject):
         if break_signature is None:
             return
 
-        if self._process == self.Process.GO_TO_NEXT:
+        if self._process is self.Process.RAISE_PROBES:
             self._check_probes_raised(settings, curve_current, break_signature)
             return
 
-        self._need_to_save = False
-        if self._process != self.Process.MEASURE:
+        if self._process is not self.Process.MEASURE:
             return
 
         score = self._calculate_score_for_curves(settings, curve_current, break_signature)
-        if score is not None and check_score_not_greater_tolerance(score, self._score_wrapper.tolerance):
+        if score is not None and check_difference_not_greater_tolerance(score, self._score_wrapper.tolerance):
+            logger.warning("The signature matched the break: difference (%f) less then tolerance (%f)", score,
+                           self._score_wrapper.tolerance)
             return
 
         score = self._calculate_score_for_curves(settings, curve_current, curve_reference)
-        if score is not None and check_score_not_greater_tolerance(score, self._score_wrapper.tolerance):
-            self._need_to_save = True
+        if score is not None and check_difference_not_greater_tolerance(score, self._score_wrapper.tolerance):
+            logger.info("The signature matched the reference: difference (%f) less than tolerance (%f)", score,
+                        self._score_wrapper.tolerance)
+            self._process = self.Process.SAVE
 
     @pyqtSlot()
     def handle_timeout(self) -> None:
-        if self._process == self.Process.SAVE and time.monotonic() - self._start_time > self.TIME_TO_SHOW:
-            self.go_to_next_signal.emit(False)
-            self._process = self.Process.GO_TO_NEXT
-            self._start_time = time.monotonic()
-            self._break_number = 0
-            return
+        if self._process is self.Process.WAIT:
+            if time.monotonic() - self._start_time > PlanAutoTransition.TIME_TO_SHOW_S:
+                self._process = self.Process.GO_TO_NEXT
+                return
 
-        self._timer.start()
-
-    def load_break_signatures(self) -> None:
-        """
-        Method loads break signatures for all required measurement settings.
-        """
-
-        self._break_signatures = dict()
-        if os.path.exists(self._dir):
-            for frequency, sensitive, voltage in iterate_settings(self._product, self._required_frequency,
-                                                                  self._required_sensitive):
-                filename = create_filename(frequency, sensitive, voltage)
-                path = os.path.join(self._dir, filename)
-                self._break_signatures[filename] = load_signature(path)
-
-    def save_pin(self) -> None:
-        """
-        Method, if necessary, sends a signal to save measurements in a pin.
-        """
-
-        if self._need_to_save:
-            self._need_to_save = False
-            self.save_pin_signal.emit()
-            self._process = self.Process.SAVE
-            self._start_time = time.monotonic()
             self._timer.start()
+
+    def save_measurements_or_go_to_next_pin(self) -> None:
+        if self._process is self.Process.SAVE:
+            self._save_measurements()
+        elif self._process is self.Process.GO_TO_NEXT:
+            self._send_signal_to_go_to_next_pin()
+
+    def set_measure_process(self) -> None:
+        self._process = self.Process.MEASURE

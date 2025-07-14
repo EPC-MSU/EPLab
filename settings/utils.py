@@ -7,11 +7,15 @@ logger = logging.getLogger("eplab")
 
 
 class InvalidParameterValueError(ValueError):
-    pass
+    """
+    Exception for the case when a parameter has an invalid value.
+    """
 
 
 class MissingParameterError(RuntimeError):
-    pass
+    """
+    Exception for the case when there is no parameter in the settings.
+    """
 
 
 def float_to_str(value: float) -> str:
@@ -26,7 +30,7 @@ def float_to_str(value: float) -> str:
 
 
 def get_parameter(settings: QSettings, parameter: str, convert: Callable[[str], Any] = None, required: bool = False,
-                  default: Any = None):
+                  default: Any = None) -> Any:
     """
     :param settings: QSettings object from which to get the parameter value;
     :param parameter: parameter name;
@@ -76,6 +80,8 @@ def to_bool(value: Any) -> bool:
 
     if isinstance(value, bool):
         return value
+
     if isinstance(value, str):
         return value.lower() == "true"
+
     return bool(value)

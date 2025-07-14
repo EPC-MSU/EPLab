@@ -9,7 +9,7 @@ from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
 import connection_window as cw
 from settings.autosettings import AutoSettings
-from window import utils as ut
+from . import utils as ut
 
 
 logger = logging.getLogger("eplab")
@@ -21,7 +21,7 @@ class ConnectionChecker(QObject):
     Class checks whether IV-measurers and multiplexer can be connected to the given ports.
     """
 
-    TIMEOUT: int = 300
+    TIMEOUT_MS: int = 300
     connect_signal: pyqtSignal = pyqtSignal(ConnectionData)
 
     def __init__(self, auto_settings: AutoSettings) -> None:
@@ -31,14 +31,14 @@ class ConnectionChecker(QObject):
 
         super().__init__()
         self._auto_settings: AutoSettings = auto_settings
-        self._force_open: bool = None
-        self._measurer_1_uri: str = None
-        self._measurer_2_uri: str = None
-        self._mux_uri: str = None
-        self._product_name: cw.ProductName = None
+        self._force_open: Optional[bool] = None
+        self._measurer_1_uri: Optional[str] = None
+        self._measurer_2_uri: Optional[str] = None
+        self._mux_uri: Optional[str] = None
+        self._product_name: Optional[cw.ProductName] = None
         self._timer: QTimer = QTimer()
         self._timer.timeout.connect(self.check_connection)
-        self._timer.setInterval(ConnectionChecker.TIMEOUT)
+        self._timer.setInterval(ConnectionChecker.TIMEOUT_MS)
         self._timer.setSingleShot(True)
 
     def _connect_devices(self, measurer_1_uri: Optional[str], measurer_2_uri: Optional[str], mux_uri: Optional[str],
@@ -59,7 +59,7 @@ class ConnectionChecker(QObject):
         if error_report_required:
             print_errors(*bad_measurer_uris, *bad_mux_uris)
 
-        if not bad_measurer_uris:
+        if not bad_measurer_uris and not bad_mux_uris:
             if len(measurers) > 1:
                 # Reorder measurers according to their addresses in USB hubs tree
                 measurers = ut.sort_devices_by_usb_numbers(measurers)
@@ -81,14 +81,17 @@ class ConnectionChecker(QObject):
         """
 
         if not self._measurer_1_uri and not self._measurer_2_uri and not self._mux_uri:
+            logger.debug("Checking the connection: no devices were connected to the application")
             return True
 
         connection_data = self._connect_devices(self._measurer_1_uri, self._measurer_2_uri, self._mux_uri,
                                                 self._product_name)
         if connection_data.measurement_system:
+            logger.debug("Checking the connection: device connection restored")
             self.connect_signal.emit(connection_data)
             return True
 
+        logger.debug("Checking the connection: device connection not restored")
         return False
 
     def _create_measurers_by_force(self, *uris: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str]]:
@@ -117,7 +120,7 @@ class ConnectionChecker(QObject):
 
     def _get_connection_params(self) -> None:
         """
-        Method gets connection parameters to IV-measurers and multiplexer from auto settings.
+        Method gets URI of the IV-measurers and multiplexer from auto settings.
         """
 
         def get_uri(uri_str: Optional[str] = None) -> Optional[str]:
@@ -150,10 +153,18 @@ class ConnectionChecker(QObject):
         return self._connect_devices(measurer_1_uri, measurer_2_uri, mux_uri, product_name, True)
 
     def run_check(self) -> None:
+        """
+        Method starts checking the connection of IV-measurers and multiplexer.
+        """
+
         self._get_connection_params()
         self._timer.start()
 
     def stop_check(self) -> None:
+        """
+        Method stops checking the connection of IV-measurers and multiplexer.
+        """
+
         self._timer.stop()
 
 
@@ -165,19 +176,21 @@ def analyze_connection_params(uris: List[Optional[str]], product_name: Optional[
     :return: product name.
     """
 
-    not_empty_uris = cw.utils.get_unique_uris(list(filter(lambda x: bool(x), uris)))
+    not_empty_uris = cw.utils.get_unique_uris(list(filter(bool, uris)))
     try:
-        default_product_name = cw.ProductName.get_default_product_name_for_uris(not_empty_uris)
+        default_product_names = cw.ProductName.get_default_product_name_for_uris(not_empty_uris)
     except ValueError:
-        default_product_name = None
+        default_product_names = []
 
-    if default_product_name and product_name:
-        if cw.ProductName.check_replaceability(default_product_name, product_name):
-            correct_product_name = product_name
+    if default_product_names and product_name:
+        for default_product_name in default_product_names:
+            if cw.ProductName.check_replaceability(default_product_name, product_name):
+                correct_product_name = product_name
+                break
         else:
-            correct_product_name = default_product_name
-    elif default_product_name and not product_name:
-        correct_product_name = default_product_name
+            correct_product_name = default_product_names[0]
+    elif default_product_names and not product_name:
+        correct_product_name = default_product_names[0]
     else:
         correct_product_name = None
         not_empty_uris = []
@@ -185,7 +198,23 @@ def analyze_connection_params(uris: List[Optional[str]], product_name: Optional[
     while len(not_empty_uris) < 2:
         not_empty_uris.append(None)
 
+    not_empty_uris = change_virtual_to_virtualasa_for_h10(not_empty_uris, correct_product_name)
     return not_empty_uris, correct_product_name
+
+
+def change_virtual_to_virtualasa_for_h10(uris: List[Optional[str]], product_name: Optional[cw.ProductName]
+                                         ) -> List[Optional[str]]:
+    """
+    :param uris: list of URIs for connecting measurers;
+    :param product_name: product name for measurers.
+    :return: corrected list of URIs.
+    """
+
+    if product_name == cw.ProductName.EYEPOINT_H10:
+        for i, uri in enumerate(uris):
+            if uri and uri.lower() == "virtual":
+                uris[i] = "virtualasa"
+    return uris
 
 
 def close_devices(*devices: Union[IVMeasurerBase, AnalogMultiplexerBase]) -> None:
@@ -197,8 +226,8 @@ def close_devices(*devices: Union[IVMeasurerBase, AnalogMultiplexerBase]) -> Non
         if device is not None:
             try:
                 device.close_device()
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.error("Error when closing device (%s)", exc)
 
 
 def create_measurement_system(measurers: List[Optional[IVMeasurerBase]], mux: Optional[AnalogMultiplexerBase]
@@ -271,8 +300,8 @@ def create_measurers(*uris: str, force_open: Optional[bool] = False
             bad_firmwares.append(text)
             bad_firmwares_uris.append((i, uri))
             measurer = None
-        except Exception:
-            logger.error("An error occurred when connecting the IV-measurer to the URI '%s'", uri)
+        except Exception as exc:
+            logger.error("An error occurred when connecting the IV-measurer to the URI '%s': %s", uri, exc)
             bad_uris.append(uri)
             measurer = None
         measurers.append(measurer)
@@ -293,7 +322,8 @@ def create_multiplexer(uri: Optional[str] = None) -> Tuple[Optional[AnalogMultip
             mux = AnalogMultiplexer(uri)
             mux.close_device()
             return mux, []
-    except Exception:
+    except Exception as exc:
+        logger.error("Error when creating multiplexer (%s)", exc)
         return None, [uri]
 
     return None, []
