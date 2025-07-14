@@ -17,7 +17,7 @@ class TestLowSettingsPanel(unittest.TestCase):
                 "sensitivity": "Middle",
                 "voltage_per_div": 1.23}
         correct_result = {"current_per_div": "Ток: 2.32 мА / дел.",
-                          "frequency": "Частота: 78342.4 Гц",
+                          "frequency": "Частота: 78.34 кГц",
                           "max_voltage": "Ампл. проб. сигнала: 34.2 В",
                           "score": "Различие: 67%",
                           "sensitivity": "Чувствительность: Middle",

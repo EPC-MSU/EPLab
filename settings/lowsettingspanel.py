@@ -91,8 +91,9 @@ class LowSettingsPanel(QWidget):
         :param probe_frequency: probe signal frequency value.
         """
 
-        self._param_dict["frequency"].setText(qApp.translate("settings", "Частота: ") + str(round(probe_frequency, 1)) +
-                                              qApp.translate("settings", " Гц"))
+        frequency, unit = convert_value_by_order(probe_frequency)
+        self._param_dict["frequency"].setText(qApp.translate("settings", "Частота: ") + f"{frequency} {unit}" +
+                                              qApp.translate("settings", "Гц"))
 
     def _set_score(self, score: str) -> None:
         """
@@ -147,7 +148,10 @@ def convert_value_by_order(value: float) -> Tuple[float, str]:
     """
 
     value = abs(value)
-    if value >= 1:
+    if value >= 10**3:
+        value = round(value / 10**3, 2)
+        unit = qApp.translate("settings", "к")
+    elif 1 <= value < 10**3:
         value = round(value, 2)
         unit = ""
     elif 1e-3 <= value < 1:

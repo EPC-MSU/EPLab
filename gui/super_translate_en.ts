@@ -847,52 +847,57 @@ Signature analyzer S2</translation>
         <translation> V</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="94"/>
+        <location filename="../settings/lowsettingspanel.py" line="95"/>
         <source>Частота: </source>
         <translation>Frequency: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="95"/>
-        <source> Гц</source>
-        <translation> Hz</translation>
+        <location filename="../settings/lowsettingspanel.py" line="96"/>
+        <source>Гц</source>
+        <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="102"/>
+        <location filename="../settings/lowsettingspanel.py" line="103"/>
         <source>Различие: </source>
         <translation>Difference: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="109"/>
+        <location filename="../settings/lowsettingspanel.py" line="110"/>
         <source>Чувствительность: </source>
         <translation>Sensitivity: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="117"/>
+        <location filename="../settings/lowsettingspanel.py" line="118"/>
         <source>Напряжение: </source>
         <translation>Voltage: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="119"/>
+        <location filename="../settings/lowsettingspanel.py" line="120"/>
         <source>В / дел.</source>
         <translation>V / div.</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="155"/>
+        <location filename="../settings/lowsettingspanel.py" line="153"/>
+        <source>к</source>
+        <translation>k</translation>
+    </message>
+    <message>
+        <location filename="../settings/lowsettingspanel.py" line="159"/>
         <source>м</source>
         <translation>m</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="158"/>
+        <location filename="../settings/lowsettingspanel.py" line="162"/>
         <source>мк</source>
         <translation>µ</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="161"/>
+        <location filename="../settings/lowsettingspanel.py" line="165"/>
         <source>н</source>
         <translation>n</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="164"/>
+        <location filename="../settings/lowsettingspanel.py" line="168"/>
         <source>п</source>
         <translation>p</translation>
     </message>
