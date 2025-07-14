@@ -268,6 +268,11 @@ leading to a numbering shift</translation>
         <source>Удалить точку</source>
         <translation>Remove point</translation>
     </message>
+    <message>
+        <location filename="mainwindow.ui" line="928"/>
+        <source>Удалить все тестовые сигнатуры</source>
+        <translation>Remove all test signatures</translation>
+    </message>
 </context>
 <context>
     <name>t</name>

@@ -331,7 +331,9 @@ class EPLabWindow(QMainWindow):
                       not (self.measurement_plan and self.measurement_plan.multiplexer is not None))
         self.new_point_action.setEnabled(enable)
         self.remove_point_action.setEnabled(enable and self.measurement_plan.pins_number > 0)
-        self.save_point_action.setEnabled(mode != WorkMode.READ_PLAN)
+        self.save_point_action.setEnabled(mode is not WorkMode.READ_PLAN)
+        self.delete_all_test_signatures_action.setEnabled(mode is not WorkMode.READ_PLAN
+                                                          and bool(self.measurement_plan))
         self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
         self.create_report_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
         enable = bool(mode is not WorkMode.COMPARE and self.measurement_plan and
@@ -543,6 +545,10 @@ class EPLabWindow(QMainWindow):
             layout.addWidget(widget)
         logger.debug("Scroll areas have been created to select measurement parameters (frequency, voltage, current)")
 
+    @pyqtSlot()
+    def _delete_all_test_signatures(self) -> None:
+        print("___delete")
+
     def _delete_measurement_plan(self) -> None:
         self._last_saved_measurement_plan_data = None
         self._measurement_plan = None
@@ -748,6 +754,7 @@ class EPLabWindow(QMainWindow):
         self.new_point_action.triggered.connect(self.create_new_pin)
         self.remove_point_action.triggered.connect(self.remove_pin)
         self.save_point_action.triggered.connect(self.save_pin_and_go_to_next)
+        self.delete_all_test_signatures_action.triggered.connect(self._delete_all_test_signatures)
         self.add_board_image_action.triggered.connect(self.load_board_image)
         self.create_report_action.triggered.connect(self.create_report)
         self.about_action.triggered.connect(show_product_info)
