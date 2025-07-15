@@ -18,7 +18,7 @@ from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
 from epcore.elements import Board, Element, ImageNotFoundError, IVCurve, Measurement, MeasurementSettings, Pin
-from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
+from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.measurementmanager import IVCComparator, MeasurementPlan, MeasurementSystem, Searcher
 from epcore.product import EyePointProduct, MeasurementParameterOption
 from ivviewer import Viewer as IVViewer
@@ -502,7 +502,7 @@ class EPLabWindow(QMainWindow):
             if isinstance(measurer, (IVMeasurerVirtual, IVMeasurerVirtualASA)):
                 device_name = qApp.translate("t", "Эмулятор")
                 icon = QIcon(os.path.join(ut.DIR_MEDIA, f"emulator_{measurer.name}.png"))
-            elif isinstance(measurer, IVMeasurerIVM10):
+            elif isinstance(measurer, IVMeasurerIVM):
                 result = re.search(r"(?P<port>(COM\d+|ttyACM\d+))", measurer.url)
                 device_name = "EyePoint IVM" if not result else f"EyePoint IVM ({result.group('port')})"
                 icon = QIcon(os.path.join(ut.DIR_MEDIA, f"ivm_{measurer.name}.png"))
@@ -561,7 +561,7 @@ class EPLabWindow(QMainWindow):
 
     def _disable_optimal_parameter_searcher(self, mode: WorkMode = None) -> None:
         """
-        Method disables searcher of the optimal parameters. Searcher can work only for IVMeasurerIVM10.
+        Method disables searcher of the optimal parameters. Searcher can work only for IVMeasurerIVM.
         :param mode: work mode.
         """
 
@@ -872,7 +872,7 @@ class EPLabWindow(QMainWindow):
     def _read_options_from_json(self) -> Optional[Dict[str, Any]]:
         """
         :return: dictionary with options for parameters of the measurement system. If the measurers are standard type
-        IVMeasurerIVM10, then the option parameters are not returned.
+        IVMeasurerIVM, then the option parameters are not returned.
         """
 
         for measurer in self.get_measurers():

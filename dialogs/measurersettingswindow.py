@@ -10,7 +10,7 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QRegExp, Qt, QTimer
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import (QComboBox, QDialog, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton,
                              QRadioButton, QTextBrowser, QVBoxLayout, QWidget)
-from epcore.ivmeasurer.base import IVMeasurerBase
+from epcore.ivmeasurer import IVMeasurerBase
 from window import utils as ut
 from window.language import get_language, Language
 from window.scaler import update_scale_of_class

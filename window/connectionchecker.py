@@ -4,7 +4,7 @@ from collections import namedtuple
 from typing import List, Optional, Tuple, Union
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QCoreApplication as qApp, QTimer
 from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerBase, AnalogMultiplexerVirtual
-from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
+from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
 import connection_window as cw
@@ -265,7 +265,7 @@ def create_measurer(uri: str, force_open: Optional[bool] = False, virtual_was: O
     if uri is not None and ("com:" in uri):
         dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         config_file = os.path.join(dir_name, "cur.ini")
-        return IVMeasurerIVM10(uri, config=config_file, defer_open=True, force_open=force_open)
+        return IVMeasurerIVM(uri, config=config_file, defer_open=True, force_open=force_open)
 
     if uri is not None and "xmlrpc:" in uri:
         return IVMeasurerASA(uri, defer_open=True)

@@ -1,7 +1,7 @@
 from enum import auto, Enum
 from typing import List, Optional
 from PyQt5.QtCore import QCoreApplication as qApp
-from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
+from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM, IVMeasurerVirtual, IVMeasurerVirtualASA
 
 
 class MeasurerType(Enum):
@@ -59,8 +59,8 @@ class ProductName(Enum):
         def check_asa(measurer_: IVMeasurerBase) -> bool:
             return type(measurer_) in (IVMeasurerASA, IVMeasurerVirtualASA)
 
-        def check_ivm10(measurer_: IVMeasurerBase) -> bool:
-            return type(measurer_) in (IVMeasurerIVM10, IVMeasurerVirtual)
+        def check_ivm(measurer_: IVMeasurerBase) -> bool:
+            return type(measurer_) in (IVMeasurerIVM, IVMeasurerVirtual)
 
         product_name = None
         not_none_measurers = list(filter(lambda x: x is not None, measurers))
@@ -68,9 +68,9 @@ class ProductName(Enum):
             measurer = not_none_measurers[0]
             if check_asa(measurer):
                 product_name = cls.EYEPOINT_H10
-            elif check_ivm10(measurer):
+            elif check_ivm(measurer):
                 product_name = cls.EYEPOINT_A2
-        elif len(not_none_measurers) == 2 and len(list(filter(check_ivm10, not_none_measurers))) == 2:
+        elif len(not_none_measurers) == 2 and len(list(filter(check_ivm, not_none_measurers))) == 2:
             product_name = cls.EYEPOINT_U22
 
         if product_name is None:
