@@ -10,7 +10,7 @@ class PedalHandler(QObject):
     """
 
     KEYS: List[int] = [Qt.Key_Control, Qt.Key_Shift, Qt.Key_P]
-    pedal_signal: pyqtSignal = pyqtSignal(bool)
+    pedal_signal: pyqtSignal = pyqtSignal(str, bool)
 
     class Button:
         """
@@ -69,7 +69,7 @@ class PedalHandler(QObject):
 
         status = PedalHandler.Status.PRESSED if all_pressed else PedalHandler.Status.RELEASED
         if status != self._status:
-            self.pedal_signal.emit(all_pressed)
+            self.pedal_signal.emit("pedal", all_pressed)
             self._status = status
 
     def handle_key_event(self, event: QKeyEvent) -> None:

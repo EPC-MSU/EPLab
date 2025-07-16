@@ -44,6 +44,7 @@ from .pedalhandler import add_pedal_handler
 from .pinindexwidget import PinIndexWidget
 from .planautotransition import PlanAutoTransition
 from .plancompatibility import PlanCompatibility
+from .pollingbuttonstates import PollingButtonStates
 from .scaler import get_scale_factor, update_scale_of_action, update_scale_of_class
 from .scorewrapper import check_difference_not_greater_tolerance, ScoreWrapper
 from .soundplayer import SoundPlayer
@@ -129,6 +130,8 @@ class EPLabWindow(QMainWindow):
         self._connection_checker.connect_signal.connect(self.handle_connection_signal_from_checker)
         self._break_signature_saver: BreakSignaturesSaver = BreakSignaturesSaver(self.product, self._auto_settings)
         self._break_signature_saver.new_settings_signal.connect(self.set_measurement_settings_and_update_ui)
+        self._polling_button_states: PollingButtonStates = PollingButtonStates()
+        self._polling_button_states.button_pressed.connect(self.handle_pedal_signal)
         self._plan_auto_transition: PlanAutoTransition = PlanAutoTransition(self.product, self._auto_settings,
                                                                             self._score_wrapper,
                                                                             self._calculate_difference,
@@ -479,6 +482,7 @@ class EPLabWindow(QMainWindow):
 
         self._set_widgets_to_init_state()
         self._plan_auto_transition.set_measure_process()
+        self._polling_button_states.set_measurers(self._msystem.measurers)
         self.measurers_connected.emit(True)
         self._timer.start()
 
@@ -649,29 +653,32 @@ class EPLabWindow(QMainWindow):
         if action.isEnabled():
             self.go_to_left_or_right_pin(prev_pin)
 
-    def _handle_freezing_curves_with_pedal(self, pressed: bool) -> None:
+    def _handle_freezing_curves_with_pedal(self, source: str, pressed: bool) -> None:
         """
         Method freezes the measurers signatures using a pedal. The signatures are frozen when the pedal is pressed in
         comparison mode. And they defrost when the pedal is released.
+        :param source:
         :param pressed: if True, then the pedal is pressed, otherwise it is released.
         """
 
         if pressed:
-            self._curves_states.store_states()
+            self._curves_states.store_states(source)
             for action in (self.freeze_curve_a_action, self.freeze_curve_b_action):
                 if action.isEnabled() and not action.isChecked():
                     action.trigger()
                 action.setEnabled(False)
         else:
-            self._curves_states.restore_states()
+            self._curves_states.restore_states(source)
 
     @pyqtSlot()
     def _handle_periodic_task(self) -> None:
         if self._device_errors_handler.all_ok:
             result_of_periodic_task = False
             with self._device_errors_handler:
+                self._polling_button_states.poll_button_states()
                 result_of_periodic_task = self._read_curves_periodic_task()
 
+            self._polling_button_states.send_signals()
             self._plan_auto_transition.save_measurements_or_go_to_next_pin()
             if self._mux_and_plan_window.measurement_plan_runner.measurement_is_valid:
                 self._mux_and_plan_window.measurement_plan_runner.save_measurements()
@@ -1653,16 +1660,17 @@ class EPLabWindow(QMainWindow):
         if self.comparing_mode_action.isEnabled():
             self.testing_mode_action.setEnabled(bool(self._msystem and there_are_measured_pins))
 
-    @pyqtSlot(bool)
-    def handle_pedal_signal(self, pressed: bool) -> None:
+    @pyqtSlot(str, bool)
+    def handle_pedal_signal(self, source: str, pressed: bool) -> None:
         """
         Slot processes pedal presses. The pedal freezes/unfreezes the measures in comparison mode and causes a
         transition to the next pin in the measurement plan in other modes.
+        :param source:
         :param pressed: if True, then the pedal is pressed, otherwise it is released.
         """
 
         if self.work_mode == WorkMode.COMPARE:
-            self._handle_freezing_curves_with_pedal(pressed)
+            self._handle_freezing_curves_with_pedal(source, pressed)
         elif pressed and self.work_mode in (WorkMode.TEST, WorkMode.WRITE) and self.save_point_action.isEnabled():
             self.save_pin_and_go_to_next()
 
@@ -1846,6 +1854,7 @@ class EPLabWindow(QMainWindow):
             self._measurement_plan_path.path = epfilemanager.save_board_to_ufiv(filename, self._measurement_plan)
             self.dir_chosen_by_user = filename
             return True
+
         return False
 
     @pyqtSlot()
