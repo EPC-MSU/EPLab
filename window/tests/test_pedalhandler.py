@@ -8,8 +8,9 @@ from window.pedalhandler import PedalHandler
 
 class TestPedalHandler(unittest.TestCase):
 
-    def _handle_pedal(self, pressed: bool) -> None:
+    def _handle_pedal(self, source: str, pressed: bool) -> None:
         """
+        :param source: source name;
         :param pressed: if True, then the pedal is pressed.
         """
 

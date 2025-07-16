@@ -17,10 +17,10 @@ class TestCurveStates(unittest.TestCase):
 
     def test_restore_states(self) -> None:
         curve_states = CurveStates(*self._actions)
-        curve_states.store_states()
+        curve_states.store_states("pedal")
         for action in self._actions:
             action.setChecked(True)
-        curve_states.restore_states()
+        curve_states.restore_states("pedal")
 
         for index, action in enumerate(self._actions):
             self.assertEqual(action.isChecked(), bool(index % 2))
