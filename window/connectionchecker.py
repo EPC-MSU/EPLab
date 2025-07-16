@@ -1,11 +1,12 @@
 import logging
+import re
 import os
 from collections import namedtuple
 from typing import List, Optional, Tuple, Union
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QCoreApplication as qApp, QTimer
 from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerBase, AnalogMultiplexerVirtual
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM, IVMeasurerVirtual, IVMeasurerVirtualASA
-from epcore.ivmeasurer.safe_opener import BadFirmwareVersion
+from epcore.ivmeasurer.safe_opener import BadConfig, BadFirmwareVersion
 from epcore.measurementmanager import MeasurementSystem
 import connection_window as cw
 from settings.autosettings import AutoSettings
@@ -116,6 +117,7 @@ class ConnectionChecker(QObject):
                         measurers[i] = new_measurers[0]
                     else:
                         bad_uris.extend(new_bad_uris)
+
         return list(filter(lambda x: x is not None, measurers)), bad_uris
 
     def _get_connection_params(self) -> None:
@@ -292,18 +294,17 @@ def create_measurers(*uris: str, force_open: Optional[bool] = False
             measurer = create_measurer(uri, force_open, virtual_was)
             if isinstance(measurer, IVMeasurerVirtual):
                 virtual_was = True
+        except BadConfig as exc:
+            handle_bad_config(exc, i, uri, bad_firmwares, bad_firmwares_uris, bad_uris)
+            measurer = None
         except BadFirmwareVersion as exc:
-            logger.error("%s firmware version %s is not compatible with this version of EPLab", exc.args[0],
-                         exc.args[2])
-            text = qApp.translate("t", "{}: версия прошивки {} {} несовместима с данной версией EPLab."
-                                  ).format(uri, exc.args[0], exc.args[2])
-            bad_firmwares.append(text)
-            bad_firmwares_uris.append((i, uri))
+            handle_bad_firmware_version(exc, i, uri, bad_firmwares, bad_firmwares_uris)
             measurer = None
         except Exception as exc:
             logger.error("An error occurred when connecting the IV-measurer to the URI '%s': %s", uri, exc)
             bad_uris.append(uri)
             measurer = None
+
         measurers.append(measurer)
     return measurers, bad_uris, "<br>".join(bad_firmwares), bad_firmwares_uris
 
@@ -327,6 +328,45 @@ def create_multiplexer(uri: Optional[str] = None) -> Tuple[Optional[AnalogMultip
         return None, [uri]
 
     return None, []
+
+
+def handle_bad_config(exc: BadConfig, i: int, uri: str, bad_firmwares: List[str],
+                      bad_firmwares_uris: List[Tuple[int, str]], bad_uris: List[str]) -> None:
+    """
+    :param exc: exception;
+    :param i: URI index in the list of URIs to connect to;
+    :param uri: URI of the connecting device;
+    :param bad_firmwares: list with error texts of incompatible firmware;
+    :param bad_firmwares_uris: list of URIs with incompatible firmware;
+    :param bad_uris: list of bad URIs that should not be connected at all.
+    """
+
+    result = re.match(r"^Library version (?P<library>.+) not found in config$", exc.args[0])
+    if result:
+        text = qApp.translate("t", "{}: версия библиотеки IVM {} несовместима с данной версией EPLab.").format(
+            uri, result.group("library"))
+        bad_firmwares.append(text)
+        bad_firmwares_uris.append((i, uri))
+    else:
+        bad_uris.append(uri)
+
+
+def handle_bad_firmware_version(exc: BadFirmwareVersion, i: int, uri: str, bad_firmwares: List[str],
+                                bad_firmwares_uris: List[Tuple[int, str]]) -> None:
+    """
+    :param exc: exception;
+    :param i: URI index in the list of URIs to connect to;
+    :param uri: URI of the connecting device;
+    :param bad_firmwares: list with error texts of incompatible firmware;
+    :param bad_firmwares_uris: list of URIs with incompatible firmware.
+    """
+
+    logger.error("%s firmware version %s is not compatible with this version of EPLab", exc.args[0],
+                 exc.args[2])
+    text = qApp.translate("t", "{}: версия прошивки {} {} несовместима с данной версией EPLab."
+                          ).format(uri, exc.args[0], exc.args[2])
+    bad_firmwares.append(text)
+    bad_firmwares_uris.append((i, uri))
 
 
 def print_errors(*bad_uris: str) -> None:
