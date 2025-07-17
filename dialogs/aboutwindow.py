@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QDialog, QHBoxLayout, QLabel, QLayout, QPushButton, 
 from connection_window.utils import get_platform
 from version import Version
 from window import utils as ut
-from window.language import get_language, Language
+from window.language import get_language, get_link_in_set_language, Language
 from window.scaler import update_scale_of_class
 
 
@@ -24,7 +24,6 @@ class AboutWindow(QDialog):
 
     def __init__(self) -> None:
         super().__init__()
-        self._language: Language = get_language()
         self._init_ui()
 
     def _create_info_text(self) -> str:
@@ -86,21 +85,22 @@ class AboutWindow(QDialog):
         h_layout.addWidget(self.button_ok)
         return h_layout
 
-    def _get_logo_name(self) -> str:
+    @staticmethod
+    def _get_logo_name() -> str:
         """
         :return: file name with logo.
         """
 
-        return "logo.png" if self._language is Language.RU else "logo_en.png"
+        return "logo.png" if get_language() is Language.RU else "logo_en.png"
 
-    def _get_page_url(self) -> str:
+    @staticmethod
+    def _get_page_url() -> str:
         """
         :return: hyperlink to website.
         """
 
         page_url = "https://eyepoint.physlab.ru/"
-        page_url += "ru/" if self._language is Language.RU else "en/"
-        return page_url
+        return get_link_in_set_language(page_url)
 
     def _init_ui(self) -> None:
         """

@@ -307,11 +307,6 @@ leading to a numbering shift</translation>
         <translation>Force open</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="346"/>
-        <source>{}: версия библиотеки IVM {} несовместима с данной версией EPLab.</source>
-        <translation>{}: IVM library version {} is not compatible with this version of EPLab.</translation>
-    </message>
-    <message>
         <location filename="../window/connectionchecker.py" line="366"/>
         <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
         <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>

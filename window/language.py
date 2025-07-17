@@ -75,3 +75,13 @@ def get_language() -> Language:
 
     language = qApp.instance().property("language")
     return Language.EN if language is None else language
+
+
+def get_link_in_set_language(base_link: str) -> str:
+    """
+    :param base_link: base link to page.
+    :return: link to the page in the set language.
+    """
+
+    link = base_link + ("ru/" if get_language() is Language.RU else "en/")
+    return link
