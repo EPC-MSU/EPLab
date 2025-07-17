@@ -401,7 +401,7 @@ def create_text_with_firmwares_list_with_template(firmwares: List[Tuple[str, Bad
         controller_name, _, firmware_version, serial_number, _ = exc.args
         text = template.format(uri=uri, name=controller_name, firmware=firmware_version, serial=serial_number)
 
-        if len(firmwares) == 1:
+        if len(firmwares) > 1:
             text = f"<li>{text}</li>"
 
         texts.append(text)
@@ -409,7 +409,7 @@ def create_text_with_firmwares_list_with_template(firmwares: List[Tuple[str, Bad
     if len(texts) == 1:
         return f"{texts[0]}<br>"
 
-    return f"<ul>{texts}</ul>"
+    return f"<ul>{''.join(texts)}</ul>"
 
 
 def create_text_with_future_firmwares_list(firmwares: List[Tuple[str, BadFirmwareVersion]]) -> str:
