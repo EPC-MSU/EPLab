@@ -302,17 +302,38 @@ leading to a numbering shift</translation>
         <translation>Comment</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="111"/>
-        <source>Все равно открыть</source>
-        <translation>Force open</translation>
+        <location filename="../window/connectionchecker.py" line="361"/>
+        <source>Скорее всего, вам нужно обновить программу EPLab. Свежую версию можно скачать на сайте {link}.&lt;br&gt;
+Если вы не хотите обновлять EPLab, вы можете установить на устройство более старую прошивку. Для работы с данной версией EPLab подходят прошивки ivm 2.4.x, которые можно скачать на сайте {link}.</source>
+        <translation>Most likely, you need to update the EPLab program. The latest version can be downloaded from the website {link}.&lt;br&gt;
+If you do not want to update EPLab, you can install an older firmware on the device. The ivm 2.4.x firmware, which can be downloaded from the website {link}, is suitable for working with this version of EPLab.</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="366"/>
-        <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
-        <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>
+        <location filename="../window/connectionchecker.py" line="382"/>
+        <source>Для работы с данной версией EPLab требуется прошивка ivm 2.4.x. Актуальную версию прошивки можно скачать на сайте {link}.&lt;br&gt;
+Если вы не хотите обновлять прошивку, воспользуйтесь более старой версией EPLab (1.4.7), которую можно скачать с сайта {link}.</source>
+        <translation>To work with this version of EPLab, you need firmware ivm 2.4.x. The current version of the firmware can be downloaded from the website {link}.&lt;br&gt;
+If you do not want to update the firmware, use an older version of EPLab (1.4.7), which can be downloaded from the website {link}.</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="381"/>
+        <location filename="../window/connectionchecker.py" line="421"/>
+        <source>На устройстве &apos;{uri}&apos; используется прошивка {firmware} измерителя {name} SN {serial}, которая является слишком новой для этой версии EPLab.</source>
+        <translation>The device &apos;{uri}&apos; uses firmware {firmware} of the measurer {name} SN {serial}, which is too new for this version of EPLab.</translation>
+    </message>
+    <message>
+        <location filename="../window/connectionchecker.py" line="432"/>
+        <source>На устройстве &apos;{uri}&apos; используется устаревшая прошивка {firmware} измерителя {name} SN {serial}, которая несовместима с данной версией EPLab.</source>
+        <translation>The device &apos;{uri}&apos; uses outdated firmware {firmware} of the measurer {name} SN {serial}, which is incompatible with this version of EPLab.</translation>
+    </message>
+    <message>
+        <location filename="../window/connectionchecker.py" line="443"/>
+        <source>Для обновления прошивки нужно воспользоваться программой epcboot_gui или epcboot. Их также можно скачать с сайта {link} или найти на флешке, которая передавалась в комплекте с устройством.&lt;br&gt;
+Если используется двухканальное устройство, то в нем находится два измерителя. Обновить прошивку нужно на обоих измерителях.</source>
+        <translation>To update the firmware, you need to use the epcboot_gui or epcboot program. They can also be downloaded from the site {link} or found on the flash drive that was supplied with the device.&lt;br&gt;
+If a dual-channel device is used, it contains two measurers. The firmware needs to be updated on both measurers.</translation>
+    </message>
+    <message>
+        <location filename="../window/connectionchecker.py" line="459"/>
         <source>Не удалось подключиться к {}.
 &lt;ul&gt;
 &lt;li&gt;Проверьте, что устройство подключено к компьютеру и не удерживается другой программой.&lt;/li&gt;
@@ -325,7 +346,7 @@ leading to a numbering shift</translation>
 &lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="387"/>
+        <location filename="../window/connectionchecker.py" line="465"/>
         <source>Не удалось подключиться к {}.
 &lt;ul&gt;
 &lt;li&gt;Проверьте, что устройства подключены к компьютеру и не удерживаются другой программой.&lt;/li&gt;
@@ -338,7 +359,7 @@ leading to a numbering shift</translation>
 &lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="392"/>
+        <location filename="../window/connectionchecker.py" line="470"/>
         <source>Ошибка подключения</source>
         <translation>Connection error</translation>
     </message>

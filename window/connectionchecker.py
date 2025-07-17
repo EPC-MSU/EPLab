@@ -56,13 +56,13 @@ class ConnectionChecker(QObject):
         :return: an object with a created measurement system and product name.
         """
 
-        measurers, bad_measurer_uris = self._create_measurers_by_force(measurer_1_uri, measurer_2_uri)
+        measurers, bad_measurer_uris, bad_firmwares = self._create_measurers_by_force(measurer_1_uri, measurer_2_uri)
         mux, bad_mux_uris = create_multiplexer(mux_uri)
 
         if error_report_required:
             print_errors(*bad_measurer_uris, *bad_mux_uris)
 
-        if not bad_measurer_uris and not bad_mux_uris:
+        if not bad_measurer_uris and not bad_mux_uris and not bad_firmwares:
             if len(measurers) > 1:
                 # Reorder measurers according to their addresses in USB hubs tree
                 measurers = ut.sort_devices_by_usb_numbers(measurers)
@@ -97,7 +97,7 @@ class ConnectionChecker(QObject):
         logger.debug("Checking the connection: device connection not restored")
         return False
 
-    def _create_measurers_by_force(self, *uris: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str]]:
+    def _create_measurers_by_force(self, *uris: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str], bool]:
         """
         Method creates IV-measurers for the given list of URIs. If during creation it turns out that the IV-measurer
         has the wrong firmware, then you can create the IV-measurer anyway.
@@ -109,25 +109,12 @@ class ConnectionChecker(QObject):
         measurers, bad_uris, bad_firmwares_uris = create_measurers(*uris)
         if bad_firmwares_uris:
             if self._force_open is None:
+                # In task #120535 it was decided to prohibit opening controllers with incompatible firmware
                 for error_message in analyze_bad_firmwares(bad_firmwares_uris):
                     ut.show_message(qApp.translate("t", "Ошибка"), error_message)
-                bad_uris = measurers
+                self._force_open = False
 
-                """
-                # In task #120535 it was decided to prohibit opening controllers with incompatible firmware
-                self._force_open = ut.show_message_with_option(qApp.translate("t", "Ошибка"), bad_firmwares,
-                                                               qApp.translate("t", "Все равно открыть"))[1]
-                """
-
-            if self._force_open:
-                for i, uri in bad_firmwares_uris:
-                    new_measurers, new_bad_uris, _ = create_measurers(uri, force_open=True)
-                    if new_measurers:
-                        measurers[i] = new_measurers[0]
-                    else:
-                        bad_uris.extend(new_bad_uris)
-
-        return list(filter(lambda x: x is not None, measurers)), bad_uris
+        return list(filter(lambda x: x is not None, measurers)), bad_uris, bool(bad_firmwares_uris)
 
     def _get_connection_params(self) -> None:
         """
@@ -362,8 +349,8 @@ def create_multiplexer(uri: Optional[str] = None) -> Tuple[Optional[AnalogMultip
 
 def create_text_for_future_firmwares(firmwares: List[Tuple[str, BadFirmwareVersion]]) -> str:
     """
-    :param firmwares:
-    :return:
+    :param firmwares: list with URI and BadFirmwareVersion errors when opening devices.
+    :return: error message for firmware versions greater than 2.4.
     """
 
     future_firmwares_text = create_text_with_future_firmwares_list(firmwares)
@@ -375,20 +362,16 @@ def create_text_for_future_firmwares(firmwares: List[Tuple[str, BadFirmwareVersi
                                "{link}.<br>\n"
                                "Если вы не хотите обновлять EPLab, вы можете установить на устройство более старую "
                                "прошивку. Для работы с данной версией EPLab подходят прошивки ivm 2.4.x, которые можно "
-                               "скачать на сайте {link}.<br>\n"
-                               "Для обновления прошивки нужно воспользоваться программой epcboot_gui или epcboot. Их "
-                               "также можно скачать с сайта {link} или найти на флешке, которая передавалась в "
-                               "комплекте с устройством.<br>\n"
-                               "Если используется двухканальное устройство, то в нем находится два измерителя. Обновить"
-                               " прошивку нужно на обоих измерителях.").format(link=hyper_link)
+                               "скачать на сайте {link}.").format(link=hyper_link)
+    firmware_update_text = get_firmware_update_info(hyper_link)
 
-    return f"{future_firmwares_text}<br>{text}"
+    return f"{future_firmwares_text}{text}<br>{firmware_update_text}"
 
 
 def create_text_for_outdated_firmwares(firmwares: List[Tuple[str, BadFirmwareVersion]]) -> str:
     """
-    :param firmwares:
-    :return:
+    :param firmwares: list with URI and BadFirmwareVersion errors when opening devices.
+    :return: error message for firmware versions less than 2.4.
     """
 
     outdated_firmwares_text = create_text_with_outdated_firmwares_list(firmwares)
@@ -398,19 +381,21 @@ def create_text_for_outdated_firmwares(firmwares: List[Tuple[str, BadFirmwareVer
     hyper_link = f'<a href="{link}">{page_address}</a>'
     text = qApp.translate("t", "Для работы с данной версией EPLab требуется прошивка ivm 2.4.x. Актуальную версию "
                                "прошивки можно скачать на сайте {link}.<br>\n"
-                               "Для обновления прошивки нужно воспользоваться программой epcboot_gui или epcboot. "
-                               "Их также можно скачать с сайта {link} или найти на флешке,"
-                               " которая передавалась в комплекте с устройством.<br>\n"
-                               "Если используется двухканальное устройство, то в нем находится два измерителя. "
-                               "Обновить прошивку нужно на обоих измерителях.<br>\n"
                                "Если вы не хотите обновлять прошивку, воспользуйтесь более старой версией EPLab "
                                "(1.4.7), которую можно скачать с сайта {link}.").format(link=hyper_link)
+    firmware_update_text = get_firmware_update_info(hyper_link)
 
-    return f"{outdated_firmwares_text}<br>{text}"
+    return f"{outdated_firmwares_text}{text}<br>{firmware_update_text}"
 
 
 def create_text_with_firmwares_list_with_template(firmwares: List[Tuple[str, BadFirmwareVersion]], template: str
                                                   ) -> str:
+    """
+    :param firmwares: list with URI and BadFirmwareVersion errors when opening devices;
+    :param template: template to create text with information about bad firmware.
+    :return: text with a list of bad firmwares.
+    """
+
     texts = []
     for uri, exc in firmwares:
         controller_name, _, firmware_version, serial_number, _ = exc.args
@@ -429,8 +414,8 @@ def create_text_with_firmwares_list_with_template(firmwares: List[Tuple[str, Bad
 
 def create_text_with_future_firmwares_list(firmwares: List[Tuple[str, BadFirmwareVersion]]) -> str:
     """
-    :param firmwares:
-    :return:
+    :param firmwares: list with URI and BadFirmwareVersion errors when opening devices.
+    :return: text with a list of bad firmwares that are older than 2.4.
     """
 
     template = qApp.translate("t", "На устройстве '{uri}' используется прошивка {firmware} измерителя {name}"
@@ -440,13 +425,26 @@ def create_text_with_future_firmwares_list(firmwares: List[Tuple[str, BadFirmwar
 
 def create_text_with_outdated_firmwares_list(firmwares: List[Tuple[str, BadFirmwareVersion]]) -> str:
     """
-    :param firmwares:
-    :return:
+    :param firmwares: list with URI and BadFirmwareVersion errors when opening devices.
+    :return: text with a list of bad firmwares that are less than 2.4.
     """
 
     template = qApp.translate("t", "На устройстве '{uri}' используется устаревшая прошивка {firmware} измерителя {name}"
                                    " SN {serial}, которая несовместима с данной версией EPLab.")
     return create_text_with_firmwares_list_with_template(firmwares, template)
+
+
+def get_firmware_update_info(link: str) -> str:
+    """
+    :param link: link to page.
+    :return: text with information on how to update the firmware.
+    """
+
+    return qApp.translate("t", "Для обновления прошивки нужно воспользоваться программой epcboot_gui или epcboot. Их "
+                               "также можно скачать с сайта {link} или найти на флешке, которая передавалась в "
+                               "комплекте с устройством.<br>\n"
+                               "Если используется двухканальное устройство, то в нем находится два измерителя. "
+                               "Обновить прошивку нужно на обоих измерителях.").format(link=link)
 
 
 def print_errors(*bad_uris: str) -> None:
