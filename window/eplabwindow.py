@@ -1201,8 +1201,13 @@ class EPLabWindow(QMainWindow):
             else:
                 for plot in (self.reference_curve_plot, self.current_curve_plot, self.test_curve_plot):
                     plot.set_curve(None)
+
                 pin_index = self.pin_index_widget.text()
                 self._clear_widgets()
+                self._work_mode = WorkMode.READ_PLAN
+                self._create_scroll_areas_for_parameters({EyePointProduct.Parameter.frequency: [],
+                                                          EyePointProduct.Parameter.sensitive: [],
+                                                          EyePointProduct.Parameter.voltage: []})
                 self.pin_index_widget.setText(pin_index)
 
     def _update_signatures_and_settings_in_test_and_write_mode(self, ref_curve: Optional[Measurement],
