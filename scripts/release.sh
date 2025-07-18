@@ -28,12 +28,11 @@ python3 -m venv venv
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmltok.so.3.51:." \
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/EyePoint_settings.json:epcore/ivmeasurer" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/EyePoint_virtual_device_settings.json:epcore/ivmeasurer" \
---add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ivm02/ivm-debian/libivm.so:epcore/ivmeasurer/ivm02/ivm-debian" \
---add-data "./venv/lib/python3.6/site-packages/epcore/ivmeasurer/ivm10/ivm-debian/libivm.so:epcore/ivmeasurer/ivm10/ivm-debian" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/measurementmanager/ivcmp-debian/libivcmp.so:." \
 --add-data "./venv/lib/python3.6/site-packages/epcore/product/doc/eplab_schema.json:epcore/product/doc" \
 --add-data "./venv/lib/python3.6/site-packages/epcore/product/eplab_default_options.json:epcore/product" \
 --add-data "./venv/lib/python3.6/site-packages/epsound/void.wav:epsound" \
+--add-data "./venv/lib/python3.6/site-packages/ivm/ivm-debian/libivm.so:ivm/ivm-debian" \
 --add-data "./venv/lib/python3.6/site-packages/ivviewer/media/*:ivviewer/media" \
 --add-data "./venv/lib/python3.6/site-packages/report_generator/locales/en/LC_MESSAGES/*:report_generator/locales/en/LC_MESSAGES" \
 --add-data "./venv/lib/python3.6/site-packages/report_templates/*:report_templates" \
