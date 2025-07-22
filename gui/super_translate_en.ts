@@ -364,77 +364,82 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
         <translation>Connection error</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="277"/>
+        <location filename="../window/eplabwindow.py" line="309"/>
         <source>Зафиксировать</source>
         <translation>Fixate</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="278"/>
+        <location filename="../window/eplabwindow.py" line="310"/>
         <source>Зафиксировать тест</source>
         <translation>Fixate test</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="279"/>
+        <location filename="../window/eplabwindow.py" line="311"/>
         <source>Зафиксировать эталон</source>
         <translation>Fixate reference</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="352"/>
+        <location filename="../window/eplabwindow.py" line="387"/>
         <source>Информация</source>
         <translation>Information</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="353"/>
+        <location filename="../window/eplabwindow.py" line="388"/>
         <source>Включен автопереход в режиме тестирования по плану. Но в приложении нет некоторых сигнатур разрыва, поэтому автопереход может работать некорректно.</source>
         <translation>Auto-transition is enabled in test mode according to plan. But the application does not have some break signatures, so auto-transition may not work correctly.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="454"/>
+        <location filename="../window/eplabwindow.py" line="507"/>
         <source>Эмулятор</source>
         <translation>Emulator</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="471"/>
+        <location filename="../window/eplabwindow.py" line="524"/>
         <source>Неизвестный измеритель</source>
         <translation>Unknown measurer</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="521"/>
+        <location filename="../window/eplabwindow.py" line="556"/>
+        <source>Вы уверены, что хотите удалить тестовые сигнатуры?</source>
+        <translation>Are you sure you want to remove test signatures?</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="597"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="712"/>
+        <location filename="../window/eplabwindow.py" line="733"/>
         <source>Добавить метку</source>
         <translation>Add marker</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="713"/>
+        <location filename="../window/eplabwindow.py" line="734"/>
         <source>Экспортировать сигнатуры в файл</source>
         <translation>Export signatures to file</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="714"/>
+        <location filename="../window/eplabwindow.py" line="735"/>
         <source>Удалить все метки</source>
         <translation>Delete all markers</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="715"/>
+        <location filename="../window/eplabwindow.py" line="736"/>
         <source>Удалить метку</source>
         <translation>Delete marker</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="817"/>
+        <location filename="../window/eplabwindow.py" line="842"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="818"/>
+        <location filename="../window/eplabwindow.py" line="843"/>
         <source>Формат файла не подходит. Указан неверный путь до изображения платы.</source>
         <translation>The file format is not suitable. The path to the board image is incorrect.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="821"/>
+        <location filename="../window/eplabwindow.py" line="846"/>
         <source>Формат файла не подходит.</source>
         <translation>The file format is not suitable.</translation>
     </message>

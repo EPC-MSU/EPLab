@@ -124,6 +124,18 @@ class MeasuredPinsChecker(QObject):
             empty = False
         return empty
 
+    def check_for_test_signatures_on_measurement_plan(self) -> bool:
+        """
+        :return: True if there are pins with test signatures on the dimension plan.
+        """
+
+        if self.measurement_plan:
+            for _, pin in self.measurement_plan.all_pins_iterator():
+                if pin.get_main_measurement():
+                    return True
+
+        return False
+
     def handle_measurement_plan_change(self, pin_index: int) -> None:
         """
         :param pin_index: pin index that has changed.
