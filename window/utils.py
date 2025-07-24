@@ -188,7 +188,7 @@ def restore_ld_library_path(func):
             os.environ["LD_LIBRARY_PATH"] = backup_ld_library_path
         else:
             os.environ.pop("LD_LIBRARY_PATH", None)
-        logger.info("LD_LIBRARY_PATH restored: %s", os.environ.get("LD_LIBRARY_PATH_ORIG", None))
+        logger.info("LD_LIBRARY_PATH restored: %s", os.environ.get("LD_LIBRARY_PATH", None))
 
         return result
 
