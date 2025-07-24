@@ -169,8 +169,8 @@ class ConnectionChecker(QObject):
 def analyze_bad_firmwares(bad_firmwares_uris: List[Tuple[int, str, BadFirmwareVersion]]
                           ) -> Generator[str, None, None]:
     """
-    :param bad_firmwares_uris:
-    :return:
+    :param bad_firmwares_uris: list of IV-measurer URIs with incorrect firmware.
+    :return: error messages for firmware versions less or greater than 2.4.
     """
 
     outdates_firmwares = []
