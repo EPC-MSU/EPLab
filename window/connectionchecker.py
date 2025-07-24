@@ -378,7 +378,7 @@ def create_text_for_outdated_firmwares(firmwares: List[Tuple[str, BadFirmwareVer
 
     page_address = "https://eyepoint.physlab.ru/"
     link = get_link_in_set_language(page_address)
-    hyper_link = f'<a href="{link}">{page_address}</a>'
+    hyper_link = f'<a href="{link}">{link}</a>'
     text = qApp.translate("t", "Для работы с данной версией EPLab требуется прошивка ivm 2.4.x. Актуальную версию "
                                "прошивки можно скачать на сайте {link}.<br>\n"
                                "Если вы не хотите обновлять прошивку, воспользуйтесь более старой версией EPLab "
