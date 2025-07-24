@@ -149,7 +149,8 @@ class AboutWindow(QDialog):
         clipboard.setText(self._remove_tags(self.label_info.text()))
 
 
-def show_product_info() -> None:
+@ut.restore_ld_library_path
+def show_product_info(*args) -> None:
     """
     Function shows window with information about application.
     """

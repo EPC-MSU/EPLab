@@ -168,6 +168,34 @@ def read_json(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
         return json.load(file)
 
 
+def restore_ld_library_path(func):
+
+    def wrapper(*args, **kwargs):
+        backup_ld_library_path = os.environ.get("LD_LIBRARY_PATH", None)
+        logger.info("LD_LIBRARY_PATH before restoration: %s", os.environ.get("LD_LIBRARY_PATH", None))
+
+        if os.environ.get("LD_LIBRARY_PATH_ORIG", None) is not None:
+            os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH_ORIG"]
+            logger.info("LD_LIBRARY_PATH is set to a value before the application is launched: %s",
+                        os.environ["LD_LIBRARY_PATH"])
+        else:
+            os.environ.pop("LD_LIBRARY_PATH", None)
+            logger.info("LD_LIBRARY_PATH removed")
+
+        result = func(*args, **kwargs)
+
+        if backup_ld_library_path is not None:
+            os.environ["LD_LIBRARY_PATH"] = backup_ld_library_path
+        else:
+            os.environ.pop("LD_LIBRARY_PATH", None)
+        logger.info("LD_LIBRARY_PATH restored: %s", os.environ.get("LD_LIBRARY_PATH", None))
+
+        return result
+
+    return wrapper
+
+
+@restore_ld_library_path
 def show_message(header: str, message: str, additional_info: str = None, detailed_text: str = None,
                  icon: QMessageBox.Icon = QMessageBox.Warning, no_button: bool = False, cancel_button: bool = False,
                  yes_button: bool = False) -> int:
