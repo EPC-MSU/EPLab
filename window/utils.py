@@ -9,7 +9,7 @@ import re
 import sys
 from operator import itemgetter
 from platform import system
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 import serial.tools.list_ports
 from PyQt5.QtCore import QCoreApplication as qApp, QDir, QStandardPaths, Qt
 from PyQt5.QtGui import QIcon
@@ -168,9 +168,13 @@ def read_json(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
         return json.load(file)
 
 
-def restore_ld_library_path(func):
+def restore_ld_library_path(func: Callable[..., Any]):
+    """
+    To run an external application (such as Firefox) from a frozen application, you need to restore LD_LIBRARY_PATH.
+    :param func: a decorated function in which an external application can be called.
+    """
 
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs) -> Any:
         backup_ld_library_path = os.environ.get("LD_LIBRARY_PATH", None)
         logger.info("LD_LIBRARY_PATH before restoration: %s", os.environ.get("LD_LIBRARY_PATH", None))
 
