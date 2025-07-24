@@ -53,13 +53,13 @@ class ConnectionChecker(QObject):
         :return: an object with a created measurement system and product name.
         """
 
-        measurers, bad_measurer_uris = self._create_measurers_by_force(measurer_1_uri, measurer_2_uri)
+        measurers, bad_measurer_uris, bad_firmwares = self._create_measurers_by_force(measurer_1_uri, measurer_2_uri)
         mux, bad_mux_uris = create_multiplexer(mux_uri)
 
         if error_report_required:
             print_errors(*bad_measurer_uris, *bad_mux_uris)
 
-        if not bad_measurer_uris and not bad_mux_uris:
+        if not bad_measurer_uris and not bad_mux_uris and not bad_firmwares:
             if len(measurers) > 1:
                 # Reorder measurers according to their addresses in USB hubs tree
                 measurers = ut.sort_devices_by_usb_numbers(measurers)
@@ -94,7 +94,7 @@ class ConnectionChecker(QObject):
         logger.debug("Checking the connection: device connection not restored")
         return False
 
-    def _create_measurers_by_force(self, *uris: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str]]:
+    def _create_measurers_by_force(self, *uris: str) -> Tuple[Optional[List[IVMeasurerBase]], List[str], bool]:
         """
         Method creates IV-measurers for the given list of URIs. If during creation it turns out that the IV-measurer
         has the wrong firmware, then you can create the IV-measurer anyway.
@@ -103,20 +103,23 @@ class ConnectionChecker(QObject):
         not be created.
         """
 
-        measurers, bad_uris, bad_firmwares, bad_firmwares_uris = create_measurers(*uris)
-        if bad_firmwares:
+        measurers, bad_uris, bad_firmwares_uris = create_measurers(*uris)
+        if bad_firmwares_uris:
             if self._force_open is None:
-                self._force_open = ut.show_message_with_option(qApp.translate("t", "Ошибка"), bad_firmwares,
+                error_msg = create_text_for_incompatible_firmwares(bad_firmwares_uris)
+                self._force_open = ut.show_message_with_option(qApp.translate("t", "Ошибка"), error_msg,
                                                                qApp.translate("t", "Все равно открыть"))[1]
 
             if self._force_open:
-                for i, uri in bad_firmwares_uris:
-                    new_measurers, new_bad_uris, _, _ = create_measurers(uri, force_open=True)
+                for i, uri, _ in list(bad_firmwares_uris[::-1]):
+                    new_measurers, new_bad_uris, _ = create_measurers(uri, force_open=True)
                     if new_measurers:
                         measurers[i] = new_measurers[0]
+                        bad_firmwares_uris.pop(i)
                     else:
                         bad_uris.extend(new_bad_uris)
-        return list(filter(lambda x: x is not None, measurers)), bad_uris
+
+        return list(filter(lambda x: x is not None, measurers)), bad_uris, bool(bad_firmwares_uris)
 
     def _get_connection_params(self) -> None:
         """
@@ -274,17 +277,16 @@ def create_measurer(uri: str, force_open: Optional[bool] = False, virtual_was: O
 
 
 def create_measurers(*uris: str, force_open: Optional[bool] = False
-                     ) -> Tuple[List[IVMeasurerBase], List[str], str, List[Tuple[int, str]]]:
+                     ) -> Tuple[List[IVMeasurerBase], List[str], List[Tuple[int, str, BadFirmwareVersion]]]:
     """
     :param uris: URIs for which to create IV-measurers;
     :param force_open: if True, then the IV-measurer must be created even if the IV-measurer firmware is incorrect.
     :return: list of IV-measurers created for a given list of URIs, list of URIs for which IV-measurers could not be
-    created, error text for IV-measurers with incorrect firmware and list of IV-measurer URIs with incorrect firmware.
+    created and list of IV-measurer URIs with incorrect firmware.
     """
 
     measurers = []
     virtual_was = False
-    bad_firmwares = []
     bad_firmwares_uris = []
     bad_uris = []
     for i, uri in enumerate(uris):
@@ -295,17 +297,15 @@ def create_measurers(*uris: str, force_open: Optional[bool] = False
         except BadFirmwareVersion as exc:
             logger.error("%s firmware version %s is not compatible with this version of EPLab", exc.args[0],
                          exc.args[2])
-            text = qApp.translate("t", "{}: версия прошивки {} {} несовместима с данной версией EPLab."
-                                  ).format(uri, exc.args[0], exc.args[2])
-            bad_firmwares.append(text)
-            bad_firmwares_uris.append((i, uri))
+            bad_firmwares_uris.append((i, uri, exc))
             measurer = None
         except Exception as exc:
             logger.error("An error occurred when connecting the IV-measurer to the URI '%s': %s", uri, exc)
             bad_uris.append(uri)
             measurer = None
+
         measurers.append(measurer)
-    return measurers, bad_uris, "<br>".join(bad_firmwares), bad_firmwares_uris
+    return measurers, bad_uris, bad_firmwares_uris
 
 
 def create_multiplexer(uri: Optional[str] = None) -> Tuple[Optional[AnalogMultiplexerBase], List[str]]:
@@ -327,6 +327,41 @@ def create_multiplexer(uri: Optional[str] = None) -> Tuple[Optional[AnalogMultip
         return None, [uri]
 
     return None, []
+
+
+def create_text_for_incompatible_firmwares(firmwares: List[Tuple[int, str, BadFirmwareVersion]]) -> str:
+    """
+    :param firmwares: list of incompatible firmwares.
+    :return: error text for incompatible firmwares.
+    """
+
+    template = qApp.translate("t", "На устройстве '{uri}' используется прошивка {firmware}, несовместимая с данной "
+                                   "версией EPLab.")
+    return create_text_with_firmwares_list_with_template(firmwares, template)
+
+
+def create_text_with_firmwares_list_with_template(firmwares: List[Tuple[int, str, BadFirmwareVersion]], template: str
+                                                  ) -> str:
+    """
+    :param firmwares: list with URI and BadFirmwareVersion errors when opening devices;
+    :param template: template to create text with information about bad firmware.
+    :return: text with a list of bad firmwares.
+    """
+
+    texts = []
+    for _, uri, exc in firmwares:
+        controller_name, _, firmware_version, _ = exc.args
+        text = template.format(uri=uri, name=controller_name, firmware=firmware_version)
+
+        if len(firmwares) > 1:
+            text = f"<li>{text}</li>"
+
+        texts.append(text)
+
+    if len(texts) == 1:
+        return f"{texts[0]}<br>"
+
+    return f"<ul>{''.join(texts)}</ul>"
 
 
 def print_errors(*bad_uris: str) -> None:

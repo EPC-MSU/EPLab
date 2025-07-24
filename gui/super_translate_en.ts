@@ -297,17 +297,17 @@ leading to a numbering shift</translation>
         <translation>Comment</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="107"/>
+        <location filename="../window/connectionchecker.py" line="111"/>
         <source>Все равно открыть</source>
         <translation>Force open</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="269"/>
-        <source>{}: версия прошивки {} {} несовместима с данной версией EPLab.</source>
-        <translation>{}: {} firmware version {} is not compatible with this version of EPLab.</translation>
+        <location filename="../window/connectionchecker.py" line="338"/>
+        <source>На устройстве &apos;{uri}&apos; используется прошивка {firmware}, несовместимая с данной версией EPLab.</source>
+        <translation>The device &apos;{uri}&apos; is using firmware {firmware}, which is incompatible with this version of EPLab.</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="311"/>
+        <location filename="../window/connectionchecker.py" line="376"/>
         <source>Не удалось подключиться к {}.
 &lt;ul&gt;
 &lt;li&gt;Проверьте, что устройство подключено к компьютеру и не удерживается другой программой.&lt;/li&gt;
@@ -320,7 +320,7 @@ leading to a numbering shift</translation>
 &lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="317"/>
+        <location filename="../window/connectionchecker.py" line="382"/>
         <source>Не удалось подключиться к {}.
 &lt;ul&gt;
 &lt;li&gt;Проверьте, что устройства подключены к компьютеру и не удерживаются другой программой.&lt;/li&gt;
@@ -333,7 +333,7 @@ leading to a numbering shift</translation>
 &lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../window/connectionchecker.py" line="322"/>
+        <location filename="../window/connectionchecker.py" line="387"/>
         <source>Ошибка подключения</source>
         <translation>Connection error</translation>
     </message>
