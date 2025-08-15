@@ -268,6 +268,11 @@ leading to a numbering shift</translation>
         <source>Удалить точку</source>
         <translation>Remove point</translation>
     </message>
+    <message>
+        <location filename="mainwindow.ui" line="928"/>
+        <source>Удалить изображение</source>
+        <translation>Delete board image</translation>
+    </message>
 </context>
 <context>
     <name>t</name>
