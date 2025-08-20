@@ -6,8 +6,11 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDialog, QGraphicsScene, QHBoxLayout, QPushButton, QVBoxLayout
 from window.boardwidget import pil_to_pixmap
+from window.scaler import update_scale_of_class
+from window.utils import DIR_MEDIA
 
 
+@update_scale_of_class
 class ImageAdder(QDialog):
     """
     Dialog box for adding a board image.
@@ -28,16 +31,14 @@ class ImageAdder(QDialog):
         self._scene.fitInView(self._scene._background, Qt.KeepAspectRatio)
 
     def _create_buttons(self) -> None:
-        media_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
-
-        self.button_rotate_counterclockwise: QPushButton = QPushButton(qApp.translate("imageadder",
+        self.button_rotate_counterclockwise: QPushButton = QPushButton(qApp.translate("dialogs",
                                                                                       "Повернуть на 90° влево"))
-        icon_path = os.path.join(media_path, "rotate_counterclockwise.png")
+        icon_path = os.path.join(DIR_MEDIA, "rotate_counterclockwise.png")
         self.button_rotate_counterclockwise.setIcon(QIcon(icon_path))
         self.button_rotate_counterclockwise.clicked.connect(self._rotate_counterclockwise)
 
-        self.button_rotate_clockwise: QPushButton = QPushButton(qApp.translate("imageadder", "Повернуть на 90° вправо"))
-        icon_path = os.path.join(media_path, "rotate_clockwise.png")
+        self.button_rotate_clockwise: QPushButton = QPushButton(qApp.translate("dialogs", "Повернуть на 90° вправо"))
+        icon_path = os.path.join(DIR_MEDIA, "rotate_clockwise.png")
         self.button_rotate_clockwise.setIcon(QIcon(icon_path))
         self.button_rotate_clockwise.clicked.connect(self._rotate_clockwise)
 
@@ -60,6 +61,9 @@ class ImageAdder(QDialog):
         self._add_image_to_scene()
 
     def _init_ui(self) -> None:
+        self.setWindowTitle(qApp.translate("MainWindow", "Добавить изображение"))
+        self.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "icon.png")))
+
         self._create_buttons()
         self._create_scene()
 
