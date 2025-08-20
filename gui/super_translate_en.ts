@@ -749,6 +749,16 @@ Signature analyzer S2</translation>
         <translation>Copy</translation>
     </message>
     <message>
+        <location filename="../dialogs/imageadder.py" line="35"/>
+        <source>Повернуть на 90° влево</source>
+        <translation>Rotate 90° to the left</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/imageadder.py" line="40"/>
+        <source>Повернуть на 90° вправо</source>
+        <translation>Rotate 90° to the right</translation>
+    </message>
+    <message>
         <location filename="../dialogs/keymapdialog.py" line="61"/>
         <source>Редактировать комментарий</source>
         <translation>Edit comment</translation>
