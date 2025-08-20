@@ -1752,6 +1752,7 @@ class EPLabWindow(QMainWindow):
                                                directory=self._dir_chosen_by_user)[0]
         if not filename:
             return
+
         image = get_image_from_file(filename)
         if image:
             self._measurement_plan.image = image
