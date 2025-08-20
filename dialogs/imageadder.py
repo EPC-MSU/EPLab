@@ -2,9 +2,9 @@ import os
 from typing import Optional
 from boardview.BoardViewWidget import BoardView
 from PIL import Image, ImageOps
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QGraphicsScene, QHBoxLayout, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QDialog, QGraphicsScene, QHBoxLayout, QPushButton, QStyle, QVBoxLayout
 from window.boardwidget import pil_to_pixmap
 from window.scaler import update_scale_of_class
 from window.utils import DIR_MEDIA
@@ -16,6 +16,8 @@ class ImageAdder(QDialog):
     Dialog box for adding a board image.
     """
 
+    INIT_SIZE_AS_PROPORTION_OF_SCREEN: float = 0.6
+
     def __init__(self, filename: str) -> None:
         """
         :param filename: the name of the file with the image to get.
@@ -24,11 +26,14 @@ class ImageAdder(QDialog):
         super().__init__()
         self._read_image(filename)
         self._init_ui()
+        self._set_init_position()
+        QTimer.singleShot(100, self._add_image_to_scene)
 
     def _add_image_to_scene(self) -> None:
         self._scene._background = None
         self._scene.set_background(pil_to_pixmap(self._image))
         self._scene.fitInView(self._scene._background, Qt.KeepAspectRatio)
+        self._scene.update()
 
     def _create_buttons(self) -> None:
         self.button_rotate_counterclockwise: QPushButton = QPushButton(qApp.translate("dialogs",
@@ -58,7 +63,6 @@ class ImageAdder(QDialog):
     def _create_scene(self) -> None:
         self._scene: BoardView = BoardView()
         self._scene.scene().setItemIndexMethod(QGraphicsScene.NoIndex)
-        self._add_image_to_scene()
 
     def _init_ui(self) -> None:
         self.setWindowTitle(qApp.translate("MainWindow", "Добавить изображение"))
@@ -97,6 +101,22 @@ class ImageAdder(QDialog):
     @pyqtSlot()
     def _rotate_counterclockwise(self) -> None:
         self._rotate(90)
+
+    def _set_init_position(self) -> None:
+        """
+        Method moves the window to the desired position and sets the initial dimensions.
+        """
+
+        geometry = qApp.instance().desktop().availableGeometry()
+        available_height = geometry.height() - self.style().pixelMetric(QStyle.PM_TitleBarHeight)
+        available_width = geometry.width()
+
+        height = self.INIT_SIZE_AS_PROPORTION_OF_SCREEN * available_height
+        width = self.INIT_SIZE_AS_PROPORTION_OF_SCREEN * available_width
+        pos_x = geometry.x() + (available_width - width) / 2
+        pos_y = geometry.y() + (available_height - height) / 2
+        self.move(pos_x, pos_y)
+        self.resize(width, height)
 
     def get_image(self) -> Image.Image:
         """
