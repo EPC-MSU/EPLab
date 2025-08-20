@@ -24,7 +24,7 @@ from epcore.product import EyePointProduct, MeasurementParameterOption
 from ivviewer import Viewer as IVViewer
 from ivviewer.ivcviewer import PlotCurve
 import connection_window as cw
-from dialogs import (ReportGenerationThread, show_keymap_info, show_language_selection_window,
+from dialogs import (get_image_from_file, ReportGenerationThread, show_keymap_info, show_language_selection_window,
                      show_measurer_settings_window, show_product_info, show_report_generation_window)
 from multiplexer import MuxAndPlanWindow
 from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
@@ -1750,8 +1750,11 @@ class EPLabWindow(QMainWindow):
         filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
                                                filter="Image Files (*.png *.jpg *.bmp)",
                                                directory=self._dir_chosen_by_user)[0]
-        if filename:
-            epfilemanager.add_image_to_ufiv(filename, self._measurement_plan)
+        if not filename:
+            return
+        image = get_image_from_file(filename)
+        if image:
+            self._measurement_plan.image = image
             self._board_window.update_board()
             self.update_current_pin()
             self._open_board_window_if_needed()
