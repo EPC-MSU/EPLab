@@ -338,6 +338,7 @@ class EPLabWindow(QMainWindow):
         self.delete_all_test_signatures_action.setEnabled(mode is not WorkMode.READ_PLAN
                                                           and bool(self.measurement_plan))
         self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
+        self.delete_board_image_action.setEnabled(mode is WorkMode.WRITE)
         self.create_report_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
         enable = bool(mode is not WorkMode.COMPARE and self.measurement_plan and
                       self.measurement_plan.multiplexer is not None)
@@ -770,6 +771,7 @@ class EPLabWindow(QMainWindow):
         self.save_point_action.triggered.connect(self.save_pin_and_go_to_next)
         self.delete_all_test_signatures_action.triggered.connect(self._delete_all_test_signatures)
         self.add_board_image_action.triggered.connect(self.load_board_image)
+        self.delete_board_image_action.triggered.connect(self.delete_board_image)
         self.create_report_action.triggered.connect(self.create_report)
         self.about_action.triggered.connect(show_product_info)
         self.action_keymap.triggered.connect(lambda: show_keymap_info(self))
@@ -1419,6 +1421,16 @@ class EPLabWindow(QMainWindow):
             if is_user_defined_path:
                 self.dir_chosen_by_user = dir_path
 
+    @pyqtSlot()
+    def delete_board_image(self) -> None:
+        """
+        Slot deletes image for board.
+        """
+
+        self._measurement_plan.delete_image()
+        self._board_window.update_board()
+        self.update_current_pin()
+
     def disconnect_measurers(self) -> None:
         """
         Method disconnects the measurers from the application. Before disconnecting, the method checks that all changes
@@ -1451,9 +1463,10 @@ class EPLabWindow(QMainWindow):
                    self.hide_curve_b_action, self.search_optimal_action, self.comparing_mode_action,
                    self.writing_mode_action, self.testing_mode_action, self.settings_mode_action,
                    self.next_point_action, self.previous_point_action, self.new_point_action, self.remove_point_action,
-                   self.save_point_action, self.add_board_image_action, self.create_report_action,
-                   self.pin_index_widget, self.start_or_stop_entire_plan_measurement_action, self.comment_dock,
-                   self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock, self.measurers_menu)
+                   self.save_point_action, self.add_board_image_action, self.delete_board_image_action,
+                   self.create_report_action, self.pin_index_widget, self.start_or_stop_entire_plan_measurement_action,
+                   self.comment_dock, self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock,
+                   self.measurers_menu)
         for widget in widgets:
             widget.setEnabled(enabled)
         if enabled and len(self._msystem.measurers) < 2:
