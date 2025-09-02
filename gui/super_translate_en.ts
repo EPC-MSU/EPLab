@@ -449,62 +449,62 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
         <translation>The file format is not suitable.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="911"/>
+        <location filename="../window/eplabwindow.py" line="932"/>
         <source>Сохранить изменения в &apos;{}&apos;?</source>
         <translation>Do you want to save changes in &apos;{}&apos;?</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="913"/>
+        <location filename="../window/eplabwindow.py" line="934"/>
         <source>Сохранить изменения в файл?</source>
         <translation>Do you want to save changes in file?</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="915"/>
+        <location filename="../window/eplabwindow.py" line="936"/>
         <source>Внимание</source>
         <translation>Warning</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1083"/>
+        <location filename="../window/eplabwindow.py" line="1104"/>
         <source>Не показывать снова</source>
         <translation>Don&apos;t show again</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1296"/>
+        <location filename="../window/eplabwindow.py" line="1317"/>
         <source>План тестирования не был сохранен.</source>
         <translation>The measurement plan was not saved.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1362"/>
+        <location filename="../window/eplabwindow.py" line="1383"/>
         <source>Добавление точки приведет к сдвигу нумерации.</source>
         <translation>Adding a point will cause the numbering to shift.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1363"/>
+        <location filename="../window/eplabwindow.py" line="1384"/>
         <source>Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1.</source>
         <translation>The added point will have the number {0}. The numbers of existing points, starting from {0}, will be increased by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1397"/>
+        <location filename="../window/eplabwindow.py" line="1418"/>
         <source>Выберите папку, в которую будет сохранен отчет</source>
         <translation>Select the folder where the report will be saved</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1556"/>
+        <location filename="../window/eplabwindow.py" line="1577"/>
         <source>Подключенный мультиплексор имеет другую конфигурацию, выход точки не был установлен.</source>
         <translation>The connected multiplexer has a different configuration, point output is not set.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1591"/>
+        <location filename="../window/eplabwindow.py" line="1612"/>
         <source>Точка с таким номером не найдена на данной плате.</source>
         <translation>Point with this number was not found on this board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1681"/>
+        <location filename="../window/eplabwindow.py" line="1703"/>
         <source>Изменен масштаб экрана. Закройте приложение и откройте снова.</source>
         <translation>Screen scale has been changed. Close the application and open again.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1744"/>
+        <location filename="../window/eplabwindow.py" line="1766"/>
         <source>Открыть изображение платы</source>
         <translation>Open board image</translation>
     </message>
@@ -514,17 +514,17 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
         <translation>No image found for the current board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1785"/>
+        <location filename="../window/eplabwindow.py" line="1807"/>
         <source>Удаление точки приведет к сдвигу нумерации.</source>
         <translation>Deleting a point will cause the numbering to shift.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1786"/>
+        <location filename="../window/eplabwindow.py" line="1808"/>
         <source>Номера имеющихся точек, начиная с {}, будут уменьшены на 1.</source>
         <translation>The numbers of existing points, starting from {}, will be reduced by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1968"/>
+        <location filename="../window/eplabwindow.py" line="1990"/>
         <source>Ошибка при установке настроек устройства.</source>
         <translation>Error occurred while configuring device settings.</translation>
     </message>
@@ -770,17 +770,17 @@ Signature analyzer S2</translation>
 <context>
     <name>dialogs</name>
     <message>
-        <location filename="../dialogs/aboutwindow.py" line="39"/>
+        <location filename="../dialogs/aboutwindow.py" line="38"/>
         <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Более подробную информацию вы можете найти {}</source>
         <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). You can find more information about EyePoint product {}</translation>
     </message>
     <message>
-        <location filename="../dialogs/aboutwindow.py" line="43"/>
+        <location filename="../dialogs/aboutwindow.py" line="42"/>
         <source>на нашем сайте.</source>
         <translation>on our website.</translation>
     </message>
     <message>
-        <location filename="../dialogs/aboutwindow.py" line="77"/>
+        <location filename="../dialogs/aboutwindow.py" line="76"/>
         <source>Копировать</source>
         <translation>Copy</translation>
     </message>
