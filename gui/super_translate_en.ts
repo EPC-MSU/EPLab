@@ -269,9 +269,14 @@ leading to a numbering shift</translation>
         <translation>Remove point</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="928"/>
+        <location filename="mainwindow.ui" line="929"/>
         <source>Удалить все тестовые сигнатуры</source>
         <translation>Remove all test signatures</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="941"/>
+        <source>Удалить изображение</source>
+        <translation>Delete board image</translation>
     </message>
 </context>
 <context>

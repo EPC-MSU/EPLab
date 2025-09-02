@@ -938,7 +938,7 @@
      <normaloff>../media/delete_image.png</normaloff>../media/delete_image.png</iconset>
    </property>
    <property name="text">
-    <string>Удалить изоражение</string>
+    <string>Удалить изображение</string>
    </property>
   </action>
  </widget>
