@@ -9,39 +9,39 @@
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="110"/>
-        <source>Допуск</source>
-        <translation>Tolerance</translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="131"/>
+        <location filename="settings.ui" line="60"/>
         <source>Показывать предупреждения при добавлении/удалении точек,
 приводящих к смещению нумерации</source>
         <translation>Show warnings when adding/removing points,
 leading to a numbering shift</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="140"/>
+        <location filename="settings.ui" line="71"/>
         <source>Включить автопереход</source>
         <translation>Enable auto transition</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="147"/>
+        <location filename="settings.ui" line="81"/>
         <source>Максимальное напряжение при автоподборе, В</source>
         <translation>Max voltage at optimal search of parameters, V</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="180"/>
+        <location filename="settings.ui" line="91"/>
+        <source>Допуск</source>
+        <translation>Tolerance</translation>
+    </message>
+    <message>
+        <location filename="settings.ui" line="220"/>
         <source>Загрузить настройки</source>
         <translation>Load settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="205"/>
+        <location filename="settings.ui" line="248"/>
         <source>Сохранить настройки</source>
         <translation>Save settings</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="255"/>
+        <location filename="settings.ui" line="298"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>
@@ -49,222 +49,222 @@ leading to a numbering shift</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.ui" line="34"/>
+        <location filename="mainwindow.ui" line="40"/>
         <source>Различие</source>
         <translation>Difference</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="80"/>
+        <location filename="mainwindow.ui" line="92"/>
         <source>Частота пробного сигнала</source>
         <translation>Probe signal frequency</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="122"/>
+        <location filename="mainwindow.ui" line="137"/>
         <source>Чувствительность по току</source>
         <translation>Current sensitivity</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="158"/>
+        <location filename="mainwindow.ui" line="176"/>
         <source>Амплитуда пробного сигнала</source>
         <translation>Probe signal amplitude</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="200"/>
+        <location filename="mainwindow.ui" line="221"/>
         <source>Комментарий к точке</source>
         <translation>Point comment</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="242"/>
+        <location filename="mainwindow.ui" line="266"/>
         <source>Файл</source>
         <translation>File</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="255"/>
+        <location filename="mainwindow.ui" line="281"/>
         <source>Вид</source>
         <translation>View</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="268"/>
+        <location filename="mainwindow.ui" line="294"/>
         <source>Режим</source>
         <translation>Mode</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="280"/>
+        <location filename="mainwindow.ui" line="305"/>
         <source>Справка</source>
         <translation>Help</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="287"/>
+        <location filename="mainwindow.ui" line="312"/>
         <source>План тестирования</source>
         <translation>Test plan</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="301"/>
+        <location filename="mainwindow.ui" line="328"/>
         <source>Измерители</source>
         <translation>Measurers</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="351"/>
+        <location filename="mainwindow.ui" line="384"/>
         <source>Тестирование по плану</source>
         <translation>Plan testing</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="367"/>
+        <location filename="mainwindow.ui" line="403"/>
         <source>Запись плана тестирования</source>
         <translation>Write test plan</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="399"/>
-        <source>Сравнение</source>
-        <translation>Comparison</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="444"/>
-        <source>Выбор языка</source>
-        <translation>Language selection</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="463"/>
-        <source>Создать план тестирования</source>
-        <translation>Create test plan</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="475"/>
-        <source>Открыть план тестирования</source>
-        <translation>Open test plan</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="487"/>
-        <source>Сохранить план тестирования</source>
-        <translation>Save test plan</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="499"/>
-        <source>Сохранить план тестирования как</source>
-        <translation>Save test plan as</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="508"/>
-        <source>Сохранить скриншот</source>
-        <translation>Screenshot</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="516"/>
-        <source>Открыть окно просмотра платы</source>
-        <translation>Open board window</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="529"/>
-        <source>Заморозить канал А</source>
-        <translation>Freeze A</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="532"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Заморозить канал А&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Freeze A&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="544"/>
-        <source>Заморозить канал B</source>
-        <translation>Freeze B</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="547"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Заморозить канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Freeze B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="610"/>
-        <source>О программе</source>
-        <translation>About product</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="625"/>
-        <source>Звук</source>
-        <translation>Sound</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="634"/>
-        <source>Настройки</source>
-        <translation>Settings</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="646"/>
-        <source>Следующая точка</source>
-        <translation>Next point</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="661"/>
-        <source>Предыдущая точка</source>
-        <translation>Previous point</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="676"/>
-        <source>Новая точка</source>
-        <translation>New point</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="706"/>
-        <source>Добавить изображение</source>
-        <translation>Add board image</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="715"/>
+        <location filename="mainwindow.ui" line="426"/>
         <source>Автоподбор параметров</source>
         <translation>Optimal search of parameters</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="764"/>
+        <location filename="mainwindow.ui" line="444"/>
+        <source>Сравнение</source>
+        <translation>Comparison</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="493"/>
+        <source>Выбор языка</source>
+        <translation>Language selection</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="512"/>
+        <source>Создать план тестирования</source>
+        <translation>Create test plan</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="527"/>
+        <source>Открыть план тестирования</source>
+        <translation>Open test plan</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="542"/>
+        <source>Сохранить план тестирования</source>
+        <translation>Save test plan</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="557"/>
+        <source>Сохранить план тестирования как</source>
+        <translation>Save test plan as</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="572"/>
+        <source>Сохранить скриншот</source>
+        <translation>Screenshot</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="581"/>
+        <source>Открыть окно просмотра платы</source>
+        <translation>Open board window</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="593"/>
+        <source>Заморозить канал А</source>
+        <translation>Freeze A</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="596"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Заморозить канал А&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Freeze A&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="608"/>
+        <source>Заморозить канал B</source>
+        <translation>Freeze B</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="611"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Заморозить канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Freeze B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="674"/>
+        <source>О программе</source>
+        <translation>About product</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="695"/>
+        <source>Звук</source>
+        <translation>Sound</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="704"/>
+        <source>Настройки</source>
+        <translation>Settings</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="716"/>
+        <source>Следующая точка</source>
+        <translation>Next point</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="734"/>
+        <source>Предыдущая точка</source>
+        <translation>Previous point</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="752"/>
+        <source>Новая точка</source>
+        <translation>New point</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="788"/>
+        <source>Добавить изображение</source>
+        <translation>Add board image</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="816"/>
         <source>Скрыть канал А</source>
         <translation>Hide curve A</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="767"/>
+        <location filename="mainwindow.ui" line="819"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Скрыть канал А&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;Hide curve A&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="781"/>
+        <location filename="mainwindow.ui" line="833"/>
         <source>Скрыть канал B</source>
         <translation>Hide curve B</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="784"/>
+        <location filename="mainwindow.ui" line="836"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Скрыть канал B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Hide curve B&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="793"/>
+        <location filename="mainwindow.ui" line="845"/>
         <source>Подключение</source>
         <translation>Connection</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="802"/>
+        <location filename="mainwindow.ui" line="854"/>
         <source>Язык</source>
         <translation>Language</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="814"/>
+        <location filename="mainwindow.ui" line="866"/>
         <source>Сгенерировать отчет</source>
         <translation>Generate report</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="829"/>
+        <location filename="mainwindow.ui" line="881"/>
         <source>Запустить измерение всех точек</source>
         <translation>Start measuring all points</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="838"/>
+        <location filename="mainwindow.ui" line="890"/>
         <source>Открыть окно просмотра мультиплексора</source>
         <translation>Open multiplexer window</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="847"/>
+        <location filename="mainwindow.ui" line="899"/>
         <source>Горячие клавиши</source>
         <translation>Keymap reference</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="859"/>
+        <location filename="mainwindow.ui" line="911"/>
         <source>Удалить точку</source>
         <translation>Remove point</translation>
     </message>
@@ -282,12 +282,12 @@ leading to a numbering shift</translation>
 <context>
     <name>t</name>
     <message>
-        <location filename="../window/breaksignaturessaver.py" line="131"/>
+        <location filename="../window/breaksignaturessaver.py" line="137"/>
         <source>Сохранение сигнатур разрыва</source>
         <translation>Saving break signatures</translation>
     </message>
     <message>
-        <location filename="../window/breaksignaturessaver.py" line="150"/>
+        <location filename="../window/breaksignaturessaver.py" line="156"/>
         <source>Чтобы включить автопереход в режиме тестирования по плану, нужно измерить сигнатуры разрыва. Для этого:
 &lt;ul&gt;
 &lt;li&gt;Разомкните щупы.&lt;/li&gt;
@@ -302,7 +302,7 @@ leading to a numbering shift</translation>
 &lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../window/commentwidget.py" line="46"/>
+        <location filename="../window/commentwidget.py" line="32"/>
         <source>Комментарий</source>
         <translation>Comment</translation>
     </message>
@@ -384,162 +384,162 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
         <translation>Fixate reference</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="387"/>
+        <location filename="../window/eplabwindow.py" line="391"/>
         <source>Информация</source>
         <translation>Information</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="388"/>
+        <location filename="../window/eplabwindow.py" line="392"/>
         <source>Включен автопереход в режиме тестирования по плану. Но в приложении нет некоторых сигнатур разрыва, поэтому автопереход может работать некорректно.</source>
         <translation>Auto-transition is enabled in test mode according to plan. But the application does not have some break signatures, so auto-transition may not work correctly.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="507"/>
+        <location filename="../window/eplabwindow.py" line="511"/>
         <source>Эмулятор</source>
         <translation>Emulator</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="524"/>
+        <location filename="../window/eplabwindow.py" line="528"/>
         <source>Неизвестный измеритель</source>
         <translation>Unknown measurer</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="556"/>
+        <location filename="../window/eplabwindow.py" line="560"/>
         <source>Вы уверены, что хотите удалить тестовые сигнатуры?</source>
         <translation>Are you sure you want to remove test signatures?</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="597"/>
+        <location filename="../window/eplabwindow.py" line="601"/>
         <source>НЕТ ПОДКЛЮЧЕНИЯ</source>
         <translation>DISCONNECTED</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="733"/>
+        <location filename="../window/eplabwindow.py" line="737"/>
         <source>Добавить метку</source>
         <translation>Add marker</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="734"/>
+        <location filename="../window/eplabwindow.py" line="738"/>
         <source>Экспортировать сигнатуры в файл</source>
         <translation>Export signatures to file</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="735"/>
+        <location filename="../window/eplabwindow.py" line="739"/>
         <source>Удалить все метки</source>
         <translation>Delete all markers</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="736"/>
+        <location filename="../window/eplabwindow.py" line="740"/>
         <source>Удалить метку</source>
         <translation>Delete marker</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="842"/>
+        <location filename="../window/eplabwindow.py" line="847"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="843"/>
+        <location filename="../window/eplabwindow.py" line="848"/>
         <source>Формат файла не подходит. Указан неверный путь до изображения платы.</source>
         <translation>The file format is not suitable. The path to the board image is incorrect.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="846"/>
+        <location filename="../window/eplabwindow.py" line="851"/>
         <source>Формат файла не подходит.</source>
         <translation>The file format is not suitable.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="899"/>
+        <location filename="../window/eplabwindow.py" line="911"/>
         <source>Сохранить изменения в &apos;{}&apos;?</source>
         <translation>Do you want to save changes in &apos;{}&apos;?</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="901"/>
+        <location filename="../window/eplabwindow.py" line="913"/>
         <source>Сохранить изменения в файл?</source>
         <translation>Do you want to save changes in file?</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="903"/>
+        <location filename="../window/eplabwindow.py" line="915"/>
         <source>Внимание</source>
         <translation>Warning</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1050"/>
+        <location filename="../window/eplabwindow.py" line="1083"/>
         <source>Не показывать снова</source>
         <translation>Don&apos;t show again</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1257"/>
+        <location filename="../window/eplabwindow.py" line="1296"/>
         <source>План тестирования не был сохранен.</source>
         <translation>The measurement plan was not saved.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1320"/>
+        <location filename="../window/eplabwindow.py" line="1362"/>
         <source>Добавление точки приведет к сдвигу нумерации.</source>
         <translation>Adding a point will cause the numbering to shift.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1321"/>
+        <location filename="../window/eplabwindow.py" line="1363"/>
         <source>Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1.</source>
         <translation>The added point will have the number {0}. The numbers of existing points, starting from {0}, will be increased by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1356"/>
+        <location filename="../window/eplabwindow.py" line="1397"/>
         <source>Выберите папку, в которую будет сохранен отчет</source>
         <translation>Select the folder where the report will be saved</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1522"/>
+        <location filename="../window/eplabwindow.py" line="1556"/>
         <source>Подключенный мультиплексор имеет другую конфигурацию, выход точки не был установлен.</source>
         <translation>The connected multiplexer has a different configuration, point output is not set.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1555"/>
+        <location filename="../window/eplabwindow.py" line="1591"/>
         <source>Точка с таким номером не найдена на данной плате.</source>
         <translation>Point with this number was not found on this board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1645"/>
+        <location filename="../window/eplabwindow.py" line="1681"/>
         <source>Изменен масштаб экрана. Закройте приложение и откройте снова.</source>
         <translation>Screen scale has been changed. Close the application and open again.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1708"/>
+        <location filename="../window/eplabwindow.py" line="1744"/>
         <source>Открыть изображение платы</source>
         <translation>Open board image</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1726"/>
+        <location filename="../window/eplabwindow.py" line="1766"/>
         <source>Для данной платы изображение не задано.</source>
         <translation>No image found for the current board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1753"/>
+        <location filename="../window/eplabwindow.py" line="1785"/>
         <source>Удаление точки приведет к сдвигу нумерации.</source>
         <translation>Deleting a point will cause the numbering to shift.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1754"/>
+        <location filename="../window/eplabwindow.py" line="1786"/>
         <source>Номера имеющихся точек, начиная с {}, будут уменьшены на 1.</source>
         <translation>The numbers of existing points, starting from {}, will be reduced by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1918"/>
+        <location filename="../window/eplabwindow.py" line="1968"/>
         <source>Ошибка при установке настроек устройства.</source>
         <translation>Error occurred while configuring device settings.</translation>
     </message>
     <message>
-        <location filename="../window/exceptionhook.py" line="17"/>
+        <location filename="../window/exceptionhook.py" line="18"/>
         <source>Что-то пошло не так, и произошла ошибка:</source>
         <translation>Something went wrong and an error occurred:</translation>
     </message>
     <message>
-        <location filename="../window/measuredpinschecker.py" line="123"/>
+        <location filename="../window/measuredpinschecker.py" line="116"/>
         <source>Точки {} не содержат сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
         <translation>Points {} do not contain any saved measurements. To save the test plan, all points must contain measurements.</translation>
     </message>
     <message>
-        <location filename="../window/measuredpinschecker.py" line="126"/>
+        <location filename="../window/measuredpinschecker.py" line="119"/>
         <source>Точка {} не содержит сохраненных измерений. Для сохранения плана тестирования все точки должны содержать измерения.</source>
         <translation>Point {} does not contain any saved measurements. To save the test plan, all points must contain measurements.</translation>
     </message>
@@ -584,17 +584,17 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
         <translation>Test plan {}does not correspond to the EPLab work mode and will be closed.</translation>
     </message>
     <message>
-        <location filename="../window/utils.py" line="74"/>
+        <location filename="../window/utils.py" line="77"/>
         <source>Да</source>
         <translation>Yes</translation>
     </message>
     <message>
-        <location filename="../window/utils.py" line="78"/>
+        <location filename="../window/utils.py" line="81"/>
         <source>Нет</source>
         <translation>No</translation>
     </message>
     <message>
-        <location filename="../window/utils.py" line="80"/>
+        <location filename="../window/utils.py" line="83"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>
@@ -602,92 +602,92 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
 <context>
     <name>mux</name>
     <message>
-        <location filename="../multiplexer/measurementplanwidget.py" line="30"/>
+        <location filename="../multiplexer/measurementplanwidget.py" line="29"/>
         <source>Модуль MUX</source>
         <translation>MUX module</translation>
     </message>
     <message>
-        <location filename="../multiplexer/measurementplanwidget.py" line="30"/>
+        <location filename="../multiplexer/measurementplanwidget.py" line="29"/>
         <source>Канал MUX</source>
         <translation>MUX channel</translation>
     </message>
     <message>
-        <location filename="../multiplexer/measurementplanwidget.py" line="31"/>
+        <location filename="../multiplexer/measurementplanwidget.py" line="30"/>
         <source>Частота</source>
         <translation>Frequency</translation>
     </message>
     <message>
-        <location filename="../multiplexer/measurementplanwidget.py" line="31"/>
+        <location filename="../multiplexer/measurementplanwidget.py" line="30"/>
         <source>Напряжение</source>
         <translation>Voltage</translation>
     </message>
     <message>
-        <location filename="../multiplexer/measurementplanwidget.py" line="32"/>
+        <location filename="../multiplexer/measurementplanwidget.py" line="31"/>
         <source>Чувствительность</source>
         <translation>Sensitivity</translation>
     </message>
     <message>
-        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="36"/>
+        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="41"/>
         <source>Включить/выключить канал {}</source>
         <translation>Turn on/off channel {}</translation>
     </message>
     <message>
-        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="50"/>
+        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="55"/>
         <source>Канал {}</source>
         <translation>Channel {}</translation>
     </message>
     <message>
-        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="132"/>
+        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="137"/>
         <source>Номер модуля</source>
         <translation>Module number</translation>
     </message>
     <message>
-        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="140"/>
+        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="145"/>
         <source>Модуль {}</source>
         <translation>Module {}</translation>
     </message>
     <message>
-        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="214"/>
+        <location filename="../multiplexer/multiplexerpinoutwidget.py" line="218"/>
         <source>Нет мультиплексора</source>
         <translation>No multiplexer</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="89"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="91"/>
         <source>Остановить измерение всех точек</source>
         <translation>Stop measuring all points</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="92"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="94"/>
         <source>Запустить измерение всех точек</source>
         <translation>Start measuring all points</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="151"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="154"/>
         <source>Режим тестирования:</source>
         <translation>Test mode:</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="182"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="185"/>
         <source>Мультиплексор и план измерения</source>
         <translation>Multiplexer and measurement plan</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="185"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="188"/>
         <source>Упорядочить окна</source>
         <translation>Arrange windows</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="351"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="360"/>
         <source>жёлтым</source>
         <translation>yellow</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="352"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="361"/>
         <source>Не все точки имеют выходы мультиплексора и/или не все выходы могут быть установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите продолжить?</source>
         <translation>Not all points have multiplexer outputs and/or not all outputs can be set. Therefore, the points excluded from the test will be highlighted with {} color. Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="360"/>
+        <location filename="../multiplexer/muxandplanwindow.py" line="369"/>
         <source>В плане тестирования есть эталонные сигнатуры. При запуске измерений в режиме записи плана все имеющиеся сигнатуры будут перезаписаны. Вы точно хотите запустить измерение всех точек?</source>
         <translation>There are reference signatures in the test plan. When starting measurements in plan writing mode, all existing signatures will be overwritten. Are you sure you want to start measuring all points?</translation>
     </message>
@@ -715,7 +715,7 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
         <translation>Connection setup</translation>
     </message>
     <message>
-        <location filename="../connection_window/measurertypewidget.py" line="107"/>
+        <location filename="../connection_window/measurertypewidget.py" line="108"/>
         <source>Тип измерителя</source>
         <translation>Measurer type</translation>
     </message>
@@ -745,14 +745,14 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
         <translation>Multiplexer</translation>
     </message>
     <message>
-        <location filename="../connection_window/productname.py" line="146"/>
+        <location filename="../connection_window/productname.py" line="148"/>
         <source>EyePoint S2 /
 Сигнатурный анализатор С2</source>
         <translation>EyePoint S2 /
 Signature analyzer S2</translation>
     </message>
     <message>
-        <location filename="../connection_window/productname.py" line="149"/>
+        <location filename="../connection_window/productname.py" line="152"/>
         <source>Сигнатурный анализатор мк22</source>
         <translation>Signature analyzer mk22</translation>
     </message>
@@ -770,32 +770,32 @@ Signature analyzer S2</translation>
 <context>
     <name>dialogs</name>
     <message>
-        <location filename="../dialogs/aboutwindow.py" line="41"/>
+        <location filename="../dialogs/aboutwindow.py" line="39"/>
         <source>Программное обеспечение для работы с устройствами линейки EyePoint, предназначенными для поиска неисправностей на печатных платах в ручном режиме (при помощи ручных щупов). Более подробную информацию вы можете найти {}</source>
         <translation>Software for working with devices of the EyePoint line, designed for troubleshooting on printed circuit boards in manual mode (using hand probes). You can find more information about EyePoint product {}</translation>
     </message>
     <message>
-        <location filename="../dialogs/aboutwindow.py" line="50"/>
+        <location filename="../dialogs/aboutwindow.py" line="43"/>
         <source>на нашем сайте.</source>
         <translation>on our website.</translation>
     </message>
     <message>
-        <location filename="../dialogs/aboutwindow.py" line="87"/>
+        <location filename="../dialogs/aboutwindow.py" line="77"/>
         <source>Копировать</source>
         <translation>Copy</translation>
     </message>
     <message>
-        <location filename="../dialogs/imageadder.py" line="35"/>
+        <location filename="../dialogs/imageadder.py" line="40"/>
         <source>Повернуть на 90° влево</source>
         <translation>Rotate 90° to the left</translation>
     </message>
     <message>
-        <location filename="../dialogs/imageadder.py" line="40"/>
+        <location filename="../dialogs/imageadder.py" line="45"/>
         <source>Повернуть на 90° вправо</source>
         <translation>Rotate 90° to the right</translation>
     </message>
     <message>
-        <location filename="../dialogs/keymapdialog.py" line="61"/>
+        <location filename="../dialogs/keymapdialog.py" line="59"/>
         <source>Редактировать комментарий</source>
         <translation>Edit comment</translation>
     </message>
@@ -943,27 +943,27 @@ Signature analyzer S2</translation>
         <translation>p</translation>
     </message>
     <message>
-        <location filename="../settings/settingswindow.py" line="156"/>
+        <location filename="../settings/settingswindow.py" line="164"/>
         <source>Открыть файл</source>
         <translation>Open file</translation>
     </message>
     <message>
-        <location filename="../settings/settingswindow.py" line="164"/>
+        <location filename="../settings/settingswindow.py" line="172"/>
         <source>Проверьте конфигурационный файл &apos;{}&apos;.</source>
         <translation>Check the configuration file &apos;{}&apos;.</translation>
     </message>
     <message>
-        <location filename="../settings/settingswindow.py" line="180"/>
+        <location filename="../settings/settingswindow.py" line="188"/>
         <source>Сохранить файл</source>
         <translation>Save file</translation>
     </message>
     <message>
-        <location filename="../settings/utils.py" line="47"/>
+        <location filename="../settings/utils.py" line="51"/>
         <source>Параметр &apos;{}&apos; имеет недопустимое значение &apos;{}&apos;.</source>
         <translation>The parameter &apos;{}&apos; has an invalid value &apos;{}&apos;.</translation>
     </message>
     <message>
-        <location filename="../settings/utils.py" line="56"/>
+        <location filename="../settings/utils.py" line="60"/>
         <source>Значение параметра &apos;{}&apos; не задано в конфигурационном файле.</source>
         <translation>The parameter &apos;{}&apos; value is not specified in the configuration file.</translation>
     </message>
