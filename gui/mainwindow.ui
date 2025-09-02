@@ -929,6 +929,18 @@
     <string>Удалить все тестовые сигнатуры</string>
    </property>
   </action>
+  <action name="delete_board_image_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/delete_image.png</normaloff>../media/delete_image.png</iconset>
+   </property>
+   <property name="text">
+    <string>Удалить изоражение</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
