@@ -1,9 +1,10 @@
 import logging
 import os
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
-from PyQt5.QtGui import QBrush, QColor, QIcon, QKeySequence
-from PyQt5.QtWidgets import QAction, QMenu, QShortcut, QTableWidgetItem
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QModelIndex, QPoint, QRect, QSize, Qt
+from PyQt5.QtGui import QBrush, QColor, QIcon, QKeySequence, QPainter, QPen
+from PyQt5.QtWidgets import (QAction, QMenu, QShortcut, QStyle, QStyledItemDelegate, QStyleOptionViewItem,
+                             QTableWidgetItem)
 from epcore.elements import Pin
 from . import utils as ut
 from .common import WorkMode
@@ -12,6 +13,61 @@ from .tablewidget import change_item_state, disconnect_item_signals, TableWidget
 
 
 logger = logging.getLogger("eplab")
+
+
+class CommentTableDelegate(QStyledItemDelegate):
+    """
+    Class for rendering table cells with comments. Table cells change color depending on the match of the test
+    signature with the reference one. In order for the selected table cells to have the same color as was specified
+    when comparing signatures, you have to use this class.
+    The class eliminates software freezes when working with large tables with comments #118225.
+    """
+
+    BORDER_COLOR_OF_SELECTED_CELL: QColor = QColor("#0000CD")
+    BORDER_WIDTH_OF_SELECTED_CELL_DISABLED: int = 1
+    BORDER_WIDTH_OF_SELECTED_CELL_ENABLED: int = 2
+    PEN_COLOR_DISABLED: QColor = QColor(Qt.gray)
+    PEN_COLOR_ENABLED: QColor = QColor(Qt.black)
+    TEXT_PADDING: int = 2
+
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex) -> None:
+        """
+        :param painter: painter;
+        :param option: style option for the item specified by index;
+        :param index: index of the item to be drawn.
+        """
+
+        painter.save()
+        painter.setRenderHint(QPainter.Antialiasing, True)
+
+        opt = QStyleOptionViewItem(option)
+        self.initStyleOption(opt, index)
+
+        if opt.state & QStyle.State_Selected:
+            if opt.state & QStyle.State_Enabled:
+                pen_width = self.BORDER_WIDTH_OF_SELECTED_CELL_ENABLED
+                final_pen_color = self.PEN_COLOR_ENABLED
+            else:
+                pen_width = self.BORDER_WIDTH_OF_SELECTED_CELL_DISABLED
+                final_pen_color = self.PEN_COLOR_DISABLED
+
+            pen = QPen()
+            pen.setColor(self.BORDER_COLOR_OF_SELECTED_CELL)
+            pen.setWidth(pen_width)
+            painter.setPen(pen)
+            painter.setBrush(opt.backgroundBrush)
+            rect_with_inside_border = QRect(opt.rect.x() + pen.width() / 2, opt.rect.y() + pen.width() / 2,
+                                            opt.rect.width() - pen.width(), opt.rect.height() - pen.width())
+            painter.drawRect(rect_with_inside_border)
+
+            painter.setPen(final_pen_color)
+            rect_with_padding = rect_with_inside_border.adjusted(self.TEXT_PADDING, self.TEXT_PADDING,
+                                                                 -self.TEXT_PADDING, -self.TEXT_PADDING)
+            painter.drawText(rect_with_padding, Qt.AlignLeft | Qt.AlignVCenter, opt.text)
+        else:
+            super().paint(painter, opt, index)
+
+        painter.restore()
 
 
 class CommentWidget(TableWidget):
@@ -30,13 +86,13 @@ class CommentWidget(TableWidget):
         """
 
         super().__init__(main_window, ["№", qApp.translate("t", "Комментарий")])
-        self._default_style_sheet: str = self.styleSheet()
         self._read_only: bool = False
         self.adjustSize()
         self._set_f2_hotkey()
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
+        self.setItemDelegate(CommentTableDelegate())
 
     def _add_row(self, index: int, comment: Optional[str] = None) -> None:
         """
@@ -75,27 +131,6 @@ class CommentWidget(TableWidget):
         for column in range(self.columnCount()):
             item = self.item(index, column)
             item.setBackground(brush)
-
-    def _change_style_for_selected_row(self, index: Optional[int] = None) -> None:
-        """
-        :param index: index of the selected row.
-        """
-
-        index = self.currentRow() if index is None else index
-        item = self.item(index, 1)
-        if item is None:
-            return
-
-        color = item.background().color().name()
-        selected_style = ("QTableView::item:selected {"
-                          f"background-color: {color};"
-                          "border: 2px solid #0000CD;"
-                          "color: black;}")
-        selected_and_disabled_style = ("QTableView::item:selected:disabled {"
-                                       f"background-color: {color};"
-                                       "border: 1px solid #0000CD;"
-                                       "color: gray;}")
-        self.setStyleSheet(self._default_style_sheet + selected_style + selected_and_disabled_style)
 
     def _check_show_context_menu(self, pos: QPoint) -> bool:
         """
@@ -197,21 +232,6 @@ class CommentWidget(TableWidget):
         if item:
             pin.comment = item.text()
 
-    def select_row(self) -> None:
-        super().select_row()
-        self._change_style_for_selected_row()
-
-    @pyqtSlot()
-    def send_current_row_index(self) -> None:
-        """
-        Slot sends a signal with the number of the table row that is activated.
-        """
-
-        super().send_current_row_index()
-        for model_index in self.selectedIndexes():
-            self._change_style_for_selected_row(model_index.row())
-            break
-
     def set_work_mode(self, mode: WorkMode) -> None:
         """
         Method sets widgets according to new work mode. Comment is only for test and write modes.
@@ -264,7 +284,6 @@ class CommentWidget(TableWidget):
 
         self._clear_table()
         self._fill_table()
-        self.select_row()
 
     def update_table_for_new_tolerance(self, *indexes) -> None:
         """
@@ -279,4 +298,3 @@ class CommentWidget(TableWidget):
         for index in indexes:
             pin = self._main_window.measurement_plan.get_pin_with_index(index)
             self._change_row_color(index, pin)
-        self._change_style_for_selected_row()
