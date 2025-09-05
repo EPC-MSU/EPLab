@@ -689,7 +689,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../media/sound.png</normaloff>../media/sound.png</iconset>
+     <normaloff>../media/no_sound.png</normaloff>../media/no_sound.png</iconset>
    </property>
    <property name="text">
     <string>Звук</string>

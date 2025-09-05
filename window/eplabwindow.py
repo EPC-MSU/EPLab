@@ -1453,6 +1453,9 @@ class EPLabWindow(QMainWindow):
         :param state: if True then sound will be enabled.
         """
 
+        icon_name = "sound.png" if state else "no_sound.png"
+        icon_path = os.path.join(ut.DIR_MEDIA, icon_name)
+        self.sound_enabled_action.setIcon(QIcon(icon_path))
         self._player.set_mute(not state)
 
     def enable_widgets(self, enabled: bool) -> None:
