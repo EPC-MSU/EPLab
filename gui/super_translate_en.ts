@@ -779,11 +779,6 @@ Signature analyzer S2</translation>
         <translation>Image file &apos;{}&apos; not found.</translation>
     </message>
     <message>
-        <location filename="../dialogs/imageadder.py" line="122"/>
-        <source>Файл изображения &apos;{}&apos; не найден.</source>
-        <translation>Image file &apos;{}&apos; not found.</translation>
-    </message>
-    <message>
         <location filename="../dialogs/imageadder.py" line="132"/>
         <source>Не удается идентифицировать файл изображения &apos;{}&apos;.</source>
         <translation>Unable to identify image file &apos;{}&apos;.</translation>
