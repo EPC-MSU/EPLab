@@ -1837,6 +1837,28 @@ class EPLabWindow(QMainWindow):
         super().resizeEvent(event)
 
     @pyqtSlot()
+    def save_image(self) -> None:
+        """
+        Slot saves screenshot of the main window.
+        """
+
+        filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
+        default_name = os.path.join(self.dir_chosen_by_user, filename)
+        if system().lower() == "windows":
+            filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
+                                                   filter="Image (*.png)", directory=default_name)[0]
+        else:
+            filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
+                                                   filter="Image (*.png)", directory=default_name,
+                                                   options=QFileDialog.DontUseNativeDialog)[0]
+        if filename:
+            if not filename.endswith(".png"):
+                filename += ".png"
+            image = self.grab(self.rect())
+            image.save(filename)
+            self.dir_chosen_by_user = filename
+
+    @pyqtSlot()
     def save_measurement_plan(self, save_as: bool = False) -> Optional[bool]:
         """
         Slot saves measurement plan to a file.
@@ -1861,28 +1883,6 @@ class EPLabWindow(QMainWindow):
             self._measurement_plan_path.path = epfilemanager.save_board_to_ufiv(filepath, self.measurement_plan)
 
         return True
-
-    @pyqtSlot()
-    def save_image(self) -> None:
-        """
-        Slot saves screenshot of the main window.
-        """
-
-        filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
-        default_name = os.path.join(self.dir_chosen_by_user, filename)
-        if system().lower() == "windows":
-            filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
-                                                   filter="Image (*.png)", directory=default_name)[0]
-        else:
-            filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
-                                                   filter="Image (*.png)", directory=default_name,
-                                                   options=QFileDialog.DontUseNativeDialog)[0]
-        if filename:
-            if not filename.endswith(".png"):
-                filename += ".png"
-            image = self.grab(self.rect())
-            image.save(filename)
-            self.dir_chosen_by_user = filename
 
     @pyqtSlot()
     def save_pin(self, pin_centering: bool = True) -> None:

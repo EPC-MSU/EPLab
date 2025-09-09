@@ -317,7 +317,7 @@ leading to a numbering shift</translation>
 &lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../window/commentwidget.py" line="32"/>
+        <location filename="../window/commentwidget.py" line="88"/>
         <source>Комментарий</source>
         <translation>Comment</translation>
     </message>
@@ -449,92 +449,92 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
         <translation>Delete marker</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="847"/>
+        <location filename="../window/eplabwindow.py" line="843"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="848"/>
+        <location filename="../window/eplabwindow.py" line="844"/>
         <source>Формат файла не подходит. Указан неверный путь до изображения платы.</source>
         <translation>The file format is not suitable. The path to the board image is incorrect.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="851"/>
+        <location filename="../window/eplabwindow.py" line="847"/>
         <source>Формат файла не подходит.</source>
         <translation>The file format is not suitable.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="932"/>
+        <location filename="../window/eplabwindow.py" line="928"/>
         <source>Сохранить изменения в &apos;{}&apos;?</source>
         <translation>Do you want to save changes in &apos;{}&apos;?</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="934"/>
+        <location filename="../window/eplabwindow.py" line="930"/>
         <source>Сохранить изменения в файл?</source>
         <translation>Do you want to save changes in file?</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="936"/>
+        <location filename="../window/eplabwindow.py" line="932"/>
         <source>Внимание</source>
         <translation>Warning</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1104"/>
+        <location filename="../window/eplabwindow.py" line="1100"/>
         <source>Не показывать снова</source>
         <translation>Don&apos;t show again</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1317"/>
+        <location filename="../window/eplabwindow.py" line="1313"/>
         <source>План тестирования не был сохранен.</source>
         <translation>The measurement plan was not saved.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1383"/>
+        <location filename="../window/eplabwindow.py" line="1379"/>
         <source>Добавление точки приведет к сдвигу нумерации.</source>
         <translation>Adding a point will cause the numbering to shift.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1384"/>
+        <location filename="../window/eplabwindow.py" line="1380"/>
         <source>Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1.</source>
         <translation>The added point will have the number {0}. The numbers of existing points, starting from {0}, will be increased by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1418"/>
+        <location filename="../window/eplabwindow.py" line="1414"/>
         <source>Выберите папку, в которую будет сохранен отчет</source>
         <translation>Select the folder where the report will be saved</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1577"/>
+        <location filename="../window/eplabwindow.py" line="1576"/>
         <source>Подключенный мультиплексор имеет другую конфигурацию, выход точки не был установлен.</source>
         <translation>The connected multiplexer has a different configuration, point output is not set.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1612"/>
+        <location filename="../window/eplabwindow.py" line="1611"/>
         <source>Точка с таким номером не найдена на данной плате.</source>
         <translation>Point with this number was not found on this board.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1703"/>
+        <location filename="../window/eplabwindow.py" line="1702"/>
         <source>Изменен масштаб экрана. Закройте приложение и откройте снова.</source>
         <translation>Screen scale has been changed. Close the application and open again.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1766"/>
+        <location filename="../window/eplabwindow.py" line="1765"/>
         <source>Открыть изображение платы</source>
         <translation>Open board image</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1807"/>
+        <location filename="../window/eplabwindow.py" line="1802"/>
         <source>Удаление точки приведет к сдвигу нумерации.</source>
         <translation>Deleting a point will cause the numbering to shift.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1808"/>
+        <location filename="../window/eplabwindow.py" line="1803"/>
         <source>Номера имеющихся точек, начиная с {}, будут уменьшены на 1.</source>
         <translation>The numbers of existing points, starting from {}, will be reduced by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1990"/>
+        <location filename="../window/eplabwindow.py" line="1972"/>
         <source>Ошибка при установке настроек устройства.</source>
         <translation>Error occurred while configuring device settings.</translation>
     </message>
@@ -795,22 +795,22 @@ Signature analyzer S2</translation>
         <translation>Copy</translation>
     </message>
     <message>
-        <location filename="../dialogs/imageadder.py" line="68"/>
+        <location filename="../dialogs/imageadder.py" line="72"/>
         <source>Повернуть на 90° влево</source>
         <translation>Rotate 90° to the left</translation>
     </message>
     <message>
-        <location filename="../dialogs/imageadder.py" line="73"/>
+        <location filename="../dialogs/imageadder.py" line="77"/>
         <source>Повернуть на 90° вправо</source>
         <translation>Rotate 90° to the right</translation>
     </message>
     <message>
-        <location filename="../dialogs/imageadder.py" line="122"/>
+        <location filename="../dialogs/imageadder.py" line="126"/>
         <source>Файл изображения &apos;{}&apos; не найден.</source>
         <translation>Image file &apos;{}&apos; not found.</translation>
     </message>
     <message>
-        <location filename="../dialogs/imageadder.py" line="132"/>
+        <location filename="../dialogs/imageadder.py" line="135"/>
         <source>Не удается идентифицировать файл изображения &apos;{}&apos;.</source>
         <translation>Unable to identify image file &apos;{}&apos;.</translation>
     </message>
