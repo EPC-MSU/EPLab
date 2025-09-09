@@ -740,8 +740,8 @@ class EPLabWindow(QMainWindow):
         self.search_optimal_action.triggered.connect(self.search_optimal)
         self.new_file_action.triggered.connect(self.create_new_board)
         self.open_file_action.triggered.connect(self.load_board)
-        self.save_file_action.triggered.connect(self.save_board)
-        self.save_as_file_action.triggered.connect(self.save_board_as)
+        self.save_file_action.triggered.connect(self.save_measurement_plan)
+        self.save_as_file_action.triggered.connect(lambda: self.save_measurement_plan(True))
         self.previous_point_action.triggered.connect(lambda: self.go_to_left_or_right_pin(True))
         self.pin_index_widget: PinIndexWidget = PinIndexWidget(self)
         self.pin_index_widget.setEnabled(False)
@@ -801,11 +801,7 @@ class EPLabWindow(QMainWindow):
         qApp.instance().setProperty("language", language)
 
     def _open_board_window_if_needed(self) -> None:
-        if self.measurement_plan.image:
-            if not self._board_window.isVisible():
-                self._board_window.show()
-            else:
-                self._board_window.activateWindow()
+        self._board_window.open_board_image_if_needed()
 
     def _read_measurement_plan(self, filename: Optional[str] = None) -> Tuple[Optional[Board], Optional[str]]:
         """
@@ -916,7 +912,7 @@ class EPLabWindow(QMainWindow):
                                      yes_button=True, no_button=True, cancel_button=True)
             if result == 0:
                 # You need to save the changes to an existing file
-                if self.save_board() is None:
+                if self.save_measurement_plan() is None:
                     result = 2
         return result in (0, 1)
 
@@ -1764,11 +1760,7 @@ class EPLabWindow(QMainWindow):
         Slot opens window with image of the board.
         """
 
-        if not self.measurement_plan.image:
-            ut.show_message(qApp.translate("t", "Ошибка"),
-                            qApp.translate("t", "Для данной платы изображение не задано."))
-        else:
-            self._open_board_window_if_needed()
+        self._board_window.open_board_image()
 
     @pyqtSlot()
     def open_mux_window(self) -> None:
@@ -1823,43 +1815,30 @@ class EPLabWindow(QMainWindow):
         super().resizeEvent(event)
 
     @pyqtSlot()
-    def save_board(self) -> Optional[bool]:
+    def save_measurement_plan(self, save_as: bool = False) -> Optional[bool]:
         """
         Slot saves measurement plan to a file.
+        :param save_as: if True, then you need to save the measurement plan to a new file.
         :return: True if measurement plan was saved otherwise False.
         """
 
         if self._measured_pins_checker.check_measurement_plan_for_empty_pins():
             return None
 
-        if not self._measurement_plan_path.path or not os.path.exists(self._measurement_plan_path.path):
-            return self.save_board_as()
+        if save_as or not self._measurement_plan_path.path or not os.path.exists(self._measurement_plan_path.path):
+            default_path = os.path.join(self.dir_chosen_by_user, "board.uzf")
+            filepath = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить план тестирования"),
+                                                   filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
+            if filepath:
+                self.dir_chosen_by_user = os.path.dirname(filepath)
+        else:
+            filepath = self._measurement_plan_path.path
 
-        self._last_saved_measurement_plan_data = self.measurement_plan.to_json()
-        self._measurement_plan_path.path = epfilemanager.save_board_to_ufiv(self._measurement_plan_path.path,
-                                                                            self.measurement_plan)
-        return True
-
-    @pyqtSlot()
-    def save_board_as(self) -> Optional[bool]:
-        """
-        Slot saves measurement plan to a new file.
-        :return: True if measurement plan was saved otherwise False.
-        """
-
-        if self._measured_pins_checker.check_measurement_plan_for_empty_pins():
-            return None
-
-        default_path = os.path.join(self.dir_chosen_by_user, "board.uzf")
-        filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить план тестирования"),
-                                               filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
-        if filename:
+        if filepath:
             self._last_saved_measurement_plan_data = self.measurement_plan.to_json()
-            self._measurement_plan_path.path = epfilemanager.save_board_to_ufiv(filename, self.measurement_plan)
-            self.dir_chosen_by_user = filename
-            return True
+            self._measurement_plan_path.path = epfilemanager.save_board_to_ufiv(filepath, self.measurement_plan)
 
-        return False
+        return True
 
     @pyqtSlot()
     def save_image(self) -> None:
