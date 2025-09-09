@@ -282,6 +282,21 @@ leading to a numbering shift</translation>
 <context>
     <name>t</name>
     <message>
+        <location filename="../window/boardwidget.py" line="84"/>
+        <source>Загружаемое изображение слишком большое. Выберите изображение меньшего размера или воспользуйтесь 64-битной версией программы EPLab.</source>
+        <translation>The image you are uploading is too large. Please select a smaller image or use the 64-bit version of EPLab.</translation>
+    </message>
+    <message>
+        <location filename="../window/boardwidget.py" line="248"/>
+        <source>Для данной платы изображение не задано.</source>
+        <translation>No image found for the current board.</translation>
+    </message>
+    <message>
+        <location filename="../window/boardwidget.py" line="251"/>
+        <source>Для данной платы не удалось загрузить изображение.</source>
+        <translation>An image could not be loaded for this board.</translation>
+    </message>
+    <message>
         <location filename="../window/breaksignaturessaver.py" line="137"/>
         <source>Сохранение сигнатур разрыва</source>
         <translation>Saving break signatures</translation>
@@ -507,11 +522,6 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
         <location filename="../window/eplabwindow.py" line="1766"/>
         <source>Открыть изображение платы</source>
         <translation>Open board image</translation>
-    </message>
-    <message>
-        <location filename="../window/eplabwindow.py" line="1766"/>
-        <source>Для данной платы изображение не задано.</source>
-        <translation>No image found for the current board.</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1807"/>
@@ -785,14 +795,24 @@ Signature analyzer S2</translation>
         <translation>Copy</translation>
     </message>
     <message>
-        <location filename="../dialogs/imageadder.py" line="40"/>
+        <location filename="../dialogs/imageadder.py" line="68"/>
         <source>Повернуть на 90° влево</source>
         <translation>Rotate 90° to the left</translation>
     </message>
     <message>
-        <location filename="../dialogs/imageadder.py" line="45"/>
+        <location filename="../dialogs/imageadder.py" line="73"/>
         <source>Повернуть на 90° вправо</source>
         <translation>Rotate 90° to the right</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/imageadder.py" line="122"/>
+        <source>Файл изображения &apos;{}&apos; не найден.</source>
+        <translation>Image file &apos;{}&apos; not found.</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/imageadder.py" line="132"/>
+        <source>Не удается идентифицировать файл изображения &apos;{}&apos;.</source>
+        <translation>Unable to identify image file &apos;{}&apos;.</translation>
     </message>
     <message>
         <location filename="../dialogs/keymapdialog.py" line="59"/>
