@@ -801,11 +801,7 @@ class EPLabWindow(QMainWindow):
         qApp.instance().setProperty("language", language)
 
     def _open_board_window_if_needed(self) -> None:
-        if self.measurement_plan.image:
-            if not self._board_window.isVisible():
-                self._board_window.show()
-            else:
-                self._board_window.activateWindow()
+        self._board_window.open_board_image_if_needed()
 
     def _read_measurement_plan(self, filename: Optional[str] = None) -> Tuple[Optional[Board], Optional[str]]:
         """
@@ -1764,11 +1760,7 @@ class EPLabWindow(QMainWindow):
         Slot opens window with image of the board.
         """
 
-        if not self.measurement_plan.image:
-            ut.show_message(qApp.translate("t", "Ошибка"),
-                            qApp.translate("t", "Для данной платы изображение не задано."))
-        else:
-            self._open_board_window_if_needed()
+        self._board_window.open_board_image()
 
     @pyqtSlot()
     def open_mux_window(self) -> None:

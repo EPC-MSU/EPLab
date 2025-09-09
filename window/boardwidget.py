@@ -2,10 +2,12 @@
 File with class to show image of board.
 """
 
+import gc
 import os
 from typing import Optional, Tuple, Union
 from PIL import Image
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QEvent, QObject, QPoint, QPointF, QRect, QRectF, Qt, QTimer
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, QPointF, QRect,
+                          QRectF, Qt, QTimer)
 from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent, QWheelEvent
 from PyQt5.QtWidgets import QGraphicsScene, QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView, GraphicsManualPinItem
@@ -16,9 +18,11 @@ from .common import WorkMode
 from .pedalhandler import add_pedal_handler
 
 
-def pil_to_pixmap(image: Image) -> QPixmap:
+def convert_pil_image_to_qpixmap(image: Image) -> QPixmap:
     """
-    See https://stackoverflow.com/questions/34697559/pil-image-to-qpixmap-conversion-issue
+    See https://stackoverflow.com/questions/34697559/pil-image-to-qpixmap-conversion-issue.
+    :param image: image.
+    :return: pixmap.
     """
 
     if image.mode == "RGB":
@@ -53,7 +57,7 @@ class BoardWidget(QWidget):
 
         super().__init__()
         self._board: Optional[MeasurementPlan] = None
-        self._board_image: Optional[QPixmap] = None
+        self._board_pixmap: Optional[QPixmap] = None
         self._control_pressed: bool = False
         self._main_window = main_window
         self._previous_pos: Optional[QRect] = None
@@ -70,6 +74,20 @@ class BoardWidget(QWidget):
         """
 
         return self._main_window.measurement_plan
+
+    def _convert_image_to_pixmap(self) -> None:
+        try:
+            self._board_pixmap = convert_pil_image_to_qpixmap(self.measurement_plan.image)
+        except MemoryError:
+            self._delete_board_pixmap()
+            ut.show_message(qApp.translate("t", "Ошибка"),
+                            qApp.translate("t", "Загружаемое изображение слишком большое. Выберите изображение меньшего"
+                                                " размера или воспользуйтесь 64-битной версией программы EPLab."))
+
+    def _delete_board_pixmap(self) -> None:
+        del self._board_pixmap
+        self._board_pixmap = None
+        gc.collect()
 
     def _handle_key_press_event(self, obj: QObject, event: QEvent) -> bool:
         """
@@ -145,7 +163,7 @@ class BoardWidget(QWidget):
             return left, right
 
         viewport_width, viewport_height = get_viewport_size_in_scene_coordinates()
-        image_rect = self._board_image.rect()
+        image_rect = self._board_pixmap.rect()
         x_left, x_right = get_left_and_right(viewport_width, image_rect.width())
         y_top, y_bottom = get_left_and_right(viewport_height, image_rect.height())
         self._scene.setSceneRect(QRectF(x_left, y_top, x_right - x_left, y_bottom - y_top))
@@ -208,7 +226,7 @@ class BoardWidget(QWidget):
 
         if obj == self._scene and isinstance(event, QWheelEvent):
             result = super().eventFilter(obj, event)
-            if self._board_image:
+            if self._board_pixmap:
                 self._timer.start()
             return result
 
@@ -224,6 +242,23 @@ class BoardWidget(QWidget):
         point = self._scene.mapToScene(int(width / 2), int(height / 2))
         return point.x(), point.y()
 
+    def open_board_image(self) -> None:
+        if not self.measurement_plan.image:
+            ut.show_message(qApp.translate("t", "Ошибка"),
+                            qApp.translate("t", "Для данной платы изображение не задано."))
+        elif not self._board_pixmap:
+            ut.show_message(qApp.translate("t", "Ошибка"),
+                            qApp.translate("t", "Для данной платы не удалось загрузить изображение."))
+        else:
+            self.open_board_image_if_needed()
+
+    def open_board_image_if_needed(self) -> None:
+        if self._board_pixmap:
+            if not self.isVisible():
+                self.show()
+            else:
+                self.activateWindow()
+
     def remove_pin_from_board_image(self, index: int) -> None:
         """
         :param index: pin index to delete from board image.
@@ -237,7 +272,7 @@ class BoardWidget(QWidget):
         """
 
         super().resizeEvent(event)
-        if self._board_image:
+        if self._board_pixmap:
             self._timer.start()
 
     def select_pin_on_scene(self, index: int, pin_centering: bool = True) -> None:
@@ -289,14 +324,16 @@ class BoardWidget(QWidget):
 
         self._scene.clear_scene()
         if self.measurement_plan.image:
-            self._board_image = pil_to_pixmap(self.measurement_plan.image)
-            self._scene.set_background(self._board_image)
+            self._convert_image_to_pixmap()
+        else:
+            self._delete_board_pixmap()
+
+        if self._board_pixmap:
+            self._scene.set_background(self._board_pixmap)
             self._scene.scale_to_window_size(self.width(), self.height())
-            image_rect = self._board_image.rect()
+            image_rect = self._board_pixmap.rect()
             self._scene.setSceneRect(image_rect.x(), image_rect.y(), image_rect.width(), image_rect.height())
         else:
-            del self._board_image
-            self._board_image = None
             self.close()
 
         for index, pin in self.measurement_plan.all_pins_iterator():

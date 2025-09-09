@@ -1,13 +1,14 @@
+import gc
 import os
 from typing import Optional
 from boardview.BoardViewWidget import BoardView
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, UnidentifiedImageError
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPixmap, QTransform
 from PyQt5.QtWidgets import QDialog, QGraphicsScene, QHBoxLayout, QPushButton, QStyle, QVBoxLayout
-from window.boardwidget import pil_to_pixmap
+from window import utils as ut
+from window.boardwidget import convert_pil_image_to_qpixmap
 from window.scaler import update_scale_of_class
-from window.utils import DIR_MEDIA
 
 
 @update_scale_of_class
@@ -18,32 +19,63 @@ class ImageAdder(QDialog):
 
     INIT_SIZE_AS_PROPORTION_OF_SCREEN: float = 0.6
 
-    def __init__(self, filename: str) -> None:
+    def __init__(self, filepath: str) -> None:
         """
-        :param filename: the name of the file with the image to get.
+        :param filepath: path to image file.
         """
 
         super().__init__()
-        self._read_image(filename)
+        self._angle: int = 0
+        self._image: Optional[Image.Image] = self._read_image(filepath)
+        if self._image is None:
+            return
+
+        self._pixmap: Optional[QPixmap] = self._convert_image_to_pixmap()
+        if self._pixmap is None:
+            return
+
         self._init_ui()
         self._set_init_position()
-        QTimer.singleShot(100, self._add_image_to_scene)
+        QTimer.singleShot(100, self._rotate_pixmap)
 
-    def _add_image_to_scene(self) -> None:
-        self._scene._background = None
-        self._scene.set_background(pil_to_pixmap(self._image))
+    def _add_pixmap_to_scene(self) -> None:
+        self._scene.set_background(self._rotated_pixmap)
+        center_pos = self._scene.scene().sceneRect().center()
+        self._scene._background.setPos(center_pos - self._scene._background.boundingRect().center())
         self._scene.fitInView(self._scene._background, Qt.KeepAspectRatio)
         self._scene.update()
+
+    def _change_rotation_angle(self, angle_change: int) -> None:
+        """
+        :param angle_change: how much the image rotation angle should be changed (positive values - clockwise rotation,
+        negative - counterclockwise).
+        """
+
+        self._angle += angle_change
+
+    def _convert_image_to_pixmap(self) -> Optional[QPixmap]:
+        """
+        :return: pixmap for image.
+        """
+
+        try:
+            pixmap = convert_pil_image_to_qpixmap(self._image)
+        except MemoryError:
+            pixmap = None
+            ut.show_message(qApp.translate("t", "Ошибка"),
+                            qApp.translate("t", "Загружаемое изображение слишком большое. Выберите изображение меньшего"
+                                                " размера или воспользуйтесь 64-битной версией программы EPLab."))
+        return pixmap
 
     def _create_buttons(self) -> None:
         self.button_rotate_counterclockwise: QPushButton = QPushButton(qApp.translate("dialogs",
                                                                                       "Повернуть на 90° влево"))
-        icon_path = os.path.join(DIR_MEDIA, "rotate_counterclockwise.png")
+        icon_path = os.path.join(ut.DIR_MEDIA, "rotate_counterclockwise.png")
         self.button_rotate_counterclockwise.setIcon(QIcon(icon_path))
         self.button_rotate_counterclockwise.clicked.connect(self._rotate_counterclockwise)
 
         self.button_rotate_clockwise: QPushButton = QPushButton(qApp.translate("dialogs", "Повернуть на 90° вправо"))
-        icon_path = os.path.join(DIR_MEDIA, "rotate_clockwise.png")
+        icon_path = os.path.join(ut.DIR_MEDIA, "rotate_clockwise.png")
         self.button_rotate_clockwise.setIcon(QIcon(icon_path))
         self.button_rotate_clockwise.clicked.connect(self._rotate_clockwise)
 
@@ -66,7 +98,7 @@ class ImageAdder(QDialog):
 
     def _init_ui(self) -> None:
         self.setWindowTitle(qApp.translate("MainWindow", "Добавить изображение"))
-        self.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "icon.png")))
+        self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
 
         self._create_buttons()
         self._create_scene()
@@ -77,30 +109,63 @@ class ImageAdder(QDialog):
         v_layout.addLayout(self._h_layout)
         self.setLayout(v_layout)
 
-    def _read_image(self, filename: str) -> None:
+    @staticmethod
+    def _read_image(filepath: str) -> Optional[Image.Image]:
         """
-        :param filename: the name of the file with the image to get.
-        """
-
-        image = Image.open(filename)
-        self._image: Image.Image = ImageOps.exif_transpose(image)
-
-    def _rotate(self, angle: float) -> None:
-        """
-        :param angle: the angle by which the image should be rotated.
+        :param filepath: path to image file.
+        :return: image read from file.
         """
 
-        self._image = self._image.rotate(angle, expand=True)
-        self._scene.scene().removeItem(self._scene._background)
-        self._add_image_to_scene()
+        filename = os.path.basename(filepath)
+        try:
+            image = Image.open(filepath)
+            image = ImageOps.exif_transpose(image)
+        except FileNotFoundError:
+            image = None
+            ut.show_message(qApp.translate("t", "Ошибка"),
+                            qApp.translate("dialogs", "Файл изображения '{}' не найден.").format(filename))
+        except MemoryError:
+            image = None
+            ut.show_message(qApp.translate("t", "Ошибка"),
+                            qApp.translate("t", "Загружаемое изображение слишком большое. Выберите изображение меньшего"
+                                                " размера или воспользуйтесь 64-битной версией программы EPLab."))
+        except UnidentifiedImageError:
+            image = None
+            ut.show_message(qApp.translate("t", "Ошибка"),
+                            qApp.translate("dialogs", "Не удается идентифицировать файл изображения '{}'."
+                                           ).format(filename))
+        return image
+
+    def _remove_pixmap_from_scene(self) -> None:
+        if self._scene._background is not None:
+            self._scene.scene().removeItem(self._scene._background)
+            self._scene._background = None
+
+    def _rotate_pixmap(self) -> None:
+        transform = QTransform()
+        transform.rotate(self._angle)
+        self._rotated_pixmap = self._pixmap.transformed(transform)
+
+        self._remove_pixmap_from_scene()
+        self._add_pixmap_to_scene()
 
     @pyqtSlot()
     def _rotate_clockwise(self) -> None:
-        self._rotate(-90)
+        """
+        Slot rotates the image 90 degrees clockwise.
+        """
+
+        self._change_rotation_angle(90)
+        self._rotate_pixmap()
 
     @pyqtSlot()
     def _rotate_counterclockwise(self) -> None:
-        self._rotate(90)
+        """
+        Slot rotates the image 90 degrees counterclockwise.
+        """
+
+        self._change_rotation_angle(-90)
+        self._rotate_pixmap()
 
     def _set_init_position(self) -> None:
         """
@@ -118,21 +183,37 @@ class ImageAdder(QDialog):
         self.move(pos_x, pos_y)
         self.resize(width, height)
 
+    def exec_(self) -> int:
+        """
+        :return: dialog code result.
+        """
+
+        if self._image is None or self._pixmap is None:
+            gc.collect()
+            return QDialog.Rejected
+
+        result = super().exec_()
+        gc.collect()
+        return result
+
     def get_image(self) -> Image.Image:
         """
         :return: image obtained from file after rotations.
         """
 
+        if self._angle:
+            return self._image.rotate(-self._angle, expand=True)
+
         return self._image
 
 
-def get_image_from_file(filename: str) -> Optional[Image.Image]:
+def get_image_from_file(filepath: str) -> Optional[Image.Image]:
     """
-    :param filename: the name of the file with the image to get.
+    :param filepath: path to image file.
     :return: image obtained from file after rotations.
     """
 
-    image_adder = ImageAdder(filename)
+    image_adder = ImageAdder(filepath)
     if image_adder.exec_() == QDialog.Accepted:
         return image_adder.get_image()
 
