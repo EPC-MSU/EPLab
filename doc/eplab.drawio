@@ -1,27 +1,27 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36" version="28.2.5">
   <diagram name="Page 3" id="0">
-    <mxGraphModel dx="1783" dy="2150" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1426" dy="1954" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="Rwa0681e-vy7oeirhcVE-58" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="2" target="13">
+        <mxCell id="_W4uVeQ2t3ANKt6jO-J5-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="2" target="13">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="455" y="-80" />
-              <mxPoint x="600" y="-80" />
+              <mxPoint x="735" y="-100" />
+              <mxPoint x="600" y="-100" />
             </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="2" style="graphMlID=n0;gradientDirection=east;shape=swimlane;startSize=30;rounded=1;arcSize=5;collapsible=0;fillColor=#B7C9E3;gradientColor=#b7c9e3;strokeColor=#000000;strokeWidth=1.0;shadow=1;swimlaneFillColor=#E8EEF7" parent="1" vertex="1">
-          <mxGeometry x="360" y="-40" width="190" height="100" as="geometry" />
+          <mxGeometry x="640" y="-80" width="190" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="0.0.0" value="Библиотека для сравнения ВАХ.&lt;br&gt;Технология: C &amp;amp; модуль Python&lt;br&gt;Тип лицензии: Internal&lt;br&gt;Источник: внутренний релиз" style="text;html=1;spacing=0;align=left;fontFamily=dialog;fontSize=12;fontStyle=0;=center;fontColor=#000000;verticalAlign=top" parent="2" vertex="1">
+        <mxCell id="0.0.0" value="Библиотека для сравнения ВАХ.&lt;br&gt;Технология: C &amp;amp; Python&lt;br&gt;Тип лицензии: Internal&lt;br&gt;Источник: внутренний релиз" style="text;html=1;spacing=0;align=left;fontFamily=dialog;fontSize=12;fontStyle=0;=center;fontColor=#000000;verticalAlign=top" parent="2" vertex="1">
           <mxGeometry x="2" y="30.701171875" width="186.625" height="62.8046875" as="geometry" />
         </mxCell>
         <mxCell id="0.0.1" value="libivcmp" style="text;html=1;spacing=0;align=center;fontFamily=dialog;fontSize=12;fontStyle=1;=center;fontColor=#000000;verticalAlign=bottom" parent="2" vertex="1">
           <mxGeometry x="68.97015625" y="4" width="52.6796875" height="18.701171875" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="3" target="5">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="3" target="5" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="3" style="graphMlID=n1;gradientDirection=east;shape=swimlane;startSize=30;rounded=1;arcSize=5;collapsible=0;fillColor=#B7C9E3;gradientColor=#b7c9e3;strokeColor=#000000;strokeWidth=1.0;shadow=1;swimlaneFillColor=#E8EEF7" parent="1" vertex="1">
@@ -42,7 +42,7 @@
         <mxCell id="0.2.1" value="epsound" style="text;html=1;spacing=0;align=center;fontFamily=dialog;fontSize=12;fontStyle=1;=center;fontColor=#000000;verticalAlign=bottom" parent="4" vertex="1">
           <mxGeometry x="92.0009765625" y="4" width="53.998046875" height="18.701171875" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-60" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="5" target="7">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-60" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="5" target="7" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="1040" y="-495" />
@@ -59,7 +59,7 @@
         <mxCell id="0.3.1" value="boardviewer" style="text;html=1;spacing=0;align=center;fontFamily=dialog;fontSize=12;fontStyle=1;=center;fontColor=#000000;verticalAlign=bottom" parent="5" vertex="1">
           <mxGeometry x="81.6533203125" y="4" width="74.693359375" height="18.701171875" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="7">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="6" target="7" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="6" style="graphMlID=n4;gradientDirection=east;shape=swimlane;startSize=30;rounded=1;arcSize=5;collapsible=0;fillColor=#B7C9E3;gradientColor=#b7c9e3;strokeColor=#000000;strokeWidth=1.0;shadow=1;swimlaneFillColor=#E8EEF7" parent="1" vertex="1">
@@ -83,7 +83,7 @@
         <mxCell id="8" style="graphMlID=n6;shape=swimlane;startSize=20;rounded=1;arcSize=5;fillColor=#ECFF84CA;strokeColor=#666699;strokeWidth=1.0;dashed=1;dashPattern=1 3" parent="1" vertex="1">
           <mxGeometry x="120" y="-560" width="880" height="440" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="8" source="9" target="13">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="8" source="9" target="13" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="9" style="graphMlID=n6::n0;gradientDirection=east;shape=swimlane;startSize=30;rounded=1;arcSize=5;collapsible=0;fillColor=#B7C9E3;gradientColor=#b7c9e3;strokeColor=#000000;strokeWidth=1.0;shadow=1;swimlaneFillColor=#E8EEF7" parent="8" vertex="1">
@@ -95,10 +95,10 @@
         <mxCell id="0.6.0.1" value="ivmeasurer" style="text;html=1;spacing=0;align=center;fontFamily=dialog;fontSize=12;fontStyle=1;=center;fontColor=#000000;verticalAlign=bottom" parent="9" vertex="1">
           <mxGeometry x="106.978515625" y="4" width="68.04296875" height="18.701171875" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="8" source="10" target="13">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="8" source="10" target="13" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="8" source="10" target="0.6.3.0">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="8" source="10" target="0.6.3.0" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="10" style="graphMlID=n6::n1;gradientDirection=east;shape=swimlane;startSize=30;rounded=1;arcSize=5;collapsible=0;fillColor=#B7C9E3;gradientColor=#b7c9e3;strokeColor=#000000;strokeWidth=1.0;shadow=1;swimlaneFillColor=#E8EEF7" parent="8" vertex="1">
@@ -140,33 +140,28 @@
         <mxCell id="0.6.7" value="epcore" style="text;html=1;spacing=0;align=right;fontFamily=dialog;fontSize=15;fontStyle=0;=center;fontColor=#000000;verticalAlign=bottom" parent="8" vertex="1">
           <mxGeometry width="775.8787226890754" height="22.37646484375" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="16" target="13">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="785" y="-80" />
-              <mxPoint x="600" y="-80" />
-            </Array>
-          </mxGeometry>
+        <mxCell id="_W4uVeQ2t3ANKt6jO-J5-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="16" target="0.6.0.0">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="16" style="graphMlID=n7;gradientDirection=east;shape=swimlane;startSize=30;rounded=1;arcSize=5;collapsible=0;fillColor=#B7C9E3;gradientColor=#b7c9e3;strokeColor=#000000;strokeWidth=1.0;shadow=1;swimlaneFillColor=#E8EEF7" parent="1" vertex="1">
-          <mxGeometry x="640" y="-40" width="290" height="100" as="geometry" />
+          <mxGeometry x="280" y="-80" width="290" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="0.7.0" value="Библиотека для взаимодействия с ВАХометрами IVM.&lt;br&gt;Технология: C &amp;amp; модуль Python из uRPC&lt;br&gt;Тип лицензии: Freeware&lt;br&gt;Источник: PyPI" style="text;html=1;spacing=0;align=left;fontFamily=dialog;fontSize=12;fontStyle=0;=center;fontColor=#000000;verticalAlign=top" parent="16" vertex="1">
+        <mxCell id="0.7.0" value="Библиотека для взаимодействия с ВАХометрами IVM.&lt;br&gt;Технология: C &amp;amp; Python&lt;br&gt;Тип лицензии: Freeware&lt;br&gt;Источник: PyPI" style="text;html=1;spacing=0;align=left;fontFamily=dialog;fontSize=12;fontStyle=0;=center;fontColor=#000000;verticalAlign=top" parent="16" vertex="1">
           <mxGeometry x="2" y="30.701171875" width="231.3203125" height="77.505859375" as="geometry" />
         </mxCell>
         <mxCell id="0.7.1" value="libivm" style="text;html=1;spacing=0;align=center;fontFamily=dialog;fontSize=12;fontStyle=1;=center;fontColor=#000000;verticalAlign=bottom" parent="16" vertex="1">
           <mxGeometry x="125.662109375" y="4" width="38.67578125" height="18.701171875" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-51" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="0.2.0" target="0.5.0">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-51" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="0.2.0" target="0.5.0" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-61" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="12" target="7">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-61" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="12" target="7" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-62" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="13" target="7">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-62" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="13" target="7" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-63" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="11" target="7">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-63" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="11" target="7" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="300" y="-570" />
@@ -174,16 +169,16 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="Rwa0681e-vy7oeirhcVE-64" target="0.5.0">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Rwa0681e-vy7oeirhcVE-64" target="0.5.0" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-64" style="graphMlID=n2;gradientDirection=east;shape=swimlane;startSize=30;rounded=1;arcSize=5;collapsible=0;fillColor=#B7C9E3;gradientColor=#b7c9e3;strokeColor=#000000;strokeWidth=1.0;shadow=1;swimlaneFillColor=#E8EEF7" vertex="1" parent="1">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-64" style="graphMlID=n2;gradientDirection=east;shape=swimlane;startSize=30;rounded=1;arcSize=5;collapsible=0;fillColor=#B7C9E3;gradientColor=#b7c9e3;strokeColor=#000000;strokeWidth=1.0;shadow=1;swimlaneFillColor=#E8EEF7" parent="1" vertex="1">
           <mxGeometry x="120" y="-930" width="300" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-65" value="Кроссплатформенная библиотека для генерации отчетов.&lt;br&gt;Технология: Python&lt;br&gt;Тип лицензии: OpenSource&lt;br&gt;Источник: GitHub" style="text;html=1;spacing=0;align=left;fontFamily=dialog;fontSize=12;fontStyle=0;=center;fontColor=#000000;verticalAlign=top" vertex="1" parent="Rwa0681e-vy7oeirhcVE-64">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-65" value="Кроссплатформенная библиотека для генерации отчетов.&lt;br&gt;Технология: Python&lt;br&gt;Тип лицензии: OpenSource&lt;br&gt;Источник: GitHub" style="text;html=1;spacing=0;align=left;fontFamily=dialog;fontSize=12;fontStyle=0;=center;fontColor=#000000;verticalAlign=top" parent="Rwa0681e-vy7oeirhcVE-64" vertex="1">
           <mxGeometry x="2" y="30.7" width="234.36" height="79.3" as="geometry" />
         </mxCell>
-        <mxCell id="Rwa0681e-vy7oeirhcVE-66" value="ep_report_generator" style="text;html=1;spacing=0;align=center;fontFamily=dialog;fontSize=12;fontStyle=1;=center;fontColor=#000000;verticalAlign=bottom" vertex="1" parent="Rwa0681e-vy7oeirhcVE-64">
+        <mxCell id="Rwa0681e-vy7oeirhcVE-66" value="ep_report_generator" style="text;html=1;spacing=0;align=center;fontFamily=dialog;fontSize=12;fontStyle=1;=center;fontColor=#000000;verticalAlign=bottom" parent="Rwa0681e-vy7oeirhcVE-64" vertex="1">
           <mxGeometry x="92.0009765625" y="4" width="53.998046875" height="18.701171875" as="geometry" />
         </mxCell>
       </root>
