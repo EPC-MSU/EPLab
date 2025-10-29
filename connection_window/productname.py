@@ -145,7 +145,8 @@ class ProductName(Enum):
 
         return {cls.EYEPOINT_A2: "EyePoint a2",
                 cls.EYEPOINT_H10: "EyePoint H10",
-                cls.EYEPOINT_S2: qApp.translate("connection_window", "EyePoint S2 /\nСигнатурный анализатор С2"),
+                cls.EYEPOINT_S2: qApp.translate("connection_window", "EyePoint S2 /\nEyePoint S3 /\n"
+                                                                     "Сигнатурный анализатор С2"),
                 cls.EYEPOINT_U21: "EyePoint u21",
                 cls.EYEPOINT_U22: "EyePoint u22",
                 cls.EYEPOINT_U32: "EyePoint u32",
