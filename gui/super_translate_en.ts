@@ -726,8 +726,10 @@ leading to a numbering shift</translation>
     <message>
         <location filename="../connection_window/productname.py" line="148"/>
         <source>EyePoint S2 /
+EyePoint S3 /
 Сигнатурный анализатор С2</source>
         <translation>EyePoint S2 /
+EyePoint S3 /
 Signature analyzer S2</translation>
     </message>
     <message>
