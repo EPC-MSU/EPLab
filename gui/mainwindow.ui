@@ -201,7 +201,7 @@
   <widget class="QDockWidget" name="comment_dock">
    <property name="minimumSize">
     <size>
-     <width>150</width>
+     <width>170</width>
      <height>40</height>
     </size>
    </property>

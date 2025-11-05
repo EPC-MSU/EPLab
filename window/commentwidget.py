@@ -93,6 +93,7 @@ class CommentWidget(TableWidget):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
         self.setItemDelegate(CommentTableDelegate())
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
     def _add_row(self, index: int, comment: Optional[str] = None) -> None:
         """
