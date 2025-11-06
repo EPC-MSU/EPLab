@@ -338,8 +338,7 @@ class EPLabWindow(QMainWindow):
         self.new_point_action.setEnabled(enable)
         self.remove_point_action.setEnabled(enable and self.measurement_plan.pins_number > 0)
         self.save_point_action.setEnabled(mode is not WorkMode.READ_PLAN)
-        self.delete_all_test_signatures_action.setEnabled(mode is not WorkMode.READ_PLAN
-                                                          and bool(self.measurement_plan))
+        self.delete_all_test_signatures_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
         self.add_board_image_action.setEnabled(mode is WorkMode.WRITE)
         self.delete_board_image_action.setEnabled(mode is WorkMode.WRITE)
         self.create_report_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
