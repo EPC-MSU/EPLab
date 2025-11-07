@@ -39,10 +39,19 @@ class MeasurementPlanPath(QObject):
         self._send_new_name()
 
     def _send_new_name(self) -> None:
+        measurement_plan_name = self.get_measurement_plan_name()
+        self.name_changed.emit(measurement_plan_name)
+
+    def get_measurement_plan_name(self) -> str:
+        """
+        :return: plan name.
+        """
+
         if self._main_window.measurement_plan is None:
             measurement_plan_name = ""
         elif self._path is None:
             measurement_plan_name = "Untitled"
         else:
             measurement_plan_name = os.path.split(self._path)[1]
-        self.name_changed.emit(measurement_plan_name)
+
+        return measurement_plan_name
