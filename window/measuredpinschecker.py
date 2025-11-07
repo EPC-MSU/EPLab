@@ -39,7 +39,7 @@ class MeasuredPinsChecker(QObject):
         return self._main_window.measurement_plan
 
     @staticmethod
-    def _check_pin(pin: Pin) -> bool:
+    def _check_pin_has_reference_signature(pin: Pin) -> bool:
         """
         Method checks whether there is a reference signature in a given pin.
         :param pin: pin in which to check the presence of a measured reference signature.
@@ -49,6 +49,20 @@ class MeasuredPinsChecker(QObject):
         for measurement in pin.measurements:
             if measurement.is_reference:
                 return True
+
+        return False
+
+    @staticmethod
+    def _check_pin_has_test_signature(pin: Pin) -> bool:
+        """
+        :param pin: pin in which to check the presence of a measured test signature.
+        :return: True, if the test signature is measured in the pin.
+        """
+
+        for measurement in pin.measurements:
+            if not measurement.is_reference:
+                return True
+
         return False
 
     def _check_pin_with_index(self, pin_index: int) -> None:
@@ -66,7 +80,7 @@ class MeasuredPinsChecker(QObject):
         if pin is None:
             self._empty_pins.discard(pin_index)
             self._measured_pins.discard(pin_index)
-        elif self._check_pin(pin):
+        elif self._check_pin_has_reference_signature(pin):
             self._empty_pins.discard(pin_index)
             self._measured_pins.add(pin_index)
         else:
@@ -82,10 +96,24 @@ class MeasuredPinsChecker(QObject):
         self._measured_pins.clear()
         if self.measurement_plan:
             for index, pin in self.measurement_plan.all_pins_iterator():
-                if self._check_pin(pin):
+                if self._check_pin_has_reference_signature(pin):
                     self._measured_pins.add(index)
                 else:
                     self._empty_pins.add(index)
+
+    def check_all_pins_have_test_signatures(self) -> bool:
+        """
+        :return: True if test signatures are measured on all pins.
+        """
+
+        if not self.measurement_plan:
+            return True
+
+        for _, pin in self.measurement_plan.all_pins_iterator():
+            if not self._check_pin_has_test_signature(pin):
+                return False
+
+        return True
 
     def check_empty_current_pin(self) -> bool:
         """

@@ -31,6 +31,11 @@ leading to a numbering shift</translation>
         <translation>Tolerance</translation>
     </message>
     <message>
+        <location filename="settings.ui" line="192"/>
+        <source>Предупреждать о неоконченном тестировании при генерации отчета</source>
+        <translation>Warn about unfinished testing when generating a report</translation>
+    </message>
+    <message>
         <location filename="settings.ui" line="220"/>
         <source>Загрузить настройки</source>
         <translation>Load settings</translation>
@@ -497,6 +502,11 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
         <location filename="../window/eplabwindow.py" line="1380"/>
         <source>Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0}, будут увеличены на 1.</source>
         <translation>The added point will have the number {0}. The numbers of existing points, starting from {0}, will be increased by 1.</translation>
+    </message>
+    <message>
+        <location filename="../window/eplabwindow.py" line="1408"/>
+        <source>Остались непротестированные точки. Продолжить?</source>
+        <translation>There are still some untested pins left. Continue?</translation>
     </message>
     <message>
         <location filename="../window/eplabwindow.py" line="1414"/>

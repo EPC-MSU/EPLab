@@ -53,6 +53,7 @@ class AutoSettings(SettingsHandler):
     mux_port: str = None
     pin_shift_warning_info: bool = True
     product_name: str = None
+    warning_about_untested_pins_in_report: bool = True
 
     def _read(self, settings: QSettings) -> None:
         """
@@ -73,7 +74,8 @@ class AutoSettings(SettingsHandler):
 
         params = {"auto_transition": {"convert": ut.to_bool},
                   "language": {"convert": get_language_from_str},
-                  "pin_shift_warning_info": {"convert": ut.to_bool}}
+                  "pin_shift_warning_info": {"convert": ut.to_bool},
+                  "warning_about_untested_pins_in_report": {"convert": ut.to_bool}}
         settings.beginGroup("Main")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
@@ -105,7 +107,8 @@ class AutoSettings(SettingsHandler):
 
         params = {"auto_transition": {"convert": str},
                   "language": {"convert": convert_language_to_str},
-                  "pin_shift_warning_info": {"convert": str}}
+                  "pin_shift_warning_info": {"convert": str},
+                  "warning_about_untested_pins_in_report": {"convert": str}}
         settings.beginGroup("Main")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
@@ -190,6 +193,14 @@ class AutoSettings(SettingsHandler):
         """
 
         self.pin_shift_warning_info = bool(pin_shift_warning_info)
+
+    @save_settings
+    def save_warning_about_untested_pins_in_report(self, warning_about_untested_pins_in_report: bool) -> None:
+        """
+        :param warning_about_untested_pins_in_report:
+        """
+
+        self.warning_about_untested_pins_in_report = bool(warning_about_untested_pins_in_report)
 
 
 def check_none(value: str) -> Optional[str]:

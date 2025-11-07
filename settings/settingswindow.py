@@ -50,6 +50,8 @@ class SettingsWindow(QDialog):
             self.label_auto_transition.hide()
             self.check_box_auto_transition.hide()
         self.check_box_pin_shift_warning_info.stateChanged.connect(self.update_pin_shift_warning_info)
+        self.check_box_warning_about_untested_pins_in_report.stateChanged.connect(
+            self.update_warning_about_untested_pins_in_report)
         self.spin_box_tolerance.valueChanged.connect(self.update_tolerance)
         self.spin_box_max_optimal_voltage.valueChanged.connect(self.update_max_optimal_voltage)
 
@@ -100,6 +102,7 @@ class SettingsWindow(QDialog):
         self._update_max_optimal_voltage(settings.max_optimal_voltage)
         self._update_pin_shift_warning_info(settings.pin_shift_warning_info)
         self._update_tolerance_in_settings_wnd(settings.tolerance)
+        self._update_warning_about_untested_pins_in_report(settings.warning_about_untested_pins_in_report)
 
     def _update_pin_shift_warning_info(self, pin_shift_warning_info: bool) -> None:
         """
@@ -118,6 +121,14 @@ class SettingsWindow(QDialog):
         tolerance = min(max(round(100 * tolerance, 1), 0), 100)
         self.spin_box_tolerance.setValue(tolerance)
         self._settings.tolerance = self._get_tolerance_value()
+
+    def _update_warning_about_untested_pins_in_report(self, warning_about_untested_pins_in_report: bool) -> None:
+        """
+        :param warning_about_untested_pins_in_report: if True, then warn about untested points when generating a report.
+        """
+
+        self.check_box_warning_about_untested_pins_in_report.setChecked(warning_about_untested_pins_in_report)
+        self._settings.warning_about_untested_pins_in_report = warning_about_untested_pins_in_report
 
     @pyqtSlot()
     def apply_changes(self) -> None:
@@ -229,4 +240,13 @@ class SettingsWindow(QDialog):
         """
 
         self._update_tolerance_in_settings_wnd(new_value / 100)
+        self._send_settings()
+
+    @pyqtSlot(int)
+    def update_warning_about_untested_pins_in_report(self, state: int) -> None:
+        """
+        :param state: if True, then warn about untested points when generating a report.
+        """
+
+        self._update_warning_about_untested_pins_in_report(state == Qt.Checked)
         self._send_settings()

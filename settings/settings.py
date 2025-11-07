@@ -30,7 +30,7 @@ class Settings(SettingsHandler):
 
     ATTRIBUTE_NAMES: List[str] = ["auto_transition", "frequency", "hide_curve_a", "hide_curve_b", "internal_resistance",
                                   "max_optimal_voltage", "max_voltage", "pin_shift_warning_info", "sound_enabled",
-                                  "tolerance", "work_mode"]
+                                  "tolerance", "warning_about_untested_pins_in_report", "work_mode"]
     changed: pyqtSignal = pyqtSignal()
     auto_transition: bool = False
     frequency: Tuple[int, int] = None
@@ -42,6 +42,7 @@ class Settings(SettingsHandler):
     pin_shift_warning_info: bool = True
     sound_enabled: bool = False
     tolerance: float = 0.15
+    warning_about_untested_pins_in_report: bool = True
     work_mode: WorkMode = WorkMode.COMPARE
 
     def __init__(self, parent=None) -> None:
@@ -74,6 +75,7 @@ class Settings(SettingsHandler):
                   "pin_shift_warning_info": {"convert": ut.to_bool},
                   "sound_enabled": {"convert": ut.to_bool},
                   "tolerance": {"convert": float},
+                  "warning_about_untested_pins_in_report": {"convert": ut.to_bool},
                   "work_mode": {"convert": lambda value: MODES[value]}}
         with SettingsEditor(self):
             settings.beginGroup("General")
@@ -101,6 +103,7 @@ class Settings(SettingsHandler):
                   "pin_shift_warning_info": {},
                   "sound_enabled": {},
                   "tolerance": {"convert": ut.float_to_str},
+                  "warning_about_untested_pins_in_report": {},
                   "work_mode": {"convert": get_work_mode}}
         settings.beginGroup("General")
         self._write_parameters_to_settings(settings, params)

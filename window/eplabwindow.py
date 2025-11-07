@@ -1279,6 +1279,7 @@ class EPLabWindow(QMainWindow):
         self._auto_settings.auto_transition = new_settings.auto_transition
         self._auto_settings.max_optimal_voltage = new_settings.max_optimal_voltage
         self._auto_settings.pin_shift_warning_info = new_settings.pin_shift_warning_info
+        self._auto_settings.warning_about_untested_pins_in_report = new_settings.warning_about_untested_pins_in_report
         self._update_tolerance(new_settings.tolerance)
 
     @pyqtSlot(str)
@@ -1397,12 +1398,24 @@ class EPLabWindow(QMainWindow):
     def create_report(self, auto_detection_report_path: bool = False) -> None:
         """
         Slot starts report generation.
-        :param auto_detection_report_path: if true, then it is needed to try to determine the path to save the
+        :param auto_detection_report_path: if True, then it is needed to try to determine the path to save the
         generated report automatically. Otherwise, it is needed to ask the user where to save the report.
         In task #92258, the algorithm for determining the directory in which to save the generated report during
         automatic testing with a multiplexer has been changed. If the path to the uzf-file with the measurement plan is
         known, then the report should be saved nearby. Otherwise, it is needed to ask the user for the path.
         """
+
+        if (not self._measured_pins_checker.check_all_pins_have_test_signatures() and
+                self._auto_settings.warning_about_untested_pins_in_report):
+            main_text = qApp.translate("t", "Остались непротестированные точки. Продолжить?")
+            result, not_show_again = ut.show_message_with_option(qApp.translate("t", "Внимание"), main_text,
+                                                                 qApp.translate("t", "Не показывать снова"),
+                                                                 no_button=True, yes_button=True)
+            if not_show_again:
+                self._auto_settings.save_warning_about_untested_pins_in_report(False)
+
+            if result:
+                return
 
         if auto_detection_report_path and self._measurement_plan_path.path and \
                 os.path.exists(self._measurement_plan_path.path):
@@ -1550,6 +1563,7 @@ class EPLabWindow(QMainWindow):
         settings.pin_shift_warning_info = self._auto_settings.pin_shift_warning_info
         settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
         settings.tolerance = self.tolerance
+        settings.warning_about_untested_pins_in_report = self._auto_settings.warning_about_untested_pins_in_report
         return settings
 
     @pyqtSlot(bool, bool)
