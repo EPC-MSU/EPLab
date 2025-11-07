@@ -1415,8 +1415,8 @@ class EPLabWindow(QMainWindow):
 
         if dir_path:
             show_report_generation_window(self, self._report_generation_thread, self.measurement_plan,
-                                          self._measurement_plan_path.get_measurement_plan_name(), dir_path,
-                                          self.tolerance, self.work_mode)
+                                          self._measurement_plan_path.get_measurement_plan_name_without_extension(),
+                                          dir_path, self.tolerance, self.work_mode)
             if is_user_defined_path:
                 self.dir_chosen_by_user = dir_path
 

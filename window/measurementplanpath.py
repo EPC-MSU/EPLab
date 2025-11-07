@@ -38,11 +38,7 @@ class MeasurementPlanPath(QObject):
         self._path = new_path
         self._send_new_name()
 
-    def _send_new_name(self) -> None:
-        measurement_plan_name = self.get_measurement_plan_name()
-        self.name_changed.emit(measurement_plan_name)
-
-    def get_measurement_plan_name(self) -> str:
+    def _get_measurement_plan_name(self) -> str:
         """
         :return: plan name.
         """
@@ -55,3 +51,15 @@ class MeasurementPlanPath(QObject):
             measurement_plan_name = os.path.split(self._path)[1]
 
         return measurement_plan_name
+
+    def _send_new_name(self) -> None:
+        measurement_plan_name = self._get_measurement_plan_name()
+        self.name_changed.emit(measurement_plan_name)
+
+    def get_measurement_plan_name_without_extension(self) -> str:
+        """
+        :return: plan name without extension.
+        """
+
+        measurement_plan_name = self._get_measurement_plan_name()
+        return os.path.splitext(measurement_plan_name)[0]
