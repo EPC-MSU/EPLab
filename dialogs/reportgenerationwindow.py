@@ -60,11 +60,11 @@ class ReportGenerationThread(QThread):
         self.report_generator: ReportGenerator = ReportGenerator()
         self.setTerminationEnabled(True)
 
-    def _create_config(self, board: Board, report_dir_name: str, dir_for_report: str, tolerance: float,
-                       work_mode: WorkMode) -> Dict[ConfigAttributes, Any]:
+    def _create_config(self, board: Board, board_name: str, dir_for_report: str, tolerance: float, work_mode: WorkMode
+                       ) -> Dict[ConfigAttributes, Any]:
         """
         :param board: board for which to generate a report;
-        :param report_dir_name: the name of the folder that will be created for the report or report name;
+        :param board_name: the name of the folder that will be created for the report or report name;
         :param dir_for_report: directory where to save the report;
         :param tolerance: tolerance;
         :param work_mode: application work mode.
@@ -80,23 +80,23 @@ class ReportGenerationThread(QThread):
                 ConfigAttributes.OBJECTS: {ObjectsForReport.BOARD: True},
                 ConfigAttributes.OPEN_REPORT_AT_FINISH: True,
                 ConfigAttributes.PIN_SIZE: 150,
-                ConfigAttributes.REPORT_DIR_NAME: report_dir_name,
+                ConfigAttributes.PROJECT_NAME: board_name,
                 ConfigAttributes.REPORTS_TO_OPEN: [report_to_open],
                 ConfigAttributes.SCALING_TYPE: ScalingTypes.USER_DEFINED,
                 ConfigAttributes.TOLERANCE: tolerance,
                 ConfigAttributes.USER_DEFINED_SCALES: scales}
 
-    def _run_report_generation(self, board: Board, report_dir_name: str, dir_for_report: str, tolerance: float,
+    def _run_report_generation(self, board: Board, board_name: str, dir_for_report: str, tolerance: float,
                                work_mode: WorkMode) -> None:
         """
         :param board: board for which to generate a report;
-        :param report_dir_name: the name of the folder that will be created for the report or report name;
+        :param board_name: board name;
         :param dir_for_report: directory where to save the report;
         :param tolerance: tolerance;
         :param work_mode: application work mode.
         """
 
-        config = self._create_config(board, report_dir_name, dir_for_report, tolerance, work_mode)
+        config = self._create_config(board, board_name, dir_for_report, tolerance, work_mode)
         self.report_generator.run(config)
 
     def add_task(self, *args, **kwargs) -> None:
@@ -221,18 +221,18 @@ class ReportGenerationWindow(QDialog):
         self._total_number = number
 
 
-def show_report_generation_window(parent, thread: ReportGenerationThread, board: Board, report_dir_name: str,
+def show_report_generation_window(parent, thread: ReportGenerationThread, board: Board, board_name: str,
                                   dir_for_report: str, tolerance: float, work_mode: WorkMode) -> None:
     """
     :param parent: main window;
     :param thread: thread in which the report will be generated;
     :param board: board for which to generate a report;
-    :param report_dir_name: the name of the folder that will be created for the report or report name;
+    :param board_name: board name;
     :param dir_for_report: directory where to save the report;
     :param tolerance: tolerance;
     :param work_mode: application work mode.
     """
 
     window = ReportGenerationWindow(parent, thread)
-    thread.add_task(board, report_dir_name, dir_for_report, tolerance, work_mode)
+    thread.add_task(board, board_name, dir_for_report, tolerance, work_mode)
     window.exec()
