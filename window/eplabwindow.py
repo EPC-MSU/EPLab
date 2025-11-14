@@ -1393,7 +1393,11 @@ class EPLabWindow(QMainWindow):
 
         if (not self._measured_pins_checker.check_all_pins_have_test_signatures() and
                 self._auto_settings.warning_about_untested_pins_in_report):
-            main_text = qApp.translate("t", "Остались непротестированные точки. Продолжить?")
+            main_text = qApp.translate("t", "Остались непротестированные точки. Продолжить?<br>\n"
+                                            "Данные точки будут автоматически отмечены в отчете как исправные. Если вы "
+                                            'не планировали проводить тест в ограниченном объеме, нажмите "Нет" и '
+                                            "зафиксируйте тестовые сигнатуры недостающих точек (отмечены белым цветом в"
+                                            " списке точек).")
             result, not_show_again = ut.show_message_with_option(qApp.translate("t", "Внимание"), main_text,
                                                                  qApp.translate("t", "Не показывать снова"),
                                                                  no_button=True, yes_button=True)
