@@ -504,12 +504,14 @@ If a dual-channel device is used, it contains two measurers. The firmware needs 
         <translation>The added point will have the number {0}. The numbers of existing points, starting from {0}, will be increased by 1.</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1408"/>
-        <source>Остались непротестированные точки. Продолжить?</source>
-        <translation>There are still some untested pins left. Continue?</translation>
+        <location filename="../window/eplabwindow.py" line="1410"/>
+        <source>Остались непротестированные точки. Продолжить?&lt;br&gt;
+Данные точки будут автоматически отмечены в отчете как исправные. Если вы не планировали проводить тест в ограниченном объеме, нажмите &quot;Нет&quot; и зафиксируйте тестовые сигнатуры недостающих точек (отмечены белым цветом в списке точек).</source>
+        <translation>Not all pins were tested. Continue?&lt;br&gt;
+Such pins will be automatically declared in the report as being fault free. If you didn&apos;t intend to make a partial test, press &quot;No&quot; and complete the recording of the remaining test signatures (marked with white color in the pins list).</translation>
     </message>
     <message>
-        <location filename="../window/eplabwindow.py" line="1414"/>
+        <location filename="../window/eplabwindow.py" line="1430"/>
         <source>Выберите папку, в которую будет сохранен отчет</source>
         <translation>Select the folder where the report will be saved</translation>
     </message>
