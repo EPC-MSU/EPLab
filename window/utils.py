@@ -5,6 +5,7 @@ File with useful functions.
 import json
 import logging
 import os
+import random
 import re
 import sys
 from operator import itemgetter
@@ -126,6 +127,15 @@ def get_dir_name() -> str:
     else:
         path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     return path
+
+
+def get_new_params_for_equivalent_circuit() -> Tuple[str, Dict[str, str]]:
+    file_path = os.path.join(DIR_MEDIA, "circuits", f"circuit_{random.randint(1, 5)}")
+    params = {"R": f"{100 * random.random():.3f} Ом",
+              "C": f"{100 * random.random():.3f} пФ",
+              "D IN": f"{100 * random.random():.3f} В",
+              "D GND": f"{100 * random.random():.3f} В"}
+    return file_path, params
 
 
 def get_port(url: str) -> Optional[str]:

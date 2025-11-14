@@ -12,7 +12,8 @@ from platform import system
 from typing import Any, Dict, List, Optional, Tuple
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeySequence, QMouseEvent, QResizeEvent
-from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QStyle, QWidget
+from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QSplitter, QStyle,
+                             QToolButton, QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
@@ -36,6 +37,7 @@ from .commentwidget import CommentWidget
 from .common import DeviceErrorsHandler, WorkMode
 from .connectionchecker import analyze_connection_params, ConnectionChecker, ConnectionData
 from .curvestates import CurveStates
+from .equivalentcircuitwidget import EquivalentCircuitWidget
 from .language import get_language, Language, Translator
 from .measuredpinschecker import MeasuredPinsChecker
 from .measurementplanpath import MeasurementPlanPath
@@ -444,6 +446,8 @@ class EPLabWindow(QMainWindow):
         self.pin_index_widget.clear()
         self._mux_and_plan_window.close()
         self._score_wrapper.set_dummy_difference()
+        self._reference_equivalent_circuit_widget.clear_circuit()
+        self._test_equivalent_circuit_widget.clear_circuit()
 
         self._settings_update_next_cycle = None
         self._skip_curve = False
@@ -455,6 +459,17 @@ class EPLabWindow(QMainWindow):
         self._reference_curve = None
         self._test_curve = None
         self._change_save_point_action_name()
+
+    @pyqtSlot()
+    def _collapse_equivalent_circuit_widgets(self) -> None:
+        if self._button_to_collapse_equivalent_circuit_widgets.arrowType() == Qt.DownArrow:
+            self._splitter_widget_backup_size = self._splitter_widget.sizes()
+            self._splitter_widget.setSizes([1, 0])
+            self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.UpArrow)
+        else:
+            self._splitter_widget.setSizes(self._splitter_widget_backup_size or [1, 100])
+            self._splitter_widget_backup_size = None
+            self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.DownArrow)
 
     def _connect_devices(self, measurement_system: MeasurementSystem, product_name: Optional[cw.ProductName] = None
                          ) -> None:
@@ -496,6 +511,25 @@ class EPLabWindow(QMainWindow):
         if len(screens) > 0:
             screen = screens[0]
             screen.logicalDotsPerInchChanged.connect(self.handle_scale_change)
+
+    def _create_equivalent_circuit_widgets(self) -> QWidget:
+        """
+        :return:
+        """
+
+        self._reference_equivalent_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
+            self.COLOR_FOR_REFERENCE.name(), place_circuit_on_left=False)
+        self._test_equivalent_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
+            self.COLOR_FOR_TEST.name())
+        layout = QHBoxLayout()
+        layout.addWidget(self._test_equivalent_circuit_widget, 10)
+        layout.addWidget(self._reference_equivalent_circuit_widget, 10)
+
+        widget = QWidget()
+        widget.setMaximumHeight(150)
+        widget.setMinimumHeight(50)
+        widget.setLayout(layout)
+        return widget
 
     def _create_measurer_setting_actions(self) -> None:
         """
@@ -549,6 +583,32 @@ class EPLabWindow(QMainWindow):
             ut.clear_layout(layout)
             layout.addWidget(widget)
         logger.debug("Scroll areas have been created to select measurement parameters (frequency, voltage, current)")
+
+    def _create_splitter_widget(self) -> None:
+        self._splitter_widget_backup_size = None
+        self._splitter_widget: QSplitter = QSplitter()
+        self._splitter_widget.splitterMoved.connect(self._handle_splitter_widget_moved)
+        self._splitter_widget.setOrientation(Qt.Vertical)
+        self._splitter_widget.addWidget(self._central_widget)
+        self._splitter_widget.addWidget(self._create_equivalent_circuit_widgets())
+        self._splitter_widget.setStretchFactor(0, 10)
+        self._splitter_widget.setStretchFactor(1, 0)
+        self._splitter_widget.setCollapsible(1, True)
+        self._splitter_widget.setHandleWidth(12)
+
+        splitter_handle_layout = QHBoxLayout()
+        splitter_handle_layout.setContentsMargins(0, 0, 0, 0)
+        splitter_handle_layout.setAlignment(Qt.AlignHCenter)
+
+        splitter_handle = self._splitter_widget.handle(1)
+        splitter_handle.setLayout(splitter_handle_layout)
+
+        self._button_to_collapse_equivalent_circuit_widgets: QToolButton = QToolButton()
+        self._button_to_collapse_equivalent_circuit_widgets.setFixedSize(100, 12)
+        self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.DownArrow)
+        self._button_to_collapse_equivalent_circuit_widgets.setCursor(Qt.ArrowCursor)
+        self._button_to_collapse_equivalent_circuit_widgets.clicked.connect(self._collapse_equivalent_circuit_widgets)
+        splitter_handle_layout.addWidget(self._button_to_collapse_equivalent_circuit_widgets)
 
     @pyqtSlot()
     def _delete_all_test_signatures(self) -> None:
@@ -699,6 +759,15 @@ class EPLabWindow(QMainWindow):
             self._disconnect_devices()
             self._connection_checker.run_check()
 
+    @pyqtSlot(int, int)
+    def _handle_splitter_widget_moved(self, pos: int, index: int) -> None:
+        if index == 1:  # Handle with arrow
+            if self._splitter_widget.sizes()[1] == 0:  # text_log is collapsed
+                self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.UpArrow)
+            else:
+                self._splitter_widget_backup_size = self._splitter_widget.sizes()
+                self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.DownArrow)
+
     def _init_tolerance(self) -> None:
         """
         Method initializes the initial value of the tolerance.
@@ -737,8 +806,9 @@ class EPLabWindow(QMainWindow):
         self.test_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Test signature")
         self.test_curve_plot.set_curve_params(self.COLOR_FOR_TEST)
 
+        self._create_splitter_widget()
         h_box_layout = QHBoxLayout(self.main_widget)
-        h_box_layout.addWidget(self._central_widget)
+        h_box_layout.addWidget(self._splitter_widget)
 
         self.connection_action.triggered.connect(self.connect_or_disconnect)
         self.open_window_board_action.triggered.connect(self.open_board_image)
@@ -1105,6 +1175,12 @@ class EPLabWindow(QMainWindow):
     def _trigger_measurements(self) -> None:
         self._msystem.trigger_measurements()
 
+    def _update_equivalent_circuit_params(self) -> None:
+        file_path, params = ut.get_new_params_for_equivalent_circuit()
+        self._reference_equivalent_circuit_widget.set_circuit(file_path, **params)
+        file_path, params = ut.get_new_params_for_equivalent_circuit()
+        self._test_equivalent_circuit_widget.set_circuit(file_path, **params)
+
     def _update_mux_actions(self) -> None:
         """
         Method updates the state of menu actions responsible for working with the multiplexer.
@@ -1161,6 +1237,7 @@ class EPLabWindow(QMainWindow):
             self._player.update_difference(difference)
         else:
             self._score_wrapper.set_dummy_difference()
+        self._update_equivalent_circuit_params()
 
         if settings is not None:
             self._set_plot_parameters_to_low_settings_panel(settings)
