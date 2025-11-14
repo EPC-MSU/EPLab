@@ -1,7 +1,7 @@
 import sys
 import unittest
 from PyQt5.QtWidgets import QApplication
-from settings import LowSettingsPanel
+from settings import SettingsPanel
 
 
 class TestLowSettingsPanel(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestLowSettingsPanel(unittest.TestCase):
                           "score": "Различие: 67%",
                           "sensitivity": "Чувствительность: Middle",
                           "voltage_per_div": "Напряжение: 1.23 В / дел."}
-        panel = LowSettingsPanel()
+        panel = SettingsPanel()
         panel.set_all_parameters(**data)
         for label_name, value in correct_result.items():
             label = panel._param_dict[label_name]
@@ -32,7 +32,7 @@ class TestLowSettingsPanel(unittest.TestCase):
         data = {"current": False,
                 "reference": True,
                 "test": True}
-        panel = LowSettingsPanel()
+        panel = SettingsPanel()
         panel.set_all_parameters(**data)
         for curve_name, value in data.items():
             legend_widget = panel._legends[curve_name]

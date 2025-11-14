@@ -12,8 +12,7 @@ from platform import system
 from typing import Any, Dict, List, Optional, Tuple
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeySequence, QMouseEvent, QResizeEvent
-from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QStyle,
-                             QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QStyle, QWidget
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
@@ -27,11 +26,12 @@ import connection_window as cw
 from dialogs import (get_image_from_file, ReportGenerationThread, show_keymap_info, show_language_selection_window,
                      show_measurer_settings_window, show_product_info, show_report_generation_window)
 from multiplexer import MuxAndPlanWindow
-from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
+from settings import AutoSettings, Settings, SettingsWindow
 from version import Version
 from . import utils as ut
 from .boardwidget import BoardWidget
 from .breaksignaturessaver import BreakSignaturesSaver, check_break_signatures
+from .centralwidget import CentralWidget
 from .commentwidget import CommentWidget
 from .common import DeviceErrorsHandler, WorkMode
 from .connectionchecker import analyze_connection_params, ConnectionChecker, ConnectionData
@@ -89,7 +89,7 @@ class EPLabWindow(QMainWindow):
         """
 
         super().__init__()
-        self._auto_settings: AutoSettings = AutoSettings(path=EPLabWindow.FILENAME_FOR_AUTO_SETTINGS)
+        self._auto_settings: AutoSettings = AutoSettings(path=self.FILENAME_FOR_AUTO_SETTINGS)
         self._comparator: IVCComparator = IVCComparator()
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
         self._dir_chosen_by_user: str = ut.get_user_documents_path()
@@ -114,7 +114,7 @@ class EPLabWindow(QMainWindow):
         self._timer.timeout.connect(self._handle_periodic_task)
 
         self._timer_to_go_to_next_pin: QTimer = QTimer()
-        self._timer_to_go_to_next_pin.setInterval(EPLabWindow.DELAY_TO_GO_TO_NEXT_PIN_MS)
+        self._timer_to_go_to_next_pin.setInterval(self.DELAY_TO_GO_TO_NEXT_PIN_MS)
         self._timer_to_go_to_next_pin.setSingleShot(True)
         self._timer_to_go_to_next_pin.timeout.connect(lambda: self.go_to_left_or_right_pin(False, False))
 
@@ -176,7 +176,7 @@ class EPLabWindow(QMainWindow):
 
         if os.path.exists(path):
             self._dir_chosen_by_user = os.path.dirname(path) if not os.path.isdir(path) else path
-            self._iv_window.plot.set_path_to_directory(self._dir_chosen_by_user)
+            self._central_widget.set_path_to_directory(self._dir_chosen_by_user)
 
     @property
     def is_measured_pin(self) -> bool:
@@ -265,8 +265,7 @@ class EPLabWindow(QMainWindow):
         """
 
         scale = ut.calculate_scales(settings)
-        self._iv_window.plot.set_scale(*scale)
-        self._iv_window.plot.set_min_borders(*scale)
+        self._central_widget.adjust_plot(*scale)
 
     def _calculate_difference(self, curve_1: IVCurve, curve_2: IVCurve, settings: MeasurementSettings) -> float:
         """
@@ -440,10 +439,9 @@ class EPLabWindow(QMainWindow):
         for action in (self.comparing_mode_action, self.writing_mode_action, self.testing_mode_action):
             action.setChecked(False)
 
-        self.low_settings_panel.clear_panel()
+        self._central_widget.clear_settings_and_remove_all_cursors()
         self.measurers_menu.clear()
         self.pin_index_widget.clear()
-        self._iv_window.plot.remove_all_cursors()
         self._mux_and_plan_window.close()
         self._score_wrapper.set_dummy_difference()
 
@@ -469,7 +467,7 @@ class EPLabWindow(QMainWindow):
 
         self._clear_widgets()
         self._comment_widget.clear_table()
-        self._iv_window.plot.clear_center_text()
+        self._central_widget.clear_central_text()
         options_data = self._read_options_from_json()
         self._product.change_options(options_data)
         if product_name is None:
@@ -597,7 +595,7 @@ class EPLabWindow(QMainWindow):
 
         self._msystem = None
         self._product_name = None
-        self._iv_window.plot.set_center_text(qApp.translate("t", "НЕТ ПОДКЛЮЧЕНИЯ"))
+        self._central_widget.show_disconnection_text()
         self.enable_widgets(False)
         self._clear_widgets()
         self._comment_widget.clear_table()
@@ -720,7 +718,6 @@ class EPLabWindow(QMainWindow):
         self._player.set_mute(not self.sound_enabled_action.isChecked())
         self._score_wrapper: ScoreWrapper = ScoreWrapper(self.score_label)
 
-        self.low_settings_panel: LowSettingsPanel = LowSettingsPanel()
         self.main_widget: QWidget = QWidget(self)
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -729,29 +726,19 @@ class EPLabWindow(QMainWindow):
                                              back_color=QColor(0, 0, 0), solid_axis_enabled=False,
                                              axis_label_enabled=False, color_for_rest_cursors=QColor(102, 255, 0),
                                              color_for_selected_cursor=QColor(102, 255, 0))
-        self._iv_window.setFocusPolicy(Qt.ClickFocus)
-        self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
         self._iv_window.plot.default_path_changed.connect(self.set_dir_chosen_by_user)
-        self._iv_window.plot.enable_context_menu()
-        self._iv_window.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),
-                                             export_ivc=qApp.translate("t", "Экспортировать сигнатуры в файл"),
-                                             remove_all_cursors=qApp.translate("t", "Удалить все метки"),
-                                             remove_cursor=qApp.translate("t", "Удалить метку"),
-                                             save_screenshot=qApp.translate("MainWindow", "Сохранить скриншот"))
-        self._iv_window.plot.set_path_to_directory(self.dir_chosen_by_user)
-        self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Current signature")
-        self.current_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_CURRENT)
-        self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Reference signature")
-        self.reference_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_REFERENCE)
-        self.test_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Test signature")
-        self.test_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_TEST)
+        self._central_widget: CentralWidget = CentralWidget(self._iv_window)
+        self._central_widget.set_path_to_directory(self.dir_chosen_by_user)
 
-        v_box_layout = QVBoxLayout()
-        v_box_layout.setSpacing(0)
-        v_box_layout.addWidget(self._iv_window)
-        v_box_layout.addWidget(self.low_settings_panel)
+        self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Current signature")
+        self.current_curve_plot.set_curve_params(self.COLOR_FOR_CURRENT)
+        self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Reference signature")
+        self.reference_curve_plot.set_curve_params(self.COLOR_FOR_REFERENCE)
+        self.test_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Test signature")
+        self.test_curve_plot.set_curve_params(self.COLOR_FOR_TEST)
+
         h_box_layout = QHBoxLayout(self.main_widget)
-        h_box_layout.addLayout(v_box_layout)
+        h_box_layout.addWidget(self._central_widget)
 
         self.connection_action.triggered.connect(self.connect_or_disconnect)
         self.open_window_board_action.triggered.connect(self.open_board_image)
@@ -873,7 +860,7 @@ class EPLabWindow(QMainWindow):
                     self._adjust_plot_params(self._settings_update_next_cycle)
                     self._settings_update_next_cycle = None
                     # You need to redraw markers with new plot parameters (the scale of the plot has changed)
-                    self._iv_window.plot.redraw_cursors()
+                    self._central_widget.redraw_cursors()
 
             return True
 
@@ -1036,7 +1023,7 @@ class EPLabWindow(QMainWindow):
                       "sensitivity": sensitivity,
                       "voltage_per_div": voltage_per_division}
         legend_dict = self._get_curves_for_legend()
-        self.low_settings_panel.set_all_parameters(**param_dict, **legend_dict)
+        self._central_widget.set_settings(**param_dict, **legend_dict)
 
     def _set_widgets_to_init_state(self) -> None:
         self._board_window.update_board()
@@ -1056,8 +1043,7 @@ class EPLabWindow(QMainWindow):
                        self.hide_curve_b_action):
             action.setChecked(False)
 
-        self._iv_window.plot.set_state_adding_cursor(False)
-        self._iv_window.plot.set_state_removing_cursor(False)
+        self._central_widget.exit_state_for_adding_or_removing_cursor()
 
         # Set ui settings state to current device
         with self._device_errors_handler:
@@ -1746,7 +1732,7 @@ class EPLabWindow(QMainWindow):
                 self._create_scroll_areas_for_parameters({EyePointProduct.Parameter.frequency: [],
                                                           EyePointProduct.Parameter.sensitive: [],
                                                           EyePointProduct.Parameter.voltage: []})
-                self._iv_window.plot.clear_center_text()
+                self._central_widget.clear_central_text()
                 measurer = None
                 multiplexer = None
             else:

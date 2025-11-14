@@ -34,21 +34,23 @@ class LegendWidget(QToolBar):
         self.label_color: QLabel = QLabel()
         self.label_color.setContentsMargins(left_margin, 0, 0, 0)
         pixmap = QPixmap(os.path.join(DIR_MEDIA, color_path))
-        self.label_color.setPixmap(pixmap.scaled(LegendWidget.ICON_SIZE, LegendWidget.ICON_SIZE, Qt.KeepAspectRatio))
+        self.label_color.setPixmap(pixmap.scaled(self.ICON_SIZE, self.ICON_SIZE, Qt.KeepAspectRatio))
         self.label_text: QLabel = QLabel(text)
         self.label_status: QLabel = QLabel()
 
-        self.h_layout: QHBoxLayout = QHBoxLayout()
-        self.h_layout.setSpacing(4)
-        self.h_layout.setContentsMargins(0, 0, 0, 0)
+        layout: QHBoxLayout = QHBoxLayout()
+        layout.setSpacing(4)
+        layout.setContentsMargins(0, 0, 0, 0)
         for label in (self.label_color, self.label_text, self.label_status):
-            label.setStyleSheet("background-color: black; color: white")
-            self.h_layout.addWidget(label)
-        self.h_layout.addStretch(1)
+            label.setStyleSheet("background-color: black; color: white;")
+            layout.addWidget(label)
+        layout.addStretch(1)
 
         widget = QWidget()
-        widget.setLayout(self.h_layout)
+        widget.setContentsMargins(0, 0, 0, 0)
+        widget.setLayout(layout)
         self.addWidget(widget)
+        self.setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet("background-color: black;")
 
     def clear(self) -> None:

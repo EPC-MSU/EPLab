@@ -1,55 +1,53 @@
 from typing import Dict, List, Tuple
 from PyQt5.QtCore import QCoreApplication as qApp
-from PyQt5.QtWidgets import QGridLayout, QLabel, QToolBar, QWidget
+from PyQt5.QtWidgets import QLabel, QToolBar, QVBoxLayout, QWidget
 from .legendwidget import LegendWidget
 
 
-class LowSettingsPanel(QWidget):
+class SettingsPanel(QWidget):
     """
-    Class for plot parameters on the low panel at GUI.
+    Widget for displaying current settings.
     """
 
-    HEIGHT: int = 30
     LEFT_MARGIN: int = 4
 
     def __init__(self, parent=None) -> None:
+        """
+        :param parent: parent widget.
+        """
+
         super().__init__(parent)
         self._legends: Dict[str, LegendWidget] = dict()
         self._param_dict: Dict[str, QLabel] = dict()
         self._init_ui()
 
     def _init_legends(self) -> None:
-        names = ["reference", "test", "current"]
-        texts = [qApp.translate("settings", "Эталон"), qApp.translate("settings", "Тест"),
-                 qApp.translate("settings", "Текущая")]
-        colors = ["reference_signature.png", "test_signature.png", "current_signature.png"]
-        row = 2
-        for column, (name, text, color) in enumerate(zip(names, texts, colors)):
-            legend = LegendWidget(text, color, LowSettingsPanel.LEFT_MARGIN)
+        names = "reference", "test", "current"
+        texts = (qApp.translate("settings", "Эталон"), qApp.translate("settings", "Тест"),
+                 qApp.translate("settings", "Текущая"))
+        colors = "reference_signature.png", "test_signature.png", "current_signature.png"
+        for name, text, color in zip(names, texts, colors):
+            legend = LegendWidget(text, color, SettingsPanel.LEFT_MARGIN)
             self._legends[name] = legend
-            self.grid_layout.addWidget(legend, row, column)
+            self._layout.addWidget(legend)
 
     def _init_param_dict(self) -> None:
-        labels = [["voltage_per_div", "max_voltage", "frequency"],
-                  ["current_per_div", "sensitivity", "score"]]
-        for row, row_labels in enumerate(labels):
-            for column, name in enumerate(row_labels):
-                label = QLabel()
-                label.setContentsMargins(LowSettingsPanel.LEFT_MARGIN, 0, 0, 0)
-                self._param_dict[name] = label
+        for param_name in ("voltage_per_div", "current_per_div", "max_voltage", "sensitivity", "frequency", "score"):
+            label = QLabel()
+            label.setContentsMargins(SettingsPanel.LEFT_MARGIN, 0, 0, 0)
+            self._param_dict[param_name] = label
 
-                tool_bar = QToolBar()
-                tool_bar.setFixedHeight(LowSettingsPanel.HEIGHT)
-                tool_bar.setStyleSheet("background-color: black; color: white; spacing: 10;")
-                tool_bar.addWidget(label)
-                tool_bar.setContentsMargins(0, 0, 0, 0)
-                self.grid_layout.addWidget(tool_bar, row, column)
+            tool_bar = QToolBar()
+            tool_bar.setStyleSheet("background-color: black; color: white;")
+            tool_bar.addWidget(label)
+            tool_bar.setContentsMargins(0, 0, 0, 0)
+            self._layout.addWidget(tool_bar)
 
     def _init_ui(self) -> None:
-        self.grid_layout: QGridLayout = QGridLayout()
-        self.grid_layout.setSpacing(0)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.grid_layout)
+        self._layout: QVBoxLayout = QVBoxLayout()
+        self._layout.setSpacing(0)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self._layout)
         self.setStyleSheet("background-color: red;")
 
         self._init_param_dict()

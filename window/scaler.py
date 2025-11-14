@@ -77,7 +77,7 @@ def update_scale(widget: QWidget) -> None:
     """
 
     from dialogs.measurersettingswindow import MeasurerSettingsWindow
-    from settings import LowSettingsPanel
+    from settings import SettingsPanel
     from window.parameterwidget import ParameterWidget
     from window.pinindexwidget import PinIndexWidget
 
@@ -105,7 +105,7 @@ def update_scale(widget: QWidget) -> None:
             if child_widget.isEditable():
                 scale_widget(child_widget.lineEdit(), font_size, scale_factor)
             scale_widget(child_widget, font_size, scale_factor)
-        elif isinstance(child_widget, LowSettingsPanel):
+        elif isinstance(child_widget, SettingsPanel):
             scale_low_settings_panel(child_widget, font_size)
 
 
