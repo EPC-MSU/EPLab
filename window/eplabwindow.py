@@ -977,8 +977,8 @@ class EPLabWindow(QMainWindow):
 
         height = min(height, available_height)
         width = min(width, available_width)
-        pos_x = geometry.x() + (available_width - width) / 2
-        pos_y = geometry.y() + (available_height - height) / 2
+        pos_x = int(round(geometry.x() + (available_width - width) / 2))
+        pos_y = int(round(geometry.y() + (available_height - height) / 2))
         self.move(pos_x, pos_y)
         self.resize(width, height)
 

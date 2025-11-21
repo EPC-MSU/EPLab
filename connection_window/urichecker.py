@@ -13,9 +13,9 @@ def get_reg_exp_for_ivm10():
     """
 
     if ut.get_platform() == "debian":
-        return re.compile(r"^(com:///dev/tty.*|(?i)virtual)$")
+        return re.compile(r"(?i)^(com:///dev/tty.*|virtual)$")
 
-    return re.compile(r"^(?i)(com:\\\\\.\\COM\d+|virtual)$")
+    return re.compile(r"(?i)^(com:\\\\\.\\COM\d+|virtual)$")
 
 
 def get_reg_exp_for_mux():
@@ -24,9 +24,9 @@ def get_reg_exp_for_mux():
     """
 
     if ut.get_platform() == "debian":
-        return re.compile(r"^(com:///dev/tty.*|(?i)virtual|(?i)none)$")
+        return re.compile(r"(?i)^(com:///dev/tty.*|virtual|none)$")
 
-    return re.compile(r"^(?i)(com:\\\\\.\\COM\d+|virtual|none)$")
+    return re.compile(r"(?i)^(com:\\\\\.\\COM\d+|virtual|none)$")
 
 
 class URIChecker:
@@ -34,7 +34,7 @@ class URIChecker:
     Class checks that the URI for the IV-measurer and multiplexer is correct.
     """
 
-    ASA_REG_EXP = re.compile(r"^(?i)(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$")
+    ASA_REG_EXP = re.compile(r"(?i)^(xmlrpc://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|virtual(asa)?)$")
     IVM10_REG_EXP = get_reg_exp_for_ivm10()
     MUX_REG_EXP = get_reg_exp_for_mux()
     URI_BAD_COLOR: str = "#FFC0CB"
