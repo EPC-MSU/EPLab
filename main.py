@@ -15,7 +15,7 @@ QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)  # enable high dpi s
 QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)  # use highdpi icons
 
 
-if "_PYIBoot_SPLASH" in os.environ and importlib.util.find_spec("pyi_splash"):
+if getattr(sys, "frozen", False):
     import pyi_splash
     pyi_splash.close()
 
