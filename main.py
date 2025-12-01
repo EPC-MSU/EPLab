@@ -1,7 +1,7 @@
 import sys
 from argparse import ArgumentParser, Namespace
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QStyleFactory
 from epcore.product import EyePointProduct
 from window import utils as ut
 from window.eplabwindow import EPLabWindow
@@ -44,6 +44,7 @@ if __name__ == "__main__":
     parsed_args = parser.parse_args()
 
     app_ = QApplication(sys.argv)
+    app_.setStyle(QStyleFactory.create("Fusion"))
     try:
         launch_eplab(app_, parsed_args)
     except Exception:
