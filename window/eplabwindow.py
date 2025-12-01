@@ -12,7 +12,8 @@ from platform import system
 from typing import Any, Dict, List, Optional, Tuple
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeySequence, QMouseEvent, QResizeEvent
-from PyQt5.QtWidgets import QAction, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QStyle, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QStyle,
+                             QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
@@ -809,9 +810,13 @@ class EPLabWindow(QMainWindow):
         """
 
         if not (isinstance(filename, str) and os.path.exists(filename)):
-            dialog = ut.get_file_dialog(self)
-            filename = dialog.getOpenFileName(self, qApp.translate("MainWindow", "Открыть план тестирования"),
-                                              directory=self.dir_chosen_by_user, filter="Board Files (*.json *.uzf)")[0]
+            if system().lower() == "windows":
+                filename = QFileDialog.getOpenFileName(self, qApp.translate("MainWindow", "Открыть план тестирования"),
+                                                       self.dir_chosen_by_user, "Board Files (*.json *.uzf)")[0]
+            else:
+                filename = QFileDialog.getOpenFileName(self, qApp.translate("MainWindow", "Открыть план тестирования"),
+                                                       self.dir_chosen_by_user, "Board Files (*.json *.uzf)",
+                                                       options=QFileDialog.DontUseNativeDialog)[0]
         board = None
         if filename:
             try:
@@ -1388,9 +1393,14 @@ class EPLabWindow(QMainWindow):
             dir_path = os.path.dirname(self._measurement_plan_path.path)
             is_user_defined_path = False
         else:
-            dialog = ut.get_file_dialog(self)
-            dir_path = dialog.getExistingDirectory(
-                self, qApp.translate("t", "Выберите папку, в которую будет сохранен отчет"), self.dir_chosen_by_user)
+            if system().lower() == "windows":
+                dir_path = QFileDialog.getExistingDirectory(
+                    self, qApp.translate("t", "Выберите папку, в которую будет сохранен отчет"),
+                    self.dir_chosen_by_user)
+            else:
+                dir_path = QFileDialog.getExistingDirectory(
+                    self, qApp.translate("t", "Выберите папку, в которую будет сохранен отчет"),
+                    self.dir_chosen_by_user, options=QFileDialog.DontUseNativeDialog)
             is_user_defined_path = True
 
         if dir_path:
@@ -1740,10 +1750,13 @@ class EPLabWindow(QMainWindow):
         Slot loads image for the board from a file.
         """
 
-        dialog = ut.get_file_dialog(self)
-        filename = dialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
-                                          filter="Image Files (*.png *.jpg *.bmp)",
-                                          directory=self._dir_chosen_by_user)[0]
+        if system().lower() == "windows":
+            filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
+                                                   self._dir_chosen_by_user, "Image Files (*.png *.jpg *.bmp)")[0]
+        else:
+            filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
+                                                   self._dir_chosen_by_user, "Image Files (*.png *.jpg *.bmp)",
+                                                   options=QFileDialog.DontUseNativeDialog)[0]
         if not filename:
             return
 
@@ -1823,9 +1836,13 @@ class EPLabWindow(QMainWindow):
 
         filename = "eplab_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
         default_name = os.path.join(self.dir_chosen_by_user, filename)
-        dialog = ut.get_file_dialog(self)
-        filename = dialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
-                                          filter="Image (*.png)", directory=default_name)[0]
+        if system().lower() == "windows":
+            filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
+                                                   default_name, "Image (*.png)")[0]
+        else:
+            filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
+                                                   default_name, "Image (*.png)",
+                                                   options=QFileDialog.DontUseNativeDialog)[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
@@ -1846,9 +1863,15 @@ class EPLabWindow(QMainWindow):
 
         if save_as or not self._measurement_plan_path.path or not os.path.exists(self._measurement_plan_path.path):
             default_path = os.path.join(self.dir_chosen_by_user, "board.uzf")
-            dialog = ut.get_file_dialog(self)
-            filepath = dialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить план тестирования"),
-                                              filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
+            if system().lower() == "windows":
+                filepath = QFileDialog.getSaveFileName(self,
+                                                       qApp.translate("MainWindow", "Сохранить план тестирования"),
+                                                       default_path, "UFIV Archived File (*.uzf)")[0]
+            else:
+                filepath = QFileDialog.getSaveFileName(self,
+                                                       qApp.translate("MainWindow", "Сохранить план тестирования"),
+                                                       default_path, "UFIV Archived File (*.uzf)",
+                                                       options=QFileDialog.DontUseNativeDialog)[0]
             if filepath:
                 self.dir_chosen_by_user = os.path.dirname(filepath)
         else:

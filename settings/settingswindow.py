@@ -1,8 +1,9 @@
 import copy
 import os
+from platform import system
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtWidgets import QDialog, QLayout
+from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout
 from window import utils as ut
 from window.scaler import update_scale_of_class
 from .settings import Settings
@@ -161,9 +162,13 @@ class SettingsWindow(QDialog):
         Slot loads settings from the configuration file.
         """
 
-        dialog = ut.get_file_dialog(self)
-        settings_path = dialog.getOpenFileName(self, qApp.translate("settings", "Открыть файл"),
-                                               self._settings_directory, "Ini file (*.ini);;All Files (*)")[0]
+        if system().lower() == "windows":
+            settings_path = QFileDialog.getOpenFileName(self, qApp.translate("settings", "Открыть файл"),
+                                                        self._settings_directory, "Ini file (*.ini);;All Files (*)")[0]
+        else:
+            settings_path = QFileDialog.getOpenFileName(self, qApp.translate("settings", "Открыть файл"),
+                                                        self._settings_directory, "Ini file (*.ini);;All Files (*)",
+                                                        options=QFileDialog.DontUseNativeDialog)[0]
         if settings_path:
             try:
                 settings = Settings()
@@ -186,10 +191,15 @@ class SettingsWindow(QDialog):
         Slot saves settings to a configuration file.
         """
 
-        dialog = ut.get_file_dialog(self)
-        settings_path = dialog.getSaveFileName(self, qApp.translate("settings", "Сохранить файл"),
-                                               directory=os.path.join(self._settings_directory, "settings.ini"),
-                                               filter="Ini file (*.ini);;All Files (*)")[0]
+        if system().lower() == "windows":
+            settings_path = QFileDialog.getSaveFileName(self, qApp.translate("settings", "Сохранить файл"),
+                                                        os.path.join(self._settings_directory, "settings.ini"),
+                                                        "Ini file (*.ini);;All Files (*)")[0]
+        else:
+            settings_path = QFileDialog.getSaveFileName(self, qApp.translate("settings", "Сохранить файл"),
+                                                        os.path.join(self._settings_directory, "settings.ini"),
+                                                        "Ini file (*.ini);;All Files (*)",
+                                                        options=QFileDialog.DontUseNativeDialog)[0]
         if settings_path:
             self._settings_directory = os.path.dirname(settings_path)
             if not settings_path.endswith(".ini"):
