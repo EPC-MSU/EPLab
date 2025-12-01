@@ -13,7 +13,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import serial.tools.list_ports
 from PyQt5.QtCore import QCoreApplication as qApp, QDir, QStandardPaths, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QLayout, QMessageBox
+from PyQt5.QtWidgets import QCheckBox, QFileDialog, QHBoxLayout, QLayout, QMessageBox
 from epcore.elements import MeasurementSettings
 from epcore.ivmeasurer import IVMeasurerBase
 
@@ -126,6 +126,18 @@ def get_dir_name() -> str:
     else:
         path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     return path
+
+
+def get_file_dialog(parent=None) -> QFileDialog:
+    """
+    :param parent: parent widget.
+    :return: file dialog.
+    """
+
+    dialog = QFileDialog()
+    if system().lower() != "windows":
+        dialog.setOption(QFileDialog.DontUseNativeDialog, True)
+    return dialog
 
 
 def get_port(url: str) -> Optional[str]:
