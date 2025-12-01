@@ -1,5 +1,3 @@
-import importlib.util
-import os
 import sys
 from argparse import ArgumentParser, Namespace
 from PyQt5.QtCore import Qt
