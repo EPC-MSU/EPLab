@@ -44,7 +44,6 @@ if __name__ == "__main__":
     parsed_args = parser.parse_args()
 
     app_ = QApplication(sys.argv)
-    app_.setStyle(QStyleFactory.create("Fusion"))
     try:
         launch_eplab(app_, parsed_args)
     except Exception:
