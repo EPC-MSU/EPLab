@@ -84,6 +84,8 @@ class TableWidget(QTableWidget):
         self.setSelectionMode(QAbstractItemView.SingleSelection)
         horizontal_header = self.horizontalHeader()
         horizontal_header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        horizontal_header.setSelectionMode(QAbstractItemView.NoSelection)
+        horizontal_header.setSectionsClickable(False)
         horizontal_header.setStretchLastSection(True)
         vertical_header = self.verticalHeader()
         vertical_header.setVisible(False)
