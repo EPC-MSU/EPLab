@@ -30,7 +30,7 @@ def get_converter(data: Dict[str, Any]) -> Callable[[Any], Any]:
         return int
 
     if value_type == "float":
-        return float
+        return lambda s: float(s.replace(",", "."))
 
     return str
 
@@ -294,21 +294,27 @@ class MeasurerSettingsWindow(QDialog):
             v_layout.addWidget(self.label, alignment=Qt.AlignHCenter)
         self.setLayout(v_layout)
 
-    @pyqtSlot()
     def _run_command(self, command_to_run: Callable[[], Any], command_name: str, data: Dict[str, Any]) -> None:
         """
-        Slot runs special commands for IV-measurers connected to buttons.
+        Method runs special commands for IV-measurers connected to buttons.
         :param command_to_run: command to run;
         :param command_name: name of command to run;
         :param data: dictionary with data for the command to be executed for the IV-measurer.
         """
 
         friendly_name = data.get(f"label_{self._lang}")
+        default_error_message = data.get(f"error_message_{self._lang}",
+                                         qApp.translate("dialogs", "Команда '{}' завершилась неудачно.").format(
+                                             friendly_name))
         try:
             result = command_to_run()
             if "required_result" in data and result != data["required_result"]:
-                text = data.get(f"error_message_{self._lang}",
-                                qApp.translate("dialogs", "Команда '{}' завершилась неудачно.").format(friendly_name))
+                for bad_results_info in data.get("bad_results", []):
+                    if bad_results_info.get("value") == result:
+                        text = bad_results_info.get(f"error_message_{self._lang}", default_error_message)
+                        break
+                else:
+                    text = default_error_message
                 ut.show_message(qApp.translate("t", "Ошибка"), text)
         except Exception:
             logger.error("Failed to execute command '%s' for measurer '%s'", command_name, self._measurer.name)
