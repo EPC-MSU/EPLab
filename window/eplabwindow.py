@@ -88,10 +88,9 @@ class EPLabWindow(QMainWindow):
         """
 
         super().__init__()
-        self._auto_settings: AutoSettings = AutoSettings(path=EPLabWindow.FILENAME_FOR_AUTO_SETTINGS)
+        self._auto_settings: AutoSettings = AutoSettings(path=self.FILENAME_FOR_AUTO_SETTINGS)
         self._comparator: IVCComparator = IVCComparator()
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
-        self._dir_chosen_by_user: str = ut.get_user_documents_path()
         self._hide_current_curve: bool = False
         self._hide_reference_curve: bool = False
         self._last_saved_measurement_plan_data: Optional[Dict[str, Any]] = None
@@ -113,7 +112,7 @@ class EPLabWindow(QMainWindow):
         self._timer.timeout.connect(self._handle_periodic_task)
 
         self._timer_to_go_to_next_pin: QTimer = QTimer()
-        self._timer_to_go_to_next_pin.setInterval(EPLabWindow.DELAY_TO_GO_TO_NEXT_PIN_MS)
+        self._timer_to_go_to_next_pin.setInterval(self.DELAY_TO_GO_TO_NEXT_PIN_MS)
         self._timer_to_go_to_next_pin.setSingleShot(True)
         self._timer_to_go_to_next_pin.timeout.connect(lambda: self.go_to_left_or_right_pin(False, False))
 
@@ -160,8 +159,8 @@ class EPLabWindow(QMainWindow):
         :return: the last directory that the user selected when working with the application.
         """
 
-        if os.path.exists(self._dir_chosen_by_user) and os.path.isdir(self._dir_chosen_by_user):
-            return self._dir_chosen_by_user
+        if os.path.exists(self._auto_settings.last_used_dir) and os.path.isdir(self._auto_settings.last_used_dir):
+            return self._auto_settings.last_used_dir
 
         return ut.get_user_documents_path()
 
@@ -172,8 +171,8 @@ class EPLabWindow(QMainWindow):
         """
 
         if os.path.exists(path):
-            self._dir_chosen_by_user = os.path.dirname(path) if not os.path.isdir(path) else path
-            self._iv_window.plot.set_path_to_directory(self._dir_chosen_by_user)
+            self._auto_settings.save_last_used_dir(os.path.dirname(path) if not os.path.isdir(path) else path)
+            self._iv_window.plot.set_path_to_directory(self._auto_settings.last_used_dir)
 
     @property
     def is_measured_pin(self) -> bool:
@@ -1752,10 +1751,10 @@ class EPLabWindow(QMainWindow):
 
         if system().lower() == "windows":
             filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
-                                                   self._dir_chosen_by_user, "Image Files (*.png *.jpg *.bmp)")[0]
+                                                   self.dir_chosen_by_user, "Image Files (*.png *.jpg *.bmp)")[0]
         else:
             filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
-                                                   self._dir_chosen_by_user, "Image Files (*.png *.jpg *.bmp)",
+                                                   self.dir_chosen_by_user, "Image Files (*.png *.jpg *.bmp)",
                                                    options=QFileDialog.DontUseNativeDialog)[0]
         if not filename:
             return

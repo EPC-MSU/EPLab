@@ -1,9 +1,11 @@
 import locale
+import os
 from typing import Any, Callable, Dict, Optional
 from PyQt5.QtCore import QSettings
 from epcore.elements import MeasurementSettings
 from epcore.product import EyePointProduct
 from window.language import Language, Translator
+from window.utils import get_user_documents_path
 from . import utils as ut
 from .settingshandler import SettingsHandler
 
@@ -47,6 +49,7 @@ class AutoSettings(SettingsHandler):
     voltage: str = None
     auto_transition: bool = False
     language: Language = get_default_language()
+    last_used_dir: str = get_user_documents_path()
     max_optimal_voltage: float = 12
     measurer_1_port: str = None
     measurer_2_port: str = None
@@ -70,9 +73,9 @@ class AutoSettings(SettingsHandler):
         settings.beginGroup("OptimalSearch")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
-
         params = {"auto_transition": {"convert": ut.to_bool},
                   "language": {"convert": get_language_from_str},
+                  "last_used_dir": {"convert": get_dir_path_from_str},
                   "pin_shift_warning_info": {"convert": ut.to_bool}}
         settings.beginGroup("Main")
         self._read_parameters_from_settings(settings, params)
@@ -105,6 +108,7 @@ class AutoSettings(SettingsHandler):
 
         params = {"auto_transition": {"convert": str},
                   "language": {"convert": convert_language_to_str},
+                  "last_used_dir": {"convert": str},
                   "pin_shift_warning_info": {"convert": str}}
         settings.beginGroup("Main")
         self._write_parameters_to_settings(settings, params)
@@ -173,6 +177,14 @@ class AutoSettings(SettingsHandler):
         self.language = language if language is not None else Language.EN
 
     @save_settings
+    def save_last_used_dir(self, dir_path: str) -> None:
+        """
+        :param dir_path: path to the last directory selected by the user.
+        """
+
+        self.last_used_dir = dir_path
+
+    @save_settings
     def save_measurement_settings(self, options: Dict[EyePointProduct.Parameter, str]) -> None:
         """
         :param options: dictionary with new measurement settings.
@@ -203,6 +215,18 @@ def convert_language_to_str(language: Language) -> str:
     """
 
     return str(Translator.get_language_name(language))
+
+
+def get_dir_path_from_str(value: Optional[str]) -> str:
+    """
+    :param value: expected path to the folder.
+    :return: path to directory.
+    """
+
+    if value is None or not os.path.isdir(value):
+        return get_user_documents_path()
+
+    return value
 
 
 def get_language_from_str(value: str) -> Language:
