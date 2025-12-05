@@ -34,8 +34,10 @@ class ScoreWrapper:
         :param color: display color.
         """
 
-        self._label.setText(f'<html><head/><body><p><span style="font-size:48pt;color:{color};">{text}</span>'
-                            f"</p></body></html>")
+        self._label.setText("<html><head/><body>"
+                            '<p align="right"><span style="font-family:\'Courier New,Courier,monospace\';'
+                            f'font-size:48pt;color:{color};">{text}</span></p>'
+                            "</body></html>")
 
     def get_friendly_score(self) -> str:
         """
@@ -51,7 +53,7 @@ class ScoreWrapper:
 
         difference = convert_to_percent_with_tenths(difference)
         color = self.COLOR_GOOD if difference <= self._tolerance_with_tenths else self.COLOR_BAD
-        self._friendly_difference = str(difference) + "%"
+        self._friendly_difference = f"{difference:.1f}%"
         self._set_difference_text(self._friendly_difference, color)
 
     def set_dummy_difference(self) -> None:

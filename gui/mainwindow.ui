@@ -24,6 +24,12 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="minimumSize">
+    <size>
+     <width>220</width>
+     <height>109</height>
+    </size>
+   </property>
    <property name="maximumSize">
     <size>
      <width>524287</width>
@@ -47,11 +53,11 @@
      <enum>Qt::ClickFocus</enum>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_5">
-     <item>
+     <item alignment="Qt::AlignRight">
       <widget class="QLabel" name="score_label">
        <property name="minimumSize">
         <size>
-         <width>190</width>
+         <width>220</width>
          <height>0</height>
         </size>
        </property>
@@ -62,7 +68,7 @@
         </size>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:48pt; color:#73d216;&quot;&gt;0%&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&lt;span style=&quot; font-family:'Courier New,Courier,monospace'; font-size:48pt; color:#73d216;&quot;&gt;0%&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::RichText</enum>
