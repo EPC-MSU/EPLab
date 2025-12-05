@@ -1,7 +1,7 @@
 import sys
 from argparse import ArgumentParser, Namespace
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QStyleFactory
+from PyQt5.QtWidgets import QApplication
 from epcore.product import EyePointProduct
 from window import utils as ut
 from window.eplabwindow import EPLabWindow
