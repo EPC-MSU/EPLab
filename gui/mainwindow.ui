@@ -26,7 +26,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>220</width>
+     <width>94</width>
      <height>109</height>
     </size>
    </property>
@@ -57,7 +57,7 @@
       <widget class="QLabel" name="score_label">
        <property name="minimumSize">
         <size>
-         <width>220</width>
+         <width>0</width>
          <height>0</height>
         </size>
        </property>
@@ -68,7 +68,7 @@
         </size>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&lt;span style=&quot; font-family:'Courier New,Courier,monospace'; font-size:48pt; color:#73d216;&quot;&gt;0%&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&lt;span style=&quot; font-family:'Courier,monospace'; font-size:48pt; color:#73d216;&quot;&gt;0%&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::RichText</enum>
