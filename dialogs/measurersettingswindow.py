@@ -304,7 +304,7 @@ class MeasurerSettingsWindow(QDialog):
 
         friendly_name = data.get(f"label_{self._lang}")
         default_error_message = data.get(f"error_message_{self._lang}",
-                                         qApp.translate("dialogs", "Команда '{}' завершилась неудачно.").format(
+                                         qApp.translate("dialogs", 'Команда "{}" завершилась неудачно.').format(
                                              friendly_name))
         try:
             result = command_to_run()
@@ -318,7 +318,7 @@ class MeasurerSettingsWindow(QDialog):
                 ut.show_message(qApp.translate("t", "Ошибка"), text)
         except Exception:
             logger.error("Failed to execute command '%s' for measurer '%s'", command_name, self._measurer.name)
-            text = qApp.translate("dialogs", "Не удалось выполнить команду '{}'.").format(friendly_name)
+            text = qApp.translate("dialogs", 'Не удалось выполнить команду "{}".').format(friendly_name)
             ut.show_message(qApp.translate("t", "Ошибка"), text)
 
     def _set_parameter_from_line_edit(self, parameter_name: str, data: Dict[str, Any]) -> Optional[str]:
@@ -334,7 +334,7 @@ class MeasurerSettingsWindow(QDialog):
             value = data["widget"].text()
             converted_value = converter(value)
         except ValueError:
-            error = qApp.translate("dialogs", "Неверное значение для '{}'. Не удалось конвертировать '{}' в '{}'."
+            error = qApp.translate("dialogs", 'Неверное значение для "{}". Не удалось конвертировать "{}" в "{}".'
                                    ).format(data.get(f"label_{self._lang}"), value, data.get("value_type"))
             return error
 

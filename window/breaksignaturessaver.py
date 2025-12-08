@@ -156,7 +156,7 @@ class BreakSignaturesSaver(QObject):
                                      qApp.translate("t", "Чтобы включить автопереход в режиме тестирования по плану, "
                                                          "нужно измерить сигнатуры разрыва. Для этого:\n<ul>\n"
                                                          "<li>Разомкните щупы.</li>\n"
-                                                         "<li>Нажмите 'Да'.</li>\n"
+                                                         '<li>Нажмите "Да".</li>\n'
                                                          "<li>Дождитесь завершения процедуры.</li>\n</ul>"),
                                      icon=QMessageBox.Information, yes_button=True, no_button=True)
             if not result:

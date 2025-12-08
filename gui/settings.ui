@@ -57,7 +57,7 @@
      <item row="2" column="0" alignment="Qt::AlignVCenter">
       <widget class="QLabel" name="label_pin_shift_warning_info">
        <property name="text">
-        <string>Показывать предупреждения при добавлении/удалении точек,
+        <string>Показывать предупреждение при добавлении/удалении точек,
 приводящих к смещению нумерации</string>
        </property>
        <property name="scaledContents">

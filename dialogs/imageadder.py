@@ -123,7 +123,7 @@ class ImageAdder(QDialog):
         except FileNotFoundError:
             image = None
             ut.show_message(qApp.translate("t", "Ошибка"),
-                            qApp.translate("dialogs", "Файл изображения '{}' не найден.").format(filename))
+                            qApp.translate("dialogs", 'Файл изображения "{}" не найден.').format(filename))
         except MemoryError:
             image = None
             ut.show_message(qApp.translate("t", "Ошибка"),
@@ -132,7 +132,7 @@ class ImageAdder(QDialog):
         except UnidentifiedImageError:
             image = None
             ut.show_message(qApp.translate("t", "Ошибка"),
-                            qApp.translate("dialogs", "Не удается идентифицировать файл изображения '{}'."
+                            qApp.translate("dialogs", 'Не удается идентифицировать файл изображения "{}".'
                                            ).format(filename))
         return image
 

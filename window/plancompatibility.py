@@ -199,7 +199,7 @@ class PlanCompatibility:
         """
 
         if is_new_plan:
-            error = qApp.translate("t", "Нажмите 'ОК' и откройте подходящий план тестирования.")
+            error = qApp.translate("t", 'Нажмите "ОК" и откройте подходящий план тестирования.')
         else:
             error = qApp.translate("t", "Мультиплексор будет закрыт.")
         ut.show_message(qApp.translate("t", "Ошибка"), exc.text, additional_info=error)

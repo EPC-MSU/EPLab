@@ -335,7 +335,7 @@ def create_text_for_incompatible_firmwares(firmwares: List[Tuple[int, str, BadFi
     :return: error text for incompatible firmwares.
     """
 
-    template = qApp.translate("t", "На устройстве '{uri}' используется прошивка {firmware}, несовместимая с данной "
+    template = qApp.translate("t", 'На устройстве "{uri}" используется прошивка {firmware}, несовместимая с данной '
                                    "версией EPLab.")
     return create_text_with_firmwares_list_with_template(firmwares, template)
 
@@ -374,14 +374,16 @@ def print_errors(*bad_uris: str) -> None:
 
     if len(bad_uris) == 1:
         text = qApp.translate("t", "Не удалось подключиться к {}.\n<ul>\n"
-                                   "<li>Проверьте, что устройство подключено к компьютеру и не удерживается другой "
+                                   "<li>Проверьте, что устройство подключено к компьютеру и не используется другой "
                                    "программой.</li>\n"
-                                   "<li>Убедитесь, что это устройство EyePoint, а не какое-то другое устройство.</li>\n"
+                                   "<li>Убедитесь, что подключаемое устройство является устройством EyePoint, а не "
+                                   "каким-либо другим.</li>\n"
                                    "</ul>")
     else:
         text = qApp.translate("t", "Не удалось подключиться к {}.\n<ul>\n"
-                                   "<li>Проверьте, что устройства подключены к компьютеру и не удерживаются другой "
+                                   "<li>Проверьте, что устройства подключены к компьютеру и не используются другой "
                                    "программой.</li>\n"
-                                   "<li>Убедитесь, что это устройства EyePoint, а не какие-то другие устройства.</li>\n"
+                                   "<li>Убедитесь, что подключаемые устройства являются устройствами EyePoint, а не "
+                                   "какие-либо другими.</li>\n"
                                    "</ul>")
     ut.show_message(qApp.translate("t", "Ошибка подключения"), text.format(", ".join(bad_uris)))
