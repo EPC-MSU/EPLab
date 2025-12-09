@@ -48,7 +48,7 @@ def get_parameter(settings: QSettings, parameter: str, convert: Callable[[str], 
             except ValueError as exc:
                 logger.error("An error occurred while converting the value '%s' for the parameter '%s'", value,
                              parameter)
-                error_message = qApp.translate("settings", "Параметр '{}' имеет недопустимое значение '{}'.").format(
+                error_message = qApp.translate("settings", 'Параметр "{}" имеет недопустимое значение "{}".').format(
                     parameter, value)
                 raise InvalidParameterValueError(error_message) from exc
             else:
@@ -57,7 +57,7 @@ def get_parameter(settings: QSettings, parameter: str, convert: Callable[[str], 
 
     if required:
         logger.error("The parameter '%s' is missing from the configuration file", parameter)
-        raise MissingParameterError(qApp.translate("settings", "Значение параметра '{}' не задано в конфигурационном "
+        raise MissingParameterError(qApp.translate("settings", 'Значение параметра "{}" не задано в конфигурационном '
                                                                "файле.").format(parameter))
     return default
 

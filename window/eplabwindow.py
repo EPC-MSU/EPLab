@@ -388,8 +388,8 @@ class EPLabWindow(QMainWindow):
                 and not check_break_signatures(self._break_signature_saver.DIR_PATH, self._product)):
             ut.show_message(qApp.translate("t", "Информация"),
                             qApp.translate("t", "Включен автопереход в режиме тестирования по плану. Но в приложении "
-                                                "нет некоторых сигнатур разрыва, поэтому автопереход может работать "
-                                                "некорректно."), icon=QMessageBox.Information)
+                                                "нет некоторых сигнатур разрыва, поэтому функция автоперехода может "
+                                                "работать некорректно."), icon=QMessageBox.Information)
 
     def _check_plan_compatibility(self, plan: MeasurementPlan, is_new_plan: bool = False,
                                   filename: Optional[str] = None) -> None:
@@ -927,7 +927,7 @@ class EPLabWindow(QMainWindow):
         result = 0
         if self.measurement_plan and self._last_saved_measurement_plan_data != self.measurement_plan.to_json():
             if self._measurement_plan_path.path:
-                main_text = qApp.translate("t", "Сохранить изменения в '{}'?").format(self._measurement_plan_path.path)
+                main_text = qApp.translate("t", 'Сохранить изменения в "{}"?').format(self._measurement_plan_path.path)
             else:
                 main_text = qApp.translate("t", "Сохранить изменения в файл?")
             text = f"{additional_info} {main_text}" if additional_info else main_text
