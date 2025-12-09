@@ -418,8 +418,8 @@ def create_text_with_future_firmwares_list(firmwares: List[Tuple[str, BadFirmwar
     :return: text with a list of bad firmwares that are older than 2.4.
     """
 
-    template = qApp.translate("t", "На устройстве '{uri}' используется прошивка {firmware} измерителя {name}"
-                                   " SN {serial}, которая является слишком новой для этой версии EPLab.")
+    template = qApp.translate("t", 'На устройстве "{uri}" используется более новая прошивка {firmware} измерителя '
+                                   "{name} SN {serial}, которая несовместима с данной версией EPLab.")
     return create_text_with_firmwares_list_with_template(firmwares, template)
 
 
@@ -429,7 +429,7 @@ def create_text_with_outdated_firmwares_list(firmwares: List[Tuple[str, BadFirmw
     :return: text with a list of bad firmwares that are less than 2.4.
     """
 
-    template = qApp.translate("t", "На устройстве '{uri}' используется устаревшая прошивка {firmware} измерителя {name}"
+    template = qApp.translate("t", 'На устройстве "{uri}" используется устаревшая прошивка {firmware} измерителя {name}'
                                    " SN {serial}, которая несовместима с данной версией EPLab.")
     return create_text_with_firmwares_list_with_template(firmwares, template)
 
@@ -443,8 +443,8 @@ def get_firmware_update_info(link: str) -> str:
     return qApp.translate("t", "Для обновления прошивки нужно воспользоваться программой epcboot_gui или epcboot. Их "
                                "также можно скачать с сайта {link} или найти на флешке, которая передавалась в "
                                "комплекте с устройством.<br>\n"
-                               "Если используется двухканальное устройство, то в нем находится два измерителя. "
-                               "Обновить прошивку нужно на обоих измерителях.").format(link=link)
+                               "Если вы работаете с двухканальным устройством, то оно содержит два измерителя - "
+                               "обновить прошивку необходимо на обоих измерителях.").format(link=link)
 
 
 def print_errors(*bad_uris: str) -> None:

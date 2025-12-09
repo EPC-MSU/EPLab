@@ -555,7 +555,7 @@ class EPLabWindow(QMainWindow):
     def _delete_all_test_signatures(self) -> None:
         if (self.measurement_plan and self._measured_pins_checker.check_for_test_signatures_on_measurement_plan() and
                 not ut.show_message(qApp.translate("t", "Внимание"),
-                                    qApp.translate("t", "Вы уверены, что хотите удалить тестовые сигнатуры?"),
+                                    qApp.translate("t", "Вы уверены, что хотите удалить все тестовые сигнатуры?"),
                                     icon=QMessageBox.Information, yes_button=True, no_button=True)):
             self.measurement_plan.remove_all_test_signatures()
             self._comment_widget.update_table_for_new_tolerance()
