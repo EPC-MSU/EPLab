@@ -1191,6 +1191,9 @@ class EPLabWindow(QMainWindow):
         :param settings: measurement settings at which signatures were measured.
         """
 
+        if self._auto_settings.equivalent_circuits_rolled_up:
+            return
+
         if self.reference_curve_plot.is_empty():
             self._reference_equivalent_circuit_widget.clear_circuit()
         elif self._reference_curve_backup != self.reference_curve_plot.curve and settings:
