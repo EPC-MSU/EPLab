@@ -77,9 +77,9 @@ def update_scale(widget: QWidget) -> None:
     """
 
     from dialogs.measurersettingswindow import MeasurerSettingsWindow
-    from settings import SettingsPanel
-    from window.parameterwidget import ParameterWidget
-    from window.pinindexwidget import PinIndexWidget
+    from .centralwidget import CentralWidget
+    from .parameterwidget import ParameterWidget
+    from .pinindexwidget import PinIndexWidget
 
     font_size = get_font_size()
     if isinstance(widget, MeasurerSettingsWindow):
@@ -105,8 +105,8 @@ def update_scale(widget: QWidget) -> None:
             if child_widget.isEditable():
                 scale_widget(child_widget.lineEdit(), font_size, scale_factor)
             scale_widget(child_widget, font_size, scale_factor)
-        elif isinstance(child_widget, SettingsPanel):
-            scale_settings_panel(child_widget, font_size)
+        elif isinstance(child_widget, CentralWidget):
+            scale_settings_panel(child_widget.settings_panel, font_size)
 
 
 def update_scale_decorator(func: Callable[..., Any]):

@@ -19,6 +19,14 @@ class CentralWidget(QWidget):
         super().__init__()
         self._init_ui(iv_viewer)
 
+    @property
+    def settings_panel(self) -> SettingsPanel:
+        """
+        :return: widget with current settings.
+        """
+
+        return self._settings_panel
+
     def _init_ui(self, iv_viewer: Viewer) -> None:
         """
         :param iv_viewer: a widget that draws signatures.

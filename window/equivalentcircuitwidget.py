@@ -9,6 +9,9 @@ class EquivalentCircuitWidget(QFrame):
     Class for displaying equivalent circuit.
     """
 
+    MAX_IMAGE_SIZE: int = 100
+    WIDGET_HEIGHT: int = 150
+
     def __init__(self, color: str, place_circuit_on_left: bool = True) -> None:
         """
         :param color: text color for displaying circuit parameters;
@@ -41,7 +44,7 @@ class EquivalentCircuitWidget(QFrame):
 
     def _set_circuit_label(self, circuit_image_path: str) -> None:
         """
-        :param circuit_image_path:
+        :param circuit_image_path: path to the file with the image of the equivalent circuit.
         """
 
         self._label_circuit.clear()
@@ -49,7 +52,7 @@ class EquivalentCircuitWidget(QFrame):
             return
 
         pixmap = QPixmap(circuit_image_path)
-        self._label_circuit.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio))
+        self._label_circuit.setPixmap(pixmap.scaled(self.MAX_IMAGE_SIZE, self.MAX_IMAGE_SIZE, Qt.KeepAspectRatio))
 
     def _set_circuit_params(self, circuit_params: Dict[str, Any]) -> None:
         """

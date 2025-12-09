@@ -390,7 +390,7 @@ class EPLabWindow(QMainWindow):
             ut.show_message(qApp.translate("t", "Информация"),
                             qApp.translate("t", "Включен автопереход в режиме тестирования по плану. Но в приложении "
                                                 "нет некоторых сигнатур разрыва, поэтому функция автоперехода может "
-                                                "работать некорректно."), icon=QMessageBox.Information)
+                                                "работать некорректно."), icon=QMessageBox.Icon.Information)
 
     def _check_plan_compatibility(self, plan: MeasurementPlan, is_new_plan: bool = False,
                                   filename: Optional[str] = None) -> None:
@@ -464,11 +464,13 @@ class EPLabWindow(QMainWindow):
         if self._button_to_collapse_equivalent_circuit_widgets.arrowType() == Qt.DownArrow:
             self._splitter_widget_backup_size = self._splitter_widget.sizes()
             self._splitter_widget.setSizes([1, 0])
-            self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.UpArrow)
+            self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.ArrowType.UpArrow)
+            self._auto_settings.save_equivalent_circuits_state(True)
         else:
             self._splitter_widget.setSizes(self._splitter_widget_backup_size or [1, 100])
             self._splitter_widget_backup_size = None
-            self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.DownArrow)
+            self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.ArrowType.DownArrow)
+            self._auto_settings.save_equivalent_circuits_state(False)
 
     def _connect_devices(self, measurement_system: MeasurementSystem, product_name: Optional[cw.ProductName] = None
                          ) -> None:
@@ -523,12 +525,12 @@ class EPLabWindow(QMainWindow):
         self._reference_equivalent_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
             self.COLOR_FOR_REFERENCE.name(), place_circuit_on_left=False)
         layout = QHBoxLayout()
-        layout.addWidget(self._current_equivalent_circuit_widget, 10)
-        layout.addWidget(self._reference_equivalent_circuit_widget, 10)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self._current_equivalent_circuit_widget)
+        layout.addWidget(self._reference_equivalent_circuit_widget)
 
         widget = QWidget()
-        widget.setMaximumHeight(150)
-        widget.setMinimumHeight(50)
+        widget.setFixedHeight(EquivalentCircuitWidget.WIDGET_HEIGHT)
         widget.setLayout(layout)
         return widget
 
@@ -589,13 +591,14 @@ class EPLabWindow(QMainWindow):
         self._splitter_widget_backup_size = None
         self._splitter_widget: QSplitter = QSplitter()
         self._splitter_widget.splitterMoved.connect(self._handle_splitter_widget_moved)
-        self._splitter_widget.setOrientation(Qt.Vertical)
+        self._splitter_widget.setOrientation(Qt.Orientation.Vertical)
         self._splitter_widget.addWidget(self._central_widget)
         self._splitter_widget.addWidget(self._create_equivalent_circuit_widgets())
         self._splitter_widget.setStretchFactor(0, 10)
         self._splitter_widget.setStretchFactor(1, 0)
         self._splitter_widget.setCollapsible(1, True)
         self._splitter_widget.setHandleWidth(12)
+        self._splitter_widget.setSizes([1, int(not self._auto_settings.equivalent_circuits_rolled_up)])
 
         splitter_handle_layout = QHBoxLayout()
         splitter_handle_layout.setContentsMargins(0, 0, 0, 0)
@@ -606,8 +609,9 @@ class EPLabWindow(QMainWindow):
 
         self._button_to_collapse_equivalent_circuit_widgets: QToolButton = QToolButton()
         self._button_to_collapse_equivalent_circuit_widgets.setFixedSize(100, 12)
-        self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.DownArrow)
-        self._button_to_collapse_equivalent_circuit_widgets.setCursor(Qt.ArrowCursor)
+        cursor = Qt.ArrowType.UpArrow if self._auto_settings.equivalent_circuits_rolled_up else Qt.ArrowType.DownArrow
+        self._button_to_collapse_equivalent_circuit_widgets.setArrowType(cursor)
+        self._button_to_collapse_equivalent_circuit_widgets.setCursor(Qt.CursorShape.ArrowCursor)
         self._button_to_collapse_equivalent_circuit_widgets.clicked.connect(self._collapse_equivalent_circuit_widgets)
         splitter_handle_layout.addWidget(self._button_to_collapse_equivalent_circuit_widgets)
 
@@ -616,7 +620,7 @@ class EPLabWindow(QMainWindow):
         if (self.measurement_plan and self._measured_pins_checker.check_for_test_signatures_on_measurement_plan() and
                 not ut.show_message(qApp.translate("t", "Внимание"),
                                     qApp.translate("t", "Вы уверены, что хотите удалить все тестовые сигнатуры?"),
-                                    icon=QMessageBox.Information, yes_button=True, no_button=True)):
+                                    icon=QMessageBox.Icon.Information, yes_button=True, no_button=True)):
             self.measurement_plan.remove_all_test_signatures()
             self._comment_widget.update_table_for_new_tolerance()
             self.update_current_pin(False)
@@ -696,7 +700,7 @@ class EPLabWindow(QMainWindow):
         """
 
         if settings is None or self._product is None:
-            return EPLabWindow.DEFAULT_COMPARATOR_MIN_VOLTAGE, EPLabWindow.DEFAULT_COMPARATOR_MIN_CURRENT
+            return self.DEFAULT_COMPARATOR_MIN_VOLTAGE, self.DEFAULT_COMPARATOR_MIN_CURRENT
 
         return self._product.adjust_noise_amplitude(settings)
 
@@ -764,10 +768,12 @@ class EPLabWindow(QMainWindow):
     def _handle_splitter_widget_moved(self, pos: int, index: int) -> None:
         if index == 1:  # Handle with arrow
             if self._splitter_widget.sizes()[1] == 0:  # text_log is collapsed
-                self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.UpArrow)
+                self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.ArrowType.UpArrow)
+                self._auto_settings.save_equivalent_circuits_state(True)
             else:
                 self._splitter_widget_backup_size = self._splitter_widget.sizes()
-                self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.DownArrow)
+                self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.ArrowType.DownArrow)
+                self._auto_settings.save_equivalent_circuits_state(False)
 
     def _init_tolerance(self) -> None:
         """
@@ -990,7 +996,7 @@ class EPLabWindow(QMainWindow):
             else:
                 main_text = qApp.translate("t", "Сохранить изменения в файл?")
             text = f"{additional_info} {main_text}" if additional_info else main_text
-            result = ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information,
+            result = ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Icon.Information,
                                      yes_button=True, no_button=True, cancel_button=True)
             if result == 0:
                 # You need to save the changes to an existing file
@@ -1034,10 +1040,10 @@ class EPLabWindow(QMainWindow):
         """
 
         self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key_Down), self)
-        self._shortcut_down.setContext(Qt.ApplicationShortcut)
+        self._shortcut_down.setContext(Qt.ShortcutContext.ApplicationShortcut)
         self._shortcut_down.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(False))
         self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key_Up), self)
-        self._shortcut_up.setContext(Qt.ApplicationShortcut)
+        self._shortcut_up.setContext(Qt.ShortcutContext.ApplicationShortcut)
         self._shortcut_up.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(True))
 
     def _set_init_position(self) -> None:
@@ -1805,7 +1811,7 @@ class EPLabWindow(QMainWindow):
 
         ut.show_message(qApp.translate("t", "Информация"),
                         qApp.translate("t", "Изменен масштаб экрана. Закройте приложение и откройте снова."),
-                        icon=QMessageBox.Information)
+                        icon=QMessageBox.Icon.Information)
 
     @pyqtSlot(bool)
     def hide_curve(self, state: bool) -> None:
@@ -2063,7 +2069,7 @@ class EPLabWindow(QMainWindow):
                 text = text_ru + "<br>" + text_en
             else:
                 text = text_en + "<br>" + text_ru
-            ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information)
+            ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Icon.Information)
 
     @pyqtSlot()
     def select_option(self) -> None:

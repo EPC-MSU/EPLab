@@ -48,6 +48,7 @@ class AutoSettings(SettingsHandler):
     sensitive: str = None
     voltage: str = None
     auto_transition: bool = False
+    equivalent_circuits_rolled_up: bool = False
     language: Language = get_default_language()
     last_used_dir: str = get_user_documents_path()
     max_optimal_voltage: float = 12
@@ -74,10 +75,12 @@ class AutoSettings(SettingsHandler):
         settings.beginGroup("OptimalSearch")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
+
         params = {"auto_transition": {"convert": ut.to_bool},
                   "language": {"convert": get_language_from_str},
                   "last_used_dir": {"convert": get_dir_path_from_str},
                   "pin_shift_warning_info": {"convert": ut.to_bool},
+                  "equivalent_circuits_rolled_up": {"convert": ut.to_bool},
                   "warning_about_untested_pins_in_report": {"convert": ut.to_bool}}
         settings.beginGroup("Main")
         self._read_parameters_from_settings(settings, params)
@@ -109,6 +112,7 @@ class AutoSettings(SettingsHandler):
         settings.endGroup()
 
         params = {"auto_transition": {"convert": str},
+                  "equivalent_circuits_rolled_up": {"convert": str},
                   "language": {"convert": convert_language_to_str},
                   "last_used_dir": {"convert": str},
                   "pin_shift_warning_info": {"convert": str},
@@ -170,6 +174,14 @@ class AutoSettings(SettingsHandler):
         self.measurer_2_port = measurer_2_port
         self.mux_port = mux_port
         self.product_name = product_name
+
+    @save_settings
+    def save_equivalent_circuits_state(self, rolled_up: bool) -> None:
+        """
+        :param rolled_up:
+        """
+
+        self.equivalent_circuits_rolled_up = rolled_up
 
     @save_settings
     def save_language(self, language: Language) -> None:
