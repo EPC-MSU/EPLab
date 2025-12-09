@@ -90,22 +90,25 @@ class SettingsPanel(QWidget):
         """
 
         frequency, unit = convert_value_by_order(probe_frequency)
-        self._param_dict["frequency"].setText(qApp.translate("settings", "Частота: ") + f"{frequency} {unit}" +
-                                              qApp.translate("settings", "Гц"))
+        freq_text = "{}: {} {}{}".format(qApp.translate("mux", "Частота"), frequency, unit,
+                                         qApp.translate("settings", "Гц"))
+        self._param_dict["frequency"].setText(freq_text)
 
     def _set_score(self, score: str) -> None:
         """
         :param score: score value.
         """
 
-        self._param_dict["score"].setText(qApp.translate("settings", "Различие: ") + score)
+        score_text = "{}: {}".format(qApp.translate("MainWindow", "Различие"), score)
+        self._param_dict["score"].setText(score_text)
 
     def _set_sensitivity(self, sensitivity: str) -> None:
         """
         :param sensitivity: current sensitivity value.
         """
 
-        self._param_dict["sensitivity"].setText(qApp.translate("settings", "Чувствительность: ") + sensitivity)
+        sens_text = "{}: {}".format(qApp.translate("mux", "Чувствительность"), sensitivity)
+        self._param_dict["sensitivity"].setText(sens_text)
 
     def _set_voltage_per_div(self, voltage_per_division: float) -> None:
         """
@@ -113,9 +116,9 @@ class SettingsPanel(QWidget):
         """
 
         voltage_per_division, unit = convert_value_by_order(voltage_per_division)
-        self._param_dict["voltage_per_div"].setText(qApp.translate("settings", "Напряжение: ") +
-                                                    f"{voltage_per_division} {unit}" +
-                                                    qApp.translate("settings", "В / дел."))
+        volt_text = "{}: {} {}{}".format(qApp.translate("mux", "Напряжение"), voltage_per_division, unit,
+                                         qApp.translate("settings", "В / дел."))
+        self._param_dict["voltage_per_div"].setText(volt_text)
 
     def clear_panel(self) -> None:
         _ = [label.clear() for label in self._param_dict.values()]

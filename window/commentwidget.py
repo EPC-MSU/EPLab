@@ -56,8 +56,11 @@ class CommentTableDelegate(QStyledItemDelegate):
             pen.setWidth(pen_width)
             painter.setPen(pen)
             painter.setBrush(opt.backgroundBrush)
-            rect_with_inside_border = QRect(opt.rect.x() + pen.width() / 2, opt.rect.y() + pen.width() / 2,
-                                            opt.rect.width() - pen.width(), opt.rect.height() - pen.width())
+            x = int(round(opt.rect.x() + pen.width() / 2))
+            y = int(round(opt.rect.y() + pen.width() / 2))
+            width = int(round(opt.rect.width() - pen.width()))
+            height = int(round(opt.rect.height() - pen.width()))
+            rect_with_inside_border = QRect(x, y, width, height)
             painter.drawRect(rect_with_inside_border)
 
             painter.setPen(final_pen_color)

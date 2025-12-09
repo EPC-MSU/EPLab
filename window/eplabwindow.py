@@ -94,7 +94,6 @@ class EPLabWindow(QMainWindow):
         self._auto_settings: AutoSettings = AutoSettings(path=self.FILENAME_FOR_AUTO_SETTINGS)
         self._comparator: IVCComparator = IVCComparator()
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
-        self._dir_chosen_by_user: str = ut.get_user_documents_path()
         self._hide_current_curve: bool = False
         self._hide_reference_curve: bool = False
         self._last_saved_measurement_plan_data: Optional[Dict[str, Any]] = None
@@ -165,8 +164,8 @@ class EPLabWindow(QMainWindow):
         :return: the last directory that the user selected when working with the application.
         """
 
-        if os.path.exists(self._dir_chosen_by_user) and os.path.isdir(self._dir_chosen_by_user):
-            return self._dir_chosen_by_user
+        if os.path.exists(self._auto_settings.last_used_dir) and os.path.isdir(self._auto_settings.last_used_dir):
+            return self._auto_settings.last_used_dir
 
         return ut.get_user_documents_path()
 
@@ -177,8 +176,8 @@ class EPLabWindow(QMainWindow):
         """
 
         if os.path.exists(path):
-            self._dir_chosen_by_user = os.path.dirname(path) if not os.path.isdir(path) else path
-            self._central_widget.set_path_to_directory(self._dir_chosen_by_user)
+            self._auto_settings.save_last_used_dir(os.path.dirname(path) if not os.path.isdir(path) else path)
+            self._central_widget.set_path_to_directory(self._auto_settings.last_used_dir)
 
     @property
     def is_measured_pin(self) -> bool:
@@ -390,8 +389,8 @@ class EPLabWindow(QMainWindow):
                 and not check_break_signatures(self._break_signature_saver.DIR_PATH, self._product)):
             ut.show_message(qApp.translate("t", "Информация"),
                             qApp.translate("t", "Включен автопереход в режиме тестирования по плану. Но в приложении "
-                                                "нет некоторых сигнатур разрыва, поэтому автопереход может работать "
-                                                "некорректно."), icon=QMessageBox.Information)
+                                                "нет некоторых сигнатур разрыва, поэтому функция автоперехода может "
+                                                "работать некорректно."), icon=QMessageBox.Information)
 
     def _check_plan_compatibility(self, plan: MeasurementPlan, is_new_plan: bool = False,
                                   filename: Optional[str] = None) -> None:
@@ -614,7 +613,7 @@ class EPLabWindow(QMainWindow):
     def _delete_all_test_signatures(self) -> None:
         if (self.measurement_plan and self._measured_pins_checker.check_for_test_signatures_on_measurement_plan() and
                 not ut.show_message(qApp.translate("t", "Внимание"),
-                                    qApp.translate("t", "Вы уверены, что хотите удалить тестовые сигнатуры?"),
+                                    qApp.translate("t", "Вы уверены, что хотите удалить все тестовые сигнатуры?"),
                                     icon=QMessageBox.Information, yes_button=True, no_button=True)):
             self.measurement_plan.remove_all_test_signatures()
             self._comment_widget.update_table_for_new_tolerance()
@@ -887,9 +886,13 @@ class EPLabWindow(QMainWindow):
         """
 
         if not (isinstance(filename, str) and os.path.exists(filename)):
-            filename = QFileDialog.getOpenFileName(self, qApp.translate("MainWindow", "Открыть план тестирования"),
-                                                   directory=self.dir_chosen_by_user,
-                                                   filter="Board Files (*.json *.uzf)")[0]
+            if system().lower() == "windows":
+                filename = QFileDialog.getOpenFileName(self, qApp.translate("MainWindow", "Открыть план тестирования"),
+                                                       self.dir_chosen_by_user, "Board Files (*.json *.uzf)")[0]
+            else:
+                filename = QFileDialog.getOpenFileName(self, qApp.translate("MainWindow", "Открыть план тестирования"),
+                                                       self.dir_chosen_by_user, "Board Files (*.json *.uzf)",
+                                                       options=QFileDialog.DontUseNativeDialog)[0]
         board = None
         if filename:
             try:
@@ -981,7 +984,7 @@ class EPLabWindow(QMainWindow):
         result = 0
         if self.measurement_plan and self._last_saved_measurement_plan_data != self.measurement_plan.to_json():
             if self._measurement_plan_path.path:
-                main_text = qApp.translate("t", "Сохранить изменения в '{}'?").format(self._measurement_plan_path.path)
+                main_text = qApp.translate("t", 'Сохранить изменения в "{}"?').format(self._measurement_plan_path.path)
             else:
                 main_text = qApp.translate("t", "Сохранить изменения в файл?")
             text = f"{additional_info} {main_text}" if additional_info else main_text
@@ -1054,8 +1057,8 @@ class EPLabWindow(QMainWindow):
 
         height = min(height, available_height)
         width = min(width, available_width)
-        pos_x = geometry.x() + (available_width - width) / 2
-        pos_y = geometry.y() + (available_height - height) / 2
+        pos_x = int(round(geometry.x() + (available_width - width) / 2))
+        pos_y = int(round(geometry.y() + (available_height - height) / 2))
         self.move(pos_x, pos_y)
         self.resize(width, height)
 
@@ -1489,8 +1492,14 @@ class EPLabWindow(QMainWindow):
             dir_path = os.path.dirname(self._measurement_plan_path.path)
             is_user_defined_path = False
         else:
-            dir_path = QFileDialog.getExistingDirectory(
-                self, qApp.translate("t", "Выберите папку, в которую будет сохранен отчет"), self.dir_chosen_by_user)
+            if system().lower() == "windows":
+                dir_path = QFileDialog.getExistingDirectory(
+                    self, qApp.translate("t", "Выберите папку, в которую будет сохранен отчет"),
+                    self.dir_chosen_by_user)
+            else:
+                dir_path = QFileDialog.getExistingDirectory(
+                    self, qApp.translate("t", "Выберите папку, в которую будет сохранен отчет"),
+                    self.dir_chosen_by_user, options=QFileDialog.DontUseNativeDialog)
             is_user_defined_path = True
 
         if dir_path:
@@ -1843,9 +1852,13 @@ class EPLabWindow(QMainWindow):
         Slot loads image for the board from a file.
         """
 
-        filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
-                                               filter="Image Files (*.png *.jpg *.bmp)",
-                                               directory=self._dir_chosen_by_user)[0]
+        if system().lower() == "windows":
+            filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
+                                                   self.dir_chosen_by_user, "Image Files (*.png *.jpg *.bmp)")[0]
+        else:
+            filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
+                                                   self.dir_chosen_by_user, "Image Files (*.png *.jpg *.bmp)",
+                                                   options=QFileDialog.DontUseNativeDialog)[0]
         if not filename:
             return
 
@@ -1927,10 +1940,10 @@ class EPLabWindow(QMainWindow):
         default_name = os.path.join(self.dir_chosen_by_user, filename)
         if system().lower() == "windows":
             filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
-                                                   filter="Image (*.png)", directory=default_name)[0]
+                                                   default_name, "Image (*.png)")[0]
         else:
             filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
-                                                   filter="Image (*.png)", directory=default_name,
+                                                   default_name, "Image (*.png)",
                                                    options=QFileDialog.DontUseNativeDialog)[0]
         if filename:
             if not filename.endswith(".png"):
@@ -1952,8 +1965,15 @@ class EPLabWindow(QMainWindow):
 
         if save_as or not self._measurement_plan_path.path or not os.path.exists(self._measurement_plan_path.path):
             default_path = os.path.join(self.dir_chosen_by_user, "board.uzf")
-            filepath = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить план тестирования"),
-                                                   filter="UFIV Archived File (*.uzf)", directory=default_path)[0]
+            if system().lower() == "windows":
+                filepath = QFileDialog.getSaveFileName(self,
+                                                       qApp.translate("MainWindow", "Сохранить план тестирования"),
+                                                       default_path, "UFIV Archived File (*.uzf)")[0]
+            else:
+                filepath = QFileDialog.getSaveFileName(self,
+                                                       qApp.translate("MainWindow", "Сохранить план тестирования"),
+                                                       default_path, "UFIV Archived File (*.uzf)",
+                                                       options=QFileDialog.DontUseNativeDialog)[0]
             if filepath:
                 self.dir_chosen_by_user = os.path.dirname(filepath)
         else:

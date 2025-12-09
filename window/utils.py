@@ -13,7 +13,7 @@ from platform import system
 from typing import Any, Callable, Dict, List, Optional, Tuple
 import serial.tools.list_ports
 from PyQt5.QtCore import QCoreApplication as qApp, QDir, QStandardPaths, Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QFontDatabase, QIcon
 from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QLayout, QMessageBox
 from epcore.elements import MeasurementSettings
 from epcore.ivmeasurer import IVMeasurerBase
@@ -162,6 +162,26 @@ def get_user_documents_path() -> str:
     for path in QStandardPaths.standardLocations(QStandardPaths.DocumentsLocation):
         return path
     return QDir.homePath()
+
+
+def load_monospace_font() -> str:
+    """
+    :return: font family name.
+    """
+
+    font_path = os.path.join(DIR_MEDIA, "consolas.ttf")
+    font_id = QFontDatabase.addApplicationFont(font_path)
+    if font_id == -1:
+        logger.error("Error loading font from file '%s'", font_path)
+        return "monospace"
+
+    font_families = QFontDatabase.applicationFontFamilies(font_id)
+    if font_families:
+        font_family_name = font_families[0]
+        logger.info("Font '%s' loaded successfully", font_family_name)
+        return font_family_name
+
+    return "monospace"
 
 
 def read_json(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
