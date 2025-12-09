@@ -1,9 +1,11 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Generator, Optional
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFrame, QHBoxLayout, QLabel
+from .scaler import update_scale_of_class
 
 
+@update_scale_of_class
 class EquivalentCircuitWidget(QFrame):
     """
     Class for displaying equivalent circuit.
@@ -68,6 +70,13 @@ class EquivalentCircuitWidget(QFrame):
     def clear_circuit(self) -> None:
         self._label_circuit.clear()
         self._label_params.clear()
+
+    def get_labels(self) -> Generator[QLabel, None, None]:
+        """
+        :yield: QLabel widget with equivalent circuit parameters.
+        """
+
+        yield self._label_params
 
     def set_circuit(self, circuit_image_path: Optional[str], circuit_params: Dict[str, Any]) -> None:
         """
