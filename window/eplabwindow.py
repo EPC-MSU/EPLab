@@ -446,7 +446,7 @@ class EPLabWindow(QMainWindow):
         self._mux_and_plan_window.close()
         self._score_wrapper.set_dummy_difference()
         self._reference_equivalent_circuit_widget.clear_circuit()
-        self._test_equivalent_circuit_widget.clear_circuit()
+        self._current_equivalent_circuit_widget.clear_circuit()
 
         self._settings_update_next_cycle = None
         self._skip_curve = False
@@ -513,15 +513,17 @@ class EPLabWindow(QMainWindow):
 
     def _create_equivalent_circuit_widgets(self) -> QWidget:
         """
-        :return:
+        :return: widget with equivalent circuit widgets for the current and reference signatures.
         """
 
+        self._current_curve_backup: Optional[IVCurve] = None
+        self._current_equivalent_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
+            self.COLOR_FOR_CURRENT.name())
+        self._reference_curve_backup: Optional[IVCurve] = None
         self._reference_equivalent_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
             self.COLOR_FOR_REFERENCE.name(), place_circuit_on_left=False)
-        self._test_equivalent_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
-            self.COLOR_FOR_TEST.name())
         layout = QHBoxLayout()
-        layout.addWidget(self._test_equivalent_circuit_widget, 10)
+        layout.addWidget(self._current_equivalent_circuit_widget, 10)
         layout.addWidget(self._reference_equivalent_circuit_widget, 10)
 
         widget = QWidget()
@@ -1081,9 +1083,9 @@ class EPLabWindow(QMainWindow):
         for parameter, value in options.items():
             self._parameters_widgets[parameter].set_checked_option(value)
 
-    def _set_plot_parameters_to_low_settings_panel(self, settings: MeasurementSettings) -> None:
+    def _set_plot_parameters_to_settings_panel(self, settings: MeasurementSettings) -> None:
         """
-        :param settings: new measurement settings that need to be shown on the bottom panel on the main window.
+        :param settings: new measurement settings that need to be shown on the settings panel on the main window.
         """
 
         sensitivity_widget = self._parameters_widgets[EyePointProduct.Parameter.sensitive]
@@ -1178,11 +1180,24 @@ class EPLabWindow(QMainWindow):
     def _trigger_measurements(self) -> None:
         self._msystem.trigger_measurements()
 
-    def _update_equivalent_circuit_params(self) -> None:
-        file_path, params = ut.get_new_params_for_equivalent_circuit()
-        self._reference_equivalent_circuit_widget.set_circuit(file_path, **params)
-        file_path, params = ut.get_new_params_for_equivalent_circuit()
-        self._test_equivalent_circuit_widget.set_circuit(file_path, **params)
+    def _update_equivalent_circuits(self, settings: Optional[MeasurementSettings]) -> None:
+        """
+        :param settings: measurement settings at which signatures were measured.
+        """
+
+        if self.reference_curve_plot.is_empty():
+            self._reference_equivalent_circuit_widget.clear_circuit()
+        elif self._reference_curve_backup != self.reference_curve_plot.curve and settings:
+            self._reference_curve_backup = self.reference_curve_plot.curve
+            file_path, params = ut.get_new_params_for_equivalent_circuit(self._reference_curve_backup, settings)
+            self._reference_equivalent_circuit_widget.set_circuit(file_path, params)
+
+        if self.current_curve_plot.is_empty():
+            self._current_equivalent_circuit_widget.clear_circuit()
+        elif self._current_curve_backup != self.current_curve_plot.curve and settings:
+            self._current_curve_backup = self.current_curve_plot.curve
+            file_path, params = ut.get_new_params_for_equivalent_circuit(self._current_curve_backup, settings)
+            self._current_equivalent_circuit_widget.set_circuit(file_path, params)
 
     def _update_mux_actions(self) -> None:
         """
@@ -1240,10 +1255,10 @@ class EPLabWindow(QMainWindow):
             self._player.update_difference(difference)
         else:
             self._score_wrapper.set_dummy_difference()
-        self._update_equivalent_circuit_params()
+        self._update_equivalent_circuits(settings)
 
         if settings is not None:
-            self._set_plot_parameters_to_low_settings_panel(settings)
+            self._set_plot_parameters_to_settings_panel(settings)
 
     def _update_signatures_and_settings_in_plan_reading_mode(self, ref_curve: Optional[Measurement],
                                                              test_curve: Optional[Measurement],

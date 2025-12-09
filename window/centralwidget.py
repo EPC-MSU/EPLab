@@ -44,6 +44,11 @@ class CentralWidget(QWidget):
         self._settings_panel.raise_()
 
     def adjust_plot(self, x_scale: float, y_scale: float) -> None:
+        """
+        :param x_scale: X axis scale;
+        :param y_scale: Y axis scale.
+        """
+
         self._iv_viewer.plot.set_scale(x_scale, y_scale)
         self._iv_viewer.plot.set_min_borders(x_scale, y_scale)
 
@@ -70,9 +75,18 @@ class CentralWidget(QWidget):
         self._settings_panel.adjustSize()
 
     def set_path_to_directory(self, dir_path: str) -> None:
+        """
+        :param dir_path: path to the directory that will be used by default when saving a screenshot and exporting
+        signatures to a file.
+        """
+
         self._iv_viewer.plot.set_path_to_directory(dir_path)
 
     def set_settings(self, **kwargs) -> None:
+        """
+        :param kwargs: keyword arguments with all parameters that are displayed on the settings panel.
+        """
+
         self._settings_panel.set_all_parameters(**kwargs)
         self._settings_panel.adjustSize()
 

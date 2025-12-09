@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, Generator, Tuple
 from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtWidgets import QLabel, QToolBar, QVBoxLayout, QWidget
 from .legendwidget import LegendWidget
@@ -27,14 +27,14 @@ class SettingsPanel(QWidget):
                  qApp.translate("settings", "Текущая"))
         colors = "reference_signature.png", "test_signature.png", "current_signature.png"
         for name, text, color in zip(names, texts, colors):
-            legend = LegendWidget(text, color, SettingsPanel.LEFT_MARGIN)
+            legend = LegendWidget(text, color, self.LEFT_MARGIN)
             self._legends[name] = legend
             self._layout.addWidget(legend)
 
     def _init_param_dict(self) -> None:
         for param_name in ("voltage_per_div", "current_per_div", "max_voltage", "sensitivity", "frequency", "score"):
             label = QLabel()
-            label.setContentsMargins(SettingsPanel.LEFT_MARGIN, 0, 0, 0)
+            label.setContentsMargins(self.LEFT_MARGIN, 0, 0, 0)
             self._param_dict[param_name] = label
 
             tool_bar = QToolBar()
@@ -124,14 +124,18 @@ class SettingsPanel(QWidget):
         _ = [label.clear() for label in self._param_dict.values()]
         _ = [legend.clear() for legend in self._legends.values()]
 
-    def get_labels(self) -> List[QLabel]:
+    def get_labels(self) -> Generator[QLabel, None, None]:
+        """
+        :yield: QLabel widgets with parameters.
+        """
+
         for label in self._param_dict.values():
             yield label
 
     def set_all_parameters(self, **kwargs) -> None:
         """
         Method sets all parameters on the low panel.
-        :param kwargs: dictionary with all parameters that are displayed on the low panel.
+        :param kwargs: keyword arguments with all parameters that are displayed on the settings panel.
         """
 
         for key, value in kwargs.items():

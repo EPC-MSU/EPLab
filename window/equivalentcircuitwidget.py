@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFrame, QHBoxLayout, QLabel
@@ -51,9 +51,9 @@ class EquivalentCircuitWidget(QFrame):
         pixmap = QPixmap(circuit_image_path)
         self._label_circuit.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio))
 
-    def _set_circuit_params(self, **circuit_params) -> None:
+    def _set_circuit_params(self, circuit_params: Dict[str, Any]) -> None:
         """
-        :param circuit_params:
+        :param circuit_params: dictionary with the circuit parameters.
         """
 
         self._label_params.clear()
@@ -66,11 +66,11 @@ class EquivalentCircuitWidget(QFrame):
         self._label_circuit.clear()
         self._label_params.clear()
 
-    def set_circuit(self, circuit_image_path: Optional[str], **circuit_params) -> None:
+    def set_circuit(self, circuit_image_path: Optional[str], circuit_params: Dict[str, Any]) -> None:
         """
-        :param circuit_image_path: path to the image with the electrical circuit;
-        :param circuit_params: circuit parameters.
+        :param circuit_image_path: path to the file with the image of the equivalent circuit;
+        :param circuit_params: dictionary with the circuit parameters.
         """
 
         self._set_circuit_label(circuit_image_path)
-        self._set_circuit_params(**circuit_params)
+        self._set_circuit_params(circuit_params)

@@ -37,16 +37,6 @@ def scale_font_on_widget(widget: QWidget, font_size: int) -> None:
     widget.setFont(font)
 
 
-def scale_low_settings_panel(widget, font_size: int) -> None:
-    """
-    :param widget: low settings panel widget;
-    :param font_size: required font size.
-    """
-
-    for label in widget.get_labels():
-        scale_font_on_widget(label, font_size)
-
-
 def scale_minimum_size_on_widget(widget: QWidget, scale_factor: Optional[float] = 1) -> None:
     """
     :param widget: widget whose minimum size needs to be scaled;
@@ -58,6 +48,16 @@ def scale_minimum_size_on_widget(widget: QWidget, scale_factor: Optional[float] 
         min_size.setHeight(int(round(min_size.height() * scale_factor)))
         min_size.setWidth(int(round(min_size.width() * scale_factor)))
         widget.setMinimumSize(min_size)
+
+
+def scale_settings_panel(widget, font_size: int) -> None:
+    """
+    :param widget: settings panel widget;
+    :param font_size: required font size.
+    """
+
+    for label in widget.get_labels():
+        scale_font_on_widget(label, font_size)
 
 
 def scale_widget(widget: QWidget, font_size: int, scale_factor: Optional[float] = 1) -> None:
@@ -106,7 +106,7 @@ def update_scale(widget: QWidget) -> None:
                 scale_widget(child_widget.lineEdit(), font_size, scale_factor)
             scale_widget(child_widget, font_size, scale_factor)
         elif isinstance(child_widget, SettingsPanel):
-            scale_low_settings_panel(child_widget, font_size)
+            scale_settings_panel(child_widget, font_size)
 
 
 def update_scale_decorator(func: Callable[..., Any]):
