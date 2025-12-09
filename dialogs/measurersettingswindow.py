@@ -220,10 +220,10 @@ class MeasurerSettingsWindow(QDialog):
         :param device_name: name of measurer.
         """
 
-        title = qApp.translate("dialogs", "Настройки. ")
+        title = qApp.translate("MainWindow", "Настройки")
         if device_name is None:
-            device_name = qApp.translate("dialogs", "Неизвестный измеритель")
-        return title + device_name
+            device_name = qApp.translate("t", "Неизвестный измеритель")
+        return "{}. {}".format(title, device_name)
 
     @pyqtSlot()
     def _fix_size(self) -> None:

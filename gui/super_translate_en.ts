@@ -578,7 +578,7 @@ Such pins will be automatically declared in the report as being fault free. If y
     <message>
         <location filename="../window/plancompatibility.py" line="27"/>
         <source>В плане тестирования не заданы номера каналов мультиплексора. Вероятно, вы открыли план, созданный с помощью ручного устройства на устройстве с мультиплексором. Мультиплексор может использоваться только с планами тестирования, в которых заданы номера каналов.</source>
-        <translation>The test plan does not specify multiplexer output numbers. You probably opened a plan created using a manual device on a multiplexer device. The multiplexer can only be used with measurement plans that specify output numbers.</translation>
+        <translation>The test plan does not specify multiplexer output numbers. You probably opened a plan created using a manual device on a multiplexer device. The multiplexer can only be used with test plans that specify output numbers.</translation>
     </message>
     <message>
         <location filename="../window/plancompatibility.py" line="47"/>
@@ -676,12 +676,7 @@ Such pins will be automatically declared in the report as being fault free. If y
     <message>
         <location filename="../multiplexer/muxandplanwindow.py" line="91"/>
         <source>Остановить измерение всех точек</source>
-        <translation>Stop measuring all points</translation>
-    </message>
-    <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="94"/>
-        <source>Запустить измерение всех точек</source>
-        <translation>Start measuring all points</translation>
+        <translation>Stop recording of all points</translation>
     </message>
     <message>
         <location filename="../multiplexer/muxandplanwindow.py" line="154"/>
@@ -690,8 +685,8 @@ Such pins will be automatically declared in the report as being fault free. If y
     </message>
     <message>
         <location filename="../multiplexer/muxandplanwindow.py" line="185"/>
-        <source>Мультиплексор и план измерения</source>
-        <translation>Multiplexer and measurement plan</translation>
+        <source>Мультиплексор и план тестирования</source>
+        <translation>Multiplexer and test plan</translation>
     </message>
     <message>
         <location filename="../multiplexer/muxandplanwindow.py" line="188"/>
@@ -725,11 +720,6 @@ Such pins will be automatically declared in the report as being fault free. If y
         <location filename="../connection_window/connectionwindow.py" line="53"/>
         <source>Отключить</source>
         <translation>Disconnect</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/connectionwindow.py" line="72"/>
-        <source>Измерители</source>
-        <translation>Measurers</translation>
     </message>
     <message>
         <location filename="../connection_window/connectionwindow.py" line="81"/>
@@ -839,16 +829,6 @@ Signature analyzer S2</translation>
         <translation>Choose language:</translation>
     </message>
     <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="223"/>
-        <source>Настройки. </source>
-        <translation>Settings. </translation>
-    </message>
-    <message>
-        <location filename="../dialogs/measurersettingswindow.py" line="225"/>
-        <source>Неизвестный измеритель</source>
-        <translation>Unknown measurer</translation>
-    </message>
-    <message>
         <location filename="../dialogs/measurersettingswindow.py" line="293"/>
         <source>Нет настроек</source>
         <translation>No settings</translation>
@@ -922,32 +902,12 @@ Signature analyzer S2</translation>
         <translation> V</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="95"/>
-        <source>Частота: </source>
-        <translation>Frequency: </translation>
-    </message>
-    <message>
         <location filename="../settings/lowsettingspanel.py" line="96"/>
         <source>Гц</source>
         <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="103"/>
-        <source>Различие: </source>
-        <translation>Difference: </translation>
-    </message>
-    <message>
-        <location filename="../settings/lowsettingspanel.py" line="110"/>
-        <source>Чувствительность: </source>
-        <translation>Sensitivity: </translation>
-    </message>
-    <message>
-        <location filename="../settings/lowsettingspanel.py" line="118"/>
-        <source>Напряжение: </source>
-        <translation>Voltage: </translation>
-    </message>
-    <message>
-        <location filename="../settings/lowsettingspanel.py" line="120"/>
+        <location filename="../settings/lowsettingspanel.py" line="119"/>
         <source>В / дел.</source>
         <translation>V / div.</translation>
     </message>
