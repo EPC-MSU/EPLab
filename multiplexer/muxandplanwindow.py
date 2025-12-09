@@ -91,7 +91,7 @@ class MuxAndPlanWindow(QWidget):
             text = qApp.translate("mux", "Остановить измерение всех точек")
             icon = QIcon(os.path.join(ut.DIR_MEDIA, "stop_auto_test.png"))
         else:
-            text = qApp.translate("mux", "Запустить измерение всех точек")
+            text = qApp.translate("MainWindow", "Запустить измерение всех точек")
             icon = QIcon(os.path.join(ut.DIR_MEDIA, "start_auto_test.png"))
         widget = self._main_window.start_or_stop_entire_plan_measurement_action
         widget.setIcon(icon)
@@ -182,7 +182,7 @@ class MuxAndPlanWindow(QWidget):
         Method initializes widgets on dialog window.
         """
 
-        self.setWindowTitle(qApp.translate("mux", "Мультиплексор и план измерения"))
+        self.setWindowTitle(qApp.translate("mux", "Мультиплексор и план тестирования"))
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
 
         self.button_arrange_windows: QPushButton = QPushButton(qApp.translate("mux", "Упорядочить окна"))
