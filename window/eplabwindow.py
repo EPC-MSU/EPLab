@@ -37,7 +37,7 @@ from .commentwidget import CommentWidget
 from .common import DeviceErrorsHandler, WorkMode
 from .connectionchecker import analyze_connection_params, ConnectionChecker, ConnectionData
 from .curvestates import CurveStates
-from .equivalentcircuitwidget import EquivalentCircuitWidget
+from .equivalentcircuitwidget import EquivalentCircuitsWidget
 from .language import get_language, Language, Translator
 from .measuredpinschecker import MeasuredPinsChecker
 from .measurementplanpath import MeasurementPlanPath
@@ -445,8 +445,7 @@ class EPLabWindow(QMainWindow):
         self.pin_index_widget.clear()
         self._mux_and_plan_window.close()
         self._score_wrapper.set_dummy_difference()
-        self._reference_equivalent_circuit_widget.clear_circuit()
-        self._current_equivalent_circuit_widget.clear_circuit()
+        self._equivalent_circuits_widget.clear_circuits()
 
         self._settings_update_next_cycle = None
         self._skip_curve = False
@@ -513,27 +512,6 @@ class EPLabWindow(QMainWindow):
             screen = screens[0]
             screen.logicalDotsPerInchChanged.connect(self.handle_scale_change)
 
-    def _create_equivalent_circuit_widgets(self) -> QWidget:
-        """
-        :return: widget with equivalent circuit widgets for the current and reference signatures.
-        """
-
-        self._current_curve_backup: Optional[IVCurve] = None
-        self._current_equivalent_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
-            self.COLOR_FOR_CURRENT.name())
-        self._reference_curve_backup: Optional[IVCurve] = None
-        self._reference_equivalent_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
-            self.COLOR_FOR_REFERENCE.name(), place_circuit_on_left=False)
-        layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self._current_equivalent_circuit_widget)
-        layout.addWidget(self._reference_equivalent_circuit_widget)
-
-        widget = QWidget()
-        widget.setFixedHeight(EquivalentCircuitWidget.WIDGET_HEIGHT)
-        widget.setLayout(layout)
-        return widget
-
     def _create_measurer_setting_actions(self) -> None:
         """
         Method creates menu items to select settings for available measurers.
@@ -588,12 +566,15 @@ class EPLabWindow(QMainWindow):
         logger.debug("Scroll areas have been created to select measurement parameters (frequency, voltage, current)")
 
     def _create_splitter_widget(self) -> None:
+        self._equivalent_circuits_widget: EquivalentCircuitsWidget = EquivalentCircuitsWidget(
+            self.COLOR_FOR_CURRENT.name(), self.COLOR_FOR_REFERENCE.name())
+
         self._splitter_widget_backup_size = None
         self._splitter_widget: QSplitter = QSplitter()
         self._splitter_widget.splitterMoved.connect(self._handle_splitter_widget_moved)
         self._splitter_widget.setOrientation(Qt.Orientation.Vertical)
         self._splitter_widget.addWidget(self._central_widget)
-        self._splitter_widget.addWidget(self._create_equivalent_circuit_widgets())
+        self._splitter_widget.addWidget(self._equivalent_circuits_widget)
         self._splitter_widget.setStretchFactor(0, 10)
         self._splitter_widget.setStretchFactor(1, 0)
         self._splitter_widget.setCollapsible(1, True)
@@ -1194,19 +1175,8 @@ class EPLabWindow(QMainWindow):
         if self._auto_settings.equivalent_circuits_rolled_up:
             return
 
-        if self.reference_curve_plot.is_empty():
-            self._reference_equivalent_circuit_widget.clear_circuit()
-        elif self._reference_curve_backup != self.reference_curve_plot.curve and settings:
-            self._reference_curve_backup = self.reference_curve_plot.curve
-            file_path, params = ut.get_new_params_for_equivalent_circuit(self._reference_curve_backup, settings)
-            self._reference_equivalent_circuit_widget.set_circuit(file_path, params)
-
-        if self.current_curve_plot.is_empty():
-            self._current_equivalent_circuit_widget.clear_circuit()
-        elif self._current_curve_backup != self.current_curve_plot.curve and settings:
-            self._current_curve_backup = self.current_curve_plot.curve
-            file_path, params = ut.get_new_params_for_equivalent_circuit(self._current_curve_backup, settings)
-            self._current_equivalent_circuit_widget.set_circuit(file_path, params)
+        self._equivalent_circuits_widget.update_circuits(self.current_curve_plot.curve, self.reference_curve_plot.curve,
+                                                         settings)
 
     def _update_mux_actions(self) -> None:
         """
