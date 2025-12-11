@@ -166,7 +166,7 @@ def get_user_documents_path() -> str:
     :return: path to the standard user folder in which documents are stored.
     """
 
-    for path in QStandardPaths.standardLocations(QStandardPaths.DocumentsLocation):
+    for path in QStandardPaths.standardLocations(QStandardPaths.StandardLocation.DocumentsLocation):
         return path
     return QDir.homePath()
 

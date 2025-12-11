@@ -33,7 +33,7 @@ class CentralWidget(QWidget):
         """
 
         self._iv_viewer: Viewer = iv_viewer
-        self._iv_viewer.setFocusPolicy(Qt.ClickFocus)
+        self._iv_viewer.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
         self._iv_viewer.layout().setContentsMargins(0, 0, 0, 0)
         self._iv_viewer.plot.enable_context_menu()
         self._iv_viewer.plot.localize_widget(add_cursor=qApp.translate("t", "Добавить метку"),

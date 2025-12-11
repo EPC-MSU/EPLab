@@ -1060,7 +1060,7 @@ class EPLabWindow(QMainWindow):
         height = self.INIT_HEIGHT
 
         geometry = qApp.instance().desktop().availableGeometry()
-        available_height = geometry.height() - self.style().pixelMetric(QStyle.PM_TitleBarHeight)
+        available_height = geometry.height() - self.style().pixelMetric(QStyle.PixelMetric.PM_TitleBarHeight)
         available_width = geometry.width()
 
         height = min(height, available_height)

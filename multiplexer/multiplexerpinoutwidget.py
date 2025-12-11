@@ -93,7 +93,7 @@ class ModuleWidget(QWidget):
         self._channels: Dict[int, ChannelWidget] = {}
         self._module_number: int = module_number
         self._module_type: ModuleTypes = module_type
-        self._turned_on_channel: int = None
+        self._turned_on_channel: Optional[int] = None
         self._init_ui()
 
     def _change_module_color(self) -> None:
@@ -206,7 +206,7 @@ class MultiplexerPinoutWidget(QWidget):
             main_window.device_errors_handler
         self._modules: Dict[int, ModuleWidget] = {}
         self._parent = main_window
-        self._turned_on_output: MultiplexerOutput = None
+        self._turned_on_output: Optional[MultiplexerOutput] = None
         self._init_ui()
 
     @staticmethod
@@ -229,7 +229,7 @@ class MultiplexerPinoutWidget(QWidget):
         self.layout_for_modules.addStretch(1)
         scroll_area: QScrollArea = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setMinimumHeight(MultiplexerPinoutWidget.SCROLL_AREA_MIN_HEIGHT)
+        scroll_area.setMinimumHeight(self.SCROLL_AREA_MIN_HEIGHT)
         widget = QWidget()
         widget.setLayout(self.layout_for_modules)
         scroll_area.setWidget(widget)
@@ -242,7 +242,7 @@ class MultiplexerPinoutWidget(QWidget):
 
         self.scroll_area: QScrollArea = self._create_widgets_for_multiplexer()
         self.label_no_mux: QLabel = self._create_empty_widget()
-        self.setMinimumWidth(MultiplexerPinoutWidget.MIN_WIDTH)
+        self.setMinimumWidth(self.MIN_WIDTH)
 
         layout = QVBoxLayout()
         layout.addWidget(self.scroll_area)

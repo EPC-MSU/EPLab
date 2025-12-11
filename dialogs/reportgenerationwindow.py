@@ -4,7 +4,7 @@ File with class for dialog window to create report for board.
 
 import queue
 import time
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QThread
 from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QProgressBar, QTextEdit, QVBoxLayout
@@ -154,7 +154,7 @@ class ReportGenerationWindow(QDialog):
         super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self._number_of_steps_done: int = 0
         self._thread: ReportGenerationThread = thread
-        self._total_number: int = None
+        self._total_number: Optional[int] = None
         self._init_ui()
         self._init_thread()
 

@@ -126,7 +126,7 @@ class BoardWidget(QWidget):
 
         self.setWindowTitle("EPLab - Board")
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
-        self.resize(BoardWidget.WIDTH, BoardWidget.HEIGHT)
+        self.resize(self.WIDTH, self.HEIGHT)
         self.setStyleSheet("background-color: black;")
 
         self._scene: BoardView = BoardView()

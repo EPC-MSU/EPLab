@@ -38,7 +38,7 @@ class CommentTableDelegate(QStyledItemDelegate):
         """
 
         painter.save()
-        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
 
         opt = QStyleOptionViewItem(option)
         self.initStyleOption(opt, index)
@@ -93,10 +93,10 @@ class CommentWidget(TableWidget):
         self.adjustSize()
         self._set_f2_hotkey()
 
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
         self.setItemDelegate(CommentTableDelegate())
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
     def _add_row(self, index: int, comment: Optional[str] = None) -> None:
         """
@@ -161,7 +161,7 @@ class CommentWidget(TableWidget):
         """
 
         self._shortcut: QShortcut = QShortcut(QKeySequence(Qt.Key_F2), self)
-        self._shortcut.setContext(Qt.ApplicationShortcut)
+        self._shortcut.setContext(Qt.ShortcutContext.ApplicationShortcut)
         self._shortcut.activated.connect(self._set_focus_on_current_item)
 
     @pyqtSlot()

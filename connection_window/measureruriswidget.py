@@ -32,10 +32,10 @@ class MeasurerURIsWidget(QWidget):
         """
 
         super().__init__()
-        self._check_uri: Callable[[str], bool] = None
+        self._check_uri: Optional[Callable[[str], bool]] = None
         self._initial_uris: List[str] = initial_uris
-        self._measurer_type: MeasurerType = None
-        self._show_two_channels: bool = None
+        self._measurer_type: Optional[MeasurerType] = None
+        self._show_two_channels: Optional[bool] = None
         self._uri_checker: URIChecker = URIChecker()
         self._init_ui()
 
@@ -166,7 +166,7 @@ class MeasurerURIsWidget(QWidget):
         Method initializes widgets on main widget.
         """
 
-        self.setFocusPolicy(Qt.ClickFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
         grid_layout = QGridLayout()
         self.buttons_show_help: List[QPushButton] = []
         self.combo_boxes_measurers: List[QComboBox] = []
@@ -177,7 +177,7 @@ class MeasurerURIsWidget(QWidget):
             self.labels_measurers.append(label)
 
             combo_box = QComboBox()
-            combo_box.setMinimumWidth(MeasurerURIsWidget.COMBO_BOX_MIN_WIDTH)
+            combo_box.setMinimumWidth(self.COMBO_BOX_MIN_WIDTH)
             combo_box.setEditable(True)
             combo_box.textActivated.connect(self.handle_text_activated)
             combo_box.installEventFilter(self)
@@ -188,13 +188,13 @@ class MeasurerURIsWidget(QWidget):
             button = QPushButton()
             button.setIcon(QIcon(os.path.join(DIR_MEDIA, "info.png")))
             button.setToolTip(qApp.translate("connection_window", "Помощь"))
-            button.setFixedWidth(MeasurerURIsWidget.BUTTON_HELP_WIDTH)
+            button.setFixedWidth(self.BUTTON_HELP_WIDTH)
             button.clicked.connect(self.show_help)
             grid_layout.addWidget(button, index, 3)
             self.buttons_show_help.append(button)
 
         self.button_update: QPushButton = QPushButton()
-        self.button_update.setFixedWidth(MeasurerURIsWidget.BUTTON_UPDATE_WIDTH)
+        self.button_update.setFixedWidth(self.BUTTON_UPDATE_WIDTH)
         self.button_update.setIcon(QIcon(os.path.join(DIR_MEDIA, "update.png")))
         self.button_update.setToolTip(qApp.translate("connection_window", "Обновить"))
         self.button_update.clicked.connect(self.update_uris)
@@ -287,10 +287,10 @@ class MeasurerURIsWidget(QWidget):
         self._measurer_type = measurer_type
         self._uri_checker.set_measurer_type(measurer_type)
         if measurer_type == MeasurerType.IVM10:
-            placeholder_text = MeasurerURIsWidget.PLACEHOLDER_IVM
+            placeholder_text = self.PLACEHOLDER_IVM
             self._init_ivm10(*self._initial_uris)
         else:
-            placeholder_text = MeasurerURIsWidget.PLACEHOLDER_ASA
+            placeholder_text = self.PLACEHOLDER_ASA
             self._init_asa(self._initial_uris[0])
         for combo_box in self.combo_boxes_measurers:
             combo_box.lineEdit().setPlaceholderText(placeholder_text)

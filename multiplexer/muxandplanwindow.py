@@ -120,8 +120,8 @@ class MuxAndPlanWindow(QWidget):
         :return: True if measurements should be continued.
         """
 
-        return not ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information, yes_button=True,
-                                   no_button=True)
+        return not ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Icon.Information,
+                                   yes_button=True, no_button=True)
 
     def _create_bottom_widget(self) -> QWidget:
         """
@@ -134,12 +134,12 @@ class MuxAndPlanWindow(QWidget):
 
         h_layout = QHBoxLayout()
         h_layout.setSpacing(0)
-        h_layout.setContentsMargins(MuxAndPlanWindow.MARGIN, 0, MuxAndPlanWindow.MARGIN, MuxAndPlanWindow.MARGIN)
+        h_layout.setContentsMargins(self.MARGIN, 0, self.MARGIN, self.MARGIN)
         h_layout.addWidget(self.progress_bar, 2)
         h_layout.addStretch(1)
 
         v_layout = QVBoxLayout()
-        v_layout.setContentsMargins(MuxAndPlanWindow.MARGIN, 0, MuxAndPlanWindow.MARGIN, 0)
+        v_layout.setContentsMargins(self.MARGIN, 0, self.MARGIN, 0)
         v_layout.addWidget(self.measurement_plan_widget)
         v_layout.addLayout(h_layout)
         widget = QWidget()
@@ -153,7 +153,7 @@ class MuxAndPlanWindow(QWidget):
 
         self.label: QLabel = QLabel(qApp.translate("mux", "Режим тестирования:"))
         self.tool_bar: QToolBar = QToolBar()
-        self.tool_bar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        self.tool_bar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.tool_bar.addAction(self._main_window.writing_mode_action)
         self.tool_bar.addAction(self._main_window.testing_mode_action)
         self.tool_bar.addAction(self._main_window.start_or_stop_entire_plan_measurement_action)
@@ -162,7 +162,7 @@ class MuxAndPlanWindow(QWidget):
 
         h_layout = QHBoxLayout()
         h_layout.setSpacing(0)
-        h_layout.setContentsMargins(MuxAndPlanWindow.MARGIN, 0, MuxAndPlanWindow.MARGIN, 0)
+        h_layout.setContentsMargins(self.MARGIN, 0, self.MARGIN, 0)
         h_layout.addWidget(self.label)
         h_layout.addWidget(self.tool_bar)
         h_layout.addStretch(1)
@@ -199,7 +199,7 @@ class MuxAndPlanWindow(QWidget):
         self.splitter.addWidget(self._create_top_widget())
         self.splitter.addWidget(self._create_bottom_widget())
         self.splitter.setHandleWidth(1)
-        self.splitter.handle(1).setAttribute(Qt.WA_Hover)
+        self.splitter.handle(1).setAttribute(Qt.WidgetAttribute.WA_Hover)
         self.splitter.setStyleSheet("QSplitter::handle {background-color: gray; margin: 5px 0px;}"
                                     "QSplitter::handle:hover {background-color: black; margin: 5px 0px;}")
 
@@ -210,7 +210,7 @@ class MuxAndPlanWindow(QWidget):
         layout.addWidget(self.splitter)
         self.setLayout(layout)
         self.change_work_mode(self._main_window.work_mode)
-        self.setMinimumWidth(MuxAndPlanWindow.MIN_WIDTH)
+        self.setMinimumWidth(self.MIN_WIDTH)
 
     def _is_arranged(self) -> Tuple[bool, QPoint, QSize, QPoint, QSize]:
         """
@@ -222,7 +222,7 @@ class MuxAndPlanWindow(QWidget):
         height = geometry.height()
         width = geometry.width()
         main_window_pos = QPoint(geometry.x(), geometry.y())
-        height -= self.style().pixelMetric(QStyle.PM_TitleBarHeight)
+        height -= self.style().pixelMetric(QStyle.PixelMetric.PM_TitleBarHeight)
         if width > 1280:
             main_window_size = QSize(width // 2, height)
             window_pos = QPoint(main_window_pos.x() + main_window_size.width(), main_window_pos.y())
@@ -356,7 +356,7 @@ class MuxAndPlanWindow(QWidget):
         :param status: if True then measurements should be started.
         """
 
-        color = '<span style="background-color: {};">{}</span>'.format(MuxAndPlanWindow.COLOR_NOT_TESTED,
+        color = '<span style="background-color: {};">{}</span>'.format(self.COLOR_NOT_TESTED,
                                                                        qApp.translate("mux", "жёлтым"))
         text = qApp.translate("mux", "Не все точки имеют выходы мультиплексора и/или не все выходы могут быть "
                                      "установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите "

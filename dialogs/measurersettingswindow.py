@@ -228,7 +228,7 @@ class MeasurerSettingsWindow(QDialog):
     @pyqtSlot()
     def _fix_size(self) -> None:
         layout = self.layout()
-        layout.setSizeConstraint(QLayout.SetFixedSize)
+        layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
         self.adjustSize()
         if self.width() < self.MIN_WIDTH:
             self.setFixedWidth(self.MIN_WIDTH)

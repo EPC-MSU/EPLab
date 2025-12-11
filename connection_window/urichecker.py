@@ -44,7 +44,7 @@ class URIChecker:
         :param for_mux: if True, then need to check the URI for the multiplexer, otherwise for the IV-measurer.
         """
 
-        self._check_uri: Callable[[str], bool] = None
+        self._check_uri: Optional[Callable[[str], bool]] = None
         if for_mux:
             self._check_uri = self.check_mux
 

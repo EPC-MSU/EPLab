@@ -62,7 +62,7 @@ class SettingsWindow(QDialog):
         self.button_ok.setDefault(True)
         self.button_save_settings.clicked.connect(self.save_settings_to_file)
         self.adjustSize()
-        self.layout().setSizeConstraint(QLayout.SetFixedSize)
+        self.layout().setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
     def _get_tolerance_value(self) -> float:
         """
@@ -146,7 +146,7 @@ class SettingsWindow(QDialog):
         Slot decreases the tolerance value by a given step.
         """
 
-        self._update_tolerance_in_settings_wnd(self._get_tolerance_value() - SettingsWindow.THRESHOLD_STEP)
+        self._update_tolerance_in_settings_wnd(self._get_tolerance_value() - self.THRESHOLD_STEP)
         self._send_settings()
 
     @pyqtSlot()
@@ -164,7 +164,7 @@ class SettingsWindow(QDialog):
         Slot increases the tolerance value by a given step.
         """
 
-        self._update_tolerance_in_settings_wnd(self._get_tolerance_value() + SettingsWindow.THRESHOLD_STEP)
+        self._update_tolerance_in_settings_wnd(self._get_tolerance_value() + self.THRESHOLD_STEP)
         self._send_settings()
 
     @pyqtSlot()

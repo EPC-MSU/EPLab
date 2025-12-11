@@ -107,7 +107,7 @@ def find_urpc_ports(device_type: str) -> List[str]:
     return sorted(map(lambda port: create_uri_name(port.device), serial_ports))
 
 
-def get_current_measurers_uris(main_window) -> List[str]:
+def get_current_measurers_uris(main_window) -> List[Optional[str]]:
     """
     :param main_window: main window of application.
     :return: list of measurer URIs that the application currently works with.
@@ -250,4 +250,4 @@ def show_help(h10: bool = False) -> None:
         port_format = "com:///dev/ttyx" if get_platform() == "debian" else "com:\\\\.\\COMx"
         info = qApp.translate("connection_window", "Введите значение последовательного порта в формате {}."
                               ).format(port_format)
-    show_message(qApp.translate("connection_window", "Помощь"), info, icon=QMessageBox.Information)
+    show_message(qApp.translate("connection_window", "Помощь"), info, icon=QMessageBox.Icon.Information)

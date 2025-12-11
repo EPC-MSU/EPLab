@@ -80,16 +80,16 @@ class TableWidget(QTableWidget):
 
         self.setColumnCount(len(headers))
         self.setHorizontalHeaderLabels(headers)
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         horizontal_header = self.horizontalHeader()
-        horizontal_header.setSectionResizeMode(QHeaderView.ResizeToContents)
-        horizontal_header.setSelectionMode(QAbstractItemView.NoSelection)
+        horizontal_header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        horizontal_header.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         horizontal_header.setSectionsClickable(False)
         horizontal_header.setStretchLastSection(True)
         vertical_header = self.verticalHeader()
         vertical_header.setVisible(False)
-        vertical_header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        vertical_header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.itemSelectionChanged.connect(self.send_current_row_index)
 
     @disconnect_item_signals

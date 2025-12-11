@@ -9,8 +9,8 @@ from window.exceptionhook import exception_hook, show_error_window
 from window.logger import set_logger
 
 
-QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)  # enable high dpi scaling
-QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)  # use highdpi icons
+QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)  # enable high dpi scaling
+QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)  # use high dpi icons
 
 
 if getattr(sys, "frozen", False):

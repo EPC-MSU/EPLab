@@ -36,7 +36,7 @@ class LanguageSelectionWindow(QDialog):
         language = Translator.get_language_name(get_language())
         self.combo_box_languages.setCurrentText(language)
         self.button_box: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        self.button_box.button(QDialogButtonBox.Cancel).setText(qApp.translate("t", "Отмена"))
+        self.button_box.button(QDialogButtonBox.StandardButton.Cancel).setText(qApp.translate("t", "Отмена"))
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
 

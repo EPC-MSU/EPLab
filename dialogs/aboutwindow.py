@@ -62,7 +62,7 @@ class AboutWindow(QDialog):
         logo_name = self._get_logo_name()
         self.label_logo: QLabel = QLabel()
         self.label_logo.setText(f'<a href="{self._get_page_url()}"><img src="{os.path.join(ut.DIR_MEDIA, logo_name)}" '
-                                f'width="{AboutWindow.WINDOW_WIDTH}"></a>')
+                                f'width="{self.WINDOW_WIDTH}"></a>')
         self.label_logo.setOpenExternalLinks(True)
         return self.label_logo
 
@@ -110,7 +110,7 @@ class AboutWindow(QDialog):
         self.setWindowTitle(qApp.translate("MainWindow", "О программе"))
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.setFixedWidth(AboutWindow.WINDOW_WIDTH)
+        self.setFixedWidth(self.WINDOW_WIDTH)
 
         layout = QVBoxLayout()
         layout.addWidget(self._create_label_with_logo())

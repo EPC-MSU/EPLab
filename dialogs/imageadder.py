@@ -42,7 +42,7 @@ class ImageAdder(QDialog):
         self._scene.set_background(self._rotated_pixmap)
         center_pos = self._scene.scene().sceneRect().center()
         self._scene._background.setPos(center_pos - self._scene._background.boundingRect().center())
-        self._scene.fitInView(self._scene._background, Qt.KeepAspectRatio)
+        self._scene.fitInView(self._scene._background, Qt.AspectRatioMode.KeepAspectRatio)
         self._scene.update()
 
     def _change_rotation_angle(self, angle_change: int) -> None:
@@ -173,7 +173,7 @@ class ImageAdder(QDialog):
         """
 
         geometry = qApp.instance().desktop().availableGeometry()
-        available_height = geometry.height() - self.style().pixelMetric(QStyle.PM_TitleBarHeight)
+        available_height = geometry.height() - self.style().pixelMetric(QStyle.PixelMetric.PM_TitleBarHeight)
         available_width = geometry.width()
 
         height = self.INIT_SIZE_AS_PROPORTION_OF_SCREEN * available_height
