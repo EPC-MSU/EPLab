@@ -7,7 +7,7 @@ import os
 from typing import Any, Callable, Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QStyle, QToolBar,
+from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QToolBar,
                              QVBoxLayout, QWidget)
 from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MultiplexerOutput
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
@@ -222,7 +222,8 @@ class MuxAndPlanWindow(QWidget):
         height = geometry.height()
         width = geometry.width()
         main_window_pos = QPoint(geometry.x(), geometry.y())
-        height -= self.style().pixelMetric(QStyle.PixelMetric.PM_TitleBarHeight)
+        border_height = self._main_window.frameGeometry().height() - self._main_window.geometry().height()
+        height -= border_height
         if width > 1280:
             main_window_size = QSize(width // 2, height)
             window_pos = QPoint(main_window_pos.x() + main_window_size.width(), main_window_pos.y())
@@ -271,6 +272,13 @@ class MuxAndPlanWindow(QWidget):
         """
 
         main_window_pos, main_window_size, window_pos, window_size = self._is_arranged()[1:]
+
+        if self._main_window.isMaximized():
+            self._main_window.setWindowState(self._main_window.windowState() & ~Qt.WindowMaximized)
+
+        if self.isMaximized():
+            self.setWindowState(self.windowState() & ~Qt.WindowMaximized)
+
         self._main_window.move(main_window_pos)
         self._main_window.resize(main_window_size)
         self.move(window_pos)
