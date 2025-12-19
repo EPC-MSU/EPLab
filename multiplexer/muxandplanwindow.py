@@ -134,12 +134,12 @@ class MuxAndPlanWindow(QWidget):
 
         h_layout = QHBoxLayout()
         h_layout.setSpacing(0)
-        h_layout.setContentsMargins(MuxAndPlanWindow.MARGIN, 0, MuxAndPlanWindow.MARGIN, MuxAndPlanWindow.MARGIN)
+        h_layout.setContentsMargins(self.MARGIN, 0, self.MARGIN, self.MARGIN)
         h_layout.addWidget(self.progress_bar, 2)
         h_layout.addStretch(1)
 
         v_layout = QVBoxLayout()
-        v_layout.setContentsMargins(MuxAndPlanWindow.MARGIN, 0, MuxAndPlanWindow.MARGIN, 0)
+        v_layout.setContentsMargins(self.MARGIN, 0, self.MARGIN, 0)
         v_layout.addWidget(self.measurement_plan_widget)
         v_layout.addLayout(h_layout)
         widget = QWidget()
@@ -162,7 +162,7 @@ class MuxAndPlanWindow(QWidget):
 
         h_layout = QHBoxLayout()
         h_layout.setSpacing(0)
-        h_layout.setContentsMargins(MuxAndPlanWindow.MARGIN, 0, MuxAndPlanWindow.MARGIN, 0)
+        h_layout.setContentsMargins(self.MARGIN, 0, self.MARGIN, 0)
         h_layout.addWidget(self.label)
         h_layout.addWidget(self.tool_bar)
         h_layout.addStretch(1)
@@ -210,7 +210,7 @@ class MuxAndPlanWindow(QWidget):
         layout.addWidget(self.splitter)
         self.setLayout(layout)
         self.change_work_mode(self._main_window.work_mode)
-        self.setMinimumWidth(MuxAndPlanWindow.MIN_WIDTH)
+        self.setMinimumWidth(self.MIN_WIDTH)
 
     def _is_arranged(self) -> Tuple[bool, QPoint, QSize, QPoint, QSize]:
         """
@@ -222,7 +222,7 @@ class MuxAndPlanWindow(QWidget):
         height = geometry.height()
         width = geometry.width()
         main_window_pos = QPoint(geometry.x(), geometry.y())
-        height -= self.style().pixelMetric(QStyle.PM_TitleBarHeight)
+        height -= self.style().pixelMetric(QStyle.PixelMetric.PM_TitleBarHeight)
         if width > 1280:
             main_window_size = QSize(width // 2, height)
             window_pos = QPoint(main_window_pos.x() + main_window_size.width(), main_window_pos.y())
@@ -356,7 +356,7 @@ class MuxAndPlanWindow(QWidget):
         :param status: if True then measurements should be started.
         """
 
-        color = '<span style="background-color: {};">{}</span>'.format(MuxAndPlanWindow.COLOR_NOT_TESTED,
+        color = '<span style="background-color: {};">{}</span>'.format(self.COLOR_NOT_TESTED,
                                                                        qApp.translate("mux", "жёлтым"))
         text = qApp.translate("mux", "Не все точки имеют выходы мультиплексора и/или не все выходы могут быть "
                                      "установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите "
