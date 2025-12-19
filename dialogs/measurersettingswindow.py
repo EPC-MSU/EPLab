@@ -254,6 +254,7 @@ class MeasurerSettingsWindow(QDialog):
         self.setWindowTitle(self._create_title(device_name))
         self.setMinimumWidth(self.MIN_WIDTH)
         self.setMaximumSize(self.MAX_WIDTH, self.MAX_HEIGHT)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
 
         v_layout = QVBoxLayout()
         if isinstance(settings, dict) and settings.get("elements"):
