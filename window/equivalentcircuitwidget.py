@@ -1,7 +1,9 @@
+import os.path
 from typing import Any, Dict, Optional
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QResizeEvent
 from PyQt5.QtWidgets import QFrame, QHBoxLayout, QLabel, QWidget
+from circuit_detector import CircuitClassifier, predict_circuit_class_for_signature
 from epcore.elements import IVCurve, MeasurementSettings
 from ivviewer import Curve
 from . import utils as ut
@@ -59,17 +61,16 @@ class EquivalentCircuitWidget(QFrame):
             self._layout.addStretch(1)
         self.setLayout(self._layout)
 
-    def _set_circuit_label(self, circuit_image_path: str) -> None:
+    def _set_circuit_label(self, circuit_image: Optional[QPixmap]) -> None:
         """
-        :param circuit_image_path: path to the file with the image of the equivalent circuit.
+        :param circuit_image: image of the equivalent circuit.
         """
 
         self._label_circuit.clear()
-        if not circuit_image_path:
+        if not circuit_image:
             return
 
-        pixmap = QPixmap(circuit_image_path)
-        self._label_circuit.setPixmap(pixmap.scaled(self.MAX_IMAGE_SIZE, self.MAX_IMAGE_SIZE, Qt.KeepAspectRatio))
+        self._label_circuit.setPixmap(circuit_image)
 
     def _set_circuit_params(self, circuit_params: Dict[str, Any]) -> None:
         """
@@ -90,13 +91,13 @@ class EquivalentCircuitWidget(QFrame):
         if self._label_circuit.isVisible():
             self._label_circuit.hide()
 
-    def set_circuit(self, circuit_image_path: Optional[str], circuit_params: Dict[str, Any]) -> None:
+    def set_circuit(self, circuit_params: Dict[str, Any], circuit_image: Optional[QPixmap]) -> None:
         """
-        :param circuit_image_path: path to the file with the image of the equivalent circuit;
-        :param circuit_params: dictionary with the circuit parameters.
+        :param circuit_params: dictionary with the circuit parameters;
+        :param circuit_image: image of the equivalent circuit;
         """
 
-        self._set_circuit_label(circuit_image_path)
+        self._set_circuit_label(circuit_image)
         self._set_circuit_params(circuit_params)
 
     def show_circuit_image(self) -> None:
@@ -109,6 +110,7 @@ class EquivalentCircuitsWidget(QWidget):
     A widget with two widgets that display equivalent circuits for the current and reference signatures.
     """
 
+    MAX_IMAGE_SIZE: int = 100
     SPACING: int = 5
     WIDGET_HEIGHT: int = 150
 
@@ -122,9 +124,16 @@ class EquivalentCircuitsWidget(QWidget):
         self._color_for_current_signature: str = color_for_current_signature
         self._color_for_reference_signature: str = color_for_reference_signature
         self._current_curve_backup: Optional[IVCurve] = None
+        self._dir_path: str = os.path.join(ut.DIR_MEDIA, "circuit_detector")
         self._reference_curve_backup: Optional[IVCurve] = None
 
+        self._create_classifier()
+        self._load_circuit_class_images()
         self._init_ui()
+
+    def _create_classifier(self) -> None:
+        model_path = os.path.join(self._dir_path, "model.pkl")
+        self._classifier: CircuitClassifier = CircuitClassifier.load(model_path)
 
     def _init_ui(self) -> None:
         self._current_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
@@ -141,9 +150,18 @@ class EquivalentCircuitsWidget(QWidget):
         self.setFixedHeight(self.WIDGET_HEIGHT)
         self.setLayout(layout)
 
-    @staticmethod
-    def _update_curve(curve: Optional[Curve], curve_backup: Optional[Curve], settings: Optional[MeasurementSettings],
-                      circuit_widget: EquivalentCircuitWidget) -> None:
+    def _load_circuit_class_images(self) -> None:
+        self._circuit_class_images: Dict[str, QPixmap] = dict()
+        dir_with_images = os.path.join(self._dir_path, "circuit_classes")
+        for file_name in os.listdir(dir_with_images):
+            file_path = os.path.join(dir_with_images, file_name)
+            if os.path.isfile(file_path):
+                class_name = os.path.splitext(os.path.basename(file_path))[0]
+                pixmap = QPixmap(file_path).scaled(self.MAX_IMAGE_SIZE, self.MAX_IMAGE_SIZE, Qt.KeepAspectRatio)
+                self._circuit_class_images[class_name] = pixmap
+
+    def _update_curve(self, curve: Optional[Curve], curve_backup: Optional[Curve],
+                      settings: Optional[MeasurementSettings], circuit_widget: EquivalentCircuitWidget) -> None:
         """
         :param curve: signature for which an equivalent circuit must be constructed;
         :param curve_backup: a signature for which an equivalent circuit has already been constructed;
@@ -154,8 +172,12 @@ class EquivalentCircuitsWidget(QWidget):
         if not curve:
             circuit_widget.clear_circuit()
         elif curve != curve_backup and settings:
-            file_path, params = ut.get_new_params_for_equivalent_circuit(curve, settings)
-            circuit_widget.set_circuit(file_path, params)
+            params = predict_circuit_class_for_signature(IVCurve(curve.currents, curve.voltages), settings,
+                                                         self._classifier)
+            circuit_class_name = params.get("class_name", "")
+            circuit_class_image = self._circuit_class_images.get(circuit_class_name, None)
+            print(circuit_class_image)
+            circuit_widget.set_circuit(params, circuit_class_image)
 
     def clear_circuits(self) -> None:
         self._current_circuit_widget.clear_circuit()
