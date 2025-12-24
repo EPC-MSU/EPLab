@@ -1,6 +1,7 @@
-from typing import Dict, Generator, Tuple
+from typing import Dict, Generator
 from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtWidgets import QLabel, QToolBar, QVBoxLayout, QWidget
+from window import utils as ut
 from .legendwidget import LegendWidget
 
 
@@ -59,10 +60,9 @@ class SettingsPanel(QWidget):
         """
 
         current_per_division *= 1e-3
-        current_per_division, unit = convert_value_by_order(current_per_division)
-        self._param_dict["current_per_div"].setText(qApp.translate("settings", "Ток: ") +
-                                                    f"{current_per_division} {unit}" +
-                                                    qApp.translate("settings", "А / дел."))
+        text = ut.get_str_representation_of_physical_quantity(qApp.translate("settings", "Ток"), current_per_division,
+                                                              qApp.translate("settings", "А / дел."))
+        self._param_dict["current_per_div"].setText(text)
 
     def _set_legend(self, **kwargs) -> None:
         """
@@ -89,10 +89,9 @@ class SettingsPanel(QWidget):
         :param probe_frequency: probe signal frequency value.
         """
 
-        frequency, unit = convert_value_by_order(probe_frequency)
-        freq_text = "{}: {} {}{}".format(qApp.translate("mux", "Частота"), frequency, unit,
-                                         qApp.translate("settings", "Гц"))
-        self._param_dict["frequency"].setText(freq_text)
+        text = ut.get_str_representation_of_physical_quantity(qApp.translate("mux", "Частота"), probe_frequency,
+                                                              qApp.translate("settings", "Гц"))
+        self._param_dict["frequency"].setText(text)
 
     def _set_score(self, score: str) -> None:
         """
@@ -115,10 +114,9 @@ class SettingsPanel(QWidget):
         :param voltage_per_division: voltage value per division.
         """
 
-        voltage_per_division, unit = convert_value_by_order(voltage_per_division)
-        volt_text = "{}: {} {}{}".format(qApp.translate("mux", "Напряжение"), voltage_per_division, unit,
-                                         qApp.translate("settings", "В / дел."))
-        self._param_dict["voltage_per_div"].setText(volt_text)
+        text = ut.get_str_representation_of_physical_quantity(qApp.translate("mux", "Напряжение"), voltage_per_division,
+                                                              qApp.translate("settings", "В / дел."))
+        self._param_dict["voltage_per_div"].setText(text)
 
     def clear_panel(self) -> None:
         _ = [label.clear() for label in self._param_dict.values()]
@@ -144,31 +142,3 @@ class SettingsPanel(QWidget):
                 method(value)
 
         self._set_legend(**kwargs)
-
-
-def convert_value_by_order(value: float) -> Tuple[float, str]:
-    """
-    :param value: number to be converted in order.
-    :return: converted number and unit prefix.
-    """
-
-    value = abs(value)
-    if value >= 10**3:
-        value = round(value / 10**3, 2)
-        unit = qApp.translate("settings", "к")
-    elif 1 <= value < 10**3:
-        value = round(value, 2)
-        unit = ""
-    elif 1e-3 <= value < 1:
-        value = round(10**3 * value, 2)
-        unit = qApp.translate("settings", "м")
-    elif 1e-6 <= value < 1e-3:
-        value = round(10**6 * value, 2)
-        unit = qApp.translate("settings", "мк")
-    elif 1e-9 <= value < 1e-6:
-        value = round(10**9 * value, 2)
-        unit = qApp.translate("settings", "н")
-    else:
-        value = round(10**12 * value, 2)
-        unit = qApp.translate("settings", "п")
-    return value, unit

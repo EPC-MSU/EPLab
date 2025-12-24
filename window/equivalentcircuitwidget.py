@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QResizeEvent
 from PyQt5.QtWidgets import QFrame, QHBoxLayout, QLabel, QWidget
-from circuit_detector import CircuitClassifier, predict_circuit_class_for_signature
+from circuit_detector import CircuitClassifier, detect_parameters, predict_circuit_class_for_iv_curve
 from epcore.elements import IVCurve, MeasurementSettings
 from ivviewer import Curve
 from . import utils as ut
@@ -16,11 +16,7 @@ class EquivalentCircuitWidget(QFrame):
     Class for displaying equivalent circuit.
     """
 
-    MARGIN: int = 5
-    MAX_IMAGE_SIZE: int = 100
-    PARAMS_LABEL_WIDTH: int = 100
-
-    def __init__(self, color: str, place_circuit_on_left: bool = True) -> None:
+    def __init__(self, color: str, margin: int, params_label_width: int, place_circuit_on_left: bool = True) -> None:
         """
         :param color: text color for displaying circuit parameters;
         :param place_circuit_on_left: if True, then you need to place the circuit to the left of the parameters,
@@ -30,38 +26,33 @@ class EquivalentCircuitWidget(QFrame):
         super().__init__()
         self._color: str = color
         self._place_circuit_on_left: bool = place_circuit_on_left
-        self._init_ui()
+        self._init_ui(margin, params_label_width)
 
-    @property
-    def min_width_with_image(self) -> int:
-        """
-        :return: minimum width of the widget with the equivalent circuit image.
-        """
-
-        return 3 * self.MARGIN + self.MAX_IMAGE_SIZE + self.PARAMS_LABEL_WIDTH
-
-    def _init_ui(self) -> None:
+    def _init_ui(self, margin: int, params_label_width: int) -> None:
         self.setStyleSheet("background-color: black;")
 
         self._label_circuit: QLabel = QLabel()
         self._label_params: QLabel = QLabel()
-        self._label_params.setFixedWidth(self.PARAMS_LABEL_WIDTH)
+        self._label_params.setFixedWidth(params_label_width)
         self._label_params.setStyleSheet(f"background-color: black; color: {self._color}")
 
         self._layout: QHBoxLayout = QHBoxLayout()
-        self._layout.setContentsMargins(self.MARGIN, self.MARGIN, self.MARGIN, self.MARGIN)
-        self._layout.setSpacing(self.MARGIN)
+        self._layout.setContentsMargins(margin, margin, margin, margin)
+        self._layout.setSpacing(margin)
         if self._place_circuit_on_left:
             self._layout.addStretch(1)
             self._layout.addWidget(self._label_circuit)
-            self._layout.addWidget(self._label_params)
+            self._layout.addWidget(self._label_params, alignment=Qt.AlignTop)
         else:
-            self._layout.addWidget(self._label_params)
+            self._layout.addWidget(self._label_params, alignment=Qt.AlignTop)
             self._layout.addWidget(self._label_circuit)
             self._layout.addStretch(1)
         self.setLayout(self._layout)
 
-    def _set_circuit_label(self, circuit_image: Optional[QPixmap]) -> None:
+    def _show_error(self, error: str) -> None:
+        self._label_params.setText(error)
+
+    def _set_circuit_image(self, circuit_image: Optional[QPixmap]) -> None:
         """
         :param circuit_image: image of the equivalent circuit.
         """
@@ -80,7 +71,11 @@ class EquivalentCircuitWidget(QFrame):
         self._label_params.clear()
         text = ""
         for name, value in circuit_params.items():
-            text += f"{name}: {value}\n"
+            units = ut.get_units_of_measurement_for_physical_quantity(name)
+            if units and isinstance(value, (int, float)):
+                text += f"{ut.get_str_representation_of_physical_quantity(name, value, units)}\n"
+            else:
+                text += f"{name}: {value}\n"
         self._label_params.setText(text)
 
     def clear_circuit(self) -> None:
@@ -91,14 +86,19 @@ class EquivalentCircuitWidget(QFrame):
         if self._label_circuit.isVisible():
             self._label_circuit.hide()
 
-    def set_circuit(self, circuit_params: Dict[str, Any], circuit_image: Optional[QPixmap]) -> None:
+    def set_circuit(self, circuit_params: Dict[str, Any], circuit_image: Optional[QPixmap], error: Optional[str] = None
+                    ) -> None:
         """
         :param circuit_params: dictionary with the circuit parameters;
         :param circuit_image: image of the equivalent circuit;
+        :param error:
         """
 
-        self._set_circuit_label(circuit_image)
-        self._set_circuit_params(circuit_params)
+        self._set_circuit_image(circuit_image)
+        if error is not None:
+            self._show_error(error)
+        else:
+            self._set_circuit_params(circuit_params)
 
     def show_circuit_image(self) -> None:
         if not self._label_circuit.isVisible():
@@ -110,7 +110,9 @@ class EquivalentCircuitsWidget(QWidget):
     A widget with two widgets that display equivalent circuits for the current and reference signatures.
     """
 
-    MAX_IMAGE_SIZE: int = 100
+    MARGIN: int = 5
+    MAX_IMAGE_SIZE: int = 140
+    PARAMS_LABEL_WIDTH: int = 100
     SPACING: int = 5
     WIDGET_HEIGHT: int = 150
 
@@ -131,15 +133,23 @@ class EquivalentCircuitsWidget(QWidget):
         self._load_circuit_class_images()
         self._init_ui()
 
+    @property
+    def min_width_with_images(self) -> int:
+        """
+        :return: minimum width of the widget with the equivalent circuit images.
+        """
+
+        return 2 * (3 * self.MARGIN + self._max_image_width + self.PARAMS_LABEL_WIDTH)
+
     def _create_classifier(self) -> None:
         model_path = os.path.join(self._dir_path, "model.pkl")
         self._classifier: CircuitClassifier = CircuitClassifier.load(model_path)
 
     def _init_ui(self) -> None:
         self._current_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
-            self._color_for_current_signature)
+            self._color_for_current_signature, self.MARGIN, self.PARAMS_LABEL_WIDTH)
         self._reference_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
-            self._color_for_reference_signature, place_circuit_on_left=False)
+            self._color_for_reference_signature, self.MARGIN, self.PARAMS_LABEL_WIDTH, False)
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -153,11 +163,13 @@ class EquivalentCircuitsWidget(QWidget):
     def _load_circuit_class_images(self) -> None:
         self._circuit_class_images: Dict[str, QPixmap] = dict()
         dir_with_images = os.path.join(self._dir_path, "circuit_classes")
+        self._max_image_width: int = 0
         for file_name in os.listdir(dir_with_images):
             file_path = os.path.join(dir_with_images, file_name)
             if os.path.isfile(file_path):
                 class_name = os.path.splitext(os.path.basename(file_path))[0]
-                pixmap = QPixmap(file_path).scaled(self.MAX_IMAGE_SIZE, self.MAX_IMAGE_SIZE, Qt.KeepAspectRatio)
+                pixmap = QPixmap(file_path).scaledToHeight(self.MAX_IMAGE_SIZE, Qt.SmoothTransformation)
+                self._max_image_width = max(pixmap.width(), self._max_image_width)
                 self._circuit_class_images[class_name] = pixmap
 
     def _update_curve(self, curve: Optional[Curve], curve_backup: Optional[Curve],
@@ -172,12 +184,24 @@ class EquivalentCircuitsWidget(QWidget):
         if not curve:
             circuit_widget.clear_circuit()
         elif curve != curve_backup and settings:
-            params = predict_circuit_class_for_signature(IVCurve(curve.currents, curve.voltages), settings,
+            results = predict_circuit_class_for_iv_curve(IVCurve(curve.currents, curve.voltages), settings,
                                                          self._classifier)
-            circuit_class_name = params.get("class_name", "")
-            circuit_class_image = self._circuit_class_images.get(circuit_class_name, None)
-            print(circuit_class_image)
-            circuit_widget.set_circuit(params, circuit_class_image)
+
+            circuit_name = results.get("class_name", "")
+            circuit_image = self._circuit_class_images.get(circuit_name, None)
+
+            error = None
+            circuit_params = dict()
+            circuit_features = results.get("features", None)
+            if circuit_features is not None:
+                try:
+                    circuit_params = detect_parameters(circuit_features)
+                except NotImplementedError:
+                    error = "Not implemented"
+                except Exception as exc:
+                    error = str(exc)
+
+            circuit_widget.set_circuit(circuit_params, circuit_image, error)
 
     def clear_circuits(self) -> None:
         self._current_circuit_widget.clear_circuit()
@@ -188,7 +212,7 @@ class EquivalentCircuitsWidget(QWidget):
         :param event: resize event.
         """
 
-        if self.width() < 2 * self._current_circuit_widget.min_width_with_image:
+        if self.width() < self.min_width_with_images:
             self._current_circuit_widget.hide_circuit_image()
             self._reference_circuit_widget.hide_circuit_image()
         else:

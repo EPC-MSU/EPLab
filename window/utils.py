@@ -46,6 +46,56 @@ def clear_layout(layout: QLayout) -> None:
         widget.deleteLater()
 
 
+def convert_to_multiple_units(value: float) -> Tuple[float, str]:
+    """
+    :param value: the value to be converted to multiples of units.
+    :return: converted number and unit prefix.
+    """
+
+    sign = 1 if value >= 0 else -1
+    value = abs(value)
+    if value >= 10 ** 18:
+        value = round(value / 10 ** 18, 2)
+        unit = qApp.translate("t", "Э")
+    elif value >= 10 ** 15:
+        value = round(value / 10 ** 15, 2)
+        unit = qApp.translate("t", "П")
+    elif value >= 10 ** 12:
+        value = round(value / 10 ** 12, 2)
+        unit = qApp.translate("t", "Т")
+    elif value >= 10 ** 9:
+        value = round(value / 10 ** 9, 2)
+        unit = qApp.translate("t", "Г")
+    elif value >= 10 ** 6:
+        value = round(value / 10 ** 6, 2)
+        unit = qApp.translate("t", "М")
+    elif value >= 10 ** 3:
+        value = round(value / 10 ** 3, 2)
+        unit = qApp.translate("t", "к")
+    elif value >= 1:
+        value = round(value, 2)
+        unit = ""
+    elif value >= 1e-3:
+        value = round(10 ** 3 * value, 2)
+        unit = qApp.translate("t", "м")
+    elif value >= 1e-6:
+        value = round(10 ** 6 * value, 2)
+        unit = qApp.translate("t", "мк")
+    elif value >= 1e-9:
+        value = round(10 ** 9 * value, 2)
+        unit = qApp.translate("t", "н")
+    elif value >= 1e-12:
+        value = round(10 ** 12 * value, 2)
+        unit = qApp.translate("t", "п")
+    elif value >= 1e-15:
+        value = round(10 ** 15 * value, 2)
+        unit = qApp.translate("t", "ф")
+    else:
+        value = round(10 ** 18 * value, 2)
+        unit = qApp.translate("t", "а")
+    return sign * value, unit
+
+
 def create_message_box(header: str, message: str, additional_info: str = None, detailed_info: str = None,
                        icon: QMessageBox.Icon = QMessageBox.Warning, no_button: bool = False,
                        cancel_button: bool = False, yes_button: bool = False) -> QMessageBox:
@@ -103,6 +153,7 @@ def find_address_in_usb_hubs_tree(url: str) -> Optional[str]:
                 return None
                 # raise ValueError("No hub found in " + existing_port.hwid)
             return hub[0]
+
     return None
 
 
@@ -139,9 +190,36 @@ def get_port(url: str) -> Optional[str]:
         port = re.findall(r"^com:///dev/(?P<port>.+)$", url)
     elif system() == "Windows":
         port = re.findall(r"^com:\\\\.\\(?P<port>.+)$", url)
+
     if not port:
         return None
+
     return port[0]
+
+
+def get_str_representation_of_physical_quantity(name: str, value: float, units_of_measurement) -> str:
+    """
+    :param name: designation/name of a physical quantity;
+    :param value: physical quantity value;
+    :param units_of_measurement: units of measurement.
+    :return: textual representation of a physical quantity.
+    """
+
+    value, prefix = convert_to_multiple_units(value)
+    return f"{name}: {value} {prefix}{units_of_measurement}"
+
+
+def get_units_of_measurement_for_physical_quantity(name: str) -> str:
+    """
+    :param name: designation/name of a physical quantity.
+    :return: units of measurement.
+    """
+
+    units = {"C": qApp.translate("t", "Ф"),
+             "R": qApp.translate("t", "Ом"),
+             "Df": qApp.translate("t", "В"),
+             "Dr": qApp.translate("t", "В")}
+    return units.get(name, "")
 
 
 def get_user_documents_path() -> str:
@@ -151,6 +229,7 @@ def get_user_documents_path() -> str:
 
     for path in QStandardPaths.standardLocations(QStandardPaths.StandardLocation.DocumentsLocation):
         return path
+
     return QDir.homePath()
 
 

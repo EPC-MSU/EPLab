@@ -606,19 +606,94 @@ Such pins will be automatically declared in the report as being fault free. If y
         <translation>Test plan {}does not correspond to the EPLab work mode and will be closed.</translation>
     </message>
     <message>
-        <location filename="../window/utils.py" line="77"/>
+        <location filename="../window/utils.py" line="59"/>
+        <source>Э</source>
+        <translation>E</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="62"/>
+        <source>П</source>
+        <translation>P</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="65"/>
+        <source>Т</source>
+        <translation>T</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="68"/>
+        <source>Г</source>
+        <translation>G</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="71"/>
+        <source>М</source>
+        <translation>M</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="74"/>
+        <source>к</source>
+        <translation>k</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="80"/>
+        <source>м</source>
+        <translation>m</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="83"/>
+        <source>мк</source>
+        <translation>µ</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="86"/>
+        <source>н</source>
+        <translation>n</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="89"/>
+        <source>п</source>
+        <translation>p</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="92"/>
+        <source>ф</source>
+        <translation>f</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="95"/>
+        <source>а</source>
+        <translation>a</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="127"/>
         <source>Да</source>
         <translation>Yes</translation>
     </message>
     <message>
-        <location filename="../window/utils.py" line="81"/>
+        <location filename="../window/utils.py" line="131"/>
         <source>Нет</source>
         <translation>No</translation>
     </message>
     <message>
-        <location filename="../window/utils.py" line="83"/>
+        <location filename="../window/utils.py" line="133"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="218"/>
+        <source>Ф</source>
+        <translation>F</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="219"/>
+        <source>Ом</source>
+        <translation>Ohm</translation>
+    </message>
+    <message>
+        <location filename="../window/utils.py" line="220"/>
+        <source>В</source>
+        <translation>V</translation>
     </message>
 </context>
 <context>
@@ -867,74 +942,49 @@ Signature analyzer S2</translation>
 <context>
     <name>settings</name>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="23"/>
+        <location filename="../settings/settingspanel.py" line="27"/>
         <source>Эталон</source>
         <translation>Reference</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="23"/>
+        <location filename="../settings/settingspanel.py" line="27"/>
         <source>Тест</source>
         <translation>Test</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="24"/>
+        <location filename="../settings/settingspanel.py" line="28"/>
         <source>Текущая</source>
         <translation>Current</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="65"/>
-        <source>Ток: </source>
-        <translation>Current: </translation>
+        <location filename="../settings/settingspanel.py" line="63"/>
+        <source>Ток</source>
+        <translation>Current</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="67"/>
+        <location filename="../settings/settingspanel.py" line="64"/>
         <source>А / дел.</source>
         <translation>A / div.</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="86"/>
+        <location filename="../settings/settingspanel.py" line="84"/>
         <source>Ампл. проб. сигнала: </source>
         <translation>Probe signal amplitude: </translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="87"/>
+        <location filename="../settings/settingspanel.py" line="85"/>
         <source> В</source>
         <translation> V</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="96"/>
+        <location filename="../settings/settingspanel.py" line="93"/>
         <source>Гц</source>
         <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../settings/lowsettingspanel.py" line="119"/>
+        <location filename="../settings/settingspanel.py" line="118"/>
         <source>В / дел.</source>
         <translation>V / div.</translation>
-    </message>
-    <message>
-        <location filename="../settings/lowsettingspanel.py" line="153"/>
-        <source>к</source>
-        <translation>k</translation>
-    </message>
-    <message>
-        <location filename="../settings/lowsettingspanel.py" line="159"/>
-        <source>м</source>
-        <translation>m</translation>
-    </message>
-    <message>
-        <location filename="../settings/lowsettingspanel.py" line="162"/>
-        <source>мк</source>
-        <translation>µ</translation>
-    </message>
-    <message>
-        <location filename="../settings/lowsettingspanel.py" line="165"/>
-        <source>н</source>
-        <translation>n</translation>
-    </message>
-    <message>
-        <location filename="../settings/lowsettingspanel.py" line="168"/>
-        <source>п</source>
-        <translation>p</translation>
     </message>
     <message>
         <location filename="../settings/settingswindow.py" line="177"/>
