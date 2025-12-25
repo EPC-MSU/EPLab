@@ -49,10 +49,15 @@ class EquivalentCircuitWidget(QFrame):
             self._layout.addStretch(1)
         self.setLayout(self._layout)
 
-    def _show_error(self, error: str) -> None:
-        self._label_params.setText(error)
+    def clear_circuit(self) -> None:
+        self._label_circuit.clear()
+        self._label_params.clear()
 
-    def _set_circuit_image(self, circuit_image: Optional[QPixmap]) -> None:
+    def hide_circuit_image(self) -> None:
+        if self._label_circuit.isVisible():
+            self._label_circuit.hide()
+
+    def set_circuit_image(self, circuit_image: Optional[QPixmap]) -> None:
         """
         :param circuit_image: image of the equivalent circuit.
         """
@@ -63,7 +68,7 @@ class EquivalentCircuitWidget(QFrame):
 
         self._label_circuit.setPixmap(circuit_image)
 
-    def _set_circuit_params(self, circuit_params: Dict[str, Any]) -> None:
+    def set_circuit_params(self, circuit_params: Dict[str, Any]) -> None:
         """
         :param circuit_params: dictionary with the circuit parameters.
         """
@@ -78,31 +83,16 @@ class EquivalentCircuitWidget(QFrame):
                 text += f"{name}: {value}\n"
         self._label_params.setText(text)
 
-    def clear_circuit(self) -> None:
-        self._label_circuit.clear()
-        self._label_params.clear()
-
-    def hide_circuit_image(self) -> None:
-        if self._label_circuit.isVisible():
-            self._label_circuit.hide()
-
-    def set_circuit(self, circuit_params: Dict[str, Any], circuit_image: Optional[QPixmap], error: Optional[str] = None
-                    ) -> None:
-        """
-        :param circuit_params: dictionary with the circuit parameters;
-        :param circuit_image: image of the equivalent circuit;
-        :param error:
-        """
-
-        self._set_circuit_image(circuit_image)
-        if error is not None:
-            self._show_error(error)
-        else:
-            self._set_circuit_params(circuit_params)
-
     def show_circuit_image(self) -> None:
         if not self._label_circuit.isVisible():
             self._label_circuit.show()
+
+    def show_error(self, error: str) -> None:
+        """
+        :param error: error text.
+        """
+
+        self._label_params.setText(error)
 
 
 class EquivalentCircuitsWidget(QWidget):
@@ -173,35 +163,42 @@ class EquivalentCircuitsWidget(QWidget):
                 self._circuit_class_images[class_name] = pixmap
 
     def _update_curve(self, curve: Optional[Curve], curve_backup: Optional[Curve],
-                      settings: Optional[MeasurementSettings], circuit_widget: EquivalentCircuitWidget) -> None:
+                      settings: Optional[MeasurementSettings], comment: str, circuit_widget: EquivalentCircuitWidget
+                      ) -> None:
         """
         :param curve: signature for which an equivalent circuit must be constructed;
         :param curve_backup: a signature for which an equivalent circuit has already been constructed;
         :param settings: measurement settings at which signatures were measured;
+        :param comment: comment on the pin where the signatures were measured;
         :param circuit_widget: a widget that displays an equivalent circuit.
         """
 
+        if curve == curve_backup:
+            return
+
+        circuit_widget.clear_circuit()
         if not curve:
-            circuit_widget.clear_circuit()
-        elif curve != curve_backup and settings:
+            return
+
+        try:
             results = predict_circuit_class_for_iv_curve(IVCurve(curve.currents, curve.voltages), settings,
-                                                         self._classifier)
+                                                         self._classifier, comment)
 
-            circuit_name = results.get("class_name", "")
+            circuit_name = results["class_name"]
             circuit_image = self._circuit_class_images.get(circuit_name, None)
+            circuit_widget.set_circuit_image(circuit_image)
 
-            error = None
-            circuit_params = dict()
-            circuit_features = results.get("features", None)
-            if circuit_features is not None:
-                try:
-                    circuit_params = detect_parameters(circuit_features)
-                except NotImplementedError:
-                    error = "Not implemented"
-                except Exception as exc:
-                    error = str(exc)
-
-            circuit_widget.set_circuit(circuit_params, circuit_image, error)
+            circuit_features = results["features"]
+            circuit_features.class_name = circuit_name
+            try:
+                circuit_params = detect_parameters(circuit_features)
+                circuit_widget.set_circuit_params(circuit_params)
+            except NotImplementedError:
+                circuit_widget.show_error("Not implemented")
+            except ValueError:
+                circuit_widget.show_error("Parameter detection failed")
+        except Exception:
+            circuit_widget.show_error("Recognition failed")
 
     def clear_circuits(self) -> None:
         self._current_circuit_widget.clear_circuit()
@@ -222,15 +219,17 @@ class EquivalentCircuitsWidget(QWidget):
         super().resizeEvent(event)
 
     def update_circuits(self, current_curve: Optional[Curve], reference_curve: Optional[Curve],
-                        settings: Optional[MeasurementSettings]) -> None:
+                        settings: Optional[MeasurementSettings], comment: Optional[str] = "") -> None:
         """
         :param current_curve: current signature for which an equivalent circuit must be constructed;
         :param reference_curve: reference signature for which an equivalent circuit must be constructed;
-        :param settings: measurement settings at which signatures were measured.
+        :param settings: measurement settings at which signatures were measured;
+        :param comment: comment on the pin where the signatures were measured.
         """
 
-        self._update_curve(current_curve, self._current_curve_backup, settings, self._current_circuit_widget)
+        self._update_curve(current_curve, self._current_curve_backup, settings, comment, self._current_circuit_widget)
         self._current_curve_backup = current_curve
 
-        self._update_curve(reference_curve, self._reference_curve_backup, settings, self._reference_circuit_widget)
+        self._update_curve(reference_curve, self._reference_curve_backup, settings, comment,
+                           self._reference_circuit_widget)
         self._reference_curve_backup = reference_curve

@@ -1175,8 +1175,9 @@ class EPLabWindow(QMainWindow):
         if self._auto_settings.equivalent_circuits_rolled_up:
             return
 
+        comment = self.measurement_plan.get_current_pin().comment or ""
         self._equivalent_circuits_widget.update_circuits(self.current_curve_plot.curve, self.reference_curve_plot.curve,
-                                                         settings)
+                                                         settings, comment)
 
     def _update_mux_actions(self) -> None:
         """

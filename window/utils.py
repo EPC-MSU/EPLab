@@ -11,6 +11,7 @@ from operator import itemgetter
 from platform import system
 from typing import Any, Callable, Dict, List, Optional, Tuple
 import serial.tools.list_ports
+import numpy as np
 from PyQt5.QtCore import QCoreApplication as qApp, QDir, QStandardPaths, Qt
 from PyQt5.QtGui import QFontDatabase, QIcon
 from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QLayout, QMessageBox
@@ -53,47 +54,51 @@ def convert_to_multiple_units(value: float) -> Tuple[float, str]:
     """
 
     sign = 1 if value >= 0 else -1
-    value = abs(value)
-    if value >= 10 ** 18:
-        value = round(value / 10 ** 18, 2)
+    abs_value = abs(value)
+    if abs_value == np.inf:
+        return value, ""
+
+    if abs_value >= 10 ** 18:
+        abs_value = round(abs_value / 10 ** 18, 2)
         unit = qApp.translate("t", "Э")
-    elif value >= 10 ** 15:
-        value = round(value / 10 ** 15, 2)
+    elif abs_value >= 10 ** 15:
+        abs_value = round(abs_value / 10 ** 15, 2)
         unit = qApp.translate("t", "П")
-    elif value >= 10 ** 12:
-        value = round(value / 10 ** 12, 2)
+    elif abs_value >= 10 ** 12:
+        abs_value = round(abs_value / 10 ** 12, 2)
         unit = qApp.translate("t", "Т")
-    elif value >= 10 ** 9:
-        value = round(value / 10 ** 9, 2)
+    elif abs_value >= 10 ** 9:
+        abs_value = round(abs_value / 10 ** 9, 2)
         unit = qApp.translate("t", "Г")
-    elif value >= 10 ** 6:
-        value = round(value / 10 ** 6, 2)
+    elif abs_value >= 10 ** 6:
+        abs_value = round(abs_value / 10 ** 6, 2)
         unit = qApp.translate("t", "М")
-    elif value >= 10 ** 3:
-        value = round(value / 10 ** 3, 2)
+    elif abs_value >= 10 ** 3:
+        abs_value = round(abs_value / 10 ** 3, 2)
         unit = qApp.translate("t", "к")
-    elif value >= 1:
-        value = round(value, 2)
+    elif abs_value >= 1:
+        abs_value = round(abs_value, 2)
         unit = ""
-    elif value >= 1e-3:
-        value = round(10 ** 3 * value, 2)
+    elif abs_value >= 1e-3:
+        abs_value = round(10 ** 3 * abs_value, 2)
         unit = qApp.translate("t", "м")
-    elif value >= 1e-6:
-        value = round(10 ** 6 * value, 2)
+    elif abs_value >= 1e-6:
+        abs_value = round(10 ** 6 * abs_value, 2)
         unit = qApp.translate("t", "мк")
-    elif value >= 1e-9:
-        value = round(10 ** 9 * value, 2)
+    elif abs_value >= 1e-9:
+        abs_value = round(10 ** 9 * abs_value, 2)
         unit = qApp.translate("t", "н")
-    elif value >= 1e-12:
-        value = round(10 ** 12 * value, 2)
+    elif abs_value >= 1e-12:
+        abs_value = round(10 ** 12 * abs_value, 2)
         unit = qApp.translate("t", "п")
-    elif value >= 1e-15:
-        value = round(10 ** 15 * value, 2)
+    elif abs_value >= 1e-15:
+        abs_value = round(10 ** 15 * abs_value, 2)
         unit = qApp.translate("t", "ф")
     else:
-        value = round(10 ** 18 * value, 2)
+        abs_value = round(10 ** 18 * abs_value, 2)
         unit = qApp.translate("t", "а")
-    return sign * value, unit
+
+    return sign * abs_value, unit
 
 
 def create_message_box(header: str, message: str, additional_info: str = None, detailed_info: str = None,
@@ -206,6 +211,9 @@ def get_str_representation_of_physical_quantity(name: str, value: float, units_o
     """
 
     value, prefix = convert_to_multiple_units(value)
+    if value == np.inf:
+        return f"{name}: {value}"
+
     return f"{name}: {value} {prefix}{units_of_measurement}"
 
 
