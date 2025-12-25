@@ -19,6 +19,8 @@ venv\Scripts\pyinstaller main.py --clean --onefile --noconsole ^
 --add-data "cur.ini;." ^
 --add-data "gui\*;gui" ^
 --add-data "media\*;media" ^
+--add-data "media\circuit_detector\*;media\circuit_detector" ^
+--add-data "media\circuit_detector\circuit_classes\*;media\circuit_detector\circuit_classes" ^
 --add-data "resources\eplab_asa_options.json;resources" ^
 --add-data "resources\win%target_platform%\*;resources\win%target_platform%" ^
 --add-data "venv\Lib\site-packages\epcore\analogmultiplexer\epmux\epmux-win%target_platform%\epmux.dll;." ^
