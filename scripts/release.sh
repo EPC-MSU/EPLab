@@ -15,6 +15,8 @@ python3 -m venv venv
 --add-data "./cur.ini:." \
 --add-data "./gui/*:gui" \
 --add-data "./media/*:media" \
+--add-data "./media/circuit_detector/*:media/circuit_detector" \
+--add-data "./media/circuit_detector/circuit_classes/*:media/circuit_detector/circuit_classes" \
 --add-data "./resources/debian/*:resources/debian" \
 --add-data "./resources/eplab_asa_options.json:resources" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/analogmultiplexer/epmux/epmux-debian/libepmux.so:." \
