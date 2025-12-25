@@ -8,6 +8,6 @@ git+https://github.com/pyserial/pyserial@7aeea35429d15f3eefed10bbb659674638903e3
 git+https://github.com/EPC-MSU/board-view@v0.1.4#egg=boardview
 git+https://github.com/EPC-MSU/ep_report_generator@v0.1.18#egg=ep_report_generator
 git+https://github.com/EPC-MSU/epcore@v0.2.2#egg=epcore
-git+https://github.com/EPC-MSU/ivc-circuit-detector@t-126426#egg=ivc_circuit_detector
+git+https://github.com/EPC-MSU/ivc-circuit-detector@main#egg=ivc_circuit_detector
 git+https://github.com/EPC-MSU/ivviewer@v1.0.5#egg=ivviewer
 git+https://github.com/EPC-MSU/PyQtExtendedScene@v1.0.15#egg=PyQtExtendedScene
