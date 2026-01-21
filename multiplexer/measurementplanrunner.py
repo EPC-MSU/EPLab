@@ -4,7 +4,7 @@ File with class to run measurements according measurement plan.
 
 import logging
 from typing import List, Optional
-from PyQt6.QtCore import pyqtSignal, pyqtSlot, QObject, QTimer
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QTimer
 from .measurementplanwidget import MeasurementPlanWidget
 
 

@@ -5,8 +5,8 @@ File with class for widget to show multiplexer pinout.
 import logging
 import sys
 from typing import Dict, Optional
-from PyQt6.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
 from window.common import DeviceErrorsHandler
