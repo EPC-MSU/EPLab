@@ -4,9 +4,9 @@ File with classes to select measurers.
 
 import os
 from typing import Callable, List, Optional, Tuple
-from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
-from PyQt6.QtGui import QFocusEvent, QIcon
-from PyQt6.QtWidgets import QComboBox, QGridLayout, QLabel, QPushButton, QWidget
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
+from PyQt5.QtGui import QFocusEvent, QIcon
+from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QPushButton, QWidget
 from window.scaler import update_scale_of_class
 from window.utils import DIR_MEDIA, show_message
 from . import utils as ut

@@ -15,9 +15,9 @@ from typing import List, Optional
 import psutil
 import serial.tools.list_ports
 import serial.tools.list_ports_common
-from PyQt6.QtCore import QCoreApplication as qApp
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QLabel, QMessageBox
+from PyQt5.QtCore import QCoreApplication as qApp
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QLabel, QMessageBox
 from epcore.ivmeasurer import IVMeasurerVirtual, IVMeasurerVirtualASA
 from window.utils import show_message
 from .productname import MeasurerType

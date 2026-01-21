@@ -1,6 +1,6 @@
 from enum import auto, Enum
 from typing import List, Optional
-from PyQt6.QtCore import QCoreApplication as qApp
+from PyQt5.QtCore import QCoreApplication as qApp
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM, IVMeasurerVirtual, IVMeasurerVirtualASA
 
 
