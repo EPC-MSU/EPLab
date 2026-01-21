@@ -5,8 +5,8 @@ File with class for widget to show multiplexer pinout.
 import logging
 import sys
 from typing import Dict, Optional
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
 from window.common import DeviceErrorsHandler
@@ -48,7 +48,7 @@ class ChannelWidget(QWidget):
         self.button_turn_on_off.setFixedSize(ChannelWidget.SIZE, ChannelWidget.SIZE)
 
         v_box_layout = QVBoxLayout()
-        v_box_layout.addWidget(self.button_turn_on_off, alignment=Qt.AlignHCenter)
+        v_box_layout.addWidget(self.button_turn_on_off, alignment=Qt.AlignmentFlag.AlignHCenter)
         v_box_layout.setSpacing(0)
         v_box_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(v_box_layout)
@@ -138,7 +138,7 @@ class ModuleWidget(QWidget):
 
         h_layout = QHBoxLayout()
         h_layout.setContentsMargins(0, 0, 0, 0)
-        h_layout.addWidget(label_module_number, alignment=Qt.AlignVCenter)
+        h_layout.addWidget(label_module_number, alignment=Qt.AlignmentFlag.AlignVCenter)
         h_layout.addWidget(self.frame_module)
         h_layout.addStretch(1)
         self.setLayout(h_layout)
@@ -246,7 +246,7 @@ class MultiplexerPinoutWidget(QWidget):
 
         layout = QVBoxLayout()
         layout.addWidget(self.scroll_area)
-        layout.addWidget(self.label_no_mux, alignment=Qt.AlignHCenter)
+        layout.addWidget(self.label_no_mux, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.setLayout(layout)
 
     def _remove_all_modules(self) -> None:
