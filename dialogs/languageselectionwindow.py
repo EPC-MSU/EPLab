@@ -4,9 +4,9 @@ File with the language selection dialog box class.
 
 import os
 from typing import Optional
-from PyQt5.QtCore import QCoreApplication as qApp, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QLabel, QLayout, QVBoxLayout
+from PyQt6.QtCore import QCoreApplication as qApp, Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QLabel, QLayout, QVBoxLayout
 from window import utils as ut
 from window.language import get_language, Language, Translator
 from window.scaler import update_scale_of_class
@@ -23,7 +23,7 @@ class LanguageSelectionWindow(QDialog):
         :param parent: parent window.
         """
 
-        super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        super().__init__(parent, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
         self._init_ui()
 
     def _init_ui(self) -> None:
@@ -35,7 +35,8 @@ class LanguageSelectionWindow(QDialog):
             self.combo_box_languages.addItem(language, value)
         language = Translator.get_language_name(get_language())
         self.combo_box_languages.setCurrentText(language)
-        self.button_box: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.button_box: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok |
+                                                             QDialogButtonBox.StandardButton.Cancel)
         self.button_box.button(QDialogButtonBox.StandardButton.Cancel).setText(qApp.translate("t", "Отмена"))
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
@@ -44,7 +45,7 @@ class LanguageSelectionWindow(QDialog):
         v_box.addWidget(self.label)
         v_box.addWidget(self.combo_box_languages)
         v_box.addWidget(self.button_box)
-        v_box.setSizeConstraint(QLayout.SetFixedSize)
+        v_box.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
         self.adjustSize()
         self.setLayout(v_box)
 
@@ -71,4 +72,5 @@ def show_language_selection_window() -> Optional[Language]:
     window = LanguageSelectionWindow()
     if window.exec():
         return window.get_language_value()
+
     return None

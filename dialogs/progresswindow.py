@@ -1,8 +1,8 @@
 import os
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QLayout, QProgressBar, QTextEdit, QVBoxLayout
+from PyQt6.QtCore import pyqtSlot, Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QDialog, QLayout, QProgressBar, QTextEdit, QVBoxLayout
 from window import utils as ut
 from window.scaler import update_scale_of_class
 
@@ -18,9 +18,9 @@ class ProgressWindow(QDialog):
         :param title: window title.
         """
 
-        super().__init__(None, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        super().__init__(None, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
         self._number_of_steps_done: int = 0
-        self._total_number: int = None
+        self._total_number: Optional[int] = None
         self._init_ui(title)
 
     def _init_ui(self, title: str) -> None:
@@ -42,7 +42,7 @@ class ProgressWindow(QDialog):
         v_box_layout = QVBoxLayout()
         v_box_layout.addWidget(self.progress_bar)
         v_box_layout.addWidget(self.text_edit_info)
-        v_box_layout.setSizeConstraint(QLayout.SetFixedSize)
+        v_box_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
         self.setLayout(v_box_layout)
         self.adjustSize()
 

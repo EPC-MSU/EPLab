@@ -4,9 +4,9 @@ File containing a dialog box class for displaying basic information about the ap
 
 import os
 import re
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QLabel, QLayout, QPushButton, QVBoxLayout
+from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QDialog, QHBoxLayout, QLabel, QLayout, QPushButton, QVBoxLayout
 from connection_window.utils import get_platform
 from version import Version
 from window import utils as ut
@@ -51,7 +51,8 @@ class AboutWindow(QDialog):
         self.label_info: QLabel = QLabel(self._create_info_text())
         self.label_info.setOpenExternalLinks(True)
         self.label_info.setWordWrap(True)
-        self.label_info.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.LinksAccessibleByMouse)
+        self.label_info.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse |
+                                                Qt.TextInteractionFlag.LinksAccessibleByMouse)
         return self.label_info
 
     def _create_label_with_logo(self) -> QLabel:
@@ -109,14 +110,14 @@ class AboutWindow(QDialog):
 
         self.setWindowTitle(qApp.translate("MainWindow", "О программе"))
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowContextHelpButtonHint)
         self.setFixedWidth(self.WINDOW_WIDTH)
 
         layout = QVBoxLayout()
         layout.addWidget(self._create_label_with_logo())
         layout.addWidget(self._create_label_with_info())
         layout.addLayout(self._create_layout_with_buttons())
-        layout.setSizeConstraint(QLayout.SetFixedSize)
+        layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
         self.setLayout(layout)
         self.adjustSize()
 

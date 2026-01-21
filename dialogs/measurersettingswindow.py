@@ -6,8 +6,8 @@ import logging
 from functools import partial
 from inspect import getmembers, ismethod
 from typing import Any, Callable, Dict, List, Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
-from PyQt5.QtWidgets import (QDialog, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton, QTextBrowser,
+from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
+from PyQt6.QtWidgets import (QDialog, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton, QTextBrowser,
                              QVBoxLayout, QWidget)
 from epcore.ivmeasurer import IVMeasurerBase
 from window import utils as ut
@@ -55,7 +55,7 @@ class MeasurerSettingsWindow(QDialog):
         :param device_name: name of measurer.
         """
 
-        super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        super().__init__(parent, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
         self._measurer: IVMeasurerBase = measurer
         self._all_widgets: List[QWidget] = []
         self._lang: str = "ru" if get_language() == Language.RU else "en"
@@ -292,7 +292,7 @@ class MeasurerSettingsWindow(QDialog):
             v_layout.addLayout(h_layout)
         else:
             self.label: QLabel = QLabel(qApp.translate("dialogs", "Нет настроек"))
-            v_layout.addWidget(self.label, alignment=Qt.AlignHCenter)
+            v_layout.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.setLayout(v_layout)
 
     def _run_command(self, command_to_run: Callable[[], Any], command_name: str, data: Dict[str, Any]) -> None:

@@ -5,9 +5,9 @@ File with class for dialog window to create report for board.
 import queue
 import time
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QThread
-from PyQt5.QtGui import QCloseEvent
-from PyQt5.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QProgressBar, QTextEdit, QVBoxLayout
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QThread
+from PyQt6.QtGui import QCloseEvent
+from PyQt6.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QProgressBar, QTextEdit, QVBoxLayout
 from epcore.elements import Board
 from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator, ReportTypes, ScalingTypes
 from window import utils as ut
@@ -151,7 +151,7 @@ class ReportGenerationWindow(QDialog):
         :param thread: thread in which to run report generation.
         """
 
-        super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        super().__init__(parent, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
         self._number_of_steps_done: int = 0
         self._thread: ReportGenerationThread = thread
         self._total_number: Optional[int] = None
@@ -195,7 +195,7 @@ class ReportGenerationWindow(QDialog):
         v_box_layout = QVBoxLayout()
         v_box_layout.addWidget(self.progress_bar)
         v_box_layout.addWidget(self.group_box_info)
-        v_box_layout.setSizeConstraint(QLayout.SetFixedSize)
+        v_box_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
         self.setLayout(v_box_layout)
         self.adjustSize()
 
