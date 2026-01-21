@@ -6,8 +6,8 @@ import logging
 from functools import partial
 from inspect import getmembers, ismethod
 from typing import Any, Callable, Dict, List, Optional
-from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
-from PyQt6.QtWidgets import (QDialog, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton, QTextBrowser,
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
+from PyQt5.QtWidgets import (QDialog, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton, QTextBrowser,
                              QVBoxLayout, QWidget)
 from epcore.ivmeasurer import IVMeasurerBase
 from window import utils as ut

@@ -3,9 +3,9 @@ File with dialog box class that displays the keyboard shortcuts used in the appl
 """
 
 import os
-from PyQt6.QtCore import QCoreApplication as qApp, Qt
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QDialog, QGridLayout, QHBoxLayout, QLabel, QLayout, QPushButton, QVBoxLayout
+from PyQt5.QtCore import QCoreApplication as qApp, Qt
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QDialog, QGridLayout, QHBoxLayout, QLabel, QLayout, QPushButton, QVBoxLayout
 from window import utils as ut
 from window.scaler import update_scale_of_class
 

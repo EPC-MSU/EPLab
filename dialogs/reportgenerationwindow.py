@@ -5,9 +5,9 @@ File with class for dialog window to create report for board.
 import queue
 import time
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt6.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QThread
-from PyQt6.QtGui import QCloseEvent
-from PyQt6.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QProgressBar, QTextEdit, QVBoxLayout
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QThread
+from PyQt5.QtGui import QCloseEvent
+from PyQt5.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QProgressBar, QTextEdit, QVBoxLayout
 from epcore.elements import Board
 from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator, ReportTypes, ScalingTypes
 from window import utils as ut

@@ -3,9 +3,9 @@ import os
 from typing import Optional
 from boardview.BoardViewWidget import BoardView
 from PIL import Image, ImageOps, UnidentifiedImageError
-from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
-from PyQt6.QtGui import QIcon, QPixmap, QTransform
-from PyQt6.QtWidgets import QDialog, QGraphicsScene, QHBoxLayout, QPushButton, QStyle, QVBoxLayout
+from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
+from PyQt5.QtGui import QIcon, QPixmap, QTransform
+from PyQt5.QtWidgets import QDialog, QGraphicsScene, QHBoxLayout, QPushButton, QStyle, QVBoxLayout
 from window import utils as ut
 from window.boardwidget import convert_pil_image_to_qpixmap
 from window.scaler import update_scale_of_class

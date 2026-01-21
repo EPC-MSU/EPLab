@@ -1,6 +1,6 @@
 from typing import Optional
-from PyQt6.QtCore import QRect
-from PyQt6.QtGui import QCloseEvent, QShowEvent
+from PyQt5.QtCore import QRect
+from PyQt5.QtGui import QCloseEvent, QShowEvent
 
 
 def update_widget_to_save_geometry(widget_cls: type) -> type:
