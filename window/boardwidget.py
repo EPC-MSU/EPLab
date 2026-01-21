@@ -35,7 +35,7 @@ def convert_pil_image_to_qpixmap(image: Image) -> QPixmap:
         image = image.convert("RGBA")
     image_2 = image.convert("RGBA")
     data = image_2.tobytes("raw", "RGBA")
-    q_image = QImage(data, image.size[0], image.size[1], QImage.Format_ARGB32)
+    q_image = QImage(data, image.size[0], image.size[1], QImage.Format.Format_ARGB32)
     return QPixmap.fromImage(q_image)
 
 
@@ -89,7 +89,7 @@ class BoardWidget(QWidget):
         self._board_pixmap = None
         gc.collect()
 
-    def _handle_key_press_event(self, obj: QObject, event: QEvent) -> bool:
+    def _handle_key_press_event(self, obj: QObject, event: QKeyEvent) -> bool:
         """
         Method handles key press events for board view.
         :param obj: board view object;
@@ -97,16 +97,16 @@ class BoardWidget(QWidget):
         :return: handling result.
         """
 
-        key = QKeyEvent(event).key()
-        if key == Qt.Key_Control:
+        key = event.key()
+        if key == Qt.Key.Key_Control:
             self._control_pressed = True
 
-        if self._control_pressed and key in (Qt.Key_Down, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up):
+        if self._control_pressed and key in (Qt.Key.Key_Down, Qt.Key.Key_Left, Qt.Key.Key_Right, Qt.Key.Key_Up):
             return super().eventFilter(obj, event)
 
         return self._main_window.eventFilter(self._main_window, event)
 
-    def _handle_key_release_event(self, obj: QObject, event: QEvent) -> bool:
+    def _handle_key_release_event(self, obj: QObject, event: QKeyEvent) -> bool:
         """
         Method handles key release event for board view.
         :param obj: board view object;
@@ -114,8 +114,8 @@ class BoardWidget(QWidget):
         :return: handling result.
         """
 
-        key = QKeyEvent(event).key()
-        if key == Qt.Key_Control:
+        key = event.key()
+        if key == Qt.Key.Key_Control:
             self._control_pressed = False
         return super().eventFilter(obj, event)
 
@@ -130,7 +130,7 @@ class BoardWidget(QWidget):
         self.setStyleSheet("background-color: black;")
 
         self._scene: BoardView = BoardView()
-        self._scene.scene().setItemIndexMethod(QGraphicsScene.NoIndex)
+        self._scene.scene().setItemIndexMethod(QGraphicsScene.ItemIndexMethod.NoIndex)
         self._scene.on_right_click.connect(self.create_new_pin)
         self._scene.point_moved.connect(self.change_pin_coordinates)
         self._scene.point_selected.connect(self.send_current_pin_index)
@@ -217,11 +217,11 @@ class BoardWidget(QWidget):
         """
 
         if obj == self._scene and isinstance(event, QKeyEvent):
-            key_event = QKeyEvent(event)
-            if key_event.type() == QEvent.KeyPress:
+            key_event = event
+            if key_event.type() == QEvent.Type.KeyPress:
                 return self._handle_key_press_event(obj, event)
 
-            if key_event.type() == QEvent.KeyRelease:
+            if key_event.type() == QEvent.Type.KeyRelease:
                 return self._handle_key_release_event(obj, event)
 
         if obj == self._scene and isinstance(event, QWheelEvent):
