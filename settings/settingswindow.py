@@ -26,7 +26,7 @@ class SettingsWindow(QDialog):
         :param settings_directory: directory for settings file.
         """
 
-        super().__init__(main_window, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        super().__init__(main_window, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
         self._init_settings: Settings = init_settings
         self._settings: Settings = copy.copy(init_settings)
         self._settings_directory: str = settings_directory or ut.get_dir_name()
@@ -179,7 +179,7 @@ class SettingsWindow(QDialog):
         else:
             settings_path = QFileDialog.getOpenFileName(self, qApp.translate("settings", "Открыть файл"),
                                                         self._settings_directory, "Ini file (*.ini);;All Files (*)",
-                                                        options=QFileDialog.DontUseNativeDialog)[0]
+                                                        options=QFileDialog.Option.DontUseNativeDialog)[0]
         if settings_path:
             try:
                 settings = Settings()
@@ -210,7 +210,7 @@ class SettingsWindow(QDialog):
             settings_path = QFileDialog.getSaveFileName(self, qApp.translate("settings", "Сохранить файл"),
                                                         os.path.join(self._settings_directory, "settings.ini"),
                                                         "Ini file (*.ini);;All Files (*)",
-                                                        options=QFileDialog.DontUseNativeDialog)[0]
+                                                        options=QFileDialog.Option.DontUseNativeDialog)[0]
         if settings_path:
             self._settings_directory = os.path.dirname(settings_path)
             if not settings_path.endswith(".ini"):
@@ -224,7 +224,7 @@ class SettingsWindow(QDialog):
         :param state: if True, then the auto transition mode is activated when testing according to plan.
         """
 
-        self._update_auto_transition(state == Qt.Checked)
+        self._update_auto_transition(state == Qt.CheckState.Checked)
         self._send_settings()
 
     @pyqtSlot(float)
@@ -242,7 +242,7 @@ class SettingsWindow(QDialog):
         :param state: if True, then the auto transition mode is activated when testing according to plan.
         """
 
-        self._update_pin_shift_warning_info(state == Qt.Checked)
+        self._update_pin_shift_warning_info(state == Qt.CheckState.Checked)
         self._send_settings()
 
     @pyqtSlot(float)
@@ -260,5 +260,5 @@ class SettingsWindow(QDialog):
         :param state: if True, then warn about untested points when generating a report.
         """
 
-        self._update_warning_about_untested_pins_in_report(state == Qt.Checked)
+        self._update_warning_about_untested_pins_in_report(state == Qt.CheckState.Checked)
         self._send_settings()
