@@ -5,8 +5,8 @@ File with class to select measurer type.
 import os
 from functools import partial
 from typing import Dict, Optional
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QTimer
-from PyQt5.QtWidgets import QGridLayout, QRadioButton, QScrollArea, QVBoxLayout, QWidget
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QTimer
+from PyQt6.QtWidgets import QGridLayout, QRadioButton, QScrollArea, QVBoxLayout, QWidget
 from window.utils import DIR_MEDIA
 from . import utils as ut
 from .productname import MeasurerType, ProductName
@@ -58,8 +58,8 @@ class MeasurerTypeWidget(QWidget):
             label = ut.create_label_with_image(os.path.join(DIR_MEDIA, f"{product_name.name}.png"),
                                                MeasurerTypeWidget.IMAGE_SIZES[product_name],
                                                MeasurerTypeWidget.IMAGE_SIZES[product_name])
-            grid_layout.addWidget(label, row, 0, Qt.AlignHCenter | Qt.AlignVCenter)
-            grid_layout.addWidget(radio_button, row, 1, Qt.AlignVCenter)
+            grid_layout.addWidget(label, row, 0, Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+            grid_layout.addWidget(radio_button, row, 1, Qt.AlignmentFlag.AlignVCenter)
             self.radio_buttons_products[product_name] = radio_button
 
         self.radio_buttons_products[self._initial_product_name].setChecked(True)

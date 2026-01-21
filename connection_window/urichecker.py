@@ -1,8 +1,8 @@
 import ipaddress
 import re
 from typing import Callable, Optional, Union
-from PyQt5.QtGui import QFocusEvent
-from PyQt5.QtWidgets import QComboBox
+from PyQt6.QtGui import QFocusEvent
+from PyQt6.QtWidgets import QComboBox
 from . import utils as ut
 from .productname import MeasurerType
 

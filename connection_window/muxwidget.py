@@ -4,9 +4,9 @@ File with class for widget to select multiplexer.
 
 import os
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
-from PyQt5.QtGui import QFocusEvent, QIcon
-from PyQt5.QtWidgets import QComboBox, QGroupBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
+from PyQt6.QtGui import QFocusEvent, QIcon
+from PyQt6.QtWidgets import QComboBox, QGroupBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 from window.scaler import update_scale_of_class
 from window.utils import DIR_MEDIA
 from . import utils as ut
@@ -75,7 +75,7 @@ class MuxWidget(QGroupBox):
         h_box_layout.addWidget(self.button_update)
         h_box_layout.addWidget(self.button_show_help)
         v_box_layout = QVBoxLayout()
-        v_box_layout.addWidget(self.label, alignment=Qt.AlignHCenter)
+        v_box_layout.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignHCenter)
         v_box_layout.addLayout(h_box_layout)
         v_box_layout.addStretch(1)
         self.setLayout(v_box_layout)
