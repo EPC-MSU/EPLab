@@ -3,19 +3,17 @@ File with class for widget to show short information from measurement plan.
 """
 
 from typing import Generator, List, Optional
-from PyQt5.QtCore import QCoreApplication as qApp
-from PyQt5.QtGui import QCloseEvent
+from PyQt6.QtCore import QCoreApplication as qApp
+from PyQt6.QtGui import QCloseEvent
 from epcore.analogmultiplexer.base import MultiplexerOutput
 from epcore.elements import MeasurementSettings, Pin
 from epcore.product import EyePointProduct
 from window.common import WorkMode
 from window.language import get_language, Language
 from window.pinindextableitem import PinIndexTableItem
-from window.scaler import update_scale_of_class
 from window.tablewidget import disconnect_item_signals, TableWidget
 
 
-@update_scale_of_class
 class MeasurementPlanWidget(TableWidget):
     """
     Class for widget to show short information from measurement plan in table.

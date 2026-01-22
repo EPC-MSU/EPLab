@@ -4,7 +4,7 @@ import os
 import time
 from enum import auto, Enum
 from typing import Callable, Dict, Optional
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QTimer
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QObject, QTimer
 from epcore.elements import IVCurve, MeasurementSettings
 from epcore.product import EyePointProduct
 from connection_window.productname import ProductName

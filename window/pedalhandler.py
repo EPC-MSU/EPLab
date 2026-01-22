@@ -1,7 +1,7 @@
 from enum import auto, Enum
 from typing import Dict, List
-from PyQt5.QtCore import pyqtSignal, QObject, Qt
-from PyQt5.QtGui import QKeyEvent
+from PyQt6.QtCore import pyqtSignal, QObject, Qt
+from PyQt6.QtGui import QKeyEvent
 
 
 class PedalHandler(QObject):

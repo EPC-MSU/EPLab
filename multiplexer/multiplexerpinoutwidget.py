@@ -5,12 +5,11 @@ File with class for widget to show multiplexer pinout.
 import logging
 import sys
 from typing import Dict, Optional
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
 from window.common import DeviceErrorsHandler
-from window.scaler import update_scale_of_class
 
 
 logger = logging.getLogger("eplab")
@@ -185,7 +184,6 @@ class ModuleWidget(QWidget):
         self._change_module_color()
 
 
-@update_scale_of_class
 class MultiplexerPinoutWidget(QWidget):
     """
     Class to show multiplexer pinout.

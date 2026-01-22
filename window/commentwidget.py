@@ -1,10 +1,9 @@
 import logging
 import os
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QModelIndex, QPoint, QRect, QSize, Qt
-from PyQt5.QtGui import QBrush, QColor, QIcon, QKeySequence, QPainter, QPen
-from PyQt5.QtWidgets import (QAction, QMenu, QShortcut, QStyle, QStyledItemDelegate, QStyleOptionViewItem,
-                             QTableWidgetItem)
+from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, QModelIndex, QPoint, QRect, QSize, Qt
+from PyQt6.QtGui import QAction, QBrush, QColor, QIcon, QKeySequence, QPainter, QPen, QShortcut
+from PyQt6.QtWidgets import QMenu, QStyle, QStyledItemDelegate, QStyleOptionViewItem, QTableWidgetItem
 from epcore.elements import Pin
 from . import utils as ut
 from .common import WorkMode

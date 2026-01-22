@@ -1,5 +1,5 @@
 from typing import List, Optional, Set, Tuple
-from PyQt5.QtCore import pyqtSignal, QCoreApplication as qApp, QObject
+from PyQt6.QtCore import pyqtSignal, QCoreApplication as qApp, QObject
 from epcore.elements import Pin
 from epcore.measurementmanager import MeasurementPlan
 from . import utils as ut

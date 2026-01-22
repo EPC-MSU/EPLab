@@ -4,16 +4,14 @@ File with class for widget to select multiplexer.
 
 import os
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
-from PyQt5.QtGui import QFocusEvent, QIcon
-from PyQt5.QtWidgets import QComboBox, QGroupBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
-from window.scaler import update_scale_of_class
+from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
+from PyQt6.QtGui import QFocusEvent, QIcon
+from PyQt6.QtWidgets import QComboBox, QGroupBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 from window.utils import DIR_MEDIA
 from . import utils as ut
 from .urichecker import URIChecker
 
 
-@update_scale_of_class
 class MuxWidget(QGroupBox):
     """
     Class for widget to show list of COM-ports for multiplexer.
@@ -88,7 +86,7 @@ class MuxWidget(QGroupBox):
         """
 
         if isinstance(event, QFocusEvent) and obj == self.combo_box:
-            self._uri_checker.color_widget(obj, QFocusEvent(event))
+            self._uri_checker.color_widget(obj, event)
         return False
 
     def get_uri(self) -> Optional[str]:

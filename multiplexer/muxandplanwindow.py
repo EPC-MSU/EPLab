@@ -5,9 +5,9 @@ File with class to show window with information about multiplexer and measuremen
 import logging
 import os
 from typing import Any, Callable, Optional, Tuple
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QToolBar,
+from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QToolBar,
                              QVBoxLayout, QWidget)
 from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MultiplexerOutput
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
@@ -15,7 +15,6 @@ from dialogs.save_geometry import update_widget_to_save_geometry
 from window import utils as ut
 from window.common import WorkMode
 from window.pedalhandler import add_pedal_handler
-from window.scaler import update_scale_of_class
 from .measurementplanrunner import MeasurementPlanRunner
 from .measurementplanwidget import MeasurementPlanWidget
 from .multiplexerpinoutwidget import MultiplexerPinoutWidget
@@ -40,7 +39,6 @@ def check_multiplexer(func: Callable[..., Any]):
 
 @add_pedal_handler
 @update_widget_to_save_geometry
-@update_scale_of_class
 class MuxAndPlanWindow(QWidget):
     """
     Class for dialog window to show information about multiplexer and measurement plan.

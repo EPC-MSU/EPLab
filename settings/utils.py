@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Callable
-from PyQt5.QtCore import QCoreApplication as qApp, QSettings
+from PyQt6.QtCore import QCoreApplication as qApp, QSettings
 
 
 logger = logging.getLogger("eplab")

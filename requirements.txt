@@ -1,13 +1,12 @@
 epsound==0.0.13
 psutil==5.8.0; python_version=="3.6"
 psutil; python_version>"3.6"
-PyQt5>=5.8.2, <=5.15.0; python_version=="3.6"
-PyQt5; python_version>"3.6"
+PyQt6
 # To fix the bug with usb hubs in pyserial, install the module from the repo. See ticket #85293
 git+https://github.com/pyserial/pyserial@7aeea35429d15f3eefed10bbb659674638903e3a#egg=pyserial
-git+https://github.com/EPC-MSU/board-view@v0.1.5#egg=boardview
-git+https://github.com/EPC-MSU/ep_report_generator@v0.1.18#egg=ep_report_generator
+git+https://github.com/EPC-MSU/board-view@t-96516#egg=boardview
+git+https://github.com/EPC-MSU/ep_report_generator@t-96516#egg=ep_report_generator
 git+https://github.com/EPC-MSU/epcore@v0.2.2#egg=epcore
 git+https://github.com/EPC-MSU/ivc-circuit-detector@v0.2.1#egg=ivc_circuit_detector
-git+https://github.com/EPC-MSU/ivviewer@v1.0.6#egg=ivviewer
-git+https://github.com/EPC-MSU/PyQtExtendedScene@v1.0.16#egg=PyQtExtendedScene
+git+https://github.com/EPC-MSU/ivviewer@t-96516#egg=ivviewer
+git+https://github.com/EPC-MSU/PyQtExtendedScene@t-96516#egg=PyQtExtendedScene

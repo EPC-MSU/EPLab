@@ -5,7 +5,7 @@ File with the language class.
 import os
 from enum import auto, Enum
 from typing import Generator, Optional, Tuple
-from PyQt5.QtCore import QCoreApplication as qApp
+from PyQt6.QtCore import QCoreApplication as qApp
 
 
 class Language(Enum):

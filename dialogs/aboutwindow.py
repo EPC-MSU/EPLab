@@ -4,17 +4,15 @@ File containing a dialog box class for displaying basic information about the ap
 
 import os
 import re
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QLabel, QLayout, QPushButton, QVBoxLayout
+from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QDialog, QHBoxLayout, QLabel, QLayout, QPushButton, QVBoxLayout
 from connection_window.utils import get_platform
 from version import Version
 from window import utils as ut
 from window.language import get_language, get_link_in_set_language, Language
-from window.scaler import update_scale_of_class
 
 
-@update_scale_of_class
 class AboutWindow(QDialog):
     """
     Class for dialog window to show main information about the application.

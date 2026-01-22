@@ -5,15 +5,14 @@ File with class for dialog window to create report for board.
 import queue
 import time
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QThread
-from PyQt5.QtGui import QCloseEvent
-from PyQt5.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QProgressBar, QTextEdit, QVBoxLayout
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QThread
+from PyQt6.QtGui import QCloseEvent
+from PyQt6.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QProgressBar, QTextEdit, QVBoxLayout
 from epcore.elements import Board
 from report_generator import ConfigAttributes, ObjectsForReport, ReportGenerator, ReportTypes, ScalingTypes
 from window import utils as ut
 from window.common import WorkMode
 from window.language import get_language, Language
-from window.scaler import update_scale_of_class
 
 
 def get_scales_and_noise_amplitudes_for_iv_curves(board: Board, main_window
@@ -139,7 +138,6 @@ class ReportGenerationThread(QThread):
         self._stop_thread = True
 
 
-@update_scale_of_class
 class ReportGenerationWindow(QDialog):
     """
     Class for dialog window to create report for board.

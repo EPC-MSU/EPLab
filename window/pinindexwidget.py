@@ -1,7 +1,7 @@
 from typing import Optional
-from PyQt5.QtCore import QCoreApplication as qApp, QRegExp
-from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import QLineEdit
+from PyQt6.QtCore import QCoreApplication as qApp, QRegularExpression
+from PyQt6.QtGui import QRegularExpressionValidator
+from PyQt6.QtWidgets import QLineEdit
 from . import utils as ut
 
 
@@ -19,7 +19,7 @@ class PinIndexWidget(QLineEdit):
 
         super().__init__(parent)
         self._index: Optional[int] = None
-        self.setValidator(QRegExpValidator(QRegExp(r"\d+")))
+        self.setValidator(QRegularExpressionValidator(QRegularExpression(r"\d+")))
         self.setFixedWidth(PinIndexWidget.WIDTH)
 
     def get_index(self) -> Optional[int]:

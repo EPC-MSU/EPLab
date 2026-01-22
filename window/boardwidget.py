@@ -6,10 +6,10 @@ import gc
 import os
 from typing import Optional, Tuple, Union
 from PIL import Image
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, QPointF, QRect,
+from PyQt6.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, QPointF, QRect,
                           QRectF, Qt, QTimer)
-from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent, QWheelEvent
-from PyQt5.QtWidgets import QGraphicsScene, QVBoxLayout, QWidget
+from PyQt6.QtGui import QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent, QWheelEvent
+from PyQt6.QtWidgets import QGraphicsScene, QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView, GraphicsManualPinItem
 from epcore.measurementmanager import MeasurementPlan
 from dialogs.save_geometry import update_widget_to_save_geometry

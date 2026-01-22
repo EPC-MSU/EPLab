@@ -1,6 +1,6 @@
 from typing import Dict, List
 from epcore.ivmeasurer import IVMeasurerBase, IVMeasurerIVM, IVMeasurerVirtual
-from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt6.QtCore import pyqtSignal, QObject
 
 
 class PollingButtonStates(QObject):

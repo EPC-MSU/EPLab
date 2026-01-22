@@ -3,15 +3,13 @@ import os
 from typing import Optional
 from boardview.BoardViewWidget import BoardView
 from PIL import Image, ImageOps, UnidentifiedImageError
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
-from PyQt5.QtGui import QIcon, QPixmap, QTransform
-from PyQt5.QtWidgets import QDialog, QGraphicsScene, QHBoxLayout, QPushButton, QStyle, QVBoxLayout
+from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
+from PyQt6.QtGui import QIcon, QPixmap, QTransform
+from PyQt6.QtWidgets import QDialog, QGraphicsScene, QHBoxLayout, QPushButton, QStyle, QVBoxLayout
 from window import utils as ut
 from window.boardwidget import convert_pil_image_to_qpixmap
-from window.scaler import update_scale_of_class
 
 
-@update_scale_of_class
 class ImageAdder(QDialog):
     """
     Dialog box for adding a board image.
@@ -214,7 +212,7 @@ def get_image_from_file(filepath: str) -> Optional[Image.Image]:
     """
 
     image_adder = ImageAdder(filepath)
-    if image_adder.exec() == QDialog.DialogCode.Accepted:
+    if image_adder.exec_() == QDialog.DialogCode.Accepted:
         return image_adder.get_image()
 
     return None

@@ -1,5 +1,5 @@
 from typing import Dict, List, Set
-from PyQt5.QtWidgets import QAction
+from PyQt6.QtGui import QAction
 
 
 class CurveStates:

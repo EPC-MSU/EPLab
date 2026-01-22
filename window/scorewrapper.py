@@ -1,5 +1,5 @@
-from PyQt5.QtGui import QFont, QFontMetrics
-from PyQt5.QtWidgets import QLabel
+from PyQt6.QtGui import QFont, QFontMetrics
+from PyQt6.QtWidgets import QLabel
 from .utils import load_monospace_font
 
 

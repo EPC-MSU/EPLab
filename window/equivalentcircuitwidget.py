@@ -1,16 +1,14 @@
 import os.path
 from typing import Any, Dict, Optional
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QResizeEvent
-from PyQt5.QtWidgets import QFrame, QHBoxLayout, QLabel, QWidget
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap, QResizeEvent
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QWidget
 from circuit_detector import CircuitClassifier, detect_parameters, predict_circuit_class_for_iv_curve
 from epcore.elements import IVCurve, MeasurementSettings
 from ivviewer import Curve
 from . import utils as ut
-from .scaler import update_scale_of_class
 
 
-@update_scale_of_class
 class EquivalentCircuitWidget(QFrame):
     """
     Class for displaying equivalent circuit.

@@ -5,8 +5,8 @@ File with class to select measurer type.
 import os
 from functools import partial
 from typing import Dict, Optional
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QTimer
-from PyQt5.QtWidgets import QGridLayout, QRadioButton, QScrollArea, QVBoxLayout, QWidget
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt, QTimer
+from PyQt6.QtWidgets import QGridLayout, QRadioButton, QScrollArea, QVBoxLayout, QWidget
 from window.utils import DIR_MEDIA
 from . import utils as ut
 from .productname import MeasurerType, ProductName

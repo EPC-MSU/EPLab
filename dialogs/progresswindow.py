@@ -1,13 +1,11 @@
 import os
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QLayout, QProgressBar, QTextEdit, QVBoxLayout
+from PyQt6.QtCore import pyqtSlot, Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QDialog, QLayout, QProgressBar, QTextEdit, QVBoxLayout
 from window import utils as ut
-from window.scaler import update_scale_of_class
 
 
-@update_scale_of_class
 class ProgressWindow(QDialog):
     """
     A window for displaying information about the progress of a process.

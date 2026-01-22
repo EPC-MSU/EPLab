@@ -1,6 +1,6 @@
 import os
 from typing import Any, Dict
-from PyQt5.QtCore import pyqtSignal, QObject, QSettings
+from PyQt6.QtCore import pyqtSignal, QObject, QSettings
 from . import utils as ut
 
 

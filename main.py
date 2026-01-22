@@ -1,16 +1,11 @@
 import sys
 from argparse import ArgumentParser, Namespace
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 from epcore.product import EyePointProduct
 from window import utils as ut
 from window.eplabwindow import EPLabWindow
 from window.exceptionhook import exception_hook, show_error_window
 from window.logger import set_logger
-
-
-QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)  # enable high dpi scaling
-QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)  # use high dpi icons
 
 
 if getattr(sys, "frozen", False):

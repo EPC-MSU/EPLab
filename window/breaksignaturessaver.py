@@ -3,8 +3,8 @@ import logging
 import math
 import os
 from typing import Generator, Optional, Tuple, Union
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QObject, QTimer
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QObject, QTimer
+from PyQt6.QtWidgets import QMessageBox
 from epcore.elements import IVCurve, MeasurementSettings
 from epcore.product import EyePointProduct, MeasurementParameterOption
 from dialogs import ProgressWindow

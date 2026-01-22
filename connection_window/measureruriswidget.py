@@ -4,17 +4,15 @@ File with classes to select measurers.
 
 import os
 from typing import Callable, List, Optional, Tuple
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
-from PyQt5.QtGui import QFocusEvent, QIcon
-from PyQt5.QtWidgets import QComboBox, QGridLayout, QLabel, QPushButton, QWidget
-from window.scaler import update_scale_of_class
+from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, QEvent, QObject, Qt
+from PyQt6.QtGui import QFocusEvent, QIcon
+from PyQt6.QtWidgets import QComboBox, QGridLayout, QLabel, QPushButton, QWidget
 from window.utils import DIR_MEDIA, show_message
 from . import utils as ut
 from .productname import MeasurerType
 from .urichecker import URIChecker
 
 
-@update_scale_of_class
 class MeasurerURIsWidget(QWidget):
     """
     Class for widget to select URLs for measurers.
@@ -236,7 +234,7 @@ class MeasurerURIsWidget(QWidget):
         if isinstance(event, QFocusEvent):
             for combo_box in self.combo_boxes_measurers:
                 if obj == combo_box:
-                    self._uri_checker.color_widget(obj, QFocusEvent(event))
+                    self._uri_checker.color_widget(obj, event)
         return False
 
     def get_selected_uris(self) -> List[str]:

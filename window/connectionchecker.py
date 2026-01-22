@@ -3,7 +3,7 @@ import os
 from collections import namedtuple
 from distutils.version import StrictVersion
 from typing import Generator, List, Optional, Tuple, Union
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QCoreApplication as qApp, QTimer
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QObject, QCoreApplication as qApp, QTimer
 from epcore.analogmultiplexer import AnalogMultiplexer, AnalogMultiplexerBase, AnalogMultiplexerVirtual
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.ivmeasurer.safe_opener import BadFirmwareVersion, get_major_and_minor_version_parts

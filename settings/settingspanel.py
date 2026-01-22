@@ -1,6 +1,6 @@
 from typing import Dict, Generator
-from PyQt5.QtCore import QCoreApplication as qApp
-from PyQt5.QtWidgets import QLabel, QToolBar, QVBoxLayout, QWidget
+from PyQt6.QtCore import QCoreApplication as qApp
+from PyQt6.QtWidgets import QLabel, QToolBar, QVBoxLayout, QWidget
 from window import utils as ut
 from .legendwidget import LegendWidget
 

@@ -1,6 +1,6 @@
 from typing import Any, Callable, List, Optional
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget, QTableWidgetItem
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt6.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget, QTableWidgetItem
 from .pinindextableitem import PinIndexTableItem
 
 

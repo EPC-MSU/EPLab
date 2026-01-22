@@ -1,6 +1,6 @@
 import traceback
-from PyQt5.QtCore import QCoreApplication as qApp
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt6.QtCore import QCoreApplication as qApp
+from PyQt6.QtWidgets import QApplication, QMessageBox
 from . import utils as ut
 
 

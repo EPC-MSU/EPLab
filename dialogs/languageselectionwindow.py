@@ -4,15 +4,13 @@ File with the language selection dialog box class.
 
 import os
 from typing import Optional
-from PyQt5.QtCore import QCoreApplication as qApp, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QLabel, QLayout, QVBoxLayout
+from PyQt6.QtCore import QCoreApplication as qApp, Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QLabel, QLayout, QVBoxLayout
 from window import utils as ut
 from window.language import get_language, Language, Translator
-from window.scaler import update_scale_of_class
 
 
-@update_scale_of_class
 class LanguageSelectionWindow(QDialog):
     """
     Class for window to select language.

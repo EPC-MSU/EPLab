@@ -1,6 +1,6 @@
-from PyQt5.QtCore import QCoreApplication as qApp, Qt
-from PyQt5.QtGui import QResizeEvent
-from PyQt5.QtWidgets import QVBoxLayout, QWidget
+from PyQt6.QtCore import QCoreApplication as qApp, Qt
+from PyQt6.QtGui import QResizeEvent
+from PyQt6.QtWidgets import QVBoxLayout, QWidget
 from ivviewer import Viewer
 from settings import SettingsPanel
 

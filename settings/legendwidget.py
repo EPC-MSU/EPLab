@@ -1,12 +1,10 @@
 import os
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QToolBar, QWidget
-from window.scaler import update_scale_of_class
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QToolBar, QWidget
 from window.utils import DIR_MEDIA
 
 
-@update_scale_of_class
 class LegendWidget(QToolBar):
     """
     Class with legend for curves that are displayed in the IVViewer window.

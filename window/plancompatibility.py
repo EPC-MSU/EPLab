@@ -1,5 +1,5 @@
 from typing import Callable, Optional, Tuple, Union
-from PyQt5.QtCore import QCoreApplication as qApp
+from PyQt6.QtCore import QCoreApplication as qApp
 from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MAX_CHANNEL_NUMBER
 from epcore.elements import Board, Element, MultiplexerOutput, Pin
 from epcore.ivmeasurer import IVMeasurerBase

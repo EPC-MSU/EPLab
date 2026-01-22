@@ -10,11 +10,11 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator
-from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeySequence, QMouseEvent, QResizeEvent
-from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QSplitter, QStyle,
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator
+from PyQt6.QtGui import QAction, QCloseEvent, QColor, QIcon, QKeySequence, QMouseEvent, QResizeEvent, QShortcut
+from PyQt6.QtWidgets import (QDialog, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QSplitter, QStyle,
                              QToolButton, QWidget)
-from PyQt5.uic import loadUi
+from PyQt6.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError
 from epcore.elements import Board, Element, ImageNotFoundError, IVCurve, Measurement, MeasurementSettings, Pin
@@ -47,7 +47,7 @@ from .pinindexwidget import PinIndexWidget
 from .planautotransition import PlanAutoTransition
 from .plancompatibility import PlanCompatibility
 from .pollingbuttonstates import PollingButtonStates
-from .scaler import get_scale_factor, update_scale_of_action, update_scale_of_class
+from .scaler import get_scale_factor
 from .scorewrapper import check_difference_not_greater_tolerance, ScoreWrapper
 from .soundplayer import SoundPlayer
 
@@ -56,7 +56,6 @@ logger = logging.getLogger("eplab")
 
 
 @add_pedal_handler
-@update_scale_of_class
 class EPLabWindow(QMainWindow):
     """
     Class for the main window of application.
@@ -541,7 +540,6 @@ class EPLabWindow(QMainWindow):
                 icon = QIcon(os.path.join(ut.DIR_MEDIA, f"unknown_measurer_{measurer.name}.png"))
             action = QAction(icon, device_name, self)
             action.triggered.connect(partial(self.show_device_settings, measurer, device_name))
-            update_scale_of_action(action)
             self.measurers_menu.addAction(action)
 
     def _create_scroll_areas_for_parameters(self, available: Dict[EyePointProduct.Parameter,
@@ -1040,7 +1038,7 @@ class EPLabWindow(QMainWindow):
             width = self.CRITICAL_WIDTH_FOR_LINUX_RU
         height = self.INIT_HEIGHT
 
-        geometry = qApp.instance().desktop().availableGeometry()
+        geometry = qApp.instance().primaryScreen().availableGeometry()
         available_height = geometry.height() - self.style().pixelMetric(QStyle.PixelMetric.PM_TitleBarHeight)
         available_width = geometry.width()
 
@@ -1440,7 +1438,7 @@ class EPLabWindow(QMainWindow):
             main_text = qApp.translate("t", "Добавление точки приведет к сдвигу нумерации.")
             text = qApp.translate("t", "Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0},"
                                        " будут увеличены на 1.").format(pin_index)
-            if self._show_pin_shift_warning(main_text, text) != 0:
+            if self._show_pin_shift_warning(main_text, text) != QDialog.DialogCode.Accepted:
                 return False
 
         x, y = (point.x(), point.y()) if point else self.get_default_pin_coordinates()
@@ -1890,7 +1888,7 @@ class EPLabWindow(QMainWindow):
             pin_index = self.measurement_plan.get_current_index() + 2
             main_text = qApp.translate("t", "Удаление точки приведет к сдвигу нумерации.")
             text = qApp.translate("t", "Номера имеющихся точек, начиная с {}, будут уменьшены на 1.").format(pin_index)
-            if self._show_pin_shift_warning(main_text, text) != 0:
+            if self._show_pin_shift_warning(main_text, text) != QDialog.DialogCode.Accepted:
                 return
 
         index = self.measurement_plan.get_current_index()

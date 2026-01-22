@@ -1,7 +1,7 @@
 import locale
 import os
 from typing import Any, Callable, Dict, Optional
-from PyQt5.QtCore import QSettings
+from PyQt6.QtCore import QSettings
 from epcore.elements import MeasurementSettings
 from epcore.product import EyePointProduct
 from window.language import Language, Translator

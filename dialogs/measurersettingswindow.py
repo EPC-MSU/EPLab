@@ -6,13 +6,12 @@ import logging
 from functools import partial
 from inspect import getmembers, ismethod
 from typing import Any, Callable, Dict, List, Optional
-from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
-from PyQt5.QtWidgets import (QDialog, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton, QTextBrowser,
+from PyQt6.QtCore import pyqtSlot, QCoreApplication as qApp, Qt, QTimer
+from PyQt6.QtWidgets import (QDialog, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton, QTextBrowser,
                              QVBoxLayout, QWidget)
 from epcore.ivmeasurer import IVMeasurerBase
 from window import utils as ut
 from window.language import get_language, Language
-from window.scaler import update_scale_of_class
 
 
 logger = logging.getLogger("eplab")
@@ -35,7 +34,6 @@ def get_converter(data: Dict[str, Any]) -> Callable[[Any], Any]:
     return str
 
 
-@update_scale_of_class
 class MeasurerSettingsWindow(QDialog):
     """
     Class for dialog window with settings of measurer.

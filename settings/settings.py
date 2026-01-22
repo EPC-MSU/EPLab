@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Set, Tuple
-from PyQt5.QtCore import pyqtSignal, QSettings
+from PyQt6.QtCore import pyqtSignal, QSettings
 from epcore.elements.measurement import MeasurementSettings
 from window.common import WorkMode
 from . import utils as ut

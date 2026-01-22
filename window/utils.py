@@ -12,9 +12,9 @@ from platform import system
 from typing import Any, Callable, Dict, List, Optional, Tuple
 import serial.tools.list_ports
 import numpy as np
-from PyQt5.QtCore import QCoreApplication as qApp, QDir, QStandardPaths, Qt
-from PyQt5.QtGui import QFontDatabase, QIcon
-from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QLayout, QMessageBox
+from PyQt6.QtCore import QCoreApplication as qApp, QDir, QStandardPaths, Qt
+from PyQt6.QtGui import QFontDatabase, QIcon
+from PyQt6.QtWidgets import QCheckBox, QHBoxLayout, QLayout, QMessageBox
 from epcore.elements import MeasurementSettings
 from epcore.ivmeasurer import IVMeasurerBase
 
