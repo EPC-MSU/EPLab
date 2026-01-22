@@ -88,7 +88,7 @@ class MuxWidget(QGroupBox):
         """
 
         if isinstance(event, QFocusEvent) and obj == self.combo_box:
-            self._uri_checker.color_widget(obj, QFocusEvent(event))
+            self._uri_checker.color_widget(obj, event)
         return False
 
     def get_uri(self) -> Optional[str]:

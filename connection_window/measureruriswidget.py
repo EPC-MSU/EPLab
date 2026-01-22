@@ -236,7 +236,7 @@ class MeasurerURIsWidget(QWidget):
         if isinstance(event, QFocusEvent):
             for combo_box in self.combo_boxes_measurers:
                 if obj == combo_box:
-                    self._uri_checker.color_widget(obj, QFocusEvent(event))
+                    self._uri_checker.color_widget(obj, event)
         return False
 
     def get_selected_uris(self) -> List[str]:
