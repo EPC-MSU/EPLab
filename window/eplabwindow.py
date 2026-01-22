@@ -460,7 +460,7 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _collapse_equivalent_circuit_widgets(self) -> None:
-        if self._button_to_collapse_equivalent_circuit_widgets.arrowType() == Qt.DownArrow:
+        if self._button_to_collapse_equivalent_circuit_widgets.arrowType() == Qt.ArrowType.DownArrow:
             self._splitter_widget_backup_size = self._splitter_widget.sizes()
             self._splitter_widget.setSizes([1, 0])
             self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.ArrowType.UpArrow)
@@ -583,7 +583,7 @@ class EPLabWindow(QMainWindow):
 
         splitter_handle_layout = QHBoxLayout()
         splitter_handle_layout.setContentsMargins(0, 0, 0, 0)
-        splitter_handle_layout.setAlignment(Qt.AlignHCenter)
+        splitter_handle_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         splitter_handle = self._splitter_widget.handle(1)
         splitter_handle.setLayout(splitter_handle_layout)
@@ -881,7 +881,7 @@ class EPLabWindow(QMainWindow):
             else:
                 filename = QFileDialog.getOpenFileName(self, qApp.translate("MainWindow", "Открыть план тестирования"),
                                                        self.dir_chosen_by_user, "Board Files (*.json *.uzf)",
-                                                       options=QFileDialog.DontUseNativeDialog)[0]
+                                                       options=QFileDialog.Option.DontUseNativeDialog)[0]
         board = None
         if filename:
             try:
@@ -1020,10 +1020,10 @@ class EPLabWindow(QMainWindow):
         Method sets hotkeys UP and DOWN for moving to the previous and next pins.
         """
 
-        self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key_Down), self)
+        self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Down), self)
         self._shortcut_down.setContext(Qt.ShortcutContext.ApplicationShortcut)
         self._shortcut_down.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(False))
-        self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key_Up), self)
+        self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Up), self)
         self._shortcut_up.setContext(Qt.ShortcutContext.ApplicationShortcut)
         self._shortcut_up.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(True))
 
@@ -1494,7 +1494,7 @@ class EPLabWindow(QMainWindow):
             else:
                 dir_path = QFileDialog.getExistingDirectory(
                     self, qApp.translate("t", "Выберите папку, в которую будет сохранен отчет"),
-                    self.dir_chosen_by_user, options=QFileDialog.DontUseNativeDialog)
+                    self.dir_chosen_by_user, options=QFileDialog.Option.DontUseNativeDialog)
             is_user_defined_path = True
 
         if dir_path:
@@ -1853,7 +1853,7 @@ class EPLabWindow(QMainWindow):
         else:
             filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
                                                    self.dir_chosen_by_user, "Image Files (*.png *.jpg *.bmp)",
-                                                   options=QFileDialog.DontUseNativeDialog)[0]
+                                                   options=QFileDialog.Option.DontUseNativeDialog)[0]
         if not filename:
             return
 
@@ -1939,7 +1939,7 @@ class EPLabWindow(QMainWindow):
         else:
             filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
                                                    default_name, "Image (*.png)",
-                                                   options=QFileDialog.DontUseNativeDialog)[0]
+                                                   options=QFileDialog.Option.DontUseNativeDialog)[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
@@ -1968,7 +1968,7 @@ class EPLabWindow(QMainWindow):
                 filepath = QFileDialog.getSaveFileName(self,
                                                        qApp.translate("MainWindow", "Сохранить план тестирования"),
                                                        default_path, "UFIV Archived File (*.uzf)",
-                                                       options=QFileDialog.DontUseNativeDialog)[0]
+                                                       options=QFileDialog.Option.DontUseNativeDialog)[0]
             if filepath:
                 self.dir_chosen_by_user = os.path.dirname(filepath)
         else:

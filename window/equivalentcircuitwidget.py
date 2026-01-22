@@ -42,9 +42,9 @@ class EquivalentCircuitWidget(QFrame):
         if self._place_circuit_on_left:
             self._layout.addStretch(1)
             self._layout.addWidget(self._label_circuit)
-            self._layout.addWidget(self._label_params, alignment=Qt.AlignTop)
+            self._layout.addWidget(self._label_params, alignment=Qt.AlignmentFlag.AlignTop)
         else:
-            self._layout.addWidget(self._label_params, alignment=Qt.AlignTop)
+            self._layout.addWidget(self._label_params, alignment=Qt.AlignmentFlag.AlignTop)
             self._layout.addWidget(self._label_circuit)
             self._layout.addStretch(1)
         self.setLayout(self._layout)
@@ -158,7 +158,8 @@ class EquivalentCircuitsWidget(QWidget):
             file_path = os.path.join(dir_with_images, file_name)
             if os.path.isfile(file_path):
                 class_name = os.path.splitext(os.path.basename(file_path))[0]
-                pixmap = QPixmap(file_path).scaledToHeight(self.MAX_IMAGE_SIZE, Qt.SmoothTransformation)
+                pixmap = QPixmap(file_path).scaledToHeight(self.MAX_IMAGE_SIZE,
+                                                           Qt.TransformationMode.SmoothTransformation)
                 self._max_image_width = max(pixmap.width(), self._max_image_width)
                 self._circuit_class_images[class_name] = pixmap
 
