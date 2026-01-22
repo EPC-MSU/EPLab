@@ -13,7 +13,7 @@ class PinIndexTableItem(QTableWidgetItem):
         """
 
         super().__init__()
-        self.setFlags(self.flags() ^ Qt.ItemIsEditable)
+        self.setFlags(self.flags() ^ Qt.ItemFlag.ItemIsEditable)
         self.set_index(index)
 
     def set_index(self, index: int) -> None:
