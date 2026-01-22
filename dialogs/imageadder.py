@@ -214,7 +214,7 @@ def get_image_from_file(filepath: str) -> Optional[Image.Image]:
     """
 
     image_adder = ImageAdder(filepath)
-    if image_adder.exec_() == QDialog.DialogCode.Accepted:
+    if image_adder.exec() == QDialog.DialogCode.Accepted:
         return image_adder.get_image()
 
     return None

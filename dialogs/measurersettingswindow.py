@@ -423,4 +423,4 @@ def show_measurer_settings_window(main_window, measurer: IVMeasurerBase, device_
     all_settings = measurer.get_all_settings()
     window = MeasurerSettingsWindow(main_window, all_settings, measurer, device_name)
     main_window.measurers_disconnected.connect(window.close)
-    window.exec_()
+    window.exec()

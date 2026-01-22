@@ -157,4 +157,4 @@ def show_product_info(*args) -> None:
     """
 
     window = AboutWindow()
-    window.exec_()
+    window.exec()
