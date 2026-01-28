@@ -113,7 +113,7 @@ class MeasurerSettingsWindow(QDialog):
         line_edit = QLineEdit()
         if isinstance(data.get("multiplier"), (int, float)) and isinstance(current_value, (int, float)):
             current_value = current_value / data["multiplier"]
-        line_edit.setText(str(current_value))
+        line_edit.setText(f"{round(current_value, 10)}")
 
         label_widget = QLabel(label)
         h_layout = QHBoxLayout()
