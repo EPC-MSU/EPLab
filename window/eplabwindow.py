@@ -596,10 +596,11 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _delete_all_test_signatures(self) -> None:
-        if (self.measurement_plan and self._measured_pins_checker.check_for_test_signatures_on_measurement_plan() and
-                not ut.show_message(qApp.translate("t", "Внимание"),
-                                    qApp.translate("t", "Вы уверены, что хотите удалить все тестовые сигнатуры?"),
-                                    icon=QMessageBox.Icon.Information, yes_button=True, no_button=True)):
+        if ((self.measurement_plan and self._measured_pins_checker.check_for_test_signatures_on_measurement_plan() and
+                ut.show_message(qApp.translate("t", "Внимание"),
+                                qApp.translate("t", "Вы уверены, что хотите удалить все тестовые сигнатуры?"),
+                                icon=QMessageBox.Icon.Information, yes_button=True, no_button=True)) ==
+                QMessageBox.ButtonRole.AcceptRole):
             self.measurement_plan.remove_all_test_signatures()
             self._comment_widget.update_table_for_new_tolerance()
             self.update_current_pin(False)
@@ -968,7 +969,7 @@ class EPLabWindow(QMainWindow):
         selected anything.
         """
 
-        result = 0
+        result = QMessageBox.ButtonRole.AcceptRole
         if self.measurement_plan and self._last_saved_measurement_plan_data != self.measurement_plan.to_json():
             if self._measurement_plan_path.path:
                 main_text = qApp.translate("t", 'Сохранить изменения в "{}"?').format(self._measurement_plan_path.path)
@@ -977,11 +978,11 @@ class EPLabWindow(QMainWindow):
             text = f"{additional_info} {main_text}" if additional_info else main_text
             result = ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Icon.Information,
                                      yes_button=True, no_button=True, cancel_button=True)
-            if result == 0:
+            if result == QMessageBox.ButtonRole.AcceptRole:
                 # You need to save the changes to an existing file
                 if self.save_measurement_plan() is None:
-                    result = 2
-        return result in (0, 1)
+                    result = QMessageBox.ButtonRole.RejectRole
+        return result in (QMessageBox.ButtonRole.AcceptRole, QMessageBox.ButtonRole.NoRole)
 
     def _save_last_signatures(self, curves: Dict[str, Optional[IVCurve]]) -> None:
         """
@@ -1438,7 +1439,7 @@ class EPLabWindow(QMainWindow):
             main_text = qApp.translate("t", "Добавление точки приведет к сдвигу нумерации.")
             text = qApp.translate("t", "Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0},"
                                        " будут увеличены на 1.").format(pin_index)
-            if self._show_pin_shift_warning(main_text, text) != QDialog.DialogCode.Accepted:
+            if self._show_pin_shift_warning(main_text, text) != QMessageBox.ButtonRole.AcceptRole:
                 return False
 
         x, y = (point.x(), point.y()) if point else self.get_default_pin_coordinates()
@@ -1477,7 +1478,7 @@ class EPLabWindow(QMainWindow):
             if not_show_again:
                 self._auto_settings.save_warning_about_untested_pins_in_report(False)
 
-            if result:
+            if result != QMessageBox.ButtonRole.AcceptRole:
                 return
 
         if auto_detection_report_path and self._measurement_plan_path.path and \
@@ -1888,7 +1889,7 @@ class EPLabWindow(QMainWindow):
             pin_index = self.measurement_plan.get_current_index() + 2
             main_text = qApp.translate("t", "Удаление точки приведет к сдвигу нумерации.")
             text = qApp.translate("t", "Номера имеющихся точек, начиная с {}, будут уменьшены на 1.").format(pin_index)
-            if self._show_pin_shift_warning(main_text, text) != QDialog.DialogCode.Accepted:
+            if self._show_pin_shift_warning(main_text, text) != QMessageBox.ButtonRole.AcceptRole:
                 return
 
         index = self.measurement_plan.get_current_index()
