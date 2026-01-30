@@ -68,7 +68,7 @@ def show_language_selection_window() -> Optional[Language]:
     """
 
     window = LanguageSelectionWindow()
-    if window.exec():
+    if window.exec() == QDialog.DialogCode.Accepted:
         return window.get_language_value()
 
     return None
