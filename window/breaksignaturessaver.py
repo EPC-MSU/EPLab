@@ -159,7 +159,7 @@ class BreakSignaturesSaver(QObject):
                                                          '<li>Нажмите "Да".</li>\n'
                                                          "<li>Дождитесь завершения процедуры.</li>\n</ul>"),
                                      icon=QMessageBox.Icon.Information, yes_button=True, no_button=True)
-            if not result:
+            if result == QMessageBox.ButtonRole.AcceptRole:
                 self._request_new_settings()
                 self._start_settings_iteration()
 
