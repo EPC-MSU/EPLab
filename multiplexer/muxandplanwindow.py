@@ -218,7 +218,7 @@ class MuxAndPlanWindow(QWidget):
         :return: True if windows are ordered by size and position.
         """
 
-        geometry = qApp.instance().desktop().availableGeometry()
+        geometry = qApp.instance().primaryScreen().availableGeometry()
         height = geometry.height()
         width = geometry.width()
         main_window_pos = QPoint(geometry.x(), geometry.y())

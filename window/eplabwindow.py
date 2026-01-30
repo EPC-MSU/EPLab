@@ -1040,7 +1040,7 @@ class EPLabWindow(QMainWindow):
             width = self.CRITICAL_WIDTH_FOR_LINUX_RU
         height = self.INIT_HEIGHT
 
-        geometry = qApp.instance().desktop().availableGeometry()
+        geometry = qApp.instance().primaryScreen().availableGeometry()
         available_height = geometry.height() - self.style().pixelMetric(QStyle.PixelMetric.PM_TitleBarHeight)
         available_width = geometry.width()
 
