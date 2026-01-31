@@ -2,7 +2,7 @@
 File with function to  create dummy main window.
 """
 
-from PyQt5.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget
 from epcore.analogmultiplexer import AnalogMultiplexerVirtual
 from epcore.elements import Board, Element, Pin
 from epcore.filemanager import load_board_from_ufiv

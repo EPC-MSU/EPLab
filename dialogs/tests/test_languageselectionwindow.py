@@ -1,8 +1,8 @@
 import os
 import sys
 import unittest
-from PyQt5.QtCore import QCoreApplication as qApp
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtCore import QCoreApplication as qApp
+from PyQt6.QtWidgets import QApplication
 from dialogs.languageselectionwindow import LanguageSelectionWindow
 from window.language import Language
 

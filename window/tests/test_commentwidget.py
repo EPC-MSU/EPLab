@@ -2,8 +2,8 @@ import os
 import sys
 import unittest
 from typing import Tuple
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication
 from window.commentwidget import CommentWidget
 from window.common import WorkMode
 from .simplemainwindow import SimpleMainWindow
@@ -41,13 +41,13 @@ class TestCommentWidget(unittest.TestCase):
         self.assertTrue(comment_widget._read_only)
         for row in range(comment_widget.rowCount()):
             item = comment_widget.item(row, 1)
-            self.assertFalse(bool(int(item.flags()) & Qt.ItemIsEditable))
+            self.assertFalse(bool(item.flags() & Qt.ItemFlag.ItemIsEditable))
 
         comment_widget.set_work_mode(WorkMode.WRITE)
         self.assertFalse(comment_widget._read_only)
         for row in range(comment_widget.rowCount()):
             item = comment_widget.item(row, 1)
-            self.assertTrue(bool(int(item.flags()) & Qt.ItemIsEditable))
+            self.assertTrue(bool(item.flags() & Qt.ItemFlag.ItemIsEditable))
 
     def test_size_hint(self) -> None:
         _, comment_widget = prepare_data("simple_board.json")

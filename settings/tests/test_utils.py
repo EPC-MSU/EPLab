@@ -1,6 +1,6 @@
 import os
 import unittest
-from PyQt5.QtCore import QSettings
+from PyQt6.QtCore import QSettings
 from settings import utils as ut
 
 

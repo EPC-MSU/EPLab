@@ -1,7 +1,8 @@
 import os
 import sys
 import unittest
-from PyQt5.QtWidgets import QApplication
+from typing import Optional
+from PyQt6.QtWidgets import QApplication
 from window.measurementplanpath import MeasurementPlanPath
 
 
@@ -9,7 +10,7 @@ class DummyMainWindow:
 
     def __init__(self) -> None:
         self.measurement_plan = True
-        self.measurement_plan_name: str = None
+        self.measurement_plan_name: Optional[str] = None
         self.measurement_plan_path: MeasurementPlanPath = MeasurementPlanPath(self)
         self.measurement_plan_path.name_changed.connect(self.change_title)
 

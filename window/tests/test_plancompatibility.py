@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 from typing import Optional, Tuple
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 from epcore.analogmultiplexer import AnalogMultiplexerVirtual
 from epcore.filemanager import load_board_from_ufiv
 from epcore.ivmeasurer import IVMeasurerVirtual

@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 from typing import Tuple
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 from window.measuredpinschecker import get_borders, MeasuredPinsChecker
 from .simplemainwindow import SimpleMainWindow
 

@@ -4,7 +4,7 @@ Tests for widget that displays multiplexer.
 
 import sys
 import unittest
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 from multiplexer.multiplexerpinoutwidget import MultiplexerPinoutWidget
 from .utils import create_dummy_main_window
 

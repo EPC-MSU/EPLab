@@ -5,7 +5,7 @@ Tests for measurement plan runner.
 import os
 import sys
 import unittest
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 from multiplexer.measurementplanrunner import MeasurementPlanRunner
 from multiplexer.measurementplanwidget import MeasurementPlanWidget
 from .utils import create_dummy_main_window

@@ -1,8 +1,8 @@
 import sys
 import unittest
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QKeyEvent
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QKeyEvent
+from PyQt6.QtWidgets import QApplication
 from window.pedalhandler import PedalHandler
 
 
@@ -33,9 +33,9 @@ class TestPedalHandler(unittest.TestCase):
         """
 
         press_and_release_events = []
-        for status in (QKeyEvent.KeyPress, QKeyEvent.KeyRelease):
-            for key in (Qt.Key_Alt, Qt.Key_Control, Qt.Key_Shift, Qt.Key_P):
-                press_and_release_events.append(QKeyEvent(status, key, Qt.NoModifier))
+        for status in (QKeyEvent.Type.KeyPress, QKeyEvent.Type.KeyRelease):
+            for key in (Qt.Key.Key_Alt, Qt.Key.Key_Control, Qt.Key.Key_Shift, Qt.Key.Key_P):
+                press_and_release_events.append(QKeyEvent(status, key, Qt.KeyboardModifier.NoModifier))
 
         number_of_presses = 6
         events = press_and_release_events * number_of_presses

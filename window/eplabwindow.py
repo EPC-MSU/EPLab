@@ -12,8 +12,7 @@ from platform import system
 from typing import Any, Dict, List, Optional, Tuple
 from PyQt6.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator
 from PyQt6.QtGui import QAction, QCloseEvent, QColor, QIcon, QKeySequence, QMouseEvent, QResizeEvent, QShortcut
-from PyQt6.QtWidgets import (QDialog, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QSplitter, QStyle,
-                             QToolButton, QWidget)
+from PyQt6.QtWidgets import QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QSplitter, QStyle, QToolButton, QWidget
 from PyQt6.uic import loadUi
 import epcore.filemanager as epfilemanager
 from epcore.analogmultiplexer import BadMultiplexerOutputError

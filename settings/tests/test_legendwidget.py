@@ -1,6 +1,6 @@
 import sys
 import unittest
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 from settings.legendwidget import LegendWidget
 
 

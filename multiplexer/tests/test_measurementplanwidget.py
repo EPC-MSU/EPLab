@@ -5,7 +5,7 @@ Tests for widget that displays measurement plan table.
 import os
 import sys
 import unittest
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 from multiplexer.measurementplanwidget import MeasurementPlanWidget
 from .utils import create_dummy_main_window
 

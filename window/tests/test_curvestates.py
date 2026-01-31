@@ -1,16 +1,20 @@
+import sys
 import unittest
 from typing import List
-from PyQt5.QtWidgets import QAction
+from PyQt6.QtGui import QAction
+from PyQt6.QtWidgets import QApplication
 from window.curvestates import CurveStates
 
 
 class TestCurveStates(unittest.TestCase):
 
     def setUp(self) -> None:
+        self._app: QApplication = QApplication(sys.argv[1:])
+
         action_number = 10
         self._actions: List[QAction] = []
         for index in range(action_number):
-            action = QAction(f"action_{index}")
+            action = QAction(f"action1_{index}")
             action.setCheckable(True)
             action.setChecked(bool(index % 2))
             self._actions.append(action)
