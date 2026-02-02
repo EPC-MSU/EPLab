@@ -92,7 +92,7 @@ class LowSettingsPanel(QWidget):
         """
 
         freq_text = "{}: {} {}".format(qApp.translate("mux", "Частота"), round(probe_frequency, 1),
-                                       qApp.translate("settings", " Гц"))
+                                       qApp.translate("settings", "Гц"))
         self._param_dict["frequency"].setText(freq_text)
 
     def _set_score(self, score: str) -> None:

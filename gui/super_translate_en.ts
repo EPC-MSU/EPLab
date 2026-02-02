@@ -860,8 +860,8 @@ Signature analyzer S2</translation>
     </message>
     <message>
         <location filename="../settings/lowsettingspanel.py" line="95"/>
-        <source> Гц</source>
-        <translation> Hz</translation>
+        <source>Гц</source>
+        <translation>Hz</translation>
     </message>
     <message>
         <location filename="../settings/lowsettingspanel.py" line="119"/>
