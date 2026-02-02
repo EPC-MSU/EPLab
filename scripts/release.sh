@@ -4,9 +4,10 @@ rm -rf dist
 rm -rf release
 rm -rf venv
 
-PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}' | awk -F. 'NR==1{print $1"."$2}' | sort -V | head -1)
+PYTHON=python3
+PYTHON_VERSION=$($PYTHON --version | cut -d' ' -f2 | cut -d. -f1,2)
 
-python3 -m venv venv
+$PYTHON -m venv venv
 ./venv/bin/python3 -m pip install --upgrade pip
 ./venv/bin/python3 -m pip install -r requirements.txt
 ./venv/bin/python3 -m pip install pyinstaller
