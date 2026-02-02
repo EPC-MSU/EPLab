@@ -36,7 +36,13 @@
    sudo apt-get install -y python3-dev libasound2-dev
    ```
 
-3. Установите зависимости для Python, перейдя в папку **scripts** и запустив скрипт **rebuild_venv.sh**:
+3. Установите Tkinter (используется для реализации splash screen при запуске приложения):
+
+   ```bash
+   sudo apt install python3-tk
+   ```
+
+4. Установите зависимости для Python, перейдя в папку **scripts** и запустив скрипт **rebuild_venv.sh**:
 
    ```bash
    bash rebuild_venv.sh
