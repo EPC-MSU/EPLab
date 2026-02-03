@@ -12,7 +12,7 @@ $PYTHON -m venv venv
 ./venv/bin/python3 -m pip install --upgrade pip
 ./venv/bin/python3 -m pip install -r requirements.txt
 ./venv/bin/python3 -m pip install pyinstaller
-./venv/bin/pyi-makespec main.py --clean --onefile --noconsole \
+./venv/bin/pyi-makespec main.py --onefile --noconsole \
 --add-data "./break_signatures/*:break_signatures" \
 --add-data "./cur.ini:." \
 --add-data "./gui/*:gui" \
@@ -47,7 +47,7 @@ $PYTHON -m venv venv
 --splash media/banner.png
 
 venv/bin/python3 tools/editspecfile.py
-venv/bin/pyinstaller main.spec
+venv/bin/pyinstaller main.spec --clean
 
 mv dist release
 mv ./release/main ./release/eplab
