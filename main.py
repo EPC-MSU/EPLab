@@ -1,4 +1,10 @@
+import os
 import sys
+
+# Force the use of X11 (xcb) only on Linux systems
+if sys.platform.startswith("linux"):
+    os.environ["QT_QPA_PLATFORM"] = "xcb"
+
 from argparse import ArgumentParser, Namespace
 from PyQt6.QtWidgets import QApplication
 from epcore.product import EyePointProduct
