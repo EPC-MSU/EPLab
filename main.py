@@ -1,8 +1,13 @@
 import os
 import sys
 
-# Force the use of X11 (xcb) only on Linux systems
 if sys.platform.startswith("linux"):
+    # Fixing GTK (pixbuf) crashes on new distributions
+    vars_to_remove = ["GDK_PIXBUF_MODULE_FILE", "GDK_PIXBUF_MODULEDIR", "GDK_BACKEND"]
+    for var in vars_to_remove:
+        os.environ.pop(var, None)
+
+    # Force the use of X11 (xcb) only on Linux systems
     os.environ["QT_QPA_PLATFORM"] = "xcb"
 
 from argparse import ArgumentParser, Namespace
