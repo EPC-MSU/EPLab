@@ -6,6 +6,7 @@ rm -rf venv
 
 PYTHON=python3
 PYTHON_VERSION=$($PYTHON --version | cut -d' ' -f2 | cut -d. -f1,2)
+LIBXCB_PATH=$(find /usr/lib/x86_64-linux-gnu -name "libxcb-cursor.so.0" | head -n 1)
 
 $PYTHON -m venv venv
 ./venv/bin/python3 -m pip install --upgrade pip
@@ -41,6 +42,7 @@ $PYTHON -m venv venv
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/ivviewer/media/*:ivviewer/media" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/report_generator/locales/en/LC_MESSAGES/*:report_generator/locales/en/LC_MESSAGES" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/report_templates/*:report_templates" \
+--add-binary "$LIBXCB_PATH:." \
 --icon media/icon.ico \
 --splash media/banner.png
 

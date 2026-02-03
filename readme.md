@@ -42,7 +42,13 @@
    sudo apt install python3-tk
    ```
 
-4. Установите зависимости для Python, перейдя в папку **scripts** и запустив скрипт **rebuild_venv.sh**:
+4. Установите библиотеку libxcb-cursor0 для корректной работы PyQt6:
+
+   ```bash
+   sudo apt install libxcb-cursor0
+   ```    
+
+5. Установите зависимости для Python, перейдя в папку **scripts** и запустив скрипт **rebuild_venv.sh**:
 
    ```bash
    bash rebuild_venv.sh
