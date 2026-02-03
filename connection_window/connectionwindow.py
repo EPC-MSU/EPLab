@@ -6,7 +6,6 @@ import logging
 from typing import List, Optional
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtWidgets import QDialog, QGroupBox, QHBoxLayout, QLayout, QPushButton, QVBoxLayout
-from window.scaler import update_scale_of_class
 from . import utils as ut
 from .measurertypewidget import MeasurerTypeWidget
 from .measureruriswidget import MeasurerURIsWidget
@@ -17,7 +16,6 @@ from .productname import ProductName
 logger = logging.getLogger("eplab")
 
 
-@update_scale_of_class
 class ConnectionWindow(QDialog):
     """
     Dialog box class for selecting devices to connect.

@@ -47,7 +47,7 @@ from .pinindexwidget import PinIndexWidget
 from .planautotransition import PlanAutoTransition
 from .plancompatibility import PlanCompatibility
 from .pollingbuttonstates import PollingButtonStates
-from .scaler import get_scale_factor, update_scale_of_action, update_scale_of_class
+from .scaler import get_scale_factor
 from .scorewrapper import check_difference_not_greater_tolerance, ScoreWrapper
 from .soundplayer import SoundPlayer
 
@@ -56,7 +56,6 @@ logger = logging.getLogger("eplab")
 
 
 @add_pedal_handler
-@update_scale_of_class
 class EPLabWindow(QMainWindow):
     """
     Class for the main window of application.
@@ -541,7 +540,6 @@ class EPLabWindow(QMainWindow):
                 icon = QIcon(os.path.join(ut.DIR_MEDIA, f"unknown_measurer_{measurer.name}.png"))
             action = QAction(icon, device_name, self)
             action.triggered.connect(partial(self.show_device_settings, measurer, device_name))
-            update_scale_of_action(action)
             self.measurers_menu.addAction(action)
 
     def _create_scroll_areas_for_parameters(self, available: Dict[EyePointProduct.Parameter,

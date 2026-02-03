@@ -8,10 +8,8 @@ from PyQt5.QtGui import QIcon, QPixmap, QTransform
 from PyQt5.QtWidgets import QDialog, QGraphicsScene, QHBoxLayout, QPushButton, QStyle, QVBoxLayout
 from window import utils as ut
 from window.boardwidget import convert_pil_image_to_qpixmap
-from window.scaler import update_scale_of_class
 
 
-@update_scale_of_class
 class ImageAdder(QDialog):
     """
     Dialog box for adding a board image.

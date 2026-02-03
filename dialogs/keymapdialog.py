@@ -7,10 +7,8 @@ from PyQt5.QtCore import QCoreApplication as qApp, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDialog, QGridLayout, QHBoxLayout, QLabel, QLayout, QPushButton, QVBoxLayout
 from window import utils as ut
-from window.scaler import update_scale_of_class
 
 
-@update_scale_of_class
 class KeymapDialog(QDialog):
     """
     Dialog box class that displays the keyboard shortcuts used in the application.

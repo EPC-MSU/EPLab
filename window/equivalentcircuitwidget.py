@@ -7,10 +7,8 @@ from circuit_detector import CircuitClassifier, detect_parameters, predict_circu
 from epcore.elements import IVCurve, MeasurementSettings
 from ivviewer import Curve
 from . import utils as ut
-from .scaler import update_scale_of_class
 
 
-@update_scale_of_class
 class EquivalentCircuitWidget(QFrame):
     """
     Class for displaying equivalent circuit.

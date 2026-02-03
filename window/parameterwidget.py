@@ -4,7 +4,6 @@ from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QRadioButton, QScrollArea, QVBoxLayout, QWidget
 from epcore.product import EyePointProduct, MeasurementParameterOption
 from .language import get_language, Language
-from .scaler import update_scale_decorator
 
 
 class ParameterWidget(QScrollArea):
@@ -26,7 +25,6 @@ class ParameterWidget(QScrollArea):
         self.setWidgetResizable(True)
         self.setWidget(self._create_radio_buttons_for_parameter(available_options))
 
-    @update_scale_decorator
     def _create_radio_buttons_for_parameter(self, available_options: List[MeasurementParameterOption]) -> QWidget:
         """
         Method creates radio buttons for the options of a given parameter and places them in the widget.
