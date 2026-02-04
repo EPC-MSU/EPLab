@@ -2,30 +2,22 @@ import ctypes
 import os
 import sys
 from argparse import ArgumentParser, Namespace
-
-os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
-os.environ["QT_FONT_DPI"] = "120"
-
-# Указываем Windows, что наше приложение само управляет DPI
-try:
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
-    shcore = ctypes.windll.shcore
-    # Получаем DPI главного экрана
-    logical_dpi = shcore.GetScaleFactorForDevice(0) / 100
-    print("___", logical_dpi)
-except:
-    logical_dpi = 1.25 # Резервное значение, если не удалось определить
-
-# 2. Устанавливаем масштаб вручную
-import os
-os.environ["QT_SCALE_FACTOR"] = str(logical_dpi)
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication
 
+# Configuring font display at different screen sizes.
+# First, we tell the OS not to interfere
+try:
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+except Exception:
+    pass
+
+# Adjusting the rounding behavior. This fixes the Device Pixel Ratio: 1.0 -> 1.25
+os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+# Additional flags
 QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)  # enable high dpi scaling
 QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)  # use high dpi icons
-QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
 
 from epcore.product import EyePointProduct
 from window import utils as ut
@@ -40,6 +32,18 @@ if getattr(sys, "frozen", False):
 
 
 sys.excepthook = exception_hook
+
+
+def increase_font_size_for_larger_view(app: QApplication) -> None:
+    """
+    Forcefully increase the font size by 1 point if the zoom level is greater than 100%.
+    :param app: application.
+    """
+
+    if 1 < app.primaryScreen().devicePixelRatio():
+        font = app.font()
+        font.setPointSizeF(font.pointSize() + 1)
+        app.setFont(font)
 
 
 def launch_eplab(app: QApplication, args: Namespace) -> None:
@@ -65,6 +69,8 @@ if __name__ == "__main__":
     parsed_args = parser.parse_args()
 
     app_ = QApplication(sys.argv)
+    increase_font_size_for_larger_view(app_)
+
     try:
         launch_eplab(app_, parsed_args)
     except Exception:
