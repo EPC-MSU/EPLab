@@ -4,9 +4,9 @@ rm -rf dist
 rm -rf release
 rm -rf venv
 
-PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}' | awk -F. 'NR==1{print $1"."$2}' | sort -V | head -1)
+PYTHON_VERSION=$(python3.6 --version 2>&1 | awk '{print $2}' | awk -F. 'NR==1{print $1"."$2}' | sort -V | head -1)
 
-python3 -m venv venv
+python3.6 -m venv venv
 ./venv/bin/python3 -m pip install --upgrade pip
 ./venv/bin/python3 -m pip install -r requirements.txt
 ./venv/bin/python3 -m pip install pyinstaller
@@ -30,11 +30,11 @@ python3 -m venv venv
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmltok.so.3.51:." \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/ivmeasurer/EyePoint_settings.json:epcore/ivmeasurer" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/ivmeasurer/EyePoint_virtual_device_settings.json:epcore/ivmeasurer" \
+--add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/ivmeasurer/ivm/ivm-debian/libivm.so:ivm/ivm-debian" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/measurementmanager/ivcmp-debian/libivcmp.so:." \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/product/doc/eplab_schema.json:epcore/product/doc" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/product/eplab_default_options.json:epcore/product" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epsound/void.wav:epsound" \
---add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/ivm/ivm-debian/libivm.so:ivm/ivm-debian" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/ivviewer/media/*:ivviewer/media" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/report_generator/locales/en/LC_MESSAGES/*:report_generator/locales/en/LC_MESSAGES" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/report_templates/*:report_templates" \
