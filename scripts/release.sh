@@ -30,7 +30,7 @@ python3.6 -m venv venv
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/ivmeasurer/asa10/libasa-debian/libxmlrpc_xmltok.so.3.51:." \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/ivmeasurer/EyePoint_settings.json:epcore/ivmeasurer" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/ivmeasurer/EyePoint_virtual_device_settings.json:epcore/ivmeasurer" \
---add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/ivmeasurer/ivm/ivm-debian/libivm.so:ivm/ivm-debian" \
+--add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/ivmeasurer/ivm/ivm-debian/libivm.so:." \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/measurementmanager/ivcmp-debian/libivcmp.so:." \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/product/doc/eplab_schema.json:epcore/product/doc" \
 --add-data "./venv/lib/python${PYTHON_VERSION}/site-packages/epcore/product/eplab_default_options.json:epcore/product" \
