@@ -1,7 +1,7 @@
 from enum import auto, Enum
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError as MuxUrpcDeviceUndefinedError
 from epcore.ivmeasurer.asa10.asa import AsaConnectionError, AsaServerResponseError
-from ivm import UrpcDeviceUndefinedError
+from epcore.ivmeasurer.ivm import UrpcDeviceUndefinedError
 
 
 class WorkMode(Enum):
