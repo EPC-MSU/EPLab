@@ -19,17 +19,17 @@ QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPo
 QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)  # enable high dpi scaling
 QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)  # use high dpi icons
 
-from epcore.product import EyePointProduct
-from window import utils as ut
-from window.eplabwindow import EPLabWindow
-from window.exceptionhook import exception_hook, show_error_window
-from window.logger import set_logger
-
+if True:
+    # A trick to fix the flake8 "E402 module level import not at top of file" error
+    from epcore.product import EyePointProduct
+    from window import utils as ut
+    from window.eplabwindow import EPLabWindow
+    from window.exceptionhook import exception_hook, show_error_window
+    from window.logger import set_logger
 
 if getattr(sys, "frozen", False):
     import pyi_splash
     pyi_splash.close()
-
 
 sys.excepthook = exception_hook
 
