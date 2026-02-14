@@ -273,6 +273,11 @@ shifts the points enumerator</translation>
         <source>Удалить изображение</source>
         <translation>Delete board image</translation>
     </message>
+    <message>
+        <location filename="mainwindow.ui" line="941"/>
+        <source>Помощь</source>
+        <translation>Help</translation>
+    </message>
 </context>
 <context>
     <name>t</name>

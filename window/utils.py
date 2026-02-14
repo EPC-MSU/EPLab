@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import sys
+import webbrowser
 from operator import itemgetter
 from platform import system
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -172,6 +173,11 @@ def load_monospace_font() -> str:
         return font_family_name
 
     return "monospace"
+
+
+def open_instruction() -> None:
+    pdf_path = os.path.join(DIR_MEDIA, "instruction_ru.pdf")
+    webbrowser.open(f"file://{os.path.realpath(pdf_path)}")
 
 
 def read_json(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
