@@ -63,8 +63,8 @@ class MuxWidget(QGroupBox):
         self.button_update.setToolTip(qApp.translate("connection_window", "Обновить"))
         self.button_update.clicked.connect(self.update_uris)
         self.button_show_help: QPushButton = QPushButton()
-        self.button_show_help.setIcon(QIcon(os.path.join(DIR_MEDIA, "info.png")))
-        self.button_show_help.setToolTip(qApp.translate("connection_window", "Помощь"))
+        self.button_show_help.setIcon(QIcon(os.path.join(DIR_MEDIA, "help_black.png")))
+        self.button_show_help.setToolTip(qApp.translate("MainWindow", "Помощь"))
         self.button_show_help.setFixedWidth(self.BUTTON_HELP_WIDTH)
         self.button_show_help.clicked.connect(ut.show_help)
 

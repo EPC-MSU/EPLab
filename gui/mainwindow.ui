@@ -310,8 +310,9 @@
     <property name="title">
      <string>Справка</string>
     </property>
-    <addaction name="about_action"/>
+    <addaction name="action_help"/>
     <addaction name="action_keymap"/>
+    <addaction name="action_about"/>
    </widget>
    <widget class="QMenu" name="test_plan_menu_action">
     <property name="title">
@@ -671,16 +672,13 @@
     <bool>false</bool>
    </property>
   </action>
-  <action name="about_action">
+  <action name="action_about">
    <property name="icon">
     <iconset>
-     <normaloff>../media/help.png</normaloff>../media/help.png</iconset>
+     <normaloff>../media/info.png</normaloff>../media/info.png</iconset>
    </property>
    <property name="text">
     <string>О программе</string>
-   </property>
-   <property name="shortcut">
-    <string>F1</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -945,6 +943,18 @@
    </property>
    <property name="text">
     <string>Удалить изображение</string>
+   </property>
+  </action>
+  <action name="action_help">
+   <property name="icon">
+    <iconset>
+     <normaloff>../media/help.png</normaloff>../media/help.png</iconset>
+   </property>
+   <property name="text">
+    <string>Помощь</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
    </property>
   </action>
  </widget>

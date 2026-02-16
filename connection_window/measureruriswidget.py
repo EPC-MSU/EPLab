@@ -184,8 +184,8 @@ class MeasurerURIsWidget(QWidget):
             self.combo_boxes_measurers.append(combo_box)
 
             button = QPushButton()
-            button.setIcon(QIcon(os.path.join(DIR_MEDIA, "info.png")))
-            button.setToolTip(qApp.translate("connection_window", "Помощь"))
+            button.setIcon(QIcon(os.path.join(DIR_MEDIA, "help_black.png")))
+            button.setToolTip(qApp.translate("MainWindow", "Помощь"))
             button.setFixedWidth(self.BUTTON_HELP_WIDTH)
             button.clicked.connect(self.show_help)
             grid_layout.addWidget(button, index, 3)

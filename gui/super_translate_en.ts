@@ -283,6 +283,11 @@ shifts the points enumerator</translation>
         <source>Удалить изображение</source>
         <translation>Delete board image</translation>
     </message>
+    <message>
+        <location filename="mainwindow.ui" line="941"/>
+        <source>Помощь</source>
+        <translation>Help</translation>
+    </message>
 </context>
 <context>
     <name>t</name>
@@ -810,11 +815,6 @@ Such pins will be automatically declared in the report as being fault free. If y
         <location filename="../connection_window/measureruriswidget.py" line="175"/>
         <source>Канал #{}</source>
         <translation>Channel #{}</translation>
-    </message>
-    <message>
-        <location filename="../connection_window/measureruriswidget.py" line="190"/>
-        <source>Помощь</source>
-        <translation>Help</translation>
     </message>
     <message>
         <location filename="../connection_window/measureruriswidget.py" line="199"/>

@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import sys
+import webbrowser
 from operator import itemgetter
 from platform import system
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -304,6 +305,12 @@ def restore_ld_library_path(func: Callable[..., Any]):
         return result
 
     return wrapper
+
+
+@restore_ld_library_path
+def show_instruction(*args) -> None:
+    pdf_path = os.path.join(DIR_MEDIA, "instruction_ru.pdf")
+    webbrowser.open(f"file://{os.path.realpath(pdf_path)}")
 
 
 @restore_ld_library_path
