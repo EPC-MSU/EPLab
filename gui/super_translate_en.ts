@@ -699,11 +699,6 @@ shifts the points enumerator</translation>
         <translation>Channel #{}</translation>
     </message>
     <message>
-        <location filename="../connection_window/measureruriswidget.py" line="190"/>
-        <source>Помощь</source>
-        <translation>Help</translation>
-    </message>
-    <message>
         <location filename="../connection_window/measureruriswidget.py" line="199"/>
         <source>Обновить</source>
         <translation>Update</translation>

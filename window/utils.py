@@ -175,11 +175,6 @@ def load_monospace_font() -> str:
     return "monospace"
 
 
-def open_instruction() -> None:
-    pdf_path = os.path.join(DIR_MEDIA, "instruction_ru.pdf")
-    webbrowser.open(f"file://{os.path.realpath(pdf_path)}")
-
-
 def read_json(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """
     Function reads file with content in json format.
@@ -223,6 +218,12 @@ def restore_ld_library_path(func: Callable[..., Any]):
         return result
 
     return wrapper
+
+
+@restore_ld_library_path
+def show_instruction(*args) -> None:
+    pdf_path = os.path.join(DIR_MEDIA, "instruction_ru.pdf")
+    webbrowser.open(f"file://{os.path.realpath(pdf_path)}")
 
 
 @restore_ld_library_path

@@ -32,10 +32,10 @@ class MeasurerURIsWidget(QWidget):
         """
 
         super().__init__()
-        self._check_uri: Callable[[str], bool] = None
+        self._check_uri: Optional[Callable[[str], bool]] = None
         self._initial_uris: List[str] = initial_uris
-        self._measurer_type: MeasurerType = None
-        self._show_two_channels: bool = None
+        self._measurer_type: Optional[MeasurerType] = None
+        self._show_two_channels: Optional[bool] = None
         self._uri_checker: URIChecker = URIChecker()
         self._init_ui()
 
@@ -186,8 +186,8 @@ class MeasurerURIsWidget(QWidget):
             self.combo_boxes_measurers.append(combo_box)
 
             button = QPushButton()
-            button.setIcon(QIcon(os.path.join(DIR_MEDIA, "info.png")))
-            button.setToolTip(qApp.translate("connection_window", "Помощь"))
+            button.setIcon(QIcon(os.path.join(DIR_MEDIA, "help_black.png")))
+            button.setToolTip(qApp.translate("MainWindow", "Помощь"))
             button.setFixedWidth(MeasurerURIsWidget.BUTTON_HELP_WIDTH)
             button.clicked.connect(self.show_help)
             grid_layout.addWidget(button, index, 3)

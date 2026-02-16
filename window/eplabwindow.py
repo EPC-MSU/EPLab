@@ -754,7 +754,7 @@ class EPLabWindow(QMainWindow):
         self.add_board_image_action.triggered.connect(self.load_board_image)
         self.delete_board_image_action.triggered.connect(self.delete_board_image)
         self.create_report_action.triggered.connect(self.create_report)
-        self.action_help.triggered.connect(self.show_help)
+        self.action_help.triggered.connect(ut.show_instruction)
         self.action_keymap.triggered.connect(lambda: show_keymap_info(self))
         self.action_about.triggered.connect(show_product_info)
         self.sound_enabled_action.toggled.connect(self.enable_sound)
@@ -2011,10 +2011,6 @@ class EPLabWindow(QMainWindow):
             if measurer == selected_measurer:
                 show_measurer_settings_window(self, measurer, device_name)
                 return
-
-    @pyqtSlot()
-    def show_help(self) -> None:
-        ut.open_instruction()
 
     @pyqtSlot()
     def show_settings_window(self) -> None:
