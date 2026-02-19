@@ -22,8 +22,12 @@ class AboutWindow(QDialog):
 
     WINDOW_WIDTH: int = 400
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, main_window) -> None:
+        """
+        :param main_window: main window of application.
+        """
+
+        super().__init__(main_window)
         self._language: Language = get_language()
         self._init_ui()
 
@@ -52,7 +56,8 @@ class AboutWindow(QDialog):
         self.label_info: QLabel = QLabel(self._create_info_text())
         self.label_info.setOpenExternalLinks(True)
         self.label_info.setWordWrap(True)
-        self.label_info.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.LinksAccessibleByMouse)
+        self.label_info.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse |
+                                                Qt.TextInteractionFlag.LinksAccessibleByMouse)
         return self.label_info
 
     def _create_label_with_logo(self) -> QLabel:
@@ -63,7 +68,7 @@ class AboutWindow(QDialog):
         logo_name = self._get_logo_name()
         self.label_logo: QLabel = QLabel()
         self.label_logo.setText(f'<a href="{self._get_page_url()}"><img src="{os.path.join(ut.DIR_MEDIA, logo_name)}" '
-                                f'width="{AboutWindow.WINDOW_WIDTH}"></a>')
+                                f'width="{self.WINDOW_WIDTH}"></a>')
         self.label_logo.setOpenExternalLinks(True)
         return self.label_logo
 
@@ -77,7 +82,6 @@ class AboutWindow(QDialog):
         self.button_copy.setToolTip(qApp.translate("dialogs", "Копировать"))
         self.button_copy.clicked.connect(self.copy_info)
         self.button_ok: QPushButton = QPushButton("OK")
-        self.button_ok.setDefault(True)
         self.button_ok.clicked.connect(self.close)
 
         h_layout = QHBoxLayout()
@@ -109,16 +113,18 @@ class AboutWindow(QDialog):
 
         self.setWindowTitle(qApp.translate("MainWindow", "О программе"))
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.setFixedWidth(AboutWindow.WINDOW_WIDTH)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowContextHelpButtonHint)
+        self.setFixedWidth(self.WINDOW_WIDTH)
 
         layout = QVBoxLayout()
         layout.addWidget(self._create_label_with_logo())
         layout.addWidget(self._create_label_with_info())
         layout.addLayout(self._create_layout_with_buttons())
-        layout.setSizeConstraint(QLayout.SetFixedSize)
+        layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
         self.setLayout(layout)
         self.adjustSize()
+        self.button_copy.setAutoDefault(False)
+        self.button_ok.setAutoDefault(True)
 
     @staticmethod
     def _remove_tags(text: str) -> str:
@@ -150,10 +156,11 @@ class AboutWindow(QDialog):
 
 
 @ut.restore_ld_library_path
-def show_product_info(*args) -> None:
+def show_product_info(main_window) -> None:
     """
     Function shows window with information about application.
+    :param main_window: main window of application.
     """
 
-    window = AboutWindow()
+    window = AboutWindow(main_window)
     window.exec_()

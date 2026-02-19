@@ -41,7 +41,7 @@ class MuxWidget(QGroupBox):
 
         combo_box = QComboBox()
         combo_box.setEditable(True)
-        combo_box.setMinimumWidth(MuxWidget.COMBO_BOX_MIN_WIDTH)
+        combo_box.setMinimumWidth(self.COMBO_BOX_MIN_WIDTH)
         placeholder = "com:///dev/ttyx" if ut.get_platform() == "debian" else "com:\\\\.\\COMx"
         combo_box.lineEdit().setPlaceholderText(placeholder)
         combo_box.installEventFilter(self)
@@ -55,19 +55,19 @@ class MuxWidget(QGroupBox):
         self.setTitle(qApp.translate("connection_window", "Мультиплексор"))
         self.setFocusPolicy(Qt.ClickFocus)
 
-        self.label: QLabel = ut.create_label_with_image(os.path.join(DIR_MEDIA, "mux.png"), MuxWidget.IMAGE_SIZE,
-                                                        MuxWidget.IMAGE_SIZE)
+        self.label: QLabel = ut.create_label_with_image(os.path.join(DIR_MEDIA, "mux.png"), self.IMAGE_SIZE,
+                                                        self.IMAGE_SIZE)
         self.combo_box: QComboBox = self._init_combo_box()
         self.update_uris()
         self.button_update: QPushButton = QPushButton()
-        self.button_update.setFixedWidth(MuxWidget.BUTTON_UPDATE_WIDTH)
+        self.button_update.setFixedWidth(self.BUTTON_UPDATE_WIDTH)
         self.button_update.setIcon(QIcon(os.path.join(DIR_MEDIA, "update.png")))
         self.button_update.setToolTip(qApp.translate("connection_window", "Обновить"))
         self.button_update.clicked.connect(self.update_uris)
         self.button_show_help: QPushButton = QPushButton()
         self.button_show_help.setIcon(QIcon(os.path.join(DIR_MEDIA, "help_black.png")))
         self.button_show_help.setToolTip(qApp.translate("MainWindow", "Помощь"))
-        self.button_show_help.setFixedWidth(MuxWidget.BUTTON_HELP_WIDTH)
+        self.button_show_help.setFixedWidth(self.BUTTON_HELP_WIDTH)
         self.button_show_help.clicked.connect(ut.show_help)
 
         h_box_layout = QHBoxLayout()

@@ -55,7 +55,7 @@ class MeasurerSettingsWindow(QDialog):
         :param device_name: name of measurer.
         """
 
-        super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        super().__init__(parent, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
         self._measurer: IVMeasurerBase = measurer
         self._all_widgets: List[QWidget] = []
         self._lang: str = "ru" if get_language() == Language.RU else "en"
@@ -228,7 +228,7 @@ class MeasurerSettingsWindow(QDialog):
     @pyqtSlot()
     def _fix_size(self) -> None:
         layout = self.layout()
-        layout.setSizeConstraint(QLayout.SetFixedSize)
+        layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
         self.adjustSize()
         if self.width() < self.MIN_WIDTH:
             self.setFixedWidth(self.MIN_WIDTH)
@@ -292,7 +292,7 @@ class MeasurerSettingsWindow(QDialog):
             v_layout.addLayout(h_layout)
         else:
             self.label: QLabel = QLabel(qApp.translate("dialogs", "Нет настроек"))
-            v_layout.addWidget(self.label, alignment=Qt.AlignHCenter)
+            v_layout.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.setLayout(v_layout)
 
     def _run_command(self, command_to_run: Callable[[], Any], command_name: str, data: Dict[str, Any]) -> None:

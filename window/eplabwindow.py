@@ -756,7 +756,7 @@ class EPLabWindow(QMainWindow):
         self.create_report_action.triggered.connect(self.create_report)
         self.action_help.triggered.connect(ut.show_instruction)
         self.action_keymap.triggered.connect(lambda: show_keymap_info(self))
-        self.action_about.triggered.connect(show_product_info)
+        self.action_about.triggered.connect(lambda: show_product_info(self))
         self.sound_enabled_action.toggled.connect(self.enable_sound)
         self.freeze_curve_a_action.toggled.connect(partial(self.freeze_curve, 0))
         self.freeze_curve_b_action.toggled.connect(partial(self.freeze_curve, 1))
@@ -1760,7 +1760,7 @@ class EPLabWindow(QMainWindow):
         if not filename:
             return
 
-        image = get_image_from_file(filename)
+        image = get_image_from_file(self, filename)
         if image:
             self.measurement_plan.image = image
             self._board_window.update_board()
@@ -1937,7 +1937,7 @@ class EPLabWindow(QMainWindow):
         Slot shows a dialog window to select language.
         """
 
-        language = show_language_selection_window()
+        language = show_language_selection_window(self)
         if language is not None and language != self._auto_settings.language:
             self._auto_settings.save_language(language)
             text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."

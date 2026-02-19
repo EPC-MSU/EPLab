@@ -18,12 +18,12 @@ class LanguageSelectionWindow(QDialog):
     Class for window to select language.
     """
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, main_window) -> None:
         """
-        :param parent: parent window.
+        :param main_window: main window of application.
         """
 
-        super().__init__(parent, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        super().__init__(main_window, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
         self._init_ui()
 
     def _init_ui(self) -> None:
@@ -35,7 +35,8 @@ class LanguageSelectionWindow(QDialog):
             self.combo_box_languages.addItem(language, value)
         language = Translator.get_language_name(get_language())
         self.combo_box_languages.setCurrentText(language)
-        self.button_box: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.button_box: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok |
+                                                             QDialogButtonBox.StandardButton.Cancel)
         self.button_box.button(QDialogButtonBox.Cancel).setText(qApp.translate("t", "Отмена"))
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
@@ -44,7 +45,7 @@ class LanguageSelectionWindow(QDialog):
         v_box.addWidget(self.label)
         v_box.addWidget(self.combo_box_languages)
         v_box.addWidget(self.button_box)
-        v_box.setSizeConstraint(QLayout.SetFixedSize)
+        v_box.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
         self.adjustSize()
         self.setLayout(v_box)
 
@@ -63,12 +64,13 @@ class LanguageSelectionWindow(QDialog):
         return Translator.get_translator_file(self.combo_box_languages.currentData())
 
 
-def show_language_selection_window() -> Optional[Language]:
+def show_language_selection_window(main_window) -> Optional[Language]:
     """
+    :param main_window: main window of application.
     :return: user's chosen language.
     """
 
-    window = LanguageSelectionWindow()
+    window = LanguageSelectionWindow(main_window)
     if window.exec():
         return window.get_language_value()
     return None

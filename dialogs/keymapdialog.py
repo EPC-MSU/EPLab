@@ -21,7 +21,7 @@ class KeymapDialog(QDialog):
         :param main_window: main window of application.
         """
 
-        super().__init__()
+        super().__init__(main_window)
         self._main_window = main_window
         self._init_ui()
 
@@ -60,7 +60,7 @@ class KeymapDialog(QDialog):
         for row, key_and_description in enumerate(key_map):
             for column, key_or_description in enumerate(key_and_description):
                 label = QLabel(key_or_description)
-                label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+                label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
                 if column == 0:
                     label.setStyleSheet("font: bold")
                 grid_layout.addWidget(label, row, column)
@@ -70,14 +70,14 @@ class KeymapDialog(QDialog):
     def _init_ui(self) -> None:
         self.setWindowTitle(qApp.translate("MainWindow", "Горячие клавиши"))
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowContextHelpButtonHint)
 
         v_layout = QVBoxLayout()
         v_layout.addLayout(self._get_layout_with_text())
         v_layout.addLayout(self._get_layout_with_button_ok())
 
         self.setLayout(v_layout)
-        v_layout.setSizeConstraint(QLayout.SetFixedSize)
+        v_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
 
 def show_keymap_info(main_window) -> None:
