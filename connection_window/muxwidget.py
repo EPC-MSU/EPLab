@@ -75,7 +75,7 @@ class MuxWidget(QGroupBox):
         h_box_layout.addWidget(self.button_update)
         h_box_layout.addWidget(self.button_show_help)
         v_box_layout = QVBoxLayout()
-        v_box_layout.addWidget(self.label, alignment=Qt.AlignHCenter)
+        v_box_layout.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignHCenter)
         v_box_layout.addLayout(h_box_layout)
         v_box_layout.addStretch(1)
         self.setLayout(v_box_layout)
