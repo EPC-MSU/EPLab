@@ -87,4 +87,4 @@ def show_keymap_info(main_window) -> None:
     """
 
     window = KeymapDialog(main_window)
-    window.exec_()
+    window.exec()

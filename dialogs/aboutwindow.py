@@ -28,7 +28,6 @@ class AboutWindow(QDialog):
         """
 
         super().__init__(main_window)
-        self._language: Language = get_language()
         self._init_ui()
 
     def _create_info_text(self) -> str:
@@ -95,7 +94,7 @@ class AboutWindow(QDialog):
         :return: file name with logo.
         """
 
-        return "logo.png" if self._language is Language.RU else "logo_en.png"
+        return "logo.png" if self.get_language() is Language.RU else "logo_en.png"
 
     def _get_page_url(self) -> str:
         """
@@ -103,7 +102,7 @@ class AboutWindow(QDialog):
         """
 
         page_url = "https://eyepoint.physlab.ru/"
-        page_url += "ru/" if self._language is Language.RU else "en/"
+        page_url += "ru/" if get_language() is Language.RU else "en/"
         return page_url
 
     def _init_ui(self) -> None:
@@ -163,4 +162,4 @@ def show_product_info(main_window) -> None:
     """
 
     window = AboutWindow(main_window)
-    window.exec_()
+    window.exec()
