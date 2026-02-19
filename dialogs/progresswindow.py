@@ -11,12 +11,13 @@ class ProgressWindow(QDialog):
     A window for displaying information about the progress of a process.
     """
 
-    def __init__(self, title: str) -> None:
+    def __init__(self, main_window, title: str) -> None:
         """
+        :param main_window: main window of application;
         :param title: window title.
         """
 
-        super().__init__(None, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
+        super().__init__(main_window, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
         self._number_of_steps_done: int = 0
         self._total_number: Optional[int] = None
         self._init_ui(title)

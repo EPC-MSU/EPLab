@@ -16,12 +16,12 @@ class LanguageSelectionWindow(QDialog):
     Class for window to select language.
     """
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, main_window) -> None:
         """
-        :param parent: parent window.
+        :param main_window: main window of application.
         """
 
-        super().__init__(parent, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
+        super().__init__(main_window, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
         self._init_ui()
 
     def _init_ui(self) -> None:
@@ -62,12 +62,13 @@ class LanguageSelectionWindow(QDialog):
         return Translator.get_translator_file(self.combo_box_languages.currentData())
 
 
-def show_language_selection_window() -> Optional[Language]:
+def show_language_selection_window(main_window) -> Optional[Language]:
     """
+    :param main_window: main window of application.
     :return: user's chosen language.
     """
 
-    window = LanguageSelectionWindow()
+    window = LanguageSelectionWindow(main_window)
     if window.exec() == QDialog.DialogCode.Accepted:
         return window.get_language_value()
 

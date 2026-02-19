@@ -17,12 +17,13 @@ class ImageAdder(QDialog):
 
     INIT_SIZE_AS_PROPORTION_OF_SCREEN: float = 0.6
 
-    def __init__(self, filepath: str) -> None:
+    def __init__(self, main_window, filepath: str) -> None:
         """
+        :param main_window: main window of application;
         :param filepath: path to image file.
         """
 
-        super().__init__()
+        super().__init__(main_window)
         self._angle: int = 0
         self._image: Optional[Image.Image] = self._read_image(filepath)
         if self._image is None:
@@ -97,6 +98,7 @@ class ImageAdder(QDialog):
     def _init_ui(self) -> None:
         self.setWindowTitle(qApp.translate("MainWindow", "Добавить изображение"))
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowContextHelpButtonHint)
 
         self._create_buttons()
         self._create_scene()
@@ -205,13 +207,14 @@ class ImageAdder(QDialog):
         return self._image
 
 
-def get_image_from_file(filepath: str) -> Optional[Image.Image]:
+def get_image_from_file(main_window, filepath: str) -> Optional[Image.Image]:
     """
     :param filepath: path to image file.
+    :param main_window: main window of application;
     :return: image obtained from file after rotations.
     """
 
-    image_adder = ImageAdder(filepath)
+    image_adder = ImageAdder(main_window, filepath)
     if image_adder.exec_() == QDialog.DialogCode.Accepted:
         return image_adder.get_image()
 

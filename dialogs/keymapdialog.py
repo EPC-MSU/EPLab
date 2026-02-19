@@ -19,7 +19,7 @@ class KeymapDialog(QDialog):
         :param main_window: main window of application.
         """
 
-        super().__init__()
+        super().__init__(main_window)
         self._main_window = main_window
         self._init_ui()
 

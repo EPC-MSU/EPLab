@@ -134,7 +134,7 @@ class BreakSignaturesSaver(QObject):
         self._timer.start()
 
     def _start_settings_iteration(self) -> None:
-        self._window: ProgressWindow = ProgressWindow(qApp.translate("t", "Сохранение сигнатур разрыва"))
+        self._window: ProgressWindow = ProgressWindow(self, qApp.translate("t", "Сохранение сигнатур разрыва"))
         self._window.set_total_number_of_steps(self._get_settings_total_number())
         self._is_running = True
         self._timer.start()

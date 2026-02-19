@@ -20,8 +20,12 @@ class AboutWindow(QDialog):
 
     WINDOW_WIDTH: int = 400
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, main_window) -> None:
+        """
+        :param main_window: main window of application.
+        """
+
+        super().__init__(main_window)
         self._init_ui()
 
     def _create_info_text(self) -> str:
@@ -75,7 +79,6 @@ class AboutWindow(QDialog):
         self.button_copy.setToolTip(qApp.translate("dialogs", "Копировать"))
         self.button_copy.clicked.connect(self.copy_info)
         self.button_ok: QPushButton = QPushButton("OK")
-        self.button_ok.setDefault(True)
         self.button_ok.clicked.connect(self.close)
 
         h_layout = QHBoxLayout()
@@ -118,6 +121,8 @@ class AboutWindow(QDialog):
         layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
         self.setLayout(layout)
         self.adjustSize()
+        self.button_copy.setAutoDefault(False)
+        self.button_ok.setAutoDefault(True)
 
     @staticmethod
     def _remove_tags(text: str) -> str:
@@ -149,10 +154,11 @@ class AboutWindow(QDialog):
 
 
 @ut.restore_ld_library_path
-def show_product_info(*args) -> None:
+def show_product_info(main_window) -> None:
     """
     Function shows window with information about application.
+    :param main_window: main window of application.
     """
 
-    window = AboutWindow()
+    window = AboutWindow(main_window)
     window.exec()
