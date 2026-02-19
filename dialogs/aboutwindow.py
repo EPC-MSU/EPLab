@@ -94,7 +94,7 @@ class AboutWindow(QDialog):
         :return: file name with logo.
         """
 
-        return "logo.png" if self.get_language() is Language.RU else "logo_en.png"
+        return "logo.png" if get_language() is Language.RU else "logo_en.png"
 
     def _get_page_url(self) -> str:
         """
