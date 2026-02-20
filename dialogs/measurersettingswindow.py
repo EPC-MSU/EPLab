@@ -142,6 +142,7 @@ class MeasurerSettingsWindow(QDialog):
             return None
 
         v_layout = QVBoxLayout()
+        v_layout.setContentsMargins(0, 0, 0, 0)
         for child_parameter_data in data.get("child_parameters", []):
             child_parameter = child_parameter_data.get("parameter")
             if not child_parameter or child_parameter_data.get("type") != "line_edit":
@@ -173,6 +174,7 @@ class MeasurerSettingsWindow(QDialog):
             return None
 
         v_layout = QVBoxLayout()
+        v_layout.setContentsMargins(0, 0, 0, 0)
         group_boxes = []
         for item in values:
             group_box = self._create_selectable_group_box(item, current_value == item.get("value"))
