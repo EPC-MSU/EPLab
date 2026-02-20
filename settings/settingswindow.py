@@ -3,7 +3,7 @@ import os
 from platform import system
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout
+from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout, QSizePolicy
 from window import utils as ut
 from .settings import Settings
 from .utils import InvalidParameterValueError, MissingParameterError
@@ -46,8 +46,11 @@ class SettingsWindow(QDialog):
         self.button_tolerance_plus.clicked.connect(self.increase_tolerance)
         self.check_box_auto_transition.stateChanged.connect(self.update_auto_transition)
         if self.parent().measurement_plan and self.parent().measurement_plan.multiplexer:
+            self.label_auto_transition.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+            self.check_box_auto_transition.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
             self.label_auto_transition.hide()
             self.check_box_auto_transition.hide()
+            self.grid_layout.setRowMinimumHeight(1, 0)
         self.check_box_pin_shift_warning_info.stateChanged.connect(self.update_pin_shift_warning_info)
         self.check_box_warning_about_untested_pins_in_report.stateChanged.connect(
             self.update_warning_about_untested_pins_in_report)

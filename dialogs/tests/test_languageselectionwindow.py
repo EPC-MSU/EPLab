@@ -14,7 +14,7 @@ class TestLanguageSelectionWindow(unittest.TestCase):
 
     def test_get_language_value(self) -> None:
         qApp.instance().setProperty("language", Language.EN)
-        window = LanguageSelectionWindow()
+        window = LanguageSelectionWindow(None)
         self.assertEqual(window.get_language_value(), Language.EN)
 
         window.combo_box_languages.setCurrentText("Русский")
@@ -22,12 +22,12 @@ class TestLanguageSelectionWindow(unittest.TestCase):
 
     def test_get_translator_file(self) -> None:
         qApp.instance().setProperty("language", Language.RU)
-        window = LanguageSelectionWindow()
+        window = LanguageSelectionWindow(None)
         self.assertEqual(window.get_translator_file(), "")
 
         window.combo_box_languages.setCurrentText("English")
         self.assertEqual(window.get_translator_file(), os.path.abspath(os.path.join("gui", "super_translate_en.qm")))
 
     def test_language_selection_window(self) -> None:
-        window = LanguageSelectionWindow()
+        window = LanguageSelectionWindow(None)
         self.assertIsNotNone(window)
