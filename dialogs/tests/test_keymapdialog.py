@@ -1,14 +1,15 @@
 import sys
 import unittest
-from PyQt5.QtWidgets import QApplication, QLabel
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget
 from dialogs.keymapdialog import KeymapDialog
 
 
 class TestKeymapDialog(unittest.TestCase):
 
-    class MainWindow:
+    class MainWindow(QWidget):
 
         def __init__(self) -> None:
+            super().__init__()
             self.save_point_action = QLabel("some text")
 
     def setUp(self) -> None:

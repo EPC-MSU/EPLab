@@ -8,5 +8,5 @@ class TestAboutWindow(unittest.TestCase):
 
     def test_about_window(self) -> None:
         _ = QApplication(sys.argv[1:])
-        window = AboutWindow()
+        window = AboutWindow(None)
         self.assertIsNotNone(window)
