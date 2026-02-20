@@ -203,6 +203,17 @@ def get_port(url: str) -> Optional[str]:
     return port[0]
 
 
+def get_scale_factor() -> float:
+    """
+    :return: scale factor for the current screen scale relative to the normal scale 96.
+    """
+
+    app = qApp.instance()
+    for screen in app.screens():
+        return screen.logicalDotsPerInch() / 96
+    return 1
+
+
 def get_str_representation_of_physical_quantity(name: str, value: float, units_of_measurement) -> str:
     """
     :param name: designation/name of a physical quantity;

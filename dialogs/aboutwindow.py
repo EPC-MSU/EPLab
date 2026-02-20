@@ -11,6 +11,7 @@ from connection_window.utils import get_platform
 from version import Version
 from window import utils as ut
 from window.language import get_language, get_link_in_set_language, Language
+from window.language import get_language, Language
 
 
 class AboutWindow(QDialog):

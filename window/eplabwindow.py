@@ -47,7 +47,6 @@ from .pinindexwidget import PinIndexWidget
 from .planautotransition import PlanAutoTransition
 from .plancompatibility import PlanCompatibility
 from .pollingbuttonstates import PollingButtonStates
-from .scaler import get_scale_factor
 from .scorewrapper import check_difference_not_greater_tolerance, ScoreWrapper
 from .soundplayer import SoundPlayer
 
@@ -252,7 +251,7 @@ class EPLabWindow(QMainWindow):
         to icon. When updating the width, the current screen scale is taken into account.
         """
 
-        scale_factor = get_scale_factor()
+        scale_factor = ut.get_scale_factor()
         for width in ("CRITICAL_WIDTH_FOR_LINUX_EN", "CRITICAL_WIDTH_FOR_LINUX_RU", "CRITICAL_WIDTH_FOR_WINDOWS_EN",
                       "CRITICAL_WIDTH_FOR_WINDOWS_RU", "INIT_HEIGHT", "MIN_WIDTH_IN_LINUX", "MIN_WIDTH_IN_WINDOWS"):
             width_value = getattr(self, width, None)
