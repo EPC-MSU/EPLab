@@ -794,6 +794,7 @@ class EPLabWindow(QMainWindow):
 
         self._create_splitter_widget()
         h_box_layout = QHBoxLayout(self.main_widget)
+        h_box_layout.setContentsMargins(0, 0, 0, 0)
         h_box_layout.addWidget(self._splitter_widget)
 
         self.connection_action.triggered.connect(self.connect_or_disconnect)
