@@ -34,7 +34,7 @@ class LegendWidget(QToolBar):
         self.label_color: QLabel = QLabel()
         self.label_color.setContentsMargins(left_margin, 0, 0, 0)
         pixmap = QPixmap(os.path.join(DIR_MEDIA, color_path))
-        self.label_color.setPixmap(pixmap.scaled(LegendWidget.ICON_SIZE, LegendWidget.ICON_SIZE, Qt.KeepAspectRatio))
+        self.label_color.setPixmap(pixmap.scaled(self.ICON_SIZE, self.ICON_SIZE, Qt.AspectRatioMode.KeepAspectRatio))
         self.label_text: QLabel = QLabel(text)
         self.label_status: QLabel = QLabel()
 

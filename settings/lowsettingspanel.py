@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, Generator, Tuple
 from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtWidgets import QGridLayout, QLabel, QToolBar, QWidget
 from .legendwidget import LegendWidget
@@ -125,7 +125,7 @@ class LowSettingsPanel(QWidget):
         _ = [label.clear() for label in self._param_dict.values()]
         _ = [legend.clear() for legend in self._legends.values()]
 
-    def get_labels(self) -> List[QLabel]:
+    def get_labels(self) -> Generator[QLabel, None, None]:
         for label in self._param_dict.values():
             yield label
 

@@ -3,7 +3,7 @@ import os
 from platform import system
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout
+from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout, QSizePolicy
 from window import utils as ut
 from window.scaler import update_scale_of_class
 from .settings import Settings
@@ -26,7 +26,7 @@ class SettingsWindow(QDialog):
         :param settings_directory: directory for settings file.
         """
 
-        super().__init__(main_window, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        super().__init__(main_window, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
         self._init_settings: Settings = init_settings
         self._settings: Settings = copy.copy(init_settings)
         self._settings_directory: str = settings_directory or ut.get_dir_name()
@@ -48,8 +48,11 @@ class SettingsWindow(QDialog):
         self.button_tolerance_plus.clicked.connect(self.increase_tolerance)
         self.check_box_auto_transition.stateChanged.connect(self.update_auto_transition)
         if self.parent().measurement_plan and self.parent().measurement_plan.multiplexer:
+            self.label_auto_transition.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+            self.check_box_auto_transition.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
             self.label_auto_transition.hide()
             self.check_box_auto_transition.hide()
+            self.grid_layout.setRowMinimumHeight(1, 0)
         self.check_box_pin_shift_warning_info.stateChanged.connect(self.update_pin_shift_warning_info)
         self.spin_box_tolerance.valueChanged.connect(self.update_tolerance)
         self.spin_box_max_optimal_voltage.valueChanged.connect(self.update_max_optimal_voltage)
@@ -60,7 +63,7 @@ class SettingsWindow(QDialog):
         self.button_ok.setDefault(True)
         self.button_save_settings.clicked.connect(self.save_settings_to_file)
         self.adjustSize()
-        self.layout().setSizeConstraint(QLayout.SetFixedSize)
+        self.layout().setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
     def _get_tolerance_value(self) -> float:
         """
@@ -135,7 +138,7 @@ class SettingsWindow(QDialog):
         Slot decreases the tolerance value by a given step.
         """
 
-        self._update_tolerance_in_settings_wnd(self._get_tolerance_value() - SettingsWindow.THRESHOLD_STEP)
+        self._update_tolerance_in_settings_wnd(self._get_tolerance_value() - self.THRESHOLD_STEP)
         self._send_settings()
 
     @pyqtSlot()
@@ -153,7 +156,7 @@ class SettingsWindow(QDialog):
         Slot increases the tolerance value by a given step.
         """
 
-        self._update_tolerance_in_settings_wnd(self._get_tolerance_value() + SettingsWindow.THRESHOLD_STEP)
+        self._update_tolerance_in_settings_wnd(self._get_tolerance_value() + self.THRESHOLD_STEP)
         self._send_settings()
 
     @pyqtSlot()
@@ -168,7 +171,7 @@ class SettingsWindow(QDialog):
         else:
             settings_path = QFileDialog.getOpenFileName(self, qApp.translate("settings", "Открыть файл"),
                                                         self._settings_directory, "Ini file (*.ini);;All Files (*)",
-                                                        options=QFileDialog.DontUseNativeDialog)[0]
+                                                        options=QFileDialog.Option.DontUseNativeDialog)[0]
         if settings_path:
             try:
                 settings = Settings()
@@ -199,7 +202,7 @@ class SettingsWindow(QDialog):
             settings_path = QFileDialog.getSaveFileName(self, qApp.translate("settings", "Сохранить файл"),
                                                         os.path.join(self._settings_directory, "settings.ini"),
                                                         "Ini file (*.ini);;All Files (*)",
-                                                        options=QFileDialog.DontUseNativeDialog)[0]
+                                                        options=QFileDialog.Option.DontUseNativeDialog)[0]
         if settings_path:
             self._settings_directory = os.path.dirname(settings_path)
             if not settings_path.endswith(".ini"):
@@ -213,7 +216,7 @@ class SettingsWindow(QDialog):
         :param state: if True, then the auto transition mode is activated when testing according to plan.
         """
 
-        self._update_auto_transition(state == Qt.Checked)
+        self._update_auto_transition(state == Qt.CheckState.Checked)
         self._send_settings()
 
     @pyqtSlot(float)
@@ -231,7 +234,7 @@ class SettingsWindow(QDialog):
         :param state: if True, then the auto transition mode is activated when testing according to plan.
         """
 
-        self._update_pin_shift_warning_info(state == Qt.Checked)
+        self._update_pin_shift_warning_info(state == Qt.CheckState.Checked)
         self._send_settings()
 
     @pyqtSlot(float)

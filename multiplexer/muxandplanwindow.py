@@ -193,7 +193,7 @@ class MuxAndPlanWindow(QWidget):
         h_layout.addStretch(1)
         h_layout.addWidget(self.button_arrange_windows)
 
-        self.splitter: QSplitter = QSplitter(Qt.Vertical)
+        self.splitter: QSplitter = QSplitter(Qt.Orientation.Vertical)
         self.splitter.setContentsMargins(0, 0, 0, 0)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(self._create_top_widget())
@@ -274,10 +274,10 @@ class MuxAndPlanWindow(QWidget):
         main_window_pos, main_window_size, window_pos, window_size = self._is_arranged()[1:]
 
         if self._main_window.isMaximized():
-            self._main_window.setWindowState(self._main_window.windowState() & ~Qt.WindowMaximized)
+            self._main_window.setWindowState(self._main_window.windowState() & ~Qt.WindowState.WindowMaximized)
 
         if self.isMaximized():
-            self.setWindowState(self.windowState() & ~Qt.WindowMaximized)
+            self.setWindowState(self.windowState() & ~Qt.WindowState.WindowMaximized)
 
         self._main_window.move(main_window_pos)
         self._main_window.resize(main_window_size)

@@ -48,7 +48,7 @@ class ChannelWidget(QWidget):
         self.button_turn_on_off.setFixedSize(ChannelWidget.SIZE, ChannelWidget.SIZE)
 
         v_box_layout = QVBoxLayout()
-        v_box_layout.addWidget(self.button_turn_on_off, alignment=Qt.AlignHCenter)
+        v_box_layout.addWidget(self.button_turn_on_off, alignment=Qt.AlignmentFlag.AlignHCenter)
         v_box_layout.setSpacing(0)
         v_box_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(v_box_layout)
@@ -138,7 +138,7 @@ class ModuleWidget(QWidget):
 
         h_layout = QHBoxLayout()
         h_layout.setContentsMargins(0, 0, 0, 0)
-        h_layout.addWidget(label_module_number, alignment=Qt.AlignVCenter)
+        h_layout.addWidget(label_module_number, alignment=Qt.AlignmentFlag.AlignVCenter)
         h_layout.addWidget(self.frame_module)
         h_layout.addStretch(1)
         self.setLayout(h_layout)
@@ -206,7 +206,7 @@ class MultiplexerPinoutWidget(QWidget):
             main_window.device_errors_handler
         self._modules: Dict[int, ModuleWidget] = {}
         self._parent = main_window
-        self._turned_on_output: MultiplexerOutput = None
+        self._turned_on_output: Optional[MultiplexerOutput] = None
         self._init_ui()
 
     @staticmethod
@@ -229,7 +229,7 @@ class MultiplexerPinoutWidget(QWidget):
         self.layout_for_modules.addStretch(1)
         scroll_area: QScrollArea = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setMinimumHeight(MultiplexerPinoutWidget.SCROLL_AREA_MIN_HEIGHT)
+        scroll_area.setMinimumHeight(self.SCROLL_AREA_MIN_HEIGHT)
         widget = QWidget()
         widget.setLayout(self.layout_for_modules)
         scroll_area.setWidget(widget)
@@ -242,11 +242,11 @@ class MultiplexerPinoutWidget(QWidget):
 
         self.scroll_area: QScrollArea = self._create_widgets_for_multiplexer()
         self.label_no_mux: QLabel = self._create_empty_widget()
-        self.setMinimumWidth(MultiplexerPinoutWidget.MIN_WIDTH)
+        self.setMinimumWidth(self.MIN_WIDTH)
 
         layout = QVBoxLayout()
         layout.addWidget(self.scroll_area)
-        layout.addWidget(self.label_no_mux, alignment=Qt.AlignHCenter)
+        layout.addWidget(self.label_no_mux, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.setLayout(layout)
 
     def _remove_all_modules(self) -> None:
