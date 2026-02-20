@@ -34,6 +34,7 @@ class ParameterWidget(QScrollArea):
 
         language = get_language()
         layout = QVBoxLayout()
+        layout.setSpacing(3)
         self._option_buttons = {}
         for option in available_options:
             button = QRadioButton()
