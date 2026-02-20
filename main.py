@@ -1,24 +1,49 @@
+import ctypes
+import os
 import sys
 from argparse import ArgumentParser, Namespace
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication
-from epcore.product import EyePointProduct
-from window import utils as ut
-from window.eplabwindow import EPLabWindow
-from window.exceptionhook import exception_hook, show_error_window
-from window.logger import set_logger
 
+# Configuring font display at different screen sizes.
+# First, we tell the OS not to interfere
+try:
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+except Exception:
+    pass
 
+# Adjusting the rounding behavior. This fixes the Device Pixel Ratio: 1.0 -> 1.25
+os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+# Additional flags
 QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)  # enable high dpi scaling
-QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)  # use highdpi icons
+QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)  # use high dpi icons
 
+if True:
+    # A trick to fix the flake8 "E402 module level import not at top of file" error
+    from epcore.product import EyePointProduct
+    from window import utils as ut
+    from window.eplabwindow import EPLabWindow
+    from window.exceptionhook import exception_hook, show_error_window
+    from window.logger import set_logger
 
 if getattr(sys, "frozen", False):
     import pyi_splash
     pyi_splash.close()
 
-
 sys.excepthook = exception_hook
+
+
+def increase_font_size_for_larger_view(app: QApplication) -> None:
+    """
+    Forcefully increase the font size by 1 point if the zoom level is greater than 100%.
+    :param app: application.
+    """
+
+    if 1 < app.primaryScreen().devicePixelRatio():
+        font = app.font()
+        font.setPointSizeF(font.pointSize() + 1)
+        app.setFont(font)
 
 
 def launch_eplab(app: QApplication, args: Namespace) -> None:
@@ -44,6 +69,8 @@ if __name__ == "__main__":
     parsed_args = parser.parse_args()
 
     app_ = QApplication(sys.argv)
+    increase_font_size_for_larger_view(app_)
+
     try:
         launch_eplab(app_, parsed_args)
     except Exception:

@@ -11,10 +11,8 @@ from connection_window.utils import get_platform
 from version import Version
 from window import utils as ut
 from window.language import get_language, Language
-from window.scaler import update_scale_of_class
 
 
-@update_scale_of_class
 class AboutWindow(QDialog):
     """
     Class for dialog window to show main information about the application.

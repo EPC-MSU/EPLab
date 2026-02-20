@@ -8,10 +8,8 @@ from PyQt5.QtGui import QIcon, QPixmap, QTransform
 from PyQt5.QtWidgets import QDialog, QGraphicsScene, QHBoxLayout, QPushButton, QStyle, QVBoxLayout
 from window import utils as ut
 from window.boardwidget import convert_pil_image_to_qpixmap
-from window.scaler import update_scale_of_class
 
 
-@update_scale_of_class
 class ImageAdder(QDialog):
     """
     Dialog box for adding a board image.
@@ -175,7 +173,7 @@ class ImageAdder(QDialog):
         """
 
         geometry = qApp.instance().primaryScreen().availableGeometry()
-        available_height = geometry.height() - self.style().pixelMetric(QStyle.PM_TitleBarHeight)
+        available_height = geometry.height() - self.style().pixelMetric(QStyle.PixelMetric.PM_TitleBarHeight)
         available_width = geometry.width()
 
         height = self.INIT_SIZE_AS_PROPORTION_OF_SCREEN * available_height

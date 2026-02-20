@@ -5,12 +5,10 @@ from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout, QSizePolicy
 from window import utils as ut
-from window.scaler import update_scale_of_class
 from .settings import Settings
 from .utils import InvalidParameterValueError, MissingParameterError
 
 
-@update_scale_of_class
 class SettingsWindow(QDialog):
     """
     Class for dialog window with measurement settings.

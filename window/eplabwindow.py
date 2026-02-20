@@ -44,7 +44,6 @@ from .pedalhandler import add_pedal_handler
 from .pinindexwidget import PinIndexWidget
 from .planautotransition import PlanAutoTransition
 from .plancompatibility import PlanCompatibility
-from .scaler import get_scale_factor, update_scale_of_action, update_scale_of_class
 from .scorewrapper import check_difference_not_greater_tolerance, ScoreWrapper
 from .soundplayer import SoundPlayer
 
@@ -53,7 +52,6 @@ logger = logging.getLogger("eplab")
 
 
 @add_pedal_handler
-@update_scale_of_class
 class EPLabWindow(QMainWindow):
     """
     Class for the main window of application.
@@ -248,7 +246,7 @@ class EPLabWindow(QMainWindow):
         to icon. When updating the width, the current screen scale is taken into account.
         """
 
-        scale_factor = get_scale_factor()
+        scale_factor = ut.get_scale_factor()
         for width in ("CRITICAL_WIDTH_FOR_LINUX_EN", "CRITICAL_WIDTH_FOR_LINUX_RU", "CRITICAL_WIDTH_FOR_WINDOWS_EN",
                       "CRITICAL_WIDTH_FOR_WINDOWS_RU", "INIT_HEIGHT", "MIN_WIDTH_IN_LINUX", "MIN_WIDTH_IN_WINDOWS"):
             width_value = getattr(self, width, None)
@@ -522,7 +520,6 @@ class EPLabWindow(QMainWindow):
                 icon = QIcon(os.path.join(ut.DIR_MEDIA, f"unknown_measurer_{measurer.name}.png"))
             action = QAction(icon, device_name, self)
             action.triggered.connect(partial(self.show_device_settings, measurer, device_name))
-            update_scale_of_action(action)
             self.measurers_menu.addAction(action)
 
     def _create_scroll_areas_for_parameters(self, available: Dict[EyePointProduct.Parameter,
@@ -976,7 +973,7 @@ class EPLabWindow(QMainWindow):
         height = self.INIT_HEIGHT
 
         geometry = qApp.instance().primaryScreen().availableGeometry()
-        available_height = geometry.height() - self.style().pixelMetric(QStyle.PM_TitleBarHeight)
+        available_height = geometry.height() - self.style().pixelMetric(QStyle.PixelMetric.PM_TitleBarHeight)
         available_width = geometry.width()
 
         height = min(height, available_height)
