@@ -338,7 +338,8 @@ def show_message(header: str, message: str, additional_info: str = None, detaile
 
 def show_message_with_option(header: str, message: str, option_text: str, additional_info: str = None,
                              icon: QMessageBox.Icon = QMessageBox.Icon.Warning, no_button: bool = False,
-                             cancel_button: bool = False, yes_button: bool = False) -> Tuple[int, bool]:
+                             cancel_button: bool = False, yes_button: bool = False
+                             ) -> Tuple[QMessageBox.ButtonRole, bool]:
     """
     Function shows message box with an additional option.
     :param header: header;

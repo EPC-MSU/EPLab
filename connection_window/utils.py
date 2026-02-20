@@ -250,4 +250,4 @@ def show_help(h10: bool = False) -> None:
         port_format = "com:///dev/ttyx" if get_platform() == "debian" else "com:\\\\.\\COMx"
         info = qApp.translate("connection_window", "Введите значение последовательного порта в формате {}."
                               ).format(port_format)
-    show_message(qApp.translate("MainWindow", "Помощь"), info, icon=QMessageBox.Information)
+    show_message(qApp.translate("MainWindow", "Помощь"), info, icon=QMessageBox.Icon.Information)
