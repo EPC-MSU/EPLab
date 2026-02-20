@@ -38,9 +38,9 @@ class BreakSignaturesSaver(QObject):
 
         super().__init__()
         self._auto_settings: AutoSettings = auto_settings
-        self._current_frequency: MeasurementParameterOption = None
-        self._current_sensitive: MeasurementParameterOption = None
-        self._current_voltage: MeasurementParameterOption = None
+        self._current_frequency: Optional[MeasurementParameterOption] = None
+        self._current_sensitive: Optional[MeasurementParameterOption] = None
+        self._current_voltage: Optional[MeasurementParameterOption] = None
         self._is_running: bool = False
         self._language: Language = get_language()
         self._new_settings_required: bool = False
@@ -158,8 +158,8 @@ class BreakSignaturesSaver(QObject):
                                                          "<li>Разомкните щупы.</li>\n"
                                                          '<li>Нажмите "Да".</li>\n'
                                                          "<li>Дождитесь завершения процедуры.</li>\n</ul>"),
-                                     icon=QMessageBox.Information, yes_button=True, no_button=True)
-            if not result:
+                                     icon=QMessageBox.Icon.Information, yes_button=True, no_button=True)
+            if result == QMessageBox.ButtonRole.AcceptRole:
                 self._request_new_settings()
                 self._start_settings_iteration()
 

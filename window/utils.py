@@ -229,7 +229,7 @@ def show_instruction(*args) -> None:
 @restore_ld_library_path
 def show_message(header: str, message: str, additional_info: str = None, detailed_text: str = None,
                  icon: QMessageBox.Icon = QMessageBox.Icon.Warning, no_button: bool = False,
-                 cancel_button: bool = False, yes_button: bool = False) -> int:
+                 cancel_button: bool = False, yes_button: bool = False) -> QMessageBox.ButtonRole:
     """
     Function shows message box.
     :param header: header;
@@ -245,12 +245,14 @@ def show_message(header: str, message: str, additional_info: str = None, detaile
 
     message_box = create_message_box(header, message, additional_info, detailed_text, icon, no_button, cancel_button,
                                      yes_button)
-    return message_box.exec()
+    message_box.exec()
+    return message_box.buttonRole(message_box.clickedButton())
 
 
 def show_message_with_option(header: str, message: str, option_text: str, additional_info: str = None,
                              icon: QMessageBox.Icon = QMessageBox.Icon.Warning, no_button: bool = False,
-                             cancel_button: bool = False, yes_button: bool = False) -> Tuple[int, bool]:
+                             cancel_button: bool = False, yes_button: bool = False
+                             ) -> Tuple[QMessageBox.ButtonRole, bool]:
     """
     Function shows message box with an additional option.
     :param header: header;
@@ -278,7 +280,9 @@ def show_message_with_option(header: str, message: str, option_text: str, additi
     h_layout.addItem(item_with_ok_button)
 
     layout.addLayout(h_layout, 2, 0, 1, 3, Qt.AlignmentFlag.AlignLeft)
-    return message_box.exec(), check_box_force_open.checkState() == Qt.CheckState.Checked
+    message_box.exec()
+    return (message_box.buttonRole(message_box.clickedButton()),
+            check_box_force_open.checkState() == Qt.CheckState.Checked)
 
 
 def sort_devices_by_usb_numbers(measurers: List[IVMeasurerBase], reverse: bool = False) -> List[IVMeasurerBase]:

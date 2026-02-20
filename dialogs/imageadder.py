@@ -174,7 +174,7 @@ class ImageAdder(QDialog):
         Method moves the window to the desired position and sets the initial dimensions.
         """
 
-        geometry = qApp.instance().desktop().availableGeometry()
+        geometry = qApp.instance().primaryScreen().availableGeometry()
         available_height = geometry.height() - self.style().pixelMetric(QStyle.PM_TitleBarHeight)
         available_width = geometry.width()
 

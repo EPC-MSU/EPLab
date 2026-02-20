@@ -385,7 +385,7 @@ class EPLabWindow(QMainWindow):
             ut.show_message(qApp.translate("t", "Информация"),
                             qApp.translate("t", "Включен автопереход в режиме тестирования по плану. Но в приложении "
                                                 "нет некоторых сигнатур разрыва, поэтому функция автоперехода может "
-                                                "работать некорректно."), icon=QMessageBox.Information)
+                                                "работать некорректно."), icon=QMessageBox.Icon.Information)
 
     def _check_plan_compatibility(self, plan: MeasurementPlan, is_new_plan: bool = False,
                                   filename: Optional[str] = None) -> None:
@@ -905,20 +905,20 @@ class EPLabWindow(QMainWindow):
         selected anything.
         """
 
-        result = 0
+        result = QMessageBox.ButtonRole.AcceptRole
         if self.measurement_plan and self._last_saved_measurement_plan_data != self.measurement_plan.to_json():
             if self._measurement_plan_path.path:
                 main_text = qApp.translate("t", 'Сохранить изменения в "{}"?').format(self._measurement_plan_path.path)
             else:
                 main_text = qApp.translate("t", "Сохранить изменения в файл?")
             text = f"{additional_info} {main_text}" if additional_info else main_text
-            result = ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information,
+            result = ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Icon.Information,
                                      yes_button=True, no_button=True, cancel_button=True)
-            if result == 0:
+            if result == QMessageBox.ButtonRole.AcceptRole:
                 # You need to save the changes to an existing file
                 if self.save_measurement_plan() is None:
-                    result = 2
-        return result in (0, 1)
+                    result = QMessageBox.ButtonRole.RejectRole
+        return result in (QMessageBox.ButtonRole.AcceptRole, QMessageBox.ButtonRole.NoRole)
 
     def _save_last_signatures(self, curves: Dict[str, Optional[IVCurve]]) -> None:
         """
@@ -975,7 +975,7 @@ class EPLabWindow(QMainWindow):
             width = self.CRITICAL_WIDTH_FOR_LINUX_RU
         height = self.INIT_HEIGHT
 
-        geometry = qApp.instance().desktop().availableGeometry()
+        geometry = qApp.instance().primaryScreen().availableGeometry()
         available_height = geometry.height() - self.style().pixelMetric(QStyle.PM_TitleBarHeight)
         available_width = geometry.width()
 
@@ -1362,7 +1362,7 @@ class EPLabWindow(QMainWindow):
             main_text = qApp.translate("t", "Добавление точки приведет к сдвигу нумерации.")
             text = qApp.translate("t", "Добавленная точка будет иметь номер {0}. Номера имеющихся точек, начиная с {0},"
                                        " будут увеличены на 1.").format(pin_index)
-            if self._show_pin_shift_warning(main_text, text) != 0:
+            if self._show_pin_shift_warning(main_text, text) != QMessageBox.ButtonRole.AcceptRole:
                 return False
 
         x, y = (point.x(), point.y()) if point else self.get_default_pin_coordinates()
@@ -1688,7 +1688,7 @@ class EPLabWindow(QMainWindow):
 
         ut.show_message(qApp.translate("t", "Информация"),
                         qApp.translate("t", "Изменен масштаб экрана. Закройте приложение и откройте снова."),
-                        icon=QMessageBox.Information)
+                        icon=QMessageBox.Icon.Information)
 
     @pyqtSlot(bool)
     def hide_curve(self, state: bool) -> None:
@@ -1793,7 +1793,7 @@ class EPLabWindow(QMainWindow):
             pin_index = self.measurement_plan.get_current_index() + 2
             main_text = qApp.translate("t", "Удаление точки приведет к сдвигу нумерации.")
             text = qApp.translate("t", "Номера имеющихся точек, начиная с {}, будут уменьшены на 1.").format(pin_index)
-            if self._show_pin_shift_warning(main_text, text) != 0:
+            if self._show_pin_shift_warning(main_text, text) != QMessageBox.ButtonRole.AcceptRole:
                 return
 
         index = self.measurement_plan.get_current_index()
@@ -1946,7 +1946,7 @@ class EPLabWindow(QMainWindow):
                 text = text_ru + "<br>" + text_en
             else:
                 text = text_en + "<br>" + text_ru
-            ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information)
+            ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Icon.Information)
 
     @pyqtSlot()
     def select_option(self) -> None:

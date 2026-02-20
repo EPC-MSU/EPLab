@@ -120,8 +120,9 @@ class MuxAndPlanWindow(QWidget):
         :return: True if measurements should be continued.
         """
 
-        return not ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Information, yes_button=True,
-                                   no_button=True)
+        result = ut.show_message(qApp.translate("t", "Внимание"), text, icon=QMessageBox.Icon.Information,
+                                 yes_button=True, no_button=True)
+        return result == QMessageBox.ButtonRole.AcceptRole
 
     def _create_bottom_widget(self) -> QWidget:
         """
@@ -218,7 +219,7 @@ class MuxAndPlanWindow(QWidget):
         :return: True if windows are ordered by size and position.
         """
 
-        geometry = qApp.instance().desktop().availableGeometry()
+        geometry = qApp.instance().primaryScreen().availableGeometry()
         height = geometry.height()
         width = geometry.width()
         main_window_pos = QPoint(geometry.x(), geometry.y())
