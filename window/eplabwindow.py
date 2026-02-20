@@ -2017,11 +2017,10 @@ class EPLabWindow(QMainWindow):
         Slot shows settings window.
         """
 
-        settings_window = SettingsWindow(self, self.get_settings(), self.dir_chosen_by_user)
+        settings_window = SettingsWindow(self, self.get_settings())
         settings_window.apply_settings_signal.connect(self.apply_settings)
         settings_window.exec()
         self._auto_settings.write()
-        self.dir_chosen_by_user = settings_window.settings_directory
         self._check_break_signatures_for_auto_transition()
         # Break signatures are only saved when debugging the application
         # self._break_signature_saver.save_break_signatures_if_necessary()

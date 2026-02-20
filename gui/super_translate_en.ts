@@ -31,16 +31,6 @@ shifts the points enumerator</translation>
         <translation>Tolerance</translation>
     </message>
     <message>
-        <location filename="settings.ui" line="220"/>
-        <source>Загрузить настройки</source>
-        <translation>Load settings</translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="248"/>
-        <source>Сохранить настройки</source>
-        <translation>Save settings</translation>
-    </message>
-    <message>
         <location filename="settings.ui" line="298"/>
         <source>Отмена</source>
         <translation>Cancel</translation>

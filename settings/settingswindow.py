@@ -1,12 +1,9 @@
 import copy
 import os
-from platform import system
 from PyQt5 import uic
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
-from PyQt5.QtWidgets import QDialog, QFileDialog, QLayout, QSizePolicy
-from window import utils as ut
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt5.QtWidgets import QDialog, QLayout, QSizePolicy
 from .settings import Settings
-from .utils import InvalidParameterValueError, MissingParameterError
 
 
 class SettingsWindow(QDialog):
@@ -17,49 +14,40 @@ class SettingsWindow(QDialog):
     THRESHOLD_STEP: float = 0.05
     apply_settings_signal: pyqtSignal = pyqtSignal(Settings)
 
-    def __init__(self, main_window, init_settings: Settings, settings_directory: str = None) -> None:
+    def __init__(self, main_window, init_settings: Settings) -> None:
         """
         :param main_window: main window of application;
-        :param init_settings: initial settings of the application;
-        :param settings_directory: directory for settings file.
+        :param init_settings: initial settings of the application.
         """
 
         super().__init__(main_window, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
         self._init_settings: Settings = init_settings
         self._settings: Settings = copy.copy(init_settings)
-        self._settings_directory: str = settings_directory or ut.get_dir_name()
         self._init_ui()
-        self._update_options(self._init_settings)
+        self._set_settings(self._init_settings)
 
-    @property
-    def settings_directory(self) -> str:
-        """
-        :return: the directory in which the configuration file with settings was last saved or opened from.
-        """
-
-        return self._settings_directory
+    def _connect_signals(self) -> None:
+        self.button_cancel.clicked.connect(self.discard_changes)
+        self.button_ok.clicked.connect(self.apply_changes)
+        self.button_tolerance_minus.clicked.connect(self.decrease_tolerance)
+        self.button_tolerance_plus.clicked.connect(self.increase_tolerance)
+        self.check_box_auto_transition.stateChanged.connect(self.update_auto_transition)
+        self.check_box_pin_shift_warning_info.stateChanged.connect(self.update_pin_shift_warning_info)
+        self.spin_box_max_optimal_voltage.valueChanged.connect(self.update_max_optimal_voltage)
+        self.spin_box_tolerance.valueChanged.connect(self.update_tolerance)
 
     def _init_ui(self) -> None:
         dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         uic.loadUi(os.path.join(dir_name, "gui", "settings.ui"), self)
-        self.button_tolerance_minus.clicked.connect(self.decrease_tolerance)
-        self.button_tolerance_plus.clicked.connect(self.increase_tolerance)
-        self.check_box_auto_transition.stateChanged.connect(self.update_auto_transition)
         if self.parent().measurement_plan and self.parent().measurement_plan.multiplexer:
             self.label_auto_transition.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
             self.check_box_auto_transition.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
             self.label_auto_transition.hide()
             self.check_box_auto_transition.hide()
             self.grid_layout.setRowMinimumHeight(1, 0)
-        self.check_box_pin_shift_warning_info.stateChanged.connect(self.update_pin_shift_warning_info)
-        self.spin_box_tolerance.valueChanged.connect(self.update_tolerance)
-        self.spin_box_max_optimal_voltage.valueChanged.connect(self.update_max_optimal_voltage)
 
-        self.button_cancel.clicked.connect(self.discard_changes)
-        self.button_load_settings.clicked.connect(self.open_settings)
-        self.button_ok.clicked.connect(self.apply_changes)
+        self._connect_signals()
         self.button_ok.setDefault(True)
-        self.button_save_settings.clicked.connect(self.save_settings_to_file)
         self.adjustSize()
         self.layout().setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
@@ -77,6 +65,16 @@ class SettingsWindow(QDialog):
 
         self.apply_settings_signal.emit(settings or self._settings)
 
+    def _set_settings(self, settings: Settings) -> None:
+        """
+        :param settings: new settings.
+        """
+
+        self._update_auto_transition(settings.auto_transition)
+        self._update_max_optimal_voltage(settings.max_optimal_voltage)
+        self._update_pin_shift_warning_info(settings.pin_shift_warning_info)
+        self._update_tolerance_in_settings_wnd(settings.tolerance)
+
     def _update_auto_transition(self, auto_transition: bool) -> None:
         """
         :param auto_transition: new value for enabling or disabling auto transition in plan testing mode.
@@ -92,16 +90,6 @@ class SettingsWindow(QDialog):
 
         self.spin_box_max_optimal_voltage.setValue(max_optimal_voltage)
         self._settings.max_optimal_voltage = max_optimal_voltage
-
-    def _update_options(self, settings: Settings) -> None:
-        """
-        :param settings: new settings.
-        """
-
-        self._update_auto_transition(settings.auto_transition)
-        self._update_max_optimal_voltage(settings.max_optimal_voltage)
-        self._update_pin_shift_warning_info(settings.pin_shift_warning_info)
-        self._update_tolerance_in_settings_wnd(settings.tolerance)
 
     def _update_pin_shift_warning_info(self, pin_shift_warning_info: bool) -> None:
         """
@@ -156,57 +144,6 @@ class SettingsWindow(QDialog):
 
         self._update_tolerance_in_settings_wnd(self._get_tolerance_value() + self.THRESHOLD_STEP)
         self._send_settings()
-
-    @pyqtSlot()
-    def open_settings(self) -> None:
-        """
-        Slot loads settings from the configuration file.
-        """
-
-        if system().lower() == "windows":
-            settings_path = QFileDialog.getOpenFileName(self, qApp.translate("settings", "Открыть файл"),
-                                                        self._settings_directory, "Ini file (*.ini);;All Files (*)")[0]
-        else:
-            settings_path = QFileDialog.getOpenFileName(self, qApp.translate("settings", "Открыть файл"),
-                                                        self._settings_directory, "Ini file (*.ini);;All Files (*)",
-                                                        options=QFileDialog.Option.DontUseNativeDialog)[0]
-        if settings_path:
-            try:
-                settings = Settings()
-                settings.set_default_values(**self._settings.get_values())
-                settings.read(path=settings_path)
-            except (InvalidParameterValueError, MissingParameterError) as exc:
-                error_message = qApp.translate("settings", 'Проверьте конфигурационный файл "{}".').format(
-                    settings_path)
-                ut.show_message(qApp.translate("t", "Ошибка"), f"{exc}\n{error_message}")
-                return
-
-            self._settings_directory = os.path.dirname(settings_path)
-            self._settings = settings
-            self._update_options(self._settings)
-            self._send_settings()
-
-    @pyqtSlot()
-    def save_settings_to_file(self) -> None:
-        """
-        Slot saves settings to a configuration file.
-        """
-
-        if system().lower() == "windows":
-            settings_path = QFileDialog.getSaveFileName(self, qApp.translate("settings", "Сохранить файл"),
-                                                        os.path.join(self._settings_directory, "settings.ini"),
-                                                        "Ini file (*.ini);;All Files (*)")[0]
-        else:
-            settings_path = QFileDialog.getSaveFileName(self, qApp.translate("settings", "Сохранить файл"),
-                                                        os.path.join(self._settings_directory, "settings.ini"),
-                                                        "Ini file (*.ini);;All Files (*)",
-                                                        options=QFileDialog.Option.DontUseNativeDialog)[0]
-        if settings_path:
-            self._settings_directory = os.path.dirname(settings_path)
-            if not settings_path.endswith(".ini"):
-                settings_path += ".ini"
-            self._settings.tolerance = self._get_tolerance_value()
-            self._settings.export(path=settings_path)
 
     @pyqtSlot(int)
     def update_auto_transition(self, state: int) -> None:
