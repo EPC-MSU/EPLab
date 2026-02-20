@@ -9,7 +9,7 @@ class PedalHandler(QObject):
     A class for processing signals from a pedal and determining whether the pedal is pressed or released.
     """
 
-    KEYS: List[int] = [Qt.Key_Control, Qt.Key_Shift, Qt.Key_P]
+    KEYS: List[int] = [Qt.Key.Key_Control, Qt.Key.Key_Shift, Qt.Key.Key_P]
     pedal_signal: pyqtSignal = pyqtSignal(bool)
 
     class Button:
@@ -40,9 +40,9 @@ class PedalHandler(QObject):
             :param new_state: Qt state of button.
             """
 
-            if new_state == QKeyEvent.KeyPress:
+            if new_state == QKeyEvent.Type.KeyPress:
                 self._status = True
-            elif new_state == QKeyEvent.KeyRelease:
+            elif new_state == QKeyEvent.Type.KeyRelease:
                 self._status = False
 
     class Status(Enum):
@@ -62,7 +62,7 @@ class PedalHandler(QObject):
 
     def _check_buttons(self) -> None:
         all_pressed = all(button.status for button in self._buttons.values())
-        control_buttons_pressed = all(self._buttons[key].status for key in (Qt.Key_Control, Qt.Key_Shift))
+        control_buttons_pressed = all(self._buttons[key].status for key in (Qt.Key.Key_Control, Qt.Key.Key_Shift))
 
         if control_buttons_pressed and not all_pressed:
             return

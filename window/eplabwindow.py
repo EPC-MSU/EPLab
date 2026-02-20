@@ -620,7 +620,7 @@ class EPLabWindow(QMainWindow):
         """
 
         if settings is None or self._product is None:
-            return EPLabWindow.DEFAULT_COMPARATOR_MIN_VOLTAGE, EPLabWindow.DEFAULT_COMPARATOR_MIN_CURRENT
+            return self.DEFAULT_COMPARATOR_MIN_VOLTAGE, self.DEFAULT_COMPARATOR_MIN_CURRENT
 
         return self._product.adjust_noise_amplitude(settings)
 
@@ -708,7 +708,7 @@ class EPLabWindow(QMainWindow):
         self._iv_window: IVViewer = IVViewer(self.main_widget, grid_color=QColor(255, 255, 255),
                                              back_color=QColor(0, 0, 0), solid_axis_enabled=False,
                                              axis_label_enabled=False, color_for_rest_cursors=QColor(102, 255, 0),
-                                             color_for_selected_cursor=QColor(102, 255, 0))
+                                             color_for_selected_cursor=QColor(102, 255, 0), accuracy=2)
         self._iv_window.setFocusPolicy(Qt.ClickFocus)
         self._iv_window.layout().setContentsMargins(0, 0, 0, 0)
         self._iv_window.plot.default_path_changed.connect(self.set_dir_chosen_by_user)
@@ -720,11 +720,11 @@ class EPLabWindow(QMainWindow):
                                              save_screenshot=qApp.translate("MainWindow", "Сохранить скриншот"))
         self._iv_window.plot.set_path_to_directory(self.dir_chosen_by_user)
         self.current_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Current signature")
-        self.current_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_CURRENT)
+        self.current_curve_plot.set_curve_params(self.COLOR_FOR_CURRENT)
         self.reference_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Reference signature")
-        self.reference_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_REFERENCE)
+        self.reference_curve_plot.set_curve_params(self.COLOR_FOR_REFERENCE)
         self.test_curve_plot: PlotCurve = self._iv_window.plot.add_curve("Test signature")
-        self.test_curve_plot.set_curve_params(EPLabWindow.COLOR_FOR_TEST)
+        self.test_curve_plot.set_curve_params(self.COLOR_FOR_TEST)
 
         v_box_layout = QVBoxLayout()
         v_box_layout.setSpacing(0)
@@ -816,7 +816,7 @@ class EPLabWindow(QMainWindow):
             else:
                 filename = QFileDialog.getOpenFileName(self, qApp.translate("MainWindow", "Открыть план тестирования"),
                                                        self.dir_chosen_by_user, "Board Files (*.json *.uzf)",
-                                                       options=QFileDialog.DontUseNativeDialog)[0]
+                                                       options=QFileDialog.Option.DontUseNativeDialog)[0]
         board = None
         if filename:
             try:
@@ -955,11 +955,11 @@ class EPLabWindow(QMainWindow):
         Method sets hotkeys UP and DOWN for moving to the previous and next pins.
         """
 
-        self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key_Down), self)
-        self._shortcut_down.setContext(Qt.ApplicationShortcut)
+        self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Down), self)
+        self._shortcut_down.setContext(Qt.ShortcutContext.ApplicationShortcut)
         self._shortcut_down.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(False))
-        self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key_Up), self)
-        self._shortcut_up.setContext(Qt.ApplicationShortcut)
+        self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Up), self)
+        self._shortcut_up.setContext(Qt.ShortcutContext.ApplicationShortcut)
         self._shortcut_up.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(True))
 
     def _set_init_position(self) -> None:
@@ -1400,7 +1400,7 @@ class EPLabWindow(QMainWindow):
             else:
                 dir_path = QFileDialog.getExistingDirectory(
                     self, qApp.translate("t", "Выберите папку, в которую будет сохранен отчет"),
-                    self.dir_chosen_by_user, options=QFileDialog.DontUseNativeDialog)
+                    self.dir_chosen_by_user, options=QFileDialog.Option.DontUseNativeDialog)
             is_user_defined_path = True
 
         if dir_path:
@@ -1756,7 +1756,7 @@ class EPLabWindow(QMainWindow):
         else:
             filename = QFileDialog.getOpenFileName(self, qApp.translate("t", "Открыть изображение платы"),
                                                    self.dir_chosen_by_user, "Image Files (*.png *.jpg *.bmp)",
-                                                   options=QFileDialog.DontUseNativeDialog)[0]
+                                                   options=QFileDialog.Option.DontUseNativeDialog)[0]
         if not filename:
             return
 
@@ -1842,7 +1842,7 @@ class EPLabWindow(QMainWindow):
         else:
             filename = QFileDialog.getSaveFileName(self, qApp.translate("MainWindow", "Сохранить скриншот"),
                                                    default_name, "Image (*.png)",
-                                                   options=QFileDialog.DontUseNativeDialog)[0]
+                                                   options=QFileDialog.Option.DontUseNativeDialog)[0]
         if filename:
             if not filename.endswith(".png"):
                 filename += ".png"
@@ -1871,7 +1871,7 @@ class EPLabWindow(QMainWindow):
                 filepath = QFileDialog.getSaveFileName(self,
                                                        qApp.translate("MainWindow", "Сохранить план тестирования"),
                                                        default_path, "UFIV Archived File (*.uzf)",
-                                                       options=QFileDialog.DontUseNativeDialog)[0]
+                                                       options=QFileDialog.Option.DontUseNativeDialog)[0]
             if filepath:
                 self.dir_chosen_by_user = os.path.dirname(filepath)
         else:

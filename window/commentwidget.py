@@ -26,8 +26,8 @@ class CommentTableDelegate(QStyledItemDelegate):
     BORDER_COLOR_OF_SELECTED_CELL: QColor = QColor("#0000CD")
     BORDER_WIDTH_OF_SELECTED_CELL_DISABLED: int = 1
     BORDER_WIDTH_OF_SELECTED_CELL_ENABLED: int = 2
-    PEN_COLOR_DISABLED: QColor = QColor(Qt.gray)
-    PEN_COLOR_ENABLED: QColor = QColor(Qt.black)
+    PEN_COLOR_DISABLED: QColor = QColor(Qt.GlobalColor.gray)
+    PEN_COLOR_ENABLED: QColor = QColor(Qt.GlobalColor.black)
     TEXT_PADDING: int = 2
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex) -> None:
@@ -43,8 +43,8 @@ class CommentTableDelegate(QStyledItemDelegate):
         opt = QStyleOptionViewItem(option)
         self.initStyleOption(opt, index)
 
-        if opt.state & QStyle.State_Selected:
-            if opt.state & QStyle.State_Enabled:
+        if opt.state & QStyle.StateFlag.State_Selected:
+            if opt.state & QStyle.StateFlag.State_Enabled:
                 pen_width = self.BORDER_WIDTH_OF_SELECTED_CELL_ENABLED
                 final_pen_color = self.PEN_COLOR_ENABLED
             else:
@@ -66,7 +66,7 @@ class CommentTableDelegate(QStyledItemDelegate):
             painter.setPen(final_pen_color)
             rect_with_padding = rect_with_inside_border.adjusted(self.TEXT_PADDING, self.TEXT_PADDING,
                                                                  -self.TEXT_PADDING, -self.TEXT_PADDING)
-            painter.drawText(rect_with_padding, Qt.AlignLeft | Qt.AlignVCenter, opt.text)
+            painter.drawText(rect_with_padding, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, opt.text)
         else:
             super().paint(painter, opt, index)
 
@@ -93,10 +93,10 @@ class CommentWidget(TableWidget):
         self.adjustSize()
         self._set_f2_hotkey()
 
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
         self.setItemDelegate(CommentTableDelegate())
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
     def _add_row(self, index: int, comment: Optional[str] = None) -> None:
         """
@@ -160,8 +160,8 @@ class CommentWidget(TableWidget):
         Method sets the F2 hotkey for editing comments.
         """
 
-        self._shortcut: QShortcut = QShortcut(QKeySequence(Qt.Key_F2), self)
-        self._shortcut.setContext(Qt.ApplicationShortcut)
+        self._shortcut: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_F2), self)
+        self._shortcut.setContext(Qt.ShortcutContext.ApplicationShortcut)
         self._shortcut.activated.connect(self._set_focus_on_current_item)
 
     @pyqtSlot()

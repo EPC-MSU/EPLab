@@ -32,4 +32,4 @@ def show_error_window(app: QApplication, exc_type: Exception, exc_value: Excepti
     """
 
     exception_hook(exc_type, exc_value, exc_traceback)
-    app.exec_()
+    app.exec()

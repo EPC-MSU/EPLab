@@ -11,7 +11,7 @@ def change_item_state(item: QTableWidgetItem, read_only: bool) -> None:
     state.
     """
 
-    item.setFlags(item.flags() ^ Qt.ItemIsEditable if read_only else item.flags() | Qt.ItemIsEditable)
+    item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable if read_only else item.flags() | Qt.ItemFlag.ItemIsEditable)
 
 
 def disconnect_item_signals(func: Callable[..., Any]):

@@ -4,7 +4,7 @@ File with the language class.
 
 import os
 from enum import auto, Enum
-from typing import Optional, Tuple
+from typing import Generator, Optional, Tuple
 from PyQt5.QtCore import QCoreApplication as qApp
 
 
@@ -50,7 +50,7 @@ class Translator:
         return None
 
     @classmethod
-    def get_languages(cls) -> Tuple[Language, str]:
+    def get_languages(cls) -> Generator[Tuple[Language, str], None, None]:
         """
         :return: names and values of languages.
         """

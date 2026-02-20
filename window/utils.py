@@ -48,7 +48,7 @@ def clear_layout(layout: QLayout) -> None:
 
 
 def create_message_box(header: str, message: str, additional_info: str = None, detailed_info: str = None,
-                       icon: QMessageBox.Icon = QMessageBox.Warning, no_button: bool = False,
+                       icon: QMessageBox.Icon = QMessageBox.Icon.Warning, no_button: bool = False,
                        cancel_button: bool = False, yes_button: bool = False) -> QMessageBox:
     """
     Function creates message box.
@@ -67,21 +67,21 @@ def create_message_box(header: str, message: str, additional_info: str = None, d
     message_box.setWindowTitle(header)
     message_box.setWindowIcon(QIcon(os.path.join(DIR_MEDIA, "icon.png")))
     message_box.setIcon(icon)
-    message_box.setTextFormat(Qt.RichText)
-    message_box.setTextInteractionFlags(Qt.TextBrowserInteraction)
+    message_box.setTextFormat(Qt.TextFormat.RichText)
+    message_box.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
     message_box.setText(message)
     if additional_info:
         message_box.setInformativeText(additional_info)
     if detailed_info:
         message_box.setDetailedText(detailed_info)
     if yes_button:
-        message_box.addButton(qApp.translate("t", "Да"), QMessageBox.AcceptRole)
+        message_box.addButton(qApp.translate("t", "Да"), QMessageBox.ButtonRole.AcceptRole)
     else:
         message_box.addButton("OK", QMessageBox.AcceptRole)
     if no_button:
-        message_box.addButton(qApp.translate("t", "Нет"), QMessageBox.NoRole)
+        message_box.addButton(qApp.translate("t", "Нет"), QMessageBox.ButtonRole.NoRole)
     if cancel_button:
-        message_box.addButton(qApp.translate("t", "Отмена"), QMessageBox.RejectRole)
+        message_box.addButton(qApp.translate("t", "Отмена"), QMessageBox.ButtonRole.RejectRole)
     return message_box
 
 
@@ -228,8 +228,8 @@ def show_instruction(*args) -> None:
 
 @restore_ld_library_path
 def show_message(header: str, message: str, additional_info: str = None, detailed_text: str = None,
-                 icon: QMessageBox.Icon = QMessageBox.Warning, no_button: bool = False, cancel_button: bool = False,
-                 yes_button: bool = False) -> int:
+                 icon: QMessageBox.Icon = QMessageBox.Icon.Warning, no_button: bool = False,
+                 cancel_button: bool = False, yes_button: bool = False) -> int:
     """
     Function shows message box.
     :param header: header;
@@ -249,7 +249,7 @@ def show_message(header: str, message: str, additional_info: str = None, detaile
 
 
 def show_message_with_option(header: str, message: str, option_text: str, additional_info: str = None,
-                             icon: QMessageBox.Icon = QMessageBox.Warning, no_button: bool = False,
+                             icon: QMessageBox.Icon = QMessageBox.Icon.Warning, no_button: bool = False,
                              cancel_button: bool = False, yes_button: bool = False) -> Tuple[int, bool]:
     """
     Function shows message box with an additional option.
@@ -277,8 +277,8 @@ def show_message_with_option(header: str, message: str, option_text: str, additi
     h_layout.addStretch(1)
     h_layout.addItem(item_with_ok_button)
 
-    layout.addLayout(h_layout, 2, 0, 1, 3, Qt.AlignLeft)
-    return message_box.exec_(), check_box_force_open.checkState() == Qt.Checked
+    layout.addLayout(h_layout, 2, 0, 1, 3, Qt.AlignmentFlag.AlignLeft)
+    return message_box.exec(), check_box_force_open.checkState() == Qt.CheckState.Checked
 
 
 def sort_devices_by_usb_numbers(measurers: List[IVMeasurerBase], reverse: bool = False) -> List[IVMeasurerBase]:

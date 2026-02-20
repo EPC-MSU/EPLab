@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, Generator, List, Optional
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QEvent, QObject, Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QRadioButton, QScrollArea, QVBoxLayout, QWidget
@@ -50,7 +50,7 @@ class ParameterWidget(QScrollArea):
         return widget
 
     @property
-    def widgets(self) -> QRadioButton:
+    def widgets(self) -> Generator[QRadioButton, None, None]:
         for button in self._option_buttons.values():
             yield button
 

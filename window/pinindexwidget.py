@@ -18,7 +18,7 @@ class PinIndexWidget(QLineEdit):
         """
 
         super().__init__(parent)
-        self._index: int = None
+        self._index: Optional[int] = None
         self.setValidator(QRegExpValidator(QRegExp(r"\d+")))
         self.setFixedWidth(PinIndexWidget.WIDTH)
 
