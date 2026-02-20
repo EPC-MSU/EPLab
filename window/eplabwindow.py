@@ -724,10 +724,12 @@ class EPLabWindow(QMainWindow):
         self.test_curve_plot.set_curve_params(self.COLOR_FOR_TEST)
 
         v_box_layout = QVBoxLayout()
+        v_box_layout.setContentsMargins(0, 0, 0, 0)
         v_box_layout.setSpacing(0)
         v_box_layout.addWidget(self._iv_window)
         v_box_layout.addWidget(self.low_settings_panel)
         h_box_layout = QHBoxLayout(self.main_widget)
+        h_box_layout.setContentsMargins(0, 0, 0, 0)
         h_box_layout.addLayout(v_box_layout)
 
         self.connection_action.triggered.connect(self.connect_or_disconnect)
