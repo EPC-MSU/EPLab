@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1207</width>
-    <height>551</height>
+    <height>485</height>
    </rect>
   </property>
   <property name="focusPolicy">
@@ -26,14 +26,14 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>94</width>
-     <height>109</height>
+     <width>96</width>
+     <height>96</height>
     </size>
    </property>
    <property name="maximumSize">
     <size>
      <width>524287</width>
-     <height>524287</height>
+     <height>96</height>
     </size>
    </property>
    <property name="focusPolicy">
@@ -53,6 +53,21 @@
      <enum>Qt::ClickFocus</enum>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_5">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
      <item alignment="Qt::AlignRight">
       <widget class="QLabel" name="score_label">
        <property name="minimumSize">
@@ -67,6 +82,9 @@
          <height>100</height>
         </size>
        </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
        <property name="text">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&lt;span style=&quot; font-family:'Courier,monospace'; font-size:48pt; color:#73d216;&quot;&gt;0%&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -75,6 +93,9 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
+       </property>
+       <property name="indent">
+        <number>0</number>
        </property>
       </widget>
      </item>
