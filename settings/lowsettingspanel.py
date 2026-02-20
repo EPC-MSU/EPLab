@@ -1,6 +1,6 @@
 from typing import Dict, Generator, Tuple
 from PyQt5.QtCore import QCoreApplication as qApp
-from PyQt5.QtWidgets import QGridLayout, QLabel, QToolBar, QWidget
+from PyQt5.QtWidgets import QGridLayout, QLabel, QSizePolicy, QToolBar, QWidget
 from .legendwidget import LegendWidget
 
 
@@ -43,6 +43,7 @@ class LowSettingsPanel(QWidget):
                 tool_bar.setStyleSheet("background-color: black; color: white; spacing: 10;")
                 tool_bar.addWidget(label)
                 tool_bar.setContentsMargins(0, 0, 0, 0)
+                tool_bar.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
                 self.grid_layout.addWidget(tool_bar, row, column)
 
     def _init_ui(self) -> None:
