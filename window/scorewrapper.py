@@ -51,7 +51,7 @@ class ScoreWrapper:
         font.setFamily(self._font_family)
         font.setPointSize(self.FONT_SIZE)
         font_metrics = QFontMetrics(font)
-        text_width = font_metrics.horizontalAdvance("100.0%")
+        text_width = int(round(1.01 * font_metrics.horizontalAdvance("100.0%")))
         self._label.setMinimumWidth(text_width)
 
     def get_friendly_score(self) -> str:
