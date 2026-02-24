@@ -6,9 +6,9 @@ import gc
 import os
 from typing import Optional, Tuple, Union
 from PIL import Image
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QObject, QPoint, QPointF, QRect,
-                          QRectF, Qt, QTimer)
-from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QPixmap, QResizeEvent, QWheelEvent
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QByteArray, QCoreApplication as qApp, QEvent, QObject, QPoint, QPointF,
+                          QRect, QRectF, Qt, QTimer)
+from PyQt5.QtGui import QIcon, QImage, QKeyEvent, QMoveEvent, QPixmap, QResizeEvent, QWheelEvent
 from PyQt5.QtWidgets import QGraphicsScene, QVBoxLayout, QWidget
 from boardview.BoardViewWidget import BoardView, GraphicsManualPinItem
 from epcore.measurementmanager import MeasurementPlan
@@ -49,6 +49,7 @@ class BoardWidget(QWidget):
     HEIGHT: int = 600
     WIDTH: int = 600
     current_pin_signal: pyqtSignal = pyqtSignal(int, bool)
+    geometry_changed: pyqtSignal = pyqtSignal(QByteArray)
 
     def __init__(self, main_window) -> None:
         """
@@ -242,6 +243,15 @@ class BoardWidget(QWidget):
         point = self._scene.mapToScene(int(width / 2), int(height / 2))
         return point.x(), point.y()
 
+    def moveEvent(self, event: QMoveEvent) -> None:
+        """
+        :param event: move event.
+        """
+
+        if self._board_pixmap:
+            self.geometry_changed.emit(self.saveGeometry())
+        super().moveEvent(event)
+
     def open_board_image(self) -> None:
         if not self.measurement_plan.image:
             ut.show_message(qApp.translate("t", "Ошибка"),
@@ -274,6 +284,7 @@ class BoardWidget(QWidget):
         super().resizeEvent(event)
         if self._board_pixmap:
             self._timer.start()
+            self.geometry_changed.emit(self.saveGeometry())
 
     def select_pin_on_scene(self, index: int, pin_centering: bool = True) -> None:
         """

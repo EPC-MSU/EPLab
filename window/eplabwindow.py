@@ -10,7 +10,8 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator, \
+    QByteArray
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeySequence, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QStyle,
                              QVBoxLayout, QWidget)
@@ -687,6 +688,7 @@ class EPLabWindow(QMainWindow):
 
         self._board_window: BoardWidget = BoardWidget(self)
         self._board_window.current_pin_signal.connect(self.go_to_selected_pin)
+        self._board_window.geometry_changed.connect(self.save_board_widget_geometry)
         self._parameters_widgets: Dict[EyePointProduct.Parameter, ParameterWidget] = dict()
         self._player: SoundPlayer = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
@@ -963,6 +965,12 @@ class EPLabWindow(QMainWindow):
 
         self._update_tolerance(self._auto_settings.tolerance)
 
+        if self._auto_settings.board_window_geometry:
+            try:
+                self._board_window.restoreGeometry(self._auto_settings.board_window_geometry)
+            except Exception as exc:
+                logger.error("Unable to restore window geometry with board photo: %s", exc)
+
     def _set_default_geometry(self) -> None:
         """
         Method moves the window to the desired position and sets the initial dimensions.
@@ -1005,7 +1013,8 @@ class EPLabWindow(QMainWindow):
 
         try:
             self.restoreGeometry(self._auto_settings.main_window_geometry)
-        except Exception:
+        except Exception as exc:
+            logger.error("Unable to restore main window geometry: %s", exc)
             self._set_default_geometry()
 
     def _set_msystem_settings(self, settings: MeasurementSettings) -> None:
@@ -1823,6 +1832,14 @@ class EPLabWindow(QMainWindow):
             tool_bar.setToolButtonStyle(style)
 
         super().resizeEvent(event)
+
+    @pyqtSlot(QByteArray)
+    def save_board_widget_geometry(self, geometry: QByteArray) -> None:
+        """
+        :param geometry: new window geometry with a photo of the board.
+        """
+
+        self._auto_settings.save_param(board_window_geometry=geometry)
 
     @pyqtSlot()
     def save_image(self) -> None:

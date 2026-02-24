@@ -1,27 +1,11 @@
-import locale
-import os
 from typing import Any, Callable, Dict, Optional
 from PyQt5.QtCore import QCoreApplication as qApp, QSettings
 from epcore.elements import MeasurementSettings
 from epcore.product import EyePointProduct
-from window.language import Language, Translator
+from window.language import Language
 from window.utils import get_user_documents_path
 from . import utils as ut
 from .settingshandler import SettingsHandler
-
-
-def get_default_language() -> Language:
-    """
-    Method automatically determines the appropriate language based on the system locale. This method added at
-    ticket #94289.
-    :return: default language for the system.
-    """
-
-    code = locale.getdefaultlocale()[0]
-    if code in ("ba_RU", "be", "be_BY", "ce", "ce_RU", "kk", "kk_KZ", "ru", "ru_BY", "ru_KG", "ru_KZ", "ru_MD", "ru_RU",
-                "ru_UA", "sah_RU", "tt_RU"):
-        return Language.RU
-    return Language.EN
 
 
 def save_settings(func: Callable[..., Any]):
@@ -48,7 +32,8 @@ class AutoSettings(SettingsHandler):
     sensitive: str = None
     voltage: str = None
     auto_transition: bool = False
-    language: Language = get_default_language()
+    board_window_geometry = None
+    language: Language = ut.get_default_language()
     last_used_dir: str = get_user_documents_path()
     main_window_geometry = None
     max_optimal_voltage: float = 12
@@ -77,9 +62,9 @@ class AutoSettings(SettingsHandler):
         :param settings: object from which to read the basic application settings.
         """
 
-        params = {"frequency": {"convert": check_none},
-                  "sensitive": {"convert": check_none},
-                  "voltage": {"convert": check_none}}
+        params = {"frequency": {"convert": ut.check_none},
+                  "sensitive": {"convert": ut.check_none},
+                  "voltage": {"convert": ut.check_none}}
         settings.beginGroup("MeasurementSettings")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
@@ -89,8 +74,8 @@ class AutoSettings(SettingsHandler):
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
         params = {"auto_transition": {"convert": ut.to_bool},
-                  "language": {"convert": get_language_from_str},
-                  "last_used_dir": {"convert": get_dir_path_from_str},
+                  "language": {"convert": ut.get_language_from_str},
+                  "last_used_dir": {"convert": ut.get_dir_path_from_str},
                   "pin_shift_warning_info": {"convert": ut.to_bool},
                   "sound": {"convert": ut.to_bool},
                   "tolerance": {"convert": float}}
@@ -98,10 +83,10 @@ class AutoSettings(SettingsHandler):
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
 
-        params = {"measurer_1_port": {"convert": check_none},
-                  "measurer_2_port": {"convert": check_none},
-                  "mux_port": {"convert": check_none},
-                  "product_name": {"convert": check_none}}
+        params = {"measurer_1_port": {"convert": ut.check_none},
+                  "measurer_2_port": {"convert": ut.check_none},
+                  "mux_port": {"convert": ut.check_none},
+                  "product_name": {"convert": ut.check_none}}
         settings.beginGroup("Connection")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
@@ -111,7 +96,8 @@ class AutoSettings(SettingsHandler):
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
 
-        params = {"main_window_geometry": {}}
+        params = {"main_window_geometry": {"convert": ut.convert_value_from_qsettings_to_geometry},
+                  "board_window_geometry": {"convert": ut.convert_value_from_qsettings_to_geometry}}
         settings.beginGroup("Window")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
@@ -134,7 +120,7 @@ class AutoSettings(SettingsHandler):
         settings.endGroup()
 
         params = {"auto_transition": {},
-                  "language": {"convert": convert_language_to_str},
+                  "language": {"convert": ut.convert_language_to_str},
                   "last_used_dir": {"convert": str},
                   "pin_shift_warning_info": {},
                   "sound": {},
@@ -156,7 +142,8 @@ class AutoSettings(SettingsHandler):
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 
-        params = {"main_window_geometry": {}}
+        params = {"main_window_geometry": {"convert": ut.convert_geometry_to_value_for_qsettings},
+                  "board_window_geometry": {"convert": ut.convert_geometry_to_value_for_qsettings}}
         settings.beginGroup("Window")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
@@ -229,38 +216,3 @@ class AutoSettings(SettingsHandler):
                                                                 " корректность названия.").format(name))
 
             setattr(self, name, value)
-
-
-def check_none(value: str) -> Optional[str]:
-    return None if value and value.lower() == "none" else str(value)
-
-
-def convert_language_to_str(language: Language) -> str:
-    """
-    :param language: language.
-    :return: language value in string format.
-    """
-
-    return str(Translator.get_language_name(language))
-
-
-def get_dir_path_from_str(value: Optional[str]) -> str:
-    """
-    :param value: expected path to the folder.
-    :return: path to directory.
-    """
-
-    if value is None or not os.path.isdir(value):
-        return get_user_documents_path()
-
-    return value
-
-
-def get_language_from_str(value: str) -> Language:
-    """
-    :param value: language value in string format.
-    :return: language.
-    """
-
-    language = Translator.get_language_value(value)
-    return get_default_language() if language is None else language
