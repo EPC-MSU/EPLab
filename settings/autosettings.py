@@ -57,6 +57,7 @@ class AutoSettings(SettingsHandler):
     pin_shift_warning_info: bool = True
     product_name: str = None
     sound: bool = False
+    tolerance: float = 0.15
 
     def _read(self, settings: QSettings) -> None:
         """
@@ -78,7 +79,8 @@ class AutoSettings(SettingsHandler):
                   "language": {"convert": get_language_from_str},
                   "last_used_dir": {"convert": get_dir_path_from_str},
                   "pin_shift_warning_info": {"convert": ut.to_bool},
-                  "sound": {"convert": ut.to_bool}}
+                  "sound": {"convert": ut.to_bool},
+                  "tolerance": {"convert": float}}
         settings.beginGroup("Main")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
@@ -108,11 +110,12 @@ class AutoSettings(SettingsHandler):
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 
-        params = {"auto_transition": {"convert": str},
+        params = {"auto_transition": {},
                   "language": {"convert": convert_language_to_str},
                   "last_used_dir": {"convert": str},
-                  "pin_shift_warning_info": {"convert": str},
-                  "sound": {}}
+                  "pin_shift_warning_info": {},
+                  "sound": {},
+                  "tolerance": {"convert": ut.float_to_str}}
         settings.beginGroup("Main")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()

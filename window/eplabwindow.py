@@ -680,13 +680,6 @@ class EPLabWindow(QMainWindow):
             self._disconnect_devices()
             self._connection_checker.run_check()
 
-    def _init_tolerance(self) -> None:
-        """
-        Method initializes the initial value of the tolerance.
-        """
-
-        self._update_tolerance(self._score_wrapper.tolerance)
-
     def _init_ui(self) -> None:
         loadUi(os.path.join(os.path.dirname(ut.DIR_MEDIA), "gui", "mainwindow.ui"), self)
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
@@ -955,6 +948,8 @@ class EPLabWindow(QMainWindow):
         if self._auto_settings.sound:
             self.sound_enabled_action.toggle()
 
+        self._update_tolerance(self._auto_settings.tolerance)
+
     def _set_hotkeys_for_moving_through_pins(self) -> None:
         """
         Method sets hotkeys UP and DOWN for moving to the previous and next pins.
@@ -1068,7 +1063,6 @@ class EPLabWindow(QMainWindow):
         self._comment_widget.update_info()
         self._add_callbacks_to_measurement_plan()
         self._switch_work_mode(WorkMode.COMPARE)
-        self._init_tolerance()
 
         with self._device_errors_handler:
             self._trigger_measurements()
@@ -1257,18 +1251,11 @@ class EPLabWindow(QMainWindow):
         :param new_settings: new settings.
         """
 
-        self._switch_work_mode(new_settings.work_mode)
-        measurement_settings = new_settings.get_measurement_settings()
-        options = self._product.settings_to_options(measurement_settings)
-        self._set_options_to_ui(options)
-        self._set_msystem_settings(measurement_settings)
-        self.hide_curve_a_action.setChecked(new_settings.hide_curve_a)
-        self.hide_curve_b_action.setChecked(new_settings.hide_curve_b)
-        self.sound_enabled_action.setChecked(new_settings.sound_enabled)
-        self._auto_settings.auto_transition = new_settings.auto_transition
-        self._auto_settings.max_optimal_voltage = new_settings.max_optimal_voltage
-        self._auto_settings.pin_shift_warning_info = new_settings.pin_shift_warning_info
-        self._update_tolerance(new_settings.tolerance)
+        self._auto_settings.save_param(auto_transition=new_settings.auto_transition,
+                                       max_optimal_voltage=new_settings.max_optimal_voltage,
+                                       pin_shift_warning_info=new_settings.pin_shift_warning_info,
+                                       tolerance=new_settings.tolerance)
+        self._update_tolerance(self._auto_settings.tolerance)
 
     @pyqtSlot(str)
     def change_window_title(self, measurement_plan_name: str) -> None:
