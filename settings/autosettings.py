@@ -50,6 +50,7 @@ class AutoSettings(SettingsHandler):
     auto_transition: bool = False
     language: Language = get_default_language()
     last_used_dir: str = get_user_documents_path()
+    main_window_geometry = None
     max_optimal_voltage: float = 12
     measurer_1_port: str = None
     measurer_2_port: str = None
@@ -93,6 +94,11 @@ class AutoSettings(SettingsHandler):
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
 
+        params = {"main_window_geometry": {}}
+        settings.beginGroup("Window")
+        self._read_parameters_from_settings(settings, params)
+        settings.endGroup()
+
     def _write(self, settings: QSettings) -> None:
         """
         :param settings: object in which to write the basic application settings.
@@ -125,6 +131,11 @@ class AutoSettings(SettingsHandler):
                   "mux_port": {"convert": str},
                   "product_name": {"convert": str}}
         settings.beginGroup("Connection")
+        self._write_parameters_to_settings(settings, params)
+        settings.endGroup()
+
+        params = {"main_window_geometry": {}}
+        settings.beginGroup("Window")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 

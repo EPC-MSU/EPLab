@@ -94,7 +94,7 @@ class SettingsHandler(QObject):
         """
 
         for parameter_name, parameter_data in parameters.items():
-            convert_function = parameter_data.get("convert", str)
+            convert_function = parameter_data.get("convert", None)
             required = parameter_data.get("required", False)
             default = self._get_default_value(parameter_name)
             value = ut.get_parameter(settings, parameter_name, convert=convert_function, required=required,

@@ -119,7 +119,7 @@ class EPLabWindow(QMainWindow):
         self._load_translation(english)
         self._init_ui()
         self._adjust_critical_width()
-        self._set_init_position()
+        self._set_init_geometry()
         self._connect_scale_change_signal()
         self.measurers_connected.connect(self.handle_connection)
         self._connection_checker: ConnectionChecker = ConnectionChecker(self._auto_settings)
@@ -950,28 +950,14 @@ class EPLabWindow(QMainWindow):
 
         self._update_tolerance(self._auto_settings.tolerance)
 
-    def _set_hotkeys_for_moving_through_pins(self) -> None:
-        """
-        Method sets hotkeys UP and DOWN for moving to the previous and next pins.
-        """
-
-        self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Down), self)
-        self._shortcut_down.setContext(Qt.ShortcutContext.ApplicationShortcut)
-        self._shortcut_down.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(False))
-        self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Up), self)
-        self._shortcut_up.setContext(Qt.ShortcutContext.ApplicationShortcut)
-        self._shortcut_up.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(True))
-
-    def _set_init_position(self) -> None:
+    def _set_default_geometry(self) -> None:
         """
         Method moves the window to the desired position and sets the initial dimensions.
         """
 
         if system().lower() == "windows":
-            self.setMinimumWidth(self.MIN_WIDTH_IN_WINDOWS)
             width = self.CRITICAL_WIDTH_FOR_WINDOWS_RU
         else:
-            self.setMinimumWidth(self.MIN_WIDTH_IN_LINUX)
             width = self.CRITICAL_WIDTH_FOR_LINUX_RU
         height = self.INIT_HEIGHT
 
@@ -985,6 +971,30 @@ class EPLabWindow(QMainWindow):
         pos_y = int(round(geometry.y() + (available_height - height) / 2))
         self.move(pos_x, pos_y)
         self.resize(width, height)
+
+    def _set_hotkeys_for_moving_through_pins(self) -> None:
+        """
+        Method sets hotkeys UP and DOWN for moving to the previous and next pins.
+        """
+
+        self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Down), self)
+        self._shortcut_down.setContext(Qt.ShortcutContext.ApplicationShortcut)
+        self._shortcut_down.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(False))
+        self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Up), self)
+        self._shortcut_up.setContext(Qt.ShortcutContext.ApplicationShortcut)
+        self._shortcut_up.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(True))
+
+    def _set_init_geometry(self) -> None:
+        if system().lower() == "windows":
+            self.setMinimumWidth(self.MIN_WIDTH_IN_WINDOWS)
+        else:
+            self.setMinimumWidth(self.MIN_WIDTH_IN_LINUX)
+
+        try:
+            self.restoreGeometry(self._auto_settings.main_window_geometry)
+        except Exception as exc:
+            print(exc)
+            self._set_default_geometry()
 
     def _set_msystem_settings(self, settings: MeasurementSettings) -> None:
         """
@@ -1294,6 +1304,9 @@ class EPLabWindow(QMainWindow):
         if self._report_generation_thread:
             self._report_generation_thread.stop_thread()
             self._report_generation_thread.wait()
+
+        self._auto_settings.save_param(main_window_geometry=self.saveGeometry())
+        super().closeEvent(event)
 
     def connect_devices(self, uri_1: Optional[str] = None, uri_2: Optional[str] = None,
                         mux_uri: str = None, product_name: Optional[cw.ProductName] = None) -> None:
