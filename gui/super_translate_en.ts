@@ -814,6 +814,11 @@ Signature analyzer S2</translation>
 <context>
     <name>settings</name>
     <message>
+        <location filename="../settings/autosettings.py" line="208"/>
+        <source>Настройку &quot;{}&quot; нельзя сохранить. Пожалуйста, проверьте корректность названия.</source>
+        <translation>Setting &quot;{}&quot; cannot be saved. Please check the name and try again.</translation>
+    </message>
+    <message>
         <location filename="../settings/lowsettingspanel.py" line="23"/>
         <source>Эталон</source>
         <translation>Reference</translation>

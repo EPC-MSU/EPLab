@@ -1,7 +1,7 @@
 import locale
 import os
 from typing import Any, Callable, Dict, Optional
-from PyQt5.QtCore import QSettings
+from PyQt5.QtCore import QCoreApplication as qApp, QSettings
 from epcore.elements import MeasurementSettings
 from epcore.product import EyePointProduct
 from window.language import Language, Translator
@@ -56,6 +56,7 @@ class AutoSettings(SettingsHandler):
     mux_port: str = None
     pin_shift_warning_info: bool = True
     product_name: str = None
+    sound: bool = False
 
     def _read(self, settings: QSettings) -> None:
         """
@@ -76,7 +77,8 @@ class AutoSettings(SettingsHandler):
         params = {"auto_transition": {"convert": ut.to_bool},
                   "language": {"convert": get_language_from_str},
                   "last_used_dir": {"convert": get_dir_path_from_str},
-                  "pin_shift_warning_info": {"convert": ut.to_bool}}
+                  "pin_shift_warning_info": {"convert": ut.to_bool},
+                  "sound": {"convert": ut.to_bool}}
         settings.beginGroup("Main")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
@@ -109,7 +111,8 @@ class AutoSettings(SettingsHandler):
         params = {"auto_transition": {"convert": str},
                   "language": {"convert": convert_language_to_str},
                   "last_used_dir": {"convert": str},
-                  "pin_shift_warning_info": {"convert": str}}
+                  "pin_shift_warning_info": {"convert": str},
+                  "sound": {}}
         settings.beginGroup("Main")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
@@ -169,22 +172,6 @@ class AutoSettings(SettingsHandler):
         self.product_name = product_name
 
     @save_settings
-    def save_language(self, language: Language) -> None:
-        """
-        :param language: new language for software.
-        """
-
-        self.language = language if language is not None else Language.EN
-
-    @save_settings
-    def save_last_used_dir(self, dir_path: str) -> None:
-        """
-        :param dir_path: path to the last directory selected by the user.
-        """
-
-        self.last_used_dir = dir_path
-
-    @save_settings
     def save_measurement_settings(self, options: Dict[EyePointProduct.Parameter, str]) -> None:
         """
         :param options: dictionary with new measurement settings.
@@ -195,13 +182,17 @@ class AutoSettings(SettingsHandler):
         self.voltage = options[EyePointProduct.Parameter.voltage]
 
     @save_settings
-    def save_pin_shift_warning_info(self, pin_shift_warning_info: bool) -> None:
+    def save_param(self, **kwargs) -> None:
         """
-        :param pin_shift_warning_info: if True, then automatically during testing the transition to the next pin will
-        be carried out.
+        :param kwargs: kwarg parameters whose new values should be saved.
         """
 
-        self.pin_shift_warning_info = bool(pin_shift_warning_info)
+        for name, value in kwargs.items():
+            if not hasattr(self, name):
+                raise AttributeError(qApp.translate("settings", 'Настройку "{}" нельзя сохранить. Пожалуйста, проверьте'
+                                                                " корректность названия.").format(name))
+
+            setattr(self, name, value)
 
 
 def check_none(value: str) -> Optional[str]:

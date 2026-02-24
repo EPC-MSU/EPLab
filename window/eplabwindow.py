@@ -76,7 +76,7 @@ class EPLabWindow(QMainWindow):
     work_mode_changed: pyqtSignal = pyqtSignal(WorkMode)
 
     def __init__(self, product: EyePointProduct, uri_1: Optional[str] = None, uri_2: Optional[str] = None,
-                 english: Optional[bool] = None, path: str = None) -> None:
+                 english: Optional[bool] = None, path: Optional[str] = None) -> None:
         """
         :param product: product;
         :param uri_1: URI for the first IV-measurer;
@@ -132,6 +132,7 @@ class EPLabWindow(QMainWindow):
                                                                             self._break_signature_saver.DIR_PATH)
         self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin, Qt.DirectConnection)
         self._plan_auto_transition.save_pin_signal.connect(self.save_pin, Qt.DirectConnection)
+        self._set_auto_settings_to_ui()
 
         if uri_1 is None and uri_2 is None:
             self._connection_checker.run_check()
@@ -169,7 +170,8 @@ class EPLabWindow(QMainWindow):
         """
 
         if os.path.exists(path):
-            self._auto_settings.save_last_used_dir(os.path.dirname(path) if not os.path.isdir(path) else path)
+            dir_path = os.path.dirname(path) if not os.path.isdir(path) else path
+            self._auto_settings.save_param(last_used_dir=dir_path)
             self._iv_window.plot.set_path_to_directory(self._auto_settings.last_used_dir)
 
     @property
@@ -949,6 +951,10 @@ class EPLabWindow(QMainWindow):
             settings = self._msystem.get_settings()
             self._compare_measurement = Measurement(settings=settings, ivc=curve)
 
+    def _set_auto_settings_to_ui(self) -> None:
+        if self._auto_settings.sound:
+            self.sound_enabled_action.toggle()
+
     def _set_hotkeys_for_moving_through_pins(self) -> None:
         """
         Method sets hotkeys UP and DOWN for moving to the previous and next pins.
@@ -1082,7 +1088,7 @@ class EPLabWindow(QMainWindow):
                                                              qApp.translate("t", "Не показывать снова"), text,
                                                              cancel_button=True)
         if not_show_again:
-            self._auto_settings.save_pin_shift_warning_info(False)
+            self._auto_settings.save_param(pin_shift_warning_info=False)
         return result
 
     @pyqtSlot(WorkMode)
@@ -1441,6 +1447,7 @@ class EPLabWindow(QMainWindow):
         icon_path = os.path.join(ut.DIR_MEDIA, icon_name)
         self.sound_enabled_action.setIcon(QIcon(icon_path))
         self._player.set_mute(not state)
+        self._auto_settings.save_param(sound=state)
 
     def enable_widgets(self, enabled: bool) -> None:
         """
@@ -1938,7 +1945,7 @@ class EPLabWindow(QMainWindow):
 
         language = show_language_selection_window(self)
         if language is not None and language != self._auto_settings.language:
-            self._auto_settings.save_language(language)
+            self._auto_settings.save_param(language=language)
             text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
             text_en = "The language settings have been saved. Restart the program for the changes to take effect."
             if get_language() is Language.RU:
