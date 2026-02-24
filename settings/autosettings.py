@@ -58,7 +58,19 @@ class AutoSettings(SettingsHandler):
     pin_shift_warning_info: bool = True
     product_name: str = None
     sound: bool = False
+    test_plan_path: str = None
     tolerance: float = 0.15
+
+    def __copy__(self) -> "AutoSettings":
+        """
+        You only need to copy the attributes that are set through the "Settings" window.
+        """
+
+        new_obj = type(self)()
+        for attr_name in ("auto_transition", "max_optimal_voltage", "pin_shift_warning_info", "tolerance"):
+            value = getattr(self, attr_name, None)
+            setattr(new_obj, attr_name, value)
+        return new_obj
 
     def _read(self, settings: QSettings) -> None:
         """
@@ -91,6 +103,11 @@ class AutoSettings(SettingsHandler):
                   "mux_port": {"convert": check_none},
                   "product_name": {"convert": check_none}}
         settings.beginGroup("Connection")
+        self._read_parameters_from_settings(settings, params)
+        settings.endGroup()
+
+        params = {"test_plan_path": {}}
+        settings.beginGroup("TestPlan")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
 
@@ -131,6 +148,11 @@ class AutoSettings(SettingsHandler):
                   "mux_port": {"convert": str},
                   "product_name": {"convert": str}}
         settings.beginGroup("Connection")
+        self._write_parameters_to_settings(settings, params)
+        settings.endGroup()
+
+        params = {"test_plan_path": {"convert": str}}
+        settings.beginGroup("TestPlan")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 

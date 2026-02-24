@@ -27,7 +27,7 @@ import connection_window as cw
 from dialogs import (get_image_from_file, ReportGenerationThread, show_keymap_info, show_language_selection_window,
                      show_measurer_settings_window, show_product_info, show_report_generation_window)
 from multiplexer import MuxAndPlanWindow
-from settings import AutoSettings, LowSettingsPanel, Settings, SettingsWindow
+from settings import AutoSettings, LowSettingsPanel, SettingsWindow
 from version import Version
 from . import utils as ut
 from .boardwidget import BoardWidget
@@ -97,6 +97,7 @@ class EPLabWindow(QMainWindow):
         self._measured_pins_checker.measured_pin_in_plan_signal.connect(self.handle_measurement_plan_change)
         self._measurement_plan_path: MeasurementPlanPath = MeasurementPlanPath(self)
         self._measurement_plan_path.name_changed.connect(self.change_window_title)
+        self._measurement_plan_path.path_changed.connect(self.save_measurement_plan_path)
         self._msystem: Optional[MeasurementSystem] = None
         self._product: EyePointProduct = product
         self._product_name: Optional[cw.ProductName] = None
@@ -141,8 +142,7 @@ class EPLabWindow(QMainWindow):
             uris, product_name = analyze_connection_params([uri_1, uri_2])
             self.connect_devices(*uris, product_name=product_name)
 
-        if path:
-            self.load_board(path)
+        self._open_measurement_plan_at_start(path)
 
     @property
     def device_errors_handler(self) -> DeviceErrorsHandler:
@@ -797,6 +797,19 @@ class EPLabWindow(QMainWindow):
     def _open_board_window_if_needed(self) -> None:
         self._board_window.open_board_image_if_needed()
 
+    def _open_measurement_plan_at_start(self, path: Optional[str] = None) -> None:
+        """
+        :param path: path to the plan that the user passed to open when the application starts.
+        """
+
+        if path:
+            self.load_board(path)
+            return
+
+        path = self._auto_settings.test_plan_path
+        if isinstance(path, str) and os.path.exists(path):
+            self.load_board(self._auto_settings.test_plan_path)
+
     def _read_measurement_plan(self, filename: Optional[str] = None) -> Tuple[Optional[Board], Optional[str]]:
         """
         :param filename: path to the file with the measurement plan that needs to be opened.
@@ -992,8 +1005,7 @@ class EPLabWindow(QMainWindow):
 
         try:
             self.restoreGeometry(self._auto_settings.main_window_geometry)
-        except Exception as exc:
-            print(exc)
+        except Exception:
             self._set_default_geometry()
 
     def _set_msystem_settings(self, settings: MeasurementSettings) -> None:
@@ -1254,8 +1266,8 @@ class EPLabWindow(QMainWindow):
         self._player.set_tolerance(tolerance)
         self._comment_widget.update_table_for_new_tolerance()
 
-    @pyqtSlot(Settings)
-    def apply_settings(self, new_settings: Settings) -> None:
+    @pyqtSlot(AutoSettings)
+    def apply_settings(self, new_settings: AutoSettings) -> None:
         """
         Slot applies settings from settings window.
         :param new_settings: new settings.
@@ -1524,28 +1536,6 @@ class EPLabWindow(QMainWindow):
         if self._msystem and self._msystem.multiplexers:
             return getattr(self._msystem.multiplexers[0], "_url")
         return None
-
-    def get_settings(self) -> Settings:
-        """
-        :return: current applied settings in different objects.
-        """
-
-        settings = Settings()
-        settings.set_measurement_settings(self._msystem.get_settings())
-        if self.testing_mode_action.isChecked():
-            settings.work_mode = WorkMode.TEST
-        elif self.writing_mode_action.isChecked():
-            settings.work_mode = WorkMode.WRITE
-        else:
-            settings.work_mode = WorkMode.COMPARE
-        settings.auto_transition = self._auto_settings.auto_transition
-        settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
-        settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
-        settings.max_optimal_voltage = self._auto_settings.max_optimal_voltage
-        settings.pin_shift_warning_info = self._auto_settings.pin_shift_warning_info
-        settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
-        settings.tolerance = self.tolerance
-        return settings
 
     @pyqtSlot(bool, bool)
     def go_to_left_or_right_pin(self, to_prev: bool, cyclic: bool = True) -> None:
@@ -1889,6 +1879,16 @@ class EPLabWindow(QMainWindow):
 
         return True
 
+    @pyqtSlot(str)
+    def save_measurement_plan_path(self, new_path: str) -> None:
+        """
+        :param new_path: the path to a new measurement plan.
+        """
+
+        if not new_path:
+            new_path = None
+        self._auto_settings.save_param(test_plan_path=new_path)
+
     @pyqtSlot()
     def save_pin(self, pin_centering: bool = True) -> None:
         """
@@ -2024,7 +2024,7 @@ class EPLabWindow(QMainWindow):
         Slot shows settings window.
         """
 
-        settings_window = SettingsWindow(self, self.get_settings())
+        settings_window = SettingsWindow(self, self._auto_settings)
         settings_window.apply_settings_signal.connect(self.apply_settings)
         settings_window.exec()
         self._auto_settings.write()

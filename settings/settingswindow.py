@@ -3,7 +3,7 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtWidgets import QDialog, QLayout, QSizePolicy
-from .settings import Settings
+from .autosettings import AutoSettings
 
 
 class SettingsWindow(QDialog):
@@ -12,17 +12,17 @@ class SettingsWindow(QDialog):
     """
 
     THRESHOLD_STEP: float = 0.05
-    apply_settings_signal: pyqtSignal = pyqtSignal(Settings)
+    apply_settings_signal: pyqtSignal = pyqtSignal(AutoSettings)
 
-    def __init__(self, main_window, init_settings: Settings) -> None:
+    def __init__(self, main_window, init_settings: AutoSettings) -> None:
         """
         :param main_window: main window of application;
         :param init_settings: initial settings of the application.
         """
 
         super().__init__(main_window, Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowCloseButtonHint)
-        self._init_settings: Settings = init_settings
-        self._settings: Settings = copy.copy(init_settings)
+        self._init_settings: AutoSettings = init_settings
+        self._settings: AutoSettings = copy.copy(init_settings)
         self._init_ui()
         self._set_settings(self._init_settings)
 
@@ -58,14 +58,14 @@ class SettingsWindow(QDialog):
 
         return self.spin_box_tolerance.value() / 100.0
 
-    def _send_settings(self, settings: Settings = None) -> None:
+    def _send_settings(self, settings: AutoSettings = None) -> None:
         """
         :param settings: settings to be sent.
         """
 
         self.apply_settings_signal.emit(settings or self._settings)
 
-    def _set_settings(self, settings: Settings) -> None:
+    def _set_settings(self, settings: AutoSettings) -> None:
         """
         :param settings: new settings.
         """
