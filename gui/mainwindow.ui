@@ -26,7 +26,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>60</width>
+     <width>76</width>
      <height>96</height>
     </size>
    </property>
@@ -778,6 +778,12 @@
    </property>
    <property name="iconText">
     <string>Новая точка</string>
+   </property>
+   <property name="shortcut">
+    <string>N</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="save_point_action">

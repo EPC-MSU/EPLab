@@ -176,10 +176,10 @@ class ImageAdder(QDialog):
         available_height = geometry.height() - self.style().pixelMetric(QStyle.PixelMetric.PM_TitleBarHeight)
         available_width = geometry.width()
 
-        height = self.INIT_SIZE_AS_PROPORTION_OF_SCREEN * available_height
-        width = self.INIT_SIZE_AS_PROPORTION_OF_SCREEN * available_width
-        pos_x = geometry.x() + (available_width - width) / 2
-        pos_y = geometry.y() + (available_height - height) / 2
+        height = int(round(self.INIT_SIZE_AS_PROPORTION_OF_SCREEN * available_height))
+        width = int(round(self.INIT_SIZE_AS_PROPORTION_OF_SCREEN * available_width))
+        pos_x = int(round(geometry.x() + (available_width - width) / 2))
+        pos_y = int(round(geometry.y() + (available_height - height) / 2))
         self.move(pos_x, pos_y)
         self.resize(width, height)
 
