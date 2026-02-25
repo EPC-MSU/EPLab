@@ -114,9 +114,9 @@ def get_parameter(settings: QSettings, parameter: str, convert: Callable[[str], 
             try:
                 converted_value = convert(value)
             except ValueError as exc:
-                logger.error("An error occurred while converting the value '%s' for the parameter '%s' (%s).\n"
-                             "Parameter '%s' will be assigned the default value '%s'", value, parameter, exc,
-                             parameter, default)
+                logger.warning("An error occurred while converting the value '%s' for the parameter '%s' (%s).\n"
+                               "Parameter '%s' will be assigned the default value '%s'", value, parameter, exc,
+                               parameter, default)
                 value = default
             else:
                 value = converted_value

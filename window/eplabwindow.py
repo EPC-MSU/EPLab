@@ -1002,7 +1002,7 @@ class EPLabWindow(QMainWindow):
             try:
                 self._board_window.restoreGeometry(self._auto_settings.board_window_geometry)
             except Exception as exc:
-                logger.error("Unable to restore window geometry with board photo: %s", exc)
+                logger.debug("Unable to restore window geometry with board photo: %s", exc)
 
     def _set_curve_view_settings_to_init_state(self) -> None:
         for action in (self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
@@ -1053,7 +1053,7 @@ class EPLabWindow(QMainWindow):
         try:
             self.restoreGeometry(self._auto_settings.main_window_geometry)
         except Exception as exc:
-            logger.error("Unable to restore main window geometry: %s", exc)
+            logger.debug("Unable to restore main window geometry: %s", exc)
             self._set_default_geometry()
 
     def _set_msystem_settings(self, settings: MeasurementSettings) -> None:
