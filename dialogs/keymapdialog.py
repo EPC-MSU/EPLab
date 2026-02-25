@@ -52,6 +52,7 @@ class KeymapDialog(QDialog):
                    ("Space", self._main_window.save_point_action.text()),
                    ("Left", qApp.translate("MainWindow", "Предыдущая точка")),
                    ("Right", qApp.translate("MainWindow", "Следующая точка")),
+                   ("N", qApp.translate("MainWindow", "Новая точка")),
                    ("Del", qApp.translate("MainWindow", "Удалить точку")),
                    ("F1", qApp.translate("MainWindow", "Помощь")),
                    ("F2", qApp.translate("dialogs", "Редактировать комментарий"))]
