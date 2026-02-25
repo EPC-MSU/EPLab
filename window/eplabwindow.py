@@ -10,7 +10,8 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator, \
+    QByteArray
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeySequence, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QSplitter, QStyle,
                              QToolButton, QWidget)
@@ -27,7 +28,7 @@ import connection_window as cw
 from dialogs import (get_image_from_file, ReportGenerationThread, show_keymap_info, show_language_selection_window,
                      show_measurer_settings_window, show_product_info, show_report_generation_window)
 from multiplexer import MuxAndPlanWindow
-from settings import AutoSettings, Settings, SettingsWindow
+from settings import AutoSettings, SettingsWindow
 from version import Version
 from . import utils as ut
 from .boardwidget import BoardWidget
@@ -79,7 +80,7 @@ class EPLabWindow(QMainWindow):
     work_mode_changed: pyqtSignal = pyqtSignal(WorkMode)
 
     def __init__(self, product: EyePointProduct, uri_1: Optional[str] = None, uri_2: Optional[str] = None,
-                 english: Optional[bool] = None, path: str = None) -> None:
+                 english: Optional[bool] = None, path: Optional[str] = None) -> None:
         """
         :param product: product;
         :param uri_1: URI for the first IV-measurer;
@@ -100,7 +101,9 @@ class EPLabWindow(QMainWindow):
         self._measured_pins_checker.measured_pin_in_plan_signal.connect(self.handle_measurement_plan_change)
         self._measurement_plan_path: MeasurementPlanPath = MeasurementPlanPath(self)
         self._measurement_plan_path.name_changed.connect(self.change_window_title)
+        self._measurement_plan_path.path_changed.connect(self.save_measurement_plan_path)
         self._msystem: Optional[MeasurementSystem] = None
+        self._need_to_restore_frozen_state: bool = False
         self._product: EyePointProduct = product
         self._product_name: Optional[cw.ProductName] = None
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
@@ -122,7 +125,7 @@ class EPLabWindow(QMainWindow):
         self._load_translation(english)
         self._init_ui()
         self._adjust_critical_width()
-        self._set_init_position()
+        self._set_init_geometry()
         self._connect_scale_change_signal()
         self.measurers_connected.connect(self.handle_connection)
         self._connection_checker: ConnectionChecker = ConnectionChecker(self._auto_settings)
@@ -145,8 +148,8 @@ class EPLabWindow(QMainWindow):
             uris, product_name = analyze_connection_params([uri_1, uri_2])
             self.connect_devices(*uris, product_name=product_name)
 
-        if path:
-            self.load_board(path)
+        self._set_auto_settings_to_ui()
+        self._open_measurement_plan_at_start(path)
 
     @property
     def device_errors_handler(self) -> DeviceErrorsHandler:
@@ -174,7 +177,8 @@ class EPLabWindow(QMainWindow):
         """
 
         if os.path.exists(path):
-            self._auto_settings.save_last_used_dir(os.path.dirname(path) if not os.path.isdir(path) else path)
+            dir_path = os.path.dirname(path) if not os.path.isdir(path) else path
+            self._auto_settings.save_param(last_used_dir=dir_path)
             self._central_widget.set_path_to_directory(self._auto_settings.last_used_dir)
 
     @property
@@ -390,6 +394,10 @@ class EPLabWindow(QMainWindow):
                                                 "нет некоторых сигнатур разрыва, поэтому функция автоперехода может "
                                                 "работать некорректно."), icon=QMessageBox.Icon.Information)
 
+    def _check_if_frozen_state_for_curves_to_restore(self) -> None:
+        self._need_to_restore_frozen_state = any(action.isChecked()
+                                                 for action in (self.freeze_curve_a_action, self.freeze_curve_b_action))
+
     def _check_plan_compatibility(self, plan: MeasurementPlan, is_new_plan: bool = False,
                                   filename: Optional[str] = None) -> None:
         """
@@ -448,8 +456,6 @@ class EPLabWindow(QMainWindow):
         self._settings_update_next_cycle = None
         self._skip_curve = False
         self._work_mode = None
-        self._hide_current_curve = False
-        self._hide_reference_curve = False
         self._compare_measurement = None
         self._current_curve = None
         self._reference_curve = None
@@ -645,6 +651,18 @@ class EPLabWindow(QMainWindow):
         self._comment_widget.clear_table()
         self._board_window.close()
 
+    def _freeze_state_for_curve(self, i: int, action: QAction) -> None:
+        """
+        :param i: index of the measurer;
+        :param action: menu item that corresponds to the measurer.
+        """
+
+        if action.isChecked():
+            self._msystem.measurers[i].freeze()
+        else:
+            self._msystem.measurers[i].unfreeze()
+            self._skip_curve = True
+
     def _get_curves_for_legend(self) -> Dict[str, bool]:
         """
         :return: a dictionary containing the signatures displayed in the application window.
@@ -754,13 +772,6 @@ class EPLabWindow(QMainWindow):
                 self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.ArrowType.DownArrow)
                 self._auto_settings.save_equivalent_circuits_state(False)
 
-    def _init_tolerance(self) -> None:
-        """
-        Method initializes the initial value of the tolerance.
-        """
-
-        self._update_tolerance(self._score_wrapper.tolerance)
-
     def _init_ui(self) -> None:
         loadUi(os.path.join(os.path.dirname(ut.DIR_MEDIA), "gui", "mainwindow.ui"), self)
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
@@ -768,6 +779,7 @@ class EPLabWindow(QMainWindow):
 
         self._board_window: BoardWidget = BoardWidget(self)
         self._board_window.current_pin_signal.connect(self.go_to_selected_pin)
+        self._board_window.geometry_changed.connect(self.save_board_widget_geometry)
         self._parameters_widgets: Dict[EyePointProduct.Parameter, ParameterWidget] = dict()
         self._player: SoundPlayer = SoundPlayer()
         self._player.set_mute(not self.sound_enabled_action.isChecked())
@@ -868,6 +880,19 @@ class EPLabWindow(QMainWindow):
     def _open_board_window_if_needed(self) -> None:
         self._board_window.open_board_image_if_needed()
 
+    def _open_measurement_plan_at_start(self, path: Optional[str] = None) -> None:
+        """
+        :param path: path to the plan that the user passed to open when the application starts.
+        """
+
+        if path:
+            self.load_board(path)
+            return
+
+        path = self._auto_settings.test_plan_path
+        if isinstance(path, str) and os.path.exists(path):
+            self.load_board(self._auto_settings.test_plan_path)
+
     def _read_measurement_plan(self, filename: Optional[str] = None) -> Tuple[Optional[Board], Optional[str]]:
         """
         :param filename: path to the file with the measurement plan that needs to be opened.
@@ -907,6 +932,8 @@ class EPLabWindow(QMainWindow):
             else:
                 curves, measurement_settings = self._get_curves_for_periodic_task()
                 self._update_signatures(curves, measurement_settings)
+                if self._need_to_restore_frozen_state:
+                    self._restore_frozen_state_for_curves()
 
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.determine_whether_to_save_measurement()
@@ -963,6 +990,10 @@ class EPLabWindow(QMainWindow):
         self._check_plan_compatibility(self.measurement_plan, True)
         self._measurement_plan_path.path = None
 
+    def _restore_frozen_state_for_curves(self) -> None:
+        for i, action in enumerate((self.freeze_curve_a_action, self.freeze_curve_b_action)):
+            self._freeze_state_for_curve(i, action)
+
     def _save_changes_in_measurement_plan(self, additional_info: str = None) -> bool:
         """
         :param additional_info: additional text to the question.
@@ -1015,28 +1046,44 @@ class EPLabWindow(QMainWindow):
             settings = self._msystem.get_settings()
             self._compare_measurement = Measurement(settings=settings, ivc=curve)
 
-    def _set_hotkeys_for_moving_through_pins(self) -> None:
-        """
-        Method sets hotkeys UP and DOWN for moving to the previous and next pins.
-        """
+    def _set_auto_settings_to_ui(self) -> None:
+        if self._auto_settings.sound:
+            self.sound_enabled_action.toggle()
 
-        self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Down), self)
-        self._shortcut_down.setContext(Qt.ShortcutContext.ApplicationShortcut)
-        self._shortcut_down.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(False))
-        self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Up), self)
-        self._shortcut_up.setContext(Qt.ShortcutContext.ApplicationShortcut)
-        self._shortcut_up.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(True))
+        if self._auto_settings.freeze_curve_a:
+            self.freeze_curve_a_action.toggle()
 
-    def _set_init_position(self) -> None:
+        if self._auto_settings.freeze_curve_b:
+            self.freeze_curve_b_action.toggle()
+
+        if self._auto_settings.hide_curve_a:
+            self.hide_curve_a_action.toggle()
+
+        if self._auto_settings.hide_curve_b:
+            self.hide_curve_b_action.toggle()
+
+        self._update_tolerance(self._auto_settings.tolerance)
+
+        if self._auto_settings.board_window_geometry:
+            try:
+                self._board_window.restoreGeometry(self._auto_settings.board_window_geometry)
+            except Exception as exc:
+                logger.debug("Unable to restore window geometry with board photo: %s", exc)
+
+    def _set_curve_view_settings_to_init_state(self) -> None:
+        for action in (self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
+                       self.hide_curve_b_action):
+            if action.isChecked():
+                action.toggle()
+
+    def _set_default_geometry(self) -> None:
         """
         Method moves the window to the desired position and sets the initial dimensions.
         """
 
         if system().lower() == "windows":
-            self.setMinimumWidth(self.MIN_WIDTH_IN_WINDOWS)
             width = self.CRITICAL_WIDTH_FOR_WINDOWS_RU
         else:
-            self.setMinimumWidth(self.MIN_WIDTH_IN_LINUX)
             width = self.CRITICAL_WIDTH_FOR_LINUX_RU
         height = self.INIT_HEIGHT
 
@@ -1050,6 +1097,30 @@ class EPLabWindow(QMainWindow):
         pos_y = int(round(geometry.y() + (available_height - height) / 2))
         self.move(pos_x, pos_y)
         self.resize(width, height)
+
+    def _set_hotkeys_for_moving_through_pins(self) -> None:
+        """
+        Method sets hotkeys UP and DOWN for moving to the previous and next pins.
+        """
+
+        self._shortcut_down: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Down), self)
+        self._shortcut_down.setContext(Qt.ShortcutContext.ApplicationShortcut)
+        self._shortcut_down.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(False))
+        self._shortcut_up: QShortcut = QShortcut(QKeySequence(Qt.Key.Key_Up), self)
+        self._shortcut_up.setContext(Qt.ShortcutContext.ApplicationShortcut)
+        self._shortcut_up.activated.connect(lambda: self._go_to_left_or_right_pin_for_hotkeys(True))
+
+    def _set_init_geometry(self) -> None:
+        if system().lower() == "windows":
+            self.setMinimumWidth(self.MIN_WIDTH_IN_WINDOWS)
+        else:
+            self.setMinimumWidth(self.MIN_WIDTH_IN_LINUX)
+
+        try:
+            self.restoreGeometry(self._auto_settings.main_window_geometry)
+        except Exception as exc:
+            logger.debug("Unable to restore main window geometry: %s", exc)
+            self._set_default_geometry()
 
     def _set_msystem_settings(self, settings: MeasurementSettings) -> None:
         """
@@ -1094,16 +1165,11 @@ class EPLabWindow(QMainWindow):
 
         self._settings_update_next_cycle = None
         self._skip_curve = False
-        self._hide_current_curve = False
-        self._hide_reference_curve = False
+
         self._compare_measurement = None
         self._current_curve = None
         self._reference_curve = None
         self._test_curve = None
-
-        for action in (self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
-                       self.hide_curve_b_action):
-            action.setChecked(False)
 
         self._central_widget.exit_state_for_adding_or_removing_cursor()
 
@@ -1127,7 +1193,6 @@ class EPLabWindow(QMainWindow):
         self._comment_widget.update_info()
         self._add_callbacks_to_measurement_plan()
         self._switch_work_mode(WorkMode.COMPARE)
-        self._init_tolerance()
 
         with self._device_errors_handler:
             self._trigger_measurements()
@@ -1147,7 +1212,7 @@ class EPLabWindow(QMainWindow):
                                                              qApp.translate("t", "Не показывать снова"), text,
                                                              cancel_button=True)
         if not_show_again:
-            self._auto_settings.save_pin_shift_warning_info(False)
+            self._auto_settings.save_param(pin_shift_warning_info=False)
         return result
 
     @pyqtSlot(WorkMode)
@@ -1322,26 +1387,19 @@ class EPLabWindow(QMainWindow):
         self._player.set_tolerance(tolerance)
         self._comment_widget.update_table_for_new_tolerance()
 
-    @pyqtSlot(Settings)
-    def apply_settings(self, new_settings: Settings) -> None:
+    @pyqtSlot(AutoSettings)
+    def apply_settings(self, new_settings: AutoSettings) -> None:
         """
         Slot applies settings from settings window.
         :param new_settings: new settings.
         """
 
-        self._switch_work_mode(new_settings.work_mode)
-        measurement_settings = new_settings.get_measurement_settings()
-        options = self._product.settings_to_options(measurement_settings)
-        self._set_options_to_ui(options)
-        self._set_msystem_settings(measurement_settings)
-        self.hide_curve_a_action.setChecked(new_settings.hide_curve_a)
-        self.hide_curve_b_action.setChecked(new_settings.hide_curve_b)
-        self.sound_enabled_action.setChecked(new_settings.sound_enabled)
-        self._auto_settings.auto_transition = new_settings.auto_transition
-        self._auto_settings.max_optimal_voltage = new_settings.max_optimal_voltage
-        self._auto_settings.pin_shift_warning_info = new_settings.pin_shift_warning_info
-        self._auto_settings.warning_about_untested_pins_in_report = new_settings.warning_about_untested_pins_in_report
-        self._update_tolerance(new_settings.tolerance)
+        self._auto_settings.save_param(auto_transition=new_settings.auto_transition,
+                                       max_optimal_voltage=new_settings.max_optimal_voltage,
+                                       pin_shift_warning_info=new_settings.pin_shift_warning_info,
+                                       tolerance=new_settings.tolerance,
+                                       warning_about_untested_pins_in_report=new_settings.warning_about_untested_pins_in_report)
+        self._update_tolerance(self._auto_settings.tolerance)
 
     @pyqtSlot(str)
     def change_window_title(self, measurement_plan_name: str) -> None:
@@ -1381,6 +1439,9 @@ class EPLabWindow(QMainWindow):
             self._report_generation_thread.stop_thread()
             self._report_generation_thread.wait()
 
+        self._auto_settings.save_param(main_window_geometry=self.saveGeometry())
+        super().closeEvent(event)
+
     def connect_devices(self, uri_1: Optional[str] = None, uri_2: Optional[str] = None,
                         mux_uri: str = None, product_name: Optional[cw.ProductName] = None) -> None:
         """
@@ -1396,6 +1457,7 @@ class EPLabWindow(QMainWindow):
                                                                                             product_name)
         if measurement_system:
             self._connect_devices(measurement_system, product_name)
+            self._set_curve_view_settings_to_init_state()
         else:
             self._disconnect_devices()
             self._delete_measurement_plan()
@@ -1524,6 +1586,7 @@ class EPLabWindow(QMainWindow):
             return
 
         self._disconnect_devices()
+        self._set_curve_view_settings_to_init_state()
         self._delete_measurement_plan()
         self._report_measurers_disconnected()
 
@@ -1537,6 +1600,7 @@ class EPLabWindow(QMainWindow):
         icon_path = os.path.join(ut.DIR_MEDIA, icon_name)
         self.sound_enabled_action.setIcon(QIcon(icon_path))
         self._player.set_mute(not state)
+        self._auto_settings.save_param(sound=state)
 
     def enable_widgets(self, enabled: bool) -> None:
         """
@@ -1573,18 +1637,23 @@ class EPLabWindow(QMainWindow):
         return super().event(event)
 
     @pyqtSlot(int, bool)
-    def freeze_curve(self, measurer_id: int, state: bool) -> None:
+    def freeze_curve(self, i: int, state: bool) -> None:
         """
-        :param measurer_id: index of the measurer;
+        :param i: index of the measurer;
         :param state: if True, then the signature of the given measurer will be frozen, otherwise it will be unfrozen.
         """
 
-        if 0 <= measurer_id < len(self._msystem.measurers):
-            if state:
-                self._msystem.measurers[measurer_id].freeze()
-            else:
-                self._msystem.measurers[measurer_id].unfreeze()
-                self._skip_curve = True
+        if i == 0:
+            action = self.freeze_curve_a_action
+            self._auto_settings.save_param(freeze_curve_a=state)
+        elif i == 1:
+            action = self.freeze_curve_b_action
+            self._auto_settings.save_param(freeze_curve_b=state)
+        else:
+            action = None
+
+        if self._msystem and action:
+            self._freeze_state_for_curve(i, action)
 
     def get_default_pin_coordinates(self) -> Tuple[float, float]:
         """
@@ -1613,29 +1682,6 @@ class EPLabWindow(QMainWindow):
         if self._msystem and self._msystem.multiplexers:
             return getattr(self._msystem.multiplexers[0], "_url")
         return None
-
-    def get_settings(self) -> Settings:
-        """
-        :return: current applied settings in different objects.
-        """
-
-        settings = Settings()
-        settings.set_measurement_settings(self._msystem.get_settings())
-        if self.testing_mode_action.isChecked():
-            settings.work_mode = WorkMode.TEST
-        elif self.writing_mode_action.isChecked():
-            settings.work_mode = WorkMode.WRITE
-        else:
-            settings.work_mode = WorkMode.COMPARE
-        settings.auto_transition = self._auto_settings.auto_transition
-        settings.hide_curve_a = bool(self.hide_curve_a_action.isChecked())
-        settings.hide_curve_b = bool(self.hide_curve_b_action.isChecked())
-        settings.max_optimal_voltage = self._auto_settings.max_optimal_voltage
-        settings.pin_shift_warning_info = self._auto_settings.pin_shift_warning_info
-        settings.sound_enabled = bool(self.sound_enabled_action.isChecked())
-        settings.tolerance = self.tolerance
-        settings.warning_about_untested_pins_in_report = self._auto_settings.warning_about_untested_pins_in_report
-        return settings
 
     @pyqtSlot(bool, bool)
     def go_to_left_or_right_pin(self, to_prev: bool, cyclic: bool = True) -> None:
@@ -1749,6 +1795,7 @@ class EPLabWindow(QMainWindow):
         measurement_system, product_name = connection_data
         if measurement_system:
             self._connect_devices(measurement_system, product_name)
+            self._check_if_frozen_state_for_curves_to_restore()
 
     @pyqtSlot(bool)
     def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:
@@ -1795,8 +1842,10 @@ class EPLabWindow(QMainWindow):
 
         if self.sender() is self.hide_curve_a_action:
             self._hide_current_curve = state
+            self._auto_settings.save_param(hide_curve_a=state)
         elif self.sender() is self.hide_curve_b_action:
             self._hide_reference_curve = state
+            self._auto_settings.save_param(hide_curve_b=state)
 
     @pyqtSlot()
     def load_board(self, filename: Optional[str] = None) -> None:
@@ -1925,6 +1974,14 @@ class EPLabWindow(QMainWindow):
 
         super().resizeEvent(event)
 
+    @pyqtSlot(QByteArray)
+    def save_board_widget_geometry(self, geometry: QByteArray) -> None:
+        """
+        :param geometry: new window geometry with a photo of the board.
+        """
+
+        self._auto_settings.save_param(board_window_geometry=geometry)
+
     @pyqtSlot()
     def save_image(self) -> None:
         """
@@ -1979,6 +2036,16 @@ class EPLabWindow(QMainWindow):
             self._measurement_plan_path.path = epfilemanager.save_board_to_ufiv(filepath, self.measurement_plan)
 
         return True
+
+    @pyqtSlot(str)
+    def save_measurement_plan_path(self, new_path: str) -> None:
+        """
+        :param new_path: the path to a new measurement plan.
+        """
+
+        if not new_path:
+            new_path = None
+        self._auto_settings.save_param(test_plan_path=new_path)
 
     @pyqtSlot()
     def save_pin(self, pin_centering: bool = True) -> None:
@@ -2036,7 +2103,7 @@ class EPLabWindow(QMainWindow):
 
         language = show_language_selection_window(self)
         if language is not None and language != self._auto_settings.language:
-            self._auto_settings.save_language(language)
+            self._auto_settings.save_param(language=language)
             text_ru = "Настройки языка сохранены. Чтобы изменения вступили в силу, перезапустите программу."
             text_en = "The language settings have been saved. Restart the program for the changes to take effect."
             if get_language() is Language.RU:
@@ -2115,11 +2182,10 @@ class EPLabWindow(QMainWindow):
         Slot shows settings window.
         """
 
-        settings_window = SettingsWindow(self, self.get_settings(), self.dir_chosen_by_user)
+        settings_window = SettingsWindow(self, self._auto_settings)
         settings_window.apply_settings_signal.connect(self.apply_settings)
         settings_window.exec()
         self._auto_settings.write()
-        self.dir_chosen_by_user = settings_window.settings_directory
         self._check_break_signatures_for_auto_transition()
         # Break signatures are only saved when debugging the application
         # self._break_signature_saver.save_break_signatures_if_necessary()

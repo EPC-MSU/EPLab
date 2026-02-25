@@ -94,11 +94,9 @@ class SettingsHandler(QObject):
         """
 
         for parameter_name, parameter_data in parameters.items():
-            convert_function = parameter_data.get("convert", str)
-            required = parameter_data.get("required", False)
+            convert_function = parameter_data.get("convert", None)
             default = self._get_default_value(parameter_name)
-            value = ut.get_parameter(settings, parameter_name, convert=convert_function, required=required,
-                                     default=default)
+            value = ut.get_parameter(settings, parameter_name, convert=convert_function, default=default)
             setattr(self, parameter_name, value)
 
     def _write(self, settings: QSettings) -> None:

@@ -1,27 +1,11 @@
-import locale
-import os
 from typing import Any, Callable, Dict, Optional
-from PyQt5.QtCore import QSettings
+from PyQt5.QtCore import QCoreApplication as qApp, QSettings
 from epcore.elements import MeasurementSettings
 from epcore.product import EyePointProduct
-from window.language import Language, Translator
+from window.language import Language
 from window.utils import get_user_documents_path
 from . import utils as ut
 from .settingshandler import SettingsHandler
-
-
-def get_default_language() -> Language:
-    """
-    Method automatically determines the appropriate language based on the system locale. This method added at
-    ticket #94289.
-    :return: default language for the system.
-    """
-
-    code = locale.getdefaultlocale()[0]
-    if code in ("ba_RU", "be", "be_BY", "ce", "ce_RU", "kk", "kk_KZ", "ru", "ru_BY", "ru_KG", "ru_KZ", "ru_MD", "ru_RU",
-                "ru_UA", "sah_RU", "tt_RU"):
-        return Language.RU
-    return Language.EN
 
 
 def save_settings(func: Callable[..., Any]):
@@ -48,25 +32,45 @@ class AutoSettings(SettingsHandler):
     sensitive: str = None
     voltage: str = None
     auto_transition: bool = False
+    board_window_geometry = None
     equivalent_circuits_rolled_up: bool = False
-    language: Language = get_default_language()
+    freeze_curve_a: bool = False
+    freeze_curve_b: bool = False
+    hide_curve_a: bool = False
+    hide_curve_b: bool = False
+    language: Language = ut.get_default_language()
     last_used_dir: str = get_user_documents_path()
+    main_window_geometry = None
     max_optimal_voltage: float = 12
     measurer_1_port: str = None
     measurer_2_port: str = None
     mux_port: str = None
     pin_shift_warning_info: bool = True
     product_name: str = None
+    sound: bool = False
+    test_plan_path: str = None
+    tolerance: float = 0.15
     warning_about_untested_pins_in_report: bool = True
+
+    def __copy__(self) -> "AutoSettings":
+        """
+        You only need to copy the attributes that are set through the "Settings" window.
+        """
+
+        new_obj = type(self)()
+        for attr_name in ("auto_transition", "max_optimal_voltage", "pin_shift_warning_info", "tolerance", "warning_about_untested_pins_in_report"):
+            value = getattr(self, attr_name, None)
+            setattr(new_obj, attr_name, value)
+        return new_obj
 
     def _read(self, settings: QSettings) -> None:
         """
         :param settings: object from which to read the basic application settings.
         """
 
-        params = {"frequency": {"convert": check_none},
-                  "sensitive": {"convert": check_none},
-                  "voltage": {"convert": check_none}}
+        params = {"frequency": {"convert": ut.check_none},
+                  "sensitive": {"convert": ut.check_none},
+                  "voltage": {"convert": ut.check_none}}
         settings.beginGroup("MeasurementSettings")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
@@ -77,20 +81,37 @@ class AutoSettings(SettingsHandler):
         settings.endGroup()
 
         params = {"auto_transition": {"convert": ut.to_bool},
-                  "language": {"convert": get_language_from_str},
-                  "last_used_dir": {"convert": get_dir_path_from_str},
-                  "pin_shift_warning_info": {"convert": ut.to_bool},
                   "equivalent_circuits_rolled_up": {"convert": ut.to_bool},
+                  "freeze_curve_a": {"convert": ut.to_bool},
+                  "freeze_curve_b": {"convert": ut.to_bool},
+                  "hide_curve_a": {"convert": ut.to_bool},
+                  "hide_curve_b": {"convert": ut.to_bool},
+                  "language": {"convert": ut.get_language_from_str},
+                  "last_used_dir": {"convert": ut.get_dir_path_from_str},
+                  "pin_shift_warning_info": {"convert": ut.to_bool},
+                  "sound": {"convert": ut.to_bool},
+                  "tolerance": {"convert": float},
                   "warning_about_untested_pins_in_report": {"convert": ut.to_bool}}
         settings.beginGroup("Main")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
 
-        params = {"measurer_1_port": {"convert": check_none},
-                  "measurer_2_port": {"convert": check_none},
-                  "mux_port": {"convert": check_none},
-                  "product_name": {"convert": check_none}}
+        params = {"measurer_1_port": {"convert": ut.check_none},
+                  "measurer_2_port": {"convert": ut.check_none},
+                  "mux_port": {"convert": ut.check_none},
+                  "product_name": {"convert": ut.check_none}}
         settings.beginGroup("Connection")
+        self._read_parameters_from_settings(settings, params)
+        settings.endGroup()
+
+        params = {"test_plan_path": {}}
+        settings.beginGroup("TestPlan")
+        self._read_parameters_from_settings(settings, params)
+        settings.endGroup()
+
+        params = {"main_window_geometry": {"convert": ut.convert_value_from_qsettings_to_geometry},
+                  "board_window_geometry": {"convert": ut.convert_value_from_qsettings_to_geometry}}
+        settings.beginGroup("Window")
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
 
@@ -111,12 +132,18 @@ class AutoSettings(SettingsHandler):
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 
-        params = {"auto_transition": {"convert": str},
-                  "equivalent_circuits_rolled_up": {"convert": str},
-                  "language": {"convert": convert_language_to_str},
+        params = {"auto_transition": {},
+                  "equivalent_circuits_rolled_up": {},
+                  "freeze_curve_a": {},
+                  "freeze_curve_b": {},
+                  "hide_curve_a": {},
+                  "hide_curve_b": {},
+                  "language": {"convert": ut.convert_language_to_str},
                   "last_used_dir": {"convert": str},
-                  "pin_shift_warning_info": {"convert": str},
-                  "warning_about_untested_pins_in_report": {"convert": str}}
+                  "pin_shift_warning_info": {},
+                  "sound": {},
+                  "tolerance": {"convert": ut.float_to_str},
+                  "warning_about_untested_pins_in_report": {}}
         settings.beginGroup("Main")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
@@ -126,6 +153,17 @@ class AutoSettings(SettingsHandler):
                   "mux_port": {"convert": str},
                   "product_name": {"convert": str}}
         settings.beginGroup("Connection")
+        self._write_parameters_to_settings(settings, params)
+        settings.endGroup()
+
+        params = {"test_plan_path": {"convert": str}}
+        settings.beginGroup("TestPlan")
+        self._write_parameters_to_settings(settings, params)
+        settings.endGroup()
+
+        params = {"main_window_geometry": {"convert": ut.convert_geometry_to_value_for_qsettings},
+                  "board_window_geometry": {"convert": ut.convert_geometry_to_value_for_qsettings}}
+        settings.beginGroup("Window")
         self._write_parameters_to_settings(settings, params)
         settings.endGroup()
 
@@ -175,31 +213,6 @@ class AutoSettings(SettingsHandler):
         self.mux_port = mux_port
         self.product_name = product_name
 
-    @save_settings
-    def save_equivalent_circuits_state(self, rolled_up: bool) -> None:
-        """
-        :param rolled_up:
-        """
-
-        self.equivalent_circuits_rolled_up = rolled_up
-
-    @save_settings
-    def save_language(self, language: Language) -> None:
-        """
-        :param language: new language for software.
-        """
-
-        self.language = language if language is not None else Language.EN
-
-    @save_settings
-    def save_last_used_dir(self, dir_path: str) -> None:
-        """
-        :param dir_path: path to the last directory selected by the user.
-        """
-
-        self.last_used_dir = dir_path
-
-    @save_settings
     def save_measurement_settings(self, options: Dict[EyePointProduct.Parameter, str]) -> None:
         """
         :param options: dictionary with new measurement settings.
@@ -210,53 +223,14 @@ class AutoSettings(SettingsHandler):
         self.voltage = options[EyePointProduct.Parameter.voltage]
 
     @save_settings
-    def save_pin_shift_warning_info(self, pin_shift_warning_info: bool) -> None:
+    def save_param(self, **kwargs) -> None:
         """
-        :param pin_shift_warning_info: if True, then automatically during testing the transition to the next pin will
-        be carried out.
-        """
-
-        self.pin_shift_warning_info = bool(pin_shift_warning_info)
-
-    @save_settings
-    def save_warning_about_untested_pins_in_report(self, warning_about_untested_pins_in_report: bool) -> None:
-        """
-        :param warning_about_untested_pins_in_report:
+        :param kwargs: kwarg parameters whose new values should be saved.
         """
 
-        self.warning_about_untested_pins_in_report = bool(warning_about_untested_pins_in_report)
+        for name, value in kwargs.items():
+            if not hasattr(self, name):
+                raise AttributeError(qApp.translate("settings", 'Настройку "{}" нельзя сохранить. Пожалуйста, проверьте'
+                                                                " корректность названия.").format(name))
 
-
-def check_none(value: str) -> Optional[str]:
-    return None if value and value.lower() == "none" else str(value)
-
-
-def convert_language_to_str(language: Language) -> str:
-    """
-    :param language: language.
-    :return: language value in string format.
-    """
-
-    return str(Translator.get_language_name(language))
-
-
-def get_dir_path_from_str(value: Optional[str]) -> str:
-    """
-    :param value: expected path to the folder.
-    :return: path to directory.
-    """
-
-    if value is None or not os.path.isdir(value):
-        return get_user_documents_path()
-
-    return value
-
-
-def get_language_from_str(value: str) -> Language:
-    """
-    :param value: language value in string format.
-    :return: language.
-    """
-
-    language = Translator.get_language_value(value)
-    return get_default_language() if language is None else language
+            setattr(self, name, value)
