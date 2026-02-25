@@ -129,7 +129,7 @@ class BoardWidget(QWidget):
         self.resize(self.WIDTH, self.HEIGHT)
         self.setStyleSheet("background-color: black;")
 
-        self._scene: BoardView = BoardView()
+        self._scene: BoardView = BoardView(cross_in_center=True)
         self._scene.scene().setItemIndexMethod(QGraphicsScene.ItemIndexMethod.NoIndex)
         self._scene.on_right_click.connect(self.create_new_pin)
         self._scene.point_moved.connect(self.change_pin_coordinates)
