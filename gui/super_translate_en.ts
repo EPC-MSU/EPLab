@@ -898,15 +898,5 @@ Signature analyzer S2</translation>
         <source>Сохранить файл</source>
         <translation>Save file</translation>
     </message>
-    <message>
-        <location filename="../settings/utils.py" line="51"/>
-        <source>Параметр &quot;{}&quot; имеет недопустимое значение &quot;{}&quot;.</source>
-        <translation>The parameter &quot;{}&quot; has an invalid value &quot;{}&quot;.</translation>
-    </message>
-    <message>
-        <location filename="../settings/utils.py" line="60"/>
-        <source>Значение параметра &quot;{}&quot; не задано в конфигурационном файле.</source>
-        <translation>The parameter &quot;{}&quot; value is not specified in the configuration file.</translation>
-    </message>
 </context>
 </TS>

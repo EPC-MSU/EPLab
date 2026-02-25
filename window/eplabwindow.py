@@ -100,6 +100,7 @@ class EPLabWindow(QMainWindow):
         self._measurement_plan_path.name_changed.connect(self.change_window_title)
         self._measurement_plan_path.path_changed.connect(self.save_measurement_plan_path)
         self._msystem: Optional[MeasurementSystem] = None
+        self._need_to_restore_frozen_state: bool = False
         self._product: EyePointProduct = product
         self._product_name: Optional[cw.ProductName] = None
         self._report_generation_thread: ReportGenerationThread = ReportGenerationThread(self)
@@ -388,6 +389,10 @@ class EPLabWindow(QMainWindow):
                                                 "нет некоторых сигнатур разрыва, поэтому функция автоперехода может "
                                                 "работать некорректно."), icon=QMessageBox.Icon.Information)
 
+    def _check_if_frozen_state_for_curves_to_restore(self) -> None:
+        self._need_to_restore_frozen_state = any(action.isChecked()
+                                                 for action in (self.freeze_curve_a_action, self.freeze_curve_b_action))
+
     def _check_plan_compatibility(self, plan: MeasurementPlan, is_new_plan: bool = False,
                                   filename: Optional[str] = None) -> None:
         """
@@ -583,6 +588,18 @@ class EPLabWindow(QMainWindow):
         self._clear_widgets()
         self._comment_widget.clear_table()
         self._board_window.close()
+
+    def _freeze_state_for_curve(self, i: int, action: QAction) -> None:
+        """
+        :param i: index of the measurer;
+        :param action: menu item that corresponds to the measurer.
+        """
+
+        if action.isChecked():
+            self._msystem.measurers[i].freeze()
+        else:
+            self._msystem.measurers[i].unfreeze()
+            self._skip_curve = True
 
     def _get_curves_for_legend(self) -> Dict[str, bool]:
         """
@@ -849,6 +866,8 @@ class EPLabWindow(QMainWindow):
             else:
                 curves, measurement_settings = self._get_curves_for_periodic_task()
                 self._update_signatures(curves, measurement_settings)
+                if self._need_to_restore_frozen_state:
+                    self._restore_frozen_state_for_curves()
 
                 if self._mux_and_plan_window.measurement_plan_runner.is_running:
                     self._mux_and_plan_window.measurement_plan_runner.determine_whether_to_save_measurement()
@@ -904,6 +923,10 @@ class EPLabWindow(QMainWindow):
             multiplexer=(None if not self._msystem.multiplexers else self._msystem.multiplexers[0]))
         self._check_plan_compatibility(self.measurement_plan, True)
         self._measurement_plan_path.path = None
+
+    def _restore_frozen_state_for_curves(self) -> None:
+        for i, action in enumerate((self.freeze_curve_a_action, self.freeze_curve_b_action)):
+            self._freeze_state_for_curve(i, action)
 
     def _save_changes_in_measurement_plan(self, additional_info: str = None) -> bool:
         """
@@ -982,11 +1005,10 @@ class EPLabWindow(QMainWindow):
                 logger.error("Unable to restore window geometry with board photo: %s", exc)
 
     def _set_curve_view_settings_to_init_state(self) -> None:
-        for action in (self.freeze_curve_a_action, self.freeze_curve_b_action):
-            action.setChecked(False)
-
-        for action in (self.hide_curve_a_action, self.hide_curve_b_action):
-            action.setChecked(False)
+        for action in (self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
+                       self.hide_curve_b_action):
+            if action.isChecked():
+                action.toggle()
 
     def _set_default_geometry(self) -> None:
         """
@@ -1519,23 +1541,23 @@ class EPLabWindow(QMainWindow):
         return super().event(event)
 
     @pyqtSlot(int, bool)
-    def freeze_curve(self, measurer_i: int, state: bool) -> None:
+    def freeze_curve(self, i: int, state: bool) -> None:
         """
-        :param measurer_i: index of the measurer;
+        :param i: index of the measurer;
         :param state: if True, then the signature of the given measurer will be frozen, otherwise it will be unfrozen.
         """
 
-        if self._msystem and 0 <= measurer_i < len(self._msystem.measurers):
-            if state:
-                self._msystem.measurers[measurer_i].freeze()
-            else:
-                self._msystem.measurers[measurer_i].unfreeze()
-                self._skip_curve = True
-
-        if self.sender() is self.freeze_curve_a_action:
+        if i == 0:
+            action = self.freeze_curve_a_action
             self._auto_settings.save_param(freeze_curve_a=state)
-        elif self.sender() is self.freeze_curve_b_action:
+        elif i == 1:
+            action = self.freeze_curve_b_action
             self._auto_settings.save_param(freeze_curve_b=state)
+        else:
+            action = None
+
+        if self._msystem and action:
+            self._freeze_state_for_curve(i, action)
 
     def get_default_pin_coordinates(self) -> Tuple[float, float]:
         """
@@ -1677,6 +1699,7 @@ class EPLabWindow(QMainWindow):
         measurement_system, product_name = connection_data
         if measurement_system:
             self._connect_devices(measurement_system, product_name)
+            self._check_if_frozen_state_for_curves_to_restore()
 
     @pyqtSlot(bool)
     def handle_measurement_plan_change(self, there_are_measured_pins: bool) -> None:

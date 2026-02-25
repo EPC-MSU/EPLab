@@ -11,22 +11,18 @@ class TestUtils(unittest.TestCase):
         self.settings: QSettings = QSettings(path, QSettings.IniFormat)
 
     def test_float_to_str(self) -> None:
-        self.assertEqual(ut.float_to_str(67.3244), "67.32")
-        self.assertEqual(ut.float_to_str(-23), "-23.00")
-        self.assertEqual(ut.float_to_str(0.0023), "0.00")
+        self.assertEqual(ut.float_to_str(67.3244), "67.324")
+        self.assertEqual(ut.float_to_str(-23), "-23")
+        self.assertEqual(ut.float_to_str(0.0023), "0.002")
 
     def test_get_parameter(self) -> None:
         self.settings.setValue("parameter_1", 56)
         self.assertEqual(ut.get_parameter(self.settings, "parameter_1", int), 56)
 
         self.settings.setValue("parameter_2", "wefkwj")
-        with self.assertRaises(ut.InvalidParameterValueError):
-            ut.get_parameter(self.settings, "parameter_2", int)
+        self.assertEqual(ut.get_parameter(self.settings, "parameter_2", int, default=78), 78)
 
-        with self.assertRaises(ut.MissingParameterError):
-            ut.get_parameter(self.settings, "parameter_3", required=True)
-
-        self.assertEqual(ut.get_parameter(self.settings, "parameter_4", required=False, default=69), 69)
+        self.assertEqual(ut.get_parameter(self.settings, "parameter_4", default=69), 69)
 
     def test_set_parameter(self) -> None:
         ut.set_parameter(self.settings, "parameter_5", 67)
