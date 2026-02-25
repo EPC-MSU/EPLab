@@ -134,7 +134,6 @@ class EPLabWindow(QMainWindow):
                                                                             self._break_signature_saver.DIR_PATH)
         self._plan_auto_transition.go_to_next_signal.connect(self.go_to_left_or_right_pin, Qt.DirectConnection)
         self._plan_auto_transition.save_pin_signal.connect(self.save_pin, Qt.DirectConnection)
-        self._set_auto_settings_to_ui()
 
         if uri_1 is None and uri_2 is None:
             self._connection_checker.run_check()
@@ -143,6 +142,7 @@ class EPLabWindow(QMainWindow):
             uris, product_name = analyze_connection_params([uri_1, uri_2])
             self.connect_devices(*uris, product_name=product_name)
 
+        self._set_auto_settings_to_ui()
         self._open_measurement_plan_at_start(path)
 
     @property
@@ -446,8 +446,6 @@ class EPLabWindow(QMainWindow):
         self._settings_update_next_cycle = None
         self._skip_curve = False
         self._work_mode = None
-        self._hide_current_curve = False
-        self._hide_reference_curve = False
         self._compare_measurement = None
         self._current_curve = None
         self._reference_curve = None
@@ -963,6 +961,18 @@ class EPLabWindow(QMainWindow):
         if self._auto_settings.sound:
             self.sound_enabled_action.toggle()
 
+        if self._auto_settings.freeze_curve_a:
+            self.freeze_curve_a_action.toggle()
+
+        if self._auto_settings.freeze_curve_b:
+            self.freeze_curve_b_action.toggle()
+
+        if self._auto_settings.hide_curve_a:
+            self.hide_curve_a_action.toggle()
+
+        if self._auto_settings.hide_curve_b:
+            self.hide_curve_b_action.toggle()
+
         self._update_tolerance(self._auto_settings.tolerance)
 
         if self._auto_settings.board_window_geometry:
@@ -970,6 +980,13 @@ class EPLabWindow(QMainWindow):
                 self._board_window.restoreGeometry(self._auto_settings.board_window_geometry)
             except Exception as exc:
                 logger.error("Unable to restore window geometry with board photo: %s", exc)
+
+    def _set_curve_view_settings_to_init_state(self) -> None:
+        for action in (self.freeze_curve_a_action, self.freeze_curve_b_action):
+            action.setChecked(False)
+
+        for action in (self.hide_curve_a_action, self.hide_curve_b_action):
+            action.setChecked(False)
 
     def _set_default_geometry(self) -> None:
         """
@@ -1060,16 +1077,11 @@ class EPLabWindow(QMainWindow):
 
         self._settings_update_next_cycle = None
         self._skip_curve = False
-        self._hide_current_curve = False
-        self._hide_reference_curve = False
+
         self._compare_measurement = None
         self._current_curve = None
         self._reference_curve = None
         self._test_curve = None
-
-        for action in (self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
-                       self.hide_curve_b_action):
-            action.setChecked(False)
 
         self._iv_window.plot.set_state_adding_cursor(False)
         self._iv_window.plot.set_state_removing_cursor(False)
@@ -1344,6 +1356,7 @@ class EPLabWindow(QMainWindow):
                                                                                             product_name)
         if measurement_system:
             self._connect_devices(measurement_system, product_name)
+            self._set_curve_view_settings_to_init_state()
         else:
             self._disconnect_devices()
             self._delete_measurement_plan()
@@ -1455,6 +1468,7 @@ class EPLabWindow(QMainWindow):
             return
 
         self._disconnect_devices()
+        self._set_curve_view_settings_to_init_state()
         self._delete_measurement_plan()
         self._report_measurers_disconnected()
 
@@ -1505,18 +1519,23 @@ class EPLabWindow(QMainWindow):
         return super().event(event)
 
     @pyqtSlot(int, bool)
-    def freeze_curve(self, measurer_id: int, state: bool) -> None:
+    def freeze_curve(self, measurer_i: int, state: bool) -> None:
         """
-        :param measurer_id: index of the measurer;
+        :param measurer_i: index of the measurer;
         :param state: if True, then the signature of the given measurer will be frozen, otherwise it will be unfrozen.
         """
 
-        if 0 <= measurer_id < len(self._msystem.measurers):
+        if self._msystem and 0 <= measurer_i < len(self._msystem.measurers):
             if state:
-                self._msystem.measurers[measurer_id].freeze()
+                self._msystem.measurers[measurer_i].freeze()
             else:
-                self._msystem.measurers[measurer_id].unfreeze()
+                self._msystem.measurers[measurer_i].unfreeze()
                 self._skip_curve = True
+
+        if self.sender() is self.freeze_curve_a_action:
+            self._auto_settings.save_param(freeze_curve_a=state)
+        elif self.sender() is self.freeze_curve_b_action:
+            self._auto_settings.save_param(freeze_curve_b=state)
 
     def get_default_pin_coordinates(self) -> Tuple[float, float]:
         """
@@ -1703,8 +1722,10 @@ class EPLabWindow(QMainWindow):
 
         if self.sender() is self.hide_curve_a_action:
             self._hide_current_curve = state
+            self._auto_settings.save_param(hide_curve_a=state)
         elif self.sender() is self.hide_curve_b_action:
             self._hide_reference_curve = state
+            self._auto_settings.save_param(hide_curve_b=state)
 
     @pyqtSlot()
     def load_board(self, filename: Optional[str] = None) -> None:

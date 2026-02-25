@@ -33,6 +33,10 @@ class AutoSettings(SettingsHandler):
     voltage: str = None
     auto_transition: bool = False
     board_window_geometry = None
+    freeze_curve_a: bool = False
+    freeze_curve_b: bool = False
+    hide_curve_a: bool = False
+    hide_curve_b: bool = False
     language: Language = ut.get_default_language()
     last_used_dir: str = get_user_documents_path()
     main_window_geometry = None
@@ -74,6 +78,10 @@ class AutoSettings(SettingsHandler):
         self._read_parameters_from_settings(settings, params)
         settings.endGroup()
         params = {"auto_transition": {"convert": ut.to_bool},
+                  "freeze_curve_a": {"convert": ut.to_bool},
+                  "freeze_curve_b": {"convert": ut.to_bool},
+                  "hide_curve_a": {"convert": ut.to_bool},
+                  "hide_curve_b": {"convert": ut.to_bool},
                   "language": {"convert": ut.get_language_from_str},
                   "last_used_dir": {"convert": ut.get_dir_path_from_str},
                   "pin_shift_warning_info": {"convert": ut.to_bool},
@@ -120,6 +128,10 @@ class AutoSettings(SettingsHandler):
         settings.endGroup()
 
         params = {"auto_transition": {},
+                  "freeze_curve_a": {},
+                  "freeze_curve_b": {},
+                  "hide_curve_a": {},
+                  "hide_curve_b": {},
                   "language": {"convert": ut.convert_language_to_str},
                   "last_used_dir": {"convert": str},
                   "pin_shift_warning_info": {},
