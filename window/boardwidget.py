@@ -207,7 +207,8 @@ class BoardWidget(QWidget):
         :param point: object with coordinates of new pin.
         """
 
-        if self._main_window.work_mode is WorkMode.WRITE and self._main_window.create_new_pin(point, False):
+        if (not self._main_window.measurement_plan.multiplexer and self._main_window.work_mode is WorkMode.WRITE
+                and self._main_window.create_new_pin(point, False)):
             self._main_window.save_pin(False)
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
