@@ -468,12 +468,12 @@ class EPLabWindow(QMainWindow):
             self._splitter_widget_backup_size = self._splitter_widget.sizes()
             self._splitter_widget.setSizes([1, 0])
             self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.ArrowType.UpArrow)
-            self._auto_settings.save_equivalent_circuits_state(True)
+            self._auto_settings.save_param(equivalent_circuits_rolled_up=True)
         else:
             self._splitter_widget.setSizes(self._splitter_widget_backup_size or [1, 100])
             self._splitter_widget_backup_size = None
             self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.ArrowType.DownArrow)
-            self._auto_settings.save_equivalent_circuits_state(False)
+            self._auto_settings.save_param(equivalent_circuits_rolled_up=False)
 
     def _connect_devices(self, measurement_system: MeasurementSystem, product_name: Optional[cw.ProductName] = None
                          ) -> None:
@@ -766,11 +766,11 @@ class EPLabWindow(QMainWindow):
         if index == 1:  # Handle with arrow
             if self._splitter_widget.sizes()[1] == 0:  # text_log is collapsed
                 self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.ArrowType.UpArrow)
-                self._auto_settings.save_equivalent_circuits_state(True)
+                self._auto_settings.save_param(equivalent_circuits_rolled_up=True)
             else:
                 self._splitter_widget_backup_size = self._splitter_widget.sizes()
                 self._button_to_collapse_equivalent_circuit_widgets.setArrowType(Qt.ArrowType.DownArrow)
-                self._auto_settings.save_equivalent_circuits_state(False)
+                self._auto_settings.save_param(equivalent_circuits_rolled_up=False)
 
     def _init_ui(self) -> None:
         loadUi(os.path.join(os.path.dirname(ut.DIR_MEDIA), "gui", "mainwindow.ui"), self)
@@ -1394,11 +1394,12 @@ class EPLabWindow(QMainWindow):
         :param new_settings: new settings.
         """
 
-        self._auto_settings.save_param(auto_transition=new_settings.auto_transition,
-                                       max_optimal_voltage=new_settings.max_optimal_voltage,
-                                       pin_shift_warning_info=new_settings.pin_shift_warning_info,
-                                       tolerance=new_settings.tolerance,
-                                       warning_about_untested_pins_in_report=new_settings.warning_about_untested_pins_in_report)
+        self._auto_settings.save_param(
+            auto_transition=new_settings.auto_transition,
+            max_optimal_voltage=new_settings.max_optimal_voltage,
+            pin_shift_warning_info=new_settings.pin_shift_warning_info,
+            tolerance=new_settings.tolerance,
+            warning_about_untested_pins_in_report=new_settings.warning_about_untested_pins_in_report)
         self._update_tolerance(self._auto_settings.tolerance)
 
     @pyqtSlot(str)
@@ -1539,7 +1540,7 @@ class EPLabWindow(QMainWindow):
                                                                  qApp.translate("t", "Не показывать снова"),
                                                                  no_button=True, yes_button=True)
             if not_show_again:
-                self._auto_settings.save_warning_about_untested_pins_in_report(False)
+                self._auto_settings.save_param(warning_about_untested_pins_in_report=False)
 
             if result != QMessageBox.ButtonRole.AcceptRole:
                 return

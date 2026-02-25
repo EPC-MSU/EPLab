@@ -58,7 +58,8 @@ class AutoSettings(SettingsHandler):
         """
 
         new_obj = type(self)()
-        for attr_name in ("auto_transition", "max_optimal_voltage", "pin_shift_warning_info", "tolerance", "warning_about_untested_pins_in_report"):
+        for attr_name in ("auto_transition", "max_optimal_voltage", "pin_shift_warning_info", "tolerance",
+                          "warning_about_untested_pins_in_report"):
             value = getattr(self, attr_name, None)
             setattr(new_obj, attr_name, value)
         return new_obj
