@@ -9,7 +9,7 @@ from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QToolBar,
                              QVBoxLayout, QWidget)
-from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MultiplexerOutput
+from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MAX_CHANNEL_NUMBER, MultiplexerOutput
 from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
 from dialogs.save_geometry import update_widget_to_save_geometry
 from window import utils as ut
@@ -320,15 +320,14 @@ class MuxAndPlanWindow(QWidget):
         self._manual_stop = False
 
     @pyqtSlot(MultiplexerOutput)
-    def handle_mux_output_turned_on(self, mux_output: MultiplexerOutput) -> None:
+    def handle_mux_output_turned_on(self, output: MultiplexerOutput) -> None:
         """
         Slot processes the signal to turn on the given multiplexer output.
-        :param mux_output: multiplexer output.
+        :param output: multiplexer output.
         """
 
-        index = self.measurement_plan_widget.get_pin_index(mux_output)
-        if index is not None:
-            self._main_window.handle_changing_pin_in_mux(index)
+        index = (output.module_number - 1) * MAX_CHANNEL_NUMBER + output.channel_number - 1
+        self._main_window.handle_changing_pin_in_mux(index)
 
     def select_current_pin(self) -> None:
         """

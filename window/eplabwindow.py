@@ -242,7 +242,7 @@ class EPLabWindow(QMainWindow):
             self._measured_pins_checker.handle_measurement_plan_change)
         self.measurement_plan.remove_all_callback_funcs_for_mux_output_change()
         self.measurement_plan.add_callback_func_for_mux_output_change(
-            self._mux_and_plan_window.multiplexer_pinout_widget.set_connected_channel)
+            self._mux_and_plan_window.multiplexer_pinout_widget.show_channel_as_connected)
 
     def _adjust_critical_width(self) -> None:
         """

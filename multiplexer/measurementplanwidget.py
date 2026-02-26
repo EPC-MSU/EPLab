@@ -2,10 +2,9 @@
 File with class for widget to show short information from measurement plan.
 """
 
-from typing import Generator, List, Optional
+from typing import Generator, List
 from PyQt5.QtCore import QCoreApplication as qApp
 from PyQt5.QtGui import QCloseEvent
-from epcore.analogmultiplexer.base import MultiplexerOutput
 from epcore.elements import MeasurementSettings, Pin
 from epcore.product import EyePointProduct
 from window.common import WorkMode
@@ -123,22 +122,6 @@ class MeasurementPlanWidget(TableWidget):
         """
 
         return self.rowCount()
-
-    def get_pin_index(self, mux_output: MultiplexerOutput) -> Optional[int]:
-        """
-        :param mux_output: multiplexer output.
-        :return: pin index with a given multiplexer output.
-        """
-
-        channel = str(mux_output.channel_number)
-        module = str(mux_output.module_number)
-        for index in range(self.rowCount()):
-            pin_module = self.item(index, 1).text()
-            pin_channel = self.item(index, 2).text()
-            if pin_channel == channel and pin_module == module:
-                return index
-
-        return None
 
     def save_measurement(self, index: int) -> None:
         """

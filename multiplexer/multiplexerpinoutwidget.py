@@ -41,10 +41,10 @@ class ChannelWidget(QWidget):
                                                           ).format(self._channel_number))
         self.button_turn_on_off.clicked.connect(self.send_to_turn_on_off)
         self.button_turn_on_off.setStyleSheet(
-            f"QPushButton {{background-color: {ChannelWidget.COLOR_TURNED_OFF}; border: none; font: 10px; "
+            f"QPushButton {{background-color: {self.COLOR_TURNED_OFF}; border: none; font: 10px; "
             f"font-weight: bold; spacing: 0px;}}"
-            f"QPushButton:checked {{background-color: {ChannelWidget.COLOR_TURNED_ON}; border: none;}}")
-        self.button_turn_on_off.setFixedSize(ChannelWidget.SIZE, ChannelWidget.SIZE)
+            f"QPushButton:checked {{background-color: {self.COLOR_TURNED_ON}; border: none;}}")
+        self.button_turn_on_off.setFixedSize(self.SIZE, self.SIZE)
 
         v_box_layout = QVBoxLayout()
         v_box_layout.addWidget(self.button_turn_on_off, alignment=Qt.AlignmentFlag.AlignHCenter)
@@ -80,7 +80,7 @@ class ModuleWidget(QWidget):
     MARGIN: int = 2
     MAX_CHANNEL_NUMBER: int = 64
     module_turned_off: pyqtSignal = pyqtSignal(MultiplexerOutput)
-    module_turned_on: pyqtSignal = pyqtSignal(MultiplexerOutput)
+    module_turned_on: pyqtSignal = pyqtSignal(MultiplexerOutput, bool)
 
     def __init__(self, module_type: ModuleTypes, module_number: int) -> None:
         """
@@ -92,7 +92,7 @@ class ModuleWidget(QWidget):
         self._channels: Dict[int, ChannelWidget] = {}
         self._module_number: int = module_number
         self._module_type: ModuleTypes = module_type
-        self._turned_on_channel: int = None
+        self._turned_on_channel: Optional[int] = None
         self._init_ui()
 
     def _change_module_color(self) -> None:
@@ -100,7 +100,7 @@ class ModuleWidget(QWidget):
         Method changes color of module.
         """
 
-        color = ModuleWidget.COLOR_TURNED_ON if self._turned_on_channel else ModuleWidget.COLOR_TURNED_OFF
+        color = self.COLOR_TURNED_ON if self._turned_on_channel else self.COLOR_TURNED_OFF
         self.frame_module.setStyleSheet(f"QWidget {{border: 2px solid {color}; border-radius: 3px;}}")
 
     def _create_pinout(self) -> QWidget:
@@ -110,9 +110,8 @@ class ModuleWidget(QWidget):
         """
 
         grid_layout = QGridLayout()
-        grid_layout.setContentsMargins(ModuleWidget.MARGIN, ModuleWidget.MARGIN, ModuleWidget.MARGIN,
-                                       ModuleWidget.MARGIN)
-        for index in range(ModuleWidget.MAX_CHANNEL_NUMBER):
+        grid_layout.setContentsMargins(self.MARGIN, self.MARGIN, self.MARGIN, self.MARGIN)
+        for index in range(self.MAX_CHANNEL_NUMBER):
             column = index // 2
             row = index % 2
             channel = ChannelWidget(index + 1)
@@ -121,7 +120,7 @@ class ModuleWidget(QWidget):
             grid_layout.addWidget(channel, row, column)
 
         widget = QWidget()
-        widget.setStyleSheet(f"QWidget {{border: 2px solid {ModuleWidget.COLOR_TURNED_OFF}; border-radius: 3px;}}")
+        widget.setStyleSheet(f"QWidget {{border: 2px solid {self.COLOR_TURNED_OFF}; border-radius: 3px;}}")
         widget.setLayout(grid_layout)
         return widget
 
@@ -143,21 +142,23 @@ class ModuleWidget(QWidget):
         self.setLayout(h_layout)
         self.setToolTip(qApp.translate("mux", "Модуль {}").format(self._module_number))
 
-    def set_connected_channel(self, channel_number: int) -> None:
+    def show_channel_as_connected(self, channel_number: int) -> None:
         """
-        Method sets given channel of module as turned on.
+        Method shows given channel of module as turned on.
         :param channel_number: channel number.
         """
 
         self._channels[channel_number].button_turn_on_off.setChecked(True)
-        self.turn_on_off_channel(True, channel_number)
+        self.turn_on_off_channel(True, channel_number, False)
 
     @pyqtSlot(bool, int)
-    def turn_on_off_channel(self, state: bool, channel_number: int) -> None:
+    def turn_on_off_channel(self, state: bool, channel_number: int, actually_turn_on: bool = True) -> None:
         """
         Slot turns on or turns off channel.
         :param state: if True then channel should be turned on;
-        :param channel_number: channel number to be turned on or off.
+        :param channel_number: channel number to be turned on or off;
+        :param actually_turn_on: if True, then you need to enable the output on the multiplexer, and not just display
+        it in widgets.
         """
 
         if state:
@@ -165,7 +166,7 @@ class ModuleWidget(QWidget):
                 self._channels[self._turned_on_channel].turn_off()
             self._turned_on_channel = channel_number
             output = MultiplexerOutput(channel_number=channel_number, module_number=self._module_number)
-            self.module_turned_on.emit(output)
+            self.module_turned_on.emit(output, actually_turn_on)
         else:
             if self._turned_on_channel and self._turned_on_channel == channel_number:
                 output = MultiplexerOutput(channel_number=channel_number, module_number=self._module_number)
@@ -277,7 +278,7 @@ class MultiplexerPinoutWidget(QWidget):
 
             connected_output = self._parent.measurement_plan.multiplexer.get_connected_channel()
             if connected_output:
-                self._modules[connected_output.module_number].set_connected_channel(connected_output.channel_number)
+                self._modules[connected_output.module_number].show_channel_as_connected(connected_output.channel_number)
                 self._turned_on_output = connected_output
 
     def enable_widgets(self, state: bool) -> None:
@@ -288,15 +289,6 @@ class MultiplexerPinoutWidget(QWidget):
 
         for module in self._modules.values():
             module.setEnabled(state)
-
-    def set_connected_channel(self, channel: MultiplexerOutput) -> None:
-        """
-        Method sets given channel of multiplexer as turned on.
-        :param channel: connected channel.
-        """
-
-        if channel.module_number in self._modules:
-            self._modules[channel.module_number].set_connected_channel(channel.channel_number)
 
     def set_visible(self, status: Optional[bool] = None) -> None:
         """
@@ -310,6 +302,15 @@ class MultiplexerPinoutWidget(QWidget):
             widget.setVisible(visible)
         self.label_no_mux.setVisible(not visible)
 
+    def show_channel_as_connected(self, output: MultiplexerOutput) -> None:
+        """
+        Method shows given channel of multiplexer as turned on.
+        :param output: output to connect.
+        """
+
+        if output.module_number in self._modules:
+            self._modules[output.module_number].show_channel_as_connected(output.channel_number)
+
     @pyqtSlot(MultiplexerOutput)
     def turn_off_output(self, output: MultiplexerOutput) -> None:
         """
@@ -322,19 +323,23 @@ class MultiplexerPinoutWidget(QWidget):
                 self._parent.measurement_plan.multiplexer.disconnect_all_channels()
                 self._turned_on_output = None
 
-    @pyqtSlot(MultiplexerOutput)
-    def turn_on_output(self, output: MultiplexerOutput) -> None:
+    @pyqtSlot(MultiplexerOutput, bool)
+    def turn_on_output(self, output: MultiplexerOutput, actually_turn_on: bool) -> None:
         """
         Slot turns on output of multiplexer.
-        :param output: output to turn on.
+        :param output: output to turn on;
+        :param actually_turn_on: if True, then you need to enable the output on the multiplexer, and not just display
+        it in widgets.
         """
 
-        try:
-            self._parent.measurement_plan.multiplexer.connect_channel(output)
-        except Exception:
-            logger.error("Failed to turn on multiplexer output %s", output, exc_info=sys.exc_info())
-            self._device_errors_handler.all_ok = False
-            return
+        if actually_turn_on:
+            try:
+                self._parent.measurement_plan.multiplexer.connect_channel(output)
+            except Exception:
+                logger.error("Failed to turn on multiplexer output %s", output, exc_info=sys.exc_info())
+                self._device_errors_handler.all_ok = False
+                return
+
         if self._turned_on_output and output.module_number != self._turned_on_output.module_number:
             self._modules[self._turned_on_output.module_number].turn_off()
         self._turned_on_output = output
