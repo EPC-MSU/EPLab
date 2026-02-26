@@ -16,7 +16,7 @@ class MeasurementPlanRunner(QObject):
     Class for carrying out measurements according to plan.
     """
 
-    PERIOD: int = 10
+    PERIOD_MS: int = 5
     go_to_pin_signal: pyqtSignal = pyqtSignal(int, bool)
     measurement_done: pyqtSignal = pyqtSignal()
     measurements_finished: pyqtSignal = pyqtSignal()
@@ -53,12 +53,12 @@ class MeasurementPlanRunner(QObject):
     def _create_timers(self) -> None:
         self._timer_to_go_to_pin: QTimer = QTimer()
         self._timer_to_go_to_pin.timeout.connect(self._go_to_pin)
-        self._timer_to_go_to_pin.setInterval(MeasurementPlanRunner.PERIOD)
+        self._timer_to_go_to_pin.setInterval(self.PERIOD_MS)
         self._timer_to_go_to_pin.setSingleShot(True)
 
         self._timer_to_save_measurements: QTimer = QTimer()
         self._timer_to_save_measurements.timeout.connect(self._save_measurements)
-        self._timer_to_save_measurements.setInterval(MeasurementPlanRunner.PERIOD)
+        self._timer_to_save_measurements.setInterval(self.PERIOD_MS)
         self._timer_to_save_measurements.setSingleShot(True)
 
     @pyqtSlot()
@@ -70,6 +70,7 @@ class MeasurementPlanRunner(QObject):
 
         if isinstance(self._amount_of_pins, int) and isinstance(self._current_pin_index, int) and \
                 self._current_pin_index < self._amount_of_pins:
+            logger.debug("Start to go to next pin in runner")
             self._main_window.go_to_selected_pin(self._current_pin_index)
             self._go_to_next_pin_required = False
             logger.debug("The multiplexer has moved to pin %d", self._current_pin_index)
@@ -88,6 +89,7 @@ class MeasurementPlanRunner(QObject):
         self.measurement_is_valid = False
         self._current_pin_index += 1
         self._timer_to_go_to_pin.start()
+        logger.debug("Send signal to go to next step")
 
     @pyqtSlot()
     def _save_measurements(self) -> None:
