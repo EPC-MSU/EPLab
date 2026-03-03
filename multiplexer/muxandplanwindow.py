@@ -149,7 +149,8 @@ class MuxAndPlanWindow(QWidget):
         return widget
 
     def _create_mux_measurement_runner(self) -> None:
-        self._mux_measurement_runner: MuxMeasurementRunner = MuxMeasurementRunner()
+        self._mux_measurement_runner: MuxMeasurementRunner = MuxMeasurementRunner(
+            self._main_window.device_errors_handler)
         self._mux_measurement_runner.measurement_done.connect(self.change_progress)
         self._mux_measurement_runner.measurements_finished.connect(self.turn_off_standby_mode)
         self._mux_measurement_runner.measurements_finished.connect(self.create_report)
@@ -354,16 +355,6 @@ class MuxAndPlanWindow(QWidget):
         """
 
         self.setEnabled(True)
-        self._check_multiplexer_connection()
-
-    @check_multiplexer
-    def set_disconnection_mode(self) -> None:
-        """
-        Method switches window to mode when devices are disconnected from application.
-        """
-
-        if self.isEnabled():
-            self._stop_plan_measurement()
         self._check_multiplexer_connection()
 
     @pyqtSlot(bool)

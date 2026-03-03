@@ -8,7 +8,7 @@ from typing import Optional
 from PyQt5.QtCore import pyqtSignal, QThread
 from epcore.elements import Measurement, MeasurementSettings
 from epcore.measurementmanager import MeasurementPlan
-from window.common import WorkMode
+from window.common import DeviceErrorsHandler, WorkMode
 
 
 logger = logging.getLogger("eplab")
@@ -23,9 +23,10 @@ class MuxMeasurementRunner(QThread):
     measurements_finished: pyqtSignal = pyqtSignal()
     measurements_started: pyqtSignal = pyqtSignal(int)
 
-    def __init__(self) -> None:
+    def __init__(self, device_errors_handler: DeviceErrorsHandler) -> None:
         super().__init__()
         self._default_measurement_settings: Optional[MeasurementSettings] = None
+        self._device_errors_handler: DeviceErrorsHandler = device_errors_handler
         self._is_running: bool = False
         self._measurement_plan: Optional[MeasurementPlan] = None
         self._work_mode: Optional[WorkMode] = None
@@ -39,16 +40,15 @@ class MuxMeasurementRunner(QThread):
         return self._is_running
 
     def _do_measurements(self) -> None:
-        logger.info("Measurements launched according to plan using a multiplexer")
-        self.measurements_started.emit(self._measurement_plan.pins_number)
+        logger.debug("Measurements launched according to plan using a multiplexer")
 
         for i, pin in self._measurement_plan.all_pins_iterator():
             if not self._is_running:
-                logger.info("The execution of measurements according to plan using a multiplexer stopped at "
-                            "pin %d of %d", i, self._measurement_plan.pins_number)
+                logger.debug("The execution of measurements according to plan using a multiplexer stopped at "
+                             "pin %d of %d", i, self._measurement_plan.pins_number)
                 break
 
-            logger.info("Measurement is performed at pin %d", i)
+            logger.debug("Measurement is performed at pin %d", i)
             self._measurement_plan.go_pin(i)
             reference_measurement = pin.get_reference_measurement()
             if reference_measurement is not None:
@@ -84,15 +84,18 @@ class MuxMeasurementRunner(QThread):
             QThread.msleep(10)
 
         if self._is_running:
-            logger.info("Measurements according to plan using a multiplexer are completed")
-
-        self._is_running = False
-        self.measurements_finished.emit()
+            logger.debug("Measurements according to plan using a multiplexer are completed")
 
     def run(self) -> None:
         while True:
             if self._is_running:
-                self._do_measurements()
+                self.measurements_started.emit(self._measurement_plan.pins_number)
+
+                with self._device_errors_handler:
+                    self._do_measurements()
+
+                self._is_running = False
+                self.measurements_finished.emit()
 
             QThread.msleep(300)
 

@@ -1350,7 +1350,7 @@ class EPLabWindow(QMainWindow):
             return
 
         self._board_window.close()
-        self._mux_and_plan_window.close()
+        self._mux_and_plan_window.close_and_stop_plan_measurement()
         if self._report_generation_thread:
             self._report_generation_thread.stop_thread()
             self._report_generation_thread.wait()
