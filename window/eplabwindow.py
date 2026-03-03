@@ -231,19 +231,6 @@ class EPLabWindow(QMainWindow):
 
         return self._work_mode
 
-    def _add_callbacks_to_measurement_plan(self) -> None:
-        """
-        Method adds the required callback functions to the measurement plan.
-        """
-
-        self.measurement_plan.remove_all_callback_funcs_for_pin_changes()
-        self.measurement_plan.add_callback_func_for_pin_changes(self._change_menu_items_for_current_pin_change)
-        self.measurement_plan.add_callback_func_for_pin_changes(
-            self._measured_pins_checker.handle_measurement_plan_change)
-        self.measurement_plan.remove_all_callback_funcs_for_mux_output_change()
-        self.measurement_plan.add_callback_func_for_mux_output_change(
-            self._mux_and_plan_window.multiplexer_pinout_widget.show_channel_as_connected)
-
     def _adjust_critical_width(self) -> None:
         """
         Method updates the critical window width at which it is necessary to change the toolbar display mode from text
@@ -283,7 +270,7 @@ class EPLabWindow(QMainWindow):
         Method changes the states of menu items when the current pin in the measurement plan changes.
         """
 
-        if self._mux_and_plan_window.measurement_plan_runner.is_running:
+        if self._mux_and_plan_window.mux_measurements_are_running:
             return
 
         if self.measurement_plan.pins_number == 0:
@@ -675,18 +662,19 @@ class EPLabWindow(QMainWindow):
 
     @pyqtSlot()
     def _handle_periodic_task(self) -> None:
+        if self._mux_and_plan_window.mux_measurements_are_running:
+            self._timer.start()
+            return
+
         if self._device_errors_handler.all_ok:
             result_of_periodic_task = False
             with self._device_errors_handler:
                 result_of_periodic_task = self._read_curves_periodic_task()
 
             self._plan_auto_transition.save_measurements_or_go_to_next_pin()
-            if self._mux_and_plan_window.measurement_plan_runner.measurement_is_valid:
-                self._mux_and_plan_window.measurement_plan_runner.save_measurements()
 
             with self._device_errors_handler:
                 if result_of_periodic_task:
-                    self._mux_and_plan_window.measurement_plan_runner.determine_if_measurement_is_valid()
                     self._trigger_measurements()
 
             self._timer.start()  # add this task to the event loop
@@ -869,9 +857,7 @@ class EPLabWindow(QMainWindow):
                 if self._need_to_restore_frozen_state:
                     self._restore_frozen_state_for_curves()
 
-                if self._mux_and_plan_window.measurement_plan_runner.is_running:
-                    self._mux_and_plan_window.measurement_plan_runner.determine_whether_to_save_measurement()
-                elif self.measurement_plan and not self.measurement_plan.multiplexer:
+                if self.measurement_plan and not self.measurement_plan.multiplexer:
                     self._plan_auto_transition.check_auto_transition(self.work_mode, self._product_name,
                                                                      measurement_settings, self._current_curve,
                                                                      self._reference_curve)
@@ -1126,7 +1112,7 @@ class EPLabWindow(QMainWindow):
 
         self._mux_and_plan_window.update_info()
         self._comment_widget.update_info()
-        self._add_callbacks_to_measurement_plan()
+        self.add_callbacks_to_measurement_plan()
         self._switch_work_mode(WorkMode.COMPARE)
 
         with self._device_errors_handler:
@@ -1309,6 +1295,15 @@ class EPLabWindow(QMainWindow):
         self._player.set_tolerance(tolerance)
         self._comment_widget.update_table_for_new_tolerance()
 
+    def add_callbacks_to_measurement_plan(self) -> None:
+        self.measurement_plan.remove_all_callback_funcs_for_pin_changes()
+        self.measurement_plan.add_callback_func_for_pin_changes(self._change_menu_items_for_current_pin_change)
+        self.measurement_plan.add_callback_func_for_pin_changes(
+            self._measured_pins_checker.handle_measurement_plan_change)
+        self.measurement_plan.remove_all_callback_funcs_for_mux_output_change()
+        self.measurement_plan.add_callback_func_for_mux_output_change(
+            self._mux_and_plan_window.multiplexer_pinout_widget.show_channel_as_connected)
+
     @pyqtSlot(AutoSettings)
     def apply_settings(self, new_settings: AutoSettings) -> None:
         """
@@ -1406,7 +1401,7 @@ class EPLabWindow(QMainWindow):
         self.update_current_pin()
         self._mux_and_plan_window.update_info()
         self._comment_widget.update_info()
-        self._add_callbacks_to_measurement_plan()
+        self.add_callbacks_to_measurement_plan()
         self._change_menu_items_for_current_pin_change()
         self._change_work_mode_for_new_measurement_plan()
 
@@ -1606,7 +1601,7 @@ class EPLabWindow(QMainWindow):
             else:
                 self.measurement_plan.go_next_pin()
         except BadMultiplexerOutputError:
-            if not self._mux_and_plan_window.measurement_plan_runner.is_running:
+            if not self._mux_and_plan_window.mux_measurements_are_running:
                 ut.show_message(qApp.translate("t", "Ошибка"),
                                 qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход "
                                                     "точки не был установлен."))
@@ -1637,7 +1632,7 @@ class EPLabWindow(QMainWindow):
             with self._device_errors_handler:
                 self.measurement_plan.go_pin(pin_index)
         except BadMultiplexerOutputError:
-            if not self._mux_and_plan_window.measurement_plan_runner.is_running:
+            if not self._mux_and_plan_window.mux_measurements_are_running:
                 ut.show_message(qApp.translate("t", "Ошибка"),
                                 qApp.translate("t", "Подключенный мультиплексор имеет другую конфигурацию, выход точки "
                                                     "не был установлен."))
@@ -1787,7 +1782,7 @@ class EPLabWindow(QMainWindow):
             else:
                 self._change_work_mode(WorkMode.READ_PLAN)
             self._comment_widget.update_info()
-            self._add_callbacks_to_measurement_plan()
+            self.add_callbacks_to_measurement_plan()
             self._change_menu_items_for_current_pin_change()
 
             self.update_current_pin()
@@ -1835,6 +1830,10 @@ class EPLabWindow(QMainWindow):
             self._mux_and_plan_window.show()
         else:
             self._mux_and_plan_window.activateWindow()
+
+    def remove_callbacks_from_measurement_plan(self) -> None:
+        self.measurement_plan.remove_all_callback_funcs_for_pin_changes()
+        self.measurement_plan.remove_all_callback_funcs_for_mux_output_change()
 
     @pyqtSlot()
     def remove_pin(self) -> None:
@@ -2053,7 +2052,7 @@ class EPLabWindow(QMainWindow):
         In TEST work mode you can make measurements only at pins where there are reference IV-curves. See ticket #89690.
         """
 
-        if self.work_mode is WorkMode.TEST and not self._mux_and_plan_window.measurement_plan_runner.is_running:
+        if self.work_mode is WorkMode.TEST and not self._mux_and_plan_window.mux_measurements_are_running:
             self.save_point_action.setEnabled(not self._measured_pins_checker.check_empty_current_pin())
 
     def set_measurement_settings_and_update_ui(self, settings: MeasurementSettings) -> None:

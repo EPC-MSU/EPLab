@@ -6,7 +6,7 @@ import os
 import sys
 import unittest
 from PyQt5.QtWidgets import QApplication
-from multiplexer.measurementplanrunner import MeasurementPlanRunner
+from multiplexer.muxmeasurementrunner import MuxMeasurementRunner
 from multiplexer.measurementplanwidget import MeasurementPlanWidget
 from .utils import create_dummy_main_window
 
@@ -22,7 +22,7 @@ class TestMeasurementPlanRunner(unittest.TestCase):
         dummy_main_window = create_dummy_main_window()
         measurement_plan_widget = MeasurementPlanWidget(dummy_main_window)
         measurement_plan_widget.update_info()
-        runner = MeasurementPlanRunner(dummy_main_window, measurement_plan_widget)
+        runner = MuxMeasurementRunner(dummy_main_window, measurement_plan_widget)
         runner.start_or_stop_measurements(True)
         self.assertEqual(runner._amount_of_pins, 1)
         app.exit(0)
@@ -38,7 +38,7 @@ class TestMeasurementPlanRunner(unittest.TestCase):
         dummy_main_window.update_measurement_plan(board_path)
         measurement_plan_widget = MeasurementPlanWidget(dummy_main_window)
         measurement_plan_widget.update_info()
-        runner = MeasurementPlanRunner(dummy_main_window, measurement_plan_widget)
+        runner = MuxMeasurementRunner(dummy_main_window, measurement_plan_widget)
         runner.start_or_stop_measurements(True)
         self.assertEqual(runner._amount_of_pins, 2)
         app.exit(0)

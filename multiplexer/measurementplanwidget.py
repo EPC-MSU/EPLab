@@ -116,13 +116,6 @@ class MeasurementPlanWidget(TableWidget):
             self._main_window.measurement_plan.remove_all_callback_funcs_for_pin_changes()
         super().closeEvent(event)
 
-    def get_amount_of_pins(self) -> int:
-        """
-        :return: amount of pins in measurement plan.
-        """
-
-        return self.rowCount()
-
     def save_measurement(self, index: int) -> None:
         """
         :param index: index of the pin whose measurements need to be saved to the table.
