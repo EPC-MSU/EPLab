@@ -626,11 +626,6 @@ shifts the points enumerator</translation>
         <translation>No multiplexer</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="91"/>
-        <source>Остановить измерение всех точек</source>
-        <translation>Stop recording of all points</translation>
-    </message>
-    <message>
         <location filename="../multiplexer/muxandplanwindow.py" line="154"/>
         <source>Режим тестирования:</source>
         <translation>Test mode:</translation>

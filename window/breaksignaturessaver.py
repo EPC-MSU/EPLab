@@ -74,19 +74,6 @@ class BreakSignaturesSaver(QObject):
                     math.isclose(settings.max_voltage, self._current_voltage.value, abs_tol=abs_tol))
         return False
 
-    def _get_settings_info(self) -> str:
-        """
-        :return: brief information with current measurement settings.
-        """
-
-        def get_info(option: MeasurementParameterOption) -> str:
-            return option.label_en if self._language is Language.EN else option.label_ru
-
-        frequency_info = get_info(self._current_frequency)
-        sensitive_info = get_info(self._current_sensitive)
-        voltage_info = get_info(self._current_voltage)
-        return f"{frequency_info}, {sensitive_info}, {voltage_info}..."
-
     def _get_settings_total_number(self) -> int:
         """
         :return: the total number of measurement settings for which to save breaks.
@@ -123,8 +110,7 @@ class BreakSignaturesSaver(QObject):
                 self._current_frequency, self._current_sensitive, self._current_voltage = next(self._settings)
                 settings = create_settings(self._current_frequency, self._current_sensitive, self._current_voltage)
                 self.new_settings_signal.emit(settings)
-                info = self._get_settings_info()
-                self._window.change_progress(info)
+                self._window.change_progress()
                 self._new_settings_required = False
             except StopIteration as exc:
                 logger.error("An error occurred while sending settings (%s)", exc)

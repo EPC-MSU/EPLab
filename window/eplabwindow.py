@@ -328,7 +328,7 @@ class EPLabWindow(QMainWindow):
         self.create_report_action.setEnabled(mode not in (WorkMode.COMPARE, WorkMode.READ_PLAN))
         enable = bool(mode is not WorkMode.COMPARE and self.measurement_plan and
                       self.measurement_plan.multiplexer is not None)
-        self.start_or_stop_entire_plan_measurement_action.setEnabled(enable)
+        self.start_plan_measurement_action.setEnabled(enable)
         self._change_save_point_action_name(mode)
 
         self._player.set_work_mode(mode)
@@ -560,8 +560,7 @@ class EPLabWindow(QMainWindow):
 
     def _disconnect_devices(self) -> None:
         self._timer.stop()
-        if self.start_or_stop_entire_plan_measurement_action.isChecked():
-            self.start_or_stop_entire_plan_measurement_action.setChecked(False)
+
         if self._msystem:
             for measurer in self._msystem.measurers:
                 measurer.close_device()
@@ -783,8 +782,7 @@ class EPLabWindow(QMainWindow):
         self._mux_and_plan_window: MuxAndPlanWindow = MuxAndPlanWindow(self)
         self._mux_and_plan_window.measurement_plan_widget.current_row_signal.connect(self.go_to_selected_pin)
         self.work_mode_changed.connect(self._mux_and_plan_window.change_work_mode)
-        self.start_or_stop_entire_plan_measurement_action.triggered.connect(
-            self._mux_and_plan_window.start_or_stop_plan_measurement)
+        self.start_plan_measurement_action.triggered.connect(self._mux_and_plan_window.start_plan_measurement)
 
     def _load_translation(self, english: Optional[bool] = None) -> None:
         """
@@ -1164,7 +1162,7 @@ class EPLabWindow(QMainWindow):
             self._mux_and_plan_window.close()
 
         enable = bool(enable and self.work_mode is not WorkMode.COMPARE)
-        self.start_or_stop_entire_plan_measurement_action.setEnabled(enable)
+        self.start_plan_measurement_action.setEnabled(enable)
 
     def _update_scroll_areas_for_parameters(self, available: Dict[EyePointProduct.Parameter,
                                                                   List[MeasurementParameterOption]]) -> None:
@@ -1513,7 +1511,7 @@ class EPLabWindow(QMainWindow):
                    self.writing_mode_action, self.testing_mode_action, self.settings_mode_action,
                    self.next_point_action, self.previous_point_action, self.new_point_action, self.remove_point_action,
                    self.save_point_action, self.add_board_image_action, self.delete_board_image_action,
-                   self.create_report_action, self.pin_index_widget, self.start_or_stop_entire_plan_measurement_action,
+                   self.create_report_action, self.pin_index_widget, self.start_plan_measurement_action,
                    self.comment_dock, self.score_dock, self.freq_dock, self.current_dock, self.voltage_dock,
                    self.measurers_menu)
         for widget in widgets:
@@ -1682,7 +1680,6 @@ class EPLabWindow(QMainWindow):
         self._auto_settings.save_connection_params(measurer_1_port, measurer_2_port, mux_port, product)
 
         if connected:
-            self._mux_and_plan_window.set_connection_mode()
             self._connection_checker.stop_check()
 
     @pyqtSlot(ConnectionData)
