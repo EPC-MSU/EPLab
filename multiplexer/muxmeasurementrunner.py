@@ -19,16 +19,18 @@ class MuxMeasurementRunner(QThread):
     Class for performing measurements according to a measurement plan using a multiplexer.
     """
 
+    device_errors_occurred: pyqtSignal = pyqtSignal()
     measurement_done: pyqtSignal = pyqtSignal()
     measurements_finished: pyqtSignal = pyqtSignal()
     measurements_started: pyqtSignal = pyqtSignal(int)
 
-    def __init__(self, device_errors_handler: DeviceErrorsHandler) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self._default_measurement_settings: Optional[MeasurementSettings] = None
-        self._device_errors_handler: DeviceErrorsHandler = device_errors_handler
+        self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
         self._is_running: bool = False
         self._measurement_plan: Optional[MeasurementPlan] = None
+        self._must_be_running: bool = False
         self._work_mode: Optional[WorkMode] = None
 
     @property
@@ -43,7 +45,7 @@ class MuxMeasurementRunner(QThread):
         logger.debug("Measurements launched according to plan using a multiplexer")
 
         for i, pin in self._measurement_plan.all_pins_iterator():
-            if not self._is_running:
+            if not self._must_be_running:
                 logger.debug("The execution of measurements according to plan using a multiplexer stopped at "
                              "pin %d of %d", i, self._measurement_plan.pins_number)
                 break
@@ -83,18 +85,23 @@ class MuxMeasurementRunner(QThread):
             self.measurement_done.emit()
             QThread.msleep(10)
 
-        if self._is_running:
+        if self._must_be_running:
             logger.debug("Measurements according to plan using a multiplexer are completed")
 
     def run(self) -> None:
         while True:
-            if self._is_running:
+            if self._must_be_running:
+                self._is_running = True
                 self.measurements_started.emit(self._measurement_plan.pins_number)
 
                 with self._device_errors_handler:
                     self._do_measurements()
 
+                if not self._device_errors_handler.all_ok:
+                    self.device_errors_occurred.emit()
+
                 self._is_running = False
+                self._must_be_running = False
                 self.measurements_finished.emit()
 
             QThread.msleep(300)
@@ -107,10 +114,11 @@ class MuxMeasurementRunner(QThread):
         :param measurement_settings: measurement settings to use by default.
         """
 
-        self._is_running = True
+        self._device_errors_handler.reset_error()
         self._default_measurement_settings = measurement_settings
         self._measurement_plan = measurement_plan
         self._work_mode = work_mode
+        self._must_be_running = True
 
     def stop_measurements(self) -> None:
-        self._is_running = False
+        self._must_be_running = False

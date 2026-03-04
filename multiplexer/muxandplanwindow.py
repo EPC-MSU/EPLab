@@ -149,10 +149,13 @@ class MuxAndPlanWindow(QWidget):
         return widget
 
     def _create_mux_measurement_runner(self) -> None:
-        self._mux_measurement_runner: MuxMeasurementRunner = MuxMeasurementRunner(
-            self._main_window.device_errors_handler)
+        self._mux_measurement_runner: MuxMeasurementRunner = MuxMeasurementRunner()
+        self._mux_measurement_runner.device_errors_occurred.connect(
+            self._main_window.set_device_errors_from_mux_measurement_runner)
         self._mux_measurement_runner.measurement_done.connect(self.change_progress)
         self._mux_measurement_runner.measurements_finished.connect(self.turn_off_standby_mode)
+        self._mux_measurement_runner.measurements_finished.connect(
+            self._main_window.update_comment_widget_and_multiplexer_widget)
         self._mux_measurement_runner.measurements_finished.connect(self.create_report)
         self._mux_measurement_runner.measurements_started.connect(self.turn_on_standby_mode)
         self._mux_measurement_runner.start()

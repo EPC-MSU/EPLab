@@ -2039,6 +2039,10 @@ class EPLabWindow(QMainWindow):
             old_options = self._product.settings_to_options(old_settings)
             self._set_options_to_ui(old_options)
 
+    @pyqtSlot()
+    def set_device_errors_from_mux_measurement_runner(self) -> None:
+        self._device_errors_handler.all_ok = False
+
     @pyqtSlot(str)
     def set_dir_chosen_by_user(self, dir_path: str) -> None:
         """
@@ -2091,6 +2095,10 @@ class EPLabWindow(QMainWindow):
         self._check_break_signatures_for_auto_transition()
         # Break signatures are only saved when debugging the application
         # self._break_signature_saver.save_break_signatures_if_necessary()
+
+    def update_comment_widget_and_multiplexer_widget(self) -> None:
+        self._comment_widget.update_table_for_new_tolerance()
+        self._mux_and_plan_window.update_info()
 
     def update_current_pin(self, pin_centering: bool = True) -> None:
         """
