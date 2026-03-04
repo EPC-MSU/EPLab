@@ -7,8 +7,8 @@ import os
 from typing import Any, Callable, Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QMessageBox, QPushButton, QSplitter, QToolBar, QVBoxLayout, QWidget, \
-    QApplication
+from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox, QPushButton, QSplitter, QToolBar,
+                             QVBoxLayout, QWidget)
 from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MAX_CHANNEL_NUMBER, MultiplexerOutput
 from dialogs import ProgressWindow
 from dialogs.save_geometry import update_widget_to_save_geometry
@@ -55,7 +55,6 @@ class MuxAndPlanWindow(QWidget):
 
         super().__init__()
         self._main_window = main_window
-        self._manual_stop: bool = False
         self._previous_main_window_pos: Optional[QPoint] = None
         self._previous_main_window_size: Optional[QSize] = None
         self._previous_window_pos: Optional[QPoint] = None
@@ -99,8 +98,7 @@ class MuxAndPlanWindow(QWidget):
         self._mux_measurement_runner.device_errors_occurred.connect(
             self._main_window.set_device_errors_from_mux_measurement_runner)
         self._mux_measurement_runner.measurements_finished.connect(
-            self._main_window.update_comment_widget_and_multiplexer_widget)
-        self._mux_measurement_runner.measurements_finished.connect(self.create_report)
+            self._main_window.update_state_after_measurement_by_multiplexer)
         self._mux_measurement_runner.start()
 
     def _create_top_widget(self) -> QWidget:
@@ -219,7 +217,6 @@ class MuxAndPlanWindow(QWidget):
         Method stops measurements by the multiplexer according to the measurement plan.
         """
 
-        self._manual_stop = True
         self._mux_measurement_runner.stop_measurements()
 
     @pyqtSlot()
@@ -257,16 +254,6 @@ class MuxAndPlanWindow(QWidget):
 
         self._stop_plan_measurement()
         self.close()
-
-    @pyqtSlot()
-    def create_report(self) -> None:
-        """
-        Slot generates report after testing according to plan.
-        """
-
-        if self._main_window.work_mode is WorkMode.TEST and not self._manual_stop:
-            self._main_window.create_report(True)
-        self._manual_stop = False
 
     @pyqtSlot(MultiplexerOutput)
     def handle_mux_output_turned_on(self, output: MultiplexerOutput) -> None:
@@ -308,11 +295,11 @@ class MuxAndPlanWindow(QWidget):
             return
 
         parent = self if QApplication.activeWindow() is self else self._main_window
-        progress_window = ProgressWindow(parent, qApp.translate("t", "Измерение всех точек"))
+        progress_window = ProgressWindow(parent, qApp.translate("mux", "Измерение всех точек"))
         progress_window.stopped.connect(self._stop_plan_measurement)
         self._mux_measurement_runner.measurements_started.connect(progress_window.set_total_number_of_steps)
         self._mux_measurement_runner.measurement_done.connect(progress_window.change_progress)
-        self._mux_measurement_runner.measurements_finished.connect(progress_window.close)
+        self._mux_measurement_runner.measurements_finished.connect(lambda _: progress_window.close())
         self._main_window.remove_callbacks_from_measurement_plan()
         self._mux_measurement_runner.start_measurements(self._main_window.measurement_plan,
                                                         self._main_window.work_mode,

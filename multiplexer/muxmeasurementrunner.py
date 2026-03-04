@@ -21,7 +21,7 @@ class MuxMeasurementRunner(QThread):
 
     device_errors_occurred: pyqtSignal = pyqtSignal()
     measurement_done: pyqtSignal = pyqtSignal()
-    measurements_finished: pyqtSignal = pyqtSignal()
+    measurements_finished: pyqtSignal = pyqtSignal(bool)
     measurements_started: pyqtSignal = pyqtSignal(int)
 
     def __init__(self) -> None:
@@ -101,8 +101,9 @@ class MuxMeasurementRunner(QThread):
                     self.device_errors_occurred.emit()
 
                 self._is_running = False
+                stopped_by_user = not self._must_be_running
                 self._must_be_running = False
-                self.measurements_finished.emit()
+                self.measurements_finished.emit(stopped_by_user)
 
             QThread.msleep(300)
 

@@ -655,6 +655,11 @@ shifts the points enumerator</translation>
         <source>В плане тестирования есть эталонные сигнатуры. При запуске измерений в режиме записи плана все имеющиеся сигнатуры будут перезаписаны. Вы точно хотите запустить измерение всех точек?</source>
         <translation>There are reference signatures in the test plan. When starting measurements in plan writing mode, all existing signatures will be overwritten. Are you sure you want to start measuring all points?</translation>
     </message>
+    <message>
+        <location filename="../multiplexer/muxandplanwindow.py" line="311"/>
+        <source>Измерение всех точек</source>
+        <translation>Measuring all points</translation>
+    </message>
 </context>
 <context>
     <name>connection_window</name>

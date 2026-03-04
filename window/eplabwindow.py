@@ -2093,10 +2093,6 @@ class EPLabWindow(QMainWindow):
         # Break signatures are only saved when debugging the application
         # self._break_signature_saver.save_break_signatures_if_necessary()
 
-    def update_comment_widget_and_multiplexer_widget(self) -> None:
-        self._comment_widget.update_table_for_new_tolerance()
-        self._mux_and_plan_window.update_info()
-
     def update_current_pin(self, pin_centering: bool = True) -> None:
         """
         Call this method when current pin index changed.
@@ -2116,3 +2112,17 @@ class EPLabWindow(QMainWindow):
 
         self._mux_and_plan_window.select_current_pin()
         self._comment_widget.select_row()
+
+    @pyqtSlot(bool)
+    def update_state_after_measurement_by_multiplexer(self, stopped_by_user: bool) -> None:
+        """
+        :param stopped_by_user: if True, then the measurement of the plan using the multiplexer is stopped by the user.
+        """
+
+        self._comment_widget.update_table_for_new_tolerance()
+        self._mux_and_plan_window.update_info()
+        self._measured_pins_checker.set_new_plan()
+        self.update_current_pin()
+
+        if self.work_mode is WorkMode.TEST and not stopped_by_user:
+            self.create_report(True)
