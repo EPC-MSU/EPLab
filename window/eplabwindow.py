@@ -1298,9 +1298,6 @@ class EPLabWindow(QMainWindow):
         self.measurement_plan.add_callback_func_for_pin_changes(self._change_menu_items_for_current_pin_change)
         self.measurement_plan.add_callback_func_for_pin_changes(
             self._measured_pins_checker.handle_measurement_plan_change)
-        self.measurement_plan.remove_all_callback_funcs_for_mux_output_change()
-        self.measurement_plan.add_callback_func_for_mux_output_change(
-            self._mux_and_plan_window.multiplexer_pinout_widget.show_channel_as_connected)
 
     @pyqtSlot(AutoSettings)
     def apply_settings(self, new_settings: AutoSettings) -> None:
@@ -1651,15 +1648,6 @@ class EPLabWindow(QMainWindow):
         """
 
         self.go_to_pin_selected_in_widget(pin_index + 1, pin_centered)
-
-    def handle_changing_pin_in_mux(self, index: int) -> None:
-        """
-        :param index: pin index that became active through the multiplexer widget.
-        """
-
-        self.measurement_plan._current_pin_index = index
-        self._mux_and_plan_window.measurement_plan_widget.select_row()
-        self._comment_widget.select_row()
 
     @pyqtSlot(bool)
     def handle_connection(self, connected: bool) -> None:

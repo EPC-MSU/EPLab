@@ -263,7 +263,7 @@ class MuxAndPlanWindow(QWidget):
         """
 
         index = (output.module_number - 1) * MAX_CHANNEL_NUMBER + output.channel_number - 1
-        self._main_window.handle_changing_pin_in_mux(index)
+        self._main_window.go_to_selected_pin(index)
 
     def select_current_pin(self) -> None:
         """
@@ -271,6 +271,13 @@ class MuxAndPlanWindow(QWidget):
         """
 
         self.measurement_plan_widget.select_row()
+
+        index = self._main_window.measurement_plan.get_current_index()
+        if index is not None:
+            module_number = index // MAX_CHANNEL_NUMBER + 1
+            channel_number = index % MAX_CHANNEL_NUMBER + 1
+            self.multiplexer_pinout_widget.show_connected_output(MultiplexerOutput(channel_number=channel_number,
+                                                                                   module_number=module_number))
 
     @pyqtSlot()
     def start_plan_measurement(self) -> None:
