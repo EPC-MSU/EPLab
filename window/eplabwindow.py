@@ -2119,6 +2119,7 @@ class EPLabWindow(QMainWindow):
         :param stopped_by_user: if True, then the measurement of the plan using the multiplexer is stopped by the user.
         """
 
+        self.add_callbacks_to_measurement_plan()
         self._comment_widget.update_table_for_new_tolerance()
         self._mux_and_plan_window.update_info()
         self._measured_pins_checker.set_new_plan()
