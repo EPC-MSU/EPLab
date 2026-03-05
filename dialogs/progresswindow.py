@@ -56,6 +56,7 @@ class ProgressWindow(QDialog):
 
         self.setWindowTitle(title)
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
 
         metrics = QFontMetrics(self.font())
         title_width = metrics.horizontalAdvance(title)
@@ -72,6 +73,14 @@ class ProgressWindow(QDialog):
     def change_progress(self) -> None:
         self._number_of_steps_done += 1
         self._progress_bar.setValue(int(self._number_of_steps_done / self._total_number * 100))
+
+    @pyqtSlot(bool)
+    def close_window(self, unused: bool) -> None:
+        """
+        :param unused: unused parameter.
+        """
+
+        self.close()
 
     @pyqtSlot(int)
     def set_total_number_of_steps(self, number: int) -> None:

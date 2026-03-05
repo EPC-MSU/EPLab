@@ -304,9 +304,9 @@ class MuxAndPlanWindow(QWidget):
         parent = self if QApplication.activeWindow() is self else self._main_window
         progress_window = ProgressWindow(parent, qApp.translate("mux", "Измерение всех точек"))
         progress_window.stopped.connect(self._stop_plan_measurement)
-        self._mux_measurement_runner.measurements_started.connect(progress_window.set_total_number_of_steps)
         self._mux_measurement_runner.measurement_done.connect(progress_window.change_progress)
-        self._mux_measurement_runner.measurements_finished.connect(lambda _: progress_window.close())
+        self._mux_measurement_runner.measurements_started.connect(progress_window.set_total_number_of_steps)
+        self._mux_measurement_runner.measurements_finished.connect(progress_window.close_window)
         self._main_window.remove_callbacks_from_measurement_plan()
         self._mux_measurement_runner.start_measurements(self._main_window.measurement_plan,
                                                         self._main_window.work_mode,
