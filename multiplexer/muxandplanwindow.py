@@ -4,12 +4,12 @@ File with class to show window with information about multiplexer and measuremen
 
 import logging
 import os
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox, QPushButton, QSplitter, QToolBar,
                              QVBoxLayout, QWidget)
-from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MAX_CHANNEL_NUMBER, MultiplexerOutput
+from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MAX_CHANNEL_NUMBER, ModuleTypes, MultiplexerOutput
 from dialogs import ProgressWindow
 from dialogs.save_geometry import update_widget_to_save_geometry
 from window import utils as ut
@@ -112,8 +112,9 @@ class MuxAndPlanWindow(QWidget):
         self.tool_bar.addAction(self._main_window.writing_mode_action)
         self.tool_bar.addAction(self._main_window.testing_mode_action)
         self.tool_bar.addAction(self._main_window.start_plan_measurement_action)
-        self.multiplexer_pinout_widget: MultiplexerPinoutWidget = MultiplexerPinoutWidget(self._main_window)
+        self.multiplexer_pinout_widget: MultiplexerPinoutWidget = MultiplexerPinoutWidget()
         self.multiplexer_pinout_widget.mux_output_turned_on.connect(self.handle_mux_output_turned_on)
+        self.multiplexer_pinout_widget.mux_outputs_turned_off.connect(self._main_window.disable_all_multiplexer_outputs)
 
         h_layout = QHBoxLayout()
         h_layout.setSpacing(0)
@@ -238,6 +239,15 @@ class MuxAndPlanWindow(QWidget):
         self.move(window_pos)
         self.resize(window_size)
 
+    @staticmethod
+    def calculate_pin_index_for_multiplexer_output(output: MultiplexerOutput) -> int:
+        """
+        :param output: multiplexer output.
+        :return: pin index.
+        """
+
+        return (output.module_number - 1) * MAX_CHANNEL_NUMBER + output.channel_number - 1
+
     @pyqtSlot(WorkMode)
     def change_work_mode(self, new_work_mode: WorkMode) -> None:
         """
@@ -262,22 +272,18 @@ class MuxAndPlanWindow(QWidget):
         :param output: multiplexer output.
         """
 
-        index = (output.module_number - 1) * MAX_CHANNEL_NUMBER + output.channel_number - 1
+        index = self.calculate_pin_index_for_multiplexer_output(output)
         self._main_window.go_to_selected_pin(index)
 
-    def select_current_pin(self) -> None:
+    def select_current_pin(self, output: Optional[MultiplexerOutput]) -> None:
         """
         Method selects row in table for measurement plan for current pin index.
+        :param output: connected output.
         """
 
         self.measurement_plan_widget.select_row()
-
-        index = self._main_window.measurement_plan.get_current_index()
-        if index is not None:
-            module_number = index // MAX_CHANNEL_NUMBER + 1
-            channel_number = index % MAX_CHANNEL_NUMBER + 1
-            self.multiplexer_pinout_widget.show_connected_output(MultiplexerOutput(channel_number=channel_number,
-                                                                                   module_number=module_number))
+        if output is not None:
+            self.multiplexer_pinout_widget.show_connected_output(output)
 
     @pyqtSlot()
     def start_plan_measurement(self) -> None:
@@ -313,10 +319,13 @@ class MuxAndPlanWindow(QWidget):
                                                         self._main_window._msystem.get_settings())
         progress_window.exec()
 
-    def update_info(self) -> None:
+    def update_info(self, connected: bool, chain: List[ModuleTypes], output: Optional[MultiplexerOutput]) -> None:
         """
         Method updates information about the measurement plan and the multiplexer.
+        :param connected: if True, then the multiplexer is connected;
+        :param chain: list with types of multiplexer modules in chain;
+        :param output: connected output.
         """
 
         self.measurement_plan_widget.update_info()
-        self.multiplexer_pinout_widget.update_info()
+        self.multiplexer_pinout_widget.update_info(connected, chain, output)

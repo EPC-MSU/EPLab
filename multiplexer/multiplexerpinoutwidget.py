@@ -3,12 +3,11 @@ File with class for widget to show multiplexer pinout.
 """
 
 import logging
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
 from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 from epcore.analogmultiplexer import ModuleTypes
 from epcore.elements import MultiplexerOutput
-from window.common import DeviceErrorsHandler
 
 
 logger = logging.getLogger("eplab")
@@ -186,17 +185,10 @@ class MultiplexerPinoutWidget(QWidget):
     MIN_WIDTH: int = 500
     SCROLL_AREA_MIN_HEIGHT: int = 100
     mux_output_turned_on: pyqtSignal = pyqtSignal(MultiplexerOutput)
+    mux_outputs_turned_off: pyqtSignal = pyqtSignal()
 
-    def __init__(self, main_window, device_errors_handler: Optional[DeviceErrorsHandler] = None) -> None:
-        """
-        :param main_window: main window of application;
-        :param device_errors_handler: device errors handler.
-        """
-
+    def __init__(self) -> None:
         super().__init__()
-        self._device_errors_handler: DeviceErrorsHandler = device_errors_handler if device_errors_handler else \
-            main_window.device_errors_handler
-        self._main_window = main_window
         self._modules: Dict[int, ModuleWidget] = dict()
         self._turned_on_output: Optional[MultiplexerOutput] = None
         self._init_ui()
@@ -251,38 +243,35 @@ class MultiplexerPinoutWidget(QWidget):
             module.deleteLater()
         self._modules = dict()
 
-    def _update_modules(self) -> None:
+    def _set_visible(self, visible: bool) -> None:
+        """
+        :param visible: if True, then the multiplexer widgets should be made visible.
+        """
+
+        self.scroll_area.setVisible(visible)
+        self.label_no_mux.setVisible(not visible)
+
+    def _update_modules(self, chain: List[ModuleTypes], output: Optional[MultiplexerOutput]) -> None:
         """
         Method updates modules for widget.
+        :param chain: list with types of multiplexer modules in chain;
+        :param output: connected output.
         """
 
         self._remove_all_modules()
-        if not self._main_window.measurement_plan.multiplexer:
+        if not chain:
             return
 
-        with self._device_errors_handler:
-            chain = self._main_window.measurement_plan.multiplexer.get_chain_info()
-            for module_index, module_type in enumerate(chain, start=1):
-                module = ModuleWidget(module_type, module_index)
-                module.module_turned_on.connect(self.turn_on_output)
-                module.module_turned_off.connect(self.turn_off_output)
-                self._modules[module_index] = module
-                self.layout_for_modules.insertWidget(0, module)
+        for module_index, module_type in enumerate(chain, start=1):
+            module = ModuleWidget(module_type, module_index)
+            module.module_turned_on.connect(self.turn_on_output)
+            module.module_turned_off.connect(self.turn_off_output)
+            self._modules[module_index] = module
+            self.layout_for_modules.insertWidget(0, module)
 
-            connected_output = self._main_window.measurement_plan.multiplexer.get_connected_channel()
-            if connected_output:
-                self._modules[connected_output.module_number].show_channel_as_connected(connected_output.channel_number)
-                self._turned_on_output = connected_output
-
-    def set_visible(self) -> None:
-        """
-        Method sets widgets to visible state.
-        """
-
-        visible = bool(self._main_window.measurement_plan and self._main_window.measurement_plan.multiplexer)
-        for widget in (self.scroll_area,):
-            widget.setVisible(visible)
-        self.label_no_mux.setVisible(not visible)
+        if output:
+            self._modules[output.module_number].show_channel_as_connected(output.channel_number)
+            self._turned_on_output = output
 
     def show_connected_output(self, output: MultiplexerOutput) -> None:
         """
@@ -301,10 +290,9 @@ class MultiplexerPinoutWidget(QWidget):
         :param output: output to turn off.
         """
 
-        with self._device_errors_handler:
-            if self._turned_on_output == output:
-                self._main_window.measurement_plan.multiplexer.disconnect_all_channels()
-                self._turned_on_output = None
+        if self._turned_on_output == output:
+            self.mux_outputs_turned_off.emit()
+            self._turned_on_output = None
 
     @pyqtSlot(MultiplexerOutput)
     def turn_on_output(self, output: MultiplexerOutput) -> None:
@@ -316,11 +304,14 @@ class MultiplexerPinoutWidget(QWidget):
         self.show_connected_output(output)
         self.mux_output_turned_on.emit(output)
 
-    def update_info(self) -> None:
+    def update_info(self, connected: bool, chain: List[ModuleTypes], output: Optional[MultiplexerOutput]) -> None:
         """
         Method updates information about multiplexer.
+        :param connected: if True, then the multiplexer is connected;
+        :param chain: list with types of multiplexer modules in chain;
+        :param output: connected output.
         """
 
         self._turned_on_output = None
-        self._update_modules()
-        self.set_visible()
+        self._update_modules(chain, output)
+        self._set_visible(connected)

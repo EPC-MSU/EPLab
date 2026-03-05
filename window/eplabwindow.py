@@ -17,8 +17,9 @@ from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMe
                              QVBoxLayout, QWidget)
 from PyQt5.uic import loadUi
 import epcore.filemanager as epfilemanager
-from epcore.analogmultiplexer import BadMultiplexerOutputError
-from epcore.elements import Board, Element, ImageNotFoundError, IVCurve, Measurement, MeasurementSettings, Pin
+from epcore.analogmultiplexer import BadMultiplexerOutputError, ModuleTypes
+from epcore.elements import (Board, Element, ImageNotFoundError, IVCurve, Measurement, MeasurementSettings,
+                             MultiplexerOutput, Pin)
 from epcore.ivmeasurer import IVMeasurerASA, IVMeasurerBase, IVMeasurerIVM10, IVMeasurerVirtual, IVMeasurerVirtualASA
 from epcore.measurementmanager import IVCComparator, MeasurementPlan, MeasurementSystem, Searcher
 from epcore.product import EyePointProduct, MeasurementParameterOption
@@ -145,14 +146,6 @@ class EPLabWindow(QMainWindow):
 
         self._set_auto_settings_to_ui()
         self._open_measurement_plan_at_start(path)
-
-    @property
-    def device_errors_handler(self) -> DeviceErrorsHandler:
-        """
-        :return: device errors handler.
-        """
-
-        return self._device_errors_handler
 
     @property
     def dir_chosen_by_user(self) -> str:
@@ -614,6 +607,23 @@ class EPLabWindow(QMainWindow):
                 self._compare_measurement = None
         return curves, measurement_settings
 
+    def _get_multiplexer_info(self) -> Tuple[bool, List[ModuleTypes], Optional[MultiplexerOutput]]:
+        """
+        :return: True if the multiplexer is connected, list with types of multiplexer modules in chain and
+        connected output.
+        """
+
+        if not self.measurement_plan or not self.measurement_plan.multiplexer:
+            return False, [], None
+
+        chain = []
+        connected_output = None
+        with self._device_errors_handler:
+            chain = self.measurement_plan.multiplexer.get_chain_info()
+            connected_output = self.measurement_plan.multiplexer.get_connected_channel()
+
+        return True, chain, connected_output
+
     def _get_noise_amplitudes(self, settings: Optional[MeasurementSettings] = None) -> Tuple[float, float]:
         """
         :param settings: measurement settings.
@@ -988,6 +998,12 @@ class EPLabWindow(QMainWindow):
             except Exception as exc:
                 logger.debug("Unable to restore window geometry with board photo: %s", exc)
 
+    def _set_connected_output_in_multiplexer_as_current_pin(self) -> None:
+        connected_output = self._get_multiplexer_info()[-1]
+        if connected_output is not None:
+            pin_index = MuxAndPlanWindow.calculate_pin_index_for_multiplexer_output(connected_output)
+            self._measurement_plan.go_pin(pin_index)
+
     def _set_curve_view_settings_to_init_state(self) -> None:
         for action in (self.freeze_curve_a_action, self.freeze_curve_b_action, self.hide_curve_a_action,
                        self.hide_curve_b_action):
@@ -1108,7 +1124,8 @@ class EPLabWindow(QMainWindow):
             options = self._product.settings_to_options(settings)
             self._set_options_to_ui(options)
 
-        self._mux_and_plan_window.update_info()
+        self._set_connected_output_in_multiplexer_as_current_pin()
+        self._mux_and_plan_window.update_info(*self._get_multiplexer_info())
         self._comment_widget.update_info()
         self.add_callbacks_to_measurement_plan()
         self._switch_work_mode(WorkMode.COMPARE)
@@ -1393,9 +1410,10 @@ class EPLabWindow(QMainWindow):
 
         self._reset_board()
         self._board_window.update_board()
-        self.update_current_pin()
-        self._mux_and_plan_window.update_info()
+        self._set_connected_output_in_multiplexer_as_current_pin()
+        self._mux_and_plan_window.update_info(*self._get_multiplexer_info())
         self._comment_widget.update_info()
+        self.update_current_pin()
         self.add_callbacks_to_measurement_plan()
         self._change_menu_items_for_current_pin_change()
         self._change_work_mode_for_new_measurement_plan()
@@ -1469,6 +1487,11 @@ class EPLabWindow(QMainWindow):
         self.measurement_plan.delete_image()
         self._board_window.update_board()
         self.update_current_pin()
+
+    @pyqtSlot()
+    def disable_all_multiplexer_outputs(self) -> None:
+        with self._device_errors_handler:
+            self.measurement_plan.multiplexer.disconnect_all_channels()
 
     def disconnect_measurers(self) -> None:
         """
@@ -1763,7 +1786,8 @@ class EPLabWindow(QMainWindow):
             self._board_window.update_board()
             self._open_board_window_if_needed()
             if self._msystem:
-                self._mux_and_plan_window.update_info()
+                self._set_connected_output_in_multiplexer_as_current_pin()
+                self._mux_and_plan_window.update_info(*self._get_multiplexer_info())
             else:
                 self._change_work_mode(WorkMode.READ_PLAN)
             self._comment_widget.update_info()
@@ -2098,7 +2122,7 @@ class EPLabWindow(QMainWindow):
         elif self.work_mode is WorkMode.READ_PLAN:
             self._update_signatures_and_settings_in_plan_reading_mode(ref_curve, test_curve, settings)
 
-        self._mux_and_plan_window.select_current_pin()
+        self._mux_and_plan_window.select_current_pin(self._get_multiplexer_info()[-1])
         self._comment_widget.select_row()
 
     @pyqtSlot(bool)
@@ -2109,7 +2133,7 @@ class EPLabWindow(QMainWindow):
 
         self.add_callbacks_to_measurement_plan()
         self._comment_widget.update_table_for_new_tolerance()
-        self._mux_and_plan_window.update_info()
+        self._mux_and_plan_window.update_info(*self._get_multiplexer_info())
         self._measured_pins_checker.set_new_plan()
         self.update_current_pin()
 
