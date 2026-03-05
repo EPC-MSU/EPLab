@@ -754,11 +754,6 @@ Such pins will be automatically declared in the report as being fault free. If y
         <translation>No multiplexer</translation>
     </message>
     <message>
-        <location filename="../multiplexer/muxandplanwindow.py" line="91"/>
-        <source>Остановить измерение всех точек</source>
-        <translation>Stop recording of all points</translation>
-    </message>
-    <message>
         <location filename="../multiplexer/muxandplanwindow.py" line="154"/>
         <source>Режим тестирования:</source>
         <translation>Test mode:</translation>
@@ -787,6 +782,11 @@ Such pins will be automatically declared in the report as being fault free. If y
         <location filename="../multiplexer/muxandplanwindow.py" line="369"/>
         <source>В плане тестирования есть эталонные сигнатуры. При запуске измерений в режиме записи плана все имеющиеся сигнатуры будут перезаписаны. Вы точно хотите запустить измерение всех точек?</source>
         <translation>There are reference signatures in the test plan. When starting measurements in plan writing mode, all existing signatures will be overwritten. Are you sure you want to start measuring all points?</translation>
+    </message>
+    <message>
+        <location filename="../multiplexer/muxandplanwindow.py" line="311"/>
+        <source>Измерение всех точек</source>
+        <translation>Measuring all points</translation>
     </message>
 </context>
 <context>

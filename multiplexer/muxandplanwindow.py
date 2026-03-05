@@ -4,37 +4,23 @@ File with class to show window with information about multiplexer and measuremen
 
 import logging
 import os
-from typing import Any, Callable, Optional, Tuple
+from typing import List, Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton, QSplitter, QToolBar,
+from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox, QPushButton, QSplitter, QToolBar,
                              QVBoxLayout, QWidget)
-from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MultiplexerOutput
-from epcore.analogmultiplexer.epmux.epmux import UrpcDeviceUndefinedError
+from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, ModuleTypes, MultiplexerOutput
+from dialogs import ProgressWindow
 from dialogs.save_geometry import update_widget_to_save_geometry
 from window import utils as ut
 from window.common import WorkMode
 from window.pedalhandler import add_pedal_handler
-from .measurementplanrunner import MeasurementPlanRunner
 from .measurementplanwidget import MeasurementPlanWidget
 from .multiplexerpinoutwidget import MultiplexerPinoutWidget
+from .muxmeasurementrunner import MuxMeasurementRunner
 
 
 logger = logging.getLogger("eplab")
-
-
-def check_multiplexer(func: Callable[..., Any]):
-    """
-    Decorator checks for a connected multiplexer.
-    :param func: function to be decorated.
-    """
-
-    def wrapper(self, *args, **kwargs) -> Any:
-        if not self.multiplexer:
-            return None
-        return func(self, *args, **kwargs)
-
-    return wrapper
 
 
 @add_pedal_handler
@@ -55,60 +41,20 @@ class MuxAndPlanWindow(QWidget):
 
         super().__init__()
         self._main_window = main_window
-        self._manual_stop: bool = False
         self._previous_main_window_pos: Optional[QPoint] = None
         self._previous_main_window_size: Optional[QSize] = None
         self._previous_window_pos: Optional[QPoint] = None
         self._previous_window_size: Optional[QSize] = None
         self._init_ui()
-
-        self.measurement_plan_runner: MeasurementPlanRunner = MeasurementPlanRunner(main_window,
-                                                                                    self.measurement_plan_widget)
-        self.measurement_plan_runner.measurement_done.connect(self.change_progress)
-        self.measurement_plan_runner.measurements_finished.connect(self.turn_off_standby_mode)
-        self.measurement_plan_runner.measurements_finished.connect(self.create_report)
-        self.measurement_plan_runner.measurements_started.connect(self.turn_on_standby_mode)
+        self._create_mux_measurement_runner()
 
     @property
-    def multiplexer(self) -> Optional[AnalogMultiplexerBase]:
+    def mux_measurements_are_running(self) -> bool:
         """
-        :return: multiplexer.
-        """
-
-        if self._main_window.measurement_plan:
-            return self._main_window.measurement_plan.multiplexer
-        return None
-
-    def _change_widgets_to_start_measurements_according_plan(self, status: bool) -> None:
-        """
-        Method changes the text and icon of widgets that launch measurements according to plan.
-        :param status: if True then measurements should be started.
+        :return: True if the measurements according to the plan are performed using a multiplexer.
         """
 
-        if status:
-            text = qApp.translate("mux", "Остановить измерение всех точек")
-            icon = QIcon(os.path.join(ut.DIR_MEDIA, "stop_auto_test.png"))
-        else:
-            text = qApp.translate("MainWindow", "Запустить измерение всех точек")
-            icon = QIcon(os.path.join(ut.DIR_MEDIA, "start_auto_test.png"))
-        widget = self._main_window.start_or_stop_entire_plan_measurement_action
-        widget.setIcon(icon)
-        widget.setText(text)
-        if widget.isChecked() != status:
-            widget.setChecked(status)
-
-    def _check_multiplexer_connection(self) -> None:
-        """
-        Method checks the connection of the multiplexer.
-        """
-
-        try:
-            self._main_window.measurement_plan.multiplexer.get_identity_information()
-        except UrpcDeviceUndefinedError as exc:
-            logger.error("Failed to get identity information from multiplexer (%s)", exc)
-            self.multiplexer_pinout_widget.set_visible(False)
-        else:
-            self.multiplexer_pinout_widget.set_visible(True)
+        return self._mux_measurement_runner.is_running
 
     @staticmethod
     def _continue_plan_measurement(text: str) -> bool:
@@ -122,28 +68,13 @@ class MuxAndPlanWindow(QWidget):
                                  yes_button=True, no_button=True)
         return result == QMessageBox.ButtonRole.AcceptRole
 
-    def _create_bottom_widget(self) -> QWidget:
-        """
-        :return: widgets that are located at the bottom of the dialog box.
-        """
-
-        self.measurement_plan_widget: MeasurementPlanWidget = MeasurementPlanWidget(self._main_window)
-        self.progress_bar: QProgressBar = QProgressBar()
-        self.progress_bar.setVisible(False)
-
-        h_layout = QHBoxLayout()
-        h_layout.setSpacing(0)
-        h_layout.setContentsMargins(self.MARGIN, 0, self.MARGIN, self.MARGIN)
-        h_layout.addWidget(self.progress_bar, 2)
-        h_layout.addStretch(1)
-
-        v_layout = QVBoxLayout()
-        v_layout.setContentsMargins(self.MARGIN, 0, self.MARGIN, 0)
-        v_layout.addWidget(self.measurement_plan_widget)
-        v_layout.addLayout(h_layout)
-        widget = QWidget()
-        widget.setLayout(v_layout)
-        return widget
+    def _create_mux_measurement_runner(self) -> None:
+        self._mux_measurement_runner: MuxMeasurementRunner = MuxMeasurementRunner()
+        self._mux_measurement_runner.device_errors_occurred.connect(
+            self._main_window.set_device_errors_from_mux_measurement_runner)
+        self._mux_measurement_runner.measurements_finished.connect(
+            self._main_window.update_state_after_measurement_by_multiplexer)
+        self._mux_measurement_runner.start()
 
     def _create_top_widget(self) -> QWidget:
         """
@@ -155,9 +86,10 @@ class MuxAndPlanWindow(QWidget):
         self.tool_bar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.tool_bar.addAction(self._main_window.writing_mode_action)
         self.tool_bar.addAction(self._main_window.testing_mode_action)
-        self.tool_bar.addAction(self._main_window.start_or_stop_entire_plan_measurement_action)
-        self.multiplexer_pinout_widget: MultiplexerPinoutWidget = MultiplexerPinoutWidget(self._main_window)
+        self.tool_bar.addAction(self._main_window.start_plan_measurement_action)
+        self.multiplexer_pinout_widget: MultiplexerPinoutWidget = MultiplexerPinoutWidget()
         self.multiplexer_pinout_widget.mux_output_turned_on.connect(self.handle_mux_output_turned_on)
+        self.multiplexer_pinout_widget.mux_outputs_turned_off.connect(self._main_window.disable_all_multiplexer_outputs)
 
         h_layout = QHBoxLayout()
         h_layout.setSpacing(0)
@@ -192,11 +124,13 @@ class MuxAndPlanWindow(QWidget):
         h_layout.addStretch(1)
         h_layout.addWidget(self.button_arrange_windows)
 
+        self.measurement_plan_widget: MeasurementPlanWidget = MeasurementPlanWidget(self._main_window)
+
         self.splitter: QSplitter = QSplitter(Qt.Orientation.Vertical)
         self.splitter.setContentsMargins(0, 0, 0, 0)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(self._create_top_widget())
-        self.splitter.addWidget(self._create_bottom_widget())
+        self.splitter.addWidget(self.measurement_plan_widget)
         self.splitter.setHandleWidth(1)
         self.splitter.handle(1).setAttribute(Qt.WidgetAttribute.WA_Hover)
         self.splitter.setStyleSheet("QSplitter::handle {background-color: gray; margin: 5px 0px;}"
@@ -259,10 +193,7 @@ class MuxAndPlanWindow(QWidget):
         Method stops measurements by the multiplexer according to the measurement plan.
         """
 
-        self._manual_stop = True
-        self._change_widgets_to_start_measurements_according_plan(False)
-        self.measurement_plan_runner.start_or_stop_measurements(False)
-        self.setEnabled(False)
+        self._mux_measurement_runner.stop_measurements()
 
     @pyqtSlot()
     def arrange_windows(self) -> None:
@@ -283,14 +214,14 @@ class MuxAndPlanWindow(QWidget):
         self.move(window_pos)
         self.resize(window_size)
 
-    @pyqtSlot()
-    def change_progress(self) -> None:
+    @staticmethod
+    def calculate_pin_index_for_multiplexer_output(output: MultiplexerOutput) -> int:
         """
-        Slots changes value for progress bar.
+        :param output: multiplexer output.
+        :return: pin index.
         """
 
-        value = self.progress_bar.value()
-        self.progress_bar.setValue(value + 1)
+        return (output.module_number - 1) * MAX_CHANNEL_NUMBER + output.channel_number - 1
 
     @pyqtSlot(WorkMode)
     def change_work_mode(self, new_work_mode: WorkMode) -> None:
@@ -309,58 +240,30 @@ class MuxAndPlanWindow(QWidget):
         self._stop_plan_measurement()
         self.close()
 
-    @pyqtSlot()
-    def create_report(self) -> None:
-        """
-        Slot generates report after testing according to plan.
-        """
-
-        if self._main_window.work_mode is WorkMode.TEST and not self._manual_stop:
-            self._main_window.create_report(True)
-        self._manual_stop = False
-
     @pyqtSlot(MultiplexerOutput)
-    def handle_mux_output_turned_on(self, mux_output: MultiplexerOutput) -> None:
+    def handle_mux_output_turned_on(self, output: MultiplexerOutput) -> None:
         """
         Slot processes the signal to turn on the given multiplexer output.
-        :param mux_output: multiplexer output.
+        :param output: multiplexer output.
         """
 
-        index = self.measurement_plan_widget.get_pin_index(mux_output)
-        if index is not None:
-            self._main_window.handle_changing_pin_in_mux(index)
+        index = self.calculate_pin_index_for_multiplexer_output(output)
+        self._main_window.go_to_selected_pin(index)
 
-    def select_current_pin(self) -> None:
+    def select_current_pin(self, output: Optional[MultiplexerOutput]) -> None:
         """
         Method selects row in table for measurement plan for current pin index.
+        :param output: connected output.
         """
 
         self.measurement_plan_widget.select_row()
+        if output is not None:
+            self.multiplexer_pinout_widget.show_connected_output(output)
 
-    @check_multiplexer
-    def set_connection_mode(self) -> None:
+    @pyqtSlot()
+    def start_plan_measurement(self) -> None:
         """
-        Method switches window to mode when devices are connected to application.
-        """
-
-        self.setEnabled(True)
-        self._check_multiplexer_connection()
-
-    @check_multiplexer
-    def set_disconnection_mode(self) -> None:
-        """
-        Method switches window to mode when devices are disconnected from application.
-        """
-
-        if self.isEnabled():
-            self._stop_plan_measurement()
-        self._check_multiplexer_connection()
-
-    @pyqtSlot(bool)
-    def start_or_stop_plan_measurement(self, status: bool) -> None:
-        """
-        Slot starts or stops measurements by the multiplexer according to the measurement plan.
-        :param status: if True then measurements should be started.
+        Slot starts measurements by the multiplexer according to the measurement plan.
         """
 
         color = '<span style="background-color: {};">{}</span>'.format(self.COLOR_NOT_TESTED,
@@ -368,69 +271,36 @@ class MuxAndPlanWindow(QWidget):
         text = qApp.translate("mux", "Не все точки имеют выходы мультиплексора и/или не все выходы могут быть "
                                      "установлены. Поэтому исключенные из теста точки будут выделены {} цветом. Хотите "
                                      "продолжить?")
-        if status and self.measurement_plan_runner.check_pins_without_multiplexer_outputs() and \
-                not self._continue_plan_measurement(text.format(color)):
-            self.sender().setChecked(False)
+        pins_not_in_multiplexer = bool(self._main_window.measurement_plan.get_pins_without_multiplexer_outputs())
+        if pins_not_in_multiplexer and not self._continue_plan_measurement(text.format(color)):
             return
 
         text = qApp.translate("mux", "В плане тестирования есть эталонные сигнатуры. При запуске измерений в режиме "
                                      "записи плана все имеющиеся сигнатуры будут перезаписаны. Вы точно хотите "
                                      "запустить измерение всех точек?")
-        if status and self._main_window.is_measured_pin and self._main_window.work_mode is WorkMode.WRITE and \
+        if self._main_window.is_measured_pin and self._main_window.work_mode is WorkMode.WRITE and \
                 not self._continue_plan_measurement(text):
-            self.sender().setChecked(False)
             return
 
-        self._change_widgets_to_start_measurements_according_plan(status)
-        self.measurement_plan_runner.start_or_stop_measurements(status)
+        parent = self if QApplication.activeWindow() is self else self._main_window
+        progress_window = ProgressWindow(parent, qApp.translate("mux", "Измерение всех точек"))
+        progress_window.stopped.connect(self._stop_plan_measurement)
+        self._mux_measurement_runner.measurement_done.connect(progress_window.change_progress)
+        self._mux_measurement_runner.measurements_started.connect(progress_window.set_total_number_of_steps)
+        self._mux_measurement_runner.measurements_finished.connect(progress_window.close_window)
+        self._main_window.remove_callbacks_from_measurement_plan()
+        self._mux_measurement_runner.start_measurements(self._main_window.measurement_plan,
+                                                        self._main_window.work_mode,
+                                                        self._main_window._msystem.get_settings())
+        progress_window.exec()
 
-    @pyqtSlot()
-    def turn_off_standby_mode(self) -> None:
-        """
-        Slot turns off standby mode.
-        """
-
-        if self._main_window.start_or_stop_entire_plan_measurement_action.isChecked():
-            self._change_widgets_to_start_measurements_according_plan(False)
-        self.measurement_plan_widget.turn_off_standby_mode()
-        self.progress_bar.setVisible(False)
-
-        self.multiplexer_pinout_widget.enable_widgets(True)
-        self._main_window.enable_widgets(True)
-        if self._main_window.work_mode is WorkMode.TEST:
-            self._main_window.search_optimal_action.setEnabled(False)
-        for action in (self._main_window.connection_action, self._main_window.new_point_action,
-                       self._main_window.open_file_action, self._main_window.remove_point_action):
-            action.setEnabled(True)
-        for action in (self._main_window.new_point_action, self._main_window.remove_point_action):
-            action.setEnabled(False)
-        self._main_window.set_enabled_save_point_action_at_test_mode()
-
-    @pyqtSlot(int)
-    def turn_on_standby_mode(self, total_number: int) -> None:
-        """
-        Slot turns on standby mode.
-        :param total_number: number of steps in standby mode.
-        """
-
-        self.measurement_plan_widget.turn_on_standby_mode()
-        self.progress_bar.setVisible(True)
-        self.progress_bar.setMinimum(0)
-        self.progress_bar.setMaximum(total_number)
-        self.progress_bar.setValue(0)
-
-        self.multiplexer_pinout_widget.enable_widgets(False)
-        self._main_window.enable_widgets(False)
-        for action in (self._main_window.connection_action, self._main_window.open_file_action):
-            action.setEnabled(False)
-        self._main_window.open_mux_window_action.setEnabled(True)
-        if self._main_window.start_or_stop_entire_plan_measurement_action.isChecked():
-            self._main_window.start_or_stop_entire_plan_measurement_action.setEnabled(True)
-
-    def update_info(self) -> None:
+    def update_info(self, connected: bool, chain: List[ModuleTypes], output: Optional[MultiplexerOutput]) -> None:
         """
         Method updates information about the measurement plan and the multiplexer.
+        :param connected: if True, then the multiplexer is connected;
+        :param chain: list with types of multiplexer modules in chain;
+        :param output: connected output.
         """
 
         self.measurement_plan_widget.update_info()
-        self.multiplexer_pinout_widget.update_info()
+        self.multiplexer_pinout_widget.update_info(connected, chain, output)

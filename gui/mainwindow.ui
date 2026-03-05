@@ -349,7 +349,7 @@
     <addaction name="add_board_image_action"/>
     <addaction name="delete_board_image_action"/>
     <addaction name="create_report_action"/>
-    <addaction name="start_or_stop_entire_plan_measurement_action"/>
+    <addaction name="start_plan_measurement_action"/>
    </widget>
    <widget class="QMenu" name="measurers_menu">
     <property name="title">
@@ -897,10 +897,7 @@
     <string>Сгенерировать отчет</string>
    </property>
   </action>
-  <action name="start_or_stop_entire_plan_measurement_action">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
+  <action name="start_plan_measurement_action">
    <property name="enabled">
     <bool>false</bool>
    </property>

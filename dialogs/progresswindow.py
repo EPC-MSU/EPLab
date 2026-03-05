@@ -1,8 +1,8 @@
 import os
 from typing import Optional
-from PyQt5.QtCore import pyqtSlot, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QLayout, QProgressBar, QTextEdit, QVBoxLayout
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, Qt
+from PyQt5.QtGui import QFontMetrics, QIcon
+from PyQt5.QtWidgets import QDialog, QHBoxLayout, QLayout, QProgressBar, QPushButton, QVBoxLayout
 from window import utils as ut
 
 
@@ -10,6 +10,8 @@ class ProgressWindow(QDialog):
     """
     A window for displaying information about the progress of a process.
     """
+
+    stopped: pyqtSignal = pyqtSignal()
 
     def __init__(self, main_window, title: str) -> None:
         """
@@ -22,6 +24,31 @@ class ProgressWindow(QDialog):
         self._total_number: Optional[int] = None
         self._init_ui(title)
 
+    def _create_cancel_button(self) -> QLayout:
+        """
+        :return: layout with button.
+        """
+
+        self._button_cancel: QPushButton = QPushButton()
+        self._button_cancel.setText(qApp.translate("t", "Отмена"))
+        self._button_cancel.clicked.connect(self.stopped.emit)
+
+        h_layout = QHBoxLayout()
+        h_layout.addStretch(1)
+        h_layout.addWidget(self._button_cancel)
+        return h_layout
+
+    def _create_progress_bar(self) -> QProgressBar:
+        """
+        :return: progress bar.
+        """
+
+        self._progress_bar: QProgressBar = QProgressBar()
+        self._progress_bar.setMinimum(0)
+        self._progress_bar.setMaximum(100)
+        self._progress_bar.setValue(0)
+        return self._progress_bar
+
     def _init_ui(self, title: str) -> None:
         """
         :param title: window title.
@@ -29,32 +56,31 @@ class ProgressWindow(QDialog):
 
         self.setWindowTitle(title)
         self.setWindowIcon(QIcon(os.path.join(ut.DIR_MEDIA, "icon.png")))
-        self.progress_bar: QProgressBar = QProgressBar()
-        self.progress_bar.setMinimum(0)
-        self.progress_bar.setMaximum(100)
-        self.progress_bar.setValue(0)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
 
-        self.text_edit_info: QTextEdit = QTextEdit()
-        self.text_edit_info.setMaximumHeight(100)
-        self.text_edit_info.setReadOnly(True)
+        metrics = QFontMetrics(self.font())
+        title_width = metrics.horizontalAdvance(title)
+        self.setMinimumWidth(title_width + 150)
 
         v_box_layout = QVBoxLayout()
-        v_box_layout.addWidget(self.progress_bar)
-        v_box_layout.addWidget(self.text_edit_info)
-        v_box_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
+        v_box_layout.addWidget(self._create_progress_bar())
+        v_box_layout.addLayout(self._create_cancel_button())
+        v_box_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
         self.setLayout(v_box_layout)
         self.adjustSize()
 
     @pyqtSlot()
-    def change_progress(self, step_info: Optional[str] = None) -> None:
+    def change_progress(self) -> None:
+        self._number_of_steps_done += 1
+        self._progress_bar.setValue(int(self._number_of_steps_done / self._total_number * 100))
+
+    @pyqtSlot(bool)
+    def close_window(self, unused: bool) -> None:
         """
-        :param step_info: information about the completed step.
+        :param unused: unused parameter.
         """
 
-        self._number_of_steps_done += 1
-        self.progress_bar.setValue(int(self._number_of_steps_done / self._total_number * 100))
-        if step_info:
-            self.text_edit_info.append(step_info)
+        self.close()
 
     @pyqtSlot(int)
     def set_total_number_of_steps(self, number: int) -> None:

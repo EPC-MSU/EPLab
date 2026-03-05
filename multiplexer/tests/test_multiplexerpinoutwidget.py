@@ -5,8 +5,8 @@ Tests for widget that displays multiplexer.
 import sys
 import unittest
 from PyQt5.QtWidgets import QApplication
+from epcore.analogmultiplexer import ModuleTypes
 from multiplexer.multiplexerpinoutwidget import MultiplexerPinoutWidget
-from .utils import create_dummy_main_window
 
 
 class TestMultiplexerPinoutWidget(unittest.TestCase):
@@ -17,10 +17,8 @@ class TestMultiplexerPinoutWidget(unittest.TestCase):
         """
 
         app = QApplication(sys.argv)
-        dummy_main_window = create_dummy_main_window()
-        dummy_main_window.measurement_plan.multiplexer = None
-        multiplexer_pinout_widget = MultiplexerPinoutWidget(dummy_main_window)
-        multiplexer_pinout_widget.update_info()
+        multiplexer_pinout_widget = MultiplexerPinoutWidget()
+        multiplexer_pinout_widget.update_info(False, [], None)
         self.assertEqual(len(multiplexer_pinout_widget._modules), 0)
         app.exit(0)
 
@@ -30,8 +28,9 @@ class TestMultiplexerPinoutWidget(unittest.TestCase):
         """
 
         app = QApplication(sys.argv)
-        dummy_main_window = create_dummy_main_window()
-        multiplexer_pinout_widget = MultiplexerPinoutWidget(dummy_main_window)
-        multiplexer_pinout_widget.update_info()
-        self.assertEqual(len(multiplexer_pinout_widget._modules), 3)
+        number_of_modules = 3
+        chain = [ModuleTypes.MODULE_TYPE_A for _ in range(number_of_modules)]
+        multiplexer_pinout_widget = MultiplexerPinoutWidget()
+        multiplexer_pinout_widget.update_info(True, chain, None)
+        self.assertEqual(len(multiplexer_pinout_widget._modules), number_of_modules)
         app.exit(0)

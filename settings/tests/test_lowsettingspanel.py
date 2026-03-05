@@ -26,7 +26,6 @@ class TestLowSettingsPanel(unittest.TestCase):
         panel.set_all_parameters(**data)
         for label_name, value in correct_result.items():
             label = panel._param_dict[label_name]
-            print(label.text(), value)
             self.assertEqual(label.text(), value)
 
     def test_set_legend(self) -> None:
