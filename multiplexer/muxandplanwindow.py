@@ -4,12 +4,12 @@ File with class to show window with information about multiplexer and measuremen
 
 import logging
 import os
-from typing import Any, Callable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 from PyQt5.QtCore import pyqtSlot, QCoreApplication as qApp, QPoint, QSize, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox, QPushButton, QSplitter, QToolBar,
                              QVBoxLayout, QWidget)
-from epcore.analogmultiplexer.base import AnalogMultiplexerBase, MAX_CHANNEL_NUMBER, ModuleTypes, MultiplexerOutput
+from epcore.analogmultiplexer.base import MAX_CHANNEL_NUMBER, ModuleTypes, MultiplexerOutput
 from dialogs import ProgressWindow
 from dialogs.save_geometry import update_widget_to_save_geometry
 from window import utils as ut
@@ -21,20 +21,6 @@ from .muxmeasurementrunner import MuxMeasurementRunner
 
 
 logger = logging.getLogger("eplab")
-
-
-def check_multiplexer(func: Callable[..., Any]):
-    """
-    Decorator checks for a connected multiplexer.
-    :param func: function to be decorated.
-    """
-
-    def wrapper(self, *args, **kwargs) -> Any:
-        if not self.multiplexer:
-            return None
-        return func(self, *args, **kwargs)
-
-    return wrapper
 
 
 @add_pedal_handler
@@ -61,17 +47,6 @@ class MuxAndPlanWindow(QWidget):
         self._previous_window_size: Optional[QSize] = None
         self._init_ui()
         self._create_mux_measurement_runner()
-
-    @property
-    def multiplexer(self) -> Optional[AnalogMultiplexerBase]:
-        """
-        :return: multiplexer.
-        """
-
-        if self._main_window.measurement_plan:
-            return self._main_window.measurement_plan.multiplexer
-
-        return None
 
     @property
     def mux_measurements_are_running(self) -> bool:
