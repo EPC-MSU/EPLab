@@ -144,6 +144,7 @@ class ModuleWidget(QWidget):
         if self._turned_on_channel and self._turned_on_channel != channel_number:
             self._channels[self._turned_on_channel].button_turn_on_off.setChecked(False)
         self._turned_on_channel = channel_number
+        self._change_module_color()
 
     @pyqtSlot(bool, int)
     def turn_on_off_channel(self, state: bool, channel_number: int) -> None:
