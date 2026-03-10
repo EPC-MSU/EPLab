@@ -91,6 +91,9 @@ class EPLabWindow(QMainWindow):
         self._auto_settings: AutoSettings = AutoSettings(path=self.FILENAME_FOR_AUTO_SETTINGS)
         self._comparator: IVCComparator = IVCComparator()
         self._device_errors_handler: DeviceErrorsHandler = DeviceErrorsHandler()
+        self._flag_go_to_next_after_save: bool = False
+        self._flag_pin_centering: bool = False
+        self._flag_save: bool = False
         self._hide_current_curve: bool = False
         self._hide_reference_curve: bool = False
         self._last_saved_measurement_plan_data: Optional[Dict[str, Any]] = None
@@ -428,6 +431,9 @@ class EPLabWindow(QMainWindow):
         self._mux_and_plan_window.close()
         self._score_wrapper.set_dummy_difference()
 
+        self._flag_go_to_next_after_save = False
+        self._flag_pin_centering = False
+        self._flag_save = False
         self._settings_update_next_cycle = None
         self._skip_curve = False
         self._work_mode = None
@@ -680,6 +686,17 @@ class EPLabWindow(QMainWindow):
             with self._device_errors_handler:
                 result_of_periodic_task = self._read_curves_periodic_task()
 
+            if result_of_periodic_task and not self._skip_curve and self._flag_save:
+                self._flag_save = False
+                self._save_pin(self._flag_pin_centering)
+
+                if self._flag_go_to_next_after_save and self.work_mode in (WorkMode.TEST, WorkMode.WRITE):
+                    self._flag_go_to_next_after_save = False
+                    self._timer_to_go_to_next_pin.start()
+
+            if result_of_periodic_task:
+                self._skip_curve = False
+
             self._plan_auto_transition.save_measurements_or_go_to_next_pin()
 
             with self._device_errors_handler:
@@ -867,9 +884,7 @@ class EPLabWindow(QMainWindow):
         """
 
         if self._msystem.measurements_are_ready():
-            if self._skip_curve:
-                self._skip_curve = False
-            else:
+            if not self._skip_curve:
                 curves, measurement_settings = self._get_curves_for_periodic_task()
                 self._update_signatures(curves, measurement_settings)
                 if self._need_to_restore_frozen_state:
@@ -983,6 +998,27 @@ class EPLabWindow(QMainWindow):
             curve = self._msystem.measurers[0].get_last_cached_iv_curve()
             settings = self._msystem.get_settings()
             self._compare_measurement = Measurement(settings=settings, ivc=curve)
+
+    def _save_pin(self, pin_centering: bool = True) -> None:
+        """
+        :param pin_centering: if True, then the created pin will be centered on the board window.
+        """
+
+        with self._device_errors_handler:
+            if self.work_mode is WorkMode.COMPARE:
+                self._save_measurement_in_compare_mode()
+            elif self.work_mode is WorkMode.TEST:
+                self.measurement_plan.save_last_measurement_as_test()
+            elif self.work_mode is WorkMode.WRITE:
+                self.measurement_plan.save_last_measurement_as_reference(True)
+
+        if self.work_mode in (WorkMode.TEST, WorkMode.WRITE):
+            index = self.measurement_plan.get_current_index()
+            self.update_current_pin(pin_centering)
+            self._comment_widget.save_comment(index)
+            self._comment_widget.update_table_for_new_tolerance(index)
+            if self.measurement_plan and self.measurement_plan.multiplexer:
+                self._mux_and_plan_window.measurement_plan_widget.save_measurement(index)
 
     def _set_auto_settings_to_ui(self) -> None:
         if self._auto_settings.sound:
@@ -1107,6 +1143,9 @@ class EPLabWindow(QMainWindow):
         self._create_measurer_setting_actions()
         self._disable_optimal_parameter_searcher()
 
+        self._flag_go_to_next_after_save = False
+        self._flag_pin_centering = False
+        self._flag_save = False
         self._settings_update_next_cycle = None
         self._skip_curve = False
 
@@ -1971,25 +2010,11 @@ class EPLabWindow(QMainWindow):
     @pyqtSlot()
     def save_pin(self, pin_centering: bool = True) -> None:
         """
-        Slot saves signature to current pin.
         :param pin_centering: if True, then the created pin will be centered on the board window.
         """
 
-        with self._device_errors_handler:
-            if self.work_mode is WorkMode.COMPARE:
-                self._save_measurement_in_compare_mode()
-            elif self.work_mode is WorkMode.TEST:
-                self.measurement_plan.save_last_measurement_as_test()
-            elif self.work_mode is WorkMode.WRITE:
-                self.measurement_plan.save_last_measurement_as_reference(True)
-
-        if self.work_mode in (WorkMode.TEST, WorkMode.WRITE):
-            index = self.measurement_plan.get_current_index()
-            self.update_current_pin(pin_centering)
-            self._comment_widget.save_comment(index)
-            self._comment_widget.update_table_for_new_tolerance(index)
-            if self.measurement_plan and self.measurement_plan.multiplexer:
-                self._mux_and_plan_window.measurement_plan_widget.save_measurement(index)
+        self._flag_pin_centering = pin_centering
+        self._flag_save = True
 
     @pyqtSlot()
     def save_pin_and_go_to_next(self) -> None:
@@ -2000,6 +2025,7 @@ class EPLabWindow(QMainWindow):
 
         self.save_pin()
         if self.work_mode in (WorkMode.TEST, WorkMode.WRITE):
+            self._flag_go_to_next_after_save = True
             self._timer_to_go_to_next_pin.start()
 
     @pyqtSlot()
