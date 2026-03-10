@@ -10,8 +10,8 @@ from datetime import datetime
 from functools import partial
 from platform import system
 from typing import Any, Dict, List, Optional, Tuple
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QCoreApplication as qApp, QEvent, QPointF, Qt, QTimer, QTranslator, \
-    QByteArray
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QByteArray, QCoreApplication as qApp, QEvent, QLibraryInfo, QPointF, Qt,
+                          QTimer, QTranslator)
 from PyQt5.QtGui import QCloseEvent, QColor, QIcon, QKeySequence, QMouseEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QFileDialog, QHBoxLayout, QMainWindow, QMessageBox, QShortcut, QStyle,
                              QVBoxLayout, QWidget)
@@ -803,8 +803,18 @@ class EPLabWindow(QMainWindow):
         if language is not Language.RU:
             translation_file = Translator.get_translator_file(language)
             self._translator: QTranslator = QTranslator()
-            self._translator.load(translation_file)
-            qApp.instance().installTranslator(self._translator)
+            if self._translator.load(translation_file) and qApp.instance().installTranslator(self._translator):
+                logger.info("English translator is loaded and installed")
+            else:
+                logger.warning("Failed to install English translator")
+        else:
+            self._qt_translator: QTranslator = QTranslator()
+            if (self._qt_translator.load("qtbase_ru", QLibraryInfo.location(QLibraryInfo.TranslationsPath)) and
+                    qApp.instance().installTranslator(self._qt_translator)):
+                logger.info("Russian Qt base translator is loaded and installed")
+            else:
+                logger.warning("Failed to install Russian Qt base translator")
+
         qApp.instance().setProperty("language", language)
 
     def _open_board_window_if_needed(self) -> None:
