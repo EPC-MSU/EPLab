@@ -44,7 +44,7 @@ class SettingsPanel(QWidget):
         self.setAttribute(Qt.WA_TransparentForMouseEvents)
 
         self._layout: QVBoxLayout = QVBoxLayout()
-        self._layout.setSpacing(0)
+        self._layout.setSpacing(2)
         self._layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self._layout)
 
