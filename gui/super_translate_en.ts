@@ -556,6 +556,23 @@ Such pins will be automatically declared in the report as being fault free. If y
         <translation>Error occurred while configuring device settings.</translation>
     </message>
     <message>
+        <location filename="../window/equivalentcircuitwidget.py" line="246"/>
+        <source>Не реализовано</source>
+        <translation>Not implemented</translation>
+    </message>
+    <message>
+        <location filename="../window/equivalentcircuitwidget.py" line="248"/>
+        <source>Ошибка определения
+параметров</source>
+        <translation>Parameter detection
+failed</translation>
+    </message>
+    <message>
+        <location filename="../window/equivalentcircuitwidget.py" line="250"/>
+        <source>Ошибка распознавания</source>
+        <translation>Recognition failed</translation>
+    </message>
+    <message>
         <location filename="../window/exceptionhook.py" line="18"/>
         <source>Что-то пошло не так, и произошла ошибка:</source>
         <translation>Something went wrong and an error occurred:</translation>

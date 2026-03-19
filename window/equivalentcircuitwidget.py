@@ -1,12 +1,51 @@
 import os.path
 from typing import Any, Dict, Optional
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QCoreApplication as qApp, QSize, Qt
 from PyQt5.QtGui import QPixmap, QResizeEvent
 from PyQt5.QtWidgets import QFrame, QHBoxLayout, QLabel, QWidget
 from circuit_detector import CircuitClassifier, detect_parameters, predict_circuit_class_for_iv_curve
 from epcore.elements import IVCurve, MeasurementSettings
 from ivviewer import Curve
 from . import utils as ut
+
+
+class ScalableLabel(QLabel):
+    """
+    Scalable label for displaying electrical circuits.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._original_pixmap: QPixmap = QPixmap()
+        self._scaled_size: Optional[QSize] = None
+        self.setMinimumSize(1, 1)
+
+    def clear(self) -> None:
+        super().clear()
+        self._original_pixmap = QPixmap()
+
+    def resize_pixmap(self, size: QSize) -> None:
+        """
+        :param size: the size to which the pixmap should be scaled.
+        """
+
+        if not self._original_pixmap.isNull():
+            scaled_pixmap = self._original_pixmap.scaled(size, Qt.AspectRatioMode.KeepAspectRatio,
+                                                         Qt.TransformationMode.SmoothTransformation)
+            self.setPixmap(scaled_pixmap)
+
+        self._scaled_size = size
+
+    def set_pixmap(self, pixmap: QPixmap) -> None:
+        """
+        :param pixmap: pixmap.
+        """
+
+        self._original_pixmap = pixmap
+        if self._scaled_size:
+            self.resize_pixmap(self._scaled_size)
+        else:
+            self.setPixmap(self._original_pixmap)
 
 
 class EquivalentCircuitWidget(QFrame):
@@ -17,6 +56,8 @@ class EquivalentCircuitWidget(QFrame):
     def __init__(self, color: str, margin: int, params_label_width: int, place_circuit_on_left: bool = True) -> None:
         """
         :param color: text color for displaying circuit parameters;
+        :param margin: margin;
+        :param params_label_width: fixed width for label with parameters;
         :param place_circuit_on_left: if True, then you need to place the circuit to the left of the parameters,
         otherwise to the right.
         """
@@ -27,9 +68,14 @@ class EquivalentCircuitWidget(QFrame):
         self._init_ui(margin, params_label_width)
 
     def _init_ui(self, margin: int, params_label_width: int) -> None:
+        """
+        :param margin:
+        :param params_label_width:
+        """
+
         self.setStyleSheet("background-color: black;")
 
-        self._label_circuit: QLabel = QLabel()
+        self._label_circuit: ScalableLabel = ScalableLabel()
         self._label_params: QLabel = QLabel()
         self._label_params.setFixedWidth(params_label_width)
         self._label_params.setStyleSheet(f"background-color: black; color: {self._color}")
@@ -55,6 +101,13 @@ class EquivalentCircuitWidget(QFrame):
         if self._label_circuit.isVisible():
             self._label_circuit.hide()
 
+    def resize_circuit(self, size: QSize) -> None:
+        """
+        :param size: the size to which the circuit image should be scaled.
+        """
+
+        self._label_circuit.resize_pixmap(size)
+
     def set_circuit_image(self, circuit_image: Optional[QPixmap]) -> None:
         """
         :param circuit_image: image of the equivalent circuit.
@@ -64,7 +117,7 @@ class EquivalentCircuitWidget(QFrame):
         if not circuit_image:
             return
 
-        self._label_circuit.setPixmap(circuit_image)
+        self._label_circuit.set_pixmap(circuit_image)
 
     def set_circuit_params(self, circuit_params: Dict[str, Any]) -> None:
         """
@@ -100,7 +153,7 @@ class EquivalentCircuitsWidget(QWidget):
 
     MARGIN: int = 5
     MAX_IMAGE_SIZE: int = 140
-    PARAMS_LABEL_WIDTH: int = 100
+    PARAMS_LABEL_WIDTH: int = 120
     SPACING: int = 5
     WIDGET_HEIGHT: int = 150
 
@@ -120,6 +173,7 @@ class EquivalentCircuitsWidget(QWidget):
         self._create_classifier()
         self._load_circuit_class_images()
         self._init_ui()
+        self._resize_circuit()
 
     @property
     def min_width_with_images(self) -> int:
@@ -127,11 +181,19 @@ class EquivalentCircuitsWidget(QWidget):
         :return: minimum width of the widget with the equivalent circuit images.
         """
 
-        return 2 * (3 * self.MARGIN + self._max_image_width + self.PARAMS_LABEL_WIDTH)
+        return 2 * (3 * self.MARGIN + self._max_image_width // 2 + self.PARAMS_LABEL_WIDTH) + self.SPACING
 
     def _create_classifier(self) -> None:
         model_path = os.path.join(self._dir_path, "model.pkl")
         self._classifier: CircuitClassifier = CircuitClassifier.load(model_path)
+
+    def _get_image_size(self) -> QSize:
+        """
+        :return: the size that the circuit image should be.
+        """
+
+        width = (self.width() - self.SPACING) // 2 - 3 * self.MARGIN - self.PARAMS_LABEL_WIDTH
+        return QSize(width, self.height())
 
     def _init_ui(self) -> None:
         self._current_circuit_widget: EquivalentCircuitWidget = EquivalentCircuitWidget(
@@ -160,6 +222,18 @@ class EquivalentCircuitsWidget(QWidget):
                                                            Qt.TransformationMode.SmoothTransformation)
                 self._max_image_width = max(pixmap.width(), self._max_image_width)
                 self._circuit_class_images[class_name] = pixmap
+
+    def _resize_circuit(self) -> None:
+        if self.width() < self.min_width_with_images:
+            self._current_circuit_widget.hide_circuit_image()
+            self._reference_circuit_widget.hide_circuit_image()
+        else:
+            self._current_circuit_widget.show_circuit_image()
+            self._reference_circuit_widget.show_circuit_image()
+
+        size = self._get_image_size()
+        self._current_circuit_widget.resize_circuit(size)
+        self._reference_circuit_widget.resize_circuit(size)
 
     def _update_curve(self, curve: Optional[Curve], curve_backup: Optional[Curve],
                       settings: Optional[MeasurementSettings], comment: str, circuit_widget: EquivalentCircuitWidget
@@ -193,11 +267,11 @@ class EquivalentCircuitsWidget(QWidget):
                 circuit_params = detect_parameters(circuit_features)
                 circuit_widget.set_circuit_params(circuit_params)
             except NotImplementedError:
-                circuit_widget.show_error("Not implemented")
+                circuit_widget.show_error(qApp.translate("t", "Не реализовано"))
             except ValueError:
-                circuit_widget.show_error("Parameter detection failed")
+                circuit_widget.show_error(qApp.translate("t", "Ошибка определения\nпараметров"))
         except Exception:
-            circuit_widget.show_error("Recognition failed")
+            circuit_widget.show_error(qApp.translate("t", "Ошибка распознавания"))
 
     def clear_circuits(self) -> None:
         self._current_circuit_widget.clear_circuit()
@@ -208,13 +282,7 @@ class EquivalentCircuitsWidget(QWidget):
         :param event: resize event.
         """
 
-        if self.width() < self.min_width_with_images:
-            self._current_circuit_widget.hide_circuit_image()
-            self._reference_circuit_widget.hide_circuit_image()
-        else:
-            self._current_circuit_widget.show_circuit_image()
-            self._reference_circuit_widget.show_circuit_image()
-
+        self._resize_circuit()
         super().resizeEvent(event)
 
     def update_circuits(self, current_curve: Optional[Curve], reference_curve: Optional[Curve],
