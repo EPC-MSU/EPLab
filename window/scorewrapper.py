@@ -8,7 +8,7 @@ class ScoreWrapper:
     COLOR_BAD: str = "#cc0000"
     COLOR_GOOD: str = "#73d216"
     DEFAULT_SCORE_TOLERANCE: float = 0.15
-    FONT_SIZE: int = 48
+    FONT_SIZE: int = 33
 
     def __init__(self, label: QLabel) -> None:
         """
