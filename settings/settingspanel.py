@@ -1,6 +1,6 @@
 from typing import Dict, Generator
-from PyQt5.QtCore import QCoreApplication as qApp
-from PyQt5.QtWidgets import QLabel, QToolBar, QVBoxLayout, QWidget
+from PyQt5.QtCore import QCoreApplication as qApp, Qt
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget
 from window import utils as ut
 from .legendwidget import LegendWidget
 
@@ -36,20 +36,17 @@ class SettingsPanel(QWidget):
         for param_name in ("voltage_per_div", "current_per_div", "max_voltage", "sensitivity", "frequency", "score"):
             label = QLabel()
             label.setContentsMargins(self.LEFT_MARGIN, 0, 0, 0)
+            label.setStyleSheet("color: white; background-color: rgba(0, 0, 0, 128);")
             self._param_dict[param_name] = label
-
-            tool_bar = QToolBar()
-            tool_bar.setStyleSheet("background-color: black; color: white;")
-            tool_bar.addWidget(label)
-            tool_bar.setContentsMargins(0, 0, 0, 0)
-            self._layout.addWidget(tool_bar)
+            self._layout.addWidget(label, alignment=Qt.AlignmentFlag.AlignLeft)
 
     def _init_ui(self) -> None:
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+
         self._layout: QVBoxLayout = QVBoxLayout()
         self._layout.setSpacing(0)
         self._layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self._layout)
-        self.setStyleSheet("background-color: red;")
 
         self._init_param_dict()
         self._init_legends()

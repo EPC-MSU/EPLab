@@ -1,11 +1,11 @@
 import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QToolBar, QWidget
+from PyQt5.QtWidgets import QHBoxLayout, QLabel, QWidget
 from window.utils import DIR_MEDIA
 
 
-class LegendWidget(QToolBar):
+class LegendWidget(QWidget):
     """
     Class with legend for curves that are displayed in the IVViewer window.
     """
@@ -40,16 +40,13 @@ class LegendWidget(QToolBar):
         layout.setSpacing(4)
         layout.setContentsMargins(0, 0, 0, 0)
         for label in (self.label_color, self.label_text, self.label_status):
-            label.setStyleSheet("background-color: black; color: white;")
+            label.setStyleSheet("background-color: black; color: white; background-color: rgba(0, 0, 0, 128);")
             layout.addWidget(label)
         layout.addStretch(1)
 
-        widget = QWidget()
-        widget.setContentsMargins(0, 0, 0, 0)
-        widget.setLayout(layout)
-        self.addWidget(widget)
+        self.setLayout(layout)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setStyleSheet("background-color: black;")
+        self.setStyleSheet("background-color: rgba(0, 0, 0, 128);")
 
     def clear(self) -> None:
         self.setVisible(False)
