@@ -9,7 +9,7 @@ class LowSettingsPanel(QWidget):
     Class for plot parameters on the low panel at GUI.
     """
 
-    HEIGHT: int = 30
+    HEIGHT: int = 20
     LEFT_MARGIN: int = 4
 
     def __init__(self, parent=None) -> None:
