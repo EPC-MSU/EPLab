@@ -98,8 +98,7 @@ class EquivalentCircuitWidget(QFrame):
         self._label_params.clear()
 
     def hide_circuit_image(self) -> None:
-        if self._label_circuit.isVisible():
-            self._label_circuit.hide()
+        self._label_circuit.hide()
 
     def resize_circuit(self, size: QSize) -> None:
         """
@@ -135,8 +134,7 @@ class EquivalentCircuitWidget(QFrame):
         self._label_params.setText(text)
 
     def show_circuit_image(self) -> None:
-        if not self._label_circuit.isVisible():
-            self._label_circuit.show()
+        self._label_circuit.show()
 
     def show_error(self, error: str) -> None:
         """
