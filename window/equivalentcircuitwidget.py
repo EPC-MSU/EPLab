@@ -30,8 +30,11 @@ class ScalableLabel(QLabel):
         """
 
         if not self._original_pixmap.isNull():
-            scaled_pixmap = self._original_pixmap.scaled(size, Qt.AspectRatioMode.KeepAspectRatio,
+            dpr = self.devicePixelRatioF()
+            target_size = QSize(int(dpr * size.width()), int(dpr * size.height()))
+            scaled_pixmap = self._original_pixmap.scaled(target_size, Qt.AspectRatioMode.KeepAspectRatio,
                                                          Qt.TransformationMode.SmoothTransformation)
+            scaled_pixmap.setDevicePixelRatio(dpr)
             self.setPixmap(scaled_pixmap)
 
         self._scaled_size = size
