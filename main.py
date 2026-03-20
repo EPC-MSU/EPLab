@@ -27,11 +27,14 @@ if True:
     from window.exceptionhook import exception_hook, show_error_window
     from window.logger import set_logger
 
-if getattr(sys, "frozen", False):
-    import pyi_splash
-    pyi_splash.close()
 
 sys.excepthook = exception_hook
+
+
+def hide_splash() -> None:
+    if getattr(sys, "frozen", False):
+        import pyi_splash
+        pyi_splash.close()
 
 
 def increase_font_size_for_larger_view(app: QApplication) -> None:
@@ -53,6 +56,7 @@ def launch_eplab(app: QApplication, args: Namespace) -> None:
     """
 
     window = EPLabWindow(EyePointProduct(ut.read_json(args.config)), args.test, args.ref, args.en, args.plan_path)
+    hide_splash()
     window.show()
     app.exec()
 
@@ -74,4 +78,5 @@ if __name__ == "__main__":
     try:
         launch_eplab(app_, parsed_args)
     except Exception:
+        hide_splash()
         show_error_window(app_, *sys.exc_info())
