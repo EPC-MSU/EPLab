@@ -40,13 +40,12 @@ class LegendWidget(QWidget):
         layout.setSpacing(4)
         layout.setContentsMargins(0, 0, 0, 0)
         for label in (self.label_color, self.label_text, self.label_status):
-            label.setStyleSheet("background-color: black; color: white; background-color: rgba(0, 0, 0, 128);")
+            label.setStyleSheet("color: white;")
             layout.addWidget(label)
         layout.addStretch(1)
 
         self.setLayout(layout)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setStyleSheet("background-color: rgba(0, 0, 0, 128);")
 
     def clear(self) -> None:
         self.setVisible(False)

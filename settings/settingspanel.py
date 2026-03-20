@@ -1,11 +1,11 @@
 from typing import Dict, Generator
 from PyQt5.QtCore import QCoreApplication as qApp, Qt
-from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QFrame, QLabel, QVBoxLayout
 from window import utils as ut
 from .legendwidget import LegendWidget
 
 
-class SettingsPanel(QWidget):
+class SettingsPanel(QFrame):
     """
     Widget for displaying current settings.
     """
@@ -36,13 +36,11 @@ class SettingsPanel(QWidget):
         for param_name in ("voltage_per_div", "current_per_div", "max_voltage", "sensitivity", "frequency", "score"):
             label = QLabel()
             label.setContentsMargins(self.LEFT_MARGIN, 0, 0, 0)
-            label.setStyleSheet("color: white; background-color: rgba(0, 0, 0, 128);")
+            label.setStyleSheet("color: white;")
             self._param_dict[param_name] = label
             self._layout.addWidget(label, alignment=Qt.AlignmentFlag.AlignLeft)
 
     def _init_ui(self) -> None:
-        self.setAttribute(Qt.WA_TransparentForMouseEvents)
-
         self._layout: QVBoxLayout = QVBoxLayout()
         self._layout.setSpacing(2)
         self._layout.setContentsMargins(0, 0, 0, 0)
@@ -50,6 +48,18 @@ class SettingsPanel(QWidget):
 
         self._init_param_dict()
         self._init_legends()
+
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.setObjectName("SettingsPanel")
+        self.setStyleSheet("""
+                    #SettingsPanel {
+                        background-color: rgba(0, 0, 0, 128);
+                    }
+                    QLabel {
+                        background-color: transparent;
+                        color: white;
+                    }
+                """)
 
     def _set_current_per_div(self, current_per_division: float) -> None:
         """
