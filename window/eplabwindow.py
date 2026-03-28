@@ -121,7 +121,6 @@ class EPLabWindow(QMainWindow):
 
         self._load_translation(english)
         self._init_ui()
-        self._adjust_critical_width()
         self._set_init_geometry()
         self._connect_scale_change_signal()
         self.measurers_connected.connect(self.handle_connection)
@@ -222,19 +221,6 @@ class EPLabWindow(QMainWindow):
         """
 
         return self._work_mode
-
-    def _adjust_critical_width(self) -> None:
-        """
-        Method updates the critical window width at which it is necessary to change the toolbar display mode from text
-        to icon. When updating the width, the current screen scale is taken into account.
-        """
-
-        scale_factor = ut.get_scale_factor()
-        for width in ("CRITICAL_WIDTH_FOR_LINUX_EN", "CRITICAL_WIDTH_FOR_LINUX_RU", "CRITICAL_WIDTH_FOR_WINDOWS_EN",
-                      "CRITICAL_WIDTH_FOR_WINDOWS_RU", "INIT_HEIGHT", "MIN_WIDTH_IN_LINUX", "MIN_WIDTH_IN_WINDOWS"):
-            width_value = getattr(self, width, None)
-            if isinstance(width_value, (int, float)):
-                setattr(self, width, int(scale_factor * width_value))
 
     def _adjust_plot_params(self, settings: MeasurementSettings) -> None:
         """
@@ -655,6 +641,18 @@ class EPLabWindow(QMainWindow):
         if action.isEnabled():
             self.go_to_left_or_right_pin(prev_pin)
 
+    def _get_total_ideal_width_for_toolbars(self) -> int:
+        """
+        :return: minimum full width for the toolbar to display text.
+        """
+
+        for tool_bar in (self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search):
+            tool_bar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+
+        return sum(tool_bar.layout().sizeHint().width() for tool_bar in
+                   (self.toolbar_file, self.toolbar_test, self.toolbar_write, self.toolbar_auto_search,
+                    self.toolbar_compare, self.toolbar_mode, self.toolbar_language))
+
     def _handle_freezing_curves_with_pedal(self, pressed: bool) -> None:
         """
         Method freezes the measurers signatures using a pedal. The signatures are frozen when the pedal is pressed in
@@ -705,6 +703,16 @@ class EPLabWindow(QMainWindow):
             self._mux_and_plan_window.close_and_stop_plan_measurement()
             self._disconnect_devices()
             self._connection_checker.run_check()
+
+    def _hide_text_in_toolbar_if_necessary(self, total_ideal_width: int) -> None:
+        """
+        :param total_ideal_width: minimum full width for the toolbar to display text.
+        """
+
+        margin = 20
+        if self.width() < (total_ideal_width + margin):
+            for tool_bar in (self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search):
+                tool_bar.setToolButtonStyle(Qt.ToolButtonIconOnly)
 
     def _init_ui(self) -> None:
         loadUi(os.path.join(os.path.dirname(ut.DIR_MEDIA), "gui", "mainwindow.ui"), self)
@@ -1057,22 +1065,20 @@ class EPLabWindow(QMainWindow):
         Method moves the window to the desired position and sets the initial dimensions.
         """
 
-        if system().lower() == "windows":
-            width = self.CRITICAL_WIDTH_FOR_WINDOWS_RU
-        else:
-            width = self.CRITICAL_WIDTH_FOR_LINUX_RU
-        height = self.INIT_HEIGHT
-
         geometry = qApp.instance().primaryScreen().availableGeometry()
         available_height = geometry.height() - self.style().pixelMetric(QStyle.PixelMetric.PM_TitleBarHeight)
         available_width = geometry.width()
 
-        height = min(height, available_height)
-        width = min(width, available_width)
+        margin_for_window = 50
+        total_ideal_width = self._get_total_ideal_width_for_toolbars()
+        height = min(self.INIT_HEIGHT, available_height)
+        width = min(total_ideal_width + margin_for_window, available_width)
         pos_x = int(round(geometry.x() + (available_width - width) / 2))
         pos_y = int(round(geometry.y() + (available_height - height) / 2))
         self.move(pos_x, pos_y)
         self.resize(width, height)
+
+        self._hide_text_in_toolbar_if_necessary(total_ideal_width)
 
     def _set_hotkeys_for_moving_through_pins(self) -> None:
         """
@@ -1914,17 +1920,8 @@ class EPLabWindow(QMainWindow):
         :param event: resizing event.
         """
 
-        for tool_bar in (self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search):
-            tool_bar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
-
-        total_ideal_width = sum(tool_bar.layout().sizeHint().width() for tool_bar in
-                                (self.toolbar_file, self.toolbar_test, self.toolbar_write, self.toolbar_auto_search,
-                                 self.toolbar_compare, self.toolbar_mode, self.toolbar_language))
-
-        margin = 20
-        if self.width() < (total_ideal_width + margin):
-            for tool_bar in (self.toolbar_write, self.toolbar_mode, self.toolbar_auto_search):
-                tool_bar.setToolButtonStyle(Qt.ToolButtonIconOnly)
+        total_ideal_width = self._get_total_ideal_width_for_toolbars()
+        self._hide_text_in_toolbar_if_necessary(total_ideal_width)
 
         super().resizeEvent(event)
 
