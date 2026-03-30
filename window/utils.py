@@ -7,14 +7,13 @@ import logging
 import os
 import re
 import sys
-import webbrowser
 from operator import itemgetter
 from platform import system
 from typing import Any, Callable, Dict, List, Optional, Tuple
 import serial.tools.list_ports
 import numpy as np
-from PyQt5.QtCore import QCoreApplication as qApp, QDir, QStandardPaths, Qt
-from PyQt5.QtGui import QFontDatabase, QIcon
+from PyQt5.QtCore import QCoreApplication as qApp, QDir, QStandardPaths, Qt, QUrl
+from PyQt5.QtGui import QDesktopServices, QFontDatabase, QIcon
 from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QLayout, QMessageBox
 from epcore.elements import MeasurementSettings
 from epcore.ivmeasurer import IVMeasurerBase
@@ -321,7 +320,8 @@ def restore_ld_library_path(func: Callable[..., Any]):
 @restore_ld_library_path
 def show_instruction(*args) -> None:
     pdf_path = os.path.join(DIR_MEDIA, "instruction_ru.pdf")
-    webbrowser.open(f"file://{os.path.realpath(pdf_path)}")
+    pdf_url = QUrl.fromLocalFile(os.path.realpath(pdf_path))
+    QDesktopServices.openUrl(pdf_url)
 
 
 @restore_ld_library_path
