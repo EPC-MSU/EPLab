@@ -1623,7 +1623,7 @@ class EPLabWindow(QMainWindow):
         else:
             action = None
 
-        if self._msystem and action:
+        if action:
             self._freeze_state_for_curve(i, action)
 
     def get_default_pin_coordinates(self) -> Tuple[float, float]:
