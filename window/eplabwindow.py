@@ -562,6 +562,9 @@ class EPLabWindow(QMainWindow):
         :param action: menu item that corresponds to the measurer.
         """
 
+        if not self._msystem or len(self._msystem.measurers) <= i:
+            return
+
         if action.isChecked():
             self._msystem.measurers[i].freeze()
         else:
