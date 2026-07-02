@@ -896,6 +896,7 @@ class EPLabWindow(QMainWindow):
                 self._update_signatures(curves, measurement_settings)
                 if self._need_to_restore_frozen_state:
                     self._restore_frozen_state_for_curves()
+                    self._need_to_restore_frozen_state = False
 
                 if self.measurement_plan and not self.measurement_plan.multiplexer:
                     self._plan_auto_transition.check_auto_transition(self.work_mode, self._product_name,
