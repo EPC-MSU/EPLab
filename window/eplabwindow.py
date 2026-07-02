@@ -1296,7 +1296,8 @@ class EPLabWindow(QMainWindow):
         if self._auto_settings.equivalent_circuits_rolled_up:
             return
 
-        comment = self.measurement_plan.get_current_pin().comment or ""
+        current_pin = self.measurement_plan.get_current_pin()
+        comment = current_pin.comment or "" if current_pin else ""
         self._equivalent_circuits_widget.update_circuits(self.current_curve_plot.curve, self.reference_curve_plot.curve,
                                                          settings, comment)
 
