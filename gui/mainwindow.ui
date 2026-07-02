@@ -27,7 +27,7 @@
    <property name="minimumSize">
     <size>
      <width>76</width>
-     <height>38</height>
+     <height>91</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -926,6 +926,9 @@
    <property name="text">
     <string>Горячие клавиши</string>
    </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
   </action>
   <action name="remove_point_action">
    <property name="enabled">
@@ -976,9 +979,6 @@
    </property>
    <property name="text">
     <string>Помощь</string>
-   </property>
-   <property name="shortcut">
-    <string>F1</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>

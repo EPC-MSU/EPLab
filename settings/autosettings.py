@@ -47,7 +47,7 @@ class AutoSettings(SettingsHandler):
     mux_port: str = None
     pin_shift_warning_info: bool = True
     product_name: str = None
-    sound: bool = False
+    sound: bool = True
     test_plan_path: str = None
     tolerance: float = 0.15
     warning_about_untested_pins_in_report: bool = True
