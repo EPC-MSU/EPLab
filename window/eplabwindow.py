@@ -1039,7 +1039,7 @@ class EPLabWindow(QMainWindow):
                                      yes_button=True, no_button=True, cancel_button=True)
             if result == QMessageBox.ButtonRole.AcceptRole:
                 # You need to save the changes to an existing file
-                if self.save_measurement_plan() is None:
+                if not self.save_measurement_plan():
                     result = QMessageBox.ButtonRole.RejectRole
         return result in (QMessageBox.ButtonRole.AcceptRole, QMessageBox.ButtonRole.NoRole)
 
@@ -2058,7 +2058,7 @@ class EPLabWindow(QMainWindow):
             self.dir_chosen_by_user = filename
 
     @pyqtSlot()
-    def save_measurement_plan(self, save_as: bool = False) -> Optional[bool]:
+    def save_measurement_plan(self, save_as: bool = False) -> bool:
         """
         Slot saves measurement plan to a file.
         :param save_as: if True, then you need to save the measurement plan to a new file.
@@ -2066,7 +2066,7 @@ class EPLabWindow(QMainWindow):
         """
 
         if self._measured_pins_checker.check_measurement_plan_for_empty_pins():
-            return None
+            return False
 
         if save_as or not self._measurement_plan_path.path or not os.path.exists(self._measurement_plan_path.path):
             default_path = os.path.join(self.dir_chosen_by_user, "board.uzf")
@@ -2087,8 +2087,9 @@ class EPLabWindow(QMainWindow):
         if filepath:
             self._last_saved_measurement_plan_data = self.measurement_plan.to_json()
             self._measurement_plan_path.path = epfilemanager.save_board_to_ufiv(filepath, self.measurement_plan)
+            return True
 
-        return True
+        return False
 
     @pyqtSlot(str)
     def save_measurement_plan_path(self, new_path: str) -> None:
