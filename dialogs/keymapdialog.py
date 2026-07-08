@@ -54,7 +54,7 @@ class KeymapDialog(QDialog):
                    ("Right", qApp.translate("MainWindow", "Следующая точка")),
                    ("N", qApp.translate("MainWindow", "Новая точка")),
                    ("Del", qApp.translate("MainWindow", "Удалить точку")),
-                   ("F1", qApp.translate("MainWindow", "Горячие клавиши")),
+                   ("F1", qApp.translate("MainWindow", "Помощь")),
                    ("F2", qApp.translate("dialogs", "Редактировать комментарий"))]
         for row, key_and_description in enumerate(key_map):
             for column, key_or_description in enumerate(key_and_description):
