@@ -45,6 +45,8 @@ $PYTHON -m venv venv
 
 mv dist release
 mv ./release/main ./release/eplab
+cp ./scripts/install.sh ./release/install.sh
+
 rm -rf build
 rm -rf dist
 rm -rf venv
