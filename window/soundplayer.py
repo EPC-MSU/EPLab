@@ -37,7 +37,9 @@ class SoundPlayer:
         dir_media = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "media")
         for i in range(1, 11):
             self._player.add_sound(os.path.join(dir_media, f"{i}.wav"), f"{i}")
-        self._player.add_sound(os.path.join(dir_media, "test.wav"), "test")
+
+        for name in ("save_bad", "save_good", "test"):
+            self._player.add_sound(os.path.join(dir_media, f"{name}.wav"), name)
 
     def _play(self, name: str) -> None:
         """
@@ -67,8 +69,34 @@ class SoundPlayer:
         :param difference: signature difference value.
         """
 
-        if self._difference > self._tolerance > difference:
+        if self._difference > self._tolerance >= difference:
             self._play("test")
+
+    def play_save_sound(self, difference: float) -> None:
+        """
+        :param difference: signature difference value.
+        """
+
+        if difference <= self._tolerance:
+            self._play("save_good")
+        else:
+            self._play("save_bad")
+
+    def set_difference(self, difference: float) -> None:
+        """
+        :param difference: signature difference value.
+        """
+
+        # Logic described here #39296
+        # FIXME: in case of *very fast* score update in asynchronous mode here may be big stack of wav files
+        if self._work_mode is WorkMode.COMPARE:
+            # Users do not like the original sound in comparison mode. Therefore, in task #92261 it was decided to
+            # replace it with the same one as in test plan mode
+            # self._play_sound_in_compare_mode(difference)
+            self._play_sound_in_test_mode(difference)
+        elif self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
+            self._play_sound_in_test_mode(difference)
+        self._difference = difference
 
     def set_mute(self, mute: bool = True) -> None:
         """
@@ -91,19 +119,3 @@ class SoundPlayer:
         """
 
         self._work_mode = mode
-
-    def update_difference(self, difference: float) -> None:
-        """
-        :param difference: signature difference value.
-        """
-
-        # Logic described here #39296
-        # FIXME: in case of *very fast* score update in asynchronous mode here may be big stack of wav files
-        if self._work_mode is WorkMode.COMPARE:
-            # Users do not like the original sound in comparison mode. Therefore, in task #92261 it was decided to
-            # replace it with the same one as in test plan mode
-            # self._play_sound_in_compare_mode(difference)
-            self._play_sound_in_test_mode(difference)
-        elif self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
-            self._play_sound_in_test_mode(difference)
-        self._difference = difference

@@ -1017,6 +1017,11 @@ class EPLabWindow(QMainWindow):
                 self._save_measurement_in_compare_mode()
             elif self.work_mode is WorkMode.TEST:
                 self.measurement_plan.save_last_measurement_as_test()
+                pin = self.measurement_plan.get_current_pin()
+                curve_ref, curve_test, settings = pin.get_reference_and_test_measurements()
+                if curve_ref and curve_test:
+                    difference = self._calculate_difference(curve_ref.ivc, curve_test.ivc, settings)
+                    self._player.play_save_sound(difference)
             elif self.work_mode is WorkMode.WRITE:
                 self.measurement_plan.save_last_measurement_as_reference(True)
 
@@ -1276,7 +1281,7 @@ class EPLabWindow(QMainWindow):
         if None not in (curve_1, curve_2, settings):
             difference = self._calculate_difference(curve_1, curve_2, settings)
             self._score_wrapper.set_difference(difference)
-            self._player.update_difference(difference)
+            self._player.set_difference(difference)
         else:
             self._score_wrapper.set_dummy_difference()
 
