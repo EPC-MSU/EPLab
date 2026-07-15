@@ -27,7 +27,7 @@ def get_stream_handler(formatter: logging.Formatter) -> logging.StreamHandler:
 
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(formatter)
-    stream_handler.setLevel(logging.INFO)
+    stream_handler.setLevel(logging.DEBUG)
     return stream_handler
 
 

@@ -1019,9 +1019,11 @@ class EPLabWindow(QMainWindow):
                 self.measurement_plan.save_last_measurement_as_test()
                 pin = self.measurement_plan.get_current_pin()
                 curve_ref, curve_test, settings = pin.get_reference_and_test_measurements()
+                logger.debug("Test signature saved")
                 if curve_ref and curve_test:
                     difference = self._calculate_difference(curve_ref.ivc, curve_test.ivc, settings)
                     self._player.play_save_sound(difference)
+                    logger.debug("Save sound played")
             elif self.work_mode is WorkMode.WRITE:
                 self.measurement_plan.save_last_measurement_as_reference(True)
 
