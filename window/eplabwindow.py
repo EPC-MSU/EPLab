@@ -727,7 +727,8 @@ class EPLabWindow(QMainWindow):
         self._board_window.geometry_changed.connect(self.save_board_widget_geometry)
         self._parameters_widgets: Dict[EyePointProduct.Parameter, ParameterWidget] = dict()
         self._player: SoundPlayer = SoundPlayer()
-        self._player.set_mute(not self.sound_enabled_action.isChecked())
+        self._player.set_test_sound_enabled(self.sound_enabled_action.isChecked())
+        self._player.set_save_sound_enabled(self._auto_settings.sound_save_bad, self._auto_settings.sound_save_good)
         self._score_wrapper: ScoreWrapper = ScoreWrapper(self.score_label)
 
         self.low_settings_panel: LowSettingsPanel = LowSettingsPanel()
@@ -1578,7 +1579,7 @@ class EPLabWindow(QMainWindow):
         icon_name = "sound.png" if state else "no_sound.png"
         icon_path = os.path.join(ut.DIR_MEDIA, icon_name)
         self.sound_enabled_action.setIcon(QIcon(icon_path))
-        self._player.set_mute(not state)
+        self._player.set_test_sound_enabled(state)
         self._auto_settings.save_param(sound=state)
 
     def enable_widgets(self, enabled: bool) -> None:

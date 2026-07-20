@@ -13,6 +13,9 @@ class SoundPlayer:
         self._difference: float = 0
         self._player: WavPlayer = WavPlayer(wait=False)
         self._sound_available: bool = True
+        self._sound_test_enabled: bool = True
+        self._sound_save_bad_enabled: bool = True
+        self._sound_save_good_enabled: bool = True
         self._tolerance: float = 0
         self._work_mode: WorkMode = WorkMode.COMPARE
 
@@ -78,9 +81,11 @@ class SoundPlayer:
         """
 
         if difference <= self._tolerance:
-            self._play("save_good")
+            if self._sound_save_good_enabled:
+                self._play("save_good")
         else:
-            self._play("save_bad")
+            if self._sound_save_bad_enabled:
+                self._play("save_bad")
 
     def set_difference(self, difference: float) -> None:
         """
@@ -88,23 +93,33 @@ class SoundPlayer:
         """
 
         # Logic described here #39296
-        # FIXME: in case of *very fast* score update in asynchronous mode here may be big stack of wav files
-        if self._work_mode is WorkMode.COMPARE:
-            # Users do not like the original sound in comparison mode. Therefore, in task #92261 it was decided to
-            # replace it with the same one as in test plan mode
-            # self._play_sound_in_compare_mode(difference)
-            self._play_sound_in_test_mode(difference)
-        elif self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
-            self._play_sound_in_test_mode(difference)
+        if self._sound_test_enabled:
+            # FIXME: in case of *very fast* score update in asynchronous mode here may be big stack of wav files
+            if self._work_mode is WorkMode.COMPARE:
+                # Users do not like the original sound in comparison mode. Therefore, in task #92261 it was decided to
+                # replace it with the same one as in test plan mode
+                # self._play_sound_in_compare_mode(difference)
+                self._play_sound_in_test_mode(difference)
+            elif self._work_mode in (WorkMode.TEST, WorkMode.WRITE):
+                self._play_sound_in_test_mode(difference)
+
         self._difference = difference
 
-    def set_mute(self, mute: bool = True) -> None:
+    def set_save_sound_enabled(self, save_bad_enabled: bool, save_good_enabled: bool) -> None:
         """
-        :param mute: if True, then the sound will be muted.
+        :param save_bad_enabled: if True, then the save bad signature sound will be enabled.
+        :param save_good_enabled: if True, then the save good signature sound will be enabled.
         """
 
-        if self._sound_available:
-            self._player.set_mute(mute)
+        self._sound_save_bad_enabled = save_bad_enabled
+        self._sound_save_good_enabled = save_good_enabled
+
+    def set_test_sound_enabled(self, test_sound_enabled: bool = True) -> None:
+        """
+        :param test_sound_enabled: if True, then the test sound will be enabled.
+        """
+
+        self._sound_test_enabled = test_sound_enabled
 
     def set_tolerance(self, tolerance: float) -> None:
         """

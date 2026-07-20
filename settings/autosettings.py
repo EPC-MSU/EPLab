@@ -47,6 +47,8 @@ class AutoSettings(SettingsHandler):
     pin_shift_warning_info: bool = True
     product_name: str = None
     sound: bool = True
+    sound_save_bad: bool = True
+    sound_save_good: bool = True
     test_plan_path: str = None
     tolerance: float = 0.15
 
@@ -86,6 +88,8 @@ class AutoSettings(SettingsHandler):
                   "last_used_dir": {"convert": ut.get_dir_path_from_str},
                   "pin_shift_warning_info": {"convert": ut.to_bool},
                   "sound": {"convert": ut.to_bool},
+                  "sound_save_bad": {"convert": ut.to_bool},
+                  "sound_save_good": {"convert": ut.to_bool},
                   "tolerance": {"convert": float}}
         settings.beginGroup("Main")
         self._read_parameters_from_settings(settings, params)
@@ -136,6 +140,8 @@ class AutoSettings(SettingsHandler):
                   "last_used_dir": {"convert": str},
                   "pin_shift_warning_info": {},
                   "sound": {},
+                  "sound_save_bad": {},
+                  "sound_save_good": {},
                   "tolerance": {"convert": ut.float_to_str}}
         settings.beginGroup("Main")
         self._write_parameters_to_settings(settings, params)
