@@ -245,6 +245,7 @@ class EPLabWindow(QMainWindow):
 
         # It is very important to set relevant noise levels
         self._comparator.set_min_ivc(*self._get_noise_amplitudes(settings))
+        self._comparator.set_ranges(settings.max_voltage, 1000 * settings.max_voltage / settings.internal_resistance)
         return self._comparator.compare_ivc(curve_1, curve_2)
 
     def _change_menu_items_for_current_pin_change(self, *args) -> None:
