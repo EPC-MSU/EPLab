@@ -552,6 +552,10 @@ class EPLabWindow(QMainWindow):
         self._splitter_widget.setHandleWidth(12)
         self._splitter_widget.setSizes([1, int(not self._auto_settings.equivalent_circuits_rolled_up)])
 
+        self._equivalent_circuits_widget.hide()
+        self._splitter_widget.setSizes([100, 0])
+        self._splitter_widget.handle(1).setEnabled(False)
+
         splitter_handle_layout = QHBoxLayout()
         splitter_handle_layout.setContentsMargins(0, 0, 0, 0)
         splitter_handle_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
